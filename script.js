@@ -5,6 +5,17 @@ window.onload = function() {
         return;
     }
     const ctx = canvas.getContext('2d');
+    const music = document.getElementById('bg-music');
+    const musicBtn = document.getElementById('music-toggle');
+    musicBtn.addEventListener('click', () => {
+        if (music.paused) {
+            music.play();
+            musicBtn.classList.remove('paused');
+        } else {
+            music.pause();
+            musicBtn.classList.add('paused');
+        }
+    });
 
     let petals = [];
     let leaves = [];
@@ -37,7 +48,7 @@ window.onload = function() {
             this.x = Math.random() * canvas.width;
             this.y = -Math.random() * 20 - 10; // Start above the screen
             this.size = Math.random() * 10 + 5; // Size between 5 and 15
-            this.speedY = Math.random() * 0.8 + 0.4; // Slightly increased petal speed
+            this.speedY = Math.random() * 1.2 + 0.8; // Slightly increased petal speed
             this.speedX = Math.random() * 0.6 - 0.3; // Adjusted petal sway
             this.opacity = Math.random() * 0.5 + 0.3; 
             this.color = petalColors[Math.floor(Math.random() * petalColors.length)];
@@ -66,7 +77,10 @@ window.onload = function() {
             ctx.translate(this.x + this.size / 2, this.y + this.size / 2);
             ctx.rotate(this.spin);
             ctx.beginPath();
-            ctx.ellipse(0, 0, this.size / 2, this.size, Math.PI / 4, 0, 2 * Math.PI); // Simple ellipse shape
+            ctx.moveTo(0, -this.size * 0.8);
+            ctx.quadraticCurveTo(this.size * 0.6, -this.size * 0.6, 0, 0);
+            ctx.quadraticCurveTo(-this.size * 0.6, -this.size * 0.6, 0, -this.size * 0.8);
+            ctx.closePath();
             
             // Apply blur
             ctx.filter = 'blur(1px)'; 
@@ -92,7 +106,7 @@ window.onload = function() {
             this.x = Math.random() * canvas.width;
             this.y = -Math.random() * 30 - 15; // Start slightly higher
             this.size = Math.random() * 12 + 8; // Leaves can be slightly larger
-            this.speedY = Math.random() * 0.7 + 0.3; // Leaf speed
+            this.speedY = Math.random() * 1.5 + 0.8; // Leaf speed
             this.speedX = Math.random() * 0.8 - 0.4; // Leaf sway
             this.opacity = Math.random() * 0.6 + 0.4; // Leaves can be a bit more opaque
             this.color = leafColors[Math.floor(Math.random() * leafColors.length)];
@@ -120,8 +134,10 @@ window.onload = function() {
             ctx.translate(this.x + this.size / 2, this.y + this.size / 2);
             ctx.rotate(this.spin);
             ctx.beginPath();
-            // More elongated ellipse for a simple leaf shape
-            ctx.ellipse(0, 0, this.size / 2.5, this.size / 1.5, Math.PI / 8, 0, 2 * Math.PI); 
+            ctx.moveTo(0, -this.size / 2);
+            ctx.bezierCurveTo(this.size / 2, -this.size / 4, this.size / 2, this.size / 4, 0, this.size / 2);
+            ctx.bezierCurveTo(-this.size / 2, this.size / 4, -this.size / 2, -this.size / 4, 0, -this.size / 2);
+            ctx.closePath();
             
             ctx.filter = 'blur(1px)';
             ctx.fillStyle = this.color;
