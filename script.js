@@ -30,6 +30,9 @@ window.onload = function() {
     let clouds = [];
     let hearts = [];
 
+    let bookmarks = [];
+    const MAX_BOOKMARKS = 5; // Optional: Limit the number of bookmarks
+
     function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -323,12 +326,157 @@ window.onload = function() {
     initBackgroundElements();
     animate();
 
+    updateArticleTitle(); // Call the new function
+
+    const mainContentArea = document.querySelector('main');
+    if (mainContentArea) {
+        mainContentArea.addEventListener('scroll', updateReadingProgress);
+    } else {
+        console.log("Main content area not found for attaching scroll listener.");
+    }
+    // Also call it once on load to set initial state, in case content is already scrolled or very short
+    updateReadingProgress();
+
+    const addBookmarkButton = document.getElementById('add-bookmark-button');
+    if (addBookmarkButton) {
+        addBookmarkButton.addEventListener('click', addBookmark);
+    } else {
+        console.error("Add bookmark button not found.");
+    }
+    renderBookmarks(); // Initial render 
+
     // Optional: Add new elements periodically if you want more than the initial set
     // setInterval(() => {
     //     if (petals.length < numPetals + 50) { // Add a cap
     //         petals.push(new Petal());
     //     }
     // }, 2000); // Add a new petal every 2 seconds
+
+function updateArticleTitle() {
+    const mainArticleTitleElement = document.querySelector('main article h3');
+    const titlePlaceholder = document.getElementById('current-article-title-placeholder');
+
+    if (mainArticleTitleElement && titlePlaceholder) {
+        titlePlaceholder.textContent = mainArticleTitleElement.textContent;
+    } else {
+        if (!mainArticleTitleElement) console.log("Could not find article title element in main section.");
+        if (!titlePlaceholder) console.log("Could not find title placeholder element.");
+        titlePlaceholder.textContent = "[无法获取标题]";
+    }
+}
+
+function updateReadingProgress() {
+    const mainElement = document.querySelector('main');
+    const progressBarElement = document.querySelector('.progress-bar-placeholder');
+
+    if (!mainElement || !progressBarElement) {
+        if (!mainElement) console.log("Could not find main element for reading progress.");
+        if (!progressBarElement) console.log("Could not find progress bar element.");
+        return;
+    }
+
+    const scrollableHeight = mainElement.scrollHeight - mainElement.clientHeight;
+    if (scrollableHeight <= 0) { // Content is not scrollable or no content
+        progressBarElement.style.width = '0%';
+        return;
+    }
+
+    const scrollTop = mainElement.scrollTop;
+    const progressPercentage = (scrollTop / scrollableHeight) * 100;
+    progressBarElement.style.width = progressPercentage + '%';
+}
+
+function addBookmark() {
+    const mainElement = document.querySelector('main');
+    if (!mainElement) {
+        console.error("Main element not found for bookmarking.");
+        return;
+    }
+
+    if (bookmarks.length >= MAX_BOOKMARKS) {
+        alert(`最多只能添加 ${MAX_BOOKMARKS} 个书签。`);
+        return;
+    }
+
+    const currentScrollTop = mainElement.scrollTop;
+    let bookmarkName = `书签 ${bookmarks.length + 1} (位置: ${currentScrollTop}px)`;
+    
+    const headings = Array.from(mainElement.querySelectorAll('h1, h2, h3, h4, h5, h6'));
+    let closestHeading = null;
+    let smallestDiff = Infinity;
+
+    headings.forEach(h => {
+        const rect = h.getBoundingClientRect();
+        if (rect.top >= 0 && rect.top < mainElement.clientHeight) {
+            const diff = Math.abs(rect.top - 0);
+            if (diff < smallestDiff) {
+                smallestDiff = diff;
+                closestHeading = h;
+            }
+        }
+    });
+
+    if (closestHeading) {
+        bookmarkName = `书签 ${bookmarks.length + 1}: ${closestHeading.textContent.substring(0, 20)}...`;
+    }
+
+    const newBookmark = {
+        name: bookmarkName,
+        scrollTop: currentScrollTop
+    };
+
+    bookmarks.push(newBookmark);
+    renderBookmarks();
+}
+
+function renderBookmarks() {
+    const bookmarksListElement = document.getElementById('bookmarks-list');
+    if (!bookmarksListElement) {
+        console.error("Bookmarks list element not found.");
+        return;
+    }
+
+    bookmarksListElement.innerHTML = ''; // Clear existing bookmarks
+
+    bookmarks.forEach((bookmark, index) => {
+        const listItem = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = '#'; 
+        link.textContent = bookmark.name;
+        link.title = `跳转到: ${bookmark.name}`;
+        link.addEventListener('click', (event) => {
+            event.preventDefault(); 
+            scrollToBookmark(bookmark.scrollTop);
+        });
+        listItem.appendChild(link);
+        
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = '删除';
+        deleteButton.style.marginLeft = '10px';
+        deleteButton.style.fontSize = '0.8em';
+        deleteButton.onclick = () => {
+            deleteBookmark(index);
+        };
+        listItem.appendChild(deleteButton);
+        
+        bookmarksListElement.appendChild(listItem);
+    });
+}
+
+function scrollToBookmark(scrollTopValue) {
+    const mainElement = document.querySelector('main');
+    if (mainElement) {
+        mainElement.scrollTo({
+            top: scrollTopValue,
+            behavior: 'smooth'
+        });
+    }
+}
+
+function deleteBookmark(index) {
+    bookmarks.splice(index, 1);
+    renderBookmarks(); // Re-render the list
+}
 
     // Mouse click effect to show "鑫"
     document.addEventListener('mousedown', function showXinOnClick(event) {
