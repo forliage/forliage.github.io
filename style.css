@@ -1,0 +1,217 @@
+body {
+    background-color: #FFC0CB; /* Light pink */
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #FFB6C1; /* Slightly darker pink */
+    color: white;
+    padding: 1em 0;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+header nav ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+header nav ul li {
+    display: inline;
+    margin-right: 15px; /* Slightly reduce margin if many items */
+}
+
+header nav ul li:last-child {
+    margin-right: 0; /* No margin for the last item */
+}
+
+header nav ul li a {
+    color: white;
+    text-decoration: none;
+    padding: 5px 10px; /* Add some padding for better hover target if background changes are ever added */
+    border-radius: 6px; /* Rounded corners for potential background on hover */
+    transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out, text-decoration-color 0.2s ease-in-out;
+}
+
+header nav ul li a:hover {
+    text-decoration: underline; 
+    text-decoration-color: #FFC0CB; /* Lighter pink for underline */
+    /* background-color: rgba(255, 255, 255, 0.1); Example hover background */
+}
+
+/* General link styling */
+a {
+    color: #D81B60; /* A darker pink/magenta for links */
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: #AD1457; /* Darken on hover */
+}
+
+/* Sidebar specific link styling */
+/* This ensures sidebar links have a specific color, */
+/* overriding the general 'a' if needed, and inherits hover from general 'a:hover' or can be specified */
+aside a {
+    color: #C2185B; /* Sidebar specific link color */
+}
+
+/* Example if a different hover for sidebar links was desired:
+aside a:hover {
+    color: #880E4F; 
+    text-decoration: none; 
+}
+*/
+
+.container {
+    display: flex;
+    width: 90%;
+    margin: 20px auto;
+}
+
+main {
+    flex: 1; /* Main content takes remaining space */
+    padding-left: 20px; /* Add padding on the left for separation from new left sidebar */
+    /* background-color: #FFFFFF; /* Already had this, from a previous step, ensure it's still there if needed */
+}
+
+aside { /* This is now the LEFT sidebar */
+    flex: 0 0 25%; /* Fixed width for left sidebar, e.g., 25% */
+    background-color: #FFF0F5; /* Lavender blush - same bg as old sidebar for now */
+    padding: 15px; /* General padding */
+    padding-right: 20px; /* Specifically ensure padding on the right for separation */
+    border-right: 1px solid #FFC0CB; /* Optional: add a border */
+}
+
+/* Removing old widget styles as they are no longer in use in the new left sidebar structure */
+/* 
+aside section.widget { ... }
+aside section.widget:last-child { ... }
+aside h2 { ... }  <- This was for widget titles. The new 'aside h2' for "文章结构" will use default or new rules if added.
+*/
+
+/* New styling for the h2 in the left sidebar, if desired, otherwise it uses default h2 styles */
+aside h2 {
+    font-size: 1.3em;
+    color: #333; /* Standard text color for this heading */
+    margin-top: 0;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 15px; /* Add margin below the main aside heading */
+}
+
+/* Styling for new sections/widgets within the left aside */
+aside section.widget {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #FFFAFA; /* Snow, slightly different from aside background */
+    border-radius: 8px; /* Rounder widgets */
+    border: 1px solid #eee;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Subtle shadow for widgets */
+    transition: box-shadow 0.3s ease;
+}
+
+aside section.widget:hover { /* Optional: slightly enhance shadow on widget hover */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+
+aside section.widget:last-child {
+    margin-bottom: 0;
+}
+
+aside section.widget h3 {
+    font-size: 1.1em;
+    color: #D81B60; /* Pink color for subheadings */
+    margin-top: 0;
+    margin-bottom: 8px;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed #FFC0CB; /* Dashed pink border for subheadings */
+}
+
+/* Article Title Widget specific styling (if any beyond common widget) */
+.article-title-widget p {
+    font-size: 0.9em;
+    color: #555;
+}
+
+/* Reading Progress Widget */
+.progress-bar-container-placeholder {
+    background-color: #e0e0e0; /* Light grey background for the bar container */
+    border-radius: 10px; /* Rounder progress bar container */
+    height: 20px;
+    border: 1px solid #ccc;
+    overflow: hidden; /* Ensure inner bar stays within rounded corners */
+}
+
+.progress-bar-placeholder {
+    background-color: #FF69B4; /* Hot pink for progress fill */
+    height: 100%;
+    display: block;
+    border-radius: 10px; /* Rounder progress fill. If container is 10px, this should be 10px or slightly less. */
+    /* If only filled part is rounded: border-radius: 10px 0 0 10px; */
+    transition: width 0.3s ease-in-out; 
+}
+
+/* Bookmark Widget */
+#add-bookmark-button-placeholder {
+    background-color: #FFB6C1; /* Light pink button */
+    color: white;
+    border: none;
+    padding: 10px 15px; /* Slightly more padding */
+    border-radius: 8px; /* Rounder button */
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+#add-bookmark-button-placeholder:hover {
+    background-color: #FF69B4; /* Darker pink on hover */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+#bookmarks-list-placeholder {
+    list-style-type: none;
+    padding-left: 0;
+    font-size: 0.9em;
+}
+
+#bookmarks-list-placeholder li {
+    margin-bottom: 5px;
+}
+
+#bookmarks-list-placeholder li a {
+    /* Uses existing aside a styling, which is fine */
+    /* color: #C2185B; */ /* Example from existing aside a */
+    text-decoration: none;
+}
+
+#bookmarks-list-placeholder li a:hover {
+    text-decoration: underline;
+}
+
+footer {
+    background-color: #FFB6C1; /* Slightly darker pink, same as header */
+    color: white;
+    text-align: center;
+    padding: 1em 0;
+    position: relative; /* Changed from fixed to relative for better flow */
+    bottom: 0;
+    width: 100%;
+}
+
+#petalsCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    pointer-events: none;
+}

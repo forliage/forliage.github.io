@@ -1,11 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>forliage</title>
+    <title>forliage的blog</title>
+    <link rel="stylesheet" href="style.css"> <!-- Placeholder for CSS -->
 </head>
 <body>
-    <h1>forliage's blog</h1>
-    <h1>Hello ~</h1>
+    <canvas id="petalsCanvas"></canvas>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="#">首页</a></li>
+                <li><a href="#">文章</a></li>
+                <li><a href="#">关于</a></li>
+                <li><a href="#">技术文章</a></li>
+                <li><a href="#">生活随笔</a></li>
+                <li><a href="#">学习笔记</a></li>
+                <li><a href="#">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <aside>
+            <h2>文章结构</h2>
+            <section class="widget article-title-widget">
+                <h3>当前文章标题</h3>
+                <p id="current-article-title-placeholder">[文章标题会显示在这里]</p>
+            </section>
+            <section class="widget reading-progress-widget">
+                <h3>阅读进度</h3>
+                <div class="progress-bar-container-placeholder">
+                    <div class="progress-bar-placeholder" style="width: 30%;"></div> <!-- Example fill -->
+                </div>
+            </section>
+            <section class="widget bookmark-widget">
+                <h3>书签</h3>
+                <button type="button" id="add-bookmark-button-placeholder">添加书签</button>
+                <ul id="bookmarks-list-placeholder">
+                    <li><a href="#">书签一: 段落标题</a></li>
+                    <li><a href="#">书签二: 另一部分</a></li>
+                </ul>
+            </section>
+        </aside>
+        <main>
+            <!-- Blog posts will go here -->
+            <article>
+                <h2>博客文章标题</h2>
+                <p>这里是博客文章的摘要... Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                <a href="#">阅读更多</a>
+            </article>
+            <article>
+                <h2>另一篇精彩的博客</h2>
+                <p>这篇博客讨论了其他引人入胜的内容，探索未知领域。</p>
+                <a href="#">阅读更多</a>
+            </article>
+        </main>
+        <!-- The aside element is now moved before main and repurposed -->
+    </div>
+    <footer>
+        <p>© 2025 我的博客</p>
+    </footer>
+    <script src="script.js"></script> <!-- Placeholder for JS -->
 </body>
 </html>
+
