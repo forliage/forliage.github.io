@@ -203,7 +203,7 @@ footer {
     color: white;
     text-align: center;
     padding: 1em 0;
-    position: relative; /* Changed from fixed to relative for better flow */
+    position: relative; /* Keep footer at the very bottom */
     bottom: 0;
     width: 100%;
 }
