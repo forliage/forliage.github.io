@@ -9,16 +9,34 @@
     <h1>后台管理</h1>
     <section id="visit-record-section">
         <h2>访客记录</h2>
-        <ul id="visit-list"></ul>
+        <canvas id="lineChart" width="400" height="200"></canvas>
+        <canvas id="pieChart" width="400" height="200"></canvas>
     </section>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="analytics.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const list = document.getElementById('visit-list');
-            const records = JSON.parse(localStorage.getItem('visitHistory') || '[]');
-            records.forEach(r => {
-                const li = document.createElement('li');
-                li.textContent = r.time + ' - ' + r.page;
-                list.appendChild(li);
+        document.addEventListener('DOMContentLoaded', async () => {
+            const res = await fetch('/api/stats');
+            const stats = await res.json();
+            const days = Object.keys(stats.perDay);
+            const counts = Object.values(stats.perDay);
+            const ctxLine = document.getElementById('lineChart').getContext('2d');
+            new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: days,
+                    datasets: [{ label: '访问量', data: counts, borderColor: 'blue' }]
+                }
+            });
+            const countries = Object.keys(stats.perCountry);
+            const num = Object.values(stats.perCountry);
+            const ctxPie = document.getElementById('pieChart').getContext('2d');
+            new Chart(ctxPie, {
+                type: 'pie',
+                data: {
+                    labels: countries,
+                    datasets: [{ data: num, backgroundColor: countries.map(() => `hsl(${Math.random()*360},70%,70%)`) }]
+                }
             });
         });
     </script>
