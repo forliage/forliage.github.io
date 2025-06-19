@@ -11,9 +11,12 @@ window.onload = function() {
     const savedTime = localStorage.getItem('music-current-time');
     const savedPaused = localStorage.getItem('music-paused');
     if (savedTime) {
-        music.currentTime = parseFloat(savedTime);
+        music.addEventListener('loadedmetadata', () => {
+            music.currentTime = parseFloat(savedTime);
+        });
     }
-    if (savedPaused == 'false') {
+    if (savedPaused === 'false') {
+        // Try to resume playback if it was playing on the previous page
         music.play().catch(() => {});
         musicBtn.classList.remove('paused');
     } else {
@@ -371,15 +374,17 @@ window.onload = function() {
     // }, 2000); // Add a new petal every 2 seconds
 
 function updateArticleTitle() {
-    const mainArticleTitleElement = document.querySelector('main article h3');
     const titlePlaceholder = document.getElementById('current-article-title-placeholder');
-
-    if (mainArticleTitleElement && titlePlaceholder) {
-        titlePlaceholder.textContent = mainArticleTitleElement.textContent;
-    } else {
-        if (!mainArticleTitleElement) console.log("Could not find article title element in main section.");
-        if (!titlePlaceholder) console.log("Could not find title placeholder element.");
-        titlePlaceholder.textContent = "[无法获取标题]";
+    let title = '';
+    const mainArticle = document.querySelector('main article');
+    if (mainArticle) {
+        const heading = mainArticle.querySelector('h1, h2, h3, h4, h5, h6');
+        if (heading) {
+            title = heading.textContent;
+        }
+    }
+    if (titlePlaceholder) {
+        titlePlaceholder.textContent = title || '[无法获取标题]';
     }
 }
 

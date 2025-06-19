@@ -237,3 +237,33 @@ footer {
 .music-control.paused {
     background-color: #bbb;
 }
+
+.hero {
+    text-align: center;
+    margin-top: 20vh;
+    color: #fff;
+}
+
+.hero h2 {
+    font-size: 3em;
+    margin-bottom: 0.3em;
+}
+
+.hero p {
+    font-size: 1.5em;
+}
+
+.hero .btn {
+    display: inline-block;
+    margin-top: 1.5em;
+    padding: 10px 20px;
+    background-color: #FF69B4;
+    color: #fff;
+    border-radius: 30px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.hero .btn:hover {
+    background-color: #FF1493;
+}
