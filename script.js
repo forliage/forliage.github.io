@@ -7,6 +7,19 @@ window.onload = function() {
     const ctx = canvas.getContext('2d');
     const music = document.getElementById('bg-music');
     const musicBtn = document.getElementById('music-toggle');
+
+    const savedTime = localStorage.getItem('music-current-time');
+    const savedPaused = localStorage.getItem('music-paused');
+    if (savedTime) {
+        music.currentTime = parseFloat(savedTime);
+    }
+    if (savedPaused == 'false') {
+        music.play().catch(() => {});
+        musicBtn.classList.remove('paused');
+    } else {
+        musicBtn.classList.add('paused');
+    }
+
     musicBtn.addEventListener('click', () => {
         if (music.paused) {
             music.play();
@@ -17,6 +30,11 @@ window.onload = function() {
         }
     });
 
+    window.addEventListener('beforeunload', () => {
+        localStorage.setItem('music-current-time', music.currentTime);
+        localStorage.setItem('music-paused', music.paused);
+    });
+    
     let petals = [];
     let leaves = [];
     const numPetals = 70; 

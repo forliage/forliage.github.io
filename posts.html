@@ -1,31 +1,25 @@
----
-title: 我的第一篇博客
-date: 2025-06-16
-category: 心情日记
----
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>我的第一篇博客</title>
-    <link rel="stylesheet" href="../style.css">
+    <title>文章列表</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <canvas id="petalsCanvas"></canvas>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <audio id="bg-music" src="music.mp3" loop></audio>
     <button id="music-toggle" class="music-control">♪</button>
     <header>
         <h1>forliage的blog</h1>
         <nav>
             <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+                <li><a href="index.html">首页</a></li>
+                <li><a href="posts.html">文章</a></li>
+                <li><a href="about.html">关于</a></li>
+                <li><a href="category.html?category=技术文章">技术文章</a></li>
+                <li><a href="category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="category.html?category=心情日记">心情日记</a></li>
             </ul>
         </nav>
     </header>
@@ -49,16 +43,20 @@ category: 心情日记
             </section>
         </aside>
         <main>
-            <article>
-                <h2>我的第一篇博客</h2>
-                <p>这是我用HTML撰写的第一篇博客文章，属于"心情日记"分类。</p>
-                <p>这里可以记录当天的所思所感。</p>
-            </article>
+            <section>
+                <h2>文章分类</h2>
+                <ul>
+                    <li><a href="category.html?category=技术文章">技术文章</a></li>
+                    <li><a href="category.html?category=生活随笔">生活随笔</a></li>
+                    <li><a href="category.html?category=学习笔记">学习笔记</a></li>
+                    <li><a href="category.html?category=心情日记">心情日记</a></li>
+                </ul>
+            </section>
         </main>
     </div>
     <footer>
         <p>© 2025 我的博客</p>
     </footer>
-    <script src="../script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
