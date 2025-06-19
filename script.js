@@ -5,17 +5,29 @@ window.onload = function() {
     const musicBtn = document.getElementById('music-toggle');
 
     const savedTime = parseFloat(localStorage.getItem('music-current-time') || '0');
-    const wasPaused = localStorage.getItem('music-paused') === 'true';
+    const shouldPlay = localStorage.getItem('music-paused') !== 'true';
 
-    music.addEventListener('loadedmetadata', () => {
+    function restoreMusic() {
         music.currentTime = savedTime;
-        if (!wasPaused) {
-            music.play().catch(() => {});
-            musicBtn.classList.remove('paused');
+        if (shouldPlay) {
+            const playPromise = music.play();
+            if (playPromise) {
+                playPromise.then(() => {
+                    musicBtn.classList.remove('paused');
+                }).catch(() => {
+                    musicBtn.classList.add('paused');
+                });
+            }
         } else {
             musicBtn.classList.add('paused');
         }
-    });
+    }
+
+    if (music.readyState >= 2) {
+        restoreMusic();
+    } else {
+        music.addEventListener('canplay', restoreMusic);
+    }
 
     musicBtn.addEventListener('click', () => {
         if (music.paused) {
@@ -25,6 +37,7 @@ window.onload = function() {
             music.pause();
             musicBtn.classList.add('paused');
         }
+        localStorage.setItem('music-paused', music.paused);
     });
 
     music.addEventListener('timeupdate', () => {
@@ -36,6 +49,13 @@ window.onload = function() {
         localStorage.setItem('music-paused', music.paused);
     });
 
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            localStorage.setItem('music-current-time', music.currentTime);
+            localStorage.setItem('music-paused', music.paused);
+        }
+    });
+    
     recordVisit();
 
     const sidebarContainer = document.getElementById('sidebar-container');
@@ -387,6 +407,14 @@ window.onload = function() {
     // 初始化侧栏功能（在 loadSidebar 完成后调用）
     function initSidebarFeatures() {
         updateArticleTitle();
+        const progressContainer = document.querySelector('.progress-bar-container-placeholder');
+        if (progressContainer) {
+            progressContainer.className = 'progress-bar-container';
+        }
+        const progressBar = document.querySelector('.progress-bar-placeholder');
+        if (progressBar) {
+            progressBar.className = 'progress-bar';
+        }
         window.addEventListener('scroll', updateReadingProgress);
         updateReadingProgress();
         const addBookmarkButton = document.getElementById('add-bookmark-button');
