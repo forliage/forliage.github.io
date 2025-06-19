@@ -267,3 +267,45 @@ footer {
 .hero .btn:hover {
     background-color: #FF1493;
 }
+
+.tagline {
+    min-height: 1.5em;
+    font-size: 1.5em;
+    position: relative;
+}
+
+.tagline::after {
+    content: '|';
+    position: absolute;
+    right: -10px;
+    animation: blinkCursor 1s steps(1) infinite;
+}
+
+.scroll-arrow {
+    display: block;
+    margin: 40px auto 0;
+    font-size: 2em;
+    color: #fff;
+    animation: bounce 2s infinite;
+    text-decoration: none;
+}
+
+@keyframes blinkCursor {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes bounce {
+    0%,20%,50%,80%,100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+.hero h2 {
+    animation: fadeSlideIn 1s ease-out;
+}
+
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

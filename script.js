@@ -37,6 +37,32 @@ window.onload = function() {
         localStorage.setItem('music-current-time', music.currentTime);
         localStorage.setItem('music-paused', music.paused);
     });
+
+    const taglineEl = document.getElementById('tagline');
+    const phrases = ['这里有forliage的学习笔记', '分享科研和学习中的idea', '书写自己的精彩的生活', '分享绚丽的爱'];
+    let phraseIndex = 0;
+    let charIndex = 0;
+    let deleting = false;
+
+    function typeLoop() {
+        if (!taglineEl) return;
+        taglineEl.textContent = phrases[phraseIndex].substring(0, charIndex);
+        if (!deleting && charIndex < phrases[phraseIndex].length) {
+            charIndex++;
+            setTimeout(typeLoop, 150);
+        } else if (!deleting) {
+            deleting = true;
+            setTimeout(typeLoop, 1000);
+        } else if (deleting && charIndex > 0) {
+            charIndex--;
+            setTimeout(typeLoop, 80);
+        } else {
+            deleting = false;
+            phraseIndex = (phraseIndex + 1) % phrases.length;
+            setTimeout(typeLoop, 500);
+        }
+    }
+    typeLoop();
     
     let petals = [];
     let leaves = [];
