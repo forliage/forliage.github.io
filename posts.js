@@ -8,7 +8,7 @@ var postsData = [
     },
     {
       "title": "午后随想",
-      "date": "2025-06-17",
+      "date": "2025-06-19",
       "category": "生活随笔",
       "path": "_posts/2025-06-19-AfternoonThoughts.html",
       "abstract": "记录一个阳光午后的随笔。"
