@@ -1,0 +1,64 @@
+---
+title: 午后随想
+date: 2025-06-19
+category: 生活随笔
+---
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>午后随想</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <canvas id="petalsCanvas"></canvas>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <aside>
+            <h2>文章结构</h2>
+            <section class="widget article-title-widget">
+                <h3>当前文章标题</h3>
+                <p id="current-article-title-placeholder">[文章标题会显示在这里]</p>
+            </section>
+            <section class="widget reading-progress-widget">
+                <h3>阅读进度</h3>
+                <div class="progress-bar-container-placeholder">
+                    <div class="progress-bar-placeholder" style="width: 0%;"></div>
+                </div>
+            </section>
+            <section class="widget bookmark-widget">
+                <h3>书签</h3>
+                <button type="button" id="add-bookmark-button">添加书签</button>
+                <ul id="bookmarks-list"></ul>
+            </section>
+        </aside>
+        <main>
+            <article>
+                <h2>午后随想</h2>
+                <p>记录一个阳光午后的随笔。</p>
+                <p>午后的阳光透过窗帘洒下，思绪也随之轻盈起来。</p>
+            </article>
+        </main>
+    </div>
+    <footer>
+        <p>© 2025 我的博客</p>
+    </footer>
+    <script src="../script.js"></script>
+</body>
+</html>

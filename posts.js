@@ -1,0 +1,16 @@
+var postsData = [
+    {
+      "title": "我的第一篇博客",
+      "date": "2025-06-16",
+      "category": "心情日记",
+      "path": "_posts/2025-06-16-Welcome.html",
+      "abstract": "这是我用HTML撰写的第一篇博客文章，属于\"心情日记\"分类。"
+    },
+    {
+      "title": "午后随想",
+      "date": "2025-06-17",
+      "category": "生活随笔",
+      "path": "_posts/2025-06-19-AfternoonThoughts.html",
+      "abstract": "记录一个阳光午后的随笔。"
+    }
+  ];

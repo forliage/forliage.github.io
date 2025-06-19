@@ -41,13 +41,7 @@
             if (category) {
                 categoryNameElement.textContent = category;
                 document.title = category + " - 分类文章";
-                // Placeholder for fetching and displaying articles
                 articleListElement.innerHTML = `<p>正在加载“${category}”分类下的文章...</p>`;
-                // In a later step, we will implement the actual fetching of posts.
-                // For now, this confirms the category is being read from the URL.
-                console.log(`Category to load: ${category}`);
-
-                // Example of how you might fetch posts (to be fully implemented later)
                 fetchPostsForCategory(category);
             } else {
                 categoryNameElement.textContent = '未指定分类';
@@ -56,38 +50,40 @@
         });
 
         async function fetchPostsForCategory(category) {
-            // This function will be expanded in a subsequent step
-            // to list files from _posts and filter them.
-            // For now, let's simulate finding one post.
-            console.log(`Simulating fetching posts for category: ${category}`);
-            
-            // Simulate fetching post files (this part will need actual backend/listing logic or a predefined list)
-            // For now, we know we have one post: _posts/2025-06-16-Welcome.html
-            // We need to parse its metadata if we want to filter by category.
-            // This is a simplified example. A real implementation would:
-            // 1. List all files in _posts.
-            // 2. For each file, fetch its content.
-            // 3. Parse the front matter (like in Jekyll) to get title, date, category.
-            // 4. If the category matches, add it to the list.
-
-            const postPath = '_posts/2025-06-16-Welcome.html';
-            // In a real scenario, you'd fetch and parse the front matter.
-            // Let's assume this post belongs to "心情日记"
-            if (category === "心情日记") {
-                const articleListElement = document.getElementById('article-list');
-                // We need the title. We can't get it without fetching the file and parsing it.
-                // Let's just link to it for now.
-                articleListElement.innerHTML = `
-                    <article>
-                        <h3><a href="${postPath}">我的第一篇博客</a></h3>
-                        <p>点击标题阅读文章。</p>
-                    </article>
-                `;
-            } else {
-                 document.getElementById('article-list').innerHTML = `<p>“${category}”分类下暂无文章。</p>`;
+            let posts;
+            try {
+                const res = await fetch('./posts.json');
+                if (!res.ok) throw new Error(res.statusText);
+                posts = await res.json();
+            } catch (err) {
+                if (window.postsData) {
+                    posts = window.postsData;
+                } else {
+                    document.getElementById('article-list').innerHTML = '<p>加载文章列表时发生错误。</p>';
+                    console.error(err);
+                    return;
+                }
             }
+            const filtered = posts.filter(p => p.category === category);
+            const articleListElement = document.getElementById('article-list');
+
+            if (filtered.length === 0) {
+                articleListElement.innerHTML = `<p>“${category}”分类下暂无文章。</p>`;
+                return;
+            }
+
+            articleListElement.innerHTML = '';
+            filtered.forEach(post => {
+                const article = document.createElement('article');
+                article.innerHTML = `
+                        <h3><a href="${post.path}">${post.title}</a></h3>
+                        <p>${post.abstract}</p>
+                    `;
+                articleListElement.appendChild(article);
+            });
         }
 </script>
+    <script src="posts.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
