@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>后台管理</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>后台管理</h1>
+    <section id="visit-record-section">
+        <h2>访客记录</h2>
+        <ul id="visit-list"></ul>
+    </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const list = document.getElementById('visit-list');
+            const records = JSON.parse(localStorage.getItem('visitHistory') || '[]');
+            records.forEach(r => {
+                const li = document.createElement('li');
+                li.textContent = r.time + ' - ' + r.page;
+                list.appendChild(li);
+            });
+        });
+    </script>
+</body>
+</html>

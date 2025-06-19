@@ -1,9 +1,3 @@
----
-title: 第一篇，说点心里话
-date: 2025-06-16
-category: 心情日记
----
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -12,7 +6,6 @@ category: 心情日记
     <link rel="stylesheet" href="../style.css">
 </head>
 <body>
-    <canvas id="petalsCanvas"></canvas>
     <audio id="bg-music" src="../music.mp3" loop></audio>
     <button id="music-toggle" class="music-control">♪</button>
     <header>
@@ -30,24 +23,7 @@ category: 心情日记
         </nav>
     </header>
     <div class="container">
-        <aside>
-            <h2>文章结构</h2>
-            <section class="widget article-title-widget">
-                <h3>当前文章标题</h3>
-                <p id="current-article-title-placeholder">[文章标题会显示在这里]</p>
-            </section>
-            <section class="widget reading-progress-widget">
-                <h3>阅读进度</h3>
-                <div class="progress-bar-container-placeholder">
-                    <div class="progress-bar-placeholder" style="width: 0%;"></div>
-                </div>
-            </section>
-            <section class="widget bookmark-widget">
-                <h3>书签</h3>
-                <button type="button" id="add-bookmark-button">添加书签</button>
-                <ul id="bookmarks-list"></ul>
-            </section>
-        </aside>
+        <div id="sidebar-container"></div>
         <main>
             <article>
                 <h2>第一篇，说点心里话</h2>

@@ -151,7 +151,7 @@ aside section.widget h3 {
 }
 
 /* Reading Progress Widget */
-.progress-bar-container-placeholder {
+.progress-bar-container {
     background-color: #e0e0e0; /* Light grey background for the bar container */
     border-radius: 10px; /* Rounder progress bar container */
     height: 20px;
@@ -159,7 +159,7 @@ aside section.widget h3 {
     overflow: hidden; /* Ensure inner bar stays within rounded corners */
 }
 
-.progress-bar-placeholder {
+.progress-bar {
     background-color: #FF69B4; /* Hot pink for progress fill */
     height: 100%;
     display: block;
@@ -169,7 +169,7 @@ aside section.widget h3 {
 }
 
 /* Bookmark Widget */
-#add-bookmark-button-placeholder {
+#add-bookmark-button {
     background-color: #FFB6C1; /* Light pink button */
     color: white;
     border: none;
@@ -182,29 +182,29 @@ aside section.widget h3 {
     transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
 }
 
-#add-bookmark-button-placeholder:hover {
+#add-bookmark-button:hover {
     background-color: #FF69B4; /* Darker pink on hover */
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
-#bookmarks-list-placeholder {
+#bookmarks-list {
     list-style-type: none;
     padding-left: 0;
     font-size: 0.9em;
 }
 
-#bookmarks-list-placeholder li {
+#bookmarks-list li {
     margin-bottom: 5px;
 }
 
-#bookmarks-list-placeholder li a {
+#bookmarks-list li a {
     /* Uses existing aside a styling, which is fine */
     /* color: #C2185B; */ /* Example from existing aside a */
     text-decoration: none;
 }
 
-#bookmarks-list-placeholder li a:hover {
+#bookmarks-list li a:hover {
     text-decoration: underline;
 }
 

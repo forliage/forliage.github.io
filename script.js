@@ -1,27 +1,21 @@
 window.onload = function() {
     const canvas = document.getElementById('petalsCanvas');
-    if (!canvas) {
-        console.error("Canvas element not found!");
-        return;
-    }
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas ? canvas.getContext('2d') : null;
     const music = document.getElementById('bg-music');
     const musicBtn = document.getElementById('music-toggle');
 
-    const savedTime = localStorage.getItem('music-current-time');
-    const savedPaused = localStorage.getItem('music-paused');
-    if (savedTime) {
-        music.addEventListener('loadedmetadata', () => {
-            music.currentTime = parseFloat(savedTime);
-        });
-    }
-    if (savedPaused === 'false') {
-        // Try to resume playback if it was playing on the previous page
-        music.play().catch(() => {});
-        musicBtn.classList.remove('paused');
-    } else {
-        musicBtn.classList.add('paused');
-    }
+    const savedTime = parseFloat(localStorage.getItem('music-current-time') || '0');
+    const wasPaused = localStorage.getItem('music-paused') === 'true';
+
+    music.addEventListener('loadedmetadata', () => {
+        music.currentTime = savedTime;
+        if (!wasPaused) {
+            music.play().catch(() => {});
+            musicBtn.classList.remove('paused');
+        } else {
+            musicBtn.classList.add('paused');
+        }
+    });
 
     musicBtn.addEventListener('click', () => {
         if (music.paused) {
@@ -33,10 +27,23 @@ window.onload = function() {
         }
     });
 
+    music.addEventListener('timeupdate', () => {
+        localStorage.setItem('music-current-time', music.currentTime);
+    });
+
     window.addEventListener('beforeunload', () => {
         localStorage.setItem('music-current-time', music.currentTime);
         localStorage.setItem('music-paused', music.paused);
     });
+
+    recordVisit();
+
+    const sidebarContainer = document.getElementById('sidebar-container');
+    if (sidebarContainer) {
+        loadSidebar().then(initSidebarFeatures);
+    } else {
+        initSidebarFeatures();
+    }
 
     const taglineEl = document.getElementById('tagline');
     const phrases = ['这里有forliage的学习笔记', '分享科研和学习中的idea', '书写自己的精彩的生活', '分享绚丽的爱'];
@@ -85,8 +92,10 @@ window.onload = function() {
         canvas.height = window.innerHeight;
     }
 
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas(); // Initial resize
+    if (canvas) {
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas(); // Initial resize
+    }
 
     class Petal {
         constructor() {
@@ -365,26 +374,29 @@ window.onload = function() {
         requestAnimationFrame(animate);
     }
 
-    window.addEventListener('resize', () => {
-        resizeCanvas();
-        initBackgroundElements(); // Re-create petals and leaves on resize
-    });
+    if (canvas) {
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            initBackgroundElements(); // Re-create petals and leaves on resize
+        });
 
-    initBackgroundElements();
-    animate();
-
-    updateArticleTitle(); // Call the new function
-
-    window.addEventListener('scroll', updateReadingProgress);
-    updateReadingProgress(); // 初始化阅读进度
-
-    const addBookmarkButton = document.getElementById('add-bookmark-button');
-    if (addBookmarkButton) {
-        addBookmarkButton.addEventListener('click', addBookmark);
-    } else {
-        console.error("Add bookmark button not found.");
+        initBackgroundElements();
+        animate();
     }
-    renderBookmarks(); // Initial render 
+
+    // 初始化侧栏功能（在 loadSidebar 完成后调用）
+    function initSidebarFeatures() {
+        updateArticleTitle();
+        window.addEventListener('scroll', updateReadingProgress);
+        updateReadingProgress();
+        const addBookmarkButton = document.getElementById('add-bookmark-button');
+        if (addBookmarkButton) {
+            addBookmarkButton.addEventListener('click', addBookmark);
+        } else {
+            console.error("Add bookmark button not found.");
+        }
+        renderBookmarks();
+    }
 
     // Optional: Add new elements periodically if you want more than the initial set
     // setInterval(() => {
@@ -409,7 +421,7 @@ function updateArticleTitle() {
 }
 
 function updateReadingProgress() {
-    const progressBarElement = document.querySelector('.progress-bar-placeholder');
+    const progressBarElement = document.querySelector('.progress-bar');
 
     if (!progressBarElement) {
         console.log("Could not find progress bar element.");
@@ -558,3 +570,25 @@ function deleteBookmark(index) {
         }, 550); // Duration of opacity transition (500ms) + buffer
     });
 };
+
+function recordVisit() {
+    try {
+        const list = JSON.parse(localStorage.getItem('visitHistory') || '[]');
+        list.push({ time: new Date().toISOString(), page: location.pathname });
+        localStorage.setItem('visitHistory', JSON.stringify(list));
+    } catch (e) {
+        console.error('Failed to record visit', e);
+    }
+}
+
+function loadSidebar() {
+    return new Promise((resolve) => {
+        const container = document.getElementById('sidebar-container');
+        if (!container) { resolve(); return; }
+        let prefix = location.pathname.includes('_posts') ? '../' : './';
+        fetch(prefix + 'sidebar.html')
+            .then(r => r.text())
+            .then(html => { container.innerHTML = html; resolve(); })
+            .catch(err => { console.error('Failed to load sidebar', err); resolve(); });
+    });
+}
