@@ -1,6 +1,6 @@
 body {
-    background-color: #FFC0CB; /* Light pink */
-    font-family: sans-serif;
+    background-color: #FFC0CB; /* Softer pink background */
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
     margin: 0;
     padding: 0;
 }
@@ -81,12 +81,22 @@ main {
     /* background-color: #FFFFFF; /* Already had this, from a previous step, ensure it's still there if needed */
 }
 
+main article p {
+    text-indent: 2em;
+    line-height: 1.6;
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #333;
+}
+
 aside { /* This is now the LEFT sidebar */
     flex: 0 0 25%; /* Fixed width for left sidebar, e.g., 25% */
     background-color: #FFF0F5; /* Lavender blush - same bg as old sidebar for now */
     padding: 15px; /* General padding */
     padding-right: 20px; /* Specifically ensure padding on the right for separation */
     border-right: 1px solid #FFC0CB; /* Optional: add a border */
+    position: sticky;
+    top: 20px;
+    align-self: flex-start;
 }
 
 /* Removing old widget styles as they are no longer in use in the new left sidebar structure */

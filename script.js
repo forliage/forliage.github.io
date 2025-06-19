@@ -375,14 +375,8 @@ window.onload = function() {
 
     updateArticleTitle(); // Call the new function
 
-    const mainContentArea = document.querySelector('main');
-    if (mainContentArea) {
-        mainContentArea.addEventListener('scroll', updateReadingProgress);
-    } else {
-        console.log("Main content area not found for attaching scroll listener.");
-    }
-    // Also call it once on load to set initial state, in case content is already scrolled or very short
-    updateReadingProgress();
+    window.addEventListener('scroll', updateReadingProgress);
+    updateReadingProgress(); // 初始化阅读进度
 
     const addBookmarkButton = document.getElementById('add-bookmark-button');
     if (addBookmarkButton) {
@@ -415,22 +409,21 @@ function updateArticleTitle() {
 }
 
 function updateReadingProgress() {
-    const mainElement = document.querySelector('main');
     const progressBarElement = document.querySelector('.progress-bar-placeholder');
 
-    if (!mainElement || !progressBarElement) {
-        if (!mainElement) console.log("Could not find main element for reading progress.");
-        if (!progressBarElement) console.log("Could not find progress bar element.");
+    if (!progressBarElement) {
+        console.log("Could not find progress bar element.");
         return;
     }
 
-    const scrollableHeight = mainElement.scrollHeight - mainElement.clientHeight;
-    if (scrollableHeight <= 0) { // Content is not scrollable or no content
+    const doc = document.documentElement;
+    const scrollableHeight = doc.scrollHeight - doc.clientHeight;
+    if (scrollableHeight <= 0) {
         progressBarElement.style.width = '0%';
         return;
     }
 
-    const scrollTop = mainElement.scrollTop;
+    const scrollTop = doc.scrollTop || document.body.scrollTop;
     const progressPercentage = (scrollTop / scrollableHeight) * 100;
     progressBarElement.style.width = progressPercentage + '%';
 }
@@ -447,7 +440,7 @@ function addBookmark() {
         return;
     }
 
-    const currentScrollTop = mainElement.scrollTop;
+    const currentScrollTop = window.scrollY;
     let bookmarkName = `书签 ${bookmarks.length + 1} (位置: ${currentScrollTop}px)`;
     
     const headings = Array.from(mainElement.querySelectorAll('h1, h2, h3, h4, h5, h6'));
@@ -456,7 +449,7 @@ function addBookmark() {
 
     headings.forEach(h => {
         const rect = h.getBoundingClientRect();
-        if (rect.top >= 0 && rect.top < mainElement.clientHeight) {
+        if (rect.top >= 0 && rect.top < window.innerHeight) {
             const diff = Math.abs(rect.top - 0);
             if (diff < smallestDiff) {
                 smallestDiff = diff;
@@ -513,13 +506,10 @@ function renderBookmarks() {
 }
 
 function scrollToBookmark(scrollTopValue) {
-    const mainElement = document.querySelector('main');
-    if (mainElement) {
-        mainElement.scrollTo({
-            top: scrollTopValue,
-            behavior: 'smooth'
-        });
-    }
+    window.scrollTo({
+        top: scrollTopValue,
+        behavior: 'smooth'
+    });
 }
 
 function deleteBookmark(index) {
