@@ -19,5 +19,12 @@ var postsData = [
       "category": "技术文章",
       "path": "_posts/2025-06-20-CBO.html",
       "abstract": "CBO讲解"
+    },
+    {
+      "title":"保持微笑",
+      "date":"2025-06-20",
+      "category":"心情日记",
+      "path":"_posts/2025-06-20-Smile.html",
+      "abstract":"要相信,爱永远在"
     }
   ];
