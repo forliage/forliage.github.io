@@ -12,5 +12,12 @@
     "category": "生活随笔",
     "path": "_posts/2025-06-19-AfternoonThoughts.html",
     "abstract": "记录一个阳光午后的随笔。"
+  },
+  {
+    "title":"基于代价的优化器（Cost-Based Optimizer, CBO）",
+    "date": "2025-06-20",
+    "category": "技术文章",
+    "path": "_posts/2025-06-20-CBO.html",
+    "abstract": "CBO讲解"
   }
 ]

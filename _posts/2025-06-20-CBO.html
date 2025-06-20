@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>基于代价的优化器（Cost-Based Optimizer, CBO）</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h2>基于代价的优化器（Cost-Based Optimizer, CBO）</h2>
+                <p> <strong>在正文开始之前,说一说为什么会想到CBO</strong>.在我们学习&lt;数据库系统与设计&gt;这门课程的时候,我们的大程作业是minisql,也即实现一个自己的迷你数据库,一个不得不考虑的问题就是对我们的数据库进行优化.我在完成了基本基本框架之后发现操作对select,insert等的速度影响是极大的(其实有很多的原因),为了提升数据库的质量,查询资料学习了CBO.(在课程作业中直接加入CBO且可以看到完整效果的代码是不公开的,若有需要请私信我,我的email在<strong>关于</strong>板块中).</p>
+<p> 接下来我们进入正题,我们的目的就是理解"为什么我的SQL有时候快如闪电，有时候慢如蜗牛".</p>
+<h3 id="第一章：问题的提出-——-为何需要“优化”？">第一章：问题的提出 —— 为何需要“优化”？</h3>
+<p>想象一下，你是一位图书馆的管理员，有人向你借两本书：一本是《计算机科学导论》，另一本是雨果的《悲惨世界》。这两本书都在图书馆里，但你有两种寻找方式：</p>
+<ol>
+<li>
+<p><strong>方案A：</strong> 你先去“计算机”区域，找到《计算机科学导论》，然后走到“外国文学”区域，找到《悲惨世界》。</p>
+</li>
+<li>
+<p><strong>方案B：</strong> 你先去“外国文学”区域，找到《悲惨世界》，然后走到“计算机”区域，找到《计算机科学导论》。</p>
+</li>
+</ol>
+<p>对于你来说，这两个方案最终都能完成任务，但所花费的时间和行走的距离可能差不多。</p>
+<p>现在，我们把场景切换到数据库。假设你执行了这样一条SQL查询：</p>
+<pre class=" language-sql"><code class="prism  language-sql">
+<span class="token keyword">SELECT</span> <span class="token operator">*</span>
+
+<span class="token keyword">FROM</span> students s
+
+<span class="token keyword">JOIN</span> scores sc <span class="token keyword">ON</span> s<span class="token punctuation">.</span>student_id <span class="token operator">=</span> sc<span class="token punctuation">.</span>student_id
+
+<span class="token keyword">WHERE</span> s<span class="token punctuation">.</span>major <span class="token operator">=</span> <span class="token string">'计算机科学'</span>  <span class="token operator">AND</span> sc<span class="token punctuation">.</span>course_name <span class="token operator">=</span> <span class="token string">'数据库系统'</span><span class="token punctuation">;</span>
+
+</code></pre>
+<p>这条SQL的目的是找出所有“计算机科学”专业学生中，选修了“数据库系统”这门课的成绩。数据库为了得到结果，至少有两种执行路径（我们称之为<strong>执行计划 (Execution Plan)</strong>）：</p>
+<ol>
+<li><strong>计划A：</strong></li>
+</ol>
+<ul>
+<li>
+<p>第一步：扫描<code>students</code>表，筛选出所有<code>major = '计算机科学'</code>的学生。</p>
+</li>
+<li>
+<p>第二步：对于每一个找到的学生，拿着他/她的<code>student_id</code>去<code>scores</code>表里查找<code>course_name = '数据库系统'</code>的记录。</p>
+</li>
+</ul>
+<ol start="2">
+<li><strong>计划B：</strong></li>
+</ol>
+<ul>
+<li>
+<p>第一步：扫描<code>scores</code>表，筛选出所有<code>course_name = '数据库系统'</code>的选课记录。</p>
+</li>
+<li>
+<p>第二步：对于每一条找到的记录，拿着它的<code>student_id</code>去<code>students</code>表里查找<code>major = '计算机科学'</code>的学生。</p>
+</li>
+</ul>
+<p>这两个计划哪个更好呢？</p>
+<p>直觉告诉我们，这取决于“计算机科学”专业的学生数量和“数据库系统”这门课的选课人数。</p>
+<ul>
+<li>
+<p>如果全校有10000名学生，但只有100人是计算机科学专业的。而“数据库系统”是一门有5000人选修的大热门课。</p>
+</li>
+<li>
+<p><strong>计划A</strong>：先从10000人里筛出100人，然后用这100个<code>student_id</code>去查询。</p>
+</li>
+<li>
+<p><strong>计划B</strong>：先从海量的选课记录中筛出5000条，然后用这5000个<code>student_id</code>去查询。</p>
+</li>
+<li>
+<p>显然，<strong>计划A</strong>的计算量要小得多。</p>
+</li>
+<li>
+<p>反之，如果全校只有20人选修了“数据库系统”，但“计算机科学”是一个有3000人的大学院。</p>
+</li>
+<li>
+<p>此时，<strong>计划B</strong>就变得更优了。</p>
+</li>
+</ul>
+<p><strong>问题的核心来了：</strong> 数据库本身并不知道哪个条件更“稀有”，哪个计划的“代价”更低。它如何能像我们一样做出明智的判断，选择那个最高效的执行计划呢？</p>
+<p>这就是<strong>查询优化器 (Query Optimizer)</strong> 的使命。而CBO，就是那个能够进行智能判断的“大脑”。</p>
+<hr>
+<h3 id="第二章：cbo的核心思想-——-万物皆有“代价”">第二章：CBO的核心思想 —— 万物皆有“代价”</h3>
+<p>在CBO出现之前，流行的是<strong>基于规则的优化器（Rule-Based Optimizer, RBO）</strong>。RBO非常“死板”，它有一系列的内置规则（比如：有索引就一定要用索引），然后按照规则的优先级来决定执行计划，它不关心表里有多少数据，数据是如何分布的。这就像一个只会按固定路线巡逻的机器人，不懂得变通。</p>
+<p>而CBO则是一个“经济学家”，它的核心思想是：<strong>为每一个可能的执行计划计算一个量化的“代价”（Cost），然后选择那个代价最小的计划去执行。</strong></p>
+<p>这个“代价”是什么呢？它是一个估算值，主要由以下几部分组成：</p>
+<ul>
+<li>
+<p><strong>I/O代价：</strong> 从磁盘读取数据页到内存的代价。这是最主要的代价，因为磁盘I/O比CPU计算慢几个数量级。</p>
+</li>
+<li>
+<p><strong>CPU代价：</strong> 处理内存中数据的代价，例如排序、哈希计算、比较等。</p>
+</li>
+<li>
+<p><strong>网络代价：</strong> 在分布式数据库中，节点间传输数据的代价。</p>
+</li>
+</ul>
+<p>为了简化模型，我们通常可以认为：</p>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Total&nbsp;Cost</mtext><mo>≈</mo><mtext>I/O&nbsp;Cost</mtext><mo>+</mo><mi>w</mi><mo>⋅</mo><mtext>CPU&nbsp;Cost</mtext></mrow><annotation encoding="application/x-tex">\text{Total Cost} \approx  \text{I/O Cost} + w \cdot  \text{CPU Cost}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.69444em; vertical-align: 0em;"></span><span class="mord text"><span class="mord">Total&nbsp;Cost</span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">I/O&nbsp;Cost</span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.44445em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.02691em;">w</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord text"><span class="mord">CPU&nbsp;Cost</span></span></span></span></span></span></span></p>
+<p>其中 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi></mrow><annotation encoding="application/x-tex">w</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.02691em;">w</span></span></span></span></span> 是一个权重因子。在很多经典的模型里，为了教学和理解方便，甚至会直接将 <strong>Cost等价于需要读取的磁盘页（Page/Block）的数量</strong>。这个假设虽然粗糙，但抓住了主要矛盾。</p>
+<p><strong>所以，CBO的工作流程可以概括为三步：</strong></p>
+<ol>
+<li>
+<p><strong>生成候选计划：</strong> 根据一条SQL，列出所有逻辑上等价的执行计划。</p>
+</li>
+<li>
+<p><strong>估算计划代价：</strong> 为每一个候选计划计算一个总代价。</p>
+</li>
+<li>
+<p><strong>选择最优计划：</strong> 选出代价最小的那个计划。</p>
+</li>
+</ol>
+<p>现在，最关键的问题来了：CBO是如何“未卜先知”，在不真正执行的情况下，估算出代价的呢？</p>
+<hr>
+<h3 id="第三章：cbo的基石-——-统计信息">第三章：CBO的基石 —— 统计信息</h3>
+<p>CBO不是神，它进行估算需要依据，这个依据就是数据库提前收集好的<strong>统计信息（Statistics）</strong>。这些信息描绘了数据的“长相”和“分布”，存储在系统表中。</p>
+<p>常见的统计信息包括：</p>
+<ul>
+<li>
+<p><strong>表级别统计信息：</strong></p>
+</li>
+<li>
+<p><code>NumRows</code>: 表的总行数。</p>
+</li>
+<li>
+<p><code>NumPages</code> / <code>Blocks</code>: 表占用的数据块（页）数量。</p>
+</li>
+<li>
+<p><strong>列级别统计信息：</strong></p>
+</li>
+<li>
+<p><code>Ndv</code> (Number of Distinct Values): 列中不重复值的数量。</p>
+</li>
+<li>
+<p><code>NullFreq</code>: NULL值的比例。</p>
+</li>
+<li>
+<p><code>Min/Max Value</code>: 列的最大值和最小值。</p>
+</li>
+<li>
+<p><strong>直方图 (Histogram):</strong> 这是非常重要的信息！它描述了列中数据的分布情况。例如，一个年龄列，大部分人可能集中在20-30岁，而不是均匀分布在0-100岁。直方图就能捕捉到这种不均匀性。</p>
+</li>
+<li>
+<p><strong>索引级别统计信息：</strong></p>
+</li>
+<li>
+<p><code>Levels</code>: B+树索引的高度。</p>
+</li>
+<li>
+<p><code>LeafBlocks</code>: 索引的叶子节点占用的块数。</p>
+</li>
+<li>
+<p><code>Clustering Factor</code>: <strong>聚簇因子</strong>。一个至关重要的指标，表示索引键值的顺序与表中数据行物理存储顺序的匹配程度。聚簇因子越低，说明索引顺序和物理顺序越一致，通过索引范围扫描的效率越高。</p>
+</li>
+</ul>
+<p>数据库通过<code>ANALYZE TABLE</code>或自动任务来收集和更新这些统计信息。<strong>如果统计信息是陈旧的、不准确的，CBO就会被误导，做出错误的判断（Garbage In, Garbage Out），这是导致SQL性能问题的常见原因。</strong></p>
+<hr>
+<h3 id="第四章：代价估算详解-——-公式与推导">第四章：代价估算详解 —— 公式与推导</h3>
+<h4 id="核心概念：选择率（selectivity）">4.1 核心概念：选择率（Selectivity）</h4>
+<p><strong>选择率（Selectivity）</strong> 是一个过滤条件（如 <code>WHERE col = value</code>）能筛选出数据行数的比例，是代价估算中最基础、最重要的概念。它的值在0到1之间。</p>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Selectivity&nbsp;(S)</mtext><mo>=</mo><mfrac><mtext>满足条件的行数</mtext><mtext>总行数</mtext></mfrac></mrow><annotation encoding="application/x-tex">\text{Selectivity (S)} = \frac{\text{满足条件的行数}}{\text{总行数}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Selectivity&nbsp;(S)</span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 2.04633em; vertical-align: -0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 1.36033em;"><span class="" style="top: -2.314em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord text"><span class="mord cjk_fallback">总行数</span></span></span></span><span class="" style="top: -3.23em;"><span class="pstrut" style="height: 3em;"></span><span class="frac-line" style="border-bottom-width: 0.04em;"></span></span><span class="" style="top: -3.677em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord text"><span class="mord cjk_fallback">满足条件的行数</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.686em;"><span class=""></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></span></p>
+<p>估算出的返回行数（我们称之为<strong>基数 (Cardinality)</strong>）就等于：</p>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Cardinality</mtext><mo>=</mo><mtext>NumRows</mtext><mo>×</mo><mtext>Selectivity</mtext></mrow><annotation encoding="application/x-tex">
+\text{Cardinality} = \text{NumRows} \times  \text{Selectivity}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.88888em; vertical-align: -0.19444em;"></span><span class="mord text"><span class="mord">Cardinality</span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.76666em; vertical-align: -0.08333em;"></span><span class="mord text"><span class="mord">NumRows</span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.88888em; vertical-align: -0.19444em;"></span><span class="mord text"><span class="mord">Selectivity</span></span></span></span></span></span></span></p>
+<p>CBO如何估算不同条件的选择率呢？</p>
+<p><strong>1. 等值查询 (<code>column = value</code>)</strong></p>
+<p>在没有详细数据分布信息（如直方图）时，CBO会假设数据是<strong>均匀分布</strong>的。</p>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>S</mi><mrow><mtext>col</mtext><mo>=</mo><mtext>val</mtext></mrow></msub><mo>=</mo><mfrac><mn>1</mn><mrow><mtext>Ndv</mtext><mo stretchy="false">(</mo><mtext>col</mtext><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">S_{\text{col}=\text{val}} = \frac{1}{\text{Ndv}(\text{col})}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.83333em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.336108em;"><span class="" style="top: -2.55em; margin-left: -0.05764em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">col</span></span><span class="mrel mtight">=</span><span class="mord text mtight"><span class="mord mtight">val</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 2.25744em; vertical-align: -0.936em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 1.32144em;"><span class="" style="top: -2.314em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord text"><span class="mord">Ndv</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">col</span></span><span class="mclose">)</span></span></span><span class="" style="top: -3.23em;"><span class="pstrut" style="height: 3em;"></span><span class="frac-line" style="border-bottom-width: 0.04em;"></span></span><span class="" style="top: -3.677em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.936em;"><span class=""></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></span></p>
+<ul>
+<li>
+<p><strong>推导：</strong> 假设列 <code>col</code> 有 <code>Ndv</code> 个不同的值，并且每个值出现的概率相等。那么任何一个特定值出现的概率就是 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mtext>Ndv</mtext></mrow><annotation encoding="application/x-tex">1/\text{Ndv}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">1/</span><span class="mord text"><span class="mord">Ndv</span></span></span></span></span></span>。</p>
+</li>
+<li>
+<p><strong>例子：</strong>  <code>students</code>表有10000行，<code>major</code>列有50个不同的专业（<code>Ndv('major') = 50</code>）。那么 <code>WHERE major = '计算机科学'</code> 的选择率估算为 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mn>50</mn><mo>=</mo><mn>0.02</mn></mrow><annotation encoding="application/x-tex">1/50 = 0.02</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">1/50</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">0.02</span></span></span></span></span>。估算的返回行数（基数）为 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>10000</mn><mo>×</mo><mn>0.02</mn><mo>=</mo><mn>200</mn></mrow><annotation encoding="application/x-tex">10000 \times 0.02 = 200</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.72777em; vertical-align: -0.08333em;"></span><span class="mord">10000</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">0.02</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">200</span></span></span></span></span>行。</p>
+</li>
+</ul>
+<p><strong>2. 范围查询 (<code>column &gt; value</code>)</strong></p>
+<p>同样，在没有直方图的情况下，假设数据在 <code>min</code> 和 <code>max</code> 之间线性均匀分布。</p>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>S</mi><mrow><mtext>col</mtext><mo>&gt;</mo><mtext>val</mtext></mrow></msub><mo>=</mo><mfrac><mrow><mtext>MaxValue</mtext><mo stretchy="false">(</mo><mtext>col</mtext><mo stretchy="false">)</mo><mo>−</mo><mtext>val</mtext></mrow><mrow><mtext>MaxValue</mtext><mo stretchy="false">(</mo><mtext>col</mtext><mo stretchy="false">)</mo><mo>−</mo><mtext>MinValue</mtext><mo stretchy="false">(</mo><mtext>col</mtext><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">S_{\text{col}&gt;\text{val}} = \frac{\text{MaxValue}(\text{col}) - \text{val}}{\text{MaxValue}(\text{col}) - \text{MinValue}(\text{col})}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.8607em; vertical-align: -0.17737em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.336108em;"><span class="" style="top: -2.55em; margin-left: -0.05764em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">col</span></span><span class="mrel mtight">&gt;</span><span class="mord text mtight"><span class="mord mtight">val</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.17737em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 2.363em; vertical-align: -0.936em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 1.427em;"><span class="" style="top: -2.314em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord text"><span class="mord">MaxValue</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">col</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mord text"><span class="mord">MinValue</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">col</span></span><span class="mclose">)</span></span></span><span class="" style="top: -3.23em;"><span class="pstrut" style="height: 3em;"></span><span class="frac-line" style="border-bottom-width: 0.04em;"></span></span><span class="" style="top: -3.677em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord text"><span class="mord">MaxValue</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">col</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mord text"><span class="mord">val</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.936em;"><span class=""></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></span></p>
+<ul>
+<li>
+<p><strong>推导：</strong> 这就是计算 <code>val</code> 在整个值域范围内的相对位置。</p>
+</li>
+<li>
+<p><strong>例子：</strong>  <code>age</code>列的<code>min=18</code>, <code>max=60</code>。<code>WHERE age &gt; 39</code> 的选择率估算为 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>60</mn><mo>−</mo><mn>39</mn><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><mn>60</mn><mo>−</mo><mn>18</mn><mo stretchy="false">)</mo><mo>=</mo><mn>21</mn><mi mathvariant="normal">/</mi><mn>42</mn><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">(60 - 39) / (60 - 18) = 21 / 42 = 0.5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord">60</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">39</span><span class="mclose">)</span><span class="mord">/</span><span class="mopen">(</span><span class="mord">60</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">18</span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">21/42</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">0.5</span></span></span></span></span>。</p>
+</li>
+</ul>
+<p><strong>注意：</strong> 如果有了直方图，CBO的估算会精确得多。它会查看直方图，计算出大于<code>val</code>的值具体落在了哪些“桶”里，然后根据桶的信息进行累加计算，而不是简单地假设线性分布。</p>
+<p><strong>3. 多个条件的组合</strong></p>
+<ul>
+<li><strong>AND (<code>P1 AND P2</code>)</strong>: 假设两个条件是相互独立的。</li>
+</ul>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>S</mi><mrow><mi>P</mi><mn>1</mn><mtext>&nbsp;AND&nbsp;</mtext><mi>P</mi><mn>2</mn></mrow></msub><mo>=</mo><msub><mi>S</mi><mrow><mi>P</mi><mn>1</mn></mrow></msub><mo>×</mo><msub><mi>S</mi><mrow><mi>P</mi><mn>2</mn></mrow></msub></mrow><annotation encoding="application/x-tex">S_{P1  \text{ AND } P2} = S_{P1} \times S_{P2}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.83333em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.328331em;"><span class="" style="top: -2.55em; margin-left: -0.05764em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right: 0.13889em;">P</span><span class="mord mtight">1</span><span class="mord text mtight"><span class="mord mtight">&nbsp;AND&nbsp;</span></span><span class="mord mathnormal mtight" style="margin-right: 0.13889em;">P</span><span class="mord mtight">2</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.83333em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.328331em;"><span class="" style="top: -2.55em; margin-left: -0.05764em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right: 0.13889em;">P</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.83333em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.328331em;"><span class="" style="top: -2.55em; margin-left: -0.05764em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right: 0.13889em;">P</span><span class="mord mtight">2</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span></span></span></span></span></span></p>
+<ul>
+<li><strong>OR (<code>P1 OR P2</code>)</strong>: 根据集合的容斥原理，并假设独立性。</li>
+</ul>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>S</mi><mrow><mi>P</mi><mn>1</mn><mtext>&nbsp;OR&nbsp;</mtext><mi>P</mi><mn>2</mn></mrow></msub><mo>=</mo><msub><mi>S</mi><mrow><mi>P</mi><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>S</mi><mrow><mi>P</mi><mn>2</mn></mrow></msub><mo>−</mo><mo stretchy="false">(</mo><msub><mi>S</mi><mrow><mi>P</mi><mn>1</mn></mrow></msub><mo>×</mo><msub><mi>S</mi><mrow><mi>P</mi><mn>2</mn></mrow></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">S_{P1  \text{ OR } P2} = S_{P1} + S_{P2} - (S_{P1} \times S_{P2})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.83333em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.328331em;"><span class="" style="top: -2.55em; margin-left: -0.05764em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right: 0.13889em;">P</span><span class="mord mtight">1</span><span class="mord text mtight"><span class="mord mtight">&nbsp;OR&nbsp;</span></span><span class="mord mathnormal mtight" style="margin-right: 0.13889em;">P</span><span class="mord mtight">2</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.83333em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.328331em;"><span class="" style="top: -2.55em; margin-left: -0.05764em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right: 0.13889em;">P</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.83333em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.328331em;"><span class="" style="top: -2.55em; margin-left: -0.05764em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right: 0.13889em;">P</span><span class="mord mtight">2</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.328331em;"><span class="" style="top: -2.55em; margin-left: -0.05764em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right: 0.13889em;">P</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.328331em;"><span class="" style="top: -2.55em; margin-left: -0.05764em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right: 0.13889em;">P</span><span class="mord mtight">2</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span></span></p>
+<p><strong>重要提示：</strong> “条件独立”是一个非常强的假设，在现实世界中常常不成立（例如 <code>state = 'California'</code> 和 <code>city = 'Los Angeles'</code> 强相关）。这是CBO估算不准的另一个主要原因。现代数据库会通过多列统计信息等手段来缓解这个问题。</p>
+<h4 id="访问路径的代价估算">4.2 访问路径的代价估算</h4>
+<p>有了基数估算，CBO就可以开始估算不同<strong>访问路径 (Access Path)</strong> 的代价了。</p>
+<p><strong>1. 全表扫描 (Full Table Scan, FTS)</strong></p>
+<p>这是最简单的访问方式：读取表中的所有数据块。</p>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>FTS</mtext><mo stretchy="false">)</mo><mo>=</mo><mtext>NumPages</mtext></mrow><annotation encoding="application/x-tex">\text{Cost}(\text{FTS}) = \text{NumPages}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">FTS</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.87777em; vertical-align: -0.19444em;"></span><span class="mord text"><span class="mord">NumPages</span></span></span></span></span></span></span></p>
+<ul>
+<li><strong>例子：</strong>  <code>students</code> 表占用 500 个数据页，那么全表扫描的I/O代价就是 500。</li>
+</ul>
+<p><strong>2. 索引扫描 (Index Scan)</strong></p>
+<p>这里情况复杂一些，取决于索引类型和需要扫描的数据量。</p>
+<ul>
+<li><strong>唯一索引扫描 (Index Unique Scan):</strong> 通过唯一索引查找单条记录，例如 <code>WHERE student_id = 123</code>。</li>
+</ul>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>Unique&nbsp;Scan</mtext><mo stretchy="false">)</mo><mo>=</mo><mtext>B-Tree&nbsp;Height</mtext><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\text{Cost}(\text{Unique Scan}) = \text{B-Tree Height} + 1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">Unique&nbsp;Scan</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.88888em; vertical-align: -0.19444em;"></span><span class="mord text"><span class="mord">B-Tree&nbsp;Height</span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">1</span></span></span></span></span></span></p>
+<ul>
+<li>
+<p><strong>推导：</strong> 代价约等于B+树的高度（通常是2-4，代表从根节点到叶子节点的I/O次数）+ 1次读取数据块的I/O。这是一个非常低的常数代价。</p>
+</li>
+<li>
+<p><strong>索引范围扫描 (Index Range Scan):</strong> 通过非唯一索引或范围条件查找一批数据，例如 <code>WHERE age &gt; 39</code>。</p>
+</li>
+</ul>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>Range&nbsp;Scan</mtext><mo stretchy="false">)</mo><mo>≈</mo><mo stretchy="false">(</mo><mtext>B-Tree&nbsp;Height</mtext><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mtext>Selectivity</mtext><mo>×</mo><mtext>LeafBlocks</mtext><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mtext>Cardinality</mtext><mo>×</mo><mtext>ClusteringFactor_Adjusted</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{Cost}(\text{Range Scan}) \approx (\text{B-Tree Height}) + (\text{Selectivity} \times  \text{LeafBlocks}) + (\text{Cardinality} \times  \text{ClusteringFactor\_Adjusted})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">Range&nbsp;Scan</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord text"><span class="mord">B-Tree&nbsp;Height</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord text"><span class="mord">Selectivity</span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">LeafBlocks</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">(</span><span class="mord text"><span class="mord">Cardinality</span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1.06em; vertical-align: -0.31em;"></span><span class="mord text"><span class="mord">ClusteringFactor_Adjusted</span></span><span class="mclose">)</span></span></span></span></span></span></p>
+<ul>
+<li><strong>推导：</strong></li>
+</ul>
+<ol>
+<li>
+<p><code>B-Tree Height</code>: 定位到范围起点的索引叶子节点的I/O。</p>
+</li>
+<li>
+<p><code>Selectivity × LeafBlocks</code>: 需要扫描的索引叶子块的数量。</p>
+</li>
+<li>
+<p><code>Cardinality</code>: 估算出的返回行数。</p>
+</li>
+<li>
+<p><code>ClusteringFactor_Adjusted</code>: 这是对<strong>聚簇因子</strong>的运用。它估算为了获取<code>Cardinality</code>这么多行数据，需要访问多少个<strong>数据块</strong>。</p>
+</li>
+</ol>
+<ul>
+<li>
+<p>如果聚簇因子很低（数据物理有序），可能<code>Cardinality</code>行数据都集中在少数几个数据块里，这部分的I/O代价就很小。</p>
+</li>
+<li>
+<p>如果聚簇因子很高（数据物理无序），极端情况下，每一行数据都来自不同的数据块，那么这部分I/O代价就是 <code>Cardinality</code>，这将是灾难性的。</p>
+</li>
+</ul>
+<p>CBO会比较 <code>Cost(FTS)</code> 和 <code>Cost(Index Scan)</code>。如果<code>WHERE</code>条件的选择率很低（筛选出的数据很少），那么索引扫描的代价通常会远低于全表扫描。反之，如果选择率很高（比如要查出表中50%的数据），CBO可能会发现全表扫描的顺序I/O反而比索引扫描的大量随机I/O更划算，从而放弃使用索引。<strong>这就是为什么有时候加了索引SQL也不用索引的原因！</strong></p>
+<h4 id="连接操作的代价估算">4.3 连接操作的代价估算</h4>
+<p>连接（Join）是CBO优化的重中之重，因为不同的连接算法和连接顺序，性能差异极大。</p>
+<p>假设我们连接表 R (Outer Table) 和 S (Inner Table)。</p>
+<p><strong>1. 嵌套循环连接 (Nested Loop Join, NLJ)</strong></p>
+<ul>
+<li>
+<p><strong>算法：</strong> 对外表R的每一行，都去内表S中查找匹配的行。</p>
+</li>
+<li>
+<p><strong>代价公式：</strong></p>
+</li>
+</ul>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>NLJ</mtext><mo stretchy="false">)</mo><mo>=</mo><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>Outer</mtext><mo stretchy="false">)</mo><mo>+</mo><mtext>Cardinality</mtext><mo stretchy="false">(</mo><mtext>Outer</mtext><mo stretchy="false">)</mo><mo>×</mo><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>Inner&nbsp;Access</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{Cost}(\text{NLJ}) = \text{Cost}(\text{Outer}) + \text{Cardinality}(\text{Outer}) \times  \text{Cost}(\text{Inner Access})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">NLJ</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">Outer</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Cardinality</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">Outer</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">Inner&nbsp;Access</span></span><span class="mclose">)</span></span></span></span></span></span></p>
+<ul>
+<li><strong>推导：</strong></li>
+</ul>
+<ol>
+<li>
+<p><code>Cost(Outer)</code>: 访问外表的代价。</p>
+</li>
+<li>
+<p><code>Cardinality(Outer)</code>: 外表经过过滤后返回的行数。</p>
+</li>
+<li>
+<p><code>Cost(Inner Access)</code>: 对于外表的每一行，访问内表的代价。如果内表的连接键上有索引，这个代价会很低（类似于索引扫描）；如果没有，可能就是一次全表扫描，代价会非常高。</p>
+</li>
+</ol>
+<ul>
+<li><strong>适用场景：</strong> 外表结果集很小，且内表的连接键上有高效索引。</li>
+</ul>
+<p><strong>2. 哈希连接 (Hash Join, HJ)</strong></p>
+<ul>
+<li><strong>算法：</strong></li>
+</ul>
+<ol>
+<li>
+<p><strong>Build Phase:</strong> 选择小表（通常是R）作为构建表，在内存中基于连接键创建一个哈希表。</p>
+</li>
+<li>
+<p><strong>Probe Phase:</strong> 扫描大表（S），用S的每一行的连接键去探测（Probe）哈希表，查找匹配项。</p>
+</li>
+</ol>
+<ul>
+<li><strong>代价公式（简化版）：</strong></li>
+</ul>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>HJ</mtext><mo stretchy="false">)</mo><mo>≈</mo><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>Scan&nbsp;R</mtext><mo stretchy="false">)</mo><mo>+</mo><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>Scan&nbsp;S</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{Cost}(\text{HJ}) \approx  \text{Cost}(\text{Scan R}) + \text{Cost}(\text{Scan S})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">HJ</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">Scan&nbsp;R</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">Scan&nbsp;S</span></span><span class="mclose">)</span></span></span></span></span></span></p>
+<p>在I/O模型下，就是读取两个表的代价：</p>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>HJ</mtext><mo stretchy="false">)</mo><mo>≈</mo><mtext>NumPages</mtext><mo stretchy="false">(</mo><mi>R</mi><mo stretchy="false">)</mo><mo>+</mo><mtext>NumPages</mtext><mo stretchy="false">(</mo><mi>S</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{Cost}(\text{HJ}) \approx  \text{NumPages}(R) + \text{NumPages}(S)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">HJ</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">NumPages</span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right: 0.00773em;">R</span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">NumPages</span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right: 0.05764em;">S</span><span class="mclose">)</span></span></span></span></span></span></p>
+<ul>
+<li>
+<p><strong>推导：</strong> 主要是对两个表进行一次全盘扫描的代价。CPU代价在于构建和探测哈希表。如果哈希表大到内存放不下，就需要写入临时磁盘文件，代价会急剧增加。</p>
+</li>
+<li>
+<p><strong>适用场景：</strong> 大数据量连接，特别是当连接键上没有索引时。它对等值连接（<code>ON R.key = S.key</code>）非常高效。</p>
+</li>
+</ul>
+<p><strong>3. 排序归并连接 (Sort-Merge Join, SMJ)</strong></p>
+<ul>
+<li><strong>算法：</strong></li>
+</ul>
+<ol>
+<li>
+<p><strong>Sort Phase:</strong> 分别对表R和表S按照连接键进行排序。</p>
+</li>
+<li>
+<p><strong>Merge Phase:</strong> 像拉链一样，同步地扫描两个已排序的表，合并匹配的行。</p>
+</li>
+</ol>
+<ul>
+<li><strong>代价公式：</strong></li>
+</ul>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>SMJ</mtext><mo stretchy="false">)</mo><mo>=</mo><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>Sort&nbsp;R</mtext><mo stretchy="false">)</mo><mo>+</mo><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>Sort&nbsp;S</mtext><mo stretchy="false">)</mo><mo>+</mo><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>Merge</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{Cost}(\text{SMJ}) = \text{Cost}(\text{Sort R}) + \text{Cost}(\text{Sort S}) + \text{Cost}(\text{Merge})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">SMJ</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">Sort&nbsp;R</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">Sort&nbsp;S</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">Merge</span></span><span class="mclose">)</span></span></span></span></span></span></p>
+<p>排序的代价通常很高，如果数据量大，需要外部排序（使用磁盘）。<code>Cost(Sort)</code> 大致正比于 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mi>log</mi><mo>⁡</mo><mi>N</mi></mrow><annotation encoding="application/x-tex">N \log N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.88888em; vertical-align: -0.19444em;"></span><span class="mord mathnormal" style="margin-right: 0.10903em;">N</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mop">lo<span style="margin-right: 0.01389em;">g</span></span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathnormal" style="margin-right: 0.10903em;">N</span></span></span></span></span>。归并的代价则接近于一次线性扫描。</p>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>Merge</mtext><mo stretchy="false">)</mo><mo>≈</mo><mtext>NumPages</mtext><mo stretchy="false">(</mo><mi>R</mi><mo stretchy="false">)</mo><mo>+</mo><mtext>NumPages</mtext><mo stretchy="false">(</mo><mi>S</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\text{Cost}(\text{Merge}) \approx  \text{NumPages}(R) + \text{NumPages}(S)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">Merge</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">NumPages</span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right: 0.00773em;">R</span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">NumPages</span></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right: 0.05764em;">S</span><span class="mclose">)</span></span></span></span></span></span></p>
+<ul>
+<li><strong>适用场景：</strong> 如果数据源本身已经是有序的，或者查询要求最终结果按连接键排序，SMJ就很有优势。也适用于非等值连接（如 <code>ON R.key &gt; S.key</code>）。</li>
+</ul>
+<hr>
+<h3 id="第五章：实战演练-——-cbo如何决策">第五章：实战演练 —— CBO如何决策</h3>
+<p>回到我们最初的例子：</p>
+<pre class=" language-sql"><code class="prism  language-sql">
+<span class="token keyword">SELECT</span> <span class="token operator">*</span>
+
+<span class="token keyword">FROM</span> students s
+
+<span class="token keyword">JOIN</span> scores sc <span class="token keyword">ON</span> s<span class="token punctuation">.</span>student_id <span class="token operator">=</span> sc<span class="token punctuation">.</span>student_id
+
+<span class="token keyword">WHERE</span> s<span class="token punctuation">.</span>major <span class="token operator">=</span> <span class="token string">'计算机科学'</span>  <span class="token operator">AND</span> sc<span class="token punctuation">.</span>course_name <span class="token operator">=</span> <span class="token string">'数据库系统'</span><span class="token punctuation">;</span>
+
+</code></pre>
+<p>假设有以下统计信息：</p>
+<ul>
+<li>
+<p><code>students</code>: 10,000行 (<code>NumRows</code>), 500页 (<code>NumPages</code>)</p>
+</li>
+<li>
+<p><code>major</code>: 50个不同值 (<code>Ndv</code>)</p>
+</li>
+<li>
+<p><code>student_id</code> 是主键（有唯一索引）</p>
+</li>
+<li>
+<p><code>scores</code>: 200,000行, 4000页</p>
+</li>
+<li>
+<p><code>course_name</code>: 200个不同值</p>
+</li>
+<li>
+<p><code>student_id</code> 上有非唯一索引</p>
+</li>
+</ul>
+<p>CBO会评估多个可能的计划，我们来分析其中两个：</p>
+<p><strong>计划A: <code>students</code>驱动<code>scores</code> (NLJ)</strong></p>
+<ol>
+<li><strong>访问<code>students</code>表:</strong></li>
+</ol>
+<ul>
+<li>
+<p>条件: <code>s.major = '计算机科学'</code></p>
+</li>
+<li>
+<p>选择率: <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mi>s</mi></msub><mo>=</mo><mn>1</mn><mi mathvariant="normal">/</mi><mtext>Ndv(major)</mtext><mo>=</mo><mn>1</mn><mi mathvariant="normal">/</mi><mn>50</mn><mo>=</mo><mn>0.02</mn></mrow><annotation encoding="application/x-tex">S_s = 1 / \text{Ndv(major)} = 1/50 = 0.02</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.83333em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.151392em;"><span class="" style="top: -2.55em; margin-left: -0.05764em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">1/</span><span class="mord text"><span class="mord">Ndv(major)</span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">1/50</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">0.02</span></span></span></span></span></p>
+</li>
+<li>
+<p>基数: <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mtext>Card</mtext><mi>s</mi></msub><mo>=</mo><mn>10000</mn><mo>×</mo><mn>0.02</mn><mo>=</mo><mn>200</mn></mrow><annotation encoding="application/x-tex">\text{Card}_s = 10000  \times  0.02 = 200</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.84444em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord text"><span class="mord">Card</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.151392em;"><span class="" style="top: -2.55em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.72777em; vertical-align: -0.08333em;"></span><span class="mord">10000</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">0.02</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">200</span></span></span></span></span> 行</p>
+</li>
+<li>
+<p>访问方式: <code>major</code>上若无索引，则全表扫描。Cost ≈ <code>NumPages(s)</code> = 500。</p>
+</li>
+</ul>
+<ol start="2">
+<li><strong>访问<code>scores</code>表 (for each of 200 students):</strong></li>
+</ol>
+<ul>
+<li>
+<p>连接条件: <code>sc.student_id = ?</code> (来自<code>students</code>表)</p>
+</li>
+<li>
+<p>过滤条件: <code>sc.course_name = '数据库系统'</code></p>
+</li>
+<li>
+<p>访问方式: 使用<code>scores</code>表上<code>student_id</code>的索引。每次访问代价很低，假设为 <code>Cost(idx_access)</code> ≈ 3 (B-Tree Height + 1)。</p>
+</li>
+</ul>
+<ol start="3">
+<li><strong>总代价 (估算):</strong></li>
+</ol>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.2500em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>Plan&nbsp;A</mtext><mo stretchy="false">)</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>Access&nbsp;students</mtext><mo stretchy="false">)</mo><mo>+</mo><msub><mtext>Card</mtext><mi>s</mi></msub><mo>×</mo><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>Access&nbsp;scores&nbsp;per&nbsp;student</mtext><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>≈</mo><mn>500</mn><mo>+</mo><mn>200</mn><mo>×</mo><mn>3</mn></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mn>1100</mn></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+\text{Cost}(\text{Plan A}) &amp;= \text{Cost}(\text{Access students}) + \text{Card}_s \times  \text{Cost}(\text{Access scores per student}) \\
+&amp;\approx  500 + 200  \times  3 \\
+&amp;= 1100
+\end{align*}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 4.5em; vertical-align: -2em;"></span><span class="mord"><span class="mtable"><span class="col-align-r"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 2.5em;"><span class="" style="top: -4.66em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">Plan&nbsp;A</span></span><span class="mclose">)</span></span></span><span class="" style="top: -3.16em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"></span></span><span class="" style="top: -1.66em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 2em;"><span class=""></span></span></span></span></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 2.5em;"><span class="" style="top: -4.66em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">Access&nbsp;students</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mord"><span class="mord text"><span class="mord">Card</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.151392em;"><span class="" style="top: -2.55em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">s</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">Access&nbsp;scores&nbsp;per&nbsp;student</span></span><span class="mclose">)</span></span></span><span class="" style="top: -3.16em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mord">500</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mord">200</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mord">3</span></span></span><span class="" style="top: -1.66em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mord">1100</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 2em;"><span class=""></span></span></span></span></span></span></span></span></span></span></span></span></p>
+<p>(这里忽略了对<code>course_name</code>的过滤，因为在索引查找<code>student_id</code>后，这个过滤是在内存中完成的，CPU代价，I/O代价小)</p>
+<p><strong>计划B: <code>scores</code>驱动<code>students</code> (NLJ)</strong></p>
+<ol>
+<li><strong>访问<code>scores</code>表:</strong></li>
+</ol>
+<ul>
+<li>
+<p>条件: <code>sc.course_name = '数据库系统'</code></p>
+</li>
+<li>
+<p>选择率: <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>S</mi><mrow><mi>s</mi><mi>c</mi></mrow></msub><mo>=</mo><mn>1</mn><mi mathvariant="normal">/</mi><mtext>Ndv(course_name)</mtext><mo>=</mo><mn>1</mn><mi mathvariant="normal">/</mi><mn>200</mn><mo>=</mo><mn>0.005</mn></mrow><annotation encoding="application/x-tex">S_{sc} = 1 / \text{Ndv(course\_name)} = 1/200 = 0.005</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.83333em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.151392em;"><span class="" style="top: -2.55em; margin-left: -0.05764em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">sc</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1.06em; vertical-align: -0.31em;"></span><span class="mord">1/</span><span class="mord text"><span class="mord">Ndv(course_name)</span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">1/200</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">0.005</span></span></span></span></span></p>
+</li>
+<li>
+<p>基数: <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mtext>Card</mtext><mrow><mi>s</mi><mi>c</mi></mrow></msub><mo>=</mo><mn>200000</mn><mo>×</mo><mn>0.005</mn><mo>=</mo><mn>1000</mn></mrow><annotation encoding="application/x-tex">\text{Card}_{sc} = 200000  \times  0.005 = 1000</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.84444em; vertical-align: -0.15em;"></span><span class="mord"><span class="mord text"><span class="mord">Card</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.151392em;"><span class="" style="top: -2.55em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">sc</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.72777em; vertical-align: -0.08333em;"></span><span class="mord">200000</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">0.005</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.64444em; vertical-align: 0em;"></span><span class="mord">1000</span></span></span></span></span> 行</p>
+</li>
+<li>
+<p>访问方式: <code>course_name</code>上若无索引，则全表扫描。Cost ≈ <code>NumPages(sc)</code> = 4000。</p>
+</li>
+</ul>
+<ol start="2">
+<li><strong>访问<code>students</code>表 (for each of 1000 scores):</strong></li>
+</ol>
+<ul>
+<li>
+<p>连接条件: <code>s.student_id = ?</code></p>
+</li>
+<li>
+<p>访问方式: 使用<code>students</code>表上<code>student_id</code>的主键索引。每次访问代价极低，<code>Cost(pk_access)</code> ≈ 2。</p>
+</li>
+</ul>
+<ol start="3">
+<li><strong>总代价 (估算):</strong></li>
+</ol>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mtable rowspacing="0.2500em" columnalign="right left" columnspacing="0em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>Plan&nbsp;B</mtext><mo stretchy="false">)</mo></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>Access&nbsp;scores</mtext><mo stretchy="false">)</mo><mo>+</mo><msub><mtext>Card</mtext><mrow><mi>s</mi><mi>c</mi></mrow></msub><mo>×</mo><mtext>Cost</mtext><mo stretchy="false">(</mo><mtext>Access&nbsp;students&nbsp;per&nbsp;score</mtext><mo stretchy="false">)</mo></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>≈</mo><mn>4000</mn><mo>+</mo><mn>1000</mn><mo>×</mo><mn>2</mn></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mn>6000</mn></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+\text{Cost}(\text{Plan B}) &amp;= \text{Cost}(\text{Access scores}) + \text{Card}_{sc} \times  \text{Cost}(\text{Access students per score}) \\
+&amp;\approx  4000 + 1000  \times  2 \\
+&amp;= 6000
+\end{align*}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 4.5em; vertical-align: -2em;"></span><span class="mord"><span class="mtable"><span class="col-align-r"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 2.5em;"><span class="" style="top: -4.66em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">Plan&nbsp;B</span></span><span class="mclose">)</span></span></span><span class="" style="top: -3.16em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"></span></span><span class="" style="top: -1.66em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 2em;"><span class=""></span></span></span></span></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 2.5em;"><span class="" style="top: -4.66em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">Access&nbsp;scores</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mord"><span class="mord text"><span class="mord">Card</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 0.151392em;"><span class="" style="top: -2.55em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">sc</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.15em;"><span class=""></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mord text"><span class="mord">Cost</span></span><span class="mopen">(</span><span class="mord text"><span class="mord">Access&nbsp;students&nbsp;per&nbsp;score</span></span><span class="mclose">)</span></span></span><span class="" style="top: -3.16em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≈</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mord">4000</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mord">1000</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mord">2</span></span></span><span class="" style="top: -1.66em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mord">6000</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 2em;"><span class=""></span></span></span></span></span></span></span></span></span></span></span></span></p>
+<p><strong>决策:</strong>  <code>Cost(Plan A)</code> = 1100 &lt;&lt; <code>Cost(Plan B)</code> = 6000。因此，CBO会明智地选择<strong>计划A</strong>。</p>
+<p>CBO还会考虑<strong>Hash Join</strong>。其代价约为 <code>NumPages(s) + NumPages(sc) = 500 + 4000 = 4500</code>。这个代价介于A和B之间，所以CBO依然会选择计划A。</p>
+<p><strong>思考：</strong> 如果我们在<code>students.major</code>和<code>scores.course_name</code>上都建立了索引，CBO的计算会如何变化？它会重新计算索引扫描的代价，然后可能会发现一个全新的、更优的计划！</p>
+            </article>
+        </main>
+    </div>
+    <footer>
+        <p>© 2025 我的博客</p>
+    </footer>
+    <script src="../script.js"></script>
+</body>
+</html>
