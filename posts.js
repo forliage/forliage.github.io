@@ -26,5 +26,12 @@ var postsData = [
       "category":"心情日记",
       "path":"_posts/2025-06-20-Smile.html",
       "abstract":"要相信,爱永远在"
+    },
+    {
+      "title": "SDS",
+      "date":"2025-06-21",
+      "category":"技术文章",
+      "path":"_posts/2025-06-21-SDS.html",
+      "abstract":"当Diffusion Model遇到3DGS，会擦出什么样的爱的火花呢"
     }
   ];
