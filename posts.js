@@ -33,5 +33,12 @@ var postsData = [
       "category":"技术文章",
       "path":"_posts/2025-06-21-SDS.html",
       "abstract":"当Diffusion Model遇到3DGS，会擦出什么样的爱的火花呢"
+    },
+    {
+      "title": "2025IMOP3解答",
+      "date":"2025-07-15",
+      "category":"技术文章",
+      "path":"_posts/2025-07-15-IMO3.html",
+      "abstract":"2025 IMO Problem 3的解答"
     }
   ];
