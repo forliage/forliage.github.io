@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机动画01：粒子系统(Particle Systems)</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8A%A8%E7%94%BB01%E7%B2%92%E5%AD%90%E7%B3%BB%E7%BB%9Fparticle-systems">计算机动画01：粒子系统(Particle Systems)</h1>
+                <h3 id="1-%E4%BB%80%E4%B9%88%E6%98%AF%E7%B2%92%E5%AD%90%E7%B3%BB%E7%BB%9F">1. 什么是粒子系统？</h3>
+                <h4 id="11-%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3">1.1 核心思想</h4>
+                <p>粒子系统的核心思想可以用一句话来概括：<strong>“用至简的程序化规则，创造出极为深邃的视觉效果。”</strong>
+                (&quot;Very simple procedural rules can create very deep visual effects.&quot;)</p>
+                <p>传统的三维建模技术，如多边形网格或参数曲面，非常适合于构建具有清晰边界的静态物体（例如桌子、汽车）。然而，当我们尝试模拟自然界中那些形态模糊、动态变化且无固定形状的现象——我们称之为“模糊物体”（&quot;fuzzy&quot; phenomena）时，这些技术就显得力不从心。这些现象包括：</p>
+                <ul>
+                <li><strong>自然现象</strong>：火焰、烟雾、云彩、流水（瀑布、浪花）、雨雪、落叶</li>
+                <li><strong>特效</strong>：爆炸、火花、喷泉、烟花</li>
+                <li><strong>聚合体</strong>：草地、毛发、星云、成群的生物</li>
+                </ul>
+                <p>粒子系统正是为了解决这一难题而生。它并不试图为整个模糊物体建立一个统一的、复杂的几何模型，而是将其视为一个由<strong>大量、简单、独立的粒子</strong>构成的集合。系统的整体行为和外观，是通过控制每个粒子的生成、运动、演化和消亡的规则来程序化地定义的。</p>
+                <h4 id="12-%E5%8E%86%E5%8F%B2%E4%B8%8E%E5%8A%A8%E6%9C%BA">1.2 历史与动机</h4>
+                <p>粒子系统的概念最早由 <strong>William T. Reeves</strong> 在他1983年发表于SIGGRAPH的里程碑式论文《Particle Systems - a Technique for Modeling a Class of Fuzzy Objects》中正式提出。</p>
+                <p>这项技术的直接驱动力来自于电影特效的需求。在1982年的电影 <strong>《星际迷航2：可汗之怒》（Star Trek II: The Wrath of Khan）</strong> 中，有一个被称为“创世效应”（Genesis Effect）的著名片段，需要展示一个荒芜的星球在火焰席卷后迅速转变为一个充满生机的世界。使用传统动画技术来绘制成千上万个飞舞的火花是极其困难且不真实的。Reeves和他的团队为此开发了粒子系统，成功地模拟了火焰墙环绕并改造星球的宏大场面，这被认为是计算机图形学历史上的一个重要突破。</p>
+                <p>自此，粒子系统成为了影视特技、视频游戏和科学可视化中生成视觉特效的一种核心方法。Ree-ves本人也因其在皮克斯（Pixar）的杰出贡献，包括参与制作了获得奥斯卡奖的动画短片《锡铁小兵》（Tin Toy），而成为行业传奇。</p>
+                <h3 id="2-%E7%B2%92%E5%AD%90%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%9E%B6%E6%9E%84">2. 粒子系统的基本架构</h3>
+                <p>一个典型的粒子系统模拟遵循一个固定的循环，这个循环在每一帧都会执行。我们可以将其分解为四个核心阶段：</p>
+                <ol>
+                <li><strong>生成 (Emission/Generation)</strong>：在当前时间步，根据发射器（Emitter）的规则创建新的粒子。</li>
+                <li><strong>更新 (Update/Animation)</strong>：更新系统中所有活动粒子的状态。这是模拟的核心，主要涉及物理动力学的计算。</li>
+                <li><strong>销毁 (Culling/Reaping)</strong>：移除那些生命周期结束或满足其他死亡条件的粒子。</li>
+                <li><strong>渲染 (Rendering)</strong>：将所有活动粒子以某种方式绘制到屏幕上。</li>
+                </ol>
+                <h4 id="21-%E5%9F%BA%E7%A1%80%E5%81%87%E8%AE%BE">2.1 基础假设</h4>
+                <p>为了实现高效的计算，经典的粒子系统通常建立在以下几个简化假设之上：</p>
+                <ul>
+                <li><strong>粒子间无相互作用</strong>：粒子通常不与其它粒子发生碰撞或施加作用力（高级系统中如SPH会打破此假设）。这极大地降低了计算复杂度，从 O(n²) 降至 O(n)。</li>
+                <li><strong>无自阴影</strong>：粒子通常不向其他粒子投射阴影。</li>
+                <li><strong>单向环境交互</strong>：粒子可以被环境影响（如与地面碰撞），但通常不改变环境。</li>
+                <li><strong>不反射光</strong>：粒子通常被视为自发光或仅受简单光照影响，不进行复杂的全局光照计算。</li>
+                <li><strong>有限生命周期</strong>：每个粒子都有一个生命值（lifespan），随时间流逝而减少，归零时粒子死亡。</li>
+                </ul>
+                <p>这些假设使得我们能够实时模拟成千上万甚至数百万个粒子。</p>
+                <h3 id="3-%E6%95%B0%E5%AD%A6%E4%B8%8E%E7%89%A9%E7%90%86%E6%A8%A1%E5%9E%8B">3. 数学与物理模型</h3>
+                <p>粒子系统的核心在于“更新”阶段，即如何根据物理规律计算每个粒子的运动。</p>
+                <h4 id="31-%E7%B2%92%E5%AD%90%E7%9A%84%E5%B1%9E%E6%80%A7">3.1 粒子的属性</h4>
+                <p>每个粒子本质上是一个质点，其状态由一组属性描述。这些属性构成了粒子系统状态向量的基础。</p>
+                <ul>
+                <li><strong>位置 (Position)</strong>: $\vec{x}(t)$，一个三维向量。</li>
+                <li><strong>速度 (Velocity)</strong>: $\vec{v}(t) = \frac{d\vec{x}}{dt}$，一个三维向量。</li>
+                <li><strong>加速度 (Acceleration)</strong>: $\vec{a}(t) = \frac{d\vec{v}}{dt}$，一个三维向量。</li>
+                <li><strong>质量 (Mass)</strong>: $m$，一个标量。</li>
+                <li><strong>生命周期 (Lifespan)</strong>: $l$，一个标量，表示粒子还能存活多久。</li>
+                <li><strong>渲染属性</strong>: 颜色(Color)、透明度(Alpha)、尺寸(Size)等。</li>
+                <li><strong>力累加器 (Force Accumulator)</strong>: $\vec{F}_{total}$，用于累加作用在该粒子上的所有力。</li>
+                </ul>
+                <h4 id="32-%E8%BF%90%E5%8A%A8%E6%96%B9%E7%A8%8B">3.2 运动方程</h4>
+                <p>粒子的运动遵循牛顿第二定律：
+                $$ \vec{F}_{total} = m \vec{a}(t) $$
+                由此可得加速度：
+                $$ \vec{a}(t) = \frac{\vec{F}_{total}}{m} $$
+                这是一个二阶常微分方程（ODE）：
+                $$ \frac{d^2\vec{x}}{dt^2} = \frac{\vec{F}_{total}(\vec{x}, \vec{v}, t)}{m} $$
+                为了便于数值求解，我们通常将其转换为一个由两个一阶常微分方程组成的系统。我们定义一个系统的<strong>状态向量</strong> $S(t)$：
+                $$ S(t) = \begin{pmatrix} \vec{x}(t) \\ \vec{v}(t) \end{pmatrix} $$
+                其导数为：
+                $$ \frac{dS(t)}{dt} = \begin{pmatrix} \frac{d\vec{x}}{dt} \\ \frac{d\vec{v}}{dt} \end{pmatrix} = \begin{pmatrix} \vec{v}(t) \\ \vec{a}(t) \end{pmatrix} = \begin{pmatrix} \vec{v}(t) \\ \frac{\vec{F}_{total}(\vec{x}, \vec{v}, t)}{m} \end{pmatrix} $$
+                这个形式 <code>dS/dt = f(S, t)</code> 就是我们要用数值方法求解的标准形式。</p>
+                <h4 id="33-%E5%8A%9B%E7%9A%84%E5%BB%BA%E6%A8%A1-force-modeling">3.3 力的建模 (Force Modeling)</h4>
+                <p>总作用力 $\vec{F}_{total}$ 是所有单个力的矢量和。常见的力模型包括：</p>
+                <ol>
+                <li>
+                <p><strong>一元力 (Unary Forces)</strong>：只与单个粒子自身状态相关的力。</p>
+                <ul>
+                <li><strong>重力 (Gravity)</strong>: $\vec{F}_g = m\vec{g}$，其中 $\vec{g}$ 是重力加速度常数（如 <code>(0, -9.8, 0)</code>）。</li>
+                <li><strong>粘性阻力 (Viscous Drag)</strong>: $\vec{F}_d = -k_d \vec{v}$，其中 $k_d$ 是阻力系数。这个力模拟了粒子在空气或液体等介质中受到的阻力，方向与速度方向相反。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>N元力 (N-ary Forces)</strong>：与多个粒子相互作用相关的力。</p>
+                <ul>
+                <li><strong>弹簧-阻尼器 (Spring-Damper)</strong>：这是连接两个粒子 $a$ 和 $b$ 的最常见模型，用于模拟布料、软体等。
+                <ul>
+                <li>设粒子 $a$ 和 $b$ 的位置为 $\vec{x}_a, \vec{x}_b$，速度为 $\vec{v}_a, \vec{v}_b$。</li>
+                <li>向量 $\vec{d} = \vec{x}_a - \vec{x}_b$，当前长度 $l = ||\vec{d}||$，方向单位向量 $\hat{d} = \vec{d}/l$。</li>
+                <li>弹簧静止长度为 $l_0$。</li>
+                <li><strong>弹簧力 (Hooke's Law)</strong>：$\vec{F}_{spring} = -k_s (l - l_0) \hat{d}$，其中 $k_s$ 是弹簧劲度系数。</li>
+                <li><strong>阻尼力 (Damping Force)</strong>：$\vec{F}_{damper} = -k_d (\vec{v}_a - \vec{v}_b) \cdot \hat{d} $，其中 $k_d$ 是阻尼系数。这个力用于耗散能量，使系统趋于稳定。</li>
+                <li>作用在粒子 $a$ 上的总力为 $\vec{F}_a = \vec{F}_{spring} + \vec{F}_{damper}$。作用在粒子 $b$ 上的力为 $-\vec{F}_a$。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>环境力 (Environmental Forces)</strong>：由外部环境施加的力。</p>
+                <ul>
+                <li><strong>风场 (Wind Fields)</strong>：可以是一个恒定向量，也可以是一个复杂的向量场函数 $\vec{F}_{wind} = f(\vec{x}, t)$。</li>
+                <li><strong>漩涡 (Vortex)</strong>：模拟旋转的力场。</li>
+                </ul>
+                </li>
+                </ol>
+                <h4 id="34-%E6%95%B0%E5%80%BC%E7%A7%AF%E5%88%86-numerical-integration">3.4 数值积分 (Numerical Integration)</h4>
+                <p>我们已经建立了运动方程 <code>dS/dt = f(S, t)</code>，但除了极少数情况，这个方程无法得到解析解。因此，我们必须使用数值方法在离散的时间步长 $h$（或 $\Delta t$）上近似求解。</p>
+                <h5 id="341-%E6%AC%A7%E6%8B%89%E6%B3%95-eulers-method">3.4.1 欧拉法 (Euler's Method)</h5>
+                <p>这是最简单的数值积分方法，它基于函数的一阶泰勒展开：
+                $$ S(t+h) \approx S(t) + h \frac{dS(t)}{dt} $$
+                将我们的状态向量代入，得到更新规则：
+                $$ \vec{v}(t+h) = \vec{v}(t) + h \cdot \vec{a}(t) $$
+                $$ \vec{x}(t+h) = \vec{x}(t) + h \cdot \vec{v}(t) $$
+                这种方法被称为<strong>显式欧拉法</strong>。它非常简单，但存在致命缺陷：<strong>数值不稳定性</strong>。它会系统性地高估速度，导致能量在模拟过程中不断增加，最终导致系统“爆炸”。在实践中，除非使用极小的时间步长，否则很少单独使用。</p>
+                <h5 id="342-%E9%9F%A6%E5%B0%94%E8%8E%B1%E7%A7%AF%E5%88%86%E6%B3%95-verlet-integration">3.4.2 韦尔莱积分法 (Verlet Integration)</h5>
+                <p>为了解决欧拉法的不稳定问题，物理模拟领域广泛采用韦尔莱积分及其变体。</p>
+                <p><strong>推导</strong>：
+                我们对位置 $\vec{x}(t)$ 进行向前和向后的三阶泰勒展开：
+                $$ \vec{x}(t+h) = \vec{x}(t) + h\vec{v}(t) + \frac{h^2}{2}\vec{a}(t) + \frac{h^3}{6}\vec{b}(t) + O(h^4) $$
+                $$ \vec{x}(t-h) = \vec{x}(t) - h\vec{v}(t) + \frac{h^2}{2}\vec{a}(t) - \frac{h^3}{6}\vec{b}(t) + O(h^4) $$
+                (其中 $\vec{b}(t)$ 是加加速度)。
+                将两式相加，奇数阶项被消去：
+                $$ \vec{x}(t+h) + \vec{x}(t-h) = 2\vec{x}(t) + h^2\vec{a}(t) + O(h^4) $$
+                整理后得到<strong>基本韦尔莱积分</strong>的更新公式：
+                $$ \vec{x}(t+h) = 2\vec{x}(t) - \vec{x}(t-h) + h^2\vec{a}(t) $$
+                <strong>优点</strong>：</p>
+                <ul>
+                <li><strong>数值稳定性好</strong>：它是一种辛积分器（Symplectic integrator），能更好地保持系统能量，即使在较大的时间步长下也不易发散。</li>
+                <li><strong>时间可逆</strong>。</li>
+                </ul>
+                <p><strong>缺点</strong>：</p>
+                <ul>
+                <li>速度 $\vec{v}(t)$ 没有被直接计算出来。虽然可以近似计算 $\vec{v}(t) = (\vec{x}(t+h) - \vec{x}(t-h)) / (2h)$，但这在精度和启动模拟（需要两个先前位置）时会带来不便。</li>
+                </ul>
+                <h5 id="343-%E9%80%9F%E5%BA%A6%E9%9F%A6%E5%B0%94%E8%8E%B1%E6%B3%95-velocity-verlet">3.4.3 速度韦尔莱法 (Velocity Verlet)</h5>
+                <p>这是实践中最常用、最稳健的积分方法之一。它同时、同步地更新位置和速度，且保持了韦尔莱积分的优良稳定性。</p>
+                <p>其更新过程分为两步：</p>
+                <ol>
+                <li>首先，更新位置和半步速度：
+                $$ \vec{x}(t+h) = \vec{x}(t) + h\vec{v}(t) + \frac{h^2}{2}\vec{a}(t) $$</li>
+                <li>然后，根据新位置 $\vec{x}(t+h)$ 计算新的加速度 $\vec{a}(t+h) = \vec{F}(\vec{x}(t+h)) / m$。</li>
+                <li>最后，使用新旧加速度的平均值来更新最终速度：
+                $$ \vec{v}(t+h) = \vec{v}(t) + \frac{h}{2}(\vec{a}(t) + \vec{a}(t+h)) $$</li>
+                </ol>
+                <p><strong>速度韦尔莱法</strong>是稳定性和易用性的完美结合，强烈推荐在粒子系统中使用。</p>
+                <h4 id="35-%E7%A2%B0%E6%92%9E%E6%A3%80%E6%B5%8B%E4%B8%8E%E5%93%8D%E5%BA%94">3.5 碰撞检测与响应</h4>
+                <p>粒子与环境（如地面、墙壁）的交互是特效真实感的关键。</p>
+                <ol>
+                <li>
+                <p><strong>碰撞检测 (Collision Detection)</strong>：最简单的情况是粒子与一个无限大平面的碰撞。</p>
+                <ul>
+                <li>平面由法向量 $\vec{N}$ 和平面上一点 $\vec{P_0}$ 定义。</li>
+                <li>对于任意粒子位置 $\vec{P}$，它到平面的符号距离为 $d = (\vec{P} - \vec{P_0}) \cdot \vec{N}$。</li>
+                <li>当 $d < 0$ 时，粒子穿过了平面，发生碰撞。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>碰撞响应 (Collision Response)</strong>：当检测到碰撞后，需要修正粒子的位置和速度。</p>
+                <ul>
+                <li><strong>位置修正</strong>：将粒子弹回到平面上：$\vec{P}_{new} = \vec{P} - d \cdot \vec{N}$。</li>
+                <li><strong>速度修正</strong>：将速度分解为垂直于法线的<strong>法向分量</strong> $\vec{v}_n$ 和平行于法线的<strong>切向分量</strong> $\vec{v}_t$。
+                $$ \vec{v}_n = (\vec{v} \cdot \vec{N})\vec{N} $$
+                $$ \vec{v}_t = \vec{v} - \vec{v}_n $$
+                碰撞主要影响法向速度。我们会反转法向速度，并乘以一个<strong>恢复系数 (coefficient of restitution)</strong> $\varepsilon$（$0 \le \varepsilon \le 1$，1表示完全弹性碰撞，0表示完全非弹性碰撞）。切向速度可以保持不变，或乘以一个摩擦系数。
+                $$ \vec{v}'_n = -\varepsilon \vec{v}_n $$
+                $$ \vec{v}'_t = (1 - \mu) \vec{v}_t \quad (\text{其中} \mu \text{是摩擦系数}) $$
+                新的速度为：
+                $$ \vec{v}_{new} = \vec{v}'_n + \vec{v}'_t $$</li>
+                </ul>
+                </li>
+                </ol>
+                <h3 id="4-%E6%B8%B2%E6%9F%93-rendering">4. 渲染 (Rendering)</h3>
+                <p>将计算出的粒子数据转化为视觉图像是最后一步。渲染方法直接决定了粒子系统的最终外观。</p>
+                <ol>
+                <li>
+                <p><strong>点光源/点精灵 (Point Sprites)</strong></p>
+                <ul>
+                <li><strong>方法</strong>：将每个粒子渲染成一个像素点或一个小的发光点。</li>
+                <li><strong>实现</strong>：在现代图形API（如OpenGL, Vulkan）中，可以使用Point Sprites功能，直接将一个点渲染为一个2D纹理贴图。</li>
+                <li><strong>效果</strong>：适合模拟火花、星辰、魔法尘埃等。</li>
+                <li><strong>混合模式</strong>：通常使用<strong>加法混合 (Additive Blending)</strong>，<code>FinalColor = SrcColor + DstColor</code>。这可以模拟发光物体的叠加效果，粒子重叠的区域会变得更亮。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>带纹理的广告牌 (Textured Billboards)</strong></p>
+                <ul>
+                <li><strong>方法</strong>：将每个粒子渲染成一个始终面向摄像机的矩形面片（Quad），并贴上带有alpha通道的纹理。</li>
+                <li><strong>实现</strong>：在顶点着色器中，通过模型视图矩阵的逆变换来消除旋转，使面片始终朝向视点。</li>
+                <li><strong>效果</strong>：这是模拟烟雾、火焰、爆炸和云彩最常用的技术。纹理提供了丰富的细节，alpha通道则创造了柔和的边缘。</li>
+                <li><strong>混合模式</strong>：通常使用<strong>Alpha混合 (Alpha Blending)</strong>，<code>FinalColor = SrcColor.alpha * SrcColor + (1 - SrcColor.alpha) * DstColor</code>。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>元球/隐式曲面 (Metaballs / Implicit Surfaces)</strong></p>
+                <ul>
+                <li><strong>方法</strong>：每个粒子不直接渲染，而是被看作一个<strong>场函数</strong>的中心，该函数在粒子中心处值最大，并向外衰减。整个粒子系统的表面被定义为所有粒子场函数值之和等于某个阈值的<strong>等值面 (Isosurface)</strong>。</li>
+                <li><strong>数学</strong>：一个以 $\vec{c}_i$ 为中心的粒子的场函数可以是 $f_i(\vec{p}) = \frac{R^2}{||\vec{p} - \vec{c}_i||^2}$。整个系统的场函数为 $F(\vec{p}) = \sum_i f_i(\vec{p})$。渲染的表面就是满足 $F(\vec{p}) = T$ (阈值) 的所有点 $\vec{p}$ 的集合。</li>
+                <li><strong>实现</strong>：通常使用光线步进（Ray Marching）或移动立方体（Marching Cubes）算法来生成最终的几何体。</li>
+                <li><strong>效果</strong>：非常适合模拟液体、岩浆、粘液等具有融合和分离行为的流体效果，如《终结者2》中的液态金属机器人T-1000。</li>
+                </ul>
+                </li>
+                </ol>
+                <h3 id="5-c-%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E5%AE%8C%E6%95%B4%E7%9A%84%E7%B2%92%E5%AD%90%E7%B3%BB%E7%BB%9F">5. C++ 实现一个完整的粒子系统</h3>
+                <p>下面，我们将用C++实现一个基础但完整的粒子系统，它包含我们讨论过的所有核心组件，并采用<strong>速度韦尔莱积分法</strong>。</p>
+                <h4 id="51-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84">5.1 数据结构</h4>
+                <p>首先定义基础的3D向量类和粒子结构体。</p>
+                <div class="code-container">
+                <pre><code class="language-cpp">// Vec3.h
+struct Vec3 {
+    float x = 0, y = 0, z = 0;
+    // ... (重载 +, -, *, / 等运算符)
+};
+
+// Particle.h
+struct Particle {
+    Vec3 position;
+    Vec3 velocity;
+    Vec3 acceleration;
+    Vec3 forceAccumulator; // 力累加器
+
+    float mass = 1.0f;
+    float lifespan = 0.0f;
+    float age = 0.0f;
+
+    // 渲染属性
+    Vec4 color;
+    float size = 1.0f;
+
+    bool isAlive() const { return age < lifespan; }
+};
+</code></pre>
+                </div>
+                <h4 id="52-%E7%B2%92%E5%AD%90%E7%B3%BB%E7%BB%9F%E7%B1%BB">5.2 粒子系统类</h4>
+                <p>这个类是整个系统的管理器。</p>
+                <div class="code-container">
+                <pre><code class="language-cpp">// ParticleSystem.h
+#include &lt;vector&gt;
+#include "Particle.h"
+
+class ParticleSystem {
+public:
+    ParticleSystem(int maxParticles);
+    ~ParticleSystem();
+
+    void update(float dt);
+    void render();
+
+    void emit(int count);
+
+private:
+    void applyForces(Particle&amp; p);
+    void integrate(Particle&amp; p, float dt);
+    void handleCollisions(Particle&amp; p);
+    void initializeParticle(Particle&amp; p);
+
+    std::vector&lt;Particle&gt; m_particles;
+    int m_maxParticles;
+};
+</code></pre>
+                </div>
+                <h4 id="53-%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82">5.3 实现细节</h4>
+                <div class="code-container">
+                <pre><code class="language-cpp">// ParticleSystem.cpp
+#include "ParticleSystem.h"
+
+ParticleSystem::ParticleSystem(int maxParticles) : m_maxParticles(maxParticles) {
+    m_particles.resize(m_maxParticles);
+}
+
+ParticleSystem::~ParticleSystem() {}
+
+// 核心更新循环
+void ParticleSystem::update(float dt) {
+    for (auto&amp; p : m_particles) {
+        if (!p.isAlive()) continue;
+
+        p.age += dt;
+        if (!p.isAlive()) continue;
+
+        // 1. 清空力累加器
+        p.forceAccumulator = {0, 0, 0};
+
+        // 2. 施加力
+        applyForces(p);
+
+        // 3. 积分 (核心物理模拟)
+        integrate(p, dt);
+        
+        // 4. 碰撞处理
+        handleCollisions(p);
+    }
+}
+
+void ParticleSystem::render() {
+    // 渲染逻辑: 遍历所有活着的粒子，并根据选择的渲染方法绘制
+    // 例如，使用OpenGL绘制点精灵或广告牌
+    for (const auto&amp; p : m_particles) {
+        if (p.isAlive()) {
+            // ... OpenGL/Vulkan/DirectX rendering code ...
+            // drawParticle(p.position, p.size, p.color);
+        }
+    }
+}
+
+void ParticleSystem::emit(int count) {
+    int emitted = 0;
+    for (auto&amp; p : m_particles) {
+        if (emitted >= count) break;
+        if (!p.isAlive()) {
+            initializeParticle(p);
+            emitted++;
+        }
+    }
+}
+
+// 初始化一个新粒子
+void ParticleSystem::initializeParticle(Particle&amp; p) {
+    p.age = 0.0f;
+    p.lifespan = 2.0f + static_cast&lt;float&gt;(rand()) / RAND_MAX * 3.0f; // 2-5s
+    p.position = {0, 0, 0}; // 从原点发射
+    p.velocity = {
+        (static_cast&lt;float&gt;(rand()) / RAND_MAX - 0.5f) * 5.0f,
+        static_cast&lt;float&gt;(rand()) / RAND_MAX * 10.0f,
+        (static_cast&lt;float&gt;(rand()) / RAND_MAX - 0.5f) * 5.0f
+    }; // 向上随机发射
+    p.mass = 1.0f;
+}
+
+// 施加各种力
+void ParticleSystem::applyForces(Particle&amp; p) {
+    // 重力
+    Vec3 gravity = {0.0f, -9.8f * p.mass, 0.0f};
+    p.forceAccumulator += gravity;
+
+    // 空气阻力
+    Vec3 drag = p.velocity * -0.5f; // k_d = 0.5
+    p.forceAccumulator += drag;
+}
+
+// 速度韦尔莱积分法
+void ParticleSystem::integrate(Particle&amp; p, float dt) {
+    // 记住旧的加速度
+    Vec3 old_acceleration = p.acceleration;
+
+    // 1. 更新位置
+    p.position = p.position + p.velocity * dt + old_acceleration * (0.5f * dt * dt);
+
+    // 2. 计算新加速度 (来自新位置的力)
+    // 这里我们假设力不依赖于位置，所以新的加速度就等于 F/m
+    Vec3 new_acceleration = p.forceAccumulator / p.mass;
+
+    // 3. 更新速度
+    p.velocity = p.velocity + (old_acceleration + new_acceleration) * (0.5f * dt);
+
+    // 更新加速度状态
+    p.acceleration = new_acceleration;
+}
+
+
+// 碰撞处理
+void ParticleSystem::handleCollisions(Particle&amp; p) {
+    // 与地面的碰撞 (平面 y=0, 法线 N=(0,1,0))
+    if (p.position.y < 0.0f) {
+        // 1. 位置修正
+        p.position.y = 0.0f;
+        
+        // 2. 速度响应
+        float epsilon = 0.75f; // 恢复系数
+        p.velocity.y = -p.velocity.y * epsilon;
+    }
+}
+</code></pre>
+                </div>
+                <h3 id="6-%E8%BF%9B%E9%98%B6%E4%B8%BB%E9%A2%98%E7%89%A9%E8%B4%A8%E7%82%B9%E6%B3%95-material-point-method-mpm">6. 进阶主题：物质点法 (Material Point Method, MPM)</h3>
+                <p>传统的粒子系统（也称为质点法，mass-spring systems）非常适合模拟稀疏、分离的现象。然而，当模拟连续介质（如雪、沙、水、弹性体）的大变形、断裂和相变时，它们会遇到困难。</p>
+                <p><strong>物质点法 (MPM)</strong> 是一个更先进的、基于粒子的方法，它结合了拉格朗日方法（粒子承载物质属性）和欧拉方法（固定的背景网格用于计算）的优点。</p>
+                <ul>
+                <li><strong>粒子 (Particles)</strong>: 存储所有状态变量，如质量、速度、位置、变形梯度等。它们跟随材料一起运动。</li>
+                <li><strong>网格 (Grid)</strong>: 一个固定的背景网格。在每个时间步：
+                <ol>
+                <li>粒子的信息（质量、动量）被<strong>映射</strong>到网格节点。</li>
+                <li>在网格上计算力（如压力、应力）并求解动量方程，更新网格节点的速度。</li>
+                <li>网格节点的速度被<strong>插值</strong>回粒子，以更新粒子的速度和位置。</li>
+                <li>网格被重置。</li>
+                </ol>
+                </li>
+                </ul>
+                <p>MPM能够以统一的框架模拟各种材料，并自然地处理拓扑变化，是当前图形学研究的热点之一，被广泛用于电影特效中的雪、沙和流体模拟。</p>
+                <h3 id="7-%E6%80%BB%E7%BB%93">7. 总结</h3>
+                <p>粒子系统是一种强大而灵活的程序化动画技术。它的核心优势在于：</p>
+                <ul>
+                <li><strong>广泛的应用性</strong>：能够模拟从火焰、烟雾到水流、星云等各种“模糊”现象。</li>
+                <li><strong>计算效率高</strong>：基于简化的物理假设，可以实时模拟大量粒子。</li>
+                <li><strong>艺术可控性强</strong>：通过调整发射器参数、力场和渲染风格，艺术家可以创造出丰富多样的视觉效果。</li>
+                </ul>
+                <p>从基础的牛顿动力学，到稳健的数值积分方法，再到多样的渲染技术，对粒子系统的深入理解是每一位从事计算机图形学和动画领域的学生和研究人员的必备技能。</p>
+            </article>
+        </main>
+    </div>
+    <footer>
+        <p>© 2025 我的博客</p>
+    </footer>
+    <script src="../script.js"></script>
+</body>
+</html>
