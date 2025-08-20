@@ -47,5 +47,12 @@ var postsData = [
       "category":"技术文章",
       "path":"_posts/2025-08-20-PSA.html",
       "abstract":"并行退火算法讲解"
+    },
+    {
+      "title": "CUDA学习笔记0:Introduction",
+      "date": "2025-08-20",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-20-CUDA00.html",
+      "abstract": "CUDA00: Introduction"
     }
   ];
