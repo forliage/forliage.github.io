@@ -54,5 +54,12 @@
     "category": "学习笔记",
     "path": "_posts/2025-08-20-CUDA00.html",
     "abstract": "CUDA00: Introduction"
+  },
+  {
+    "title": "CUDA学习笔记1:Programming Model",
+    "date": "2025-08-20",
+    "category": "学习笔记",
+    "path": "_posts/2025-08-20-CUDA01.html",
+    "abstract": "CUDA01:Programming Model"
   }
 ]
