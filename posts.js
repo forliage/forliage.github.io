@@ -40,5 +40,12 @@ var postsData = [
       "category":"技术文章",
       "path":"_posts/2025-07-15-IMO3.html",
       "abstract":"2025 IMO Problem 3的解答"
+    },
+    {
+      "title": "并行退火算法(PSA)",
+      "date":"2025-08-20",
+      "category":"技术文章",
+      "path":"_posts/2025-08-20-PSA.html",
+      "abstract":"并行退火算法讲解"
     }
   ];

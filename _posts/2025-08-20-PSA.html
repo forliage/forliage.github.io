@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>并行退火算法(PSA)</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+<link rel="stylesheet" href="../style.css">
+<script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    },
+    svg: {
+      fontCache: 'global'
+    }
+  };
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+</script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+<h1 id="%E5%B9%B6%E8%A1%8C%E9%80%80%E7%81%AB%E7%AE%97%E6%B3%95psa">并行退火算法(PSA)</h1>
+<h2 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%BC%95%E8%A8%80---%E4%BB%8E%E7%89%A9%E7%90%86%E9%80%80%E7%81%AB%E5%88%B0%E6%A8%A1%E6%8B%9F%E9%80%80%E7%81%ABsa">第一部分：引言 - 从物理退火到模拟退火(SA)</h2>
+<p>众所周知，组合优化问题(Combinatorial Optimization)是计算机科学中的一大难题，例如TSP、VLSI Layout等。这类问题的解空间通常随着问题规模呈指数级增长，使得暴力枚举变得不切实际。</p>
+<p>许多局部搜索算法，如Hill Climbing，虽然高效，但极易陷入Local Optima，而无法找到全局最优解。</p>
+<p>模拟退火算法的灵感，正来自于冶金学中的物理退火过程。</p>
+<ul>
+<li><strong>Physical Annealing</strong>：将固体（如金属）加热至足够高的温度，使其内部粒子处于无序但高能量的状态。然后，缓慢地、有控制地降低温度。在这个过程中，粒子有足够的时间和“机会”去寻找能量最低、结构最稳定的晶格状态。如果降温过快（淬火），粒子会被“冻结”在能量较高的非晶格的亚稳态。</li>
+<li><strong>Simulated Annealing,SA</strong>：1983年，S. Kirkpatrick, C. D. Gelatt Jr., M. P. Vecchi 等人受到这一物理过程的启发，将其思想抽象为一种通用的随机优化算法。
+<ul>
+<li><strong>State</strong>：对应于优化问题的一个解<code>S</code>。</li>
+<li><strong>Energy</strong>：对应于优化问题的Cost Function <code>E(S)</code>。我们的目标是找到使<code>E(S)</code>最小的<code>S</code>。</li>
+<li><strong>Temperature</strong>：对应于控制参数<code>T</code>，它会随着算法迭代逐渐降低。</li>
+<li><strong>寻找新状态</strong>：对应于从当前解<code>S</code>通过某种Neighborhood Function生成一个新解<code>S'</code>。</li>
+</ul>
+</li>
+</ul>
+<p><strong>SA的核心思想</strong>：</p>
+<p>算法不仅仅接收比当前解更好的新解($\Delta E=E(S')-E(S)<0$)，还能以一定的概率接受一个更差的解($\Delta E>0$)。这个接受概率由Metropolis准则给出：
+$$P(\text{accept } S')=\begin{cases}1,\quad\text{  if } \Delta E<0\ e^{-\frac{\Delta E}{T}},\text{if }\Delta E\geq 0\ \end{cases}$$
+这个概率性的"向坏处走"的举动，是SA算法的灵魂。</p>
+<ul>
+<li><strong>高温时</strong>(<code>T</code>很大)：$e^{-\frac{\Delta E}{T}}$趋近于1.算法几乎会接受任何新解，表现出强烈的随机探索行为，使其有能力"翻越"高山，避免陷入局部最优。</li>
+<li><strong>低温时</strong>(<code>T</code>很小)：$e^{-\frac{\Delta E}{T}}$趋近于0.算法变得非常贪婪，几乎只接受更好的解，从而在已经找到的较优区域内进行精细搜索(Exploitation)。</li>
+</ul>
+<p><strong>算法伪代码</strong></p>
+<pre><code><div>1. 初始化: 
+   - 初始解 S_current = generate_initial_solution()
+   - 初始温度 T = T_initial
+   - 终止温度 T_final
+   - 冷却率 alpha (0 < alpha < 1)
+   - S_best = S_current
+2. while T > T_final:
+3.    for i = 1 to L: // 在每个温度下迭代L次
+4.       S_new = generate_neighbor(S_current)
+5.       delta_E = E(S_new) - E(S_current)
+6.       if delta_E < 0:
+7.          S_current = S_new
+8.          if E(S_current) < E(S_best):
+9.             S_best = S_current
+10.      else:
+11.         if random(0, 1) < exp(-delta_E / T):
+12.            S_current = S_new
+13.   T = T * alpha // 降温
+14. return S_best
+</div></code></pre>
+<h2 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E6%A8%A1%E6%8B%9F%E9%80%80%E7%81%AB%E7%AE%97%E6%B3%95%E7%9A%84%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%9F%B3">第二部分：模拟退火算法的数学基石</h2>
+<p>SA的收敛性可以通过Markov Chain理论严谨的证明。</p>
+<p>我们将算法的执行过程看作一个状态序列$S_0,S_1,S_2,...$，其中每个状态是解空间中的一个解。</p>
+<h3 id="1%E5%9B%BA%E5%AE%9A%E6%B8%A9%E5%BA%A6%E4%B8%8B%E7%9A%84%E9%BD%90%E6%AC%A1%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB%E9%93%BE">1.固定温度下的齐次马尔可夫链</h3>
+<p>首先，我们考虑在一个固定的温度$T$下，算法的迭代过程构成一个齐次马尔可夫链(Homogeneous Markov Chain)。</p>
+<ul>
+<li><strong>状态空间</strong>：问题的所有可能解$\Omega$。</li>
+<li><strong>转移概率</strong>：从状态$i$转移到状态$j$的概率$P_{ij}(T)$。</li>
+</ul>
+<p>$$P_{ij}(T) = G_{ij} \cdot A_{ij}(T)$$
+其中，$G_{ij}$是从状态$i$生成邻居$j$的概率(由邻域函数决定)，$A_{ij}(T)$是接受$j$的概率(由Metropolis准则决定)。</p>
+<p>这条马尔可夫链有一个重要的性质：它存在一个<strong>稳态分布</strong>(Stationary Distribution)。当$t \to \infty$时，系统处于状态$i$的概率$\pi_i (T)$会收敛到一个不随时间变化的值。这个稳态分布是<strong>吉布斯/玻尔兹曼分布</strong>(Gibbs/Boltzmann Distribution)：
+$$\pi_i (T)=\frac{1}{Z(T)} e^{-\frac{E(i)}{T}}$$
+其中，$Z(T)=\sum\limits_j e^{-\frac{E(j)}{T}}$是归一化因子，称为配分函数。</p>
+<p><strong>证明(基于细致平衡条件):</strong></p>
+<p>一个马尔可夫链存在稳态分布$\pi$的充分条件是Detailed Balance Condition成立：
+$$\pi_i P_{ij} = \pi_j P_{ji}\quad \forall i,j \in \Omega$$
+我们来验证。假设$E(j)>E(i)$，则$\Delta E=E(j)-E(i)>0$。
+$$A_{ij}(T) = e^{-\frac{E(j)-E(i)}{T}}\text{ and } A_{ji}(T)=1$$
+代入细致平衡条件：
+$$\text{LHS}=\pi_i P_{ij} = \left(\frac{1}{Z(T)}e^{-\frac{E(i)}{T}}\right)\cdot G_{ij}\cdot e^{-\frac{E(i)-E(j)}{T}}=\frac{G_{ij}}{Z(T)}e^{-\frac{E(j)}{T}}$$
+$$\text{RHS}=\pi_j P_{ji} = \left(\frac{1}{Z(T)}e^{-\frac{E(j)}{T}}\right)\cdot G_{ji}\cdot 1 = \frac{G_{ji}}{Z(T)} e^{-\frac{E(j)}{T}}$$</p>
+<p>如果我们的邻域生成函数是对称的，即$G_{ij}=G_{ji}$例如，在TSP中，随机交换两个城市，这个操作是可逆的，概率相同），那么左右两边相等，细致平衡条件满足。</p>
+<p><strong>稳态分布的意义：</strong></p>
+<p>在温度$T$下，经过足够多的迭代，算法访问到状态$i$的概率正比于$e^{-\frac{E(i)}{T}}$。这意味着：能量越低的状态，被访问到的概率指数级地越高。</p>
+<h3 id="2%E9%99%8D%E6%B8%A9%E8%BF%87%E7%A8%8B%E4%B8%8E%E9%9D%9E%E9%BD%90%E6%AC%A1%E9%A9%AC%E5%B0%94%E5%8F%AF%E5%A4%AB%E9%93%BE">2.降温过程与非齐次马尔可夫链</h3>
+<p>SA算法的温度是变化的，因此它是一个非齐次马尔可夫链（Inhomogeneous Markov Chain）。其收敛性证明要复杂得多，但核心思想是：</p>
+<p><strong>定理</strong>:如果满足以下两个条件，SA算法将以概率1收敛到全局最优解：</p>
+<ol>
+<li><strong>遍历性</strong>（Ergodicity）：对于任意温度$T > 0$，其对应的马尔可夫链都是不可约的。这意味着从任意解$i$出发，经过有限步，都有可能到达任意其他解$j$。这要求我们的邻域函数设计得当，能够连通整个解空间。</li>
+<li><strong>足够慢的冷却</strong>（Sufficiently Slow Cooling）：温度$T(k)$（$k$是迭代次数）必须下降得足够慢，以保证在每个温度下，系统都有足够的时间趋近其稳态分布。Geman和Geman在1984年证明，如果冷却进度表满足：
+$$T(k) \ge \frac{C}{\log(k+k_0)}$$
+其中$C$是一个足够大的常数（至少是解空间“能垒”的最大高度），算法就能保证收敛到全局最优。</li>
+</ol>
+<p><strong>直观理解</strong>：</p>
+<p>当$T\to 0$时，吉布斯分布$\pi_i (T)$的特性是：
+$$\lim\limits_{T\to 0} \pi_i (T) = \begin{cases}\frac{1}{|S_{opt}|}\text{ if } i \in S_{opt}\ 0\quad \text{otherwise}\ \end{cases}$$</p>
+<p>其中$S_{opt}$是全局最优解的集合。这意味着当温度趋于0时，概率将全部集中在全局最优解上。足够慢的降温，就是为了让这个非齐次马$T$尔可夫链能“追踪”上随温度变化的稳态分布，最终停留在全局最优点。</p>
+<p>然而，对数冷却在实践中太慢了。我们通常采用指数冷却$T_{k+1} = \alpha T_k$，它虽然不能在理论上保证100%收敛到全局最优，但在有限时间内能得到非常高质量的近似解，这是一种理论与实践的权衡。</p>
+<h2 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E5%B9%B6%E8%A1%8C%E5%8C%96%E7%9A%84%E5%8A%A8%E6%9C%BA%E4%B8%8E%E6%8C%91%E6%88%98">第三部分：并行化的动机与挑战</h2>
+<p>SA算法有两个致命弱点，使其在面对大规模问题时力不从心：</p>
+<ol>
+<li><strong>天生的序列性</strong>（Inherent Sequentiality）：第$k+1$次迭代的状态依赖于第$k$次迭代的结果，这是一个严格的马尔可夫链，难以直接并行化一个链的内部。</li>
+<li><strong>收敛速度慢</strong>（Slow Convergence）：为了保证解的质量，冷却过程必须非常缓慢，导致迭代次数极多。</li>
+</ol>
+<p>并行计算的崛起为我们提供了克服这些缺点的强大武器。并行化的核心目标是：在不显著牺牲（有时甚至能提高）解质量的前提下，大幅度缩短寻找最优解所需的真实时间（Wall Clock Time）。</p>
+<p><strong>并行化的挑战</strong>:</p>
+<ul>
+<li><strong>破坏马尔可夫性</strong>：并行执行可能破坏算法的马尔可夫性质，导致其理论收敛性不再成立。</li>
+<li><strong>通信开销</strong>（Communication Overhead）：并行进程/线程间的信息交换会带来额外的时间开销。如果通信过于频繁或数据量过大，可能会抵消并行计算带来的收益。</li>
+<li><strong>负载均衡</strong>（Load Balancing）：如何将计算任务均匀分配给所有处理单元，避免某些单元空闲而另一些单元过载。</li>
+<li><strong>同步问题</strong>（Synchronization）：多个进程如何协调工作，特别是在需要共享信息（如当前最优解）时。</li>
+</ul>
+<h2 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E5%B9%B6%E8%A1%8C%E9%80%80%E7%81%AB%E7%AE%97%E6%B3%95%E7%9A%84%E4%B8%BB%E8%A6%81%E6%B5%81%E6%B4%BE">第四部分：并行退火算法的主要流派</h2>
+<p>根据并行化的粒度和策略不同，PSA算法可以分为几个主要类别。</p>
+<h3 id="%E6%B5%81%E6%B4%BE%E4%B8%80%E7%8B%AC%E7%AB%8B%E6%90%9C%E7%B4%A2independent-searches--multi-start-sa">流派一：独立搜索（Independent Searches / Multi-start SA）</h3>
+<p>这是最简单、最直接的并行化方式。</p>
+<ul>
+<li><strong>思想</strong>：在$N$个处理器上，同时独立地运行$N$个完全不相关的SA算法。每个算法拥有自己的初始解、随机数种子和完整的冷却过程。最后，从这$N$个结果中选出最好的一个作为最终解。</li>
+<li><strong>优点</strong>:
+<ul>
+<li>无通信开销：各进程间“零交流”，完美并行，加速比（Speedup）接近线性。</li>
+<li>易于实现：代码改动极小。</li>
+<li>增强探索性：从不同的初始点开始搜索，增加了找到全局最优解所在“盆地”的概率。</li>
+</ul>
+</li>
+<li><strong>缺点</strong>:无协同效应：一个进程的“好发现”无法帮助其他进程，浪费了宝贵的计算信息。可能会出现多个进程在同一个差的区域里重复搜索。</li>
+</ul>
+<h3 id="%E6%B5%81%E6%B4%BE%E4%BA%8C%E5%B9%B6%E8%A1%8C%E7%A7%BB%E5%8A%A8parallel-moves">流派二：并行移动（Parallel Moves）</h3>
+<p>这种策略试图并行化单个SA链的内部循环。</p>
+<ul>
+<li><strong>思想</strong>：在每个温度下，主进程持有当前解<code>S_current</code>。它将<code>S_current</code>广播给$N$个从属进程。每个从属进程独立地生成一个<code>S_current</code>的邻居解<code>S'_i</code>并计算其能量<code>E(S'_i)</code>。然后，所有<code>S'_i</code>被送回主进程，主进程根据某种规则选择一个作为下一个<code>S_current</code>。
+<ul>
+<li><strong>选择规则1</strong>（最贪婪）：选择所有S'_i和S_current中能量最低的那个。</li>
+<li><strong>选择规则2</strong>（Metropolis变体）：从所有被接受的移动中（包括那些概率性接受的坏移动）随机选择一个。</li>
+</ul>
+</li>
+<li><strong>优点</strong>：在一次迭代中探索了更多的邻居，可能加速收敛。</li>
+<li><strong>缺点</strong>：
+<ul>
+<li>高通信/同步开销：每次迭代都需要广播和收集，主从进程间同步频繁。</li>
+<li>接受率降低：并行生成的多个邻居中，只要有一个是好移动，就可能被选中，这使得接受坏移动的概率大大降低，算法行为趋向于贪婪，容易过早陷入局部最优。</li>
+<li>理论基础薄弱：严重破坏了原始SA的马尔可夫链结构，收敛性难以保证。</li>
+</ul>
+</li>
+</ul>
+<h3 id="%E6%B5%81%E6%B4%BE%E4%B8%89%E4%BA%A4%E4%BA%92%E5%BC%8F%E6%90%9C%E7%B4%A2interacting-searches--cooperative-sa">流派三：交互式搜索（Interacting Searches / Cooperative SA）</h3>
+<p>这是介于独立搜索和并行移动之间的一种折中，也是目前研究和应用最广泛的流派。它允许多个SA链（称为Walker或Agent）并行运行，但它们之间会周期性地或异步地交换信息。</p>
+<ul>
+<li><strong>思想</strong>：$N$个SA链并行运行。它们可以交换的信息包括：
+<ul>
+<li>当前解</li>
+<li>迄今为止找到的最优解</li>
+<li>当前温度</li>
+</ul>
+</li>
+<li><strong>常见的交互策略</strong>：
+<ul>
+<li>迁移模型（Migration Model）：类似于并行遗传算法。各个SA链独立运行一段时间（一个epoch）后，进行一次“迁移”。例如，每个链将自己找到的最优解发送给邻居链，并用收到的更优解替换自己的当前解。这有助于将好的基因（解的结构）传播到整个种群。</li>
+<li>中央黑板模型（Blackboard Model）：所有链共享一个全局的“黑板”，上面记录着全局最优解<code>S_global_best</code>。每个链在本地运行自己的SA过程，但会定期地：
+<ul>
+<li>将自己找到的更优解更新到黑板上。</li>
+<li>从黑板上读取<code>S_global_best</code>，并有一定概率用它来重置（re-seed）自己的当前解，从而跳出自己所在的局部最优区域。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>优点</strong>:
+<ul>
+<li>协同搜索：兼顾了探索（多个独立链）和利用（信息共享），好的解可以引导其他链的搜索方向。</li>
+<li>鲁棒性强：一个链陷入局部最优，可以被其他链“拉出来”。</li>
+<li>通信开销可控：通信频率可以根据问题调整，远低于并行移动模型。</li>
+</ul>
+</li>
+<li><strong>缺点</strong>：
+<ul>
+<li>参数增多：需要设计迁移拓扑、通信频率、信息交换策略等，增加了算法的复杂度。</li>
+<li>理论分析复杂：多条马尔可夫链的耦合行为分析起来非常困难。</li>
+</ul>
+</li>
+</ul>
+<h2 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E6%8B%93%E5%B1%95%E4%B8%8E%E5%89%8D%E6%B2%BF">第五部分：拓展与前沿</h2>
+<ul>
+<li><strong>自适应并行退火</strong>（Adaptive PSA）：算法的参数（如冷却率、迁移频率）不再是固定的，而是根据搜索过程的反馈（如解的多样性、接受率等）动态调整，使算法更加“智能”。</li>
+<li><strong>异构并行退火</strong>：在CPU+GPU等异构平台上，不同计算能力的单元执行不同的任务。例如，让GPU执行大量的独立短链进行广泛探索，而CPU执行少数长链进行深度挖掘，并负责协调。</li>
+<li><strong>与机器学习结合</strong>：
+<ul>
+<li>使用强化学习来动态调整SA参数。</li>
+<li>将SA嵌入到神经网络的训练中，用于权重优化，特别是对于那些梯度不明显的网络结构。</li>
+</ul>
+</li>
+<li><strong>量子退火</strong>（Quantum Annealing）：这是一种物理实现而非模拟。它利用量子隧穿效应来“穿过”能量壁垒，而不是像经典SA那样“翻过”它。D-Wave公司的量子计算机就是基于这个原理。它是SA在量子计算领域的终极模拟。</li>
+</ul>
+<h2 id="%E7%AC%AC%E5%85%AD%E9%83%A8%E5%88%86%E9%87%8D%E8%A6%81%E5%BA%94%E7%94%A8%E9%A2%86%E5%9F%9F">第六部分：重要应用领域</h2>
+<p>PSA的强大能力使其在众多NP-hard问题中大放异彩：</p>
+<ol>
+<li>电子设计自动化（EDA）：
+<ul>
+<li>VLSI布局（Placement）：将数百万个逻辑门放置在芯片上，目标是最小化总线长和布线拥塞度。解空间极其巨大。</li>
+<li>VLSI布线（Routing）：连接布局好的逻辑门，目标是100%连接且满足各种物理约束。</li>
+</ul>
+</li>
+<li>旅行商问题（TSP）及其变体：
+<ul>
+<li>车辆路径规划（Vehicle Routing Problem, VRP）、物流配送、无人机路径规划等。</li>
+</ul>
+</li>
+<li>生物信息学：
+<ul>
+<li>蛋白质折叠：预测蛋白质的三维结构，这是一个能量最小化问题，其构象空间是天文数字。</li>
+<li>基因序列比对。</li>
+</ul>
+</li>
+<li>图像处理：
+<ul>
+<li>图像恢复/去噪：将含噪图像看作一个高能量状态，寻找能量最低的原始清晰图像。</li>
+<li>图像分割。</li>
+</ul>
+</li>
+<li>机器学习：
+<ul>
+<li>超参数优化：在巨大的超参数空间中为模型寻找最佳配置。</li>
+<li>训练玻尔兹曼机（Boltzmann Machines）：这是一种随机神经网络，其训练过程本身就与SA有紧密联系。</li>
+</ul>
+</li>
+</ol>
+<h2 id="%E7%AC%AC%E4%B8%83%E9%83%A8%E5%88%86%E5%AE%9E%E8%B7%B5---%E9%AB%98%E6%80%A7%E8%83%BD%E5%AE%9E%E7%8E%B0">第七部分：实践 - 高性能实现</h2>
+<p>理论终须实践。我们以经典的TSP问题为例，展示两种PSA的实现：C++多线程（模拟交互式搜索的简化版——独立搜索）和CUDA（大规模独立搜索）。</p>
+<p><strong>问题定义</strong>：给定$N$个城市的坐标，找到一条访问每个城市一次并最终返回起点的最短路径。</p>
+<ul>
+<li><strong>解的定义</strong>：一个城市的排列，例如 $[0, 4, 1, 3, 2]$。</li>
+<li><strong>代价函数</strong>：路径的总欧几里得距离。</li>
+<li><strong>邻域函数</strong>：2-opt，即随机选择路径中的两段边，将其断开并以另一种方式重连（相当于颠倒了两个城市之间的一段子路径）。</li>
+</ul>
+<ol>
+<li>C++ 多线程实现 (独立搜索模型)</li>
+</ol>
+<p>我们将使用 std::thread 来启动多个独立的SA实例。</p>
+<pre><code><div class="code-container">// parallel_sa_tsp.cpp
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;cmath&gt;
+#include &lt;random&gt;
+#include &lt;algorithm&gt;
+#include &lt;thread&gt;
+#include &lt;mutex&gt;
+
+// 城市结构体
+struct City {
+    double x, y;
+};
+
+// 计算两城市间距离
+double distance(const City&amp; a, const City&amp; b) {
+    return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2));
+}
+
+// 计算路径总长度
+double total_distance(const std::vector&lt;int&gt;&amp; path, const std::vector&lt;City&gt;&amp; cities) {
+    double dist = 0.0;
+    for (size_t i = 0; i &lt; path.size() - 1; ++i) {
+        dist += distance(cities[path[i]], cities[path[i + 1]]);
+    }
+    dist += distance(cities[path.back()], cities[path.front()]); // 回到起点
+    return dist;
+}
+
+// 单个模拟退火线程函数
+void simulated_annealing_worker(
+    int thread_id,
+    const std::vector&lt;City&gt;&amp; cities,
+    std::vector&lt;int&gt;&amp; best_path,
+    double&amp; min_distance,
+    std::mutex&amp; mtx) 
+{
+    // 线程安全的随机数生成器
+    std::mt19937 rng(std::chrono::high_resolution_clock::now().time_since_epoch().count() + thread_id);
+    std::uniform_real_distribution&lt;double&gt; dist(0.0, 1.0);
+
+    // 初始化路径
+    std::vector&lt;int&gt; current_path(cities.size());
+    std::iota(current_path.begin(), current_path.end(), 0);
+    std::shuffle(current_path.begin() + 1, current_path.end(), rng); // 随机打乱（起点固定为0）
+
+    double current_energy = total_distance(current_path, cities);
+    std::vector&lt;int&gt; local_best_path = current_path;
+    double local_min_energy = current_energy;
+
+    double T = 10000.0;
+    double T_final = 1e-8;
+    double alpha = 0.999;
+
+    while (T > T_final) {
+        for (int i = 0; i &lt; 100; ++i) { // 每个温度迭代100次
+            // 生成新邻居 (2-opt)
+            std::vector&lt;int&gt; new_path = current_path;
+            int a = std::uniform_int_distribution&lt;int&gt;(1, cities.size() - 2)(rng);
+            int b = std::uniform_int_distribution&lt;int&gt;(a + 1, cities.size() - 1)(rng);
+            std::reverse(new_path.begin() + a, new_path.begin() + b + 1);
+
+            double new_energy = total_distance(new_path, cities);
+            double delta_E = new_energy - current_energy;
+
+            if (delta_E < 0 || dist(rng) < std::exp(-delta_E / T)) {
+                current_path = new_path;
+                current_energy = new_energy;
+                if (current_energy < local_min_energy) {
+                    local_best_path = current_path;
+                    local_min_energy = current_energy;
+                }
+            }
+        }
+        T *= alpha;
+    }
+
+    // 更新全局最优解（需要加锁）
+    std::lock_guard&lt;std::mutex&gt; lock(mtx);
+    if (local_min_energy < min_distance) {
+        min_distance = local_min_energy;
+        best_path = local_best_path;
+        std::cout << "Thread " << thread_id << " found new best distance: " << min_distance << std::endl;
+    }
+}
+
+int main() {
+    // 创建TSP问题实例
+    const int num_cities = 50;
+    std::vector&lt;City&gt; cities(num_cities);
+    std::mt19937 city_rng(123); // 固定种子以复现
+    std::uniform_real_distribution&lt;double&gt; coord_dist(0.0, 100.0);
+    for (int i = 0; i < num_cities; ++i) {
+        cities[i] = {coord_dist(city_rng), coord_dist(city_rng)};
+    }
+
+    const int num_threads = std::thread::hardware_concurrency(); // 获取CPU核心数
+    std::cout << "Using " << num_threads << " threads." << std::endl;
+
+    std::vector&lt;int&gt; global_best_path;
+    double global_min_distance = std::numeric_limits&lt;double&gt;::max();
+    std::mutex mtx;
+
+    std::vector&lt;std::thread&gt; threads;
+    for (int i = 0; i < num_threads; ++i) {
+        threads.emplace_back(simulated_annealing_worker, i, std::ref(cities), 
+                             std::ref(global_best_path), std::ref(global_min_distance), std::ref(mtx));
+    }
+
+    for (auto&amp; t : threads) {
+        t.join();
+    }
+
+    std::cout << "\nFinal best distance: " << global_min_distance << std::endl;
+    std::cout << "Path: ";
+    for (int city_idx : global_best_path) {
+        std::cout << city_idx << " -> ";
+    }
+    std::cout << global_best_path[0] << std::endl;
+
+    return 0;
+}
+</div></code></pre>
+<p>这个实现清晰地展示了独立搜索模型的并行策略：每个线程都是一个独立的求解器，它们通过一个互斥锁（mutex）来安全地更新全局最优解。</p>
+<ol start="2">
+<li>CUDA 实现 (大规模独立搜索)</li>
+</ol>
+<p>GPU拥有成千上万的计算核心，非常适合执行大规模的独立搜索。每个CUDA线程将负责一个完整的SA退火过程。</p>
+<p>关键点：</p>
+<ul>
+<li>设备端随机数：在GPU上进行随机算法，必须为每个线程初始化一个独立的随机数生成器状态。我们将使用 cuRAND 库。</li>
+<li>数据结构：城市坐标、路径等数据需要从CPU（Host）拷贝到GPU（Device）。</li>
+<li>Kernel函数：这是在GPU上执行的核心代码，每个线程都在这里运行自己的SA循环。</li>
+</ul>
+<pre><code><div class="code-container">// parallel_sa_tsp.cu
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;cmath&gt;
+#include &lt;numeric&gt;
+#include &lt;algorithm&gt;
+#include &lt;curand_kernel.h&gt;
+
+#define NUM_CITIES 50
+#define NUM_WALKERS 10240 // 启动大量的独立SA实例（walkers）
+
+// 城市结构体
+struct City {
+    float x, y;
+};
+
+// GPU设备函数：计算两点距离
+__device__ float distance_gpu(const City&amp; a, const City&amp; b) {
+    return sqrtf(powf(a.x - b.x, 2) + powf(a.y - b.y, 2));
+}
+
+// GPU设备函数：计算路径总长度
+__device__ float total_distance_gpu(int* path, City* cities) {
+    float dist = 0.0f;
+    for (int i = 0; i < NUM_CITIES - 1; ++i) {
+        dist += distance_gpu(cities[path[i]], cities[path[i + 1]]);
+    }
+    dist += distance_gpu(cities[path[NUM_CITIES - 1]], cities[path[0]]);
+    return dist;
+}
+
+// CUDA Kernel: 每个线程执行一个完整的SA过程
+__global__ void parallel_sa_kernel(City* d_cities, int* d_best_paths, float* d_min_distances, curandState* states) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (tid >= NUM_WALKERS) return;
+
+    // 1. 初始化每个线程的随机数生成器
+    curandState local_state = states[tid];
+
+    // 2. 初始化路径 (存储在每个线程的局部内存中)
+    int current_path[NUM_CITIES];
+    for (int i = 0; i < NUM_CITIES; ++i) current_path[i] = i;
+    // Fisher-Yates shuffle
+    for (int i = NUM_CITIES - 1; i > 0; --i) {
+        int j = curand_uniform(&amp;local_state) * (i + 1);
+        int temp = current_path[i];
+        current_path[i] = current_path[j];
+        current_path[j] = temp;
+    }
+
+    float current_energy = total_distance_gpu(current_path, d_cities);
+    
+    int local_best_path[NUM_CITIES];
+    for(int i=0; i<NUM_CITIES; ++i) local_best_path[i] = current_path[i];
+    float local_min_energy = current_energy;
+
+    float T = 10000.0f;
+    float T_final = 1e-5f;
+    float alpha = 0.995f;
+
+    // 3. SA主循环
+    while (T > T_final) {
+        for (int i = 0; i < 50; ++i) {
+            // 生成邻居 (2-opt)
+            int a = 1 + (int)(curand_uniform(&amp;local_state) * (NUM_CITIES - 2));
+            int b = 1 + (int)(curand_uniform(&amp;local_state) * (NUM_CITIES - 2));
+            if (a == b) continue;
+            if (a > b) { int temp = a; a = b; b = temp; }
+            
+            // Reverse the sub-path in a temporary array
+            int new_path[NUM_CITIES];
+            for(int k=0; k<NUM_CITIES; ++k) new_path[k] = current_path[k];
+
+            int l=a, r=b;
+            while(l < r){
+                int temp = new_path[l];
+                new_path[l] = new_path[r];
+                new_path[r] = temp;
+                l++; r--;
+            }
+
+            float new_energy = total_distance_gpu(new_path, d_cities);
+            float delta_E = new_energy - current_energy;
+
+            if (delta_E < 0 || curand_uniform(&amp;local_state) < expf(-delta_E / T)) {
+                for(int k=0; k<NUM_CITIES; ++k) current_path[k] = new_path[k];
+                current_energy = new_energy;
+                if (current_energy < local_min_energy) {
+                    local_min_energy = current_energy;
+                    for(int k=0; k<NUM_CITIES; ++k) local_best_path[k] = current_path[k];
+                }
+            }
+        }
+        T *= alpha;
+    }
+
+    // 4. 将结果写回全局内存
+    d_min_distances[tid] = local_min_energy;
+    for (int i = 0; i < NUM_CITIES; ++i) {
+        d_best_paths[tid * NUM_CITIES + i] = local_best_path[i];
+    }
+    
+    // 5. 保存随机状态
+    states[tid] = local_state;
+}
+
+
+int main() {
+    // --- Host (CPU) Code ---
+    // 1. 创建TSP问题
+    std::vector&lt;City&gt; h_cities(NUM_CITIES);
+    srand(123);
+    for (int i = 0; i < NUM_CITIES; ++i) {
+        h_cities[i] = {(float)(rand() % 1000), (float)(rand() % 1000)};
+    }
+
+    // 2. 分配GPU内存
+    City* d_cities;
+    int* d_best_paths;
+    float* d_min_distances;
+    curandState* d_states;
+
+    cudaMalloc((void**)&amp;d_cities, NUM_CITIES * sizeof(City));
+    cudaMalloc((void**)&amp;d_best_paths, NUM_WALKERS * NUM_CITIES * sizeof(int));
+    cudaMalloc((void**)&amp;d_min_distances, NUM_WALKERS * sizeof(float));
+    cudaMalloc((void**)&amp;d_states, NUM_WALKERS * sizeof(curandState));
+
+    // 3. 拷贝数据到GPU
+    cudaMemcpy(d_cities, h_cities.data(), NUM_CITIES * sizeof(City), cudaMemcpyHostToDevice);
+
+    // 4. 初始化cuRAND状态
+    // 使用一个kernel来并行初始化，比在CPU上做然后拷贝快得多
+    cudaError_t err = cudaGetLastError();
+
+    dim3 blocks_rand( (NUM_WALKERS+255)/256 );
+    dim3 threads_rand( 256 );
+
+    // 内联的初始化kernel
+    auto init_rand_kernel = [](curandState* states, int num_walkers, unsigned long long seed){
+        int tid = blockIdx.x * blockDim.x + threadIdx.x;
+        if (tid < num_walkers) {
+            curand_init(seed, tid, 0, &amp;states[tid]);
+        }
+    };
+    // C++ Lambda anomymous kernel launch
+    void (*ptr_init_rand_kernel)(curandState*, int, unsigned long long) = init_rand_kernel;
+    ptr_init_rand_kernel<<<blocks_rand, threads_rand>>>(d_states, NUM_WALKERS, time(0));
+    
+    
+    // 5. 启动SA Kernel
+    int threadsPerBlock = 256;
+    int blocksPerGrid = (NUM_WALKERS + threadsPerBlock - 1) / threadsPerBlock;
+    
+    std::cout << "Launching " << NUM_WALKERS << " walkers on GPU..." << std::endl;
+    parallel_sa_kernel<<<blocksPerGrid, threadsPerBlock>>>(d_cities, d_best_paths, d_min_distances, d_states);
+    cudaDeviceSynchronize(); // 等待kernel执行完毕
+    
+    err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        std::cerr << "CUDA error after kernel launch: " << cudaGetErrorString(err) << std::endl;
+        return 1;
+    }
+
+
+    // 6. 将结果拷贝回CPU
+    std::vector&lt;int&gt; h_best_paths(NUM_WALKERS * NUM_CITIES);
+    std::vector&lt;float&gt; h_min_distances(NUM_WALKERS);
+    cudaMemcpy(h_best_paths.data(), d_best_paths, NUM_WALKERS * NUM_CITIES * sizeof(int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_min_distances.data(), d_min_distances, NUM_WALKERS * sizeof(float), cudaMemcpyDeviceToHost);
+
+    // 7. 在CPU上寻找全局最优解
+    float global_min_dist = h_min_distances[0];
+    int best_walker_idx = 0;
+    for (int i = 1; i < NUM_WALKERS; ++i) {
+        if (h_min_distances[i] < global_min_dist) {
+            global_min_dist = h_min_distances[i];
+            best_walker_idx = i;
+        }
+    }
+
+    std::cout << "\nFinal best distance (from GPU): " << global_min_dist << std::endl;
+    std::cout << "Path: ";
+    for (int i = 0; i < NUM_CITIES; ++i) {
+        std::cout << h_best_paths[best_walker_idx * NUM_CITIES + i] << " -> ";
+    }
+    std::cout << h_best_paths[best_walker_idx * NUM_CITIES] << std::endl;
+
+    // 8. 释放GPU内存
+    cudaFree(d_cities);
+    cudaFree(d_best_paths);
+    cudaFree(d_min_distances);
+    cudaFree(d_states);
+
+    return 0;
+}
+</div></code></pre>
+<p>这个CUDA实现利用了GPU的大规模并行性，在瞬间完成了成千上万次独立的退火过程，极大地增加了找到高质量解的概率，并且花费的时间远少于在CPU上串行执行同样次数的退火。</p>
+<h2 id="%E6%80%BB%E7%BB%93%E4%B8%8E%E5%B1%95%E6%9C%9B">总结与展望</h2>
+<p>未来，随着计算能力的进一步提升，以及与AI、量子计算等前沿领域的深度融合，并行退火及其衍生算法必将在解决人类面临的更宏大、更复杂的优化问题中，扮演愈发重要的角色。</p>
+            </article>
+        </main>
+    </div>
+    <footer>
+        <p>© 2025 我的博客</p>
+    </footer>
+    <script src="../script.js"></script>
+</body>
+</html>
