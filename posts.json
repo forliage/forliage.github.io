@@ -49,6 +49,13 @@
     "abstract":"并行退火算法讲解"
   },
   {
+    "title": "ads课程笔记01:AVL树、Splay树和摊还分析",
+    "date": "2025-08-21",
+    "category": "学习笔记",
+    "path": "_posts/2025-08-21-ads01.html",
+    "abstract": "ads lecture note (update) 01:AVL树、Splay树和摊还分析"
+  },
+  {
     "title": "CUDA学习笔记0:Introduction",
     "date": "2025-08-20",
     "category": "学习笔记",

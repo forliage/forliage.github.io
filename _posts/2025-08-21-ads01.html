@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>ads01：AVL树、Splay树和摊还分析</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="ads01avl%E6%A0%91splay%E6%A0%91%E5%92%8C%E6%91%8A%E8%BF%98%E5%88%86%E6%9E%90">ads01：AVL树、Splay树和摊还分析</h1>
+                <p>（补档：将以前的ads笔记做修缮后上传）</p>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86avl%E6%A0%91-adelson-velskii-landis-trees">第一部分：AVL树 (Adelson-Velskii-Landis Trees)</h3>
+                <h4 id="11-%E9%97%AE%E9%A2%98%E7%9A%84%E6%8F%90%E5%87%BA%E4%B8%BA%E4%BD%95%E9%9C%80%E8%A6%81avl%E6%A0%91">1.1 问题的提出：为何需要AVL树？</h4>
+                <p>让我们回顾一下二叉搜索树（BST）。</p>
+                <ul>
+                <li><strong>目标 (Target):</strong> 我们希望能够快速地进行查找、插入和删除操作。</li>
+                <li><strong>工具 (Tool):</strong> 二叉搜索树。它的核心性质是：对于任意节点，其左子树中所有节点的值都小于它，右子树中所有节点的值都大于它。</li>
+                <li><strong>问题 (Problem):</strong> 在BST中，一次查找、插入或删除操作的时间复杂度是 $O(\text{height})$，即与树的高度成正比。</li>
+                </ul>
+                <p>理想情况下，一棵包含 $N$ 个节点的树，其高度可以达到 $O(\log N)$。但最坏情况下，树的高度可能退化成 $O(N)$，就像一个链表一样。</p>
+                <p><strong>【示例】月份的插入</strong></p>
+                <p>我们来看一个直观的例子。假设我们按顺序（“Jan”, “Feb”, “Mar”, ... , “Dec”）插入12个月份的英文名。由于月份的字典序是杂乱的，我们可能会得到一棵相对平衡的树，也可能得到一棵非常倾斜的树。</p>
+                <p>下面是两个例子：</p>
+                <ol>
+                <li>
+                <p><strong>按“Jan”到“Dec”顺序插入（部分示意）</strong>
+                这会形成一棵比较倾斜的树。例如，“Jan”是根，“Feb”比“Jan”小，在左边。“Mar”比“Jan”大，在右边。“Apr”比“Jan”小，比“Feb”小，在“Feb”的左边... 最终形成的树会比较杂乱且不平衡。</p>
+                <ul>
+                <li><strong>平均查找时间 = 3.5</strong> （需要遍历的平均节点数）</li>
+                <li><strong>最坏查找时间</strong>（查找最深的节点）会更长。如果插入顺序恰好是升序或降序，树会退化成链表，平均查找时间将是 $(1+2+...+N)/N$，约为 $N/2$，即 $O(N)$。对于12个月份，最坏情况（例如按字母序插入）的平均查找时间会是 $(1+2+...+12)/12 = 6.5$。</li>
+                </ul>
+                <div class="mermaid">
+                graph TD
+                    Jan --> Feb
+                    Jan --> Mar
+                    Feb --> Apr
+                    Mar --> June
+                    Mar --> May
+                    Apr --> Aug
+                    Aug --> July
+                    July --> Dec
+                    May --> Sept
+                    Sept --> Oct
+                    Oct --> Nov
+                </div>
+                <p><em>（这是一个示意图，实际结构取决于完整的插入顺序）</em></p>
+                </li>
+                <li>
+                <p><strong>经过优化的平衡树</strong>
+                如果我们选择一个中间值（如“July”）作为根，然后递归地构建左右子树，我们会得到一棵非常平衡的树。</p>
+                <ul>
+                <li><strong>平均查找时间 = 3.1</strong></li>
+                </ul>
+                <div class="mermaid">
+                graph TD
+                    July --> Feb
+                    July --> May
+                    Feb --> Aug
+                    Feb --> Jan
+                    May --> Mar
+                    May --> Oct
+                    Aug --> Apr
+                    Aug --> Dec
+                    Jan --> June
+                    Mar --> Nov
+                    Oct --> Sept
+                </div>
+                <p><em>（这是一个平衡后的示意图）</em></p>
+                </li>
+                </ol>
+                <p>这个例子清晰地告诉我们：<strong>树的结构至关重要</strong>。我们不能奢望用户总能提供一个好的插入顺序。我们需要一种数据结构，它能在插入和删除后，<strong>自动维持自身的平衡</strong>。AVL树就是第一个被发明的自平衡二叉搜索树。</p>
+                <h4 id="12-avl%E6%A0%91%E7%9A%84%E5%AE%9A%E4%B9%89">1.2 AVL树的定义</h4>
+                <p>AVL树由其发明者 G. M. <strong>A</strong>delson-<strong>V</strong>elskii 和 E. M. <strong>L</strong>andis 于1962年提出。它本质上是一棵二叉搜索树，但增加了一个额外的约束条件。</p>
+                <p><strong>【定义】高度平衡 (Height Balanced)</strong></p>
+                <p>一棵二叉树是高度平衡的，当且仅当：</p>
+                <ol>
+                <li>它是一棵空树。</li>
+                <li>或者，它的左右两棵子树都是高度平衡的，并且<strong>左右子树的高度差的绝对值不超过1</strong>。</li>
+                </ol>
+                <p>为了方便定义，我们规定：<strong>空树的高度为 -1</strong>。一个只包含根节点的树，其左右子树都是空树，高度为-1，所以该树的高度为 $\max(-1, -1) + 1 = 0$。</p>
+                <p><strong>【定义】平衡因子 (Balance Factor, BF)</strong></p>
+                <p>对于树中的任意一个节点，我们定义其<strong>平衡因子</strong>为：
+                <code>BF(node) = height(node-&gt;left) - height(node-&gt;right)</code></p>
+                <p>根据AVL树的定义，对于一棵合法的AVL树，其<strong>所有节点</strong>的平衡因子 <code>BF</code> 只能是 <strong>-1, 0, 或 1</strong>。</p>
+                <ul>
+                <li><code>BF = 1</code>: 左子树比右子树高1。</li>
+                <li><code>BF = 0</code>: 左右子树等高。</li>
+                <li><code>BF = -1</code>: 右子树比左子树高1。</li>
+                </ul>
+                <p>如果任何一个节点的 <code>BF</code> 变成了 <code>2</code> 或 <code>-2</code>，那么这棵树就不再是AVL树，需要进行调整。</p>
+                <p>我们来看几个例子：</p>
+                <div class="mermaid">
+                graph TD
+                    subgraph "树 1 (非法AVL)"
+                        A(4) --> B(3)
+                        A --> C(5)
+                        B --> D(2)
+                        D --> E(1)
+                        C --> F(6)
+                        F --> G(7)
+                    end
+                    subgraph "树 2 (合法AVL)"
+                        H(5) --> I(2)
+                        H --> J(8)
+                        I --> K(1)
+                        I --> L(4)
+                        L --> M(3)
+                        L --> N(7)
+                    end
+                    subgraph "树 3 (非法AVL)"
+                        O(7) --> P(2)
+                        O --> Q(8)
+                        P --> R(1)
+                        P --> S(4)
+                        S --> T(3)
+                        S --> U(5)
+                    end
+                </div>
+                <ul>
+                <li><strong>树 1</strong>：节点 <code>4</code> 的左子树高度为2（根为<code>3</code>），右子树高度为1（根为<code>5</code>），<code>BF(4) = 2 - 1 = 1</code>。但是，节点 <code>3</code> 的左子树高度为1（根为<code>2</code>），右子树为空（高度-1），<code>BF(3) = 1 - (-1) = 2</code>。<strong>非法</strong>。</li>
+                <li><strong>树 2</strong>：所有节点的平衡因子都在 <code>{-1, 0, 1}</code> 范围内。<strong>合法</strong>。</li>
+                <li><strong>树 3</strong>：节点 <code>2</code> 的右子树（根为<code>4</code>）高度为1，左子树（根为<code>1</code>）高度为0，<code>BF(2) = 0 - 1 = -1</code>。节点 <code>7</code> 的左子树（根为<code>2</code>）高度为2，右子树（根为<code>8</code>）高度为0，<code>BF(7) = 2 - 0 = 2</code>。<strong>非法</strong>。</li>
+                </ul>
+                <h4 id="13-avl%E6%A0%91%E7%9A%84%E5%B9%B3%E8%A1%A1%E4%BF%AE%E5%A4%8D%E6%97%8B%E8%BD%AC%E6%93%8D%E4%BD%9C">1.3 AVL树的平衡修复：旋转操作</h4>
+                <p>当我们在AVL树中进行插入或删除操作时，可能会破坏某些节点的平衡（即 <code>BF</code> 变为 <code>2</code> 或 <code>-2</code>）。这个被破坏平衡的节点中，离插入/删除位置最近的那个，我们称之为“失衡点”。我们的任务就是通过<strong>旋转 (Rotation)</strong> 操作来修复它。</p>
+                <p>旋转分为两大类：单旋转和双旋转。</p>
+                <h5 id="131-%E5%8D%95%E6%97%8B%E8%BD%AC-single-rotation">1.3.1 单旋转 (Single Rotation)</h5>
+                <p>单旋转用于解决“一边倒”的失衡情况。</p>
+                <p><strong>情况1：右右 (RR) 失衡</strong></p>
+                <p>当一个节点的<strong>右子树</strong>的<strong>右子树</strong>中插入了新节点，导致失衡时，我们采用RR旋转（也叫左单旋）。</p>
+                <p><strong>【示例】</strong> 依次插入 “Mar”, “May”, “Nov”。（字典序 Mar &lt; May &lt; Nov）</p>
+                <ol>
+                <li>
+                <p>插入 “Mar”：树只有根节点 <code>Mar</code>。</p>
+                </li>
+                <li>
+                <p>插入 “May”：<code>May</code> &gt; <code>Mar</code>，成为 <code>Mar</code> 的右孩子。此时 <code>BF(Mar) = -1</code>。</p>
+                </li>
+                <li>
+                <p>插入 “Nov”：<code>Nov</code> &gt; <code>May</code>，成为 <code>May</code> 的右孩子。</p>
+                <ul>
+                <li>此时 <code>height(May)</code> 为 1， <code>height(Mar的左子树)</code> 为 -1。</li>
+                <li><code>BF(Mar) = -1 - 1 = -2</code>。<code>Mar</code> 成为失衡点。</li>
+                <li>失衡是由于在 <code>Mar</code> 的<strong>右</strong>孩子 (<code>May</code>) 的<strong>右</strong>子树 (<code>Nov</code>) 插入导致的，这就是 <strong>RR</strong> 失衡。</li>
+                </ul>
+                </li>
+                </ol>
+                <p><strong>操作：左单旋</strong></p>
+                <p>将 <code>Mar</code> 的右孩子 <code>May</code> “提”上来成为新的根，<code>Mar</code> “降”下去成为 <code>May</code> 的左孩子。<code>May</code> 原来的左子树（本例中为空）成为 <code>Mar</code> 的新右子树。</p>
+                <p><strong>图解 RR 旋转（通用情况）</strong></p>
+                <p>假设失衡点为 <code>A</code>，其 <code>BF(A) = -2</code>。它的右孩子是 <code>B</code>。</p>
+                <div class="mermaid">
+                graph TD
+                    subgraph "旋转前 (RR失衡)"
+                        A -- BF=-2 --> B
+                        A --> AL
+                        B --> BL
+                        B --> BR
+                    end
+
+                    subgraph "旋转后 (平衡)"
+                        B -- BF=0 --> A
+                        B --> BR
+                        A -- BF=0 --> AL
+                        A --> BL
+                    end
+                </div>
+                <ul>
+                <li><strong>旋转前：</strong> <code>A</code> 是根，<code>B</code> 是其右孩子。<code>AL</code> 是 <code>A</code> 的左子树，<code>BL</code> 和 <code>BR</code> 分别是 <code>B</code> 的左、右子树。插入发生在 <code>BR</code> 中，导致 <code>height(BR)</code> 增加，从而 <code>BF(A)</code> 变为-2。</li>
+                <li><strong>旋转后：</strong> <code>B</code> 成为新的根。<code>A</code> 成为 <code>B</code> 的左孩子。<code>A</code> 的左子树仍然是 <code>AL</code>。<code>B</code> 的右子树仍然是 <code>BR</code>。关键在于 <code>B</code> 原来的左子树 <code>BL</code>，现在成为了 <code>A</code> 的新右子树。由于二叉搜索树的性质 <code>AL &lt; A &lt; BL &lt; B &lt; BR</code>，这个结构是正确的。旋转后，树恢复平衡。</li>
+                </ul>
+                <p><strong>情况2：左左 (LL) 失衡</strong></p>
+                <p>这与RR失衡完全对称。当一个节点的<strong>左子树</strong>的<strong>左子树</strong>中插入了新节点，导致失衡时（<code>BF = 2</code>），我们采用LL旋转（也叫右单旋）。操作与左单旋相反。</p>
+                <h5 id="132-%E5%8F%8C%E6%97%8B%E8%BD%AC-double-rotation">1.3.2 双旋转 (Double Rotation)</h5>
+                <p>双旋转用于解决“之字形”的失衡情况。</p>
+                <p><strong>情况3：左右 (LR) 失衡</strong></p>
+                <p>当一个节点的<strong>左子树</strong>的<strong>右子树</strong>中插入了新节点，导致失衡时（<code>BF = 2</code>），我们需要进行LR旋转。</p>
+                <p><strong>【示例】</strong> 假设我们有如下的树，现在要插入 “Jan”。</p>
+                <div class="mermaid">
+                graph TD
+                    subgraph "插入前"
+                        May --> Aug
+                        May --> Nov
+                        Aug --> Apr
+                        Aug --> Mar
+                    end
+                </div>
+                <p>插入 &quot;Jan&quot; (Jan &lt; Mar)：</p>
+                <div class="mermaid">
+                graph TD
+                    subgraph "插入 Jan 后 (LR失衡)"
+                        May("May(BF=2)") --> Aug("Aug(BF=-1)")
+                        May --> Nov("Nov(BF=0)")
+                        Aug --> Apr("Apr(BF=0)")
+                        Aug --> Mar("Mar(BF=1)")
+                        Mar --> Jan("Jan(BF=0)")
+                    end
+                </div>
+                <ul>
+                <li>我们重新算一下： <code>h(Jan)=0</code>，<code>h(Mar)</code> 变为 <code>max(-1, 0)+1=1</code>。<code>h(Apr)=0</code>。<code>h(Aug)</code> 变为 <code>max(h(Apr), h(Mar)) + 1 = max(0, 1) + 1 = 2</code>。<code>h(Nov)=0</code>。<code>h(May)</code> 变为 <code>max(h(Aug), h(Nov)) + 1 = max(2, 0) + 1 = 3</code>。</li>
+                <li>我们来看平衡因子：<code>BF(May) = h(Aug) - h(Nov) = 2 - 0 = 2</code>。失衡点是 <code>May</code>。</li>
+                <li>失衡是由于在 <code>May</code> 的<strong>左</strong>孩子 (<code>Aug</code>) 的<strong>右</strong>子树 (<code>Mar</code>) 插入导致的，这就是 <strong>LR</strong> 失衡。</li>
+                </ul>
+                <p><strong>操作：LR旋转</strong></p>
+                <p>LR旋转实际上是两次单旋转的组合：</p>
+                <ol>
+                <li><strong>先对子节点进行一次RR旋转（左单旋）</strong>：对 <code>Aug</code> 和 <code>Mar</code> 进行左单旋，<code>Mar</code> 上升，<code>Aug</code> 下降。</li>
+                <li><strong>再对失衡点进行一次LL旋转（右单旋）</strong>：对 <code>May</code> 和 <code>Mar</code> 进行右单旋，<code>Mar</code> 上升，<code>May</code> 下降。</li>
+                </ol>
+                <p><strong>图解 LR 旋转（通用情况）</strong></p>
+                <p>假设失衡点为 <code>A</code> (<code>BF=2</code>)，其左孩子为 <code>B</code>，<code>B</code> 的右孩子为 <code>C</code>。</p>
+                <div class="mermaid">
+                graph TD
+                    subgraph "旋转前 (LR失衡)"
+                        A -- BF=2 --> B
+                        B -- BF=-1 --> C
+                        A --> AR
+                        B --> BL
+                        C --> CL
+                        C --> CR
+                    end
+
+                    subgraph "第一步：对B左旋"
+                        A -- BF=2 --> C
+                        C --> B
+                        C --> CR
+                        B --> BL
+                        B --> CL
+                        A --> AR
+                    end
+
+                    subgraph "第二步：对A右旋 (最终结果)"
+                        C --> B
+                        C --> A
+                        B --> BL
+                        B --> CL
+                        A --> CR
+                        A --> AR
+                    end
+                </div>
+                <ul>
+                <li><strong>旋转前：</strong> <code>A</code> 是失衡点，插入发生在 <code>C</code> 的子树 (<code>CL</code> 或 <code>CR</code>) 中。</li>
+                <li><strong>最终结果：</strong> <code>C</code> 成为了新的根，<code>B</code> 和 <code>A</code> 成为了它的左右孩子。<code>B</code> 和 <code>A</code> 原来的子树 <code>BL</code>, <code>AR</code> 不变，而 <code>C</code> 的两个子树 <code>CL</code>, <code>CR</code> 重新分配给了 <code>B</code> 的新右子树和 <code>A</code> 的新左子树。二叉搜索树的性质 <code>BL &lt; B &lt; CL &lt; C &lt; CR &lt; A &lt; AR</code> 依然保持。</li>
+                </ul>
+                <p><strong>情况4：右左 (RL) 失衡</strong></p>
+                <p>与LR失衡完全对称。当一个节点的<strong>右子树</strong>的<strong>左子树</strong>中插入了新节点，导致失衡时 (<code>BF = -2</code>)，我们采用RL旋转。它由一次右单旋和一次左单旋组成。</p>
+                <h4 id="14-avl%E6%A0%91%E7%9A%84%E9%AB%98%E5%BA%A6%E5%88%86%E6%9E%90%E9%87%8D%E8%A6%81%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC">1.4 AVL树的高度分析（重要数学推导）</h4>
+                <p>我们已经知道AVL树可以自平衡，但它的高度到底是多少？它能真正保证 $O(log N)$ 吗？答案是肯定的。</p>
+                <p>让我们来做一个严谨的数学推导。</p>
+                <p><strong>问题</strong>：一个高度为 $h$ 的AVL树，最少包含多少个节点？</p>
+                <p>我们用 $n_h$ 来表示高度为 $h$ 的AVL树所需的最少节点数。</p>
+                <ul>
+                <li>$n_0 = 1$ (一个根节点)</li>
+                <li>$n_1 = 2$ (一个根节点，一个孩子)</li>
+                <li>$n_{-1} = 0$ (空树)</li>
+                </ul>
+                <p>为了让节点数最少，根节点的左右子树的高度必须尽可能地不相等，即高度差为1。假设左子树高度为 $h-1$，右子树高度为 $h-2$（或者反过来）。</p>
+                <p>那么，这棵高度为 $h$ 的树的总节点数就是：
+                <code>1 (根节点) + 左子树的最少节点数 + 右子树的最少节点数</code></p>
+                <p>所以我们得到了递推关系式：
+                $n_h = 1 + n_{h-1} + n_{h-2}$</p>
+                <p>这个式子看起来是不是很眼熟？它和斐波那契数列非常相似。
+                斐波那契数列 $F_i$ 定义为:
+                $$F_0 = 0, F_1 = 1, F_i = F_{i-1} + F_{i-2} (\forall i > 1)$$
+                数列为: 0, 1, 1, 2, 3, 5, 8, ...</p>
+                <p>我们来观察一下 $n_h$ 和 $F_i$ 的关系。
+                $n_0 = 1$
+                $n_1 = 1 + n_0 + n_{-1} = 1 + 1 + 0 = 2$
+                $n_2 = 1 + n_1 + n_0 = 1 + 2 + 1 = 4$</p>
+                <p>让我们尝试将 $n_h$ 表示为 $F_i$ 的形式。
+                令 $n_h = F_{k} - 1$，代入递推式：
+                $F_k - 1 = 1 + (F_{k-1} - 1) + (F_{k-2} - 1)$
+                $F_k - 1 = F_{k-1} + F_{k-2} - 1$
+                $F_k = F_{k-1} + F_{k-2}$
+                这完全符合斐波那契数列的定义！</p>
+                <p>现在我们来确定 $k$ 和 $h$ 的关系。
+                $n_0 = 1 \implies F_k - 1 = 1 \implies F_k = 2$。在斐波那契数列中，$F_3 = 2$。所以 $k=3$。
+                $n_1 = 2 \implies F_k - 1 = 2 \implies F_k = 3$。在斐波那契数列中，$F_4 = 3$。所以 $k=4$。
+                我们可以得出结论：$$k = h + 3$$</p>
+                <p>所以，高度为 $h$ 的AVL树的最少节点数是：
+                $$n_h = F_{h+3} - 1$$</p>
+                <p>斐波那契数列有一个近似的通项公式：
+                $F_i \approx \frac{\phi^i}{\sqrt{5}}$, 其中 $\phi = \frac{1+\sqrt{5}}{2} \approx 1.618$ (黄金分割比)。</p>
+                <p>因此，$$N = n_h \approx \frac{\phi^{h+3}}{\sqrt{5}} - 1$$
+                我们可以看到，节点数 <code>N</code> 是以指数形式随高度 <code>h</code> 增长的。反过来，我们可以解出 <code>h</code>：
+                $$\phi^{h+3} \approx N\sqrt{5}$$
+                $$(h+3)\log\phi \approx \log(N\sqrt{5})$$
+                $$h \approx \frac{\log N}{\log\phi} + C$$</p>
+                <p>因为 $\log\phi$ 是一个常数，所以我们得到了最终的结论：
+                $$h = O(\log N)$$</p>
+                <p><strong>证明</strong>：对于一个包含N个节点的AVL树，其高度 $h$ 不会超过 $1.44 log₂(N)$。这是一个非常严格和优秀的界限，确保了所有操作的效率。</p>
+                <h4 id="15-avl%E6%A0%91%E7%9A%84%E5%AE%9E%E7%8E%B0-c%E4%BC%AA%E4%BB%A3%E7%A0%81%E4%B8%8E%E4%BB%A3%E7%A0%81">1.5 AVL树的实现 (C++伪代码与代码)</h4>
+                <p><strong>节点结构</strong></p>
+                <div class="code-container">
+                <pre><code class="language-cpp">struct AvlNode {
+    int data;
+    AvlNode *left;
+    AvlNode *right;
+    int height; // 存储高度比存储BF更方便
+
+    AvlNode(int val) : data(val), left(nullptr), right(nullptr), height(0) {}
+};
+</code></pre>
+                </div>
+                <p><strong>核心函数</strong></p>
+                <div class="code-container">
+                <pre><code class="language-cpp">// 获取节点高度（处理空节点）
+int height(AvlNode* node) {
+    return node == nullptr ? -1 : node-&gt;height;
+}
+
+// 右单旋 (LL)
+AvlNode* rotateWithLeftChild(AvlNode* k2) {
+    AvlNode* k1 = k2-&gt;left;
+    k2-&gt;left = k1-&gt;right;
+    k1-&gt;right = k2;
+    // 更新高度
+    k2-&gt;height = max(height(k2-&gt;left), height(k2-&gt;right)) + 1;
+    k1-&gt;height = max(height(k1-&gt;left), k2-&gt;height) + 1;
+    return k1; // 新的根
+}
+
+// 左单旋 (RR)
+AvlNode* rotateWithRightChild(AvlNode* k1) {
+    AvlNode* k2 = k1-&gt;right;
+    k1-&gt;right = k2-&gt;left;
+    k2-&gt;left = k1;
+    // 更新高度
+    k1-&gt;height = max(height(k1-&gt;left), height(k1-&gt;right)) + 1;
+    k2-&gt;height = max(height(k2-&gt;right), k1-&gt;height) + 1;
+    return k2; // 新的根
+}
+
+// 双旋转 (LR)
+AvlNode* doubleWithLeftChild(AvlNode* k3) {
+    k3-&gt;left = rotateWithRightChild(k3-&gt;left);
+    return rotateWithLeftChild(k3);
+}
+
+// 双旋转 (RL)
+AvlNode* doubleWithRightChild(AvlNode* k1) {
+    k1-&gt;right = rotateWithLeftChild(k1-&gt;right);
+    return rotateWithRightChild(k1);
+}
+
+// 插入函数（递归）
+AvlNode* insert(AvlNode* root, int data) {
+    if (root == nullptr) {
+        return new AvlNode(data);
+    }
+
+    if (data &lt; root-&gt;data) {
+        root-&gt;left = insert(root-&gt;left, data);
+    } else if (data &gt; root-&gt;data) {
+        root-&gt;right = insert(root-&gt;right, data);
+    }
+    // else: data already exists, do nothing
+
+    // --- 平衡调整 ---
+    int balance = height(root-&gt;left) - height(root-&gt;right);
+
+    // LL Case
+    if (balance > 1 &amp;&amp; data &lt; root-&gt;left-&gt;data) {
+        return rotateWithLeftChild(root);
+    }
+    // RR Case
+    if (balance &lt; -1 &amp;&amp; data &gt; root-&gt;right-&gt;data) {
+        return rotateWithRightChild(root);
+    }
+    // LR Case
+    if (balance > 1 &amp;&amp; data &gt; root-&gt;left-&gt;data) {
+        return doubleWithLeftChild(root);
+    }
+    // RL Case
+    if (balance &lt; -1 &amp;&amp; data &lt; root-&gt;right-&gt;data) {
+        return doubleWithRightChild(root);
+    }
+
+    // 更新当前节点高度
+    root-&gt;height = max(height(root-&gt;left), height(root-&gt;right)) + 1;
+
+    return root;
+}
+</code></pre>
+                </div>
+                <hr>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86splay%E6%A0%91-%E4%BC%B8%E5%B1%95%E6%A0%91">第二部分：Splay树 (伸展树)</h3>
+                <p>AVL树提供了一种完美的平衡保证：任何时候，树都处于近乎完美平衡的状态，所有操作都是严格的 $O(\log N)$。但这种保证是有代价的：实现复杂，需要存储额外的高度或平衡因子信息，并且在每次插入/删除后都需要从下到上检查和旋转，这在某些情况下可能效率不高。</p>
+                <p>Splay树提出了一种完全不同的哲学：<strong>我们不追求时刻的平衡，而是追求长期的、摊还的效率</strong>。</p>
+                <h4 id="21-splay%E6%A0%91%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3">2.1 Splay树的核心思想</h4>
+                <ul>
+                <li><strong>目标 (Target):</strong> 任何 M 次连续的操作（从空树开始），总时间最多为 $O(M \log N)$。这意味着，<strong>平均</strong>每次操作的摊还时间是 $O(\log N)$。</li>
+                <li><strong>核心思想 (Idea):</strong> 每当一个节点被访问时（无论是查找、插入还是删除），就通过一系列特殊的旋转操作，将这个节点<strong>移动到树的根部</strong>。这个过程称为<strong>伸展 (Splaying)</strong>。</li>
+                </ul>
+                <p><strong>直觉：</strong>
+                这个想法基于一种常见的“局部性原理”：如果一个节点最近被访问过，那么它很可能在不久的将来再次被访问。把它移动到根部，下一次访问它就会非常快 ($O(1)$)。</p>
+                <p>更重要的是，Splay操作不仅仅是将目标节点移到根部，它还有一个奇妙的副作用：<strong>它会改善从根到访问节点的整条路径上其他节点的深度，使树趋向于平衡</strong>。它能有效地“打散”那些过长的、倾斜的路径。</p>
+                <h4 id="22-%E9%94%99%E8%AF%AF%E7%9A%84%E5%B0%9D%E8%AF%95%E6%9C%B4%E7%B4%A0%E7%9A%84%E6%97%8B%E8%BD%AC">2.2 错误的尝试：朴素的旋转</h4>
+                <p>我们可能会想，把一个节点移到根部很简单，只要不断地对它和它的父节点进行单旋转，直到它成为根就行了。</p>
+                <p><strong>但这行不通！</strong></p>
+                <p>让我们看一个例子。假设我们有一棵倾斜的树，节点为 <code>k1, k2, ..., kN</code>。如果我们依次访问 <code>k1, k2, k3...</code></p>
+                <div class="code-container">
+                <pre><code>  k_N
+  /
+k_{N-1}
+  ...
+  /
+ k_2
+ /
+k_1
+</code></pre>
+                </div>
+                <ul>
+                <li>访问 <code>k1</code>：不断旋转 <code>k1</code>，它成为根。树的形态变化不大。</li>
+                <li>访问 <code>k2</code>：不断旋转 <code>k2</code>，它成为根。树的形态又变回去了，只是<code>k1</code>和<code>k2</code>换了位置。</li>
+                <li>访问 <code>k3</code>...</li>
+                </ul>
+                <p>如果我们按顺序访问 <code>1, 2, 3, ..., N</code>，每次查找的成本都是 <code>O(N)</code>。N次操作的总成本将是 <code>O(N²)</code>，平均每次操作的成本是 <code>O(N)</code>。这个朴素的方法完全失败了，甚至比普通的BST还差。</p>
+                <h4 id="23-%E6%AD%A3%E7%A1%AE%E7%9A%84splay%E6%97%8B%E8%BD%AC%E7%AD%96%E7%95%A5">2.3 正确的Splay旋转策略</h4>
+                <p>Splay树的精髓在于其独特的旋转规则，它比AVL树的旋转更复杂一些。对于要伸展的节点 <code>X</code>，我们看它的父节点 <code>P</code> 和祖父节点 <code>G</code>。</p>
+                <p><strong>Case 1: Zig (单旋)</strong>
+                如果 <code>P</code> 是树的根节点，那么我们只需要对 <code>X</code> 和 <code>P</code> 进行一次单旋转。</p>
+                <div class="mermaid">
+                graph TD
+                    subgraph "Before"
+                        P --> X
+                        P --> B
+                        X --> A
+                    end
+                    subgraph "After"
+                        X --> A
+                        X --> P
+                        P --> B
+                    end
+                </div>
+                <p><strong>Case 2: P 不是根节点</strong>
+                这时候我们需要看 <code>X, P, G</code> 的相对位置。</p>
+                <ul>
+                <li>
+                <p><strong>Zig-Zig (之之型):</strong> 如果 <code>X</code> 和 <code>P</code> 同为左孩子（或同为右孩子），即 <code>G-P-X</code> 形成一条直线。
+                <strong>操作：</strong> 先旋转 <code>P</code> 和 <code>G</code>，再旋转 <code>X</code> 和 <code>P</code>。</p>
+                <div class="mermaid">
+                graph TD
+                    subgraph "Before (Zig-Zig)"
+                        G --> P
+                        G --> D
+                        P --> X
+                        P --> C
+                        X --> A
+                        X --> B
+                    end
+                    subgraph "After"
+                        X --> A
+                        X --> P
+                        P --> B
+                        P --> G
+                        G --> C
+                        G --> D
+                    end
+                </div>
+                </li>
+                <li>
+                <p><strong>Zig-Zag (之字型):</strong> 如果 <code>X</code> 是右孩子而 <code>P</code> 是左孩子（或反之），即 <code>G-P-X</code> 形成一个“之”字形。
+                <strong>操作：</strong> 先旋转 <code>X</code> 和 <code>P</code>，然后 <code>X</code> 上升，再旋转 <code>X</code> 和 <code>G</code>。这和AVL的双旋转很像。</p>
+                <div class="mermaid">
+                graph TD
+                    subgraph "Before (Zig-Zag)"
+                        G --> P
+                        G --> D
+                        P --> A
+                        P --> X
+                        X --> B
+                        X --> C
+                    end
+                    subgraph "After"
+                        X --> P
+                        X --> G
+                        P --> A
+                        P --> B
+                        G --> C
+                        G --> D
+                    end
+                </div>
+                </li>
+                </ul>
+                <p><strong>关键区别：</strong> Splay树的 <strong>Zig-Zig</strong> 操作与朴素方法中连续两次单旋转的顺序是<strong>不同</strong>的。正是这个区别，使得Splay树能够有效地缩短路径深度，避免退化。</p>
+                <h4 id="24-splay%E6%A0%91%E6%93%8D%E4%BD%9C%E7%A4%BA%E4%BE%8B">2.4 Splay树操作示例</h4>
+                <p><strong>【示例】</strong> 插入 1, 2, 3, 4, 5, 6, 7，然后查找 1。</p>
+                <ol>
+                <li>
+                <p><strong>插入1-7:</strong> 由于每次插入的数都是当前最大的，所以会形成一个向右倾斜的链表。</p>
+                <div class="code-container">
+                <pre><code>1 -&gt; 2 -&gt; 3 -&gt; 4 -&gt; 5 -&gt; 6 -&gt; 7 (root)
+</code></pre>
+                </div>
+                </li>
+                <li>
+                <p><strong>查找 1:</strong> 找到节点 1，开始对 1 进行 Splay 操作。</p>
+                <ul>
+                <li><strong>Step 1:</strong> <code>X=1, P=2, G=3</code> (Zig-Zig)。先旋<code>2-3</code>，再旋<code>1-2</code>。<code>1</code>成为<code>3</code>的左孩子。</li>
+                <li><strong>Step 2:</strong> <code>X=1, P=3, G=4</code> (Zig-Zig)。先旋<code>3-4</code>，再旋<code>1-3</code>。<code>1</code>成为<code>4</code>的左孩子。</li>
+                <li><strong>Step 3:</strong> <code>X=1, P=4, G=5</code> (Zig-Zig)。</li>
+                <li>...</li>
+                <li><strong>最后一步:</strong> <code>X=1, P=7</code> (Zig)。旋<code>1-7</code>。</li>
+                </ul>
+                <p>经过一系列 Zig-Zig 和最后的 Zig 操作，节点 1 最终成为根，并且树的结构变得更加平衡。原本很深的节点（如 2, 3, 4）都被提到了离根更近的位置。这就是Splay的魔力。</p>
+                </li>
+                </ol>
+                <h4 id="25-splay%E6%A0%91%E7%9A%84%E5%88%A0%E9%99%A4">2.5 Splay树的删除</h4>
+                <p>删除操作也利用Splay。</p>
+                <ol>
+                <li><strong>Step 1:</strong> 查找要删除的节点 <code>X</code>。这会自动将 <code>X</code> 伸展到根部。</li>
+                <li><strong>Step 2:</strong> 移除 <code>X</code>。此时树分裂成两棵独立的子树：左子树 <code>T_L</code> 和右子树 <code>T_R</code>。</li>
+                <li><strong>Step 3:</strong> 在左子树 <code>T_L</code> 中查找最大的元素（<code>FindMax</code>）。这个操作会将 <code>T_L</code> 中的最大元素伸展到 <code>T_L</code> 的根部。</li>
+                <li><strong>Step 4:</strong> 由于新的 <code>T_L</code> 的根是最大元素，所以它没有右孩子。直接将 <code>T_R</code> 作为这个新根的右孩子即可。</li>
+                </ol>
+                <h4 id="26-splay%E6%A0%91%E7%9A%84%E5%AE%9E%E7%8E%B0-c%E4%BC%AA%E4%BB%A3%E7%A0%81%E4%B8%8E%E4%BB%A3%E7%A0%81">2.6 Splay树的实现 (C++伪代码与代码)</h4>
+                <div class="code-container">
+                <pre><code class="language-cpp">struct SplayNode {
+    int data;
+    SplayNode *left;
+    SplayNode *right;
+    SplayNode *parent; // Splay树通常需要父指针来简化旋转
+
+    SplayNode(int val) : data(val), left(nullptr), right(nullptr), parent(nullptr) {}
+};
+
+class SplayTree {
+private:
+    SplayNode* root;
+
+    // 左旋和右旋 (这里需要处理父指针)
+    void rotateLeft(SplayNode* x) { ... }
+    void rotateRight(SplayNode* x) { ... }
+
+    // 核心Splay操作
+    void splay(SplayNode* x) {
+        while (x-&gt;parent != nullptr) {
+            SplayNode* p = x-&gt;parent;
+            SplayNode* g = p-&gt;parent;
+
+            if (g == nullptr) { // Zig
+                if (x == p-&gt;left) rotateRight(p);
+                else rotateLeft(p);
+            } else if (x == p-&gt;left &amp;&amp; p == g-&gt;left) { // Zig-Zig
+                rotateRight(g);
+                rotateRight(p);
+            } else if (x == p-&gt;right &amp;&amp; p == g-&gt;right) { // Zig-Zig
+                rotateLeft(g);
+                rotateLeft(p);
+            } else { // Zig-Zag
+                if (x == p-&gt;left) rotateRight(p);
+                else rotateLeft(p);
+                if (x == g-&gt;left) rotateRight(g);
+                else rotateLeft(g);
+            }
+        }
+        this-&gt;root = x;
+    }
+
+public:
+    // 查找
+    SplayNode* find(int data) {
+        SplayNode* curr = root;
+        // ... 普通BST查找 ...
+        // 找到后 splay(found_node)
+        // 没找到 splay(last_visited_node)
+        return root; // Splay后根就是查找的节点
+    }
+
+    // 插入
+    void insert(int data) {
+        // ... 普通BST插入 ...
+        // 插入新节点后 splay(new_node)
+    }
+
+    // 删除
+    void remove(int data) {
+        find(data); // Step 1: Splay X to root
+        SplayNode* X = root;
+        // Step 2 & 3 & 4
+        // ... 合并左右子树 ...
+    }
+};
+</code></pre>
+                </div>
+                <p><em>（注意：这里只展示核心逻辑）</em></p>
+                <hr>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E6%91%8A%E8%BF%98%E5%88%86%E6%9E%90-amortized-analysis">第三部分：摊还分析 (Amortized Analysis)</h3>
+                <p>Splay树的性能保证是“摊还 $O(log N)$”，而不是“最坏情况 $O(log N)$”。这意味着单次操作可能很慢（比如对一个深层节点的Splay操作，成本可能是 $O(N)$），但一系列操作的<strong>总成本</strong>是可控的。摊还分析就是用来证明这一点的数学工具。</p>
+                <p><strong>核心概念</strong></p>
+                <p>摊还分析不是平均情况分析，它不涉及概率。它是一种对<strong>数据结构操作序列</strong>的<strong>最坏情况</strong>性能分析。</p>
+                <ul>
+                <li><strong>最坏情况界 (Worst-case bound):</strong> 保证<strong>每次</strong>操作的成本上限。 (AVL树)</li>
+                <li><strong>摊还界 (Amortized bound):</strong> 保证<strong>一系列</strong>操作的<strong>平均</strong>成本上限。 (Splay树)</li>
+                <li><strong>平均情况界 (Average-case bound):</strong> 在假设输入有某种概率分布的情况下，操作的<strong>期望</strong>成本。</li>
+                </ul>
+                <p>通常有 <code>worst-case bound ≥ amortized bound ≥ average-case bound</code>。</p>
+                <p>摊还分析有三种主要方法：</p>
+                <ol>
+                <li><strong>聚合分析 (Aggregate Analysis)</strong></li>
+                <li><strong>记账方法 (Accounting Method)</strong></li>
+                <li><strong>势能方法 (Potential Method)</strong></li>
+                </ol>
+                <p>我们用一个经典的例子——“带MultiPop的栈”——来理解这三种方法。</p>
+                <p><strong>【示例】带MultiPop的栈</strong>
+                我们有一个栈，支持三种操作：</p>
+                <ul>
+                <li><code>Push(x)</code>: 将元素x入栈。实际成本为1。</li>
+                <li><code>Pop()</code>: 弹出一个元素。实际成本为1。</li>
+                <li><code>MultiPop(k)</code>: 连续弹出k个元素。实际成本为 <code>min(k, size)</code>。</li>
+                </ul>
+                <p><strong>问题：</strong> $n$ 次操作的序列，最坏情况总时间是多少？
+                一个朴素的分析是：<code>MultiPop</code> 最坏情况下成本是 $O(n)$。如果 $n$ 次操作都是 <code>MultiPop</code>，总时间是 $O(n²)$ 吗？
+                不对。因为你不能连续进行 $n$ 次 $O(n)$ 的<code>MultiPop</code>。要弹出元素，必须先推进去。</p>
+                <h4 id="31-%E8%81%9A%E5%90%88%E5%88%86%E6%9E%90">3.1 聚合分析</h4>
+                <p><strong>思想：</strong> 计算 $n$ 次操作序列的<strong>总</strong>最坏情况成本 $T(n)$，然后摊还成本就是 $T(n) / n$。</p>
+                <p>对于栈的例子，我们观察到：<strong>一个元素最多只能被压入栈一次，也最多只能被弹出一次</strong>（无论是通过 <code>Pop</code> 还是 <code>MultiPop</code>）。</p>
+                <ul>
+                <li>每次 <code>Push</code> 的成本是1。</li>
+                <li>每个元素一生中对 <code>Pop</code> 或 <code>MultiPop</code> 的总成本贡献最多是1。</li>
+                </ul>
+                <p>假设在 $n$ 次操作序列中，有 $k$ 次是 <code>Push</code>。那么总的 <code>Push</code> 成本是 $k$。
+                被压入栈的元素总数是 $k$。因此，所有 <code>Pop</code> 和 <code>MultiPop</code> 操作的总成本之和，不可能超过 $k$。
+                总成本 <code>T(n) ≤ k (Push成本) + k (Pop总成本) ≤ 2k</code>。
+                因为 $k ≤ n$，所以总成本 $T(n) = O(n)$。
+                那么，$n$ 次操作的摊还成本是 $T(n) / n = O(n) / n = O(1)$。</p>
+                <h4 id="32-%E8%AE%B0%E8%B4%A6%E6%96%B9%E6%B3%95">3.2 记账方法</h4>
+                <p><strong>思想：</strong> 这是一个更精细化的方法。我们为每个操作设定一个<strong>摊还成本 (amortized cost, ĉ)</strong>。</p>
+                <ul>
+                <li>如果 <code>ĉ</code> &gt; <code>实际成本(c)</code>，我们将差额 <code>ĉ - c</code> 存为“信用 (credit)”，把它“存”在数据结构的某个部分上。</li>
+                <li>如果 <code>ĉ</code> &lt; <code>实际成本(c)</code>，我们用之前存下的信用，来支付 <code>c - ĉ</code> 这部分“赤字”。</li>
+                </ul>
+                <p><strong>规则：</strong> 任何时候，总信用都必须<strong>非负</strong>。</p>
+                <p>对于栈的例子，我们设定摊还成本：</p>
+                <ul>
+                <li><code>Push</code>: <code>ĉ = 2</code> (实际成本 <code>c = 1</code>)。每次Push，我们支付1单位的实际成本，然后存下1单位的信用。这个信用可以看作是“附着”在刚入栈的元素上，作为它未来被弹出的“预付款”。</li>
+                <li><code>Pop</code>: <code>ĉ = 0</code> (实际成本 <code>c = 1</code>)。当这个元素被<code>Pop</code>时，它的实际成本1由它自己携带的信用支付。</li>
+                <li><code>MultiPop(k)</code>: <code>ĉ = 0</code> (实际成本 <code>c = k'</code>)。弹出的 <code>k'</code> 个元素，每个都用自己携带的1单位信用支付自己的弹出成本。</li>
+                </ul>
+                <p>因为每个元素入栈时都预付了它出栈的费用，所以任何操作序列的总摊还成本 <code>Σĉ</code> 总是大于或等于总实际成本 <code>Σc</code>。
+                一个 <code>Push</code> 的摊还成本是2，<code>Pop</code>和<code>MultiPop</code>是0。所以 <code>n</code> 次操作的总摊还成本是 <code>O(n)</code>，因此总实际成本也是 <code>O(n)</code>。平均每次操作的摊还成本是 <code>O(1)</code>。</p>
+                <h4 id="33-%E5%8A%BF%E8%83%BD%E6%96%B9%E6%B3%95-%E6%9C%80%E5%BC%BA%E5%A4%A7%E6%9C%80%E6%95%B0%E5%AD%A6%E5%8C%96%E7%9A%84%E6%96%B9%E6%B3%95">3.3 势能方法 (最强大、最数学化的方法)</h4>
+                <p><strong>思想：</strong> 我们定义一个<strong>势能函数 (Potential Function) $\Phi$</strong>，它将数据结构的一个状态 $D$ 映射到一个实数 $\Phi(D)$。这个势能代表了我们“储存”的“预付款”，类似于记账方法中的总信用。</p>
+                <p>我们规定初始状态 $D_0$ 的势能$\Phi(D_0)=0$，并且对于任何状态$D_i$，$\Phi(D_i)\geq 0$。</p>
+                <p>第 $i$ 次操作的<strong>摊还成本 ($\hat{c_i}$)</strong> 定义为：
+                $$\hat{c_i} = c_i + \Phi(D_i) - \Phi(D_{i-1})$$
+                其中 $c_i$是实际成本，$D_{i-1}$ 和 $D_i$ 分别是操作前后的数据结构状态。$\Phi(D_i)-\Phi(D_{i-1})$是势能的变化量。</p>
+                <p>对一个包含 $n$ 次操作的序列，总摊还成本为：
+                $$\sum_{i=1}^{n} \hat{c}<em>i = \sum</em>{i=1}^{n} (c_i + \Phi(D_i) - \Phi(D_{i-1}))$$
+                这是一个<strong>伸缩和 (telescoping sum)</strong>：
+                $$\sum \hat{c}<em>i = (\sum c_i) + (\Phi(D_1) - \Phi(D_0)) + (\Phi(D_2) - \Phi(D_1)) + ... + (\Phi(D_n) - \Phi(D</em>{n-1}))$$
+                $$\sum \hat{c}_i = (\sum c_i) + \Phi(D_n) - \Phi(D_0)$$</p>
+                <p>因为我们要求 $\Phi(D_n)\geq \Phi(D_0)$（通常是 $\Phi(D_n)\geq 0$且 $\Phi(D_0)=0$），所以我们有：
+                $$\sum \hat{c}_i \ge \sum c_i$$
+                总摊还成本是总实际成本的一个上界。如果我们能证明每次操作的摊还成本 <code>ĉᵢ</code> 很小，就能证明总实际成本也很小。</p>
+                <p><strong>应用于栈的例子：</strong></p>
+                <ul>
+                <li><strong>势能函数定义：</strong> $\Phi(D)=\text{栈中元素的数量}$。
+                <ul>
+                <li>初始空栈 $D_0$，$\Phi(D_0)=0$。</li>
+                <li>任何时候 $\Phi(D_i)\geq 0$。满足条件。</li>
+                </ul>
+                </li>
+                <li><strong>分析 Push:</strong>
+                <ul>
+                <li>$c_i=1$。</li>
+                <li>栈中元素数量加1，$\Phi(D_i)-\Phi(D_{i-1})=1$。</li>
+                <li>$\hat{c_i}=c_i+(\Phi(D_i)-\Phi(D_{i-1}))=1+1=2$。</li>
+                </ul>
+                </li>
+                <li><strong>分析 Pop:</strong>
+                <ul>
+                <li>$c_i=1$。</li>
+                <li>栈中元素数量减1，$\Phi(D_i)-\Phi(D_{i-1})=-1$。</li>
+                <li>$\hat{c_i}=c_i+(\Phi(D_i)-\Phi(D_{i-1}))=1+(-1)=0$。</li>
+                </ul>
+                </li>
+                <li><strong>分析 MultiPop(k):</strong>
+                <ul>
+                <li>实际成本 $c_i=k'$ (弹出了 $k'$ 个)。</li>
+                <li>栈中元素数量减 $k'$，$\Phi(D_i)-\Phi(D_{i-1})=-k'$。</li>
+                <li>$\hat{c_i}=c_i + (\Phi(D_i)-\Phi(D_{i-1}))=k'+(-k')=0$。</li>
+                </ul>
+                </li>
+                </ul>
+                <p>每次操作的摊还成本都是 $O(1)$。因此 $n$ 次操作的总摊还成本是 $O(n)$，总实际成本也是 $O(n)$。</p>
+                <h4 id="34-splay%E6%A0%91%E7%9A%84%E5%8A%BF%E8%83%BD%E5%88%86%E6%9E%90">3.4 Splay树的势能分析</h4>
+                <p>现在，我们用强大的势能方法来证明Splay树的摊还复杂度是 $O(log N)$。</p>
+                <ul>
+                <li>
+                <p><strong>定义：</strong></p>
+                <ul>
+                <li>对于树中的任意节点 $i$，定义 $S(i)$ 为以 $i$ 为根的子树的大小（包括 $i$ 自己）。</li>
+                <li>定义节点 $i$ 的<strong>秩 (rank)</strong> 为 $R(i) = \log_2(S(i))$。</li>
+                <li><strong>势能函数定义：</strong> 整棵树 <code>T</code> 的势能是所有节点的秩之和。
+                $$\Phi(T) = \sum_{i \in T} R(i) = \sum_{i \in T} \log_2(S(i))$$</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>分析：</strong> 我们需要计算一次Splay操作中每个小步骤（Zig, Zig-Zig, Zig-Zag）的摊还成本。假设我们要伸展的节点是 <code>X</code>。一次Splay操作由 $d$ 次小步骤组成，总实际成本是 $d$ 次旋转的成本，约为 $O(d)$。</p>
+                <p><code>Amortized Cost = Actual Cost + ΔΦ</code></p>
+                <p>经过非常严谨和巧妙的数学推导（这里省略具体细节，但它基于 $\log(a)+\log(b)\leq 2\log (a+b)-2$的不等式），我们可以得到每个小步骤的摊还成本$\hat{c_i}$ 的上界：</p>
+                <ul>
+                <li><strong>Zig 步:</strong> $\hat{c_i}\leq 1 + 3\left(R_{\text{after}}(X)-R_{\text{before}}(X)\right)$</li>
+                <li><strong>Zig-Zig 步:</strong> $\hat{c_i}\leq 3\left(R_{\text{after}}(X)-R_{\text{before}}(X)\right)$</li>
+                <li><strong>Zig-Zag 步:</strong> $\hat{c_i}\leq 2\left(R_{\text{after}}(X)-R_{\text{before}}(X)\right)$</li>
+                </ul>
+                <p>这里 $R_{\text{before}}(X)$ 和 $R_{\text{after}}(X)$ 分别是这个小步骤执行前后 <code>X</code> 的秩。注意，在每个小步骤中，<code>X</code> 都在向上移动，所以它的子树大小 $S(X)$ 在增加，因此它的秩 $R(X)$ 也在增加。$R_{\text{after}}(X)-R_{\text{before}}(X)$ 是一个正数。</p>
+                </li>
+                <li>
+                <p><strong>求和：</strong> 我们将一次完整的Splay操作（包含 $k$ 个小步骤）的摊还成本加起来。
+                <code>Total Amortized Cost = (k 次旋转的实际成本) + (总的势能变化)</code></p>
+                <p>幸运的是，当我们把所有步骤的摊还成本加起来时，中间项会相互抵消（伸缩和）：
+                $$\sum_{i=1}^{k} \hat{c}<em>i \le O(k) + 3 \sum (R</em>{i}(X) - R_{i-1}(X))$$
+                $$\sum \hat{c}<em>i \le O(k) + 3(R</em>{final}(X) - R_{initial}(X))$$</p>
+                <p>其中$R_{\text{initial}}(X)$ 是Splay操作开始时 <code>X</code> 的秩，$R_{\text{final}}(X)$ 是Splay结束后 <code>X</code> 的秩。</p>
+                <ul>
+                <li>Splay结束后，<code>X</code> 成为根节点，所以 $S_{\text{final}}(X)=N$（树的总节点数）。因此 $R_{\text{final}}(X)=\log N$。</li>
+                <li>$S_{\text{initial}}\geq 1$，所以 $R_{\text{initial}}\geq \log 1 = 0$。</li>
+                </ul>
+                <p>因此，一次完整的Splay操作的摊还成本为：
+                $$\text{Amortized Cost (Splay)}\leq O(k) + 3 (\log N - R_{\text{initial}}(X))=O(\log N)$$
+                <em>（$O(k)$项实际上被更精确的分析吸收了，最终结果就是$O(\log N)$）</em></p>
+                </li>
+                </ul>
+                <p><strong>结论：</strong>
+                一次Splay操作的摊还成本是 $O(\log N)$。由于Splay树的所有操作（查找、插入、删除）都基于Splay，所以这些操作的摊还成本也都是 $O(\log N)$。这就严格证明了Splay树的性能保证。</p>
+                <hr>
+                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E6%80%BB%E7%BB%93%E4%B8%8E%E6%AF%94%E8%BE%83">第四部分：总结与比较</h3>
+                <p>现在，我们来回答那个终极问题：<strong>Splay树真的比AVL树更好吗？</strong></p>
+                <p>答案是：<strong>看情况 (It depends)。</strong></p>
+                <table>
+                <thead>
+                <tr>
+                <th style="text-align:left">特性</th>
+                <th style="text-align:left">普通BST</th>
+                <th style="text-align:left">AVL树</th>
+                <th style="text-align:left">Splay树</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                <td style="text-align:left"><strong>单次操作最坏时间</strong></td>
+                <td style="text-align:left">$O(N)$</td>
+                <td style="text-align:left">$O(\log N)$</td>
+                <td style="text-align:left">$O(N)$</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>M次操作总最坏时间</strong></td>
+                <td style="text-align:left">$O(M*N)$</td>
+                <td style="text-align:left">$O(M \log N)$</td>
+                <td style="text-align:left">$O(M \log N)$</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>单次操作摊还时间</strong></td>
+                <td style="text-align:left">$O(N)$</td>
+                <td style="text-align:left">$O(\log N)$</td>
+                <td style="text-align:left">$O(\log N)$</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>空间复杂度</strong></td>
+                <td style="text-align:left">$O(1)$ (额外)</td>
+                <td style="text-align:left">$O(N)$ (存高度)</td>
+                <td style="text-align:left">$O(N)$ (需父指针)</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>实现复杂度</strong></td>
+                <td style="text-align:left">简单</td>
+                <td style="text-align:left">复杂</td>
+                <td style="text-align:left">非常复杂</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>局部性优势</strong></td>
+                <td style="text-align:left">无</td>
+                <td style="text-align:left">无</td>
+                <td style="text-align:left"><strong>强</strong></td>
+                </tr>
+                </tbody>
+                </table>
+                <p><strong>选择建议：</strong></p>
+                <ul>
+                <li>如果你需要<strong>严格的、可预测的</strong>单次操作性能保证，比如在实时系统中，<strong>选择AVL树</strong>（或红黑树）。</li>
+                <li>如果你的应用中存在明显的<strong>访问局部性</strong>（即某些元素被频繁访问），或者你对平均性能要求很高，而可以容忍偶尔的慢操作，<strong>Splay树是绝佳的选择</strong>。它的自优化特性会使常用数据自动靠近根部，长期运行下来性能会非常好。</li>
+                <li>如果数据是静态的，只构建一次，之后只有查询操作，那么一个静态的、完美平衡的BST是最好的。</li>
+                <li>在大多数通用场景下，标准库（如C++的<code>std::map</code>）通常使用<strong>红黑树</strong>，它是AVL树和Splay树之间的一种折衷：它不像AVL树那样严格平衡，但能保证$O(\log N)$的最坏情况性能，同时旋转和调整的次数比AVL树少，实现也相对（只是相对）简单一些。</li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+            ? 'dark'
+            : 'default'
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
