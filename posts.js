@@ -75,5 +75,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-21-Animation02.html",
       "abstract": "Computer Animation 02: 2D Image Morphing"
+    },
+    {
+      "title": "计算机动画学习笔记3:基于StyleGan的肖像Morphing和二维多边形形状渐变",
+      "date": "2025-08-21",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-21-Animation03.html",
+      "abstract": "Computer Animation:Portrait Morphing and 2D Polygon Shape Gradient Based on StyleGAN "
     }
   ];

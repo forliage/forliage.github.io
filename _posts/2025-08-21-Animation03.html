@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机动画03：基于StyleGan的肖像Morphing和二维多边形形状渐变</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8A%A8%E7%94%BB03%E5%9F%BA%E4%BA%8Estylegan%E7%9A%84%E8%82%96%E5%83%8Fmorphing%E5%92%8C%E4%BA%8C%E7%BB%B4%E5%A4%9A%E8%BE%B9%E5%BD%A2%E5%BD%A2%E7%8A%B6%E6%B8%90%E5%8F%98">计算机动画03：基于StyleGan的肖像Morphing和二维多边形形状渐变</h1>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%9F%BA%E4%BA%8Estylegan%E7%9A%84%E8%82%96%E5%83%8Fmorphing"><strong>第一部分：基于StyleGAN的肖像Morphing</strong></h3>
+                <h4 id="11-%E7%94%9F%E6%88%90%E5%AF%B9%E6%8A%97%E7%BD%91%E7%BB%9C-generative-adversarial-networks-gan-%E7%AE%80%E4%BB%8B"><strong>1.1 生成对抗网络 (Generative Adversarial Networks, GAN) 简介</strong></h4>
+                <p>在我们深入StyleGAN之前，必须先理解它的基石——<strong>生成对抗网络 (GAN)</strong>。</p>
+                <p>2014年，Ian Goodfellow等人提出了GAN，它彻底改变了生成模型领域。GAN的核心思想源于博弈论中的“零和博弈”。它由两个相互竞争的神经网络组成：</p>
+                <ul>
+                <li><strong>生成器 (Generator, G)</strong>：它的任务是学习真实数据的分布，从而生成新的、与真实数据难以区分的“假”数据。它就像一个伪画制造者，试图画出能骗过专家的赝品。</li>
+                <li><strong>判别器 (Discriminator, D)</strong>：它的任务是判断输入的数据是来自真实数据集还是由生成器生成的。它就像一个艺术品鉴定专家，尽力分辨真伪。</li>
+                </ul>
+                <p><strong>数学原理：Minimax博弈</strong></p>
+                <p>GAN的训练过程是一个Minimax（最小化最大值）博弈过程。假设真实数据分布为 $p_{data}(x)$，生成器从一个简单的先验分布（如高斯分布）$p_z(z)$ 中采样噪声 $z$，并生成样本 $G(z)$。判别器 $D(x)$ 输出一个标量，表示 $x$ 来自真实数据的概率。</p>
+                <p>我们的目标是找到一个纳什均衡点，使得生成器生成的分布 $p_g$ 与真实数据分布 $p_{data}$ 无限接近。这个过程可以通过优化以下价值函数 $V(D, G)$ 来实现：</p>
+                <p>$$
+                \min_{G} \max_{D} V(D, G) = \mathbb{E}<em>{x \sim p</em>{data}(x)}[\log D(x)] + \mathbb{E}_{z \sim p_z(z)}[\log(1 - D(G(z)))]
+                $$</p>
+                <ul>
+                <li><strong>对于判别器D</strong>：它的目标是最大化 $V(D, G)$。当输入是真实样本 $x$ 时，它希望 $D(x)$ 接近1；当输入是生成样本 $G(z)$ 时，它希望 $D(G(z))$ 接近0。</li>
+                <li><strong>对于生成器G</strong>：它的目标是最小化 $V(D, G)$。它希望自己生成的样本 $G(z)$ 能够骗过判别器，即让 $D(G(z))$ 接近1，这等价于最小化 $\log(1 - D(G(z)))$。</li>
+                </ul>
+                <p>通过这种对抗训练，判别器和生成器共同进化。最终，当生成器能够生成与真实数据无法区分的样本时，判别器的输出对于任何样本都将是0.5，系统达到均衡。</p>
+                <p>GAN的提出是深度学习领域的里程碑。2019年，深度学习的三位先驱Geoffrey Hinton、Yoshua Bengio和Yann LeCun共同获得了图灵奖。Yann LeCun曾评价GAN的对抗训练是“自切片面包以来最酷的事情”，足见其影响力。从2014年模糊的人脸到2017年以后照片级逼真的图像，GAN的发展速度惊人。</p>
+                <h4 id="12-gan%E5%9C%A8%E4%BA%BA%E8%84%B8%E7%94%9F%E6%88%90%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8%E4%BB%8E%E5%83%8F%E7%B4%A0%E5%88%B0%E6%A6%82%E7%8E%87%E5%88%86%E5%B8%83"><strong>1.2 GAN在人脸生成中的应用：从像素到概率分布</strong></h4>
+                <p>我们如何看待人脸生成问题？一张 $n \times n$ 的彩色人脸图像可以被看作一个位于 $N = n \times n \times 3$ 维空间中的一个点。然而，这个高维空间中绝大多数的点都对应着无意义的噪声，只有极小一部分子空间（一个复杂的流形）对应着“看起来像人脸”的图像。</p>
+                <p>GAN的目标，就是学习这个“人脸流形”上的概率分布。我们无法用一个明确的公式来描述这个分布，但我们可以通过训练一个生成器来隐式地学习它。</p>
+                <p>生成器 $G$ 就可以被看作是一个复杂的非线性函数，它将一个来自简单、低维<strong>隐空间 (Latent Space)</strong> 的随机向量 $z$（称为<strong>隐码, Latent Code</strong>），映射到高维的图像空间中，其输出 $G(z)$ 就遵循着我们想要的人脸概率分布。</p>
+                <p>$$
+                G: \mathcal{Z} \rightarrow \mathcal{X}
+                $$</p>
+                <p>其中 $\mathcal{Z}$ 是隐空间（如 $\mathbb{R}^{512}$），$\mathcal{X}$ 是图像空间（如 $\mathbb{R}^{1024 \times 1024 \times 3}$）。</p>
+                <h4 id="13-stylegan-%E5%9F%BA%E4%BA%8E%E9%A3%8E%E6%A0%BC%E7%9A%84%E7%94%9F%E6%88%90%E5%99%A8%E6%9E%B6%E6%9E%84"><strong>1.3 StyleGAN: 基于风格的生成器架构</strong></h4>
+                <p>传统GAN将隐码 $z$ 直接作为输入，通过一系列转置卷积层（上采样）生成图像。而2019年由NVIDIA提出的<strong>StyleGAN</strong>对此做出了革命性的改进。</p>
+                <p><strong>核心思想</strong>：StyleGAN认为，图像的生成过程可以分解为对不同层次“风格”的控制。它不再将隐码直接输入生成网络，而是用隐码来调制 (modulate) 生成网络每一层的行为。</p>
+                <p><strong>StyleGAN的两大优点：</strong></p>
+                <ol>
+                <li><strong>极高的生成质量</strong>：生成的图像在分辨率和逼真度上都达到了新的高度。</li>
+                <li><strong>优越的隐空间性质</strong>：其隐空间具有良好的<strong>语义解耦 (Disentanglement)</strong> 特性，这意味着隐空间中的不同方向对应着不同的、可解释的语义属性（如年龄、发型、性别、姿态等）。</li>
+                </ol>
+                <p><strong>StyleGAN架构剖析：</strong></p>
+                <ol>
+                <li>
+                <p><strong>从Z空间到W空间</strong>：</p>
+                <ul>
+                <li>StyleGAN有两个隐空间。首先是传统的<strong>Z空间</strong>，通常是一个512维的标准高斯分布。</li>
+                <li>StyleGAN引入了一个由8个全连接层组成的<strong>映射网络 (Mapping Network)</strong> $f$，它将 $z \in \mathcal{Z}$ 映射到一个中间隐空间——<strong>W空间</strong>，得到 $w = f(z), w \in \mathcal{W}$。</li>
+                <li><strong>为什么需要W空间？</strong> Z空间是一个超球体，为了拟合真实世界中极其复杂的数据分布，网络需要进行高度非线性的扭曲。这种扭曲导致了特征的“纠缠”(Entanglement)，即一个方向可能同时控制多个语义属性。而映射网络 $f$ 的作用就是“解开”这种纠缠，使得W空间中的分布更能匹配真实数据的特征分布，属性更加线性可分，从而实现更好的解耦。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>风格控制 (Style Modulation)</strong>：</p>
+                <ul>
+                <li>生成网络（称为<strong>合成网络, Synthesis Network</strong> $g$）的输入不再是隐码，而是一个可学习的<strong>固定常数</strong>张量。</li>
+                <li>中间隐码 $w$ 通过一个可学习的<strong>仿射变换 (Affine Transform)</strong> A，为合成网络的每一层生成一个“风格”向量 <code>style</code>。</li>
+                <li>这个<code>style</code>向量通过<strong>自适应实例归一化 (Adaptive Instance Normalization, AdaIN)</strong> 来控制每一层的输出特征图。</li>
+                </ul>
+                <p>AdaIN的数学公式为：
+                $$
+                \text{AdaIN}(x_i, \mathbf{y}) = y_{s,i} \frac{x_i - \mu(x_i)}{\sigma(x_i)} + y_{b,i}
+                $$
+                其中，$x_i$ 是第 $i$ 个特征图，$\mu(x_i)$ 和 $\sigma(x_i)$ 是其均值和标准差。$\mathbf{y} = (y_{s,i}, y_{b,i})$ 是从 $w$ 经仿射变换 A 得到的风格向量，分别代表缩放因子和偏置。这个操作本质上是将特征图的统计特性（风格）替换为由 $w$ 指定的统计特性。</p>
+                </li>
+                <li>
+                <p><strong>分层风格控制</strong>：
+                StyleGAN的合成网络通常有18层（对应 $1024 \times 1024$ 分辨率）。不同层级的<code>style</code>控制着不同粒度的图像特征：</p>
+                <ul>
+                <li><strong>Coarse styles (层 1-4)</strong>：控制高级、粗粒度的特征，如姿态、脸型、发型轮廓。</li>
+                <li><strong>Middle styles (层 5-8)</strong>：控制中等粒度的特征，如面部细节（眼睛、鼻子）、头发纹理。</li>
+                <li><strong>Fine styles (层 9-18)</strong>：控制细节、色彩和光影，如肤色、发色、光照方向、背景等。</li>
+                </ul>
+                <p>通过在不同层级注入来自不同 $w$ 向量的<code>style</code>，可以实现<strong>风格混合 (Style Mixing)</strong>，例如，将A的姿态与B的肤色结合，生成一个新的、不存在的人脸。</p>
+                </li>
+                </ol>
+                <h4 id="14-stylegan%E4%B8%AD%E7%9A%84%E5%9B%BE%E5%83%8Fmorphing"><strong>1.4 StyleGAN中的图像Morphing</strong></h4>
+                <p>StyleGAN的W空间由于其良好的解耦和平滑性，非常适合进行插值。</p>
+                <p><strong>核心原理</strong>：在W空间中，两个点 $w_1$ 和 $w_2$（分别对应图像 $I_1$ 和 $I_2$）之间的线性路径上的点，会生成在视觉上平滑过渡的中间图像。</p>
+                <p><strong>实现方法</strong>：
+                给定两个隐码 $w_1$ 和 $w_2$，我们可以通过简单的线性插值来生成一个中间隐码 $w_{interp}$：
+                $$
+                w_{interp}(t) = (1 - t)w_1 + t w_2, \quad t \in [0, 1]
+                $$
+                然后将 $w_{interp}(t)$ 送入合成网络 $g$，即可得到渐变过程中的第 $t$ 帧图像 $I(t) = g(w_{interp}(t))$。</p>
+                <p>由于W空间的优越特性，这种简单的线性插值就能产生极其自然和高质量的视觉渐变效果。我们甚至可以对不同层级的风格进行选择性插值，例如，只插值Coarse styles来改变脸型和姿态，而保持肤色和光照不变，从而实现更具创意的控制。</p>
+                <hr>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%9F%BA%E4%BA%8Ediffusion%E6%A8%A1%E5%9E%8B%E7%9A%84morphing%E5%8F%8A%E6%8E%A7%E5%88%B6"><strong>第二部分：基于Diffusion模型的Morphing及控制</strong></h3>
+                <p>虽然StyleGAN在特定领域（如人脸）表现出色，但近年来，<strong>扩散模型 (Diffusion Models)</strong> 已成为图像生成领域的新的SOTA（State-of-the-Art）。</p>
+                <h4 id="21-%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><strong>2.1 扩散模型基本原理</strong></h4>
+                <p>扩散模型包含两个过程：</p>
+                <ol>
+                <li>
+                <p><strong>前向过程 (Forward/Diffusion Process)</strong>：这是一个固定的过程，它逐步向一张清晰的图像 $x_0$ 中添加高斯噪声，经过 $T$ 步后，图像变为纯粹的噪声 $x_T \sim \mathcal{N}(0, \mathbf{I})$。
+                第 $t$ 步的加噪过程可以表示为：
+                $$
+                q(x_t | x_{t-1}) = \mathcal{N}(x_t; \sqrt{1 - \beta_t}x_{t-1}, \beta_t\mathbf{I})
+                $$
+                其中 $\beta_t$ 是一个预设的、随 $t$ 增大的小常数（噪声方差）。</p>
+                </li>
+                <li>
+                <p><strong>反向过程 (Reverse/Denoising Process)</strong>：这是模型需要学习的过程。它从纯噪声 $x_T$ 开始，逐步地、迭代地去除噪声，最终恢复出一张清晰的图像 $x_0$。这个过程由一个神经网络（通常是U-Net架构）$p_\theta$ 来参数化：
+                $$
+                p_\theta(x_{t-1} | x_t) = \mathcal{N}(x_{t-1}; \mu_\theta(x_t, t), \Sigma_\theta(x_t, t))
+                $$
+                在实践中，模型通常不直接预测去噪后的图像 $\mu_\theta$，而是预测在第 $t$ 步添加的噪声 $\epsilon_t$。损失函数就是让模型预测的噪声 $\epsilon_\theta(x_t, t)$ 与真实添加的噪声 $\epsilon$ 尽可能接近。</p>
+                </li>
+                </ol>
+                <h4 id="22-%E4%BD%BF%E7%94%A8controlnet%E6%8E%A7%E5%88%B6%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8B"><strong>2.2 使用ControlNet控制扩散模型</strong></h4>
+                <p>像Stable Diffusion这样的大型扩散模型虽然强大，但其生成过程主要是由文本提示词（text prompt）引导，难以进行精细的结构控制。<strong>ControlNet</strong>是一种革命性的技术，它能在不破坏预训练大模型的前提下，为其增加额外的条件控制。</p>
+                <p><strong>工作原理</strong>：ControlNet冻结原始的预训练模型（如Stable Diffusion的U-Net），然后为其创建一个可训练的副本。这个副本接收额外的条件输入（如Canny边缘图、人体姿态骨架、深度图等），并学习如何根据这些条件来调整生成过程。副本的输出通过特殊的“零卷积层”被添加到原始模型的对应层中。由于零卷积层在训练初期输出为零，因此它不会破坏原始模型的性能，而是像一个插件一样，逐步地将控制信息注入到生成过程中。</p>
+                <p>这使得我们可以实现前所未有的控制力，例如，让生成的人物完全遵循指定的姿态，或者将一张照片转化为具有相同构图的另一种风格。</p>
+                <h4 id="23-%E8%A7%86%E9%A2%91%E7%94%9F%E6%88%90%E5%A4%A7%E6%A8%A1%E5%9E%8B%E6%A6%82%E8%A7%88"><strong>2.3 视频生成大模型概览</strong></h4>
+                <p>从静态图像生成到动态视频生成是AIGC领域的下一个重要突破口。近年来涌现了众多视频大模型，如OpenAI的<strong>Sora</strong>、Luma AI的<strong>Dream Machine</strong>、Google的<strong>Veo3</strong>等。</p>
+                <p>这些模型面临的核心挑战是<strong>时间一致性 (Temporal Consistency)</strong>，即确保视频中的物体和场景在连续帧中保持一致的身份、外观和物理规律。它们通常采用类似Diffusion或Transformer的架构，但在处理数据时引入了时间维度，例如Sora的“时空补丁”(Spacetime Patches)技术，将视频看作是一系列在时间和空间上排列的视觉数据块，从而在统一的框架下学习其动态变化。</p>
+                <p>像Dream Machine支持设置<strong>首尾帧</strong>，这为视频的循环播放和可控生成提供了极大便利，也为视频Morphing提供了新的可能性。</p>
+                <hr>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E4%BA%8C%E7%BB%B4%E5%A4%9A%E8%BE%B9%E5%BD%A2%E5%BD%A2%E7%8A%B6%E6%B8%90%E5%8F%98-2d-shape-blending"><strong>第三部分：二维多边形形状渐变 (2D Shape Blending)</strong></h3>
+                <p>现在，让我们从高维的像素世界回到经典的计算机图形学领域，探讨二维矢量形状的渐变问题。这在2D动画（In-betweening）、字体设计、工业设计等领域有广泛应用。</p>
+                <p>给定两个关键帧形状（多边形）$P_A$ 和 $P_B$，我们的目标是生成平滑过渡的中间形状 $P(t)$。</p>
+                <p>这个问题可以分解为两个子问题：</p>
+                <ol>
+                <li><strong>顶点对应问题 (Vertex Correspondence)</strong>：确定 $P_A$ 上的哪个顶点对应 $P_B$ 上的哪个顶点。</li>
+                <li><strong>顶点路径问题 (Vertex Path)</strong>：确定对应顶点之间如何插值移动。</li>
+                </ol>
+                <h4 id="31-%E7%BA%BF%E6%80%A7%E6%8F%92%E5%80%BC%E6%B3%95-linear-interpolation-lerp-%E5%8F%8A%E5%85%B6%E7%BC%BA%E9%99%B7"><strong>3.1 线性插值法 (Linear Interpolation, LERP) 及其缺陷</strong></h4>
+                <p>最简单的方法是<strong>顶点线性插值</strong>。假设我们已经解决了顶点对应问题，且两个多边形有相同数量的顶点 $n$。对于第 $i$ 对对应的顶点 $P_{A,i}$ 和 $P_{B,i}$，中间顶点 $P_i(t)$ 可以计算为：
+                $$
+                P_i(t) = (1 - t)P_{A,i} + t P_{B,i}, \quad t \in [0, 1]
+                $$
+                这种方法虽然简单，但存在严重缺陷：</p>
+                <ul>
+                <li><strong>收缩 (Shrinkage) 与扭结 (Kink)</strong>：当物体发生旋转时，线性插值会导致形状在中间过程中不自然地收缩和变形。例如，一个旋转90度的正方形，在 $t=0.5$ 时会坍缩成一个点。这是因为线性插值没有考虑物体的刚性运动，它只关心顶点的绝对坐标。</li>
+                </ul>
+                <h4 id="32-%E5%9F%BA%E4%BA%8E%E5%86%85%E5%9C%A8%E5%BD%A2%E7%8A%B6%E6%8F%92%E5%80%BC-intrinsic-shape-interpolation-%E7%9A%84%E6%96%B9%E6%B3%95"><strong>3.2 基于内在形状插值 (Intrinsic Shape Interpolation) 的方法</strong></h4>
+                <p>为了解决线性插值的缺陷，Sederberg等人在1993年提出了一种更优雅的方法，它不插值顶点的笛卡尔坐标，而是插值形状的<strong>内在属性 (Intrinsic Properties)</strong>。</p>
+                <p>这种方法的思想来源于“<strong>乌龟几何 (Turtle Graphics)</strong>”：一个多边形可以不通过顶点坐标，而是通过一系列“前进”和“转向”的指令来定义。这些指令就是形状的内在属性：<strong>边长</strong>和<strong>顶点角</strong>。</p>
+                <p><strong>算法步骤：</strong></p>
+                <ol>
+                <li>
+                <p><strong>计算内在属性</strong>：
+                对于源多边形 $P_A$ 和目标多边形 $P_B$，我们计算它们的边长序列 ${L_{A,i}}$ 和 ${L_{B,i}}$，以及有向顶点转角序列 ${\theta_{A,i}}$ 和 ${\theta_{B,i}}$。</p>
+                </li>
+                <li>
+                <p><strong>插值内在属性</strong>：
+                我们对这些内在属性进行线性插值，得到中间形状的内在属性：
+                $$
+                L_i(t) = (1 - t)L_{A,i} + t L_{B,i} \\
+                \theta_i(t) = (1 - t)\theta_{A,i} + t \theta_{B,i}
+                $$</p>
+                </li>
+                <li>
+                <p><strong>重建形状与闭合问题</strong>：
+                从一个起始点开始，使用插值得到的边长 $L_i(t)$ 和转角 $\theta_i(t)$，我们可以一步步重建出中间多边形的顶点。然而，这样重建出的多边形<strong>通常是不封闭的</strong>！也就是说，最后一个顶点无法精确地回到第一个顶点。这是因为边长和角度的线性组合不保证满足多边形的几何闭合约束。</p>
+                </li>
+                <li>
+                <p><strong>强制闭合：约束优化问题</strong>：
+                这个“几乎闭合”的多边形是解决问题的关键。我们需要对插值得到的边长进行微小的调整（称为 <strong>Edge Tweaking</strong>），记为 $S_i$，使得调整后的新边长 $L'_i(t) = L_i(t) + S_i$ 能够构成一个封闭的多边形，同时这些调整量 $S_i$ 本身应该尽可能小。</p>
+                <p>这转化为一个经典的<strong>约束优化问题</strong>：</p>
+                <ul>
+                <li>
+                <p><strong>目标函数</strong>：最小化调整量的加权平方和。我们希望调整尽可能小。
+                $$
+                \min \sum_{i=0}^{m} \frac{S_i^2}{L_{AB,i}}
+                $$
+                （分母 $L_{AB,i}$ 是归一化项，用于处理不同尺度的边，通常定义为 $max(|L_{A,i} - L_{B,i}|, \epsilon)$）</p>
+                </li>
+                <li>
+                <p><strong>约束条件</strong>：调整后的多边形必须封闭。这意味着所有边向量之和为零。设 $\alpha_i$ 为第 $i$ 条边的绝对朝向角（可以由转角累加得到），则约束条件为：
+                $$
+                \phi_1 = \sum_{i=0}^{m} L'<em>i(t) \cos(\alpha_i) = \sum</em>{i=0}^{m} (L_i(t) + S_i) \cos(\alpha_i) = 0 \\
+                \phi_2 = \sum_{i=0}^{m} L'<em>i(t) \sin(\alpha_i) = \sum</em>{i=0}^{m} (L_i(t) + S_i) \sin(\alpha_i) = 0
+                $$</p>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>使用拉格朗日乘数法求解</strong>：
+                这是一个有等式约束的二次规划问题，可以用<strong>拉格朗日乘数法</strong>求解。我们构造拉格朗日函数：
+                $$
+                \Phi(S_0, ..., S_m, \lambda_1, \lambda_2) = \sum_{i=0}^{m} \frac{S_i^2}{L_{AB,i}} + \lambda_1 \phi_1 + \lambda_2 \phi_2
+                $$
+                对每个 $S_i$ 以及 $\lambda_1, \lambda_2$ 求偏导并令其为零：
+                $$
+                \frac{\partial \Phi}{\partial S_i} = \frac{2S_i}{L_{AB,i}} + \lambda_1 \cos(\alpha_i) + \lambda_2 \sin(\alpha_i) = 0 \\
+                \frac{\partial \Phi}{\partial \lambda_1} = \phi_1 = 0 \\
+                \frac{\partial \Phi}{\partial \lambda_2} = \phi_2 = 0
+                $$
+                从第一个方程我们可以解出 $S_i$ 关于 $\lambda_1, \lambda_2$ 的表达式：
+                $$
+                S_i = -\frac{L_{AB,i}}{2} (\lambda_1 \cos(\alpha_i) + \lambda_2 \sin(\alpha_i))
+                $$
+                将这个表达式代入两个约束条件，我们会得到一个关于 $\lambda_1, \lambda_2$ 的 $2 \times 2$ 线性方程组。解出 $\lambda_1, \lambda_2$ 后，回代即可求得所有 $S_i$。</p>
+                </li>
+                <li>
+                <p><strong>最终重建</strong>：
+                得到优化的边长 $L'_i(t)$ 后，我们就可以精确地重建出封闭的、视觉效果自然的中间多边形。</p>
+                </li>
+                </ol>
+                <p><strong>算法总结</strong></p>
+                <ul>
+                <li><strong>输入</strong>：两个顶点对应的多边形 $P_A, P_B$。</li>
+                <li><strong>过程</strong>：
+                <ol>
+                <li>计算 $P_A, P_B$ 的内在表示（边长、转角）。</li>
+                <li>线性插值内在表示。</li>
+                <li>建立并求解关于 $\lambda_1, \lambda_2$ 的线性方程组。</li>
+                <li>计算边长调整量 $S_i$。</li>
+                <li>更新边长，并从起始点重建多边形顶点坐标。</li>
+                </ol>
+                </li>
+                <li><strong>输出</strong>：中间帧多边形 $P(t)$。</li>
+                </ul>
+                <p>这种内在插值法能很好地处理旋转、缩放和非刚性形变，生成的结果远比线性插值法自然。</p>
+                <hr>
+                <h4 id="33-%E5%AE%9E%E7%8E%B0%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B-python"><strong>3.3 实现代码示例 (Python)</strong></h4>
+                <p>下面是一个简化的Python实现，使用<code>numpy</code>进行计算，<code>matplotlib</code>进行可视化。</p>
+                <div class="code-container">
+                <pre><code class="language-python">import numpy as np
+import matplotlib.pyplot as plt
+
+def compute_intrinsics(vertices):
+    """计算多边形的内在属性：边长和转角"""
+    shifted_vertices = np.roll(vertices, -1, axis=0)
+    edges = shifted_vertices - vertices
+    lengths = np.linalg.norm(edges, axis=1)
+    
+    angles = np.arctan2(edges[:, 1], edges[:, 0])
+    shifted_angles = np.roll(angles, 1)
+    
+    turn_angles = angles - shifted_angles
+    # 将角度标准化到 (-pi, pi]
+    turn_angles = (turn_angles + np.pi) % (2 * np.pi) - np.pi
+    
+    # 第一个转角是相对于x轴的绝对角度
+    turn_angles[0] = angles[0]
+    
+    return lengths, turn_angles
+
+def reconstruct_from_intrinsics(lengths, turn_angles):
+    """根据内在属性重建多边形顶点"""
+    num_verts = len(lengths)
+    vertices = np.zeros((num_verts + 1, 2))
+    abs_angles = np.cumsum(turn_angles)
+    
+    edges = np.zeros((num_verts, 2))
+    edges[:, 0] = lengths * np.cos(abs_angles)
+    edges[:, 1] = lengths * np.sin(abs_angles)
+    
+    vertices[1:] = np.cumsum(edges, axis=0)
+    return vertices[:-1] # 返回封闭多边形的顶点
+
+def intrinsic_morph(verts_a, verts_b, t):
+    """执行内在形状插值"""
+    if len(verts_a) != len(verts_b):
+        raise ValueError("Polygons must have the same number of vertices.")
+        
+    # 1. 计算内在属性
+    len_a, angles_a = compute_intrinsics(verts_a)
+    len_b, angles_b = compute_intrinsics(verts_b)
+
+    # 2. 插值内在属性
+    interp_len = (1 - t) * len_a + t * len_b
+    interp_angles = (1 - t) * angles_a + t * angles_b
+    
+    # 累加得到绝对角度
+    abs_angles = np.cumsum(interp_angles)
+    
+    # 3. 求解约束优化问题
+    cos_a = np.cos(abs_angles)
+    sin_a = np.sin(abs_angles)
+    
+    # 定义 L_ABi 用于归一化 (这里简化处理)
+    lab = np.maximum(np.abs(len_a - len_b), 1e-6)
+
+    # 建立 2x2 线性系统 E*lambda = U
+    E_mat = np.zeros((2, 2))
+    E_mat[0, 0] = np.sum(lab * cos_a * cos_a)
+    E_mat[0, 1] = np.sum(lab * cos_a * sin_a)
+    E_mat[1, 0] = E_mat[0, 1]
+    E_mat[1, 1] = np.sum(lab * sin_a * sin_a)
+    
+    # 计算初始的闭合误差
+    initial_reconstruction = reconstruct_from_intrinsics(interp_len, interp_angles)
+    closure_error = initial_reconstruction[0] - np.roll(initial_reconstruction, 1, axis=0)[0]
+    
+    U_vec = 2 * closure_error # 实际上 U = -2 * C_x, V = -2 * C_y
+    
+    # 求解 lambda
+    try:
+        lambdas = np.linalg.solve(E_mat, U_vec)
+    except np.linalg.LinAlgError:
+        lambdas = np.array([0., 0.]) # 如果矩阵奇异，则不进行调整
+
+    # 4. 计算边长调整量 S_i
+    s = -0.5 * lab * (lambdas[0] * cos_a + lambdas[1] * sin_a)
+    
+    # 5. 更新边长并重建
+    final_len = interp_len + s
+    morphed_verts = reconstruct_from_intrinsics(final_len, interp_angles)
+    
+    # 将形状质心移动到原始质心的插值位置
+    centroid_a = np.mean(verts_a, axis=0)
+    centroid_b = np.mean(verts_b, axis=0)
+    interp_centroid = (1 - t) * centroid_a + t * centroid_b
+    
+    current_centroid = np.mean(morphed_verts, axis=0)
+    morphed_verts += (interp_centroid - current_centroid)
+    
+    return morphed_verts
+
+# --- 示例 ---
+if __name__ == '__main__':
+    # 一个正方形
+    square = np.array([
+        [0, 0], [1, 0], [1, 1], [0, 1]
+    ])
+    
+    # 一个旋转并拉伸过的星形（对应顶点）
+    star = np.array([
+        [2.5, 2.0], [3.0, 3.0], [3.5, 2.0], [2.75, 2.75]
+    ])
+    # 调整星形使其与正方形顶点数相同
+    # 这是一个简化的对应关系，实际应用中对应问题很复杂
+    # 我们这里假设正方形的顶点对应星形的四个外角点
+    star_like = np.array([
+        [2, 2], [3, 1], [4, 2], [3, 3]
+    ])
+
+
+    plt.figure(figsize=(12, 5))
+    
+    # LERP for comparison
+    plt.subplot(1, 2, 1)
+    plt.title("Linear Interpolation (LERP)")
+    plt.plot(square[:, 0], square[:, 1], 'r-o', label='Start')
+    plt.plot(star_like[:, 0], star_like[:, 1], 'b-o', label='End')
+    for t_val in np.linspace(0, 1, 6):
+        morphed = (1 - t_val) * square + t_val * star_like
+        plt.plot(morphed[:, 0], morphed[:, 1], 'g-', alpha=0.5)
+    plt.axis('equal')
+    plt.legend()
+    
+    # Intrinsic Morphing
+    plt.subplot(1, 2, 2)
+    plt.title("Intrinsic Shape Interpolation")
+    plt.plot(square[:, 0], square[:, 1], 'r-o', label='Start')
+    plt.plot(star_like[:, 0], star_like[:, 1], 'b-o', label='End')
+    for t_val in np.linspace(0, 1, 6):
+        morphed = intrinsic_morph(square, star_like, t_val)
+        plt.plot(morphed[:, 0], morphed[:, 1], 'g-', alpha=0.5)
+    plt.axis('equal')
+    plt.legend()
+    
+    plt.show()
+</code></pre>
+                </div>
+                <hr>
+                <h3 id="%E6%80%BB%E7%BB%93%E4%B8%8E%E5%B1%95%E6%9C%9B"><strong>总结与展望</strong></h3>
+                <p>今天我们探讨了两种截然不同但目标一致的“Morphing”技术：</p>
+                <ol>
+                <li><strong>基于StyleGAN的肖像Morphing</strong>：利用深度生成模型学习到的高质量、解耦的隐空间，通过简单的线性插值实现照片级逼真的人脸渐变。这是数据驱动方法的典范，其效果的上限取决于模型的表达能力和训练数据的质量。</li>
+                <li><strong>二维多边形形状渐变</strong>：采用经典的计算机图形学方法，通过对形状的内在几何属性（边长和角度）进行插值，并结合约束优化来保证几何的有效性。这是一种基于模型和数学推理的方法，结果精确、可控且具有物理解释性。</li>
+                </ol>
+                <p>从StyleGAN到扩散模型，再到最新的视频生成大模型，我们看到AI在模拟和创造视觉内容方面的能力正以前所未有的速度发展。而经典的形状渐变算法，则为我们提供了理解和控制几何形变的基础理论。</p>
+                <p>未来的研究方向可能包括：</p>
+                <ul>
+                <li><strong>3D Morphing</strong>：将这些思想扩展到三维模型，如NeRF（神经辐射场）的插值，或者3D网格的内在几何渐变。</li>
+                <li><strong>可控性与语义编辑</strong>：结合两者的优点，例如，使用AI理解高级指令（“让他笑起来”），然后用几何方法精确地执行形变。</li>
+                <li><strong>物理真实感</strong>：在渐变过程中引入物理仿真，确保形变符合材料力学和动力学规律。</li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    <footer>
+        <p>© 2025 我的博客</p>
+    </footer>
+    <script src="../script.js"></script>
+</body>
+</html>
