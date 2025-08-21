@@ -70,6 +70,13 @@ var postsData = [
       "abstract": "ads lecture note (update) 03:倒排文件索引(Inverted File Index)"
     },
     {
+      "title": "ads课程笔记04:左式堆(Leftist Heaps) 和 斜堆(Skew Heaps)",
+      "date": "2025-08-21",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-21-ads04.html",
+      "abstract": "ads lecture note (update) 04:左式堆(Leftist Heaps) 和 斜堆(Skew Heaps)"
+    },
+    {
       "title": "CUDA学习笔记0:Introduction",
       "date": "2025-08-20",
       "category": "学习笔记",

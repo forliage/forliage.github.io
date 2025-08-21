@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>ads04: 左式堆（Leftist Heaps） 和 斜堆（Skew Heaps）</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="ads04-%E5%B7%A6%E5%BC%8F%E5%A0%86leftist-heaps-%E5%92%8C-%E6%96%9C%E5%A0%86skew-heaps">ads04: 左式堆（Leftist Heaps） 和 斜堆（Skew Heaps）</h1>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%B7%A6%E5%BC%8F%E5%A0%86-leftist-heaps">第一部分：左式堆 (Leftist Heaps)</h3>
+                <h4 id="11-%E6%A0%B8%E5%BF%83%E7%9B%AE%E6%A0%87%E4%B8%8E%E6%80%9D%E6%83%B3">1.1 核心目标与思想</h4>
+                <p>我们的核心目标非常明确：</p>
+                <p><strong>Target: 将合并操作的速度提升到 O(log N)。</strong></p>
+                <p>为了实现这个目标，我们必须对传统堆的结构进行一些改造。我们知道，一个标准的堆需要满足两个性质：</p>
+                <ol>
+                <li><strong>结构性 (Structure Property):</strong> 它必须是一棵完全二叉树。</li>
+                <li><strong>有序性 (Order Property):</strong> 父节点的值必须小于（或大于）其所有子节点的值（以小顶堆为例）。</li>
+                </ol>
+                <p>完全二叉树的结构保证了树的高度为 O(log N)，从而保证了 <code>insert</code> 和 <code>deleteMin</code> 的效率。但正是这个严格的结构限制，使得高效合并变得困难。</p>
+                <p>左式堆的思想就是：<strong>放宽对结构性的要求，但引入一个新的规则来保证效率。</strong></p>
+                <ul>
+                <li><strong>有序性 (Order Property):</strong> 保持不变，父节点依然小于子节点。</li>
+                <li><strong>结构性 (Structure Property):</strong> 不再是完全二叉树，只是一棵普通的二叉树，但是它必须是<strong>不平衡</strong>的，而且是<strong>有目的地不平衡</strong>。</li>
+                </ul>
+                <h4 id="12-%E9%97%AE%E9%A2%98%E5%AF%BC%E5%85%A5%E4%BC%A0%E7%BB%9F%E5%A0%86%E5%90%88%E5%B9%B6%E7%9A%84%E6%95%88%E7%8E%87">1.2 问题导入：传统堆合并的效率</h4>
+                <p>在深入左式堆之前，让我们先来回答一个问题：</p>
+                <p><strong>【讨论 】: 如果我们坚持使用原始的（基于数组的）二叉堆结构，合并两个堆最快能做到多快？</strong></p>
+                <p><strong>答案：</strong> 正如我们刚才提到的，最快可以做到 <strong>O(N)</strong>，其中 N 是两个堆的节点总数。具体方法是：</p>
+                <ol>
+                <li>将两个堆的底层数组简单地拼接在一起。</li>
+                <li>对这个新的、无序的数组执行一次 <code>buildHeap</code> 操作。
+                <code>buildHeap</code> 算法通过自下而上地对每个非叶子节点执行 &quot;下沉&quot;（percolate down）操作，可以在线性时间 O(N) 内构建一个合法的堆。</li>
+                </ol>
+                <p>虽然 O(N) 是线性的，但我们的目标是 O(log N)，这是一个巨大的飞跃。现在，让我们看看左式堆是如何通过引入一个巧妙的概念来实现这一点的。</p>
+                <h4 id="13-%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5%E9%9B%B6%E8%B7%AF%E5%BE%84%E9%95%BF-null-path-length-npl">1.3 关键概念：零路径长 (Null Path Length, Npl)</h4>
+                <p>为了控制树的“不平衡”，左式堆引入了一个核心概念——<strong>零路径长</strong>。</p>
+                <p><strong>【定义】零路径长 (Null Path Length, Npl)</strong></p>
+                <blockquote>
+                <p>对于任意节点 $X$，它的零路径长 $\text{Npl}(X)$ 指的是从 $X$ 出发，到达一个<strong>缺少某个儿子</strong>（即只有一个儿子或没有儿子）的节点所经过的最短路径的长度。</p>
+                <p>为了方便计算，我们定义 $\text{Npl}(\text{NULL}) = -1$。</p>
+                </blockquote>
+                <p>一个节点的两个子节点都不为 NULL，那么这个节点就不是我们寻找的终点。如果一个节点是叶子节点（左右子都为 NULL），或者它只有一个子节点，那么从它自己到它自己的路径长度是 0，它就满足“缺少某个儿子”的条件。</p>
+                <p>根据这个定义，我们可以推导出 <code>Npl</code> 的计算公式：</p>
+                <p><strong>【注意】计算 Npl(X):</strong>
+                <code>Npl(X) = 1 + min( Npl(X-&gt;left), Npl(X-&gt;right) )</code></p>
+                <p>如果一个节点 X 是叶子节点，它的左右子节点都是 NULL。那么 <code>Npl(X) = 1 + min(Npl(NULL), Npl(NULL)) = 1 + min(-1, -1) = 0</code>。
+                如果一个节点 X 只有一个左孩子 L，右孩子为 NULL。那么 <code>Npl(X) = 1 + min(Npl(L), Npl(NULL)) = 1 + min(Npl(L), -1) = 0</code>。</p>
+                <p>这个 <code>Npl</code> 值衡量了距离“不完整”节点有多远。<code>Npl</code> 越大，说明从该节点向下，树的结构在“短期内”越完整。</p>
+                <h4 id="14-%E5%B7%A6%E5%BC%8F%E5%A0%86%E6%80%A7%E8%B4%A8-leftist-heap-property">1.4 左式堆性质 (Leftist Heap Property)</h4>
+                <p>有了 Npl 的概念，我们就可以定义左式堆的核心性质了。</p>
+                <p><strong>【定义】左式堆性质 (Leftist Heap Property)</strong></p>
+                <blockquote>
+                <p>对于堆中的<strong>每一个</strong>节点 X，其<strong>左孩子</strong>的零路径长必须<strong>大于或等于</strong>其<strong>右孩子</strong>的零路径长。
+                <code>Npl(X-&gt;left) &gt;= Npl(X-&gt;right)</code></p>
+                </blockquote>
+                <p>这个性质意味着什么？它强制要求树向左边“倾斜”和“加深”。任何节点的最短路径（即通向 NULL 的路径）必须出现在右子树中。因此，从根节点出发，一直沿着<strong>右路径</strong>(right path)走，是我们能最快到达一个 NULL 节点的方式。</p>
+                <p>让我们来看两个例子：</p>
+                <div class="mermaid">
+                graph TD
+                    subgraph "合法的左式堆 (Valid Leftist Heap)"
+                        A(1) --> B(1);
+                        A --> C(0);
+                        B --> D(0);
+                        B --> E(0);
+                        D --> F(0);
+
+                        style A fill:#f9f,stroke:#333,stroke-width:2px
+                        style B fill:#ccf,stroke:#333,stroke-width:2px
+                        style C fill:#ccf,stroke:#333,stroke-width:2px
+                        style D fill:#ccf,stroke:#333,stroke-width:2px
+                        style E fill:#ccf,stroke:#333,stroke-width:2px
+                        style F fill:#ccf,stroke:#333,stroke-width:2px
+                        
+                        %% Node labels are Npl values
+                    end
+
+                    subgraph "非法的左式堆 (Invalid Leftist Heap)"
+                        A2(1) --> B2(0);
+                        A2 --> C2(1);
+                        C2 --> D2(0);
+                        C2 --> E2(0);
+                        D2 --> F2(0);
+
+                        style A2 fill:#f9f,stroke:#333,stroke-width:2px
+                        style B2 fill:#ccf,stroke:#333,stroke-width:2px
+                        style C2 fill:#f99,stroke:#333,stroke-width:2px
+                        style D2 fill:#ccf,stroke:#333,stroke-width:2px
+                        style E2 fill:#ccf,stroke:#333,stroke-width:2px
+                        style F2 fill:#ccf,stroke:#333,stroke-width:2px
+                    end
+                </div>
+                <ul>
+                <li>
+                <p><strong>左图 (合法)</strong>:</p>
+                <ul>
+                <li>根节点(Npl=1): 左孩子(Npl=1) &gt;= 右孩子(Npl=0)。合法。</li>
+                <li>所有其他节点的子节点都是叶子(Npl=0)，满足 0 &gt;= 0 或 0 &gt;= -1。合法。</li>
+                <li>这棵树明显是向左边倾斜的，<strong>树被偏置成朝左边更深</strong>。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>右图 (非法)</strong>:</p>
+                <ul>
+                <li>根节点(Npl=1): 左孩子(Npl=0) &lt; 右孩子(Npl=1)。<strong>不合法</strong>。这违反了左式堆的性质。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="15-%E5%8F%B3%E8%B7%AF%E5%BE%84%E7%9A%84%E9%95%BF%E5%BA%A6%E5%88%86%E6%9E%90">1.5 右路径的长度分析</h4>
+                <p>左式堆的核心优势，就在于它保证了<strong>右路径非常短</strong>。有多短呢？下面这个定理给出了答案。</p>
+                <p><strong>【定理】一棵右路径上有 $r$ 个节点的左式堆，至少拥有 $2^r - 1$ 个节点。</strong></p>
+                <p><strong>证明 (数学归纳法):</strong></p>
+                <ul>
+                <li>
+                <p><strong>基础情况:</strong> 当 $r = 1$ 时，右路径上只有1个节点（根节点）。这棵树至少要有 2¹ - 1 = 1 个节点。显然成立。</p>
+                </li>
+                <li>
+                <p><strong>归纳假设:</strong> 假设对于所有右路径节点数小于 $r$ 的左式堆，定理成立。即，一棵右路径上有 $k &lt; r$ 个节点的左式堆，至少有 $2^k - 1$ 个节点。</p>
+                </li>
+                <li>
+                <p><strong>归纳证明:</strong> 考虑一棵右路径上有 $r$ 个节点的左式堆 $T$。设根节点为 $X$。它的右子树 $T_R$ 的右路径上有 $r-1$ 个节点。根据归纳假设，$T_R$ 至少有 $2^{r-1} - 1$ 个节点。
+                根据左式堆性质，<code>Npl(X-&gt;left) &gt;= Npl(X-&gt;right)</code>。
+                我们知道，一个节点的 Npl 值等于其右路径的长度。所以，根的右孩子的 Npl，即 <code>Npl(T_R)</code>，就是 $T_R$ 的右路径长度，即 $r-1$。
+                因此，<code>Npl(T_L) &gt;= r-1</code>。这意味着 $T_L$ 的右路径长度至少是 $r-1$。再次使用归纳假设，$T_L$ 至少拥有 $2^{r-1} - 1$ 个节点。</p>
+                <p>所以，整棵树 T 的总节点数 <code>N &gt;= (T_L 的节点数) + (T_R 的节点数) + 1</code>
+                $N \geq (2^{r-1} - 1) + (2^{r-1} - 1) + 1$
+                $N \geq 2 * 2^{r-1} - 1$
+                $N \geq 2^r - 1$</p>
+                <p>证明完毕。</p>
+                </li>
+                </ul>
+                <p>这个定理非常强大。它反过来告诉我们什么呢？</p>
+                <p><strong>【讨论 】: 对于一个有 $N$ 个节点的左式堆，它的右路径有多长？这个结论对我们意味着什么？</strong></p>
+                <p><strong>答案：</strong>
+                根据定理，$N \geq 2^r - 1$。
+                两边加 1，$N + 1 &gt;= 2^r$。
+                两边取对数，$\log_2 (N+1) \geq r$。
+                所以，<strong>右路径的长度 $r \leq \log_2 (N+1)$</strong>，即 <strong>$r = O(\log N)$</strong>。</p>
+                <p><strong>这个结论是左式堆所有高效操作的理论基石！</strong> 它告诉我们，尽管左式堆整体可能非常不平衡，甚至深度可能达到 O(N)，但它最关键的操作路径——<strong>右路径——的长度被严格限制在 $O(\log N)$</strong>。我们的所有核心操作，尤其是合并，都将沿着这条短路径进行。</p>
+                <h4 id="16-%E5%B7%A6%E5%BC%8F%E5%A0%86%E7%9A%84%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C%E5%90%88%E5%B9%B6-merge">1.6 左式堆的核心操作：合并 (Merge)</h4>
+                <p>现在，我们来看看万众期待的合并操作。这也是 <code>Insert</code> 和 <code>DeleteMin</code> 等操作的基础。</p>
+                <p><strong>核心思想：</strong> 递归地合并两棵树的<strong>右路径</strong>，然后通过<strong>交换子节点</strong>来维护左式堆的性质。</p>
+                <p>假设我们要合并两个左式堆 H₁ 和 H₂。</p>
+                <p><strong>步骤分解 (以 H₁ 的根小于 H₂ 的根为例):</strong></p>
+                <ol>
+                <li><strong>Step 1: 递归合并。</strong> 将 H₁ 的<strong>右子树</strong>与整个 H₂ 进行合并。由于 H₁ 的根是最小的，它将成为新堆的根。</li>
+                <li><strong>Step 2: 连接。</strong> 将 Step 1 合并得到的新树，作为 H₁ 新的<strong>右子树</strong>。</li>
+                <li><strong>Step 3: 维护性质。</strong> 检查 H₁ 的左右子树的 Npl 值。如果左子树的 Npl 小于右子树的 Npl，则违反了左式堆性质。此时，<strong>交换 H₁ 的左右子树</strong>。</li>
+                <li><strong>更新 Npl。</strong> 更新 H₁ 根节点的 Npl 值。新的 Npl 是其新右子树的 Npl + 1。</li>
+                </ol>
+                <p><strong>图解合并过程：</strong></p>
+                <p>假设我们要合并下面两个堆 H₁ 和 H₂ (节点中的数字是元素值，红色代表在合并过程中被修改的节点)。</p>
+                <div class="mermaid">
+                graph TD
+                    subgraph H1
+                        A1(3) --> B1(10);
+                        A1 --> C1(8);
+                        B1 --> D1(21);
+                        B1 --> E1(14);
+                        C1 --> F1(17);
+                        E1 --> G1(23);
+                        F1 --> H1_node(26);
+                    end
+                    subgraph H2
+                        A2(6) --> B2(12);
+                        A2 --> C2(7);
+                        B2 --> D2(18);
+                        B2 --> E2(24);
+                        C2 --> F2(37);
+                        E2 --> G2(33);
+                        F2 --> H2_node(18);
+                    end
+                </div>
+                <p><strong>Merge(H₁, H₂):</strong></p>
+                <ol>
+                <li>H₁ 的根(3) &lt; H₂ 的根(6)。所以 3 是最终的根。</li>
+                <li>递归调用 <code>Merge(H₁-&gt;right, H₂)</code>，也就是 <code>Merge(树根为8的子树, H₂)</code>。</li>
+                <li>在 <code>Merge(树根为8, 树根为6)</code> 中，6 &lt; 8，所以 6 是这个子合并的根。</li>
+                <li>递归调用 <code>Merge(树根为8, H₂-&gt;right)</code>，也就是 <code>Merge(树根为8, 树根为7)</code>。</li>
+                <li>... 这个过程会沿着两条原始的右路径 (3-8 和 6-7) 进行下去，直到其中一个为空。</li>
+                </ol>
+                <p><strong>最终结果的可视化过程：</strong></p>
+                <ul>
+                <li>
+                <p><strong>Step 1: Merge(H₁-&gt;Right, H₂)</strong></p>
+                <ul>
+                <li>这会递归地沿着 H₁ 和 H₂ 的右路径（3-8-... 和 6-7-...）进行合并。</li>
+                <li>合并后的结果是，原来 H₁ 和 H₂ 的右路径上的节点，以及它们的左子树，会被重新组织成一棵新的、满足堆有序性的树。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Step 2: Attach(..., H₁-&gt;Right)</strong></p>
+                <ul>
+                <li>将上面合并的结果挂在 H₁ 的根节点(3)下面，作为新的右子树。</li>
+                </ul>
+                <div class="mermaid">
+                graph TD
+                N3(3) --> N10(10);
+                N3 --> N6(6);
+                N10 --> N21(21);
+                N10 --> N23(23);
+
+                N6 --> N12(12);
+                N6 --> N7(7);
+                N12 --> N18a(18);
+                N12 --> N24(24);
+                N24 --> N33(33);
+                N7 --> N8(8);
+                N7 --> N37(37);
+                N8 --> N17(17);
+                N17 --> N26(26);
+                N37 --> N18b(18);
+
+                style N6 fill:#f99,stroke:#333,stroke-width:2px
+                style N7 fill:#f99,stroke:#333,stroke-width:2px
+                style N8 fill:#f99,stroke:#333,stroke-width:2px
+                style N17 fill:#f99,stroke:#333,stroke-width:2px
+                style N26 fill:#f99,stroke:#333,stroke-width:2px
+                </div>
+                </li>
+                <li>
+                <p><strong>Step 3: Swap if necessary</strong></p>
+                <ul>
+                <li>在合并完成后，从下往上回溯。在每个节点，检查 <code>Npl(left) &lt; Npl(right)</code> 是否成立。如果成立，就交换左右子树。</li>
+                <li>例如，在上面的图中，节点3的左子树(根为10)的 Npl 肯定大于新形成的右子树(根为6)的 Npl，所以不需要交换。但在子合并的过程中，可能会发生交换。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="17-%E5%AE%9E%E7%8E%B0%E4%BC%AA%E4%BB%A3%E7%A0%81%E4%B8%8E-c-%E4%BB%A3%E7%A0%81">1.7 实现：伪代码与 C++ 代码</h4>
+                <p>首先是数据结构定义：</p>
+                <div class="code-container">
+                <pre><code class="language-cpp">// C++
+struct TreeNode {
+    int element;
+    TreeNode* left;
+    TreeNode* right;
+    int npl; // Null Path Length
+
+    TreeNode(int val) : element(val), left(nullptr), right(nullptr), npl(0) {}
+};
+</code></pre>
+                </div>
+                <p><strong>Merge 伪代码与 C++ 实现:</strong></p>
+                <div class="code-container">
+                <pre><code class="language-cpp">// 伪代码
+function Merge(H1, H2):
+    if H1 is null: return H2
+    if H2 is null: return H1
+
+    if H1.element < H2.element:
+        return Merge1(H1, H2)
+    else:
+        return Merge1(H2, H1)
+
+function Merge1(H1, H2): // 假设 H1.element < H2.element
+    // 如果 H1 没有左孩子，这是个优化。
+    // 因为 H1 是单节点，它的右孩子也必然为 NULL。
+    // 直接把 H2 挂到左边即可（因为右边必须最短）。
+    if H1.left is null:
+        H1.left = H2
+    else:
+        // 核心递归步骤
+        H1.right = Merge(H1.right, H2)
+
+        // 维护左式堆性质
+        if H1.left.npl < H1.right.npl:
+            swap(H1.left, H1.right)
+
+        // 更新 Npl
+        H1.npl = H1.right.npl + 1
+    
+    return H1
+</code></pre>
+                </div>
+                <div class="code-container">
+                <pre><code class="language-cpp">// C++ 实现
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+
+struct TreeNode {
+    int element;
+    TreeNode* left;
+    TreeNode* right;
+    int npl;
+
+    TreeNode(int val) : element(val), left(nullptr), right(nullptr), npl(0) {}
+};
+
+// 安全获取 Npl 的辅助函数
+int getNpl(TreeNode* node) {
+    return node == nullptr ? -1 : node-&gt;npl;
+}
+
+// 合并主函数（内部调用）
+TreeNode* merge1(TreeNode* h1, TreeNode* h2) {
+    if (h1-&gt;left == nullptr) { // 特殊情况: h1 只有根节点
+        h1-&gt;left = h2;
+    } else {
+        // 递归地合并 h1 的右子树和 h2
+        h1-&gt;right = merge(h1-&gt;right, h2);
+
+        // 检查并维护左式堆性质
+        if (getNpl(h1-&gt;left) < getNpl(h1-&gt;right)) {
+            std::swap(h1-&gt;left, h1-&gt;right);
+        }
+
+        // 更新 h1 的 npl
+        h1-&gt;npl = getNpl(h1-&gt;right) + 1;
+    }
+    return h1;
+}
+
+// 对外暴露的合并接口
+TreeNode* merge(TreeNode* h1, TreeNode* h2) {
+    if (h1 == nullptr) return h2;
+    if (h2 == nullptr) return h1;
+
+    if (h1-&gt;element < h2-&gt;element) {
+        return merge1(h1, h2);
+    } else {
+        return merge1(h2, h1);
+    }
+}
+</code></pre>
+                </div>
+                <p><strong>思考: 如果 Npl 不更新会怎样？</strong>
+                如果我们忘记更新 Npl，那么在后续的合并操作中，用于维护左式堆性质的 <code>if (Npl(left) &lt; Npl(right))</code> 判断就会基于过时的、错误的信息。这将导致无法正确地维护左式堆性质，树的右路径长度将不再有 $O(\log N)$ 的保证，最坏情况下可能退化成 $O(N)$，从而失去所有性能优势。</p>
+                <h4 id="18-%E5%85%B6%E4%BB%96%E6%93%8D%E4%BD%9C">1.8 其他操作</h4>
+                <p>有了高效的 <code>merge</code>，其他操作就变得非常简单：</p>
+                <ul>
+                <li><strong>Insert (插入):</strong> 插入一个新元素 <code>x</code>，等价于将原始堆与一个只包含 <code>x</code> 的单节点堆进行合并。
+                <code>heap = merge(heap, new TreeNode(x));</code></li>
+                <li><strong>DeleteMin (删除最小):</strong> 最小元素就是根节点。删除它，然后将其左右子树合并即可。
+                <code>TreeNode* minNode = heap;</code>
+                <code>heap = merge(heap-&gt;left, heap-&gt;right);</code>
+                <code>delete minNode;</code></li>
+                </ul>
+                <p>由于这些操作都基于 <code>merge</code>，而 <code>merge</code> 的时间复杂度由右路径长度决定，是 O(log N)，所以 <strong><code>Insert</code> 和 <code>DeleteMin</code> 的时间复杂度也都是 $O(\log N)$</strong>。</p>
+                <hr>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E6%96%9C%E5%A0%86-skew-heaps">第二部分：斜堆 (Skew Heaps)</h3>
+                <p>左式堆非常高效，但它有一个小小的“缺点”：需要额外存储和维护 <code>npl</code> 这个值。这不仅增加了空间开销，也让代码逻辑稍微复杂了一点。</p>
+                <p>有没有一种“懒人版”的左式堆，不需要 <code>npl</code> 也能达到类似的效果呢？答案就是<strong>斜堆</strong>。</p>
+                <h4 id="21-%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3%E6%97%A0%E6%9D%A1%E4%BB%B6%E7%9A%84%E4%BA%A4%E6%8D%A2">2.1 核心思想：无条件的交换</h4>
+                <p>斜堆是左式堆的一种自适应（self-adjusting）变体。它的核心思想非常激进和简单：</p>
+                <p><strong>Merge 法则:</strong> 在递归地合并右路径之后，<strong>总是 (always) 交换</strong>根节点的左右子节点。</p>
+                <p>就是这样！没有 <code>npl</code>，没有判断 <code>if (Npl(left) &lt; Npl(right))</code>，只有简单粗暴的“<strong>合并右路，然后交换</strong>”。</p>
+                <p>这个无条件的交换操作，就是“斜堆”名字的由来。它不断地“扭曲”这棵树，将原本在右边的长路径“扭”到左边去，从而在长期看来，摊平了操作成本。</p>
+                <p><strong>一个小的例外:</strong>
+                在某些描述中，会提到“最深路径上的最后一个节点不交换”。这其实不是一个特殊的规则，而是递归算法自然结束的结果。当递归到最底层进行合并时，其中一个子树是 NULL，合并后挂上去，再交换，效果上和直接挂上去是一样的。所以我们只需要记住核心规则：<strong>合并右路，然后交换</strong>。</p>
+                <h4 id="22-%E6%80%A7%E8%83%BD%E7%9B%AE%E6%A0%87%E6%91%8A%E9%94%80%E5%88%86%E6%9E%90-amortized-analysis">2.2 性能目标：摊销分析 (Amortized Analysis)</h4>
+                <p>斜堆放弃了左式堆那种严格的、每次操作都保证的 O(log N) 性能。取而代之的是一个<strong>摊销 (Amortized)</strong> 的 $O(\log N)$ 复杂度。</p>
+                <p><strong>Target: 任意 $M$ 次连续操作的总时间最多为 $O(M \log N)$。</strong></p>
+                <p>这意味着，虽然单次操作可能很慢（最坏 $O(N)$），但这种情况很少见。一次昂贵的操作会“整理”树的结构，为后续的廉价操作“付费”，从而使得平均下来每次操作的成本是 $O(\log N)$。</p>
+                <h4 id="23-%E6%96%9C%E5%A0%86%E7%9A%84%E5%90%88%E5%B9%B6%E6%93%8D%E4%BD%9C">2.3 斜堆的合并操作</h4>
+                <p>让我们用图来展示一下斜堆的合并。还是 $H_1$ 和 $H_2$。</p>
+                <div class="mermaid">
+                graph TD
+                    subgraph H1
+                        A1(3) --> B1(10);
+                        A1 --> C1(8);
+                        B1 --> D1(21);
+                        B1 --> E1(14);
+                        C1 --> F1(17);
+                        E1 --> G1(23);
+                        F1 --> H1_node(26);
+                    end
+                    subgraph H2
+                        A2(6) --> B2(12);
+                        A2 --> C2(7);
+                        B2 --> D2(18);
+                        B2 --> E2(24);
+                        C2 --> F2(37);
+                        E2 --> G2(33);
+                        %% A slight change for clarity
+                        F2 --> H2_node(35);
+                    end
+                </div>
+                <p><strong>Merge(H₁, H₂):</strong></p>
+                <ol>
+                <li>H₁ 的根(3) &lt; H₂ 的根(6)。所以 3 是最终的根。</li>
+                <li>递归调用 <code>Merge(H₁-&gt;right, H₂)</code>，即 <code>Merge(树根为8, H₂)</code>。</li>
+                <li><strong>注意：</strong> 在递归返回后，将 H₁ 的新右子树（即第2步的结果）与它的旧左子树（根为10）<strong>进行交换</strong>。</li>
+                </ol>
+                <p>这个过程会一路向下，每次递归返回时都执行一次交换。</p>
+                <p>合并 H₁ 的右子树(8)和 H₂ 的过程。合并 8 和 6，6 成为根，递归合并 8 和 7。合并 8 和 7，7 成为根，递归合并 8 和 37... 在每次递归返回时，比如 7 这个节点，它的左右孩子（合并后的 8 和 null）会被交换。然后 6 这个节点，它的左右孩子（12 和合并后的 7）也会被交换。这个交换链会一直传递到顶层。</p>
+                <h4 id="24-%E5%AE%9E%E7%8E%B0%E4%BC%AA%E4%BB%A3%E7%A0%81%E4%B8%8E-c">2.4 实现：伪代码与 C++</h4>
+                <p>斜堆的实现比左式堆更简洁。</p>
+                <div class="code-container">
+                <pre><code class="language-cpp">// C++ TreeNode 结构 (无需 npl)
+struct SkewNode {
+    int element;
+    SkewNode* left;
+    SkewNode* right;
+
+    SkewNode(int val) : element(val), left(nullptr), right(nullptr) {}
+};
+
+// C++ 实现
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+
+SkewNode* merge(SkewNode* h1, SkewNode* h2) {
+    if (h1 == nullptr) return h2;
+    if (h2 == nullptr) return h1;
+
+    // 保证 h1 的根是较小值
+    if (h1-&gt;element > h2-&gt;element) {
+        std::swap(h1, h2);
+    }
+
+    // 递归合并 h1 的右子树和 h2
+    h1-&gt;right = merge(h1-&gt;right, h2);
+
+    // 无条件交换 h1 的左右子节点
+    std::swap(h1-&gt;left, h1-&gt;right);
+
+    return h1;
+}
+
+// Insert 和 DeleteMin 的实现与左式堆完全相同，只是调用的是斜堆的 merge
+</code></pre>
+                </div>
+                <h4 id="25-%E6%91%8A%E9%94%80%E5%88%86%E6%9E%90-amortized-analysis">2.5 摊销分析 (Amortized Analysis)</h4>
+                <p>现在到了最硬核的部分：如何证明斜堆的合并操作具有摊销 $O(\log N)$ 的复杂度？我们将使用<strong>势能法 (Potential Method)</strong>。</p>
+                <ol>
+                <li>
+                <p><strong>定义“势”函数 (Potential Function):</strong>
+                我们需要一个函数 $\Phi(D)$，它能衡量堆 $D$ 的“结构混乱程度”。当 $\Phi$ 值高时，表示结构较差，未来操作可能很快；当 $\Phi$ 值低时，表示结构较好，未来操作可能较慢。</p>
+                </li>
+                <li>
+                <p><strong>定义“重节点”与“轻节点” (Heavy/Light Nodes):</strong>
+                <strong>【定义】</strong> 对于一个节点 $p$，<code>size(p)</code> 表示以 $p$ 为根的子树中的节点总数（包括$p$）。
+                如果 <code>size(p-&gt;right) &gt; size(p-&gt;left)</code>，我们称节点 $p$ 是<strong>重节点 (heavy node)</strong>。
+                否则，称 $p$ 是<strong>轻节点 (light node)</strong>。</p>
+                <blockquote>
+                <p><em>(注意：这个定义与某些教科书可能略有不同，比如用 <code>size(p-&gt;right) &gt; 1/2 * size(p)</code>，但核心思想一致)</em></p>
+                </blockquote>
+                </li>
+                <li>
+                <p><strong>势函数:</strong>
+                <strong>$\Phi(D)$ = 堆 $D$ 中所有重节点的数量。</strong></p>
+                </li>
+                <li>
+                <p><strong>摊销成本公式:</strong>
+                <strong>T_amortized = T_actual + $\Delta \Phi$ = T_actual + ($\Phi$_final - $\Phi$_initial)</strong>
+                其中 <code>T_actual</code> 是实际运行时间。我们的目标是证明 <code>T_amortized</code> 是 $O(\log N)$。</p>
+                </li>
+                </ol>
+                <p><strong>证明思路:</strong>
+                合并操作的实际成本 <code>T_actual</code> 与两个堆右路径的长度成正比。我们将证明，在合并过程中，如果右路径很长，那么这条路径上一定有很多<strong>重节点</strong>。而斜堆的“交换”操作，会<strong>将这些重节点变成轻节点</strong>，从而导致势函数 $\Phi$ 大幅下降。这个势能的下降，就“支付”了实际操作的高昂成本。</p>
+                <p><strong>详细分析 <code>merge(H1, H2)</code> (假设 H1 的根更小):</strong></p>
+                <ul>
+                <li>
+                <p><strong>实际成本 <code>T_actual</code>:</strong> 合并操作访问的节点都在 H1 和 H2 的初始右路径上。设 H1 的右路径长度为 <code>r1</code>，H2 的为 <code>r2</code>。<code>T_actual</code> 正比于 <code>r1 + r2</code>。</p>
+                </li>
+                <li>
+                <p><strong>势能变化 $\Delta \Phi$:</strong></p>
+                <ul>
+                <li>在合并路径上的节点，它们的重/轻状态可能会改变。</li>
+                <li>考虑 H1 右路径上的一个<strong>重节点</strong> $p$。这意味着 <code>size(p-&gt;right) &gt; size(p-&gt;left)</code>。在合并过程中，$p$ 的右子树会被一个新的、合并后的子树替换，然后 $p$ 的左右子树会<strong>交换</strong>。新的左子树是原来大的右子树，新的右子树是原来小的左子树。因此，这个重节点 $p$ <strong>必然会变成一个轻节点</strong>。</li>
+                <li>考虑 H1 右路径上的一个<strong>轻节点</strong> $q$。它在交换后，可能会变成重节点，也可能仍然是轻节点。</li>
+                <li>设 H1 和 H2 的右路径上，共有 $h$ 个重节点和 $l$ 个轻节点。<code>T_actual ≈ h + l</code>。</li>
+                <li>在操作后，这 $h$ 个重节点全部变成了轻节点，导致势函数至少减少 $h$。</li>
+                <li>这 $l$ 个轻节点中，最多有 $l$ 个可能会变成重节点，导致势函数最多增加 $l$。</li>
+                <li>所以，势能变化 $\Delta \Phi \leq l - h$。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>计算摊销成本:</strong>
+                <code>T_amortized = T_actual + ΔΦ &lt;= (h + l) + (l - h) = 2l</code></p>
+                <p>摊销成本只与右路径上的<strong>轻节点</strong>数量有关！</p>
+                </li>
+                <li>
+                <p><strong>最后一步：证明轻节点路径的长度为 O(log N)</strong>
+                如果从一个节点 $p$ 出发，沿着任意路径向下走，路径上连续有 $k$ 个轻节点。设路径为 $p_1, p_2, ..., p_k$。
+                因为 $p_i$ 是轻节点，所以 <code>size(p_i-&gt;right) &lt;= size(p_i-&gt;left)</code>。
+                那么 <code>size(p_{i-1}) = size(p_i) + size(p_{i-1}-&gt;left) + 1</code>。由于 $p_{i-1}$ 是轻节点，<code>size(p_{i-1}-&gt;right) &lt;= size(p_{i-1}-&gt;left)</code>，而 $p_i$ 就在右子树中，所以 <code>size(p_i) &lt;= size(p_{i-1}-&gt;left)</code>。
+                因此，<code>size(p_{i-1}) &gt;= 2 * size(p_i) + 1</code>。
+                这是一个指数增长关系！从根节点到任意节点的路径上，轻节点的数量不可能是无限的。具体来说，路径上轻节点的数量 $l$ 必须满足 $N \geq 2^l$，即 <strong>$l \leq  \log N$</strong>。</p>
+                </li>
+                <li>
+                <p><strong>结论:</strong>
+                <code>T_amortized = 2l = O(log N)</code>。</p>
+                <p>证明完毕！斜堆的合并操作具有摊销 $O(\log N)$ 的复杂度。</p>
+                </li>
+                </ul>
+                <h4 id="26-%E5%B7%A6%E5%BC%8F%E5%A0%86-vs-%E6%96%9C%E5%A0%86">2.6 左式堆 vs. 斜堆</h4>
+                <table>
+                <thead>
+                <tr>
+                <th style="text-align:left">特性</th>
+                <th style="text-align:left">左式堆 (Leftist Heap)</th>
+                <th style="text-align:left">斜堆 (Skew Heap)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                <td style="text-align:left"><strong>核心思想</strong></td>
+                <td style="text-align:left">维护 Npl，强制右路径最短</td>
+                <td style="text-align:left">无条件交换左右子节点</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>空间开销</strong></td>
+                <td style="text-align:left">每个节点需额外存储 Npl</td>
+                <td style="text-align:left">无额外空间开销</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>性能保证</strong></td>
+                <td style="text-align:left"><strong>最坏情况 (Worst-Case)</strong> $O(\log N)$</td>
+                <td style="text-align:left"><strong>摊销 (Amortized)</strong> $O(\log N)$</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>实现复杂度</strong></td>
+                <td style="text-align:left">稍高，需要计算和更新 Npl</td>
+                <td style="text-align:left">非常低，代码简洁</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>适用场景</strong></td>
+                <td style="text-align:left">需要严格实时性保证的系统</td>
+                <td style="text-align:left">对单次操作性能不敏感，但总体吞吐量要求高的场景</td>
+                </tr>
+                </tbody>
+                </table>
+                <p><strong>补充说明:</strong></p>
+                <blockquote>
+                <ul>
+                <li><strong>空间优势:</strong> 斜堆不需要额外的空间来维护路径长度，也不需要额外的比较来决定是否交换。这使得它在实践中非常轻量和快速。</li>
+                <li><strong>开放问题:</strong> 精确计算左式堆和斜堆在随机数据下的<strong>期望右路径长度</strong>仍然是一个开放的理论问题。</li>
+                </ul>
+                </blockquote>
+                <hr>
+                <h3 id="%E6%80%BB%E7%BB%93">总结</h3>
+                <ul>
+                <li><strong>左式堆</strong> 通过引入<strong>零路径长 (Npl)</strong> 的概念，并强制维持“左倾”的结构，保证了其<strong>右路径长度始终为 $O(\log N)$</strong>，从而为所有操作提供了<strong>最坏情况下的 $O(\log N)$ 性能保证</strong>。</li>
+                <li><strong>斜堆</strong> 则是左式堆的“懒惰”或“自适应”版本。它放弃了严格的结构维护，代之以一个简单粗暴的**“无条件交换”<strong>规则。虽然这牺牲了最坏情况的性能，但通过</strong>摊销分析**，我们证明了其长期平均性能同样是 <strong>$O(\log N)$</strong>，且实现更简单，空间开销更小。</li>
+                </ul>
+                <p>这两种数据结构完美地诠释了算法设计中的一种重要思想：<strong>为了优化特定操作（这里是 Merge），我们可以牺牲一些其他方面的约束（如完全二叉树结构），并通过引入新的规则（Npl 或无条件交换）来重新获得性能保证。</strong></p>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
