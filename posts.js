@@ -63,6 +63,13 @@ var postsData = [
       "abstract": "ads lecture note (update) 02:红黑树与B+树"
     },
     {
+      "title": "ads课程笔记03:倒排文件索引(Inverted File Index)",
+      "date": "2025-08-21",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-21-ads03.html",
+      "abstract": "ads lecture note (update) 03:倒排文件索引(Inverted File Index)"
+    },
+    {
       "title": "CUDA学习笔记0:Introduction",
       "date": "2025-08-20",
       "category": "学习笔记",
