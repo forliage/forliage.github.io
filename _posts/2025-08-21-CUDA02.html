@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>CUDA02: Compilation with NVCC</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="cuda02-compilation-with-nvcc">CUDA02: Compilation with NVCC</h1>
+                <p>（所有内容均基于NVIDIA官方CUDA Document。本次内容包含原文档Chapter6.1）</p>
+                <p>内核可以使用CUDA指令集架构（称为PTX）编写，该架构在PTX参考手册中有所描述。
+                然而，通常使用高级编程语言（如C++）会更有效。在两种情况下，内核都必须通过nvcc编译为二进制代码，以便在设备上执行。</p>
+                <p>nvcc 是一个编译器驱动程序，用于简化 C++ 或 PTX 代码的编译过程：它提供简单且熟悉的命令行选项，并通过调用实现不同编译阶段的工具集合来执行这些选项。本节概述了 nvcc 的工作流程和命令行选项。完整的描述可在 nvcc 用户手册中找到。</p>
+                <h2 id="icompilation-workflow">I.Compilation Workflow</h2>
+                <h3 id="11offline-compilation">1.1.Offline Compilation</h3>
+                <p>使用 nvcc 编译的源文件可以包含主机代码（即在主机上执行的代码）
+                和设备代码（即在设备上执行的代码）。nvcc 的基本工作流程包括将设备代码与主机代码分离，然后：</p>
+                <ul>
+                <li>将设备代码编译为汇编形式（PTX代码）和/或二进制形式（cubin对象），</li>
+                <li>并通过替换内核中引入的 <code>&lt;&lt;&lt;...&gt;&gt;&gt;</code> 语法（在 ExecutionConfiguration 中有更详细的描述）为必要的 CUDA 运行时函数调用，来修改主机代码，以从 PTX 代码和/或 cubin 对象中加载并启动每个编译好的内核。</li>
+                </ul>
+                <p>修改后的宿主代码可以以C++代码的形式输出，该代码需通过其他工具进行编译，或直接以目标代码形式输出，即在最后的编译阶段让nvcc调用宿主编译器进行编译。</p>
+                <ul>
+                <li>要么链接到编译后的宿主代码（这是最常见的情况）</li>
+                <li>如果存在修改后的主机代码，则使用该代码，并通过CUDA驱动程序API（参见驱动程序API）加载并执行PTX代码或cubin对象。</li>
+                </ul>
+                <h3 id="12just-in-time-compilation">1.2.Just-in-Time Compilation</h3>
+                <p>任何在运行时由应用程序加载的PTX代码都会由设备驱动程序进一步编译为二进制代码。这被称为即时编译。即时编译会增加应用程序的加载时间，但使应用程序能够从每个新设备驱动程序带来的编译器改进中受益。这也是应用程序在编译时不存在的设备上运行的唯一方式，如应用程序兼容性部分所述。</p>
+                <p>当设备驱动程序为某个应用程序即时编译部分PTX代码时，它会自动将生成的二进制代码的副本缓存起来，以避免在后续应用程序调用时重复编译。该缓存（称为计算缓存）在设备驱动程序升级时会自动失效，以便应用程序能够受益于设备驱动程序中内置的新即时编译器的改进。</p>
+                <p>环境变量可用于控制即时编译，具体内容请参阅CUDA环境变量。</p>
+                <p>作为使用nvcc编译CUDA C++设备代码的替代方案，NVRTC可用于在运行时将CUDA C++设备代码编译为PTX。NVRTC是CUDA C++的运行时编译库。</p>
+                <h2 id="iibinary-compatibility">II.Binary Compatibility</h2>
+                <p>二进制代码具有架构依赖性。通过编译器选项-code生成cubin对象，该选项指定目标架构：例如，使用-code=sm_80编译将生成适用于计算能力为8.0的设备的二进制代码。二进制兼容性在相邻次要版本之间得到保证，但不适用于相邻次要版本之间或跨主要版本的情况。换句话说，为计算能力X.y生成的cubin对象仅能在计算能力为X.z的设备上执行。</p>
+                <p>注意：二进制兼容性仅支持桌面版本。不支持Tegra。此外，桌面与Tegra之间的二进制兼容性也不支持。</p>
+                <h2 id="iiiptx-compatibility">III.PTX Compatibility</h2>
+                <p>某些PTX指令仅在计算能力更高的设备上受支持。例如，包含 warp shuffle 的代码必须使用 -arch=compute_50（或更高）进行编译。</p>
+                <p>针对特定计算能力的 PTX 代码始终可以编译为计算能力更高或相同的二进制代码。需要注意的是，从较早版本的 PTX 编译而来的二进制文件可能无法利用某些硬件功能。例如，针对计算能力7.0（Volta）的二进制文件，如果使用针对计算能力6.0（Pascal）生成的PTX代码编译，将无法使用张量核指令，因为这些指令在Pascal架构上不可用。因此，最终的二进制文件性能可能不如使用最新版本PTX生成的二进制.</p>
+                <p>PTX 代码编译为针对特定架构的特性时，仅能在与目标架构完全相同的物理架构上运行，而不能在其他架构上运行。针对特定架构的 PTX 代码不具备向前兼容性和向后兼容性。</p>
+                <p>使用 sm_90a 或 compute_90a 编译的示例代码仅能在计算能力为 9.0 的设备上运行，且不具备向后兼容性和向前兼容性。</p>
+                <p>PTX 代码编译为针对特定家族功能时，仅能在与目标物理架构完全相同的物理架构上运行，以及同一家族中的其他架构。家族特定的PTX代码与同一家族中的其他设备向前兼容，但不向后兼容。例如，使用sm_100f或compute_100f编译的示例代码仅可在计算能力为10.0和10.3的设备上运行。表25显示了家族特定目标与计算能力的兼容性。</p>
+                <h2 id="ivapplication-compatibility">IV.Application Compatibility</h2>
+                <p>要在具有特定计算能力的设备上执行代码，应用程序必须加载与该计算能力兼容的二进制或PTX代码，如《二进制兼容性与PTX兼容性》中所述。特别是，为了能够在具有更高计算能力的未来架构上执行代码（目前尚无法为此生成二进制代码），应用程序必须加载PTX代码，该代码将计算能力（目前尚无法为其生成二进制代码）的设备上执行代码，应用程序必须加载PTX代码，该代码将为这些设备进行即时编译（参见即时编译）。</p>
+                <p>嵌入到CUDAC++应用程序中的PTX和二进制代码由-arch和-code编译器选项或-gencode编译器选项控制，具体细节请参阅nvcc用户手册。例如：</p>
+                <div class="code-container">
+                <pre><code>nvcc x.cu
+        -gencode arch=compute_50,code=sm_50
+        -gencode arch=compute_60,code=sm_60
+        -gencode arch=compute_70,code="compute_70,sm_70"
+</code></pre>
+                </div>
+                <p>嵌入与计算能力 5.0 和 6.0（第一代和第二代代码选项）兼容的二进制代码，以及与计算能力 7.0（第三代代码选项）兼容的 PTX 和二进制代码。</p>
+                <p>主机代码在运行时自动选择最合适的代码进行加载和执行，以上示例中将为：</p>
+                <ul>
+                <li>5.0 binary code for devices with compute capability 5.0 and 5.2,</li>
+                <li>6.0 binary code for devices with compute capability 6.0 and 6.1,</li>
+                <li>7.0 binary code for devices with compute capability 7.0 and 7.5,</li>
+                <li>PTX code which is compiled to binary code at runtime for devices with compute capability later than 7.5</li>
+                </ul>
+                <p>x.cu 可以包含一个优化后的代码路径，该路径使用了 warp 缩减操作，例如，这些操作仅在计算能力为 8.0 及以上的设备上支持。<code>__CUDA_ARCH__</code> 宏可用于根据计算能力区分不同的代码路径。它仅在设备代码中定义。例如，当使用 -arch=compute_80 进行编译时，<code>__CUDA_ARCH__</code> 等于 800。</p>
+                <p>如果 x.cu 文件是针对特定架构的特性进行编译，使用了 sm_100f 或 compute_100f，那么该代码只能在特定架构的设备上运行，即计算能力为 10.0 和 10.3 的设备。对于特定架构的代码目标，会定义一个额外的宏 <code>__CUDA_ARCH_FAMILY_SPECIFIC__</code>。在此示例中，<code>__CUDA_ARCH_FAMILY_SPECIFIC__</code> 等于 1000。</p>
+                <p>如果 x.cu 针对架构特定功能使用 sm_100a 或 compute_100a 进行编译，则代码只能
+                在计算能力为 10.0 的设备上运行。对于架构特定的代码目标，会额外定义一个宏<code>__CUDA_ARCH_SPECIFIC__</code>。在此示例中，<code>__CUDA_ARCH_SPECIFIC__</code> 等于 1000。由于架构特定功能是家族特定功能的超集，因此家族特定宏<code>__CUDA_ARCH_FAMILY_SPECIFIC__</code> 也被定义且等于 1000.</p>
+                <p>使用驱动程序 API 的应用程序必须将代码编译到单独的文件中，并在运行时显式加载并执行
+                最合适的文件。</p>
+                <p>Volta 架构引入了独立线程调度，这改变了线程在 GPU 上调度的方式。对于依赖于先前架构中 SIMT 调度特定行为的代码，独立线程调度可能会改变参与线程的集合，导致错误的结果。在实施独立线程调度中详细描述的纠正措施时，为帮助迁移，Volta开发者可通过编译器选项组-arch=compute_60-code=sm_70选择启用Pascal的线程调度。</p>
+                <p>nvcc 用户手册列出了各种用于 -arch、-code 和 -gencode 编译器选项的简写形式。例如，-arch=sm_70 是 -arch=compute_70 -code=compute_70 的简写，sm_70（与 -gencode arch=compute_70,code=\“compute_70,sm_70\” 相同）</p>
+                <h2 id="vc-compatibility">V.C++ Compatibility</h2>
+                <p>编译器的前端部分根据C++语法规则处理CUDA源文件。主机代码支持完整的C++语言。然而，对于设备代码，仅支持C++语言的一部分，具体内容如C++语言支持部分所述。</p>
+                <h2 id="vi-64-bit-compatibility">VI. 64-Bit Compatibility</h2>
+                <p>64位版本的nvcc以64位模式编译设备代码（即指针为64位）。设备代码以64位模式编译的设备代码仅与以64位模式编译的主机代码兼容。</p>
+            </article>
+        </main>
+    </div>
+    <footer>
+        <p>© 2025 我的博客</p>
+    </footer>
+    <script src="../script.js"></script>
+</body>
+</html>

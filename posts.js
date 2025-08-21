@@ -63,6 +63,13 @@ var postsData = [
       "abstract": "CUDA01:Programming Model"
     },
     {
+      "title": "CUDA学习笔记2:Compilation with nvcc",
+      "date": "2025-08-21",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-21-CUDA02.html",
+      "abstract": "CUDA02:Compilation with nvcc"
+    },
+    {
       "title": "计算机动画学习笔记1:粒子系统",
       "date": "2025-08-21",
       "category": "学习笔记",
