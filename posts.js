@@ -68,5 +68,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-21-Animation01.html",
       "abstract": "Computer Animation 01: Particle Systems"
+    },
+    {
+      "title": "计算机动画学习笔记2:二维图像Morphing",
+      "date": "2025-08-21",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-21-Animation02.html",
+      "abstract": "Computer Animation 02: 2D Image Morphing"
     }
   ];
