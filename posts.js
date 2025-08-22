@@ -126,6 +126,13 @@ var postsData = [
       "abstract": "ads lecture note (update):近似算法(Approximation)"
     },
     {
+      "title": "ads课程笔记12:局部搜索 (Local Search)",
+      "date": "2025-08-22",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-22-ads12.html",
+      "abstract": "ads lecture note (update):局部搜索 (Local Search)"
+    },
+    {
       "title": "CUDA学习笔记0:Introduction",
       "date": "2025-08-20",
       "category": "学习笔记",

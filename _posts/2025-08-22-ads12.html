@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>ads12:局部搜索 (Local Search)</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="ads12%E5%B1%80%E9%83%A8%E6%90%9C%E7%B4%A2-local-search">ads12:局部搜索 (Local Search)</h1>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E4%BB%80%E4%B9%88%E6%98%AF%E5%B1%80%E9%83%A8%E6%90%9C%E7%B4%A2"><strong>第一部分：什么是局部搜索？</strong></h3>
+                <p>想象一下，你被蒙上眼睛，放在一个连绵起伏的山脉中，你的任务是找到山脉的最高点（全局最优解）。你该怎么办？一个很自然的想法是：在你的脚下感受一下周围哪个方向是向上走的，然后朝着最陡峭的向上方向走一步。你不断重复这个过程，直到你发现无论朝哪个方向走，地势都是向下的。这时，你就到达了一个“山顶”。</p>
+                <p>这个“山顶”就是我们所说的<strong>局部最优解 (local optimum)</strong>。它不一定是整个山脉的最高峰（<strong>全局最优解, global optimum</strong>），但它确实是它附近区域的最高点。</p>
+                <p>这张图生动地展示了局部搜索的核心思想。我们从一个初始的“猜测”（Guess）开始，在它的“邻域”（Neighborhood）内寻找一个更好的解。我们不断地进行这种“爬山”式的改进，直到无法找到任何更好的邻居为止。这时，我们就陷入了一个局部最优。我们的目标，当然是希望这个局部最优点就是全局最小值（Global Minimum）。</p>
+                <p>一个关键问题是：<strong>这个过程能在有限的步数内结束吗？</strong> 答案是肯定的，只要我们的每一步都是在进行“改进”，并且解空间是有限的，那么我们最终会停在“直到无法再改进”的地方。</p>
+                <h4 id="11-%E5%B1%80%E9%83%A8%E6%90%9C%E7%B4%A2%E7%9A%84%E5%BD%A2%E5%BC%8F%E5%8C%96%E6%A1%86%E6%9E%B6"><strong>1.1 局部搜索的形式化框架</strong></h4>
+                <p>让我们用更严谨的语言来定义这个过程。局部搜索算法通常包含两个核心部分：<strong>“局部”</strong> 和 <strong>“搜索”</strong>。</p>
+                <ul>
+                <li>
+                <p><strong>局部 (Local):</strong></p>
+                <ol>
+                <li><strong>定义邻域 (Neighborhoods):</strong> 对于解空间中的每一个可行解 $S$，我们需要定义一个与之相邻的解的集合，称为 $S$ 的邻域，记作 $N(S)$。邻域中的解通常都是通过对 $S$ 进行微小的改动得到的。</li>
+                <li><strong>定义局部最优:</strong> 如果一个解 $S$ 在其所有邻域 $N(S)$ 中是最好的（例如成本最低或收益最高），那么它就是一个<strong>局部最优解</strong>。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>搜索 (Search):</strong></p>
+                <ol>
+                <li><strong>起始:</strong> 从一个初始的可行解开始。</li>
+                <li><strong>迭代:</strong> 在当前解的邻域中寻找一个更好的解。如果找到了，就移动到那个更好的解，并继续这个过程。</li>
+                <li><strong>终止:</strong> 当在当前解的邻域中找不到任何比它更好的解时，搜索停止。此时，我们就说算法收敛到了一个<strong>局部最优解</strong>。</li>
+                </ol>
+                </li>
+                </ul>
+                <h4 id="12-%E9%82%BB%E5%9F%9F%E5%85%B3%E7%B3%BB%E4%B8%8E%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E7%AE%97%E6%B3%95"><strong>1.2 邻域关系与梯度下降算法</strong></h4>
+                <p>我们来形式化地定义“邻域”。</p>
+                <ul>
+                <li><strong>邻接关系 ($\sim$):</strong> 如果解 $S'$ 可以通过对解 $S$ 进行一次小的修改得到，我们就说 $S'$ 是 $S$ 的一个<strong>邻接解 (neighboring solution)</strong>，记作 $S \sim S'$。</li>
+                <li><strong>邻域 ($N(S)$):</strong> 解 $S$ 的邻域 $N(S)$ 是所有与 $S$ 邻接的解的集合，即 $N(S) = { S' \mid S \sim S' }$。</li>
+                </ul>
+                <p>最简单、最直观的局部搜索算法就是<strong>梯度下降 (Gradient Descent)</strong> 或称为 <strong>爬山法 (Hill Climbing)</strong>。它的策略是“贪心”的：在每一步都选择邻域中最好的那个解。</p>
+                <p>下面是梯度下降算法的伪代码：</p>
+                <div class="code-container">
+                <pre><code>SolutionType Gradient_descent()
+{
+    // 从一个可行的初始解 S 开始
+    S = GenerateInitialSolution();
+    
+    // 计算初始解的成本
+    MinCost = cost(S);
+
+    while (true) {
+        // 在 S 的邻域 N(S) 中找到最好的邻居 S'
+        S' = Search_Best_In_Neighborhood(N(S));
+        
+        // 计算 S' 的成本
+        CurrentCost = cost(S');
+        
+        // 如果 S' 比 S 更好 (成本更低)
+        if (CurrentCost < MinCost) {
+            // 更新最优解和最低成本
+            S = S';
+            MinCost = CurrentCost;
+        } else {
+            // 如果邻域中没有更好的解，说明到达局部最优，退出循环
+            break;
+        }
+    }
+    
+    // 返回找到的局部最优解
+    return S;
+}
+</code></pre>
+                </div>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%AE%9E%E4%BE%8B%E5%88%86%E6%9E%90---%E9%A1%B6%E7%82%B9%E8%A6%86%E7%9B%96%E9%97%AE%E9%A2%98-vertex-cover"><strong>第二部分：实例分析 - 顶点覆盖问题 (Vertex Cover)</strong></h3>
+                <p>为了更好地理解局部搜索，我们来看一个经典的NP-Hard问题：<strong>顶点覆盖</strong>。</p>
+                <h4 id="21-%E9%97%AE%E9%A2%98%E5%AE%9A%E4%B9%89"><strong>2.1 问题定义</strong></h4>
+                <ul>
+                <li>
+                <p><strong>决策版本:</strong> 给定一个无向图 $G=(V, E)$ 和一个整数 $K$，问图中是否存在一个顶点的子集 $V' \subseteq V$，使得 $|V'| \le K$，并且图中的每一条边 $(u, v) \in E$ 的两个端点至少有一个在 $V'$ 中？这样的 $V'$ 就被称为一个<strong>顶点覆盖</strong>。</p>
+                </li>
+                <li>
+                <p><strong>优化版本:</strong> 给定一个无向图 $G=(V, E)$，找到一个<strong>最小</strong>的顶点子集 $S \subseteq V$，使得 $S$ 是一个顶点覆盖。</p>
+                </li>
+                </ul>
+                <p>我们的目标是解决这个优化版本。</p>
+                <h4 id="22-%E5%BA%94%E7%94%A8%E5%B1%80%E9%83%A8%E6%90%9C%E7%B4%A2"><strong>2.2 应用局部搜索</strong></h4>
+                <p>现在，我们将顶点覆盖问题套入局部搜索的框架中：</p>
+                <ol>
+                <li>
+                <p><strong>可行解集 (Feasible Solution Set, <code>FS</code>):</strong> 所有的顶点覆盖都是我们的可行解。</p>
+                </li>
+                <li>
+                <p><strong>成本函数 (Cost Function):</strong> 对于一个可行解（一个顶点覆盖）<code>S</code>，其成本就是它包含的顶点数量，即 <code>cost(S) = |S|</code>。我们的目标是最小化这个成本。</p>
+                </li>
+                <li>
+                <p><strong>邻域关系 (<code>S ~ S'</code>):</strong> 如何定义邻域？一个简单的方法是：每次只修改一个顶点。但是，如果我们随意添加或删除一个顶点，得到的新集合可能不再是一个顶点覆盖。一个更巧妙的定义是：</p>
+                <ul>
+                <li>从一个顶点覆盖 <code>S</code> 中<strong>删除</strong>一个顶点 <code>v</code>。如果得到的新集合 <code>S' = S - {v}</code> 仍然是一个顶点覆盖，那么 <code>S'</code> 就是 <code>S</code> 的一个邻居。</li>
+                <li>向一个顶点覆盖 <code>S</code> 中<strong>添加</strong>一个不在 <code>S</code> 中的顶点 <code>v</code>。得到的新集合 <code>S' = S + {v}</code> 显然还是一个顶点覆盖，但它增加了成本，这对于我们的梯度下降算法来说不是一个有吸引力的移动方向，但在更高级的算法中可能会用到。</li>
+                </ul>
+                <p>因此，对于梯度下降，我们可以定义 <code>S'</code> 是 <code>S</code> 的邻居，如果 <code>S'</code> 是通过从 <code>S</code> 中移除一个顶点得到的，并且 <code>S'</code> 仍然是顶点覆盖。</p>
+                </li>
+                <li>
+                <p><strong>搜索策略:</strong></p>
+                <ul>
+                <li><strong>起始:</strong> 一个简单且保证是可行解的初始方案是 <code>S = V</code>，即选择所有顶点。这显然是一个顶点覆盖，尽管成本很高。</li>
+                <li><strong>迭代:</strong> 在当前顶点覆盖 <code>S</code> 中，尝试删除每一个顶点 <code>v</code>，检查 <code>S' = S - {v}</code> 是否仍然是顶点覆盖。如果是，并且 <code>|S'| &lt; |S|</code>（这总是成立的），我们就找到了一个更好的解。我们可以选择第一个找到的，也可以遍历所有可删除的顶点，选择使成本下降最多的那个。</li>
+                </ul>
+                </li>
+                </ol>
+                <p><strong>总结一下：</strong></p>
+                <ul>
+                <li>每个顶点覆盖 <code>S</code> 最多有 $|S| \le |V|$ 个邻居（通过删除一个顶点得到）。</li>
+                <li>搜索过程：从 <code>S = V</code> 开始，不断地尝试删除一个顶点，只要删除后仍然是顶点覆盖，就执行这个删除操作，直到无法再删除任何顶点为止。</li>
+                </ul>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E5%B1%80%E9%83%A8%E6%90%9C%E7%B4%A2%E7%9A%84%E9%99%B7%E9%98%B1"><strong>第三部分：局部搜索的陷阱</strong></h3>
+                <p>梯度下降法非常直观，但它有一个致命的弱点：<strong>容易陷入局部最优</strong>。我们来看几个例子。</p>
+                <p>右边的曲线图可以看作是解空间的成本函数地貌。我们的目标是找到最低谷（全局最优），但梯度下降只会带我们到某个山谷（局部最优）。</p>
+                <div class="mermaid">
+                graph TD
+
+                    %% ======================================================
+                    %% Group for "Case 0"
+                    %% ======================================================
+                    subgraph case0 [Case 0: No Edges]
+                        A0(( ))
+                        B0(( ))
+                        C0(( ))
+                        D0(( ))
+                    end
+                    
+                    subgraph result0 [Result for Case 0]
+                        S_0("S = ∅ <br/>(Global Optimum)")
+                    end
+
+                    case0 -- "Gradient Descent finds" --> result0
+
+                    %% ======================================================
+                    %% Group for "Case 1" - THIS IS THE NEW, SAFE VERSION
+                    %% ======================================================
+                    subgraph case1 [Case 1: Star Graph]
+                        %% STEP 1: Define every node on its own line.
+                        CenterNode
+                        Leaf1(( ))
+                        Leaf2(( ))
+                        Leaf3(( ))
+                        Leaf4(( ))
+
+                        %% STEP 2: Define every connection on its own line.
+                        Leaf1 --- CenterNode
+                        Leaf2 --- CenterNode
+                        Leaf3 --- CenterNode
+                        Leaf4 --- CenterNode
+                    end
+
+                    subgraph result1 [Result for Case 1]
+                        X("Local Optimum: {Leafs}<br/>Global Optimum: {CenterNode}")
+                    end
+
+                    case1 -- "May get stuck in" --> result1
+
+                    %% ======================================================
+                    %% Group for "Case 2"
+                    %% ======================================================
+                    subgraph case2 [Case 2: Plateau / Ridge]
+                        %% Define nodes first
+                        R1
+                        N1_2
+                        R2
+                        N1_3
+                        R3
+
+                        %% Define connections line by line
+                        R1 --- N1_2
+                        N1_2 --- R2
+                        R2 --- N1_3
+                        N1_3 --- R3
+                    end
+
+                    subgraph result2 [Result for Case 2]
+                        Y("Stuck in Local Optimum / Plateau")
+                    end
+
+                    case2 -- "May get stuck on" --> result2
+
+                    %% ======================================================
+                    %% Apply all styles at the end
+                    %% ======================================================
+                    style CenterNode fill:red,stroke:#333,stroke-width:2px
+                    style R1 fill:red,stroke:#333,stroke-width:2px
+                    style R2 fill:red,stroke:#333,stroke-width:2px
+                    style R3 fill:red,stroke:#333,stroke-width:2px
+                </div>
+                <ul>
+                <li>
+                <p><strong>Case 0: 没有边的图</strong></p>
+                <ul>
+                <li>最小顶点覆盖是空集 <code>S = ∅</code>，成本为0。</li>
+                <li>如果我们从 <code>S = V</code> 开始，我们可以一个个地删除所有顶点，最终会顺利到达全局最优解 <code>S = ∅</code>。这个例子很简单，梯度下降是有效的。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Case 1: 星形图</strong></p>
+                <ul>
+                <li>这个图有一个中心节点和许多叶子节点。</li>
+                <li>全局最优解是只包含中心节点，<code>S = {中心节点}</code>，成本为 1。</li>
+                <li>另一个解是包含所有叶子节点，<code>S' = {所有叶子节点}</code>，成本很高。这个解也是一个顶点覆盖，而且它是一个<strong>局部最优解</strong>！为什么？因为你不能从 <code>S'</code> 中删除任何一个叶子节点，否则它与中心节点相连的边就没有被覆盖。因此，<code>S'</code> 没有成本更低的邻居，梯度下降如果从某个特定的初始状态出发（或者其邻域定义比较特殊），就可能卡在这里。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Case 2: 高原 (Plateau) 和山脊 (Ridge)</strong></p>
+                <ul>
+                <li>在这个例子中，可能存在很多成本相同的局部最优解，它们之间无法通过简单的“下山”移动来切换。</li>
+                <li>想象一下一个平坦的高原，或者一个狭长的山脊，任何方向的微小移动要么保持高度不变，要么就是下山。梯度下降算法在高原上会随机停止，在山脊上则无法跨越到另一侧可能存在的更低的山谷。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="%E8%AE%A8%E8%AE%BA%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E5%9C%A8%E5%93%AA%E4%BA%9B%E5%85%B6%E4%BB%96%E6%83%85%E5%86%B5%E4%B8%8B%E4%BC%9A%E5%A4%B1%E6%95%88"><strong>讨论：梯度下降在哪些其他情况下会失效？</strong></h4>
+                <p>这是一个很好的问题。除了上面提到的情况，一个经典的例子是<strong>旅行商问题 (TSP)</strong>。</p>
+                <ul>
+                <li><strong>问题:</strong> 找到一条访问所有城市一次并返回起点的最短路径。</li>
+                <li><strong>局部搜索框架:</strong>
+                <ul>
+                <li><strong>解:</strong> 一条合法的路径（一个城市的排列）。</li>
+                <li><strong>成本:</strong> 路径总长度。</li>
+                <li><strong>邻域:</strong> 一个常用的邻域是 <strong>2-opt</strong>。即，选择路径中的两条边 <code>(a, b)</code> 和 <code>(c, d)</code>，删除它们，然后用 <code>(a, c)</code> 和 <code>(b, d)</code> 重新连接，从而得到一条新的路径。</li>
+                </ul>
+                </li>
+                <li><strong>失效情况:</strong> 2-opt 局部搜索很容易陷入局部最优。可能会找到一个看起来还不错的环路，但这个环路可能存在一些交叉，而要解开这些交叉可能需要同时改变3条或更多的边（即需要一个更大的邻域），而 2-opt 无法实现这一点。</li>
+                </ul>
+                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E5%A6%82%E4%BD%95%E9%80%83%E7%A6%BB%E5%B1%80%E9%83%A8%E6%9C%80%E4%BC%98--%E6%A8%A1%E6%8B%9F%E9%80%80%E7%81%AB"><strong>第四部分：如何逃离局部最优？- 模拟退火</strong></h3>
+                <p>既然梯度下降这么容易“卡住”，我们该如何改进呢？一个核心思想是：<strong>允许偶尔接受一个更差的解</strong>，以求“跳出”当前的局部最优，去探索更广阔的解空间。</p>
+                <h4 id="41-metropolis-%E7%AE%97%E6%B3%95"><strong>4.1 Metropolis 算法</strong></h4>
+                <p>Metropolis 算法引入了概率。</p>
+                <ul>
+                <li>如果邻居 <code>S'</code> 比当前解 <code>S</code> 好，我们总是接受它。</li>
+                <li>如果邻居 <code>S'</code> 比当前解 <code>S</code> 差（成本更高），我们<strong>以一定的概率</strong>接受它。</li>
+                </ul>
+                <p>这个概率通常由 <strong>Boltzmann 分布</strong> 给出：$P(\text{accept}) = e^{-\Delta E / (kT)}$
+                其中：</p>
+                <ul>
+                <li>$\Delta E = \text{cost}(S') - \text{cost}(S)$ 是成本的增量（在这里是正数）。</li>
+                <li>$T$ 是一个称为“温度”的参数。</li>
+                <li>$k$ 是玻尔兹曼常数（在算法中可以设为1）。</li>
+                </ul>
+                <p><strong>直观理解:</strong></p>
+                <ul>
+                <li><strong>$\Delta E$ 越小</strong> (即 <code>S'</code> 差得不多)，接受的概率越大。</li>
+                <li><strong>温度 $T$ 越高</strong>，接受的概率越大。这意味着在高温时，算法更倾向于探索，甚至接受很差的解。</li>
+                </ul>
+                <p>伪代码如下：</p>
+                <div class="code-container">
+                <pre><code>SolutionType Metropolis()
+{
+    // 定义常数 k 和 T
+    Define constants k and T;
+
+    // 从一个可行解开始
+    S = GenerateInitialSolution();
+    MinCost = cost(S); // 记录遇到的最好成本
+
+    while (not_stopped) {
+        // 从邻域中随机选择一个邻居
+        S' = Randomly_chosen_from(N(S));
+        CurrentCost = cost(S');
+
+        if (CurrentCost < cost(S)) { // 注意这里是和 cost(S) 比较
+            // 如果更好，总是接受
+            S = S';
+            if (CurrentCost < MinCost) MinCost = CurrentCost;
+        } else {
+            // 如果更差，计算成本差
+            delta_cost = CurrentCost - cost(S);
+            // 以一定概率接受
+            if (random_uniform(0, 1) < exp(-delta_cost / (k * T))) {
+                S = S';
+            }
+        }
+    }
+    return best_solution_found; // 返回整个过程中遇到的最好的解
+}
+</code></pre>
+                </div>
+                <h4 id="42-%E6%A8%A1%E6%8B%9F%E9%80%80%E7%81%AB-simulated-annealing"><strong>4.2 模拟退火 (Simulated Annealing)</strong></h4>
+                <p>模拟退火是 Metropolis 算法的升级版。它模拟了物理中金属退火的过程：将金属加热到高温，然后非常缓慢地冷却。在高温时，分子可以自由移动（对应算法中的广泛探索），随着温度降低，分子逐渐稳定下来，形成能量最低的晶体结构（对应算法收敛到最优解）。</p>
+                <p>关键在于<strong>冷却策略 (Cooling schedule)</strong>：温度 <code>T</code> 不再是固定的，而是随着时间的推移慢慢降低。
+                $T = { T_1, T_2, T_3, \dots }$, 其中 $T_1 > T_2 > T_3 > \dots$</p>
+                <ul>
+                <li><strong>初期 (高温):</strong> <code>T</code> 很大，<code>exp(-ΔE/kT)</code> 接近1，算法几乎会接受所有移动，类似于随机游走，从而广泛探索解空间。</li>
+                <li><strong>中期 (中温):</strong> <code>T</code> 减小，算法开始倾向于接受好的移动，但仍有一定机会跳出局部最优。</li>
+                <li><strong>末期 (低温):</strong> <code>T</code> 趋近于0，<code>exp(-ΔE/kT)</code> 趋近于0，算法几乎只接受好的移动，行为类似于梯度下降，从而在当前找到的“好区域”内进行精细搜索。</li>
+                </ul>
+                <p>理论上可以证明，如果冷却得足够慢，模拟退火算法能以概率1收敛到全局最优解。</p>
+                <p><strong>注</strong>：更详细的关于模拟退火及其拓展的内容可以参考: <a href="https://forliage.github.io/_posts/2025-08-20-PSA.html">我的另一篇文章</a></p>
+                <h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E9%AB%98%E7%BA%A7%E5%AE%9E%E4%BE%8B-1---hopfield-%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C"><strong>第五部分：高级实例 1 -  Hopfield 神经网络</strong></h3>
+                <p>局部搜索在很多领域都有应用，我们来看一个来自神经网络的例子：Hopfield 网络。</p>
+                <h4 id="51-%E9%97%AE%E9%A2%98%E5%BB%BA%E6%A8%A1"><strong>5.1 问题建模</strong></h4>
+                <p>想象一个网络，由节点和带权重的边组成。</p>
+                <ul>
+                <li>
+                <p><strong>图:</strong> $G=(V, E)$，边的权重 $w_e$ 可以是正数或负数。</p>
+                </li>
+                <li>
+                <p><strong>节点状态:</strong> 每个节点 <code>u</code> 有一个状态 $s_u$，可以是 <code>+1</code> 或 <code>-1</code>。</p>
+                </li>
+                <li>
+                <p><strong>约束:</strong></p>
+                <ul>
+                <li>如果边 <code>e=(u, v)</code> 的权重 $w_e &lt; 0$，它表示 <code>u</code> 和 <code>v</code> 希望拥有<strong>相同</strong>的状态 ($s_u = s_v$)。</li>
+                <li>如果边 <code>e=(u, v)</code> 的权重 $w_e &gt; 0$，它表示 <code>u</code> 和 <code>v</code> 希望拥有<strong>不同</strong>的状态 ($s_u = -s_v$)。</li>
+                <li>权重的绝对值 $|w_e|$ 代表这个约束的<strong>强度</strong>。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>输出:</strong> 我们要找一个网络的<strong>构型 (configuration)</strong> <code>S</code>，也就是给每个节点都分配一个状态 <code>+1</code> 或 <code>-1</code>，使得整个网络“尽可能和谐”（即满足尽可能多的、权重大的约束）。</p>
+                </li>
+                </ul>
+                <div class="mermaid">
+                graph TD
+                    A ---|7| B
+                    B ---|6| C
+                    C ---|5| A
+
+                    style A fill:#fff,stroke:#333,stroke-width:2px
+                    style B fill:#fff,stroke:#333,stroke-width:2px
+                    style C fill:#fff,stroke:#333,stroke-width:2px
+                </div>
+                <p>在这个例子中，所有权重都是正的。<code>A</code>和<code>B</code>想不同，<code>B</code>和<code>C</code>想不同，<code>C</code>和<code>A</code>也想不同。这可能吗？如果我们让 $s_A=+1$, $s_B=-1$, $s_C=+1$，那么 <code>(A,B)</code> 和 <code>(B,C)</code> 满足了，但 <code>(C,A)</code> 不满足。事实上，<strong>可能不存在一个构型满足所有边的要求</strong>。我们的目标是找到一个“足够好”的构型。</p>
+                <h4 id="52-%E5%BD%A2%E5%BC%8F%E5%8C%96%E5%AE%9A%E4%B9%89"><strong>5.2 形式化定义</strong></h4>
+                <ul>
+                <li>
+                <p><strong>好边 (good edge) / 坏边 (bad edge):</strong></p>
+                <ul>
+                <li>在构型 <code>S</code> 中，如果一条边 <code>e=(u,v)</code> 的约束被满足，即 $w_e s_u s_v &lt; 0$，则称它为<strong>好边</strong>。
+                <ul>
+                <li>(若 $w_e &lt; 0$，需 $s_u s_v &gt; 0 \implies s_u=s_v$)</li>
+                <li>(若 $w_e &gt; 0$，需 $s_u s_v &lt; 0 \implies s_u \ne s_v$)</li>
+                </ul>
+                </li>
+                <li>否则，称之为<strong>坏边</strong>。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>满足的节点 (satisfied node):</strong></p>
+                <ul>
+                <li>一个节点 <code>u</code> 是<strong>满足的</strong>，如果与它相连的<strong>好边的权重之和</strong>大于或等于<strong>坏边的权重之和</strong>。</li>
+                <li>数学上，这等价于 $\sum_{v: e=(u,v) \in E} w_e s_u s_v \le 0$。
+                <ul>
+                <li>为什么？$w_e s_u s_v$ 对于好边是负数，对于坏边是正数。这个和小于等于0，意味着好边的权重（的绝对值）之和大于等于坏边的。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>稳定构型 (stable configuration):</strong></p>
+                <ul>
+                <li>如果一个构型中的<strong>所有节点</strong>都是满足的，则称该构型是<strong>稳定</strong>的。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>问题：</strong> Hopfield 网络是否总存在一个稳定构型？如果存在，如何找到它？</p>
+                <div class="mermaid">
+                graph TD
+
+                    A ---|-10| B
+                    A ---|4| C
+                    A ---|5| D
+                    C ---|-1| B
+                    D ---|-1| B
+
+                    subgraph Legend
+                        L_White("State (+1)")
+                        L_Black("State (-1)")
+                    end
+
+                    style A fill:#fff,stroke:#333,stroke-width:2px
+                    style B fill:#fff,stroke:#333,stroke-width:2px
+                    style C fill:#000,stroke:#333,stroke-width:2px,color:#fff
+                    style D fill:#000,stroke:#333,stroke-width:2px,color:#fff
+                    
+                    style L_White fill:#fff,stroke:#333,stroke-width:2px
+                    style L_Black fill:#000,stroke:#333,stroke-width:2px,color:#fff
+
+                </div>
+                <p>我们来分析上图左下角的节点 <code>A</code> (状态+1)。</p>
+                <ul>
+                <li>与B相连的边：$w=-10, s_A=+1, s_B=+1 \implies w s_A s_B = -10 &lt; 0$ (好边)</li>
+                <li>与C相连的边：$w=4, s_A=+1, s_C=-1 \implies w s_A s_B = -4 &lt; 0$ (好边)</li>
+                <li>与D相连的边：$w=5, s_A=+1, s_D=-1 \implies w s_A s_B = -5 &lt; 0$ (好边)
+                所有连接 <code>A</code> 的边都是好边，所以 <code>A</code> 是满足的。</li>
+                </ul>
+                <p>现在我们看右边的计算示例，假设这是对某个节点的计算：<code>-4-1-1+5 = -1 &lt;= 0</code>。这意味着连接该节点的边中，好边的权重之和（4+1+1）大于坏边的权重之和（5），所以该节点是满足的。</p>
+                <h4 id="53-%E7%8A%B6%E6%80%81%E7%BF%BB%E8%BD%AC%E7%AE%97%E6%B3%95-state-flipping-algorithm"><strong>5.3 状态翻转算法 (State-flipping Algorithm)</strong></h4>
+                <p>我们可以用一个简单的局部搜索算法来寻找稳定构型。</p>
+                <ul>
+                <li><strong>算法思想:</strong> 只要网络中还存在不满意的节点，就随便找一个，然后<strong>翻转它</strong>的状态 (从+1到-1，或-1到+1)。</li>
+                </ul>
+                <p>伪代码：</p>
+                <div class="code-container">
+                <pre><code>ConfigType State_flipping()
+{
+    // 从一个任意的初始构型 S 开始
+    S = GenerateRandomConfiguration();
+    
+    // 只要 S 还不是稳定的
+    while (!IsStable(S)) {
+        // 找出一个不满意的节点 u
+        u = GetUnsatisfied(S);
+        
+        // 翻转 u 的状态
+        s_u = -s_u;
+    }
+    
+    // 返回找到的稳定构型
+    return S;
+}
+</code></pre>
+                </div>
+                <p><strong>关键问题：这个算法会一直运行下去吗？还是总能终止？</strong></p>
+                <div class="mermaid">
+                graph TD
+                    A(( )) ---|8| C
+                    A ---|-10| B
+                    B(( )) ---|-5| D
+                    C ---|-1| B
+                    D ---|-1| B
+
+                    style C fill:#000,stroke:#333,stroke-width:2px
+                    style D fill:#000,stroke:#333,stroke-width:2px
+                </div>
+                <p>上图给出了一个网络。我们想知道，对这个网络运行状态翻转算法，它会停下来吗？</p>
+                <p><strong>答案是：是的，这个算法总会终止。</strong> 我们可以用一个非常漂亮的数学方法来证明它——<strong>势函数法 (Potential Function Method)</strong>。</p>
+                <h4 id="54-%E7%BB%88%E6%AD%A2%E6%80%A7%E8%AF%81%E6%98%8E"><strong>5.4 终止性证明</strong></h4>
+                <p><strong>声明 (Claim):</strong> 状态翻转算法最多在 $W = \sum_{e \in E} |w_e|$ 次迭代后，会终止于一个稳定构型。</p>
+                <p><strong>证明 (Proof):</strong>
+                我们来定义一个“衡量系统有多好”的函数，称为势函数 $\Phi(S)$。
+                让 $\Phi(S)$ 等于当前构型 <code>S</code> 中所有<strong>好边</strong>的权重绝对值之和。
+                $$\Phi(S) = \sum_{e \text{ is good}} |w_e|$$</p>
+                <p>现在，我们来分析当一个<strong>不满足的节点 u</strong> 翻转其状态后，$\Phi(S)$ 会发生什么变化。设新构型为 <code>S'</code>。</p>
+                <ol>
+                <li><strong>与 <code>u</code> 相连的边:</strong>
+                <ul>
+                <li>当 <code>u</code> 的状态 $s_u$ 变为 $-s_u$ 时，对于任何一条边 $e=(u,v)$，乘积项 $s_u s_v$ 会变号。</li>
+                <li>这意味着，所有原来与 <code>u</code> 相连的<strong>好边</strong>现在都变成了<strong>坏边</strong>。</li>
+                <li>所有原来与 <code>u</code> 相连的<strong>坏边</strong>现在都变成了<strong>好边</strong>。</li>
+                </ul>
+                </li>
+                <li><strong>与 <code>u</code> 不相连的边:</strong>
+                <ul>
+                <li>这些边的状态（好或坏）保持不变。</li>
+                </ul>
+                </li>
+                </ol>
+                <p>所以，$\Phi(S')$ 的值相对于 $\Phi(S)$ 的变化是：</p>
+                <ul>
+                <li><strong>减少了</strong>所有原来与 <code>u</code> 相连的好边的 $|w_e|$。</li>
+                <li><strong>增加了</strong>所有原来与 <code>u</code> 相连的坏边的 $|w_e|$。</li>
+                </ul>
+                <p>$$\Phi(S') = \Phi(S) - \sum_{e=(u,v) \in E, e \text{ is bad in } S'} |w_e| + \sum_{e=(u,v) \in E, e \text{ is good in } S'} |w_e|$$
+                这等价于：
+                $$\Phi(S') = \Phi(S) - \sum_{e=(u,v) \in E, e \text{ is good in } S} |w_e| + \sum_{e=(u,v) \in E, e \text{ is bad in } S} |w_e|$$</p>
+                <p>现在，关键的一步来了。我们为什么选择翻转一个<strong>不满足的节点 u</strong>？
+                根据定义，节点 <code>u</code> 不满足，意味着与它相连的坏边权重之和<strong>严格大于</strong>好边权重之和。
+                $$\sum_{e=(u,v) \in E, e \text{ is bad in } S} |w_e| &gt; \sum_{e=(u,v) \in E, e \text{ is good in } S} |w_e|$$
+                (注意：$|w_e|$ 与原始定义中的 $w_e s_u s_v \le 0$ 是对应的)</p>
+                <p>因此，$$\Phi(S') - \Phi(S) = \sum_{\text{bad edges at } u} |w_e| - \sum_{\text{good edges at } u} |w_e| &gt; 0$$
+                由于权重都是整数，我们甚至可以得出 $\Phi(S') - \Phi(S) \ge 1$。</p>
+                <p><strong>结论:</strong> 每一次翻转一个不满足的节点，势函数 $\Phi(S)$ 的值<strong>至少增加1</strong>。</p>
+                <p>这个函数有上限吗？当然有。$\Phi(S)$ 的最大值不可能超过所有边权重绝对值之和，即 $W = \sum_{e \in E} |w_e|$。
+                $$0 \le \Phi(S) \le W$$</p>
+                <p>一个单调递增且有上界的整数序列必然是有限的。因此，状态翻转算法必然会在有限步内终止。当它终止时，网络中不存在任何不满足的节点，此时的构型就是一个稳定构型。</p>
+                <h4 id="55-%E7%AE%97%E6%B3%95%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%88%86%E6%9E%90"><strong>5.5 算法复杂度分析</strong></h4>
+                <ul>
+                <li><strong>与局部搜索的关系:</strong>
+                <ul>
+                <li><strong>问题:</strong> 最大化势函数 $\Phi$。</li>
+                <li><strong>可行解集 <code>FS</code>:</strong> 所有的网络构型。</li>
+                <li><strong>邻域关系 <code>S ~ S'</code>:</strong> <code>S'</code> 可由 <code>S</code> 通过翻转单个节点状态得到。</li>
+                </ul>
+                </li>
+                <li><strong>Claim:</strong> 在最大化 $\Phi$ 的状态翻转算法中，任何一个局部最大值点都是一个稳定构型。
+                <ul>
+                <li><strong>证明:</strong> 如果一个构型 <code>S</code> 不是稳定的，就必然存在一个不满足的节点 <code>u</code>。翻转 <code>u</code> 会得到一个邻居 <code>S'</code>，且 $\Phi(S') &gt; \Phi(S)$。这意味着 <code>S</code> 不是一个局部最大值。反之，一个局部最大值必须是稳定的。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>这是一个多项式时间算法吗？(Is it a polynomial time algorithm?)</strong></p>
+                <p>答案是：<strong>不一定</strong>。它是一个<strong>伪多项式时间 (pseudo-polynomial time)</strong> 算法。</p>
+                <ul>
+                <li>算法的运行步数上界是 $W = \sum |w_e|$。</li>
+                <li>输入图的规模由节点数 <code>n</code> 和边数 <code>m</code> 决定。权值 <code>w_e</code> 是用二进制表示的。如果权重 <code>W</code> 的数值可以非常大（例如，是 <code>n</code> 的指数级别），那么运行时间就不是 <code>n</code> 和 <code>m</code> 的多项式了。</li>
+                <li><strong>一个至今未解的公开问题 (Still an open question):</strong> 是否存在一个算法，能在关于 <code>n</code> 和 <code>log W</code> 的多项式时间内找到稳定构型？或者，在只考虑算术运算次数的情况下，是否存在一个只关于 <code>n</code> 的多项式时间算法（与 <code>W</code> 无关）？</li>
+                </ul>
+                <h3 id="%E7%AC%AC%E5%85%AD%E9%83%A8%E5%88%86%E9%AB%98%E7%BA%A7%E5%AE%9E%E4%BE%8B-2---%E6%9C%80%E5%A4%A7%E5%89%B2%E9%97%AE%E9%A2%98-maximum-cut"><strong>第六部分：高级实例 2 - 最大割问题 (Maximum Cut)</strong></h3>
+                <p>最大割是另一个经典的NP-hard问题，它与 Hopfield 网络有很深的联系。</p>
+                <h4 id="61-%E9%97%AE%E9%A2%98%E5%AE%9A%E4%B9%89"><strong>6.1 问题定义</strong></h4>
+                <p>给定一个带正权重的无向图 $G=(V, E)$，你需要将所有顶点 <code>V</code> 划分成两个不相交的集合 <code>(A, B)</code>。一个“割”指的是连接 <code>A</code> 中顶点和 <code>B</code> 中顶点的边的集合。<strong>最大割问题</strong>的目标是找到一个划分 <code>(A, B)</code>，使得这个割中所有边的权重之和最大。
+                $w(A, B) := \sum_{u \in A, v \in B} w_{uv}$</p>
+                <div class="mermaid">
+                graph TD
+                    subgraph Partition A
+                        direction LR
+                        a1(a1):::setA --- a2(a2):::setA
+                        a1 --- a3(a3):::setA
+                    end
+                    subgraph Partition B
+                        direction LR
+                        b1(b1):::setB --- b2(b2):::setB
+                    end
+                    
+                    a1 ---|5| b1
+                    a2 ---|8| b1
+                    a3 ---|3| b2
+
+                    classDef setA fill:#f9f,stroke:#333,stroke-width:2px
+                    classDef setB fill:#9cf,stroke:#333,stroke-width:2px
+                </div>
+                <p>上图展示了一个割。割的权重是 5 + 8 + 3 = 16。我们的目标是调整 <code>A</code> 和 <code>B</code>，使这个权重和最大。</p>
+                <ul>
+                <li><strong>应用:</strong>
+                <ul>
+                <li><strong>趣味应用:</strong> 假设有 <code>n</code> 个活动和 <code>m</code> 个人。每个人都想参加其中两项活动。你需要把所有活动安排在上午或下午，目标是让尽可能多的人能参加他们想参加的两项活动（即一项在上午，一项在下午）。
+                <ul>
+                <li>建模：每个活动是一个节点。如果有人想同时参加活动 <code>u</code> 和 <code>v</code>，就在 <code>u</code> 和 <code>v</code> 之间连一条边。最大割就是将活动划分为上午(A)和下午(B)的最佳方案。</li>
+                </ul>
+                </li>
+                <li><strong>实际应用:</strong> 电路设计（最小化不同模块间的连线）、统计物理等。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="62-%E6%9C%80%E5%A4%A7%E5%89%B2%E4%B8%8E%E5%B1%80%E9%83%A8%E6%90%9C%E7%B4%A2"><strong>6.2 最大割与局部搜索</strong></h4>
+                <p>我们可以将最大割问题看作是 Hopfield 网络的一个特例：</p>
+                <ul>
+                <li>将划分 <code>(A, B)</code> 对应于节点状态：<code>A</code> 中的节点状态为 <code>+1</code>，<code>B</code> 中的节点状态为 <code>-1</code>。</li>
+                <li>一条边 <code>(u,v)</code> 跨越割，当且仅当 <code>u</code> 和 <code>v</code> 在不同的集合中，即 $s_u \ne s_v$。</li>
+                <li>为了最大化跨越割的边的权重，我们希望满足 $s_u \ne s_v$ 这个约束。这对应于 Hopfield 网络中 $w_{uv} > 0$ 的情况。</li>
+                <li>所以，最大割问题等价于一个<strong>所有边权重都为正</strong>的 Hopfield 网络，其目标是最大化 $\sum_{e \text{ is good}} w_e$。</li>
+                </ul>
+                <p>我们可以使用与 Hopfield 网络相同的<strong>状态翻转算法</strong>（在这里称为 <strong>single-flip</strong>）：</p>
+                <ul>
+                <li><strong>邻域:</strong> 通过将一个节点从 <code>A</code> 移动到 <code>B</code>，或者从 <code>B</code> 移动到 <code>A</code>，来得到新的划分。</li>
+                <li><strong>算法:</strong>
+                <ol>
+                <li>从一个任意划分 <code>(A, B)</code> 开始。</li>
+                <li>只要存在一个节点 <code>u</code>，移动它可以增加割的权重，就移动它。</li>
+                <li>直到没有节点可以通过移动来增加割的权重时停止。</li>
+                </ol>
+                </li>
+                </ul>
+                <p>这个简单的局部搜索算法，我们称之为 <strong>Single-Flip Heuristic</strong>。</p>
+                <p><strong>问题:</strong></p>
+                <ol>
+                <li>这个算法的运行时间是多项式吗？（同样，可能是伪多项式）</li>
+                <li>它找到的局部最优解，质量如何？离全局最优解有多远？</li>
+                </ol>
+                <h4 id="63-%E5%B1%80%E9%83%A8%E6%9C%80%E4%BC%98%E8%A7%A3%E7%9A%84%E8%B4%A8%E9%87%8F%E5%88%86%E6%9E%90-%E8%BF%91%E4%BC%BC%E6%AF%94"><strong>6.3 局部最优解的质量分析 (近似比)</strong></h4>
+                <p>这是一个非常深刻和重要的结果。</p>
+                <p><strong>声明 (Claim):</strong> 对于最大割问题，由 Single-Flip Heuristic 找到的任何一个局部最优划分 <code>(A, B)</code>，其割权重至少是全局最优划分 <code>(A*, B*)</code> 的一半。
+                即： $w(A, B) \ge \frac{1}{2} w(A^<em>, B^</em>)$
+                这被称为 <strong>2-近似算法</strong>。</p>
+                <p><strong>证明 (Proof):</strong>
+                设 <code>(A, B)</code> 是一个局部最优解。这意味着对于任何节点的移动，割的权重都不会增加。</p>
+                <ol>
+                <li>
+                <p>考虑任意一个在 <code>A</code> 中的节点 <code>u</code> ($u \in A$)。如果我们将 <code>u</code> 从 <code>A</code> 移动到 <code>B</code>，割权重的变化是多少？</p>
+                <ul>
+                <li>原来与 <code>u</code> 相连，且另一端在 <code>B</code> 中的边（权重为 $\sum_{v \in B} w_{uv}$），现在不再跨越割。</li>
+                <li>原来与 <code>u</code> 相连，且另一端在 <code>A</code> 中的边（权重为 $\sum_{v \in A} w_{uv}$），现在开始跨越割。</li>
+                <li>移动 <code>u</code> 后割权重的增加量为: $\Delta w = \sum_{v \in A} w_{uv} - \sum_{v \in B} w_{uv}$。</li>
+                </ul>
+                </li>
+                <li>
+                <p>因为 <code>(A, B)</code> 是局部最优，所以移动 <code>u</code> 不会增加割权重，即 $\Delta w \le 0$。
+                所以，对于任何 $u \in A$，我们有：
+                $$\sum_{v \in A} w_{uv} \le \sum_{v \in B} w_{uv}$$</p>
+                </li>
+                <li>
+                <p>我们将这个不等式对所有 $u \in A$ 进行求和：
+                $$\sum_{u \in A} \left( \sum_{v \in A} w_{uv} \right) \le \sum_{u \in A} \left( \sum_{v \in B} w_{uv} \right)$$</p>
+                </li>
+                <li>
+                <p>我们来分析这个不等式的两边：</p>
+                <ul>
+                <li><strong>右边:</strong> $\sum_{u \in A} \sum_{v \in B} w_{uv}$。这正是割 <code>(A, B)</code> 的权重定义，即 $w(A, B)$。</li>
+                <li><strong>左边:</strong> $\sum_{u \in A} \sum_{v \in A} w_{uv}$。这个和计算了所有两个端点都在 <code>A</code> 内部的边的权重，但每条边 <code>(u, v)</code> 被计算了两次（一次在 <code>u</code> 的求和中，一次在 <code>v</code> 的求和中）。所以，这个和等于 $2 \times w(A, A)$，其中 $w(A, A)$ 是 <code>A</code> 内部所有边的权重之和。</li>
+                </ul>
+                <p>所以我们得到： $2 \cdot w(A, A) \le w(A, B)$。</p>
+                </li>
+                <li>
+                <p>同理，对于任何 $u \in B$，移动它也不会增加割权重，我们可以得到： $2 \cdot w(B, B) \le w(A, B)$。</p>
+                </li>
+                <li>
+                <p>将这两个不等式相加：
+                $2 \cdot w(A, A) + 2 \cdot w(B, B) \le 2 \cdot w(A, B)$</p>
+                <p>图中所有边的总权重 $W_{total} = w(A,A) + w(B,B) + w(A,B)$。
+                将上面两个不等式相加，得到 $$2(w(A,A)+w(B,B)) \le 2w(A,B)$$即 $$w(A,A)+w(B,B) \le w(A,B)$$</p>
+                <p>所以，$$W_{total} = (w(A,A)+w(B,B)) + w(A,B) \le w(A,B) + w(A,B) = 2w(A,B)$$</p>
+                <p>因为全局最优解 $w(A^<em>,B^</em>)$ 不可能比所有边的总权重还大，所以 $$w(A^<em>,B^</em>) \le W_{total}$$</p>
+                <p>因此，我们得到 $$w(A^<em>, B^</em>) \le 2w(A, B)$$，或者写成 $$w(A, B) \ge \frac{1}{2} w(A^<em>, B^</em>)$$</p>
+                <p>证明完毕。这个简单的局部搜索算法，保证能找到一个不差于最优解一半的答案！</p>
+                </li>
+                </ol>
+                <h4 id="64-%E6%9C%80%E5%A4%A7%E5%89%B2%E8%BF%91%E4%BC%BC%E7%AE%97%E6%B3%95%E7%9A%84%E8%BF%9B%E5%B1%95"><strong>6.4 最大割近似算法的进展</strong></h4>
+                <ul>
+                <li><strong>[Sahni-Gonzales 1976]</strong> 证明了存在一个2-近似算法（我们刚才证明的那个就是）。</li>
+                <li><strong>[Goemans-Williamson 1995]</strong> 这是一个里程碑式的工作。他们使用<strong>半定规划 (Semidefinite Programming)</strong> 松弛技术，给出了一个 <strong>1.1382-近似</strong>算法（即 $1/0.878$）。这个结果非常深刻，打开了近似算法的新篇章。</li>
+                <li><strong>[Håstad 1997]</strong> 他证明了，除非 P=NP，否则不存在比 <strong>17/16 ≈ 1.0625</strong> 更好的近似算法。这为最大割问题的近似性设置了一个理论上的上限。</li>
+                </ul>
+                <h4 id="65-%E6%94%B9%E8%BF%9B%E5%B1%80%E9%83%A8%E6%90%9C%E7%B4%A2%E7%AE%97%E6%B3%95"><strong>6.5 改进局部搜索算法</strong></h4>
+                <p><strong>1. 如何保证多项式时间？Big-improvement-flip</strong></p>
+                <p>Single-flip 算法的运行时间可能依赖于权重 <code>W</code>。为了让它成为真正的多项式时间算法，我们可以修改策略：不是任何一点改进都接受，而是只接受<strong>足够大的改进</strong>。</p>
+                <ul>
+                <li><strong>Big-improvement-flip:</strong> 只选择那些翻转后能让割权重至少增加 $\frac{2\epsilon}{|V|} w(A,B)$ 的节点进行翻转。</li>
+                <li><strong>Claim 1:</strong> 算法终止时，能返回一个 $(2+\epsilon)$-近似解。即 $(2+\epsilon)w(A,B) \ge w(A^<em>,B^</em>)$。</li>
+                <li><strong>Claim 2:</strong> 该算法在 $O(\frac{n}{\epsilon} \log W)$ 次翻转后就会终止，这是一个多项式时间算法。</li>
+                </ul>
+                <p><strong>2. 如何获得更好的解？尝试更好的<code>local</code>（邻域）</strong></p>
+                <p>Single-flip 的邻域太小了，容易陷入质量不高的局部最优。我们可以扩大邻域。</p>
+                <ul>
+                <li><strong>邻域大小的权衡:</strong>
+                <ul>
+                <li><strong>邻域太小:</strong> 容易陷入局部最优。</li>
+                <li><strong>邻域太大:</strong> 搜索邻域本身的时间开销巨大。</li>
+                </ul>
+                </li>
+                <li><strong>k-flip:</strong> 允许一次移动 <code>k</code> 个节点。邻域大小为 $O(n^k)$，当 <code>k</code> 稍大时就不可行了。</li>
+                <li><strong>Kernighan-Lin (KL) 启发式算法 [1970]:</strong> 这是一个非常著名且有效的图划分算法，它的邻域定义非常巧妙。
+                <ul>
+                <li>它不是一次只移动一个节点，而是进行一系列的节点交换。</li>
+                <li><strong>Step 1:</strong> 找到一个能带来最大收益的单次翻转（将节点 $v_1$ 移动），即使这个收益是负的。然后“锁定” $v_1$。</li>
+                <li><strong>Step k:</strong> 在剩下未锁定的节点中，找到一个能带来最大收益的单次翻转（将节点 $v_k$ 移动），然后锁定 $v_k$。</li>
+                <li>这个过程一直持续到所有节点都被翻转过一次，我们就得到了一系列的中间划分。</li>
+                <li>最后，在这一系列划分中，选择那个割权重最大的作为本次迭代的结果。</li>
+                <li>整个过程的邻域大小是 $O(n^2)$，比简单的 k-flip 要高效得多。</li>
+                </ul>
+                </li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
