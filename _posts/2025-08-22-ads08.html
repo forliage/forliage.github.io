@@ -346,7 +346,7 @@ int main() {
                 </div>
                 <p>这个算法的时间复杂度同样是 $O(N^3)$。值得一提的是，数学家 Knuth 发现了一个优化，可以证明最优根 $k$ 的选择范围是有限的，从而可以将复杂度降低到 $O(N^2)$。</p>
                 <hr>
-                <h3 id="%E7%AC%AC%E4%BA%94%E7%AB%A0%E5%BA%94%E7%94%A8%E4%B8%89--%E6%89%80%E6%9C%89%E8%8A%82%E7%82%B9%E5%AF%B9%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84"><strong>第五章：应用三 · 所有节点对最短路径</strong></h3>
+                <h3 id="%E7%AC%AC%E4%BA%94%E7%AB%A0%E5%BA%94%E7%94%A8%E4%B8%89--%E6%89%80%E6%9C%89%E8%8A%82%E7%82%B9%E5%AF%B9%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84"><strong>第五部分：应用三 · 所有节点对最短路径</strong></h3>
                 <p><strong>问题情境</strong>：
                 给定一个带权有向图，我们需要找到图中每一对顶点 $(u, v)$ 之间的最短路径长度。</p>
                 <p><strong>常规思路</strong>：
@@ -389,7 +389,7 @@ void floydWarshall(std::vector&lt;std::vector&lt;int&gt;&gt;& adjMatrix, int N) 
                 <p><strong>至关重要的一点</strong>：循环的顺序必须是 <code>k, i, j</code>。<code>k</code> 在最外层，意味着我们每轮都“解锁”一个新的中间顶点，并用它来更新所有顶点对之间的距离。</p>
                 <p>这个算法的时间复杂度是 $O(N^3)$，非常适合稠密图。它可以优雅地处理负权边，并且还能通过检查对角线元素 <code>D[i][i]</code> 是否为负来检测负权环的存在。</p>
                 <hr>
-                <h3 id="%E7%AC%AC%E5%85%AD%E7%AB%A0%E6%9C%80%E7%BB%88%E7%AB%A0--%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E7%9A%84%E6%A0%B8%E5%BF%83%E4%B8%8E%E8%BE%B9%E7%95%8C"><strong>第六章：最终章 · 动态规划的核心与边界</strong></h3>
+                <h3 id="%E7%AC%AC%E5%85%AD%E7%AB%A0%E6%9C%80%E7%BB%88%E7%AB%A0--%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E7%9A%84%E6%A0%B8%E5%BF%83%E4%B8%8E%E8%BE%B9%E7%95%8C"><strong>第六部分： 动态规划的核心与边界</strong></h3>
                 <p>经过以上案例，我们再来审视动态规划的两大基石：</p>
                 <ol>
                 <li><strong>最优子结构</strong>：确保局部最优可以导出全局最优。</li>
