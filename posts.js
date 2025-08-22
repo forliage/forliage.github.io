@@ -109,28 +109,35 @@ var postsData = [
       "date": "2025-08-22",
       "category": "学习笔记",
       "path": "_posts/2025-08-22-ads09.html",
-      "abstract": "ads lecture note (update):贪心算法 (Greedy Algorithms)"
+      "abstract": "ads lecture note (update) 09:贪心算法 (Greedy Algorithms)"
     },
     {
       "title": "ads课程笔记10:NP完备性理论 (NP-Completeness)",
       "date": "2025-08-22",
       "category": "学习笔记",
       "path": "_posts/2025-08-22-ads10.html",
-      "abstract": "ads lecture note (update):NP完备性理论 (NP-Completeness)"
+      "abstract": "ads lecture note (update) 10:NP完备性理论 (NP-Completeness)"
     },
     {
       "title": "ads课程笔记11:近似算法(Approximation)",
       "date": "2025-08-22",
       "category": "学习笔记",
       "path": "_posts/2025-08-22-ads11.html",
-      "abstract": "ads lecture note (update):近似算法(Approximation)"
+      "abstract": "ads lecture note (update) 11:近似算法(Approximation)"
     },
     {
       "title": "ads课程笔记12:局部搜索 (Local Search)",
       "date": "2025-08-22",
       "category": "学习笔记",
       "path": "_posts/2025-08-22-ads12.html",
-      "abstract": "ads lecture note (update):局部搜索 (Local Search)"
+      "abstract": "ads lecture note (update) 12:局部搜索 (Local Search)"
+    },
+    {
+      "title": "ads课程笔记13:随机算法 (Randomized Algorithms)",
+      "date": "2025-08-22",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-22-ads13.html",
+      "abstract": "ads lecture note (update) 13:随机算法 (Randomized Algorithms)"
     },
     {
       "title": "CUDA学习笔记0:Introduction",
