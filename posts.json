@@ -119,6 +119,13 @@
     "abstract": "ads lecture note (update):NP完备性理论 (NP-Completeness)"
   },
   {
+    "title": "ads课程笔记11:近似算法(Approximation)",
+    "date": "2025-08-22",
+    "category": "学习笔记",
+    "path": "_posts/2025-08-22-ads11.html",
+    "abstract": "ads lecture note (update):近似算法(Approximation)"
+  },
+  {
     "title": "CUDA学习笔记0:Introduction",
     "date": "2025-08-20",
     "category": "学习笔记",
