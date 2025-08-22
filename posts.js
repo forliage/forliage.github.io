@@ -140,6 +140,13 @@ var postsData = [
       "abstract": "ads lecture note (update) 13:随机算法 (Randomized Algorithms)"
     },
     {
+      "title": "ads课程笔记14:并行算法 (Parallel Algorithms)",
+      "date": "2025-08-22",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-22-ads14.html",
+      "abstract": "ads lecture note (update) 14:并行算法 (Parallel Algorithms)"
+    },
+    {
       "title": "CUDA学习笔记0:Introduction",
       "date": "2025-08-20",
       "category": "学习笔记",
