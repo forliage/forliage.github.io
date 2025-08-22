@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>ads15:外部排序 (External Sorting)</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="ads15%E5%A4%96%E9%83%A8%E6%8E%92%E5%BA%8F-external-sorting">ads15:外部排序 (External Sorting)</h1>
+                <h3 id="1-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%A4%96%E9%83%A8%E6%8E%92%E5%BA%8F">1. 为什么需要外部排序？</h3>
+                <p>让我们从一个问题开始：<strong>为什么我们不能直接在磁盘上运行像快速排序（Quicksort）这样的高效内部排序算法呢？</strong></p>
+                <p>我们知道，快速排序是一个非常优秀的算法，它的平均时间复杂度是 $O(N \log N)$。这个复杂度分析是基于一个基本假设：访问任意一个元素 <code>a[i]</code> 的时间是常数时间，即 $O(1)$。</p>
+                <p>这个假设在**内存（Internal Memory）<strong>中是成立的。但在</strong>硬盘（Hard Disk）**这样的外部存储设备上，这个假设就完全失效了。</p>
+                <p>要从硬盘上获取一个数据 <code>a[i]</code>，计算机需要经历一个复杂且耗时的过程：</p>
+                <ol>
+                <li><strong>寻道（Find the track）</strong>: 磁头需要移动到数据所在的磁道。这是机械运动，速度很慢，通常是毫秒级。</li>
+                <li><strong>旋转延迟（Find the sector）</strong>: 等待磁盘旋转，直到数据所在的扇区转到磁头下方。这同样是毫秒级的延迟。</li>
+                <li><strong>传输（Transmit）</strong>: 将数据从磁盘扇区读取并传输到内存。</li>
+                </ol>
+                <p>这整个过程比内存访问慢了几个数量级。快速排序的特点是频繁地进行<strong>随机访问</strong>（例如，选择基准元，分区操作中的元素交换），如果每次访问都要经历一次完整的硬盘I/O，那性能将是灾难性的。我们可以说，这种I/O操作是<strong>设备相关的（device-dependent）</strong>，其成本远远超过了CPU的计算成本。</p>
+                <p>因此，外部排序算法设计的核心思想就是：<strong>最小化磁盘I/O的次数</strong>。</p>
+                <p>为了简化模型，便于我们分析，我们引入一个经典工具：<strong>归并排序（Mergesort）</strong>，并做出以下简化假设：</p>
+                <ul>
+                <li>数据存储在<strong>磁带（Tapes）<strong>上，磁带只能进行</strong>顺序读写</strong>，这非常符合我们减少随机访问的目标。</li>
+                <li>我们至少有 <strong>3</strong> 个磁带机。</li>
+                </ul>
+                <h3 id="2-%E4%B8%A4%E9%98%B6%E6%AE%B5%E5%A4%96%E9%83%A8%E5%BD%92%E5%B9%B6%E6%8E%92%E5%BA%8F%E4%B8%80%E4%B8%AA%E5%AE%9E%E4%BE%8B">2. 两阶段外部归并排序：一个实例</h3>
+                <p>外部排序通常分两个阶段：</p>
+                <ol>
+                <li><strong>生成初始顺串（Run Generation）</strong>: 在内存限制下，从输入数据中生成尽可能长的、已排序的子序列，我们称之为“顺串”（Run），并将这些顺串写到外部存储上。</li>
+                <li><strong>合并顺串（Run Merging）</strong>: 将生成的多个顺串通过多路归并，最终合并成一个完全有序的序列。</li>
+                </ol>
+                <p>让我们通过一个例子来直观地理解这个过程。</p>
+                <p><strong>【例子】</strong>
+                假设我们的输入数据在磁带 <code>T1</code> 上，内部存储器一次最多能处理 $M=3$ 条记录。输入数据共有 $N=13$ 条记录。</p>
+                <p><code>T1</code>: <code>81 94 11 | 96 12 35 | 17 99 28 | 58 41 75 | 15</code></p>
+                <h4 id="%E9%98%B6%E6%AE%B5%E4%B8%80%E7%94%9F%E6%88%90%E5%88%9D%E5%A7%8B%E9%A1%BA%E4%B8%B2"><strong>阶段一：生成初始顺串</strong></h4>
+                <p>我们逐块读取数据，每块大小为 $M=3$。在内存中对它们进行内部排序，然后将排好序的顺串交替写入到两个磁带 <code>T2</code> 和 <code>T3</code> 上。</p>
+                <ol>
+                <li>读入 <code>81 94 11</code> -&gt; 内存排序 -&gt; <code>11 81 94</code> -&gt; 写入 <code>T2</code></li>
+                <li>读入 <code>96 12 35</code> -&gt; 内存排序 -&gt; <code>12 35 96</code> -&gt; 写入 <code>T3</code></li>
+                <li>读入 <code>17 99 28</code> -&gt; 内存排序 -&gt; <code>17 28 99</code> -&gt; 写入 <code>T2</code></li>
+                <li>读入 <code>58 41 75</code> -&gt; 内存排序 -&gt; <code>41 58 75</code> -&gt; 写入 <code>T3</code></li>
+                <li>读入 <code>15</code> -&gt; 内存排序 -&gt; <code>15</code> -&gt; 写入 <code>T2</code></li>
+                </ol>
+                <p>这个过程被称为一次**“遍”（Pass）**，我们称之为 <strong>Pass 0</strong>。完成后，磁带状态如下：</p>
+                <p><code>T2</code>: <code>[11 81 94] [17 28 99] [15]</code> (共3个顺串)
+                <code>T3</code>: <code>[12 35 96] [41 58 75]</code> (共2个顺串)</p>
+                <p>这里每个方括号<code>[]</code>代表一个已排序的顺串。</p>
+                <h4 id="%E9%98%B6%E6%AE%B5%E4%BA%8C%E5%90%88%E5%B9%B6%E9%A1%BA%E4%B8%B2"><strong>阶段二：合并顺串</strong></h4>
+                <p>现在我们进行多趟（Passes）合并。每一趟合并都从 <code>T2</code> 和 <code>T3</code> 中各取一个顺串，将它们合并成一个两倍长的顺串，然后交替写入另外两个磁带（这里是 <code>T1</code> 和 <code>T4</code>）。</p>
+                <p><strong>Pass 1:</strong></p>
+                <ul>
+                <li>合并 <code>T2</code> 的 <code>[11 81 94]</code> 和 <code>T3</code> 的 <code>[12 35 96]</code> -&gt; <code>[11 12 35 81 94 96]</code> -&gt; 写入 <code>T1</code></li>
+                <li>合并 <code>T2</code> 的 <code>[17 28 99]</code> 和 <code>T3</code> 的 <code>[41 58 75]</code> -&gt; <code>[17 28 41 58 75 99]</code> -&gt; 写入 <code>T4</code></li>
+                <li><code>T2</code> 剩下 <code>[15]</code>，直接复制到 <code>T1</code></li>
+                </ul>
+                <p>完成后磁带状态：
+                <code>T1</code>: <code>[11 12 35 81 94 96] [15]</code>
+                <code>T4</code>: <code>[17 28 41 58 75 99]</code></p>
+                <p><strong>Pass 2:</strong></p>
+                <ul>
+                <li>合并 <code>T1</code> 的 <code>[11 12 35 81 94 96]</code> 和 <code>T4</code> 的 <code>[17 28 41 58 75 99]</code> -&gt; <code>[11 12 17 28 35 41 58 75 81 94 96 99]</code> -&gt; 写入 <code>T2</code></li>
+                <li><code>T1</code> 剩下 <code>[15]</code>，直接复制到 <code>T3</code></li>
+                </ul>
+                <p>完成后磁带状态：
+                <code>T2</code>: <code>[11 12 17 28 35 41 58 75 81 94 96 99]</code>
+                <code>T3</code>: <code>[15]</code></p>
+                <p><strong>Pass 3:</strong></p>
+                <ul>
+                <li>合并 <code>T2</code> 的长顺串和 <code>T3</code> 的 <code>[15]</code> -&gt; 最终排好序的序列 -&gt; 写入 <code>T1</code></li>
+                </ul>
+                <p>完成后磁带状态：
+                <code>T1</code>: <code>[11 12 15 17 28 35 41 58 75 81 94 96 99]</code> (排序完成)</p>
+                <p>总共的遍数是多少？</p>
+                <ul>
+                <li><strong>Pass 0</strong>: 生成初始顺串，这是 <strong>1</strong> 遍。</li>
+                <li><strong>Pass 1, 2, 3</strong>: 合并顺串，共 <strong>3</strong> 遍。</li>
+                <li>总遍数 = $1 + 3 = 4$ 遍。</li>
+                </ul>
+                <p>我们来分析一下合并阶段的遍数。初始顺串的数量是 $\lceil N/M \rceil = \lceil 13/3 \rceil = 5$ 个。
+                每一次2-路归并，顺串数量大约减半。所以合并遍数大约是 $\log_2(\text{顺串数量})$。
+                总遍数 = $1 (\text{生成}) + \lceil \log_2(\lceil N/M \rceil) \rceil (\text{合并}) = 1 + \lceil \log_2(5) \rceil = 1 + 3 = 4$ 遍。</p>
+                <p>这正是幻灯片中给出的公式：
+                <strong>总遍数 = $1 + \lceil \log_2(N/M) \rceil$</strong></p>
+                <h3 id="3-%E6%80%A7%E8%83%BD%E8%80%83%E9%87%8F%E4%B8%8E%E4%BC%98%E5%8C%96%E7%9B%AE%E6%A0%87">3. 性能考量与优化目标</h3>
+                <p>通过上面的例子，我们可以总结出外部排序的主要时间开销在哪些方面：</p>
+                <ul>
+                <li><strong>寻道时间 (Seek time)</strong>: 每次开始读写一个新的顺串块（block）时都会发生。它的总开销与<strong>总遍数</strong>成正比。这是我们优化的首要目标。</li>
+                <li><strong>读写时间</strong>: 传输数据的时间，与数据总量和读写遍数有关。</li>
+                <li><strong>内部排序时间</strong>: 在Pass 0生成初始顺串时，对内存中的 $M$ 个记录进行排序的时间。</li>
+                <li><strong>内部合并时间</strong>: 在合并阶段，从输入缓冲区向输出缓冲区合并记录的CPU时间。</li>
+                </ul>
+                <p>通常情况下，I/O时间（寻道+读写）远大于CPU处理时间。一个好消息是，现代计算机可以<strong>并行执行 I/O 和 CPU 处理</strong>。例如，当CPU在处理当前内存中的数据时，可以预先将下一块数据从磁盘读入缓冲区。</p>
+                <p>基于以上分析，我们的优化目标（Targets）变得非常清晰：</p>
+                <ol>
+                <li><strong>减少总遍数（Reduction of the number of passes）</strong>: 这是最核心的优化点。</li>
+                <li><strong>优化顺串合并（Run merging）</strong>: 提高合并效率，比如使用更少的磁带。</li>
+                <li><strong>优化缓冲区管理（Buffer handling for parallel operation）</strong>: 实现I/O和CPU的并行，隐藏I/O延迟。</li>
+                <li><strong>优化初始顺串生成（Run generation）</strong>: 生成更长的初始顺串，从源头上减少顺串数量。</li>
+                </ol>
+                <p>接下来，我们将逐一探讨实现这些目标的策略。</p>
+                <h3 id="4-%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5%E4%B8%80k-%E8%B7%AF%E5%BD%92%E5%B9%B6-k-way-merge">4. 优化策略一：k-路归并 (k-way Merge)</h3>
+                <p>如何最直接地减少合并的遍数？答案是<strong>增加每次合并的顺串数量</strong>。之前的例子是2-路归并，如果我们能同时合并 $k$ 个顺串，即 <strong>k-路归并</strong>，那么顺串数量每次会减少为原来的 $1/k$。</p>
+                <p>这样，合并遍数的公式就从 $\lceil \log_2(\text{顺串数}) \rceil$ 变为 $\lceil \log_k(\text{顺串数}) \rceil$。</p>
+                <p><strong>总遍数 = $1 + \lceil \log_k(N/M) \rceil$</strong></p>
+                <p><code>k</code> 越大，$\log_k$ 的值越小，遍数就越少。</p>
+                <p>让我们用一个图来形象地展示这个过程。假设我们有4个初始顺串，进行2-路归并和4-路归并的对比：</p>
+                <div class="mermaid">
+                graph TD
+                    subgraph "2-路归并 (2 Passes)"
+                        direction TB
+                        A1[Run 1] --> M1((Merge))
+                        A2[Run 2] --> M1
+                        A3[Run 3] --> M2((Merge))
+                        A4[Run 4] --> M2
+                        
+                        M1 --> F1((Final Merge))
+                        M2 --> F1
+                    end
+                    
+                    subgraph "4-路归并 (1 Pass)"
+                        direction TB
+                        B1[Run 1] --> M_Final((Merge))
+                        B2[Run 2] --> M_Final
+                        B3[Run 3] --> M_Final
+                        B4[Run 4] --> M_Final
+                    end
+                </div>
+                <p><strong>【权衡与代价】</strong></p>
+                <p>k-路归并虽然减少了遍数，但也带来了新的挑战：</p>
+                <ol>
+                <li><strong>更多的磁带/文件句柄</strong>: 一个简单的模型是，需要 $k$ 个输入磁带和 $k$ 个输出磁带，交替进行读写，总共需要 <strong>2k 个磁带</strong>。这在磁带是物理设备的年代是一个巨大的成本。在现代系统中，这意味着需要同时打开更多的文件。</li>
+                <li><strong>更多的内存</strong>：为了进行k-路归并，我们需要 $k$ 个输入缓冲区来存放每个顺串的当前数据块，以及至少1个输出缓冲区。</li>
+                </ol>
+                <p>因此，<code>k</code> 的选择是一个权衡：它受到可用内存和磁带/文件句柄数量的限制。</p>
+                <h3 id="5-%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5%E4%BA%8C%E5%A4%9A%E7%9B%B8%E5%BD%92%E5%B9%B6-polyphase-merge">5. 优化策略二：多相归并 (Polyphase Merge)</h3>
+                <p>2k个磁带的代价太高了。我们能否用更少的磁带完成k-路归并？比如，<strong>用3个磁带完成2-路归并？</strong></p>
+                <p>让我们来分析一下。假设初始顺串都在 <code>T1</code> 上，我们需要把它们分配到 <code>T2</code> 和 <code>T3</code> 上，然后从 <code>T2</code>, <code>T3</code> 归并回 <code>T1</code>。</p>
+                <p><strong>传统方法：均匀分配</strong>
+                假设有34个初始顺串。我们把它们均匀分配：</p>
+                <ul>
+                <li><code>T2</code>: 17个顺串</li>
+                <li><code>T3</code>: 17个顺串</li>
+                </ul>
+                <p>现在开始合并：从 <code>T2</code> 和 <code>T3</code> 各读一个，合并到 <code>T1</code>。</p>
+                <ul>
+                <li><strong>Pass 1</strong>: <code>T2</code> 和 <code>T3</code> 的17对顺串合并后，<code>T1</code> 上会得到17个新顺串。<code>T2</code> 和 <code>T3</code> 变空。</li>
+                <li><strong>问题来了</strong>: 现在所有顺串都在 <code>T1</code> 上，我们无法继续归并。必须停下来，做一次**拷贝（copy）**操作，将 <code>T1</code> 上的17个顺串再重新分配到 <code>T2</code>(9个) 和 <code>T3</code>(8个) 上。然后才能继续下一轮归并。</li>
+                </ul>
+                <p>这种频繁的拷贝操作非常低效，完全违背了我们最小化I/O的初衷。</p>
+                <p><strong>更聪明的方法：不均匀分配 (A smarter way – split unevenly)</strong></p>
+                <p>这正是<strong>多相归并</strong>的精髓。它的思想是，在每一轮归并后，都期望恰好有一个磁带变空，而其他磁带上仍有数据，这样就可以立即开始下一轮归并，形成一个完美的多相工作流，避免了任何拷贝。</p>
+                <p>这个完美的分配比例，恰好与**斐波那契数（Fibonacci numbers）**有关！</p>
+                <p>斐波那契数列：$F_0=0, F_1=1, F_2=1, F_3=2, F_4=3, F_5=5, F_6=8, F_7=13, F_8=21, F_9=34, ...$
+                其中 $F_N = F_{N-1} + F_{N-2}$。</p>
+                <p><strong>【声明】</strong>: 如果初始顺串的总数是一个斐波那契数 $F_N$，那么用3个磁带进行2-路归并的最佳分配方式是将其分配到两个磁带上，数量分别为 $F_{N-1}$ 和 $F_{N-2}$。</p>
+                <p>让我们用34个顺串 ($F_9=34$) 来验证一下：</p>
+                <ul>
+                <li>初始分配：<code>T2</code> 上放 $F_8=21$ 个顺串，<code>T3</code> 上放 $F_7=13$ 个顺串。<code>T1</code> 为空，作为输出磁带。</li>
+                </ul>
+                <p><strong>归并过程:</strong></p>
+                <ol>
+                <li>
+                <p><strong>Merge 1</strong>: 从 <code>T2</code> 和 <code>T3</code> 各取13个顺串进行归并，生成13个新顺串到 <code>T1</code>。</p>
+                <ul>
+                <li><code>T1</code>: 13个顺串 (长度为2)</li>
+                <li><code>T2</code>: 剩下 $21-13=8$ 个顺串 (长度为1)</li>
+                <li><code>T3</code>: 变空
+                此时，<code>T1</code> 和 <code>T2</code> 上的顺串数量为13和8，恰好是 $F_7$ 和 $F_6$！<code>T3</code> 顺理成章地成为新的输出磁带。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Merge 2</strong>: 从 <code>T1</code> 和 <code>T2</code> 各取8个顺串归并到 <code>T3</code>。</p>
+                <ul>
+                <li><code>T1</code>: 剩下 $13-8=5$ 个顺串</li>
+                <li><code>T2</code>: 变空</li>
+                <li><code>T3</code>: 8个新顺串
+                此时，<code>T1</code> 和 <code>T3</code> 上的顺串数量为5和8，即 $F_5$ 和 $F_6$。</li>
+                </ul>
+                </li>
+                </ol>
+                <p>这个过程会一直持续下去，每次归并都会消耗掉一个磁带上的所有顺串，并且剩下两个磁带上的顺串数量恰好是相邻的两个斐波那契数。</p>
+                <div class="mermaid">
+                graph TD
+                    A["<b>初始状态 (34个顺串)</b><br>T1: (输出磁带)<br>T2: 21个顺串 (F<sub>8</sub>)<br>T3: 13个顺串 (F<sub>7</sub>)"]
+                    --> B("<b>Pass 1</b><br>从T2和T3合并13个顺串到T1")
+                    --> C["<b>状态 1 (21个顺串)</b><br>T1: 13个顺串 (F<sub>7</sub>)<br>T2: 8个顺串 (F<sub>6</sub>)<br>T3: (输出磁带)"]
+                    --> D("<b>Pass 2</b><br>从T1和T2合并8个顺串到T3")
+                    --> E["<b>状态 2 (13个顺串)</b><br>T1: 5个顺串 (F<sub>5</sub>)<br>T2: (输出磁带)<br>T3: 8个顺串 (F<sub>6</sub>)"]
+                    --> F("...")
+                    --> G["<b>最终状态 (1个顺串)</b><br>排序完成"]
+                </div>
+                <p>最终，经过 $N-1$ 次（这里是 $9-1=8$ 次）这样的合并阶段，所有数据都会被合并成一个单一的、完全排序的顺串，整个过程没有任何数据拷贝。</p>
+                <p><strong>【补充问题解答】</strong></p>
+                <ol>
+                <li>
+                <p><strong>如果22个顺串在T2，12个在T3会发生什么？</strong></p>
+                <ul>
+                <li>总顺串数是 34。$22$ 和 $12$ 并非相邻的斐波那契数 ($F_8=21, F_7=13$)。</li>
+                <li><strong>第一步合并</strong>: 从<code>T2</code>和<code>T3</code>各取12个顺串合并到<code>T1</code>。
+                <ul>
+                <li><code>T1</code>：12个新顺串</li>
+                <li><code>T2</code>：剩下 $22-12=10$ 个顺串</li>
+                <li><code>T3</code>：变空</li>
+                </ul>
+                </li>
+                <li><strong>问题出现</strong>: 现在<code>T1</code>有12个，<code>T2</code>有10个。这个组合 (12, 10) 破坏了斐波那契的完美结构，下一轮合并后无法继续保持这种模式，最终会导致某个阶段需要进行额外的拷贝操作，效率降低。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>如果初始顺串数量不是斐波那契数怎么办？</strong></p>
+                <ul>
+                <li>这是一个非常实际的问题。解决方法是添加<strong>虚拟的空顺串（dummy runs）</strong>。</li>
+                <li>例如，如果我们有25个顺串。下一个斐波那契数是 $F_9=34$。我们需要 $34-25=9$ 个虚拟顺串。</li>
+                <li>我们假装有34个顺串，并按斐波那契分割方式分配它们，即在 <code>T2</code> 上分配 $F_8=21$ 个，<code>T3</code> 上分配 $F_7=13$ 个。</li>
+                <li>这21和13个顺串中，包含了真实的25个和虚拟的9个。在合并时，如果遇到虚拟顺串，就相当于输入流为空，直接将另一个输入流的数据复制过去即可。这虽然会增加一些逻辑，但依然避免了大规模的磁盘数据拷贝。</li>
+                </ul>
+                </li>
+                </ol>
+                <p><strong>【推广到 k-路归并】</strong></p>
+                <p>多相归并可以推广到使用 <strong>k+1 个磁带进行 k-路归并</strong>。这时，完美的分配比例不再是斐波那契数，而是<strong>广义斐波那契数</strong>。
+                其递推关系为：
+                $F_N^{(k)} = F_{N-1}^{(k)} + F_{N-2}^{(k)} + \dots + F_{N-k}^{(k)}$
+                初始条件为：$F_N^{(k)} = 0 \quad (0 \le N \le k-2)$, $F_{k-1}^{(k)} = 1$。
+                当 k=2 时，这就是标准的斐波那契数列。</p>
+                <h3 id="6-%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5%E4%B8%89%E7%BC%93%E5%86%B2%E5%8C%BA%E4%B8%8E%E5%B9%B6%E8%A1%8C%E6%93%8D%E4%BD%9C-buffer-handling">6. 优化策略三：缓冲区与并行操作 (Buffer Handling)</h3>
+                <p>为了实现I/O和CPU的并行，我们需要精心设计<strong>缓冲区（Buffers）</strong>。</p>
+                <p>核心思想是<strong>双缓冲（Double Buffering）</strong>。对于每个输入流和输出流，我们都使用两个缓冲区。</p>
+                <ul>
+                <li>当CPU正在处理<strong>缓冲区A</strong>中的数据时，I/O系统可以同时将下一块数据读入<strong>缓冲区B</strong>。</li>
+                <li>当CPU处理完A，它立刻转向处理B。与此同时，I/O系统可以将A中处理过的数据写回磁盘（如果是输出缓冲），或者将新的数据读入A。</li>
+                </ul>
+                <p>这样，CPU和I/O设备可以像流水线一样协同工作，只要I/O速度能跟上CPU处理速度，I/O的等待时间就可以被大部分隐藏。</p>
+                <p><strong>【k-路归并的缓冲需求】</strong>
+                为了实现完全的并行操作，对于一个k-路归并：</p>
+                <ul>
+                <li>我们需要 <strong>k 个输入流</strong>，每个流配备双缓冲，共需 <strong>2k 个输入缓冲区</strong>。</li>
+                <li>我们需要 <strong>1 个输出流</strong>，配备双缓冲，共需 <strong>2 个输出缓冲区</strong>。</li>
+                </ul>
+                <p>总共需要 $2k+2$ 个缓冲区。</p>
+                <p><strong>【例子】</strong></p>
+                <ul>
+                <li>一个文件包含 <strong>3250</strong> 条记录。</li>
+                <li>内存一次最多能排序 <strong>750</strong> 条记录 ($M=750$)。</li>
+                <li>磁盘块（block）大小为 <strong>250</strong> 条记录。</li>
+                </ul>
+                <ol>
+                <li>
+                <p><strong>生成初始顺串 (Pass 0)</strong>:</p>
+                <ul>
+                <li>总顺串数 = $\lceil 3250 / 750 \rceil = 5$ 个。</li>
+                <li>每个顺串的平均长度为750。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>合并阶段 (假设 k=2，即2-路归并)</strong>:</p>
+                <ul>
+                <li>内存大小为750条记录。</li>
+                <li>块大小为250条记录。</li>
+                <li>我们需要2个输入流和1个输出流。为了并行，使用双缓冲。</li>
+                <li><strong>输入缓冲</strong>: $2 \times k = 2 \times 2 = 4$ 个。</li>
+                <li><strong>输出缓冲</strong>: $2 \times 1 = 2$ 个。</li>
+                <li>总共需要 $4+2=6$ 个缓冲区。</li>
+                <li>每个缓冲区大小是多少？假设我们平均分配内存：$750 / 6 = 125$ 条记录/缓冲区。</li>
+                <li><strong>问题</strong>: 缓冲区大小（125）小于磁盘块大小（250）！这意味着我们无法一次读入一个完整的块，I/O效率会很低。</li>
+                </ul>
+                </li>
+                </ol>
+                <p><strong>【权衡与最优 k 的选择】</strong></p>
+                <p>这个例子揭示了一个重要的权衡关系：</p>
+                <ul>
+                <li><strong>增加 <code>k</code> (路数)</strong>:
+                <ul>
+                <li>优点：减少合并遍数，从而减少总的寻道次数和数据读写总量。</li>
+                <li>缺点：需要的缓冲区数量（$2k+2$）增加，导致在<strong>总内存固定</strong>的情况下，每个缓冲区的<strong>尺寸变小</strong>。</li>
+                </ul>
+                </li>
+                <li><strong>减小缓冲区尺寸</strong>:
+                <ul>
+                <li>缺点：如果缓冲区尺寸小于磁盘块大小，会造成低效I/O。即使大于块大小，更小的缓冲区也意味着更频繁的I/O请求，可能增加总的寻道时间和旋转延迟。</li>
+                </ul>
+                </li>
+                </ul>
+                <p>如下图所示，存在一个最优的 <code>k</code> 值。当 <code>k</code> 太小时，总遍数太多，I/O时间长。当 <code>k</code> 太大时，虽然遍数少了，但单次I/O效率变低，导致总I/O时间反而增加。</p>
+                <div class="code-container">
+                <pre><code>k (路数)  &lt;---&gt; # of input buffers &lt;---&gt; buffer size
+    ^                                       |
+    |                                       v
+seek time &lt;---&gt; block size on disk &lt;---&gt; I/O efficiency
+</code></pre>
+                </div>
+                <p>最优的 <code>k</code> 值取决于磁盘的具体参数（寻道时间、传输速率）、块大小以及可用的总内存大小。</p>
+                <h3 id="7-%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5%E5%9B%9B%E7%94%9F%E6%88%90%E6%9B%B4%E9%95%BF%E7%9A%84%E5%88%9D%E5%A7%8B%E9%A1%BA%E4%B8%B2-replacement-selection">7. 优化策略四：生成更长的初始顺串 (Replacement Selection)</h3>
+                <p>到目前为止，我们生成的初始顺串长度都受限于内存大小 $M$。有没有办法生成<strong>平均长度大于 $M$ 的顺串</strong>呢？答案是肯定的，这就是**替换选择（Replacement Selection）**算法。</p>
+                <p>该算法使用一个大小为 $M$ 的**最小堆（Min-Heap）**作为核心数据结构。</p>
+                <p><strong>算法流程:</strong></p>
+                <ol>
+                <li><strong>初始化</strong>: 将输入文件的前 $M$ 个记录读入内存，并建立一个最小堆。</li>
+                <li><strong>循环生成顺串</strong>:
+                a. 从堆顶取出最小元素，将其写入当前的输出顺串。
+                b. 从输入文件中读取下一个记录。
+                c. <strong>比较</strong>: 将新读入的记录与刚输出的记录进行比较。
+                * 如果新记录 <strong>大于或等于</strong> 刚输出的记录，说明它可以属于当前这个递增的顺串。将它加入堆中。
+                * 如果新记录 <strong>小于</strong> 刚输出的记录，它就不能加入当前顺串了（否则会破坏有序性）。我们将它放入堆中一个<strong>逻辑上分开</strong>的“冻结区”，在下一轮新顺串生成前，它不会参与堆的操作。
+                d. 重复 a-c，直到堆中所有“活跃”元素都被输出。</li>
+                <li><strong>结束当前顺串</strong>: 当主堆变空时，当前顺串结束。将堆中“冻结区”的所有元素“解冻”，形成新的堆，开始生成下一个顺串。</li>
+                </ol>
+                <p><strong>【图解与示例】</strong>
+                让我们用一个例子来模拟。假设 $M=3$，输入序列为 <code>81, 94, 11, 96, 12, 35, ...</code></p>
+                <div class="mermaid">
+                graph TD
+                    Start("<b>开始</b><br>Input: 81, 94, 11, ...") --> FillHeap("<b>初始化 (M=3)</b><br>读入前3个元素<br><b>Heap:</b> [11, 81, 94]<br><b>Run:</b> []<br><b>Frozen:</b> []")
+                    
+                    FillHeap --> Step1_Out("<b>1. 输出最小值: 11</b>")
+                    Step1_Out --> Step1_In("<b>读入新元素: 96</b><br>因为 96 >= 11 (上次输出)<br>加入Heap")
+                    Step1_In --> State1("<b>状态</b><br><b>Heap:</b> [81, 94, 96]<br><b>Run:</b> [11]<br><b>Frozen:</b> []")
+
+                    State1 --> Step2_Out("<b>2. 输出最小值: 81</b>")
+                    Step2_Out --> Step2_In("<b>读入新元素: 12</b><br>因为 12 < 81 (上次输出)<br><b>放入冻结区</b>")
+                    Step2_In --> State2("<b>状态</b><br><b>Heap:</b> [94, 96]<br><b>Run:</b> [11, 81]<br><b>Frozen:</b> [12]")
+
+                    State2 --> Step3_Out("<b>3. 输出最小值: 94</b>")
+                    Step3_Out --> Step3_In("<b>读入新元素: 35</b><br>因为 35 < 94 (上次输出)<br><b>放入冻结区</b>")
+                    Step3_In --> State3("<b>状态</b><br><b>Heap:</b> [96]<br><b>Run:</b> [11, 81, 94]<br><b>Frozen:</b> [12, 35]")
+                    
+                    State3 --> Final("... (继续此过程直到Heap变空, 第一个Run结束)")
+                </div>
+                <p><strong>【性能分析】</strong></p>
+                <p>替换选择算法的神奇之处在于，在随机输入的情况下，它生成的顺串的<strong>平均长度是 $2M$</strong>！是传统方法的两倍。</p>
+                <ul>
+                <li><strong>直观理解</strong>: 堆就像一个“蓄水池”，它能容纳那些暂时还“不够大”的元素，让那些“足够大”的元素先输出，从而延长了当前顺串的生命周期。</li>
+                <li><strong>最佳情况</strong>: 如果输入数据本身就是<strong>几乎有序的（nearly sorted）</strong>，替换选择可以生成一个极长的、甚至可能是一个覆盖整个文件的顺串！这使得它在处理这类数据时极为强大。</li>
+                </ul>
+                <p>通过将初始顺串数量减半（平均而言），替换选择能显著减少后续合并所需的遍数，是外部排序中非常关键的一项优化。</p>
+                <h4 id="%E4%BC%AA%E4%BB%A3%E7%A0%81"><strong>伪代码</strong></h4>
+                <div class="code-container">
+                <pre><code>function ReplacementSelection(inputFile, outputTapes, M):
+    heap = new MinHeap(M)
+    frozen_area = new Array()
+    
+    // Phase 1: Fill memory and build heap
+    for i from 1 to M:
+        record = inputFile.read()
+        if record is not EOF:
+            heap.insert(record)
+
+    current_output_tape = outputTapes.next()
+
+    while not heap.isEmpty():
+        // Main loop to generate one run
+        while not heap.isEmpty():
+            min_record = heap.extractMin()
+            current_output_tape.write(min_record)
+            last_output = min_record
+            
+            new_record = inputFile.read()
+            if new_record is EOF:
+                continue // Just empty the heap
+
+            if new_record >= last_output:
+                heap.insert(new_record)
+            else:
+                frozen_area.add(new_record)
+        
+        // Current run is finished. Start a new one with frozen elements.
+        current_output_tape = outputTapes.next()
+        for record in frozen_area:
+            heap.insert(record)
+        frozen_area.clear()
+
+    // Handle any remaining elements in the last run
+    while not heap.isEmpty():
+         min_record = heap.extractMin()
+         current_output_tape.write(min_record)
+</code></pre>
+                </div>
+                <h4 id="c-%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B-%E6%A0%B8%E5%BF%83%E9%80%BB%E8%BE%91"><strong>C++ 代码示例 (核心逻辑)</strong></h4>
+                <div class="code-container">
+                <pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;queue&gt;
+#include &lt;algorithm&gt;
+#include &lt;functional&gt; // For std::greater
+
+// Simulate input stream
+struct InputStream {
+    std::vector&lt;int&gt; data;
+    size_t pos = 0;
+    bool eof() { return pos >= data.size(); }
+    int read() { return eof() ? -1 : data[pos++]; }
+};
+
+// Simulate output stream (runs)
+using Run = std::vector&lt;int&gt;;
+
+void replacementSelection(InputStream& input, std::vector&lt;Run&gt;& output_runs, size_t M) {
+    if (M == 0) return;
+
+    std::priority_queue&lt;int, std::vector&lt;int&gt;, std::greater&lt;int&gt;&gt; heap;
+    std::vector&lt;int&gt; frozen_elements;
+
+    // Initial fill
+    for (size_t i = 0; i < M && !input.eof(); ++i) {
+        heap.push(input.read());
+    }
+
+    if (heap.empty()) return;
+
+    while (true) {
+        Run current_run;
+        int last_output = -1; // Assuming non-negative data
+
+        // Generate one run
+        while (!heap.empty()) {
+            int min_val = heap.top();
+            heap.pop();
+            current_run.push_back(min_val);
+            last_output = min_val;
+
+            if (!input.eof()) {
+                int new_val = input.read();
+                if (new_val >= last_output) {
+                    heap.push(new_val);
+                } else {
+                    frozen_elements.push_back(new_val);
+                }
+            }
+        }
+        
+        output_runs.push_back(current_run);
+
+        // Check if we are done
+        if (frozen_elements.empty()) {
+            break;
+        }
+
+        // Prepare for the next run
+        for (int val : frozen_elements) {
+            heap.push(val);
+        }
+        frozen_elements.clear();
+    }
+}
+
+int main() {
+    InputStream input;
+    input.data = {81, 94, 11, 96, 12, 35, 17, 99, 28, 58, 41, 75, 15};
+    std::vector&lt;Run&gt; runs;
+    size_t M = 3;
+
+    replacementSelection(input, runs, M);
+
+    std::cout &lt;&lt; "Generated Runs (avg length should be ~2M=" &lt;&lt; 2*M &lt;&lt; "):\n";
+    for (size_t i = 0; i < runs.size(); ++i) {
+        std::cout &lt;&lt; "Run " &lt;&lt; i + 1 &lt;&lt; " (length " &lt;&lt; runs[i].size() &lt;&lt; "): ";
+        for (int val : runs[i]) {
+            std::cout &lt;&lt; val &lt;&lt; " ";
+        }
+        std::cout &lt;&lt; std::endl;
+    }
+    // Expected output from the example:
+    // Run 1: 11 12 17 28 35 41 58 75 81 94 96 99
+    // Run 2: 15
+    // Average length is (12+1)/2 = 6.5, which is approx 2*M=6
+    return 0;
+}
+</code></pre>
+                </div>
+                <h3 id="8-%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5%E4%BA%94%E6%9C%80%E5%B0%8F%E5%8C%96%E5%90%88%E5%B9%B6%E6%97%B6%E9%97%B4-huffman-tree">8. 优化策略五：最小化合并时间 (Huffman Tree)</h3>
+                <p>前面的优化都假设所有初始顺串长度相等。但如果使用替换选择，或者数据本身特性导致生成的顺串<strong>长度不一</strong>，我们又该如何安排合并顺序呢？</p>
+                <p><strong>【问题】</strong>
+                假设我们有4个顺串，长度分别为 2, 4, 5, 15。我们每次只能做2-路归并。如何安排合并顺序，才能使得总的合并代价（可以理解为读写记录的总数）最小？</p>
+                <ul>
+                <li><strong>合并代价</strong>: 合并两个长度为 $L_1$ 和 $L_2$ 的顺串，需要读取 $L_1+L_2$ 个记录，并写入 $L_1+L_2$ 个记录。总代价可以认为是 $L_1+L_2$。</li>
+                <li><strong>总合并时间</strong>: 所有合并步骤的代价之和。</li>
+                </ul>
+                <p>让我们尝试两种合并策略：</p>
+                <p><strong>策略A：</strong></p>
+                <ol>
+                <li>合并 (2, 4) -&gt; 6。代价 = 6。剩下 (6, 5, 15)</li>
+                <li>合并 (6, 5) -&gt; 11。代价 = 11。剩下 (11, 15)</li>
+                <li>合并 (11, 15) -&gt; 26。代价 = 26。
+                总代价 = $6 + 11 + 26 = 43$。</li>
+                </ol>
+                <p><strong>策略B：</strong></p>
+                <ol>
+                <li>合并 (15, 5) -&gt; 20。代价 = 20。剩下 (20, 2, 4)</li>
+                <li>合并 (20, 4) -&gt; 24。代价 = 24。剩下 (24, 2)</li>
+                <li>合并 (24, 2) -&gt; 26。代价 = 26。
+                总代价 = $20 + 24 + 26 = 70$。</li>
+                </ol>
+                <p>显然，策略A远优于策略B。这背后的原则是：<strong>应该优先合并那些最短的顺串</strong>。</p>
+                <p>这个原则和构造**霍夫曼树（Huffman Tree）**的算法完全一致！</p>
+                <p>我们可以把每个顺串看作一个叶子节点，顺串的长度看作是节点的权重。构造霍夫曼树的过程就是不断选择权重最小的两个节点合并，生成一个父节点，其权重为两个子节点权重之和。这个过程持续下去，直到所有节点合并成一个根节点。</p>
+                <p><strong>【应用霍夫曼树】</strong>
+                对于长度为 2, 4, 5, 15 的顺串：</p>
+                <div class="mermaid">
+                graph TD
+                    subgraph Huffman Tree Construction
+                        R26(26) --> R11(11)
+                        R26 --> L15[15]
+
+                        R11 --> R6(6)
+                        R11 --> L5[5]
+                        
+                        R6 --> L2[2]
+                        R6 --> L4[4]
+                    end
+                </div>
+                <p>这个树的构造过程就是最优的合并策略：</p>
+                <ol>
+                <li>合并 2 和 4 (最小的两个) -&gt; 得到长度为 6 的顺串。</li>
+                <li>现在有 (6, 5, 15)，合并 6 和 5 (最小的两个) -&gt; 得到长度为 11 的顺串。</li>
+                <li>现在有 (11, 15)，合并它们 -&gt; 得到最终长度为 26 的顺串。</li>
+                </ol>
+                <p>这正是我们的策略A！</p>
+                <p>总的合并代价可以表示为该霍夫曼树的<strong>带权外部路径长度（Weighted External Path Length）</strong>。</p>
+                <ul>
+                <li>一个叶节点的路径长度，是它到根节点的边数。</li>
+                <li>带权外部路径长度 = $\sum (\text{叶节点权重} \times \text{路径长度})$</li>
+                </ul>
+                <p>计算一下：</p>
+                <ul>
+                <li>顺串 2: 权重2，路径长度3 (2-&gt;6-&gt;11-&gt;26)</li>
+                <li>顺串 4: 权重4，路径长度3 (4-&gt;6-&gt;11-&gt;26)</li>
+                <li>顺串 5: 权重5，路径长度2 (5-&gt;11-&gt;26)</li>
+                <li>顺串 15: 权重15，路径长度1 (15-&gt;26)</li>
+                </ul>
+                <p>总代价 = $2 \times 3 + 4 \times 3 + 5 \times 2 + 15 \times 1 = 6 + 12 + 10 + 15 = 43$。</p>
+                <p>因此，当初始顺串长度不等时，我们可以利用霍夫曼树来制定最优的合并计划，从而最小化总的合并时间。</p>
+                <p><strong>总合并时间 = $O(\text{带权外部路径长度})$</strong></p>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
