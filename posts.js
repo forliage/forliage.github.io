@@ -84,6 +84,13 @@ var postsData = [
       "abstract": "ads lecture note (update) 05:二项队列(Binomial Queue)"
     },
     {
+      "title": "ads课程笔记06:回溯(Backtracking)",
+      "date": "2025-08-22",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-22-ads06.html",
+      "abstract": "ads lecture note (update) 06:回溯(Backtracking)"
+    },
+    {
       "title": "CUDA学习笔记0:Introduction",
       "date": "2025-08-20",
       "category": "学习笔记",
