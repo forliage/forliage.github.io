@@ -91,6 +91,13 @@ var postsData = [
       "abstract": "ads lecture note (update) 06:回溯(Backtracking)"
     },
     {
+      "title": "ads课程笔记07:分治法 (Divide and Conquer)",
+      "date": "2025-08-22",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-22-ads07.html",
+      "abstract": "ads lecture note (update) 07:分治法 (Divide and Conquer)"
+    },
+    {
       "title": "CUDA学习笔记0:Introduction",
       "date": "2025-08-20",
       "category": "学习笔记",
