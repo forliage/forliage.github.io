@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>ads08:动态规划 (Dynamic Programming)</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="ads08%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92-dynamic-programming">ads08:动态规划 (Dynamic Programming)</h1>
+                <p>Main Idea:<strong>“记住过去，预见未来”</strong></p>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E6%96%90%E6%B3%A2%E9%82%A3%E5%A5%91%E6%95%B0%E5%88%97%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E7%9A%84%E5%90%AF%E7%A4%BA"><strong>第一部分：斐波那契数列——动态规划的启示</strong></h3>
+                <p>斐波那契数列的定义想必大家都很熟悉：
+                $$F(N) = F(N-1) + F(N-2)$$
+                我们设定初始条件为 $F(0) = 1, F(1) = 1$。</p>
+                <p>面对这个定义，最符合直觉的编程实现方式是什么？没错，是递归。</p>
+                <div class="code-container">
+                <pre><code class="language-cpp">// 纯粹的递归实现
+int Fib_recursive(int n) {
+    if (n <= 1) {
+        return 1;
+    }
+    return Fib_recursive(n - 1) + Fib_recursive(n - 2);
+}
+</code></pre>
+                </div>
+                <p>代码简洁优雅，但美丽的外表下却隐藏着效率的灾难。让我们一起看看计算 <code>Fib(6)</code> 时，计算机都做了些什么。</p>
+                <div class="mermaid">
+                graph TD
+                    subgraph "递归调用树 for Fib(6)"
+                        F6("Fib(6)") --> F5("Fib(5)");
+                        F6 --> F4_1("Fib(4)");
+
+                        F5 --> F4_2("Fib(4)");
+                        F5 --> F3_1("Fib(3)");
+
+                        F4_1 --> F3_2("Fib(3)");
+                        F4_1 --> F2_1("Fib(2)");
+
+                        F4_2 --> F3_3("Fib(3)");
+                        F4_2 --> F2_2("Fib(2)");
+
+                        F3_1 --> F2_3("Fib(2)");
+                        F3_1 --> F1_1("Fib(1)");
+
+                        F3_2 --> F2_4("Fib(2)");
+                        F3_2 --> F1_2("Fib(1)");
+
+                        F3_3 --> F2_5("Fib(2)");
+                        F3_3 --> F1_3("Fib(1)");
+
+                        F2_1 --> F1_4("Fib(1)");
+                        F2_1 --> F0_1("Fib(0)");
+                        
+                        F2_2 --> F1_5("Fib(1)");
+                        F2_2 --> F0_2("Fib(0)");
+
+                        F2_3 --> F1_6("Fib(1)");
+                        F2_3 --> F0_3("Fib(0)");
+
+                        F2_4 --> F1_7("Fib(1)");
+                        F2_4 --> F0_4("Fib(0)");
+
+                        F2_5 --> F1_8("Fib(1)");
+                        F2_5 --> F0_5("Fib(0)");
+                    end
+                    
+                    %% 为重复计算的节点着色
+                    style F4_1 fill:#ffcdd2,stroke:#c62828
+                    style F4_2 fill:#ffcdd2,stroke:#c62828
+                    style F3_1 fill:#fff59d,stroke:#fbc02d
+                    style F3_2 fill:#fff59d,stroke:#fbc02d
+                    style F3_3 fill:#fff59d,stroke:#fbc02d
+                    style F2_1 fill:#c5cae9,stroke:#3949ab
+                    style F2_2 fill:#c5cae9,stroke:#3949ab
+                    style F2_3 fill:#c5cae9,stroke:#3949ab
+                    style F2_4 fill:#c5cae9,stroke:#3949ab
+                    style F2_5 fill:#c5cae9,stroke:#3949ab
+                </div>
+                <p><strong>问题的根源</strong>在于，这棵递归树中出现了大量的<strong>冗余计算</strong>。<code>Fib(4)</code> 被计算了2次，<code>Fib(3)</code>被计算了3次... 这种重复是爆炸性的。</p>
+                <p><strong>[数学分析]</strong>
+                设 $T(N)$ 为计算 <code>Fib(N)</code> 所需的计算步骤。我们有：
+                $$T(N) \ge T(N-1) + T(N-2)$$
+                这个递推关系与斐波那契数列本身的定义惊人地相似。我们可以证明，$T(N)$ 的增长率与 $F(N)$ 相同，是指数级的，大约为 $O(1.618^N)$。这意味着计算 <code>Fib(100)</code> 可能需要等到天荒地老。</p>
+                <p><strong>解决方案</strong>：既然我们反复遇到相同的子问题，为何不把它们的解记录下来呢？这就是动态规划的精髓。我们可以构建一个“备忘录”，或者更直接地，采用一种<strong>自底向上 (Bottom-up)</strong> 的迭代方式。</p>
+                <div class="code-container">
+                <pre><code class="language-cpp">// 动态规划实现
+int Fibonacci_dp(int n) {
+    if (n <= 1) {
+        return 1;
+    }
+
+    // 我们只需要存储前两个数
+    int nextToLast = 1; // F(i-2)
+    int last = 1;       // F(i-1)
+    int answer = 0;
+
+    for (int i = 2; i <= n; ++i) {
+        answer = last + nextToLast; // 计算 F(i)
+        nextToLast = last;          // 更新 F(i-2)
+        last = answer;              // 更新 F(i-1)
+    }
+    return answer;
+}
+</code></pre>
+                </div>
+                <p>这个版本只用了一个简单的循环，时间复杂度降至 $O(N)$，空间复杂度仅为 $O(1)$。从指数级到线性级，这是质的飞跃。</p>
+                <p>这个简单的例子揭示了动态规划适用的两个核心特征：</p>
+                <ol>
+                <li><strong>最优子结构 (Optimal Substructure):</strong> 一个问题的最优解（或解本身）包含其子问题的最优解。</li>
+                <li><strong>重叠子问题 (Overlapping Subproblems):</strong> 在求解过程中，某些子问题会被反复计算多次。</li>
+                </ol>
+                <hr>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E8%AE%BE%E8%AE%A1%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E7%AE%97%E6%B3%95%E7%9A%84%E9%80%9A%E7%94%A8%E8%93%9D%E5%9B%BE"><strong>第二部分：设计动态规划算法的通用蓝图</strong></h3>
+                <p>掌握了核心思想后，我们可以总结出一套解决动态规划问题的通用方法论，称之为<strong>DP四步法</strong>：</p>
+                <ol>
+                <li><strong>刻画最优解的结构</strong>：首先，你要能清晰地描述一个最优解是什么样的，并且证明它是由子问题的最优解构成的。</li>
+                <li><strong>建立递推关系</strong>：基于最优子结构，写出问题的解与子问题解之间的数学关系式，也就是状态转移方程。</li>
+                <li><strong>自底向上计算</strong>：确定计算顺序，从小规模的子问题开始，逐步填充一张“备忘录”表格，直到计算出最终问题的解。</li>
+                <li><strong>构造最优解路径</strong>：最终的计算结果通常只是一个最优值。如果需要知道这个最优解是如何达成的，我们还需要根据计算过程中记录的信息，回溯出具体的方案。</li>
+                </ol>
+                <p>接下来，我们将运用它，去攻克几个更复杂、也更有趣的经典问题。</p>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E5%BA%94%E7%94%A8%E4%B8%80--%E7%9F%A9%E9%98%B5%E9%93%BE%E7%9B%B8%E4%B9%98"><strong>第三部分：应用一 · 矩阵链相乘</strong></h3>
+                <p><strong>问题情境</strong>：
+                我们有一系列矩阵 $&lt;M_1, M_2, \dots, M_n&gt;$ 需要相乘。矩阵乘法满足结合律，例如 $(M_1 M_2) M_3 = M_1 (M_2 M_3)$，但不同的计算顺序（即加括号的方式）所需要的标量乘法总次数可能天差地别。我们的目标是找到一种最佳顺序，使得总计算量最小。</p>
+                <p><strong>一个直观的例子</strong>：
+                假设有4个矩阵，维度分别为：</p>
+                <ul>
+                <li>$M_1: 10 \times 20$</li>
+                <li>$M_2: 20 \times 50$</li>
+                <li>$M_3: 50 \times 1$</li>
+                <li>$M_4: 1 \times 100$</li>
+                </ul>
+                <p>两种不同的计算顺序：</p>
+                <ol>
+                <li>
+                <p><strong>顺序一</strong>: $M_1 \times (M_2 \times (M_3 \times M_4))$</p>
+                <ul>
+                <li>$M_3 \times M_4$ (一个 $50 \times 1$ 矩阵乘以 $1 \times 100$ 矩阵) 需要 $50 \times 1 \times 100 = 5,000$ 次乘法。</li>
+                <li>$M_2 \times (M_3M_4)$ ($20 \times 50$ 乘以 $50 \times 100$) 需要 $20 \times 50 \times 100 = 100,000$ 次。</li>
+                <li>$M_1 \times (M_2M_3M_4)$ ($10 \times 20$ 乘以 $20 \times 100$) 需要 $10 \times 20 \times 100 = 20,000$ 次。</li>
+                <li><strong>总计: 125,000 次乘法。</strong></li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>顺序二</strong>: $((M_1 \times M_2) \times M_3) \times M_4$</p>
+                <ul>
+                <li>$M_1 \times M_2$ ($10 \times 20$ 乘以 $20 \times 50$) 需要 $10 \times 20 \times 50 = 10,000$ 次。</li>
+                <li>$(M_1M_2) \times M_3$ ($10 \times 50$ 乘以 $50 \times 1$) 需要 $10 \times 50 \times 1 = 500$ 次。</li>
+                <li>$((M_1M_2)M_3) \times M_4$ ($10 \times 1$ 乘以 $1 \times 100$) 需要 $10 \times 1 \times 100 = 1,000$ 次。</li>
+                <li><strong>总计: 11,500 次乘法。</strong></li>
+                </ul>
+                </li>
+                </ol>
+                <p>结果相差超过10倍！对于n个矩阵，加括号的方式数量是<strong>卡特兰数</strong>，呈指数级增长。暴力搜索所有可能性是不可行的。</p>
+                <p><strong>运用DP四步法</strong>：</p>
+                <p><strong>1. 刻画最优解的结构</strong>
+                考虑计算矩阵链 $M_i \dots M_j$ 的最优方案。这个方案的最后一步乘法，必然是在某个位置 $k$ (其中 $i \le k &lt; j$) 分割，即计算 $(M_i \dots M_k) \times (M_{k+1} \dots M_j)$。这个方案要成为最优，那么计算子链 $(M_i \dots M_k)$ 和 $(M_{k+1} \dots M_j)$ 的方案也必须是它们各自的最优方案。这就是完美的最优子结构。</p>
+                <p><strong>2. 建立递推关系</strong>
+                设 $m[i][j]$ 为计算矩阵链 $M_i \dots M_j$ 的最少乘法次数。设矩阵 $M_i$ 的维度是 $r_{i-1} \times r_i$。</p>
+                <ul>
+                <li>当 $i = j$ 时，只有一个矩阵，无需计算，所以 $m[i][i] = 0$。</li>
+                <li>当 $i &lt; j$ 时，我们尝试所有可能的分割点 $k$，并取其中的最小值：
+                $m[i][j] = \min_{i \le k &lt; j} { \text{cost}(M_{i..k}) + \text{cost}(M_{k+1..j}) + \text{cost of final multiplication} }$
+                $m[i][j] = \min_{i \le k &lt; j} { m[i][k] + m[k+1][j] + r_{i-1} \cdot r_k \cdot r_j }$</li>
+                </ul>
+                <p><strong>3. 自底向上计算</strong>
+                我们需要一个二维表 <code>m</code> 来存储计算结果。观察递推式，计算 $m[i][j]$ 需要所有更短子链（即 <code>j-i</code> 值更小）的结果。因此，我们应该按照<strong>链的长度</strong>从小到大进行计算。</p>
+                <ul>
+                <li>长度为1: $m[i][i]$ (对角线)</li>
+                <li>长度为2: $m[i][i+1]$</li>
+                <li>...</li>
+                <li>长度为n: $m[1][n]$ (最终答案)</li>
+                </ul>
+                <p>这个计算过程的可视化如下：</p>
+                <div class="mermaid">
+                graph TD
+                    subgraph "DP Table Filling Order (by Chain Length)"
+                        direction LR
+                        
+                        subgraph "Length 1 (Base Cases)"
+                            m11("m[1,1]"); m22("m[2,2]"); m33("m[3,3]"); m44("m[4,4]");
+                        end
+
+                        subgraph "Length 2"
+                            m12("m[1,2]"); m23("m[2,3]"); m34("m[3,4]");
+                        end
+
+                        subgraph "Length 3"
+                            m13("m[1,3]"); m24("m[2,4]");
+                        end
+
+                        subgraph "Length 4 (Final Answer)"
+                            m14("m[1,4]");
+                        end
+                        
+                        %% 描绘计算依赖关系
+                        m11 & m22 --> m12;
+                        m22 & m33 --> m23;
+                        m33 & m44 --> m34;
+
+                        m12 & m23 --> m13;
+                        m23 & m34 --> m24;
+
+                        m13 & m24 --> m14;
+                    end
+
+                    %% 美化样式
+                    style m11 fill:#c8e6c9, stroke-width:2px, stroke:#388e3c
+                    style m22 fill:#c8e6c9, stroke-width:2px, stroke:#388e3c
+                    style m33 fill:#c8e6c9, stroke-width:2px, stroke:#388e3c
+                    style m44 fill:#c8e6c9, stroke-width:2px, stroke:#388e3c
+
+                    style m12 fill:#a5d6a7, stroke-width:2px, stroke:#388e3c
+                    style m23 fill:#a5d6a7, stroke-width:2px, stroke:#388e3c
+                    style m34 fill:#a5d6a7, stroke-width:2px, stroke:#388e3c
+
+                    style m13 fill:#81c784, stroke-width:2px, stroke:#388e3c
+                    style m24 fill:#81c784, stroke-width:2px, stroke:#388e3c
+
+                    style m14 fill:#4caf50, stroke-width:2px, stroke:#2e7d32, color:#fff
+                </div>
+                <p><strong>4. 构造最优解路径</strong>
+                为了能回溯出具体的加括号方案，我们需要在计算时额外记录一个表 <code>s[i][j]</code>，它存储了使得 $m[i][j]$ 取得最小值的那个分割点 $k$。</p>
+                <p><strong>[C++ 核心实现]</strong></p>
+                <div class="code-container">
+                <pre><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;climits&gt;
+
+// r 数组存储维度，r[i-1] 和 r[i] 是矩阵 M_i 的维度
+void matrixChainOrder(const std::vector&lt;long&gt;& r) {
+    int n = r.size() - 1; // n 是矩阵的数量
+    std::vector&lt;std::vector&lt;long&gt;&gt; m(n + 1, std::vector&lt;long&gt;(n + 1, 0));
+    std::vector&lt;std::vector&lt;int&gt;&gt; s(n + 1, std::vector&lt;int&gt;(n + 1, 0));
+
+    // len 是矩阵链的长度
+    for (int len = 2; len <= n; ++len) {
+        for (int i = 1; i <= n - len + 1; ++i) {
+            int j = i + len - 1;
+            m[i][j] = LONG_MAX;
+            // k 是分割点
+            for (int k = i; k < j; ++k) {
+                long cost = m[i][k] + m[k + 1][j] + r[i - 1] * r[k] * r[j];
+                if (cost < m[i][j]) {
+                    m[i][j] = cost;
+                    s[i][j] = k; // 记录最佳分割点
+                }
+            }
+        }
+    }
+    std::cout &lt;&lt; "最少乘法次数: " &lt;&lt; m[1][n] &lt;&lt; std::endl;
+    // ... 此处可以添加一个递归函数，利用 s 表打印出最优括号方案
+}
+
+int main() {
+    std::vector&lt;long&gt; dimensions = {10, 20, 50, 1, 100};
+    matrixChainOrder(dimensions);
+    return 0;
+}
+</code></pre>
+                </div>
+                <p>该算法有三层嵌套循环，因此时间复杂度为 $O(N^3)$。</p>
+                <hr>
+                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E5%BA%94%E7%94%A8%E4%BA%8C--%E6%9C%80%E4%BC%98%E4%BA%8C%E5%8F%89%E6%90%9C%E7%B4%A2%E6%A0%91"><strong>第四部分：应用二 · 最优二叉搜索树</strong></h3>
+                <p><strong>问题情境</strong>：
+                给定 $N$ 个已排序的关键字 $w_1 &lt; w_2 &lt; \dots &lt; w_N$ 和它们各自的被搜索概率 $p_i$。我们需要构建一棵二叉搜索树 (BST)，使得期望搜索代价最小。
+                节点深度从0开始，期望总代价为：
+                $$E[\text{cost}] = \sum\limits_{i=1}^{N} p_i \cdot (1 + \text{depth}(w_i))$$</p>
+                <p><strong>一个挑战：贪心和平衡树是否最优？</strong></p>
+                <p>在深入DP解法前，我们必须思考一个问题：更简单的方法行不行？</p>
+                <ul>
+                <li><strong>贪心策略</strong>：一个很自然的想法是，把概率最高的关键字放在根节点，因为它被访问最频繁。然后递归地对左右子树执行此策略。但这会导致一个问题：为了让一个高频词深度为0，我们可能会创建一棵极不平衡的树，导致其他许多词的深度大大增加，最终总成本反而更高。</li>
+                <li><strong>AVL等平衡树</strong>：这类树追求的是结构上的绝对平衡，以保证最坏情况下的搜索性能。但它们完全忽略了关键字的访问频率。在一个静态（即无插入删除）的查询环境中，为了结构平衡而把一个高频词放在深处，显然不是最优选择。</li>
+                </ul>
+                <p>结论是，这两种方法都无法保证找到最优解。我们需要更全局的视野，而这正是DP所擅长的。</p>
+                <p><strong>运用DP四步法</strong>：</p>
+                <p><strong>1. 刻画最优解的结构</strong>
+                考虑包含关键字 $w_i, \dots, w_j$ 的一棵最优BST，记为 $T_{ij}$。这棵树一定有一个根，比如说 $w_k$ ($i \le k \le j$) 。那么，它的左子树必然包含关键字 $w_i, \dots, w_{k-1}$，右子树包含 $w_{k+1}, \dots, w_j$。为了使整棵树 $T_{ij}$ 最优，它的左子树和右子树也必须分别是对应关键字集合的最优BST。又一次，我们看到了完美的最优子结构。</p>
+                <p><strong>2. 建立递推关系</strong>
+                设 $c[i][j]$ 为包含关键字 $w_i, \dots, w_j$ 的最优BST的期望代价。
+                设 $w[i][j] = \sum\limits_{l=i}^{j} p_l$ 为这个关键字集合的总概率。</p>
+                <p>当我们选择 $w_k$ 作为根时，原先在子树中的所有节点的深度都增加了1。这使得总代价增加了 $\sum p_l = w[i][j]$。
+                因此，以 $w_k$ 为根的树的总代价为：
+                $$\text{Cost(root=}w_k) = c[i][k-1] + c[k+1][j] + w[i][j]$$
+                我们遍历所有可能的根 $k$，找到最小代价：
+                $$c[i][j] = \min_{i \le k \le j} { c[i][k-1] + c[k+1][j] + w[i][j] }$$
+                由于 $w[i][j]$ 不依赖于 $k$，可以提取出来：
+                $$c[i][j] = w[i][j] + \min_{i \le k \le j} { c[i][k-1] + c[k+1][j] }$$
+                基础情况是空树，即 $c[i][i-1] = 0$。</p>
+                <p><strong>3. &amp; 4. 计算与构造</strong>
+                和矩阵链乘法一样，我们按子树中关键字的数量（长度）从小到大来填充 $c[i][j]$ 表。同时，用一个 <code>root[i][j]</code> 表记录下最优根。</p>
+                <p><strong>示例分析</strong>：
+                对于给定的词和概率：
+                <code>break(0.22), case(0.18), char(0.20), do(0.05), return(0.25), switch(0.02), void(0.08)</code>
+                通过填充DP表，我们最终可以计算出全局最优代价。并且，通过 <code>root</code> 表，我们可以回溯构造出这棵最优树。</p>
+                <p>下面是根据DP计算结果构造出的最优BST：</p>
+                <div class="mermaid">
+                graph TD
+                    char("char (0.20)") --> break("break (0.22)");
+                    char --> return("return (0.25)");
+                    
+                    break --> case("case (0.18)");
+                    break --> do("do (0.05)");
+                    
+                    return --> switch("switch (0.02)");
+                    
+                    case --> void("void (0.08)");
+
+                    style char fill:#b2ebf2,stroke:#00acc1,stroke-width:2px;
+                    style return fill:#ffe0b2,stroke:#fb8c00,stroke-width:2px;
+                    style break fill:#ffe0b2,stroke:#fb8c00,stroke-width:2px;
+                </div>
+                <p>这个算法的时间复杂度同样是 $O(N^3)$。值得一提的是，数学家 Knuth 发现了一个优化，可以证明最优根 $k$ 的选择范围是有限的，从而可以将复杂度降低到 $O(N^2)$。</p>
+                <hr>
+                <h3 id="%E7%AC%AC%E4%BA%94%E7%AB%A0%E5%BA%94%E7%94%A8%E4%B8%89--%E6%89%80%E6%9C%89%E8%8A%82%E7%82%B9%E5%AF%B9%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84"><strong>第五章：应用三 · 所有节点对最短路径</strong></h3>
+                <p><strong>问题情境</strong>：
+                给定一个带权有向图，我们需要找到图中每一对顶点 $(u, v)$ 之间的最短路径长度。</p>
+                <p><strong>常规思路</strong>：
+                一个直接的想法是对每个顶点都运行一次单源最短路径算法，比如Dijkstra（如果无负权边）或Bellman-Ford（可处理负权边）。对于一个有 $|V|$ 个顶点的图，这将需要运行 $|V|$ 次。对于稠密图，这样做的复杂度通常是 $O(V^3)$ 或更高。</p>
+                <p><strong>动态规划的视角：Floyd-Warshall算法</strong>
+                这个算法提供了一个非常精妙的DP思路。它不是一次性考虑所有可能的路径，而是逐步“放宽”对路径的限制。</p>
+                <p><strong>DP状态定义</strong>：
+                设 $D^k[i][j]$ 为从顶点 $i$到顶点 $j$，其路径上所有<strong>中间顶点</strong>（不含起点和终点）的编号都<strong>不大于</strong> $k$ 的最短路径长度。</p>
+                <p><strong>递推关系</strong>：</p>
+                <ul>
+                <li><strong>基础情况 ($k=0$)</strong>: $D^0[i][j]$ 表示不允许任何中间顶点，即从 $i$ 到 $j$ 的直接边的权重。如果 $i=j$，则为0；若无直接边，则为无穷大。</li>
+                <li><strong>递推</strong>：对于 $D^k[i][j]$，从 $i$ 到 $j$ 且中间顶点 $\in {1, \dots, k}$ 的最短路径，有两种可能：
+                <ol>
+                <li>这条路径<strong>不经过</strong>顶点 $k$。那么它的所有中间顶点都在 ${1, \dots, k-1}$ 中，其长度就是 $D^{k-1}[i][j]$。</li>
+                <li>这条路径<strong>经过</strong>顶点 $k$。那么它可以被分解为 $i \rightarrow \dots \rightarrow k \rightarrow \dots \rightarrow j$。这两段子路径的中间顶点也必然都在 ${1, \dots, k-1}$ 中。因此，这条路径的长度是 $D^{k-1}[i][k] + D^{k-1}[k][j]$。</li>
+                </ol>
+                </li>
+                </ul>
+                <p>我们取这两者中的较小值：
+                $$D^k[i][j] = \min(D^{k-1}[i][j], \quad D^{k-1}[i][k] + D^{k-1}[k][j])$$</p>
+                <p><strong>算法实现</strong>：
+                这个递推关系引出了一个异常简洁的实现。我们可以用一个二维数组 <code>D</code> 在原地进行更新。</p>
+                <div class="code-container">
+                <pre><code class="language-cpp">// N 是顶点数量
+// adjMatrix 是邻接矩阵，无边处为无穷大，对角线为0
+void floydWarshall(std::vector&lt;std::vector&lt;int&gt;&gt;& adjMatrix, int N) {
+    // k 必须在最外层循环
+    for (int k = 0; k < N; ++k) {
+        for (int i = 0; i < N; ++i) {
+            for (int j = 0; j < N; ++j) {
+                if (adjMatrix[i][k] != INT_MAX && adjMatrix[k][j] != INT_MAX) {
+                    adjMatrix[i][j] = std::min(adjMatrix[i][j], adjMatrix[i][k] + adjMatrix[k][j]);
+                }
+            }
+        }
+    }
+}
+</code></pre>
+                </div>
+                <p><strong>至关重要的一点</strong>：循环的顺序必须是 <code>k, i, j</code>。<code>k</code> 在最外层，意味着我们每轮都“解锁”一个新的中间顶点，并用它来更新所有顶点对之间的距离。</p>
+                <p>这个算法的时间复杂度是 $O(N^3)$，非常适合稠密图。它可以优雅地处理负权边，并且还能通过检查对角线元素 <code>D[i][i]</code> 是否为负来检测负权环的存在。</p>
+                <hr>
+                <h3 id="%E7%AC%AC%E5%85%AD%E7%AB%A0%E6%9C%80%E7%BB%88%E7%AB%A0--%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E7%9A%84%E6%A0%B8%E5%BF%83%E4%B8%8E%E8%BE%B9%E7%95%8C"><strong>第六章：最终章 · 动态规划的核心与边界</strong></h3>
+                <p>经过以上案例，我们再来审视动态规划的两大基石：</p>
+                <ol>
+                <li><strong>最优子结构</strong>：确保局部最优可以导出全局最优。</li>
+                <li><strong>重叠子问题</strong>：这是DP区别于普通分治法的关键，也是其效率提升的来源。</li>
+                </ol>
+                <p><strong>那么，什么时候动态规划会“失灵”呢？</strong></p>
+                <p>这个问题帮助我们理解DP的适用边界。</p>
+                <ol>
+                <li>
+                <p><strong>当问题不具备最优子结构时</strong>：
+                一个经典的例子是<strong>最长简单路径问题</strong>（简单路径指不重复访问顶点的路径）。假设从A到C的最长路径是 A -&gt; B -&gt; C。这并不意味着 A -&gt; B 的子路径就是A到B的最长路径。因为A到B的“最优”（最长）路径可能已经经过了C，导致我们无法再走到C，从而破坏了“简单路径”的约束。子问题的解之间相互“干扰”，无法独立构成更大问题的解。</p>
+                </li>
+                <li>
+                <p><strong>当问题没有重叠子问题时</strong>：
+                如果所有子问题都是全新的，从不重复，那么“备忘录”就失去了意义。这种情况，我们称之为<strong>分治法 (Divide and Conquer)</strong>。
+                <strong>归并排序</strong>就是典型的分治。它将数组一分为二，对左半部分排序，对右半部分排序，然后合并。左、右两个子问题是完全独立的，没有任何交集。因此，它不是动态规划。</p>
+                </li>
+                </ol>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

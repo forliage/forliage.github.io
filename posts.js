@@ -98,6 +98,13 @@ var postsData = [
       "abstract": "ads lecture note (update) 07:分治法 (Divide and Conquer)"
     },
     {
+      "title": "ads课程笔记08:动态规划 (Dynamic Programming)",
+      "date": "2025-08-22",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-22-ads08.html",
+      "abstract": "ads lecture note (update) 08:动态规划 (Dynamic Programming)"
+    },
+    {
       "title": "CUDA学习笔记0:Introduction",
       "date": "2025-08-20",
       "category": "学习笔记",
