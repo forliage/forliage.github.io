@@ -250,5 +250,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-23-Animation10.html",
       "abstract": "Computer Animation:变形动画 "
+    },
+    {
+      "title": "计算机动画学习笔记11:布料动画",
+      "date": "2025-08-23",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-23-Animation11.html",
+      "abstract": "Computer Animation:布料动画 "
     }
   ];
