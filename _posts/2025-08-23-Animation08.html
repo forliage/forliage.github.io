@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机动画08:关节(角色)动画·中</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8A%A8%E7%94%BB08%E5%85%B3%E8%8A%82%E8%A7%92%E8%89%B2%E5%8A%A8%E7%94%BB%E4%B8%AD">计算机动画08:关节(角色)动画·中</h1>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E6%B7%B1%E5%85%A5%E9%80%86%E5%90%91%E9%9B%85%E5%8F%AF%E6%AF%94%E6%96%B9%E6%B3%95"><strong>第一部分：深入逆向雅可比方法</strong></h3>
+                <h4 id="11-%E5%A5%87%E5%BC%82%E6%83%85%E5%86%B5%E5%8F%8A%E5%85%B6%E5%A4%84%E7%90%86"><strong>1.1 奇异情况及其处理</strong></h4>
+                <p>我们在上一讲提到，IK存在奇异性（Singularity）的问题。那么什么是奇异性？</p>
+                <ul>
+                <li>
+                <p><strong>物理上的理解</strong>: 当关节链<strong>完全伸展</strong>成一条直线，或者<strong>多个关节轴发生重合</strong>时，就会发生奇异。在这种姿态下，无论你如何调整关节角度，末端执行器都无法在某些方向上产生有效的运动。比如手臂完全伸直时，你无法通过转动肘关节或肩关节来让手“继续向前伸”。</p>
+                </li>
+                <li>
+                <p><strong>数学上的理解</strong>: 奇异性意味着<strong>雅可比矩阵的行向量之间变得线性相关</strong>。这导致雅可比矩阵<strong>不可逆</strong>（或者说，它的行列式为零）。我们知道逆向雅可比方法依赖于对雅可比矩阵求逆，一旦矩阵不可逆，经典的求解方法就会失效。</p>
+                </li>
+                </ul>
+                <p><strong>接近奇异点时会发生什么？</strong></p>
+                <p>即使没有完全到达奇异点，只是<strong>接近</strong>它，也会引发问题。这时雅可比矩阵会变得“病态”（ill-conditioned）。这意味着，为了让末端执行器产生一个微小的位移 $\Delta X$，可能需要关节角度产生一个巨大的变化 $\Delta \theta$。这会导致动画出现剧烈的、不稳定的抖动。</p>
+                <p><strong>如何处理奇异情况？</strong></p>
+                <ol>
+                <li>
+                <p><strong>简单规避</strong>: 最直接的方法就是<strong>不允许关节链达到完全伸展</strong>的状态。在绑定角色时，为关节设置一个很小的角度限制，例如肘关节最多只能伸展到179度，从而从物理上避免奇异性的发生。</p>
+                </li>
+                <li>
+                <p><strong>算法层面的处理</strong>:</p>
+                <ul>
+                <li><strong>阻尼最小二乘法 (Damped Least Squares, DLS)</strong>: 这是处理奇异性和病态问题的标准技术。它的核心思想是在求解过程中引入一个“阻尼项”，以牺牲一点点精度为代价，换取系统的稳定性。</li>
+                </ul>
+                <p>我们回顾一下，标准伪逆求解的公式是：
+                $$\dot{\theta} = J^T(JJ^T)^{-1}V$$</p>
+                <p>问题出在 $(JJ^T)$ 这个矩阵上。当接近奇异点时，这个矩阵的行列式趋近于0，导致它的逆矩阵 $(JJ^T)^{-1}$ 中的元素变得非常大，从而引起 $\dot{\theta}$ 的剧烈变化。</p>
+                <p>阻尼最小二乘法的做法是，给这个矩阵加上一个单位矩阵 $I$ 的倍数：
+                $$\dot{\theta} = J^T(JJ^T + \lambda I)^{-1}V$$</p>
+                <p>这里的 $\lambda$ 是一个用户可控的、很小的正数（阻尼系数）。</p>
+                <ul>
+                <li><strong>数学原理</strong>: 加上 $\lambda I$ 保证了 $(JJ^T + \lambda I)$ 这个矩阵始终是<strong>正定的</strong>，因此它的行列式总会大于0，从而<strong>永远可逆</strong>。即使在奇异点，我们也能得到一个稳定、平滑的解。当远离奇异点时，$JJ^T$ 占主导，解接近标准解；当接近奇异点时，$\lambda I$ 占主导，它会“抑制”关节速度的剧烈变化，使得运动更加平滑。</li>
+                <li><strong>在奇异区域引入额外的迭代操作</strong>: 当检测到系统接近奇异时，可以减小迭代步长，或者临时切换到其他更稳定的求解策略。</li>
+                </ul>
+                </li>
+                </ol>
+                <h4 id="12-%E5%9C%A8ik%E4%B8%AD%E5%BC%95%E5%85%A5%E6%9B%B4%E5%A4%9A%E6%8E%A7%E5%88%B6%E9%9B%B6%E7%A9%BA%E9%97%B4"><strong>1.2 在IK中引入更多控制：零空间</strong></h4>
+                <p>我们之前提到，对于冗余关节链，IK问题有无穷多解。伪逆方法找到的是其中一个特殊的解——它使得关节角速度的范数 $||\dot{\theta}||^2$ 最小。这通常能产生平滑的运动，但未必是我们最想要的“自然”姿态。</p>
+                <p>那么，我们能否利用这种“解的无限性”来做更多的事情呢？答案是肯定的，这就是<strong>零空间 (Null Space)</strong> 的用武之地。</p>
+                <ul>
+                <li>
+                <p><strong>什么是雅可比的零空间？</strong>
+                雅可比矩阵 $J$ 的零空间，是指所有满足 $J\dot{\theta} = 0$ 的关节角速度向量 $\dot{\theta}$ 的集合。</p>
+                <p><strong>物理意义</strong>: 任何属于零空间的关节运动 $\dot{\theta}_{null}$，都不会对末端执行器的线速度/角速度产生任何影响。也就是说，<strong>你可以在零空间里任意活动关节，而手的位置保持不动！</strong> 试想一下，你保持手的位置不变，然后抬起或放下你的肘部，这就是一种零空间运动。</p>
+                </li>
+                <li>
+                <p><strong>利用零空间进行二次控制</strong>
+                我们可以把最终的关节速度分解为两部分：</p>
+                <ol>
+                <li><strong>主任务 (Primary Task)</strong>: 移动末端执行器到目标位置。这部分由伪逆解 $J^+V$ 负责。</li>
+                <li><strong>次任务 (Secondary Task)</strong>: 在不影响主任务的前提下，优化角色的姿态。这部分就在零空间中进行。</li>
+                </ol>
+                <p>完整的控制方程如下：
+                $$\dot{\theta} = \underbrace{J^+V}_{\text{主任务：移动末端}} + \underbrace{(I - J^+J)z}_{\text{次任务：优化姿态}}$$</p>
+                <ul>
+                <li><strong>投影矩阵</strong>: 这里的 $(I - J^+J)$ 是一个<strong>投影矩阵</strong>，它能将任意一个关节速度向量 $z$ 投影到雅可比矩阵 $J$ 的零空间上。</li>
+                <li><strong>控制向量 $z$</strong>: 这是一个我们可以自由定义的向量，用来表达我们的次要目标。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>如何证明次任务不影响主任务？</strong>
+                我们将控制项记为 $\dot{\theta}_{null} = (I - J^+J)z$。我们需要证明 $J\dot{\theta}_{null} = 0$。</p>
+                <p>$$J\dot{\theta}_{null} = J((I - J^+J)z) = (J - JJ^+J)z$$</p>
+                <p>根据伪逆的一个重要性质 $A A^+ A = A$，我们有 $JJ^+J = J$。</p>
+                <p>所以，$$J\dot{\theta}_{null} = (J - J)z = 0z = 0$$</p>
+                <p><strong>证明完毕</strong>。这表明，无论我们的控制向量 $z$ 是什么，它经过零空间投影后，产生的关节运动都绝对不会改变末端执行器的速度。</p>
+                </li>
+                <li>
+                <p><strong>定义控制向量 $z$</strong>
+                我们通常将 $z$ 定义为一个指向“期望姿态”的梯度。例如，我们希望关节保持在一个舒适的“自然”角度 $\theta_{natural}$。我们可以定义一个目标函数 $G(\theta)$：</p>
+                <p>$$G(\theta) = \sum_{i} \alpha_i (\theta_{natural}(i) - \theta(i))^2$$</p>
+                <p>我们希望最小化这个函数。$z$ 就可以是这个函数关于 $\theta$ 的负梯度：</p>
+                <p>$$z_i = -\frac{\partial G}{\partial \theta_i} = 2\alpha_i (\theta_{natural}(i) - \theta_i)$$</p>
+                <p>这里的 $\alpha_i$ 是<strong>关节增益 (Joint Gain)</strong>，代表这个关节回归到自然姿态的“意愿”有多强烈。增益越大，关节就越“僵硬”，越倾向于保持在自然角度。</p>
+                </li>
+                <li>
+                <p><strong>求解系统</strong>
+                将 $z$ 代入完整方程，我们就得到了一个既能完成主任务又能兼顾次任务的IK求解器。虽然公式看起来复杂，但每一步的计算都是明确的线性代数操作，可以在计算机中高效实现。</p>
+                </li>
+                </ul>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%85%B6%E4%BB%96%E6%95%B0%E5%80%BCik%E6%96%B9%E6%B3%95"><strong>第二部分：其他数值IK方法</strong></h3>
+                <p>逆向雅可比方法虽然强大，但并非唯一的选择。让我们快速了解一下其他几种流行的数值IK算法。</p>
+                <h4 id="21-%E5%BE%AA%E7%8E%AF%E5%9D%90%E6%A0%87%E4%B8%8B%E9%99%8D%E6%B3%95-cyclic-coordinate-descent-ccd"><strong>2.1 循环坐标下降法 (Cyclic Coordinate Descent, CCD)</strong></h4>
+                <p>CCD是一种非常直观和容易实现的IK算法。</p>
+                <ul>
+                <li>
+                <p><strong>思想</strong>:</p>
+                <ol>
+                <li>从关节链最末端的关节（离末端执行器最近的那个）开始。</li>
+                <li>计算两个向量：一个是从当前关节到末端执行器的向量 $\vec{v}_{eff}$，另一个是从当前关节到目标的向量 $\vec{v}<_{target}$。</li>
+                <li>旋转当前关节，使得 $\vec{v}_{eff}$ 对齐 $\vec{v}_{target}$。</li>
+                <li>移动到上一个关节（父关节），重复步骤2和3。</li>
+                <li>当遍历到根关节后，完成一轮迭代。</li>
+                <li>重复整个过程（通常5-10次迭代），直到末端执行器足够接近目标。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>优缺点</strong>:</p>
+                <ul>
+                <li><strong>优点</strong>:
+                <ul>
+                <li><strong>简单</strong>: 算法逻辑清晰，不需要复杂的矩阵运算。</li>
+                <li><strong>实时</strong>: 计算成本很低，非常适合游戏等实时应用。</li>
+                </ul>
+                </li>
+                <li><strong>缺点</strong>:
+                <ul>
+                <li><strong>会陷入局部极小</strong>: 可能会找到一个无法再通过单关节旋转来改进的姿态，但这个姿态并非全局最优解。</li>
+                <li><strong>不真实的姿势</strong>: 由于是贪婪地逐个优化关节，可能会产生一些不自然的“扭曲”姿势。</li>
+                <li><strong>奇异情况</strong>: 当关节链完全伸直且目标也在这条直线上时，每个关节计算出的旋转角度都为0，算法会失效。解决方法是，当发现骨骼链“很直”时，人为地加入一个微小的扰动旋转。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="22-fabrik-forward-and-backward-reaching-inverse-kinematics"><strong>2.2 FABRIK (Forward And Backward Reaching Inverse Kinematics)</strong></h4>
+                <p>FABRIK是另一种基于几何的启发式迭代方法。</p>
+                <ul>
+                <li>
+                <p><strong>思想</strong>:
+                把关节链想象成一串用固定长度的棍子连起来的珠子。</p>
+                <ol>
+                <li><strong>检查可达性</strong>: 首先判断目标点是否在关节链的最大伸展范围之内。如果目标太远，无解。</li>
+                <li><strong>迭代过程 (Forward and Backward Pass)</strong>:
+                a. <strong>向后传递 (Forward Pass / Backward Reaching)</strong>:
+                <ul>
+                <li>将末端执行器直接“拽”到目标位置。</li>
+                <li>这会导致倒数第二个连杆的长度被改变。为了恢复长度，将倒数第二个关节沿着新的“末端-倒数第二关节”连线，拉回到正确距离处。</li>
+                <li>依次向前处理，直到根关节。
+                b. <strong>向前传递 (Backward Pass / Forward Reaching)</strong>:</li>
+                <li>经过向后传递，根关节的位置会发生偏移。现在，把根关节“拽”回它原来的固定位置。</li>
+                <li>这会导致第一个连杆长度改变。同样地，将第二个关节沿着新的“根-第二关节”连线，拉回到正确距离处。</li>
+                <li>依次向后处理，直到末端执行器。</li>
+                </ul>
+                </li>
+                <li>重复整个迭代过程，直到末端执行器的位置收敛到目标点。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>优缺点</strong>:</p>
+                <ul>
+                <li><strong>优点</strong>:
+                <ul>
+                <li><strong>高效</strong>: 收敛速度快，通常几次迭代就能得到很好的结果。</li>
+                <li><strong>全局优化</strong>: 每次迭代都考虑整个链条，倾向于找到更自然的全局解。</li>
+                <li><strong>简单</strong>: 同样不涉及复杂的矩阵和角度计算，只需要向量操作。</li>
+                <li><strong>支持多末端和约束</strong>: 算法易于扩展，可以处理多个末端执行器和简单的关节约束。</li>
+                </ul>
+                </li>
+                <li><strong>缺点</strong>:
+                <ul>
+                <li><strong>依赖初始姿态</strong>: 最终结果可能受初始姿态影响。</li>
+                <li><strong>奇异情况</strong>: 同样存在直线奇异问题，解决方法也类似。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="23-%E5%9F%BA%E4%BA%8E%E4%BC%98%E5%8C%96%E7%9A%84ik%E8%AE%A1%E7%AE%97%E6%96%B9%E6%B3%95"><strong>2.3 基于优化的IK计算方法</strong></h4>
+                <p>我们可以将整个IK问题构建成一个通用的<strong>非线性优化问题</strong>。</p>
+                <ul>
+                <li>
+                <p><strong>思想</strong>:</p>
+                <ul>
+                <li><strong>目标函数 (Objective Function)</strong>: 我们要最小化的量。最基本的目标函数是末端执行器位置与目标位置之间的距离的平方：
+                $$G(\theta) = ||p_g - p_e(\theta)||^2$$
+                我们还可以加入方向误差、姿态保持项等，形成一个加权和的总目标函数。</li>
+                <li><strong>约束 (Constraint)</strong>: 角色必须遵守的规则。例如：
+                <ul>
+                <li><strong>关节限制 (Joint limits)</strong>: $\theta_{min} \le \theta \le \theta_{max}$</li>
+                <li><strong>肢体协调 (Limb coordination)</strong>: 比如左右脚之间的距离约束。</li>
+                </ul>
+                </li>
+                <li><strong>求解</strong>: 使用标准的数值优化算法（如梯度下降法、牛顿法、SQP等）来寻找能使目标函数最小化，同时满足所有约束条件的关节角度 $\theta$。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>优缺点</strong>:</p>
+                <ul>
+                <li><strong>优点</strong>:
+                <ul>
+                <li><strong>通用性强</strong>: 可以非常灵活地加入各种复杂的目标和约束，是处理高级角色控制（如平衡、避障）的强大框架。</li>
+                </ul>
+                </li>
+                <li><strong>缺点</strong>:
+                <ul>
+                <li><strong>计算昂贵</strong>: 求解非线性优化问题通常计算量很大，不一定适合实时应用。</li>
+                <li><strong>局部极小</strong>: 容易陷入局部最优解，结果依赖于初始条件。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E9%AA%A8%E6%9E%B6%E4%B8%8E%E8%A7%92%E8%89%B2%E6%A8%A1%E5%9E%8B%E7%9A%84%E7%BB%91%E5%AE%9A-rigging"><strong>第三部分：骨架与角色模型的绑定 (Rigging)</strong></h3>
+                <p>到目前为止，我们一直在讨论如何让抽象的骨架动起来。但用户最终看到的是外表的角色模型。那么，骨架的运动是如何驱动模型变形的呢？这个过程，我们称为<strong>绑定 (Rigging)</strong> 或 <strong>蒙皮 (Skinning)</strong>。</p>
+                <h4 id="31-%E9%97%AE%E9%A2%98%E7%9A%84%E5%BC%95%E5%87%BA"><strong>3.1 问题的引出</strong></h4>
+                <p>一个平滑的角色表面（皮肤）必须随着骨架的运动而平滑地变形。</p>
+                <ul>
+                <li>对于皮肤上远离关节的顶点，比如在大臂中间的点，它的运动应该完全由大臂骨骼决定。</li>
+                <li>但对于关节附近的顶点，比如在肘关节处的点，它的运动应该同时受大臂和前臂两块骨骼的影响，这样才能产生平滑的弯曲，而不是生硬的折叠。</li>
+                </ul>
+                <p>这就引出了<strong>顶点混合 (Vertex Blending)</strong> 或 <strong>线性混合蒙皮 (Linear Blend Skinning, LBS)</strong> 的思想。</p>
+                <h4 id="32-%E9%A1%B9%E7%82%B9%E6%B7%B7%E5%90%88-vertex-blending"><strong>3.2 顶点混合 (Vertex Blending)</strong></h4>
+                <p><strong>核心思想</strong>: <strong>模型上的每一个顶点，都可以受到多个（通常不超过4个）骨骼的影响。它的最终位置，是根据这些骨骼的变换进行加权平均的结果。</strong></p>
+                <p><strong>数学表示</strong>:
+                假设一个顶点在模型初始姿态（通常是T-Pose或Rest Pose）下的坐标是 $\mathbf{P}$。我们想要求出在 $t$ 时刻，骨架运动后，这个顶点的新坐标 $\mathbf{u}(t)$。</p>
+                <p>$$\mathbf{u}(t) = \sum_{i=0}^{n-1} w_i \mathbf{B}_i(t) \mathbf{M}_i^{-1} \mathbf{P}$$</p>
+                <p>其中：</p>
+                <ul>
+                <li>$n$: 影响顶点 $\mathbf{P}$ 的骨骼数量。</li>
+                <li>$w_i$: 第 $i$ 根骨骼对顶点 $\mathbf{P}$ 的<strong>权重 (weight)</strong>。这是一个介于0和1之间的标量，且所有权重的和必须为1 ($\sum w_i = 1$)。</li>
+                <li>$\mathbf{M}_i$: 第 $i$ 根骨骼在**初始姿态（Rest Pose）**下的世界变换矩阵。</li>
+                <li>$\mathbf{M}_i^{-1}$: 将世界坐标系下的点转换到第 $i$ 根骨骼的<strong>局部坐标系</strong>中。</li>
+                <li>$\mathbf{B}_i(t)$: 第 $i$ 根骨骼在<strong>当前 $t$ 时刻</strong>的世界变换矩阵（这个矩阵由我们之前讨论的FK计算得出）。</li>
+                </ul>
+                <p><strong>这个公式的直观理解</strong>:</p>
+                <ol>
+                <li>$\mathbf{M}_i^{-1}\mathbf{P}$: 首先，将顶点 $\mathbf{P}$ 从世界空间转换到每一根影响它的骨骼的局部空间中，得到它相对于这根骨骼的“固定”坐标。</li>
+                <li>$\mathbf{B}_i(t)(\mathbf{M}_i^{-1}\mathbf{P})$: 然后，用骨骼当前时刻的变换矩阵 $\mathbf{B}_i(t)$，将这个局部坐标再变换回世界空间。这就得到了“如果这个顶点只受第i根骨骼影响，它现在应该在的位置”。</li>
+                <li>$\sum_{i=0}^{n-1} w_i (\dots)$: 最后，将所有这些可能的位置，根据权重 $w_i$ 进行线性加权平均，得到顶点最终的变形后位置。</li>
+                </ol>
+                <p><strong>如何决定权重 $w_i$？</strong>
+                权重的分配是绑定师（Rigger）的核心工作，通常称为“刷权重”。</p>
+                <ul>
+                <li><strong>基本原则</strong>: 顶点离哪根骨骼越近，那根骨骼对它的影响权重就越大。</li>
+                <li>在骨骼中间的顶点，其权重 $w_i=1$，其他权重为0。</li>
+                <li>在两根骨骼之间的顶点，权重会平滑地从1过渡到0。</li>
+                </ul>
+                <h4 id="33-%E7%BA%BF%E6%80%A7%E6%B7%B7%E5%90%88%E8%92%99%E7%9A%AE%E7%9A%84%E9%97%AE%E9%A2%98%E4%B8%8E%E6%94%B9%E8%BF%9B"><strong>3.3 线性混合蒙皮的问题与改进</strong></h4>
+                <p>LBS虽然简单高效，但存在一些固有的问题：</p>
+                <ul>
+                <li><strong>关节塌陷 / 糖果包裹问题</strong>: 当关节进行大幅度旋转（如手臂完全弯曲或扭转）时，关节处的体积会不自然地减少，看起来像是被“压扁”了，或者像扭糖纸一样。</li>
+                <li><strong>原因</strong>: 问题的根源在于我们对<strong>变换矩阵</strong>进行了线性插值。旋转矩阵本身进行线性组合，其结果通常不再是一个纯粹的旋转矩阵，会引入不希望的缩放和剪切，导致体积损失。</li>
+                </ul>
+                <p><strong>改进方法：球面线性插值 (Spherical Blend Skinning, Slerp)</strong></p>
+                <ul>
+                <li><strong>思想</strong>: 不再对矩阵进行线性插值，而是对<strong>旋转</strong>本身进行更自然的插值。我们使用<strong>四元数 (Quaternion)</strong> 来表示旋转。</li>
+                <li><strong>球面线性插值 (Slerp)</strong>: 是一种在两个四元数之间进行平滑插值的方法，它能保证插值的结果始终是一个有效的旋转，并且路径是最短的球面弧线。</li>
+                <li><strong>解决办法</strong>: 将LBS公式中的矩阵变换分解为旋转（用四元数表示）和平移（用向量表示）。对旋转部分使用基于权重的Slerp，对平移部分使用常规的线性插值，最后再组合成最终的变换矩阵。这种方法（及其变种，如Dual Quaternion Skinning）能够极大地改善关节处的变形效果，保持体积的稳定。</li>
+                </ul>
+                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E5%89%8D%E6%B2%BF%E4%B8%8E%E5%B1%95%E6%9C%9B"><strong>第四部分：前沿与展望</strong></h3>
+                <p>关节动画技术仍在不断发展。</p>
+                <ul>
+                <li><strong>自动绑定与蒙皮</strong>: 手动刷权重是一项耗时且需要技巧的工作。学术界和工业界都在研究如何从模型几何自动计算出高质量的骨架和蒙皮权重，例如Pinocchio和HeterSkinNet等项目。</li>
+                <li><strong>基于样例/数据驱动的方法</strong>: 传统IK求解的是满足几何约束的“一个”解。而基于样例的方法（如Style-based IK）通过学习大量的运动捕捉数据，可以求解出不仅满足约束，而且在“风格”上（如走路是“雄赳赳”还是“懒洋洋”）也符合期望的姿态。</li>
+                <li><strong>神经网络与深度学习</strong>: 近年来，深度学习也被引入IK领域。神经网络可以直接学习从末端位置到关节角度的复杂非线性映射，或者从单张图像/视频中直接恢复出三维人体姿态，这在姿态估计领域取得了巨大的成功。</li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
