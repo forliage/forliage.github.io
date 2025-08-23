@@ -264,5 +264,54 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-23-Animation12.html",
       "abstract": "Computer Animation:隐函数曲面造型和动画技术 "
+    },
+    {
+      "title": "图像信息处理1:二值图像与形态学操作",
+      "date": "2025-08-23",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-23-dip1.html",
+      "abstract": "图像信息处理1:二值图像与形态学操作"
+    },
+    {
+      "title": "图像信息处理2:图像灰度变换与直方图处理",
+      "date": "2025-08-23",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-23-dip2.html",
+      "abstract": "图像信息处理2:图像灰度变换与直方图处理"
+    },
+    {
+      "title": "图像信息处理3:图像几何变换",
+      "date": "2025-08-23",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-23-dip3.html",
+      "abstract": "图像信息处理3:图像几何变换"
+    },
+    {
+      "title": "图像信息处理4:卷积与空间域滤波",
+      "date": "2025-08-23",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-23-dip4.html",
+      "abstract": "图像信息处理4:卷积与空间域滤波"
+    },
+    {
+      "title": "图像信息处理5:高级滤波技术与保边滤波器",
+      "date": "2025-08-23",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-23-dip5.html",
+      "abstract": "图像信息处理5:高级滤波技术与保边滤波器"
+    },
+    {
+      "title": "图像信息处理6:傅里叶变换与频域滤波",
+      "date": "2025-08-23",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-23-dip6.html",
+      "abstract": "图像信息处理6:傅里叶变换与频域滤波"
+    },
+    {
+      "title": "图像信息处理7:图像特征提取与匹配",
+      "date": "2025-08-23",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-23-dip7.html",
+      "abstract": "图像信息处理7:图像特征提取与匹配"
     }
   ];

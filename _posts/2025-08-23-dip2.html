@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>图像信息处理2:图像灰度变换与直方图处理</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E5%9B%BE%E5%83%8F%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%862%E5%9B%BE%E5%83%8F%E7%81%B0%E5%BA%A6%E5%8F%98%E6%8D%A2%E4%B8%8E%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%A4%84%E7%90%86">图像信息处理2:图像灰度变换与直方图处理</h1>
+                <h3 id="1-%E5%9B%BE%E5%83%8F%E7%9A%84%E5%8F%AF%E8%A7%81%E6%80%A7%E4%B8%8E%E6%84%9F%E7%9F%A5-visibility-of-image-and-perception"><strong>1. 图像的可见性与感知 (Visibility of Image and Perception)</strong></h3>
+                <p>我们处理图像的最终目的是为了呈现给人类观察或由机器分析。因此，了解人眼的视觉特性和显示设备的工作原理，是进行有效图像增强的基础。</p>
+                <h4 id="11-%E9%9F%A6%E4%BC%AF-%E8%B4%B9%E5%B8%8C%E7%BA%B3%E5%AE%9A%E5%BE%8B-weber-fechner-law"><strong>1.1 韦伯-费希纳定律 (Weber-Fechner Law)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>韦伯定律 (Weber's Law):</strong> 描述了人类对刺激变化的感知能力。对于亮度感知而言，它指出，人眼能感知到的最小亮度变化量（Just Noticeable Difference, JND），即$\Delta I$，与当前背景亮度$I$近似成正比。
+                $$
+                \frac{\Delta I}{I} = K_{Weber}
+                $$
+                其中 $K_{Weber}$ 是一个常数（韦伯分数），对于中等亮度的视觉场景，其值约在0.01到0.02之间。这意味着，在明亮的环境中，需要更大的亮度绝对变化才能被察觉；而在昏暗环境中，微小的亮度变化就很容易被感知。</p>
+                </li>
+                <li>
+                <p><strong>费希纳定律 (Fechner's Law):</strong> 是韦伯定律的延伸，指出主观感知强度（如感觉到的亮度 $P$）与物理刺激强度（真实亮度 $I$）的对数成正比。
+                $$
+                P = k \log(I)
+                $$
+                这解释了为什么我们通常使用对数变换来增强图像的暗部细节——因为人眼对暗部的亮度变化更敏感。</p>
+                </li>
+                <li>
+                <p><strong>显示器的灰度级：</strong> 对于一个8位灰度图像（256级），如果我们假设相邻两个灰度级之间的亮度差异恰好是人眼可见的阈值 $\Delta I$，那么从最低亮度 $I_{min}$ 到最高亮度 $I_{max}$ 的关系可以推导如下：
+                令 $I_k$ 为第 $k$ 级的亮度，则 $I_k - I_{k-1} = K_{Weber} \cdot I_{k-1}$，即 $I_k = (1+K_{Weber})I_{k-1}$。这是一个等比数列。
+                $$
+                \frac{I_{max}}{I_{min}} = \frac{I_{255}}{I_0} = (1+K_{Weber})^{255}
+                $$
+                当 $K_{Weber}=0.01$ 时，$\frac{I_{max}}{I_{min}} \approx 12.7$。当 $K_{Weber}=0.02$ 时，$\frac{I_{max}}{I_{min}} \approx 156.9$。这揭示了要平滑地覆盖人眼的感知范围，显示设备需要有足够大的动态范围（对比度）。例如，传统的CRT显示器对比度可达100:1，而纸质打印品则只有约10:1。</p>
+                </li>
+                </ul>
+                <h4 id="12-gamma-%E6%A0%A1%E6%AD%A3-gamma-correction"><strong>1.2 Gamma 校正 (Gamma Correction)</strong></h4>
+                <ul>
+                <li><strong>物理原理：</strong> 早期的阴极射线管（CRT）显示器有一个物理特性：输入的电压 $V$ 与屏幕上产生的亮度 $I$ 之间不是线性关系，而是一个幂函数关系，即 $I \propto V^\gamma$。这个指数 $\gamma$（Gamma）的值通常在 2.0 到 2.5 之间。</li>
+                <li><strong>目的：</strong> 为了在屏幕上正确地再现原始场景的亮度，我们需要对输入的图像信号进行“预补偿”。这个过程就是Gamma校正。我们希望最终的屏幕亮度与原始图像的亮度 $I_{in}$ 成线性关系，即 $I_{out} \propto I_{in}$。
+                因为 $I_{out} \propto V^\gamma$，所以我们需要让 $V \propto I_{in}^{1/\gamma}$。这样一来：
+                $$
+                I_{out} \propto (I_{in}^{1/\gamma})^\gamma = I_{in}
+                $$
+                因此，<strong>Gamma校正</strong>通常指将图像的像素值 $I_{in}$ 进行如下变换：
+                $$
+                I_{out} = c \cdot I_{in}^{1/\gamma}
+                $$</li>
+                <li><strong>应用于图像增强：</strong> 虽然Gamma校正的初衷是设备补偿，但它也成为了一种强大的非线性图像增强工具。通过调整 $\gamma$ 值，我们可以改变图像的整体亮度和对比度。
+                <ul>
+                <li>当 $\gamma &gt; 1$ 时（对应于 $1/\gamma &lt; 1$），会提升暗部区域的亮度，压缩亮部区域，图像整体变亮。</li>
+                <li>当 $\gamma &lt; 1$ 时（对应于 $1/\gamma &gt; 1$），会压缩暗部区域，拉伸亮部区域，图像整体变暗。</li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="2-%E5%9B%BE%E5%83%8F%E7%9B%B4%E6%96%B9%E5%9B%BE-image-histogram"><strong>2. 图像直方图 (Image Histogram)</strong></h3>
+                <p>直方图是图像最重要的统计特征之一，它描述了图像中各个灰度级像素的分布情况。</p>
+                <h4 id="21-%E5%AE%9A%E4%B9%89%E4%B8%8E%E8%AE%A1%E7%AE%97"><strong>2.1 定义与计算</strong></h4>
+                <ul>
+                <li><strong>灰度直方图 (Grayscale Histogram):</strong> 对于一幅灰度级范围为 $[0, L-1]$（通常是$[0, 255]$）的图像，其直方图是一个离散函数 $h(r_k) = n_k$，其中 $r_k$ 是第 $k$ 个灰度级，$n_k$ 是图像中具有该灰度级的像素数量。</li>
+                <li><strong>归一化直方图 (Normalized Histogram):</strong> 为了便于比较不同尺寸的图像，我们通常将直方图归一化，得到每个灰度级出现的<strong>概率</strong>。如果图像总像素数为 $N$，则归一化直方图为：
+                $$
+                P(r_k) = \frac{n_k}{N}, \quad \text{其中 } \sum_{k=0}^{L-1} P(r_k) = 1
+                $$</li>
+                <li><strong>累积直方图 (Cumulative Histogram / CDF):</strong> 累积分布函数（CDF）也非常重要，它表示小于等于某个灰度级的像素所占的比例。
+                $$
+                CDF(r_k) = \sum_{i=0}^{k} P(r_i)
+                $$</li>
+                </ul>
+                <h4 id="22-%E7%9B%B4%E6%96%B9%E5%9B%BE%E7%9A%84%E6%80%A7%E8%B4%A8%E4%B8%8E%E5%B1%80%E9%99%BE%E6%80%A7"><strong>2.2 直方图的性质与局限性</strong></h4>
+                <ul>
+                <li><strong>性质：</strong>
+                <ul>
+                <li><strong>基础性：</strong> 直方图是许多空间域处理技术（如阈值分割、图像增强）的基础。</li>
+                <li><strong>统计性：</strong> 它只反映了图像的灰度分布，例如图像是偏亮、偏暗，还是对比度高/低。</li>
+                <li><strong>唯一性：</strong> 一幅确定的图像有唯一的直方图。</li>
+                </ul>
+                </li>
+                <li><strong>局限性：</strong>
+                <ul>
+                <li><strong>空间信息丢失：</strong> 直方图不包含任何像素的空间位置信息。两幅内容完全不同但灰度分布相同的图像，可以拥有完全相同的直方图。</li>
+                <li><strong>非唯一对应：</strong> 不同的图像可能拥有相同的直方图。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="23-c-%E5%AE%9E%E7%8E%B0-%E4%BD%BF%E7%94%A8opencv"><strong>2.3 C++ 实现 (使用OpenCV)</strong></h4>
+                <pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;opencv2/opencv.hpp&gt;</span></span>
+                <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iostream&gt;</span></span>
+                <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;vector&gt;</span></span>
+
+                <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">plotHistogram</span><span class="hljs-params">(<span class="hljs-keyword">const</span> cv::Mat&amp; hist, <span class="hljs-keyword">int</span> histSize, <span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span>&amp; windowName)</span> </span>{
+                    <span class="hljs-keyword">int</span> hist_w = <span class="hljs-number">512</span>, hist_h = <span class="hljs-number">400</span>;
+                    <span class="hljs-keyword">int</span> bin_w = cvRound((<span class="hljs-keyword">double</span>)hist_w / histSize);
+                    <span class="hljs-function">cv::Mat <span class="hljs-title">histImage</span><span class="hljs-params">(hist_h, hist_w, CV_8UC3, cv::Scalar(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>))</span></span>;
+
+                    <span class="hljs-comment">// 归一化直方图到 [0, histImage.rows]</span>
+                    cv::normalize(hist, hist, <span class="hljs-number">0</span>, histImage.rows, cv::NORM_MINMAX, <span class="hljs-number">-1</span>, cv::Mat());
+
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>; i &lt; histSize; i++) {
+                        cv::line(histImage, cv::Point(bin_w * (i - <span class="hljs-number">1</span>), hist_h - cvRound(hist.at&lt;<span class="hljs-keyword">float</span>&gt;(i - <span class="hljs-number">1</span>))),
+                                 cv::Point(bin_w * (i), hist_h - cvRound(hist.at&lt;<span class="hljs-keyword">float</span>&gt;(i))),
+                                 cv::Scalar(<span class="hljs-number">255</span>, <span class="hljs-number">255</span>, <span class="hljs-number">255</span>), <span class="hljs-number">2</span>, <span class="hljs-number">8</span>, <span class="hljs-number">0</span>);
+                    }
+                    cv::imshow(windowName, histImage);
+                }
+
+                <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+                    cv::Mat src = cv::imread(<span class="hljs-string">"your_image.jpg"</span>, cv::IMREAD_GRAYSCALE);
+                    <span class="hljs-keyword">if</span> (src.empty()) {
+                        <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not open image"</span> &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;
+                        <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
+                    }
+
+                    <span class="hljs-comment">// 1. 设置参数</span>
+                    <span class="hljs-keyword">int</span> histSize = <span class="hljs-number">256</span>; <span class="hljs-comment">// 灰度级数</span>
+                    <span class="hljs-keyword">float</span> range[] = {<span class="hljs-number">0</span>, <span class="hljs-number">256</span>}; <span class="hljs-comment">// 灰度范围</span>
+                    <span class="hljs-keyword">const</span> <span class="hljs-keyword">float</span>* histRange = {range};
+                    <span class="hljs-keyword">bool</span> uniform = <span class="hljs-literal">true</span>, accumulate = <span class="hljs-literal">false</span>;
+
+                    cv::Mat gray_hist;
+
+                    <span class="hljs-comment">// 2. 计算直方图</span>
+                    cv::calcHist(&amp;src, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, cv::Mat(), gray_hist, <span class="hljs-number">1</span>, &amp;histSize, &amp;histRange, uniform, accumulate);
+
+                    <span class="hljs-comment">// 3. 可视化</span>
+                    plotHistogram(gray_hist, histSize, <span class="hljs-string">"Source Histogram"</span>);
+                    
+                    cv::imshow(<span class="hljs-string">"Source Image"</span>, src);
+                    cv::waitKey(<span class="hljs-number">0</span>);
+                    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+                }
+                </div></code></pre>
+                <h3 id="3-%E5%9F%BA%E4%BA%8E%E7%82%B9%E6%93%8D%E4%BD%9C%E7%9A%84%E7%81%B0%E5%BA%A6%E5%8F%98%E6%8D%A2-grayscale-transformation-via-point-operations"><strong>3. 基于点操作的灰度变换 (Grayscale Transformation via Point Operations)</strong></h3>
+                <p>灰度变换是最简单的图像增强方法，它对图像中的每个像素独立进行操作，其变换函数形式为 $s = T(r)$，其中 $r$ 是输入像素值，$s$ 是输出像素值。</p>
+                <h4 id="31-%E7%BA%BF%E6%80%A7%E5%8F%98%E6%8D%A2-linear-transform"><strong>3.1 线性变换 (Linear Transform)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>亮度和对比度调整：</strong> 最基本的线性变换是 $s = \alpha \cdot r + \beta$。</p>
+                <ul>
+                <li>$\alpha$：控制<strong>对比度</strong>。$\alpha &gt; 1$ 增加对比度， $0 &lt; \alpha &lt; 1$ 降低对比度。</li>
+                <li>$\beta$：控制<strong>亮度</strong>。$\beta &gt; 0$ 增加亮度，$\beta &lt; 0$ 降低亮度。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>对比度拉伸 (Contrast Stretching):</strong> 这是一种分段线性变换，旨在将图像中一个特定的灰度范围 $[a, b]$ 拉伸到更宽的范围 $[c, d]$，从而增强该区域的对比度。
+                $$
+                g(x, y) = \begin{cases} \frac{c}{a} f(x, y) & 0 \le f(x, y) &lt; a \\ \frac{d-c}{b-a}(f(x, y) - a) + c & a \le f(x, y) \le b \\ \frac{L-1-d}{L-1-b}(f(x, y) - b) + d & b &lt; f(x, y) \le L-1 \end{cases}
+                $$
+                其中 $f(x,y)$ 是输入像素值，$g(x,y)$ 是输出像素值。</p>
+                </li>
+                </ul>
+                <h4 id="32-%E9%9D%9E%E7%BA%BF%E6%80%A7%E5%8F%98%E6%8D%A2-non-linear-transform"><strong>3.2 非线性变换 (Non-linear Transform)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>对数变换 (Logarithmic Transform):</strong>
+                $$
+                s = c \cdot \log(1+r)
+                $$
+                其中 $c = (L-1)/\log(1+I_{max})$ 是一个缩放常数，用于将输出值映射到 $[0, L-1]$ 范围。</p>
+                <ul>
+                <li><strong>效果：</strong> 极大地拉伸了低灰度值区域，同时压缩了高灰度值区域。</li>
+                <li><strong>应用：</strong> 非常适合于增强<strong>暗部细节</strong>，例如处理傅里叶频谱图。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>指数/Gamma变换 (Exponential/Gamma Transform):</strong>
+                $$
+                s = c \cdot r^\gamma
+                $$</p>
+                <ul>
+                <li><strong>效果：</strong> 如1.2节所述，$\gamma &gt; 1$ 会拉伸亮部、压缩暗部；$\gamma &lt; 1$ 会拉伸暗部、压缩亮部。对数变换可以看作是Gamma变换的一种极限形式。</li>
+                <li><strong>应用：</strong> 灵活调整图像的整体色调和对比度。</li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="4-%E5%9F%BA%E4%BA%8E%E7%9B%B4%E6%96%B9%E5%9B%BE%E7%9A%84%E5%9B%BE%E5%83%8F%E5%A2%9E%E5%BC%BA"><strong>4. 基于直方图的图像增强</strong></h3>
+                <p>直方图不仅能描述图像，还能直接用于改造图像，其中最经典的方法就是直方图均衡化。</p>
+                <h4 id="41-%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%9D%87%E8%A1%A1%E5%8C%96-histogram-equalization"><strong>4.1 直方图均衡化 (Histogram Equalization)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>核心思想：</strong> 通过一个变换函数 $s=T(r)$，将原始图像的直方图重新分布，使其尽可能地<strong>均匀（uniform）</strong>。一个直方图均匀的图像，其灰度级得到了充分利用，通常具有较高的对比度。</p>
+                </li>
+                <li>
+                <p><strong>理论推导 (连续情况):</strong>
+                假设输入图像的灰度级 $r$ 是一个连续随机变量，其概率密度函数（PDF）为 $p_r(r)$。我们寻找一个变换 $s=T(r)$，使得输出灰度级 $s$ 的PDF $p_s(s)$ 是一个均匀分布。根据概率论，我们有：
+                $$
+                p_s(s) = p_r(r) \left| \frac{dr}{ds} \right|
+                $$
+                对于一个在 $[0, 1]$ 范围内的均匀分布，$p_s(s) = 1$。因此，我们需要 $1 = p_r(r) \frac{dr}{ds}$，即 $\frac{ds}{dr} = p_r(r)$。
+                对上式两边积分，我们得到变换函数 $T(r)$：
+                $$
+                s = T(r) = \int_{0}^{r} p_r(w) dw
+                $$
+                这个积分形式正是输入灰度级 $r$ 的<strong>累积分布函数 (CDF)</strong>。</p>
+                </li>
+                <li>
+                <p><strong>离散实现:</strong>
+                对于离散的灰度级，我们将积分替换为求和。变换公式为：
+                $$
+                s_k = T(r_k) = \sum_{j=0}^{k} P(r_j) = \frac{1}{N} \sum_{j=0}^{k} n_j
+                $$
+                最终，我们将计算出的 $s_k$（值在[0, 1]之间）乘以最大灰度级 $(L-1)$ 并取整，得到新的像素值。
+                $$
+                \text{output_pixel_value} = \text{round}((L-1) \cdot s_k)
+                $$</p>
+                </li>
+                <li>
+                <p><strong>为什么实际结果不是完全平坦的？</strong>
+                因为像素灰度值是离散的整数。在变换过程中，多个不同的输入灰度级 $r_k$ 可能会被映射到<strong>同一个</strong>输出灰度级 $s_k'$。这导致某些输出灰度级的像素数会增加，而另一些则可能为0，使得最终的直方图呈锯齿状，而非理想的平坦直线。</p>
+                </li>
+                <li>
+                <p><strong>C++ 实现 (手动与OpenCV):</strong></p>
+                <pre class="hljs"><code><div><span class="hljs-comment">// 手动实现</span>
+                <span class="hljs-function">cv::Mat <span class="hljs-title">equalizeHistManual</span><span class="hljs-params">(<span class="hljs-keyword">const</span> cv::Mat&amp; src)</span> </span>{
+                    <span class="hljs-comment">// 1. 计算直方图</span>
+                    <span class="hljs-keyword">int</span> hist[<span class="hljs-number">256</span>] = {<span class="hljs-number">0</span>};
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> y = <span class="hljs-number">0</span>; y &lt; src.rows; y++) {
+                        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>; x &lt; src.cols; x++) {
+                            hist[src.at&lt;uchar&gt;(y, x)]++;
+                        }
+                    }
+                    
+                    <span class="hljs-comment">// 2. 计算CDF</span>
+                    <span class="hljs-keyword">int</span> total_pixels = src.rows * src.cols;
+                    <span class="hljs-keyword">float</span> cdf[<span class="hljs-number">256</span>] = {<span class="hljs-number">0.0f</span>};
+                    cdf[<span class="hljs-number">0</span>] = (<span class="hljs-keyword">float</span>)hist[<span class="hljs-number">0</span>] / total_pixels;
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>; i &lt; <span class="hljs-number">256</span>; i++) {
+                        cdf[i] = cdf[i<span class="hljs-number">-1</span>] + (<span class="hljs-keyword">float</span>)hist[i] / total_pixels;
+                    }
+
+                    <span class="hljs-comment">// 3. 创建查找表 (LUT)</span>
+                    <span class="hljs-function">cv::Mat <span class="hljs-title">lut</span><span class="hljs-params">(<span class="hljs-number">1</span>, <span class="hljs-number">256</span>, CV_8U)</span></span>;
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">256</span>; i++) {
+                        lut.at&lt;uchar&gt;(i) = cv::saturate_cast&lt;uchar&gt;(<span class="hljs-number">255.0f</span> * cdf[i]);
+                    }
+                    
+                    <span class="hljs-comment">// 4. 应用LUT</span>
+                    cv::Mat result;
+                    cv::LUT(src, lut, result);
+                    <span class="hljs-keyword">return</span> result;
+                }
+
+                <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+                    <span class="hljs-comment">// ... (接上一个main函数)</span>
+                    cv::Mat equalized_manual = equalizeHistManual(src);
+                    
+                    cv::Mat equalized_opencv;
+                    cv::equalizeHist(src, equalized_opencv);
+
+                    cv::imshow(<span class="hljs-string">"Equalized Manual"</span>, equalized_manual);
+                    cv::imshow(<span class="hljs-string">"Equalized OpenCV"</span>, equalized_opencv);
+
+                    cv::Mat hist_eq;
+                    cv::calcHist(&amp;equalized_opencv, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, cv::Mat(), hist_eq, <span class="hljs-number">1</span>, &amp;histSize, &amp;histRange);
+                    plotHistogram(hist_eq, histSize, <span class="hljs-string">"Equalized Histogram"</span>);
+
+                    cv::waitKey(<span class="hljs-number">0</span>);
+                    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+                }
+                </div></code></pre>
+                </li>
+                </ul>
+                <h4 id="42-%E7%9B%B4%E6%96%B9%E5%9B%BE%E8%A7%84%E5%AE%9A%E5%8C%96-histogram-specificationmatching"><strong>4.2 直方图规定化 (Histogram Specification/Matching)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>思想：</strong> 不追求直方图的均匀分布，而是将其变换为<strong>某个指定的形状</strong>。这个目标形状可以来自另一幅参考图像，也可以是某个解析定义的分布（如高斯分布）。</p>
+                </li>
+                <li>
+                <p><strong>原理与算法:</strong>
+                假设我们想将输入图像（PDF $p_r(r)$）变换为具有目标直方图（PDF $p_z(z)$）的图像。</p>
+                <ol>
+                <li><strong>步骤1:</strong> 对原始图像进行直方图均衡化，得到变换 $s = T(r) = \int_0^r p_r(w)dw$。</li>
+                <li><strong>步骤2:</strong> 对目标直方图 $p_z(z)$ 也进行（理论上的）均衡化，得到变换 $v = G(z) = \int_0^z p_z(w)dw$。</li>
+                <li><strong>步骤3:</strong> 我们的目标是找到一个映射 $z = M(r)$。由于均衡化后的图像都具有均匀分布，我们可以令 $s=v$，即 $T(r) = G(z)$。</li>
+                <li><strong>步骤4:</strong> 从上式求解 $z$，得到最终的映射关系：$z = G^{-1}(s) = G^{-1}(T(r))$。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>离散实现步骤:</strong></p>
+                <ol>
+                <li>计算原始图像的CDF，$T(r_k)$。</li>
+                <li>计算目标直方图的CDF，$G(z_j)$。</li>
+                <li>对于原始图像的每个灰度级 $r_k$，计算出其均衡化后的值 $s_k = T(r_k)$。</li>
+                <li>在目标CDF $G(z_j)$ 中，查找与 $s_k$ 最接近的项 $G(z_j)$，并将该 $z_j$ 作为 $r_k$ 的新映射值。</li>
+                <li>根据这个映射关系，生成新图像。</li>
+                </ol>
+                </li>
+                </ul>
+                <h3 id="5-%E5%89%8D%E6%B2%BF%E6%8B%93%E5%B1%95-advanced-topics--frontiers"><strong>5. 前沿拓展 (Advanced Topics &amp; Frontiers)</strong></h3>
+                <h4 id="51-%E8%87%AA%E9%80%82%E5%BA%94%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%9D%87%E8%A1%A1%E5%8C%96-adaptive-histogram-equalization-ahe"><strong>5.1 自适应直方图均衡化 (Adaptive Histogram Equalization, AHE)</strong></h4>
+                <p>全局直方图均衡化有一个致命弱点：它对整幅图像使用同一个变换。如果图像中同时包含大面积的亮区域和暗区域，全局均衡化可能会过度增强噪声，并丢失局部细节。</p>
+                <ul>
+                <li><strong>AHE思想：</strong> 将图像划分为多个不重叠的小块（Tiles），对每个小块<strong>独立</strong>进行直方图均衡化。</li>
+                <li><strong>问题：</strong> 会产生明显的块状效应（Blocking Artifacts）。</li>
+                </ul>
+                <h4 id="52-%E5%AF%B9%E6%AF%94%E5%BA%A6%E5%8F%97%E9%99%90%E7%9A%84%E8%87%AA%E9%80%82%E5%BA%94%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%9D%87%E8%A1%A1%E5%8C%96-clahe"><strong>5.2 对比度受限的自适应直方图均衡化 (CLAHE)</strong></h4>
+                <p>CLAHE 是对AHE的重大改进，也是目前应用最广泛的局部增强算法之一。</p>
+                <ul>
+                <li><strong>核心改进：</strong>
+                <ol>
+                <li><strong>对比度限制 (Contrast Limiting):</strong> 在计算每个小块的直方图时，设置一个“裁剪阈值”。超过该阈值的像素数将被裁剪，并均匀地重新分配到所有灰度级上。这可以有效抑制噪声的过度放大。</li>
+                <li><strong>双线性插值 (Bilinear Interpolation):</strong> 为了消除块状效应，一个像素最终的灰度值由其所在位置周围四个小块的变换函数进行双线性插值得到。</li>
+                </ol>
+                </li>
+                </ul>
+                <p>CLAHE在医学图像处理、遥感图像增强等领域有极其重要的应用。OpenCV也提供了<code>cv::createCLAHE()</code>函数方便地实现这一算法。</p>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

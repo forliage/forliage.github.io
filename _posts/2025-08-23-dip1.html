@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>图像信息处理1:二值图像与形态学操作</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E5%9B%BE%E5%83%8F%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%861%E4%BA%8C%E5%80%BC%E5%9B%BE%E5%83%8F%E4%B8%8E%E5%BD%A2%E6%80%81%E5%AD%A6%E6%93%8D%E4%BD%9C">图像信息处理1:二值图像与形态学操作</h1>
+                <h3 id="1-%E4%BA%8C%E5%80%BC%E5%9B%BE%E5%83%8F-binary-image"><strong>1. 二值图像 (Binary Image)</strong></h3>
+                <h4 id="11-%E5%AE%9A%E4%B9%89%E4%B8%8E%E8%A1%A8%E7%A4%BA"><strong>1.1 定义与表示</strong></h4>
+                <p>在数字图像处理中，<strong>二值图像（Binary Image）</strong> 是一种最简单的图像形式。其特殊之处在于，图像中的每个像素点只有两种可能的取值，通常是 <code>0</code> 和 <code>1</code>，分别代表<strong>背景（Background）<strong>和</strong>前景（Foreground）</strong>。</p>
+                <ul>
+                <li><strong>理论表示</strong>：在理论层面，像素值被限制为 ${0, 1}$。这使得每个像素仅需 1 比特（bit）即可存储，是最高效的图像存储方式。</li>
+                <li><strong>编程实践</strong>：在实际编程中，为了便于显示和兼容常见的图像库（如OpenCV），我们通常使用8位无符号整数（<code>unsigned char</code>）来存储二值图像。此时，我们会用 <code>0</code> 代表黑色（背景），用 <code>255</code>（即 $2^8-1$）代表白色（前景）。这种约定俗成的表示法并不改变其二值属性的本质。</li>
+                </ul>
+                <h4 id="12-%E4%BC%98%E7%82%B9%E4%B8%8E%E5%B1%80%E9%99%BE%E6%80%A7"><strong>1.2 优点与局限性</strong></h4>
+                <p><strong>优点 (Advantages):</strong></p>
+                <ul>
+                <li><strong>内存占用极低 (Less memory):</strong> 每个像素理论上仅需1 bit，存储开销远小于灰度图像（8 bits）或彩色图像（24 bits）。</li>
+                <li><strong>计算效率高 (More efficient):</strong> 针对二值图像的算法通常只涉及逻辑运算（与、或、非）和简单的整数运算，处理速度极快。</li>
+                <li><strong>对象特征突出:</strong> 二值化过程将图像中的目标与背景清晰分离，简化了后续的特征提取、对象识别和形态分析任务。</li>
+                <li><strong>计算成本低廉 (More cheap):</strong> 由于算法简单，对硬件要求较低。</li>
+                </ul>
+                <p><strong>局限性 (Disadvantages):</strong></p>
+                <ul>
+                <li><strong>信息损失严重 (Less expressive force):</strong> 二值化是一个有损过程，完全舍弃了原始图像的灰度或色彩层次信息，无法传达视觉细节（FAIL to convey visual details）。</li>
+                <li><strong>应用领域受限 (Application field is limited):</strong> 主要适用于目标与背景对比度高、需要进行形状分析的场景。对于需要纹理、颜色分析的任务则不适用。</li>
+                <li><strong>无法直接应用于三维数据 (CANNOT be applied on 3-D data):</strong> 虽然形态学思想可以推广到三维，但二值图像本身是二维概念。</li>
+                <li><strong>对比度不可控 (CANNOT control the contrast):</strong> 图像的对比度信息在二值化过程中完全丢失。</li>
+                </ul>
+                <h3 id="2-%E5%9B%BE%E5%83%8F%E4%BA%8C%E5%80%BC%E5%8C%96-image-binarization"><strong>2. 图像二值化 (Image Binarization)</strong></h3>
+                <p>图像二值化是将灰度图像转换为二值图像的过程。其核心是选取一个合适的<strong>阈值（Threshold）</strong> <code>T</code>，然后根据像素的灰度值与 <code>T</code> 的关系来决定其输出值。</p>
+                <h4 id="21-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5%E5%85%A8%E5%B1%80%E9%98%88%E5%80%BC%E5%88%86%E5%89%B2"><strong>2.1 基本概念：全局阈值分割</strong></h4>
+                <p>对于一幅灰度图像 $I(x, y)$，其二值化后的图像 $I_{bw}(x, y)$ 可以通过以下方式获得：</p>
+                <p>$$
+                I_{bw}(x, y) = \begin{cases} 255 &amp; \text{if } I(x, y) \ge T \\ 0 &amp; \text{if } I(x, y) &lt; T \end{cases}
+                $$</p>
+                <p>这里的关键问题是：<strong>如何自动地找到一个“好”的阈值？</strong> 一个好的阈值应该能最大程度地将前景和背景区分开。Otsu算法（大津法）是解决这一问题的最经典和最有效的方法之一。</p>
+                <h4 id="22-%E5%85%A8%E5%B1%80%E9%98%88%E5%80%BC%E6%B3%95otsu%E7%AE%97%E6%B3%95-%E5%A4%A7%E6%B4%A5%E6%B3%95"><strong>2.2 全局阈值法：Otsu算法 (大津法)</strong></h4>
+                <p>Otsu算法的核心思想是：寻找一个阈值 <code>T</code>，使得被这个阈值分开的前景和背景两组像素的<strong>类间方差（Between-class variance）</strong> 最大。类间方差越大，说明前景和背景的灰度分布差异越明显，分割效果就越好。</p>
+                <p><strong>数学推导 (Mathematical Proof):</strong></p>
+                <p>假设图像共有 $N$ 个像素，灰度级为 $[0, L-1]$（通常是 $[0, 255]$）。设 $n_i$ 为灰度级为 $i$ 的像素数量，则 $N = \sum\limits_{i=0}^{L-1} n_i$。灰度级 $i$ 出现的概率为 $p_i = \frac{n_i}{N}$。</p>
+                <ol>
+                <li>
+                <p><strong>类概率和类均值:</strong>
+                当阈值为 $T$ 时，图像被分为两类：</p>
+                <ul>
+                <li><strong>背景类 $C_0$</strong>: 灰度级在 $[0, T]$ 范围内的像素。</li>
+                <li><strong>前景类 $C_1$</strong>: 灰度级在 $[T+1, L-1]$ 范围内的像素。</li>
+                </ul>
+                <p>背景类的概率（像素占比） $\omega_0(T) = \sum\limits_{i=0}^{T} p_i$
+                前景类的概率（像素占比） $\omega_1(T) = \sum\limits_{i=T+1}^{L-1} p_i = 1 - \omega_0(T)$</p>
+                <p>背景类的平均灰度 $\mu_0(T) = \frac{\sum\limits_{i=0}^{T} i \cdot p_i}{\omega_0(T)}$
+                前景类的平均灰度 $\mu_1(T) = \frac{\sum\limits_{i=T+1}^{L-1} i \cdot p_i}{\omega_1(T)}$</p>
+                </li>
+                <li>
+                <p><strong>方差定义:</strong>
+                图像的总平均灰度 $\mu_{total} = \sum\limits_{i=0}^{L-1} i \cdot p_i = \omega_0(T)\mu_0(T) + \omega_1(T)\mu_1(T)$。
+                图像的总方差 $\sigma^2_{total} = \sum\limits_{i=0}^{L-1} (i - \mu_{total})^2 p_i$。</p>
+                <p><strong>类内方差 (Within-class variance)</strong> $\sigma^2_{within}(T)$ 是两个类方差的加权和，表示每个类内部的灰度离散程度：
+                $$\sigma^2_0(T) = \frac{\sum\limits_{i=0}^{T} (i - \mu_0(T))^2 p_i}{\omega_0(T)}$$
+                $$\sigma^2_1(T) = \frac{\sum\limits_{i=T+1}^{L-1} (i - \mu_1(T))^2 p_i}{\omega_1(T)}$$
+                $$\sigma^2_{within}(T) = \omega_0(T)\sigma^2_0(T) + \omega_1(T)\sigma^2_1(T)$$</p>
+                <p><strong>类间方差 (Between-class variance)</strong> $\sigma^2_{between}(T)$ 表示两个类均值之间的差异程度：
+                $$\sigma^2_{between}(T) = \omega_0(T)(\mu_0(T) - \mu_{total})^2 + \omega_1(T)(\mu_1(T) - \mu_{total})^2$$
+                将 $\mu_{total}$ 代入，可以推导出更简洁的形式：
+                $$\sigma^2_{between}(T) = \omega_0(T)\omega_1(T)(\mu_0(T) - \mu_1(T))^2$$</p>
+                </li>
+                <li>
+                <p><strong>方差关系与优化目标:</strong>
+                可以证明，总方差是类内方差与类间方差之和：$\sigma^2_{total} = \sigma^2_{within}(T) + \sigma^2_{between}(T)$。
+                由于总方差 $\sigma^2_{total}$ 是一个与阈值 $T$ 无关的定值，因此<strong>最大化类间方差</strong>等价于<strong>最小化类内方差</strong>。</p>
+                <p>Otsu算法的目标就是找到使 $\sigma^2_{between}(T)$ 最大的阈值 $T^<em>$：
+                $$
+                T^</em> = \arg\max_{0 \le T &lt; L} \left{ \sigma^2_{between}(T) \right} = \arg\max_{0 \le T &lt; L} \left{ \omega_0(T)\omega_1(T)(\mu_0(T) - \mu_1(T))^2 \right}
+                $$</p>
+                </li>
+                </ol>
+                <p><strong>算法步骤:</strong></p>
+                <ol>
+                <li>计算图像的灰度直方图，得到每个灰度级的像素数 $n_i$。</li>
+                <li>将 $n_i$ 归一化，得到概率 $p_i = n_i / N$。</li>
+                <li>遍历所有可能的阈值 $T$ 从 $0$ 到 $L-1$（通常是255）。</li>
+                <li>对于每个 $T$，使用高效的递推方式计算 $\omega_0(T)$, $\omega_1(T)$, $\mu_0(T)$, $\mu_1(T)$。</li>
+                <li>计算类间方差 $\sigma^2_{between}(T)$。</li>
+                <li>记录下使 $\sigma^2_{between}(T)$ 最大的 $T$ 值，即为最佳阈值 $T^*$。</li>
+                </ol>
+                <p><strong>C++ 代码示例 (使用OpenCV):</strong></p>
+                <pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;opencv2/opencv.hpp&gt;</span></span>
+                <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iostream&gt;</span></span>
+
+                <span class="hljs-comment">// 手动实现Otsu算法</span>
+                <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">otsuThreshold</span><span class="hljs-params">(<span class="hljs-keyword">const</span> cv::Mat&amp; gray_image)</span> </span>{
+                    <span class="hljs-keyword">if</span> (gray_image.channels() != <span class="hljs-number">1</span>) {
+                        <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cerr</span> &lt;&lt; <span class="hljs-string">"Error: Input image must be grayscale."</span> &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;
+                        <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
+                    }
+
+                    <span class="hljs-comment">// 1. 计算灰度直方图</span>
+                    <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> gray_levels = <span class="hljs-number">256</span>;
+                    <span class="hljs-keyword">int</span> histogram[gray_levels] = {<span class="hljs-number">0</span>};
+                    <span class="hljs-keyword">int</span> total_pixels = gray_image.rows * gray_image.cols;
+
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> y = <span class="hljs-number">0</span>; y &lt; gray_image.rows; ++y) {
+                        <span class="hljs-keyword">const</span> uchar* row_ptr = gray_image.ptr&lt;uchar&gt;(y);
+                        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> x = <span class="hljs-number">0</span>; x &lt; gray_image.cols; ++x) {
+                            histogram[row_ptr[x]]++;
+                        }
+                    }
+
+                    <span class="hljs-comment">// 2. 归一化直方图 &amp; 计算总均值</span>
+                    <span class="hljs-keyword">double</span> normalized_hist[gray_levels] = {<span class="hljs-number">0.0</span>};
+                    <span class="hljs-keyword">double</span> total_mean = <span class="hljs-number">0.0</span>;
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; gray_levels; ++i) {
+                        normalized_hist[i] = <span class="hljs-keyword">static_cast</span>&lt;<span class="hljs-keyword">double</span>&gt;(histogram[i]) / total_pixels;
+                        total_mean += i * normalized_hist[i];
+                    }
+
+                    <span class="hljs-keyword">double</span> max_variance = <span class="hljs-number">0.0</span>;
+                    <span class="hljs-keyword">int</span> best_threshold = <span class="hljs-number">0</span>;
+
+                    <span class="hljs-keyword">double</span> w0 = <span class="hljs-number">0.0</span>; <span class="hljs-comment">// 背景类概率</span>
+                    <span class="hljs-keyword">double</span> sum0 = <span class="hljs-number">0.0</span>; <span class="hljs-comment">// 背景类灰度和</span>
+
+                    <span class="hljs-comment">// 3. 遍历阈值</span>
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> t = <span class="hljs-number">0</span>; t &lt; gray_levels; ++t) {
+                        w0 += normalized_hist[t];
+                        <span class="hljs-keyword">if</span> (w0 == <span class="hljs-number">0</span>) <span class="hljs-keyword">continue</span>;
+
+                        <span class="hljs-keyword">double</span> w1 = <span class="hljs-number">1.0</span> - w0;
+                        <span class="hljs-keyword">if</span> (w1 == <span class="hljs-number">0</span>) <span class="hljs-keyword">break</span>;
+
+                        sum0 += t * normalized_hist[t];
+                        
+                        <span class="hljs-keyword">double</span> u0 = sum0 / w0;
+                        <span class="hljs-keyword">double</span> u1 = (total_mean - sum0) / w1;
+
+                        <span class="hljs-comment">// 4. 计算类间方差</span>
+                        <span class="hljs-keyword">double</span> variance = w0 * w1 * (u0 - u1) * (u0 - u1);
+
+                        <span class="hljs-comment">// 5. 寻找最大方差</span>
+                        <span class="hljs-keyword">if</span> (variance &gt; max_variance) {
+                            max_variance = variance;
+                            best_threshold = t;
+                        }
+                    }
+
+                    <span class="hljs-keyword">return</span> best_threshold;
+                }
+
+                <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+                    cv::Mat image = cv::imread(<span class="hljs-string">"your_image.jpg"</span>, cv::IMREAD_GRAYSCALE);
+                    <span class="hljs-keyword">if</span> (image.empty()) {
+                        <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Could not open or find the image"</span> &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;
+                        <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
+                    }
+
+                    <span class="hljs-comment">// 使用我们自己实现的Otsu</span>
+                    <span class="hljs-keyword">int</span> threshold_val_manual = otsuThreshold(image);
+                    cv::Mat binary_image_manual;
+                    cv::threshold(image, binary_image_manual, threshold_val_manual, <span class="hljs-number">255</span>, cv::THRESH_BINARY);
+
+                    <span class="hljs-comment">// 使用OpenCV内置的Otsu</span>
+                    cv::Mat binary_image_opencv;
+                    <span class="hljs-keyword">double</span> threshold_val_opencv = cv::threshold(image, binary_image_opencv, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, cv::THRESH_BINARY | cv::THRESH_OTSU);
+
+                    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"Manual Otsu Threshold: "</span> &lt;&lt; threshold_val_manual &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;
+                    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; <span class="hljs-string">"OpenCV Otsu Threshold: "</span> &lt;&lt; threshold_val_opencv &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;
+
+                    cv::imshow(<span class="hljs-string">"Original"</span>, image);
+                    cv::imshow(<span class="hljs-string">"Binary Manual Otsu"</span>, binary_image_manual);
+                    cv::imshow(<span class="hljs-string">"Binary OpenCV Otsu"</span>, binary_image_opencv);
+                    cv::waitKey(<span class="hljs-number">0</span>);
+
+                    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+                }
+                </div></code></pre>
+                <h4 id="23-%E5%B1%80%E9%83%A8%E8%87%AA%E9%80%82%E5%BA%94%E9%98%88%E5%80%BC%E6%B3%95-local-adaptive-thresholding"><strong>2.3 局部自适应阈值法 (Local Adaptive Thresholding)</strong></h4>
+                <p>当图像光照不均匀时，全局阈值效果会很差。<strong>局部自适应阈值法</strong>为每个像素点计算其局部邻域内的一个阈值。</p>
+                <ul>
+                <li><strong>思想：</strong> 在像素 $(x, y)$ 周围设定一个窗口（例如 $11 \times 11$），计算该窗口内的统计量（如均值或高斯加权均值）作为阈值。</li>
+                <li><strong>方法：</strong>
+                <ul>
+                <li><strong>均值法 (Mean-C):</strong> $T(x,y) = \text{mean}(W_{xy}) - C$，其中 $W_{xy}$ 是以 $(x,y)$ 为中心的窗口，<code>C</code> 是一个常数。</li>
+                <li><strong>高斯法 (Gaussian-C):</strong> $T(x,y) = \text{gaussian_mean}(W_{xy}) - C$，使用高斯核对窗口内像素进行加权平均。</li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="3-%E6%95%B0%E5%AD%A6%E5%BD%A2%E6%80%81%E5%AD%A6-mathematical-morphology"><strong>3. 数学形态学 (Mathematical Morphology)</strong></h3>
+                <p>数学形态学起源于1960年代，最初用于研究生物形态结构。在图像处理中，它是一套基于<strong>集合论</strong>的非线性分析理论，其核心思想是用一个预定义的、小的形状——<strong>结构元素 (Structuring Element, SE)</strong>——来探测和改变图像的形状。</p>
+                <h4 id="31-%E5%9F%BA%E7%A1%80%E7%90%86%E8%AE%BA"><strong>3.1 基础理论</strong></h4>
+                <ul>
+                <li><strong>图像与集合：</strong> 在二值图像中，所有前景像素的坐标集合可以看作是二维整数空间 $\mathbb{Z}^2$ 的一个子集 $A$。</li>
+                <li><strong>结构元素 (SE)：</strong> 结构元素 $B$ 也是 $\mathbb{Z}^2$ 的一个小子集，它有自己的<strong>原点（origin）</strong>。常见的SE有方形、圆形、十字形等。</li>
+                </ul>
+                <p><strong>基本集合运算:</strong></p>
+                <ol>
+                <li><strong>平移 (Translation):</strong> 将集合 $A$ 按向量 $z=(z_1, z_2)$ 平移，记为 $(A)_z$。
+                $$
+                (A)_z = { c \in \mathbb{Z}^2 \mid c = a + z, \text{ for some } a \in A }
+                $$</li>
+                <li><strong>反射 (Reflection):</strong> 将集合 $B$ 关于其原点做反射，记为 $\hat{B}$。
+                $$
+                \hat{B} = { w \in \mathbb{Z}^2 \mid w = -b, \text{ for some } b \in B }
+                $$</li>
+                </ol>
+                <h4 id="32-%E5%9B%9B%E4%B8%AA%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C"><strong>3.2 四个基本操作</strong></h4>
+                <p><strong>1. 膨胀 (Dilation)</strong></p>
+                <ul>
+                <li><strong>定义：</strong> 集合 $A$ 被集合 $B$ 膨胀，记为 $A \oplus B$。其结果是所有 $z$ 点的集合，这些 $z$ 满足 $\hat{B}$ 平移到 $z$ 后与 $A$ 的交集不为空。
+                $$
+                A \oplus B = { z \mid (\hat{B})_z \cap A \neq \emptyset }
+                $$</li>
+                <li><strong>直观解释：</strong> 膨胀会使图像中的前景区域“变胖”或“扩大”。可以想象将结构元素 $B$ 的原点滑过图像中的每一个像素。如果 $B$ 接触到了前景，则 $B$ 的原点对应的位置在输出图像中被标记为前景。它能填充前景区域内的小孔洞和断裂。</li>
+                <li><strong>物理意义：</strong> 将与前景物体相连的背景像素并入前景，从而扩展物体边界，填补空洞。</li>
+                </ul>
+                <p><strong>2. 腐蚀 (Erosion)</strong></p>
+                <ul>
+                <li><strong>定义：</strong> 集合 $A$ 被集合 $B$ 腐蚀，记为 $A \ominus B$。其结果是所有 $z$ 点的集合，这些 $z$ 满足 $B$ 平移到 $z$ 后完全被包含在 $A$ 中。
+                $$
+                A \ominus B = { z \mid (B)_z \subseteq A }
+                $$</li>
+                <li><strong>直观解释：</strong> 腐蚀会使图像中的前景区域“变瘦”或“缩小”。可以想象将结构元素 $B$ 的原点滑过图像中的每一个像素。只有当 $B$ 完全位于前景区域内部时， $B$ 的原点对应的位置在输出图像中才被标记为前景。它能消除细小的噪点和断开细微的连接。</li>
+                <li><strong>物理意义：</strong> 移除物体边界，消除微小的、无意义的前景物体。</li>
+                </ul>
+                <p><strong>3. 开运算 (Opening)</strong></p>
+                <ul>
+                <li><strong>定义：</strong> 先腐蚀后膨胀。$A \circ B = (A \ominus B) \oplus B$。</li>
+                <li><strong>直观解释：</strong> “打开”了图像。它可以平滑物体的轮廓，断开狭窄的连接，并消除细小的突出物（毛刺）。<strong>重要的是，它基本不改变主要物体的大小</strong>。可以想象一个比物体内部缝隙大的结构元素滚过物体的外边界，所有滚不进去的细节都会被“磨平”。</li>
+                </ul>
+                <p><strong>4. 闭运算 (Closing)</strong></p>
+                <ul>
+                <li><strong>定义：</strong> 先膨胀后腐蚀。$A \bullet B = (A \oplus B) \ominus B$。</li>
+                <li><strong>直观解释：</strong> “闭合”了图像。它可以填充物体内部的小孔洞，连接邻近的物体，并平滑轮廓的内部。<strong>同样，它也基本不改变主要物体的大小</strong>。可以想象一个结构元素在物体内部的孔洞中滚动，所有它滚不进去的孔洞都会被“填满”。</li>
+                </ul>
+                <h4 id="33-%E5%AF%B9%E5%81%B6%E6%80%A7-duality"><strong>3.3 对偶性 (Duality)</strong></h4>
+                <p>腐蚀和膨胀、开运算和闭运算之间存在着重要的对偶关系。令 $A^c$ 为 $A$ 的补集（前景变背景，背景变前景）。</p>
+                <ul>
+                <li>
+                <p><strong>腐蚀与膨胀的对偶性：</strong>
+                对前景 $A$ 进行膨胀，等价于对背景 $A^c$ 用反射的结构元素 $\hat{B}$ 进行腐蚀。
+                $$
+                (A \oplus B)^c = A^c \ominus \hat{B}
+                $$
+                反之亦然：
+                $$
+                (A \ominus B)^c = A^c \oplus \hat{B}
+                $$</p>
+                </li>
+                <li>
+                <p><strong>开运算与闭运算的对偶性：</strong>
+                对前景 $A$ 进行开运算，等价于对背景 $A^c$ 进行闭运算。
+                $$
+                (A \circ B)^c = A^c \bullet \hat{B}
+                $$</p>
+                </li>
+                </ul>
+                <p><strong>C++ 代码示例 (使用OpenCV):</strong></p>
+                <pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;opencv2/opencv.hpp&gt;</span></span>
+
+                <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+                    cv::Mat image = cv::imread(<span class="hljs-string">"binary_image.png"</span>, cv::IMREAD_GRAYSCALE);
+                    <span class="hljs-keyword">if</span> (image.empty()) <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
+
+                    <span class="hljs-comment">// 定义一个3x3的矩形结构元素</span>
+                    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(<span class="hljs-number">3</span>, <span class="hljs-number">3</span>));
+
+                    cv::Mat dilated_img, eroded_img, opened_img, closed_img;
+
+                    <span class="hljs-comment">// 膨胀</span>
+                    cv::dilate(image, dilated_img, kernel);
+                    <span class="hljs-comment">// 腐蚀</span>
+                    cv::erode(image, eroded_img, kernel);
+                    
+                    <span class="hljs-comment">// 开运算</span>
+                    cv::morphologyEx(image, opened_img, cv::MORPH_OPEN, kernel);
+                    <span class="hljs-comment">// 闭运算</span>
+                    cv::morphologyEx(image, closed_img, cv::MORPH_CLOSE, kernel);
+
+                    cv::imshow(<span class="hljs-string">"Original"</span>, image);
+                    cv::imshow(<span class="hljs-string">"Dilation"</span>, dilated_img);
+                    cv::imshow(<span class="hljs-string">"Erosion"</span>, eroded_img);
+                    cv::imshow(<span class="hljs-string">"Opening"</span>, opened_img);
+                    cv::imshow(<span class="hljs-string">"Closing"</span>, closed_img);
+                    cv::waitKey(<span class="hljs-number">0</span>);
+                    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+                }
+                </div></code></pre>
+                <h3 id="4-%E5%BD%A2%E6%80%81%E5%AD%A6%E5%BA%94%E7%94%A8-morphological-applications"><strong>4. 形态学应用 (Morphological Applications)</strong></h3>
+                <h4 id="41-%E8%BE%B9%E7%95%8C%E6%8F%90%E5%8F%96-boundary-extraction"><strong>4.1 边界提取 (Boundary Extraction)</strong></h4>
+                <ul>
+                <li><strong>原理：</strong> 一个物体的边界，是其本身集合与被腐蚀后的集合之差。</li>
+                <li><strong>公式：</strong> $\beta(A) = A - (A \ominus B)$</li>
+                <li><strong>步骤：</strong>
+                <ol>
+                <li>对原始二值图像 $A$ 进行腐蚀操作，得到 $A \ominus B$。</li>
+                <li>用 $A$ 减去腐蚀后的结果（逻辑异或或算术减法）。</li>
+                </ol>
+                </li>
+                </ul>
+                <h4 id="42-%E5%AD%94%E6%B4%9E%E5%A1%AB%E5%85%85-hole-filling"><strong>4.2 孔洞填充 (Hole Filling)</strong></h4>
+                <ul>
+                <li><strong>原理：</strong> 这是一个迭代算法。从孔洞内部的一个种子点开始，在背景区域内进行条件性膨胀，直到填满整个孔洞。</li>
+                <li><strong>公式：</strong>
+                <ol>
+                <li>选择一个孔洞内的起始点 $p$，初始化 $X_0 = p$。</li>
+                <li>迭代执行：$X_k = (X_{k-1} \oplus B) \cap A^c$，$k=1, 2, 3, \dots$
+                <ul>
+                <li>$X_{k-1} \oplus B$：对当前填充区域进行膨胀。</li>
+                <li>$\cap A^c$：膨胀的结果不能超出原图的背景区域（即不能“漫”到另一个前景物体上）。</li>
+                </ul>
+                </li>
+                <li>当 $X_k = X_{k-1}$ 时，迭代停止。</li>
+                <li>最终结果是 $X_k \cup A$。</li>
+                </ol>
+                </li>
+                </ul>
+                <h4 id="43-%E9%AA%A8%E6%9E%B6%E6%8F%90%E5%8F%96-skeletonization"><strong>4.3 骨架提取 (Skeletonization)</strong></h4>
+                <ul>
+                <li><strong>原理：</strong> 寻找物体的中轴线，即“骨架”。可以通过不断腐蚀物体，同时保留其拓扑结构（连通性）来实现。</li>
+                <li><strong>公式：</strong> 骨架 $S(A)$ 可以表示为：
+                $$
+                S(A) = \bigcup_{k=0}^{K} S_k(A) = \bigcup_{k=0}^{K} [ (A \ominus kB) - ((A \ominus kB) \circ B) ]
+                $$
+                其中 $(A \ominus kB)$ 表示 $A$ 被 $B$ 连续腐蚀 $k$ 次。$K$ 是使 $A$ 被完全腐蚀的迭代次数。该公式的本质是每次腐蚀后，将被开运算“吃掉”的部分保留下来，这些部分就是骨架点。</li>
+                </ul>
+                <h4 id="44-%E5%99%AA%E5%A3%B0%E6%BB%A4%E9%99%A4-noise-removal"><strong>4.4 噪声滤除 (Noise Removal)</strong></h4>
+                <ul>
+                <li><strong>去除“椒盐”噪声：</strong>
+                <ul>
+                <li><strong>椒噪声（Pepper noise，黑点）：</strong> 可以通过<strong>闭运算</strong>有效去除，因为它能填充前景中的小孔洞。</li>
+                <li><strong>盐噪声（Salt noise，白点）：</strong> 可以通过<strong>开运算</strong>有效去除，因为它能消除孤立的小前景物体。</li>
+                </ul>
+                </li>
+                <li><strong>组合使用：</strong> 先进行开运算去除盐噪声，再进行闭运算去除椒噪声，是一种常用的去噪策略。</li>
+                </ul>
+                <h3 id="5-%E5%89%8D%E6%B2%BF%E6%8B%93%E5%B1%95-advanced-topics--frontiers"><strong>5. 前沿拓展 (Advanced Topics &amp; Frontiers)</strong></h3>
+                <h4 id="51-%E7%81%B0%E5%BA%A6%E5%BD%A2%E6%80%81%E5%AD%A6-grayscale-morphology"><strong>5.1 灰度形态学 (Grayscale Morphology)</strong></h4>
+                <p>形态学操作可以扩展到灰度图像。此时，集合运算被替换为 <code>min</code> 和 <code>max</code> 运算。</p>
+                <ul>
+                <li><strong>灰度膨胀：</strong> 输出像素的值是结构元素覆盖区域内输入像素的<strong>最大值</strong>。
+                $$ (I \oplus B)(x,y) = \max_{(s,t) \in B} { I(x-s, y-t) } $$</li>
+                <li><strong>灰度腐蚀：</strong> 输出像素的值是结构元素覆盖区域内输入像素的<strong>最小值</strong>。
+                $$ (I \ominus B)(x,y) = \min_{(s,t) \in B} { I(x+s, y-t) } $$</li>
+                </ul>
+                <p>灰度开运算和闭运算定义不变，它们可以用来平滑图像、去除亮/暗噪声，同时比线性滤波器（如均值滤波）更能保持边缘。</p>
+                <h4 id="52-%E5%BD%A2%E6%80%81%E5%AD%A6%E6%A2%AF%E5%BA%A6-morphological-gradient"><strong>5.2 形态学梯度 (Morphological Gradient)</strong></h4>
+                <ul>
+                <li><strong>定义：</strong> 图像膨胀的结果减去腐蚀的结果。
+                $$ G(I) = (I \oplus B) - (I \ominus B) $$</li>
+                <li><strong>用途：</strong> 可以有效提取物体的边缘轮廓。对于二值图像，它产生的是物体的边界线；对于灰度图像，它能突出灰度变化剧烈的区域，效果类似一阶导数。</li>
+                </ul>
+                <h4 id="53-%E9%A1%B6%E5%B8%BD%E5%8F%98%E6%8D%A2-top-hat-%E5%92%8C-%E9%BB%91%E5%B8%BD%E5%8F%98%E6%8D%A2-black-hat"><strong>5.3 顶帽变换 (Top-hat) 和 黑帽变换 (Black-hat)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>顶帽变换 (Top-hat):</strong> 原始图像减去其开运算结果。
+                $$ T_{hat}(I) = I - (I \circ B) $$
+                <strong>用途：</strong> 提取比周围环境<strong>更亮</strong>的微小细节和斑点，因为开运算会移除这些亮点。</p>
+                </li>
+                <li>
+                <p><strong>黑帽变换 (Black-hat):</strong> 图像的闭运算结果减去原始图像。
+                $$ B_{hat}(I) = (I \bullet B) - I $$
+                <strong>用途：</strong> 提取比周围环境<strong>更暗</strong>的微小细节和孔洞，因为闭运算会填充这些暗点。</p>
+                </li>
+                </ul>
+                <h4 id="54-%E6%B5%8B%E5%9C%B0%E7%BA%BF%E5%BD%A2%E6%80%81%E5%AD%A6%E4%B8%8E%E5%BD%A2%E6%80%81%E5%AD%A6%E9%87%8D%E5%BB%BA-geodesic-morphology-and-reconstruction"><strong>5.4 测地线形态学与形态学重建 (Geodesic Morphology and Reconstruction)</strong></h4>
+                <p>这是形态学中一个非常强大的分支。它引入一个“掩膜（mask）”图像来约束形态学操作的范围。</p>
+                <ul>
+                <li><strong>测地膨胀：</strong> 对标记图像 $F$ 进行一次基本膨胀，然后与掩膜图像 $G$ 取逐像素最小值。</li>
+                <li><strong>形态学重建：</strong> 从一个标记图像 $F$ 开始，在掩膜图像 $G$ 的约束下，反复进行测地膨胀，直到图像不再变化。</li>
+                <li><strong>应用：</strong>
+                <ul>
+                <li><strong>高效孔洞填充：</strong> 无需手动指定种子点。</li>
+                <li><strong>清除边界物体：</strong> 去除所有与图像边界相连的物体。</li>
+                <li><strong>峰值检测：</strong> 提取图像中的局部极大值点。</li>
+                </ul>
+                </li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>图像信息处理6:傅里叶变换与频域滤波</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E5%9B%BE%E5%83%8F%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%866%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2%E4%B8%8E%E9%A2%91%E5%9F%9F%E6%BB%A4%E6%B3%A2">图像信息处理6:傅里叶变换与频域滤波</h1>
+                <h3 id="1-%E5%82%85%E9%87%8C%E5%8F%B6%E5%88%86%E6%9E%90%E7%9A%84%E5%8E%86%E5%8F%B2%E4%B8%8E%E6%80%9D%E6%83%B3"><strong>1. 傅里叶分析的历史与思想</strong></h3>
+                <h4 id="11-%E4%BB%8E%E6%B3%B0%E5%8B%92%E7%BA%A7%E6%95%B0%E5%88%B0%E5%82%85%E9%87%8C%E5%8F%B6%E7%BA%A7%E6%95%B0"><strong>1.1 从泰勒级数到傅里叶级数</strong></h4>
+                <ul>
+                <li><strong>函数逼近思想：</strong> 数学的核心思想之一是用简单的“基函数”的线性组合来逼近复杂的函数。</li>
+                <li><strong>泰勒级数：</strong> 使用<strong>幂函数</strong> ($x^n$) 作为基函数，在某一点的邻域内逼近一个解析函数。
+                $$
+                f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(a)}{n!}(x-a)^n
+                $$</li>
+                <li><strong>傅里叶的革命性思想：</strong> 18世纪，法国数学家约瑟夫·傅里叶在研究热传导问题时提出，<strong>任何周期函数</strong>都可以表示为一系列不同频率的<strong>正弦和余弦函数</strong>的加权和。这就是<strong>傅里叶级数 (Fourier Series)</strong>。</li>
+                </ul>
+                <h4 id="12-%E5%82%85%E9%87%8C%E5%8F%B6%E7%BA%A7%E6%95%B0-fourier-series-fs"><strong>1.2 傅里叶级数 (Fourier Series, FS)</strong></h4>
+                <p>对于一个在 $[-\pi, \pi]$ 上周期为 $2\pi$ 的函数 $f(x)$，其傅里叶级数展开为：
+                $$
+                f(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty} [a_n \cos(nx) + b_n \sin(nx)]
+                $$
+                其中，系数 $a_n$ 和 $b_n$ 利用三角函数的<strong>正交性</strong>计算得到：
+                $$
+                a_0 = \frac{1}{\pi} \int_{-\pi}^{\pi} f(x) dx \quad (\text{直流分量/平均值})
+                $$
+                $$
+                a_n = \frac{1}{\pi} \int_{-\pi}^{\pi} f(x) \cos(nx) dx \quad (\text{偶次谐波分量})
+                $$
+                $$
+                b_n = \frac{1}{\pi} \int_{-\pi}^{\pi} f(x) \sin(nx) dx \quad (\text{奇次谐波分量})
+                $$</p>
+                <ul>
+                <li><strong>核心：</strong> 傅里叶级数将一个复杂的周期波分解为<strong>基频</strong> ($n=1$) 和其<strong>整数倍谐波</strong> ($n=2, 3, \dots$) 的叠加。$a_n, b_n$ 的大小代表了对应频率分量的“强度”。</li>
+                </ul>
+                <h3 id="2-%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2-fourier-transform-ft"><strong>2. 傅里叶变换 (Fourier Transform, FT)</strong></h3>
+                <p>傅里叶变换将傅里叶级数的思想从<strong>周期函数</strong>推广到了<strong>非周期函数</strong>。可以想象成将函数的周期 $T$ 趋向于无穷大，此时，离散的谐波频率会变得连续，求和也随之变成了积分。</p>
+                <h4 id="21-%E5%A4%8D%E6%95%B0%E4%B8%8E%E6%AC%A7%E6%8B%89%E5%85%AC%E5%BC%8F%E5%9B%9E%E9%A1%BE"><strong>2.1 复数与欧拉公式回顾</strong></h4>
+                <p>为了更简洁地表达傅里叶变换，我们需要使用复数。</p>
+                <ul>
+                <li>一个复数 $z = a+jb$，其中 $j=\sqrt{-1}$。</li>
+                <li><strong>欧拉公式 (Euler's Formula):</strong> 将三角函数与复指数函数联系起来：
+                $$
+                e^{j\theta} = \cos(\theta) + j\sin(\theta)
+                $$
+                这意味着一个简单的复指数 $e^{j\theta}$ 同时包含了正弦和余弦两种信息。</li>
+                <li><strong>幅度和相位：</strong> $z = |z|e^{j\phi(z)}$，其中 $|z|=\sqrt{a^2+b^2}$ 是幅度，$\phi(z)=\text{atan2}(b,a)$ 是相位。</li>
+                </ul>
+                <h4 id="22-%E8%BF%9E%E7%BB%AD%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2-ft"><strong>2.2 连续傅里叶变换 (FT)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>正变换 (Forward FT):</strong> 将一个时域/空域函数 $f(x)$ 变换到频域，得到频谱函数 $F(u)$。
+                $$
+                F(u) = \mathcal{F}{f(x)} = \int_{-\infty}^{\infty} f(x) e^{-j2\pi ux} dx
+                $$
+                这里的 $u$ 代表频率。$F(u)$ 是一个复数函数，包含了每个频率分量的<strong>幅度和相位</strong>信息。</p>
+                </li>
+                <li>
+                <p><strong>逆变换 (Inverse FT, IFT):</strong> 将频谱函数 $F(u)$ 变换回时域/空域。
+                $$
+                f(x) = \mathcal{F}^{-1}{F(u)} = \int_{-\infty}^{\infty} F(u) e^{j2\pi ux} du
+                $$</p>
+                </li>
+                </ul>
+                <h4 id="23-%E5%9B%BE%E5%83%8F%E4%B8%AD%E7%9A%84%E9%A2%91%E7%8E%87"><strong>2.3 图像中的频率</strong></h4>
+                <ul>
+                <li><strong>低频 (Low Frequency):</strong> 对应图像中<strong>灰度变化缓慢</strong>的区域，如大片的平滑表面、模糊的背景。</li>
+                <li><strong>高频 (High Frequency):</strong> 对应图像中<strong>灰度变化剧烈</strong>的区域，如物体的<strong>边缘、细节、纹理和噪声</strong>。</li>
+                </ul>
+                <h3 id="3-%E7%A6%BB%E6%95%A3%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2-discrete-fourier-transform-dft"><strong>3. 离散傅里叶变换 (Discrete Fourier Transform, DFT)</strong></h3>
+                <p>在计算机中，我们处理的是离散的、有限长度的信号（如图像像素），因此需要使用离散傅里叶变换。</p>
+                <h4 id="31-%E4%B8%80%E7%BB%B4dft"><strong>3.1 一维DFT</strong></h4>
+                <p>对于一个长度为 $N$ 的离散序列 $f[x], x=0, 1, \dots, N-1$，其DFT为：</p>
+                <ul>
+                <li><strong>正变换 (Forward DFT):</strong>
+                $$F[u] = \sum_{x=0}^{N-1} f[x] e^{-j2\pi ux/N}, \quad u=0, 1, \dots, N-1$$
+                </li>
+                <li><strong>逆变换 (Inverse DFT):</strong>
+                $$f[x] = \frac{1}{N} \sum_{u=0}^{N-1} F[u] e^{j2\pi ux/N}, \quad x=0, 1, \dots, N-1$$
+                </li>
+                </ul>
+                <h4 id="32-%E4%BA%8C%E7%BB%B4dft-%E7%94%A8%E4%BA%8E%E5%9B%BE%E5%83%8F"><strong>3.2 二维DFT (用于图像)</strong></h4>
+                <p>对于一幅大小为 $M \times N$ 的图像 $f(x, y)$，其二维DFT为：</p>
+                <ul>
+                <li><strong>正变换 (Forward 2D DFT):</strong>
+                $$
+                F(u, v) = \sum_{x=0}^{M-1} \sum_{y=0}^{N-1} f(x, y) e^{-j2\pi (\frac{ux}{M} + \frac{vy}{N})}, \quad u=0,..,M-1; v=0,..,N-1
+                $$</li>
+                <li><strong>逆变换 (Inverse 2D DFT):</strong>
+                $$
+                f(x, y) = \frac{1}{MN} \sum_{u=0}^{M-1} \sum_{v=0}^{N-1} F(u, v) e^{j2\pi (\frac{ux}{M} + \frac{vy}{N})}
+                $$</li>
+                <li><strong>可分离性：</strong> 二维DFT可以分解为先对图像的每一行做一维DFT，然后对结果的每一列再做一维DFT。</li>
+                </ul>
+                <h4 id="33-%E5%82%85%E9%87%8C%E5%8F%B6%E8%B0%B1-fourier-spectrum"><strong>3.3 傅里叶谱 (Fourier Spectrum)</strong></h4>
+                <p>由于 $F(u,v)$ 是复数，我们通常将其分解为<strong>幅度谱</strong>和<strong>相位谱</strong>进行分析和可视化。</p>
+                <ul>
+                <li>
+                <p><strong>幅度谱 (Magnitude/Amplitude Spectrum):</strong>
+                $$
+                |F(u, v)| = \sqrt{\text{Re}(F(u,v))^2 + \text{Im}(F(u,v))^2}
+                $$
+                幅度谱表示了每个频率分量的强度或能量。它包含了图像的<strong>主要结构信息</strong>。</p>
+                </li>
+                <li>
+                <p><strong>相位谱 (Phase Spectrum):</strong>
+                $$
+                \phi(u, v) = \text{atan2}(\text{Im}(F(u,v)), \text{Re}(F(u,v)))
+                $$
+                相位谱记录了每个频率分量的位置信息。<strong>相位谱对于图像的重构至关重要，它包含了物体的空间位置信息</strong>。如果只用幅度谱重建图像，会丢失所有位置信息；而只用相位谱（配上一个常数幅度）重建，仍然能大致看清物体的轮廓。</p>
+                </li>
+                <li>
+                <p><strong>可视化：</strong> DFT的幅度谱动态范围通常非常大（直流分量 $F(0,0)$ 能量最高），直接显示效果很差。我们通常对其进行对数变换以增强低能量频率分量的可视化效果：
+                $$
+                D(u, v) = c \log(1 + |F(u, v)|)
+                $$
+                此外，DFT的默认输出会将低频分量放在频谱图的四个角落。为了便于观察，我们通常使用 <code>fftshift</code> 操作将其移动到中心。</p>
+                </li>
+                </ul>
+                <h3 id="4-%E5%BF%AB%E9%80%9F%E5%82%85%E9%87%8C%E5%8F%B6%E5%8F%98%E6%8D%A2-fast-fourier-transform-fft"><strong>4. 快速傅里叶变换 (Fast Fourier Transform, FFT)</strong></h3>
+                <ul>
+                <li><strong>问题：</strong> 直接计算DFT的复杂度为 $O(N^2)$（一维）或 $O(M^2N^2)$（二维），对于大尺寸图像来说计算量巨大。</li>
+                <li><strong>Cooley-Tukey算法 (FFT):</strong> 1965年，Cooley和Tukey重新发现了FFT算法。其核心思想是<strong>分治法 (Divide and Conquer)</strong>。
+                <ul>
+                <li><strong>原理：</strong> 将一个长度为 $N$ 的DFT问题，递归地分解为两个长度为 $N/2$ 的子问题（例如，将原序列分为偶数项和奇数项）。</li>
+                <li><strong>复杂度：</strong> 这种分解将计算复杂度从 $O(N^2)$ 显著降低到 $O(N \log N)$。对于图像，则从 $O(M^2N^2)$ 降低到 $O(MN \log(MN))$。这使得频域处理在实际中成为可能。</li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="5-%E9%A2%91%E5%9F%9F%E6%BB%A4%E6%B3%A2-frequency-domain-filtering"><strong>5. 频域滤波 (Frequency Domain Filtering)</strong></h3>
+                <p>频域滤波提供了一种与空间域滤波完全不同的视角。其基本流程如下：</p>
+                <ol>
+                <li><strong>变换到频域：</strong> 对输入图像 $f(x,y)$ 进行FFT，得到其频谱 $F(u,v)$。</li>
+                <li><strong>滤波操作：</strong> 设计一个<strong>滤波器函数</strong> $H(u,v)$，并将其与图像频谱 $F(u,v)$ 进行<strong>逐点相乘</strong>。
+                $$
+                G(u, v) = F(u, v) \cdot H(u, v)
+                $$</li>
+                <li><strong>变换回空域：</strong> 对滤波后的频谱 $G(u,v)$ 进行逆FFT，得到最终的输出图像 $g(x,y)$。</li>
+                </ol>
+                <h4 id="51-%E5%8D%B7%E7%A7%AF%E5%AE%9A%E7%90%86-convolution-theorem"><strong>5.1 卷积定理 (Convolution Theorem)</strong></h4>
+                <p>频域滤波的核心理论基础是卷积定理，它在空域和频域之间建立了一座桥梁。</p>
+                <ul>
+                <li><strong>定理：</strong> 两个函数在<strong>空间域的卷积</strong>，等价于它们各自的傅里叶变换在<strong>频域的逐点相乘</strong>。
+                $$
+                f(x, y) * h(x, y) \iff F(u, v) \cdot H(u, v)
+                $$
+                反之亦然：
+                $$
+                f(x, y) \cdot h(x, y) \iff F(u, v) * H(u, v)
+                $$</li>
+                <li><strong>意义：</strong> 对于大的卷积核，在空间域直接计算卷积可能非常耗时。利用卷积定理，我们可以通过两次FFT和一次频域乘法来完成滤波，当核足够大时，这种方法的效率远高于空间域卷积。</li>
+                </ul>
+                <h4 id="52-%E5%B8%B8%E7%94%A8%E6%BB%A4%E6%B3%A2%E5%99%A8%E8%AE%BE%E8%AE%A1"><strong>5.2 常用滤波器设计</strong></h4>
+                <ol>
+                <li>
+                <p><strong>理想低通滤波器 (Ideal Low-Pass Filter, ILPF):</strong></p>
+                <ul>
+                <li><strong>原理：</strong> 设定一个截止频率 $D_0$。在以原点为中心的半径 $D_0$ 范围内，滤波器函数值为1（通过），范围外为0（截止）。</li>
+                <li><strong>问题：</strong> 会产生严重的<strong>振铃效应 (Ringing artifacts)</strong>，因为其在频域的矩形函数对应空域的sinc函数。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>高斯低通滤波器 (Gaussian Low-Pass Filter, GLPF):</strong></p>
+                <ul>
+                <li><strong>原理：</strong> 滤波器函数 $H(u,v)$ 是一个高斯函数。
+                $$
+                H(u, v) = e^{-D(u,v)^2 / (2D_0^2)}
+                $$
+                其中 $D(u,v)$ 是点 $(u,v)$ 到频域中心的距离。</li>
+                <li><strong>优点：</strong> 变换平滑，不会产生振铃效应。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>高通滤波器 (High-Pass Filter, HPF):</strong></p>
+                <ul>
+                <li><strong>原理：</strong> 与低通滤波器相反，它允许高频分量通过，抑制低频分量。</li>
+                <li><strong>关系：</strong> $H_{HPF} = 1 - H_{LPF}$</li>
+                <li><strong>应用：</strong> 边缘检测、图像锐化。</li>
+                </ul>
+                </li>
+                </ol>
+                <h4 id="53-c-%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B-%E4%BD%BF%E7%94%A8opencv"><strong>5.3 C++ 代码示例 (使用OpenCV)</strong></h4>
+                <pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;opencv2/opencv.hpp&gt;</span></span>
+                <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iostream&gt;</span></span>
+
+                <span class="hljs-comment">// 函数：将DFT结果移动到中心以便观察</span>
+                <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">fftShift</span><span class="hljs-params">(cv::Mat&amp; magI)</span> </span>{
+                    magI = magI(cv::Rect(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, magI.cols &amp; <span class="hljs-number">-2</span>, magI.rows &amp; <span class="hljs-number">-2</span>));
+                    <span class="hljs-keyword">int</span> cx = magI.cols / <span class="hljs-number">2</span>;
+                    <span class="hljs-keyword">int</span> cy = magI.rows / <span class="hljs-number">2</span>;
+                    <span class="hljs-function">cv::Mat <span class="hljs-title">q0</span><span class="hljs-params">(magI, cv::Rect(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, cx, cy))</span></span>;   <span class="hljs-comment">// Top-Left</span>
+                    <span class="hljs-function">cv::Mat <span class="hljs-title">q1</span><span class="hljs-params">(magI, cv::Rect(cx, <span class="hljs-number">0</span>, cx, cy))</span></span>;  <span class="hljs-comment">// Top-Right</span>
+                    <span class="hljs-function">cv::Mat <span class="hljs-title">q2</span><span class="hljs-params">(magI, cv::Rect(<span class="hljs-number">0</span>, cy, cx, cy))</span></span>;  <span class="hljs-comment">// Bottom-Left</span>
+                    <span class="hljs-function">cv::Mat <span class="hljs-title">q3</span><span class="hljs-params">(magI, cv::Rect(cx, cy, cx, cy))</span></span>; <span class="hljs-comment">// Bottom-Right</span>
+                    cv::Mat tmp;
+                    q0.copyTo(tmp);
+                    q3.copyTo(q0);
+                    tmp.copyTo(q3);
+                    q1.copyTo(tmp);
+                    q2.copyTo(q1);
+                    tmp.copyTo(q2);
+                }
+
+                <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+                    cv::Mat I = cv::imread(<span class="hljs-string">"your_image.jpg"</span>, cv::IMREAD_GRAYSCALE);
+                    <span class="hljs-keyword">if</span>(I.empty()) <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
+                    
+                    <span class="hljs-comment">// 1. 扩展图像到最佳尺寸，并转为浮点型</span>
+                    cv::Mat padded;
+                    <span class="hljs-keyword">int</span> m = cv::getOptimalDFTSize(I.rows);
+                    <span class="hljs-keyword">int</span> n = cv::getOptimalDFTSize(I.cols);
+                    cv::copyMakeBorder(I, padded, <span class="hljs-number">0</span>, m - I.rows, <span class="hljs-number">0</span>, n - I.cols, cv::BORDER_CONSTANT, cv::Scalar::all(<span class="hljs-number">0</span>));
+                    cv::Mat planes[] = {cv::Mat_&lt;<span class="hljs-keyword">float</span>&gt;(padded), cv::Mat::zeros(padded.size(), CV_32F)};
+                    cv::Mat complexI;
+                    cv::merge(planes, <span class="hljs-number">2</span>, complexI);
+
+                    <span class="hljs-comment">// 2. 进行傅里叶变换</span>
+                    cv::dft(complexI, complexI);
+
+                    <span class="hljs-comment">// 3. 计算幅度和相位，并进行可视化</span>
+                    cv::split(complexI, planes); <span class="hljs-comment">// planes[0] = Re, planes[1] = Im</span>
+                    cv::Mat magI;
+                    cv::magnitude(planes[<span class="hljs-number">0</span>], planes[<span class="hljs-number">1</span>], magI);
+                    magI += cv::Scalar::all(<span class="hljs-number">1</span>); <span class="hljs-comment">// log(1 + mag)</span>
+                    cv::<span class="hljs-built_in">log</span>(magI, magI);
+                    cv::normalize(magI, magI, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, cv::NORM_MINMAX);
+                    fftShift(magI); <span class="hljs-comment">// 移动到中心</span>
+
+                    <span class="hljs-comment">// 4. 创建一个高斯低通滤波器</span>
+                    cv::Mat filter = cv::Mat(complexI.size(), CV_32FC2, cv::Vec2f(<span class="hljs-number">0</span>,<span class="hljs-number">0</span>));
+                    <span class="hljs-keyword">int</span> D0 = <span class="hljs-number">30</span>; <span class="hljs-comment">// 截止频率</span>
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; filter.rows; ++i) {
+                        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> j = <span class="hljs-number">0</span>; j &lt; filter.cols; ++j) {
+                            <span class="hljs-keyword">float</span> d = <span class="hljs-built_in">std</span>::<span class="hljs-built_in">sqrt</span>(<span class="hljs-built_in">std</span>::<span class="hljs-built_in">pow</span>(i - filter.rows/<span class="hljs-number">2</span>, <span class="hljs-number">2</span>) + <span class="hljs-built_in">std</span>::<span class="hljs-built_in">pow</span>(j - filter.cols/<span class="hljs-number">2</span>, <span class="hljs-number">2</span>));
+                            <span class="hljs-keyword">float</span> h = <span class="hljs-built_in">std</span>::<span class="hljs-built_in">exp</span>(-d*d / (<span class="hljs-number">2</span>*D0*D0));
+                            filter.at&lt;cv::Vec2f&gt;(i, j)[<span class="hljs-number">0</span>] = h;
+                            filter.at&lt;cv::Vec2f&gt;(i, j)[<span class="hljs-number">1</span>] = h;
+                        }
+                    }
+                    fftShift(filter); <span class="hljs-comment">// 将滤波器也移位以匹配</span>
+
+                    <span class="hljs-comment">// 5. 应用滤波器并进行逆变换</span>
+                    cv::Mat filtered_complex;
+                    cv::mulSpectrums(complexI, filter, filtered_complex, <span class="hljs-number">0</span>);
+                    cv::dft(filtered_complex, filtered_complex, cv::DFT_INVERSE | cv::DFT_REAL_OUTPUT);
+                    
+                    cv::Mat result;
+                    cv::normalize(filtered_complex, result, <span class="hljs-number">0</span>, <span class="hljs-number">255</span>, cv::NORM_MINMAX);
+                    result.convertTo(result, CV_8U);
+
+                    cv::imshow(<span class="hljs-string">"Input Image"</span>, I);
+                    cv::imshow(<span class="hljs-string">"Spectrum Magnitude"</span>, magI);
+                    cv::imshow(<span class="hljs-string">"Filtered Image"</span>, result);
+                    cv::waitKey(<span class="hljs-number">0</span>);
+
+                    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+                }
+                </div></code></pre>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

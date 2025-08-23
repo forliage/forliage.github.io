@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>图像信息处理4:卷积与空间域滤波</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E5%9B%BE%E5%83%8F%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%864%E5%8D%B7%E7%A7%AF%E4%B8%8E%E7%A9%BA%E9%97%B4%E5%9F%9F%E6%BB%A4%E6%B3%A2">图像信息处理4:卷积与空间域滤波</h1>
+                <h3 id="1-%E5%8D%B7%E7%A7%AF-convolution"><strong>1. 卷积 (Convolution)</strong></h3>
+                <p>卷积是信号处理和图像处理中最基本、最重要的运算之一。它描述了一个函数（或信号）经过一个线性时不变（LTI）系统后的输出。在图像处理中，输入信号是图像本身，系统通常是一个<strong>滤波器（核）</strong>。</p>
+                <h4 id="11-%E4%B8%80%E7%BB%B4%E8%BF%9E%E7%BB%AD%E5%8D%B7%E7%A7%AF"><strong>1.1 一维连续卷积</strong></h4>
+                <ul>
+                <li><strong>定义：</strong> 两个一维连续函数 $f(x)$（输入信号）和 $h(x)$（系统响应/核函数）的卷积，记为 $g(x) = f(x) * h(x)$，定义为：
+                $$
+                g(x) = f(x) * h(x) = \int_{-\infty}^{\infty} f(t) h(x-t) dt
+                $$</li>
+                <li><strong>计算过程的直观理解：</strong>
+                要计算输出函数在特定点 $x$ 的值 $g(x)$，可以分为四个步骤：
+                <ol>
+                <li><strong>翻转 (Flip):</strong> 将核函数 $h(t)$ 绕其纵轴翻转，得到 $h(-t)$。</li>
+                <li><strong>平移 (Shift):</strong> 将翻转后的核函数 $h(-t)$ 向右平移 $x$ 个单位，得到 $h(x-t)$。</li>
+                <li><strong>乘积 (Multiply):</strong> 将平移后的核函数 $h(x-t)$ 与输入函数 $f(t)$ 逐点相乘。</li>
+                <li><strong>积分 (Integrate):</strong> 计算乘积函数 $f(t)h(x-t)$ 在整个定义域上的积分（即曲线下的面积）。这个积分值就是 $g(x)$。
+                通过改变平移量 $x$，并重复上述过程，就可以得到整个输出函数 $g(x)$。<strong>卷积的本质是加权平均</strong>，核函数 $h(x-t)$ 提供了在 $t$ 点附近对 $f(t)$ 的加权权重。</li>
+                </ol>
+                </li>
+                </ul>
+                <h4 id="12-%E5%8D%B7%E7%A7%AF%E7%9A%84%E6%80%A7%E8%B4%A8"><strong>1.2 卷积的性质</strong></h4>
+                <p>卷积运算满足以下重要性质，这些性质在理论分析和算法设计中非常有用。</p>
+                <ol>
+                <li>
+                <p><strong>交换律 (Commutative):</strong> $f * h = h * f$</p>
+                <ul>
+                <li><strong>证明：</strong>
+                $$
+                f * h = \int_{-\infty}^{\infty} f(t) h(x-t) dt
+                $$
+                令 $s = x-t$，则 $t = x-s$, $dt = -ds$。积分上下限反转。
+                $$
+                = \int_{\infty}^{-\infty} f(x-s) h(s) (-ds) = \int_{-\infty}^{\infty} h(s) f(x-s) ds = h * f
+                $$</li>
+                <li><strong>意义：</strong> 滤波器作用于图像，等价于图像作用于滤波器。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>分配律 (Distributive):</strong> $f * (g + h) = f * g + f * h$</p>
+                <ul>
+                <li><strong>证明：</strong>
+                $$
+                f * (g+h) = \int f(t)[g(x-t)+h(x-t)]dt = \int f(t)g(x-t)dt + \int f(t)h(x-t)dt = f<em>g + f</em>h
+                $$</li>
+                <li><strong>意义：</strong> 两个滤波器并联作用于图像，等价于先将两个滤波器相加，再作用于图像。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>结合律 (Associative):</strong> $f * (g * h) = (f * g) * h$</p>
+                <ul>
+                <li><strong>意义：</strong> 图像先经过滤波器 $g$ 再经过滤波器 $h$，等价于先将 $g$ 和 $h$ 卷积得到一个新滤波器，再让这个新滤波器作用于图像。这在设计复杂滤波器时非常有用。</li>
+                </ul>
+                </li>
+                </ol>
+                <h4 id="13-%E4%B8%80%E7%BB%B4%E7%A6%BB%E6%95%A3%E5%8D%B7%E7%A7%AF"><strong>1.3 一维离散卷积</strong></h4>
+                <p>在数字信号处理中，我们处理的是离散序列。积分运算被求和替代。</p>
+                <ul>
+                <li><strong>定义：</strong> 两个离散序列 $f[n]$ 和 $h[n]$ 的卷积 $g[n]$ 为：
+                $$
+                g[n] = f[n] * h[n] = \sum_{k=-\infty}^{\infty} f[k] h[n-k]
+                $$
+                计算过程与连续情况类似，只是将积分换成了求和。</li>
+                </ul>
+                <h4 id="14-%E4%BA%8C%E7%BB%B4%E7%A6%BB%E6%95%A3%E5%8D%B7%E7%A7%AF-%E5%9B%BE%E5%83%8F%E5%8D%B7%E7%A7%AF"><strong>1.4 二维离散卷积 (图像卷积)</strong></h4>
+                <p>图像是二维信号，因此图像滤波使用的是二维卷积。</p>
+                <ul>
+                <li><strong>定义：</strong> 对于图像 $f(x, y)$ 和一个二维核 $h(x, y)$，其卷积 $g(x, y)$ 定义为：
+                $$
+                g(x, y) = f(x, y) * h(x, y) = \sum_{s=-\infty}^{\infty} \sum_{t=-\infty}^{\infty} f(s, t) h(x-s, y-t)
+                $$</li>
+                <li><strong>相关 (Correlation) vs. 卷积 (Convolution):</strong>
+                在许多图像处理库（包括OpenCV和深度学习框架）中，出于计算效率的考虑，实际实现的“卷积”操作并没有对核进行翻转。这个<strong>没有翻转</strong>的操作在数学上被称为<strong>互相关 (Cross-correlation)</strong>。
+                $$
+                g_{corr}(x, y) = \sum_{s} \sum_{t} f(x+s, y+t) h(s, t)
+                $$
+                <strong>当且仅当卷积核是中心对称的时，卷积和相关的结果完全相同。</strong> 对于非对称核，两者结果不同。在深度学习中，由于核的权重是通过学习得到的，翻转与否并不影响模型的表达能力，因此通常使用计算更简单的互相关。在本课程中，我们将遵循惯例，将图像滤波操作称为“卷积”，但需知其数学本质多为“相关”。</li>
+                </ul>
+                <h3 id="2-%E7%A9%BA%E9%97%B4%E5%9F%9F%E6%BB%A4%E6%B3%A2-spatial-domain-filtering"><strong>2. 空间域滤波 (Spatial Domain Filtering)</strong></h3>
+                <p>空间域滤波是直接在图像空间上，对像素及其邻域进行操作以改变像素值的过程。其核心工具就是<strong>滤波器 (Filter)</strong>，也称为<strong>核 (Kernel)</strong>、<strong>掩膜 (Mask)</strong> 或 <strong>模板 (Template)</strong>。</p>
+                <ul>
+                <li>
+                <p><strong>原理：</strong> 一个大小为 $m \times n$ 的滤波器（通常 $m, n$ 为奇数）在其中心对准图像中的某个像素 $(x, y)$。输出像素 $g(x, y)$ 的值，由滤波器窗口覆盖下的所有输入像素值与滤波器对应位置的**系数（权重）**进行某种运算得到。</p>
+                </li>
+                <li>
+                <p><strong>线性滤波：</strong> 这种运算是线性的，即加权求和。这正是卷积（或相关）所做的事情。
+                $$
+                g(x, y) = \sum_{s=-a}^{a} \sum_{t=-b}^{b} h(s, t) f(x+s, y+t)
+                $$
+                其中滤波器大小为 $(2a+1) \times (2b+1)$。</p>
+                </li>
+                </ul>
+                <h4 id="21-%E8%BE%B9%E7%95%8C%E5%A4%84%E7%90%86-padding"><strong>2.1 边界处理 (Padding)</strong></h4>
+                <p>当滤波器窗口移动到图像边界时，部分窗口会超出图像范围。有几种常见的处理方式：</p>
+                <ul>
+                <li><strong>忽略边界 (Valid Padding):</strong> 只对滤波器能完全覆盖的内部像素进行计算，导致输出图像尺寸缩小。</li>
+                <li><strong>零填充 (Zero Padding):</strong> 在图像边界外补充0。</li>
+                <li><strong>复制边界 (Replicate Padding):</strong> 复制图像最外围的像素值进行填充。</li>
+                <li><strong>镜像填充 (Reflect Padding):</strong> 以边界为轴，镜像地填充像素。</li>
+                </ul>
+                <p>在OpenCV和深度学习中，最常用的是零填充，通过适当的填充量可以使输出图像尺寸与输入图像保持一致（<code>Same Padding</code>）。</p>
+                <h4 id="22-%E7%BA%BF%E6%80%A7%E5%B9%B3%E6%BB%91%E6%BB%A4%E6%B3%A2%E5%99%A8-smoothing-filters"><strong>2.2 线性平滑滤波器 (Smoothing Filters)</strong></h4>
+                <p>平滑滤波器的主要目的是<strong>模糊图像</strong>和<strong>抑制噪声</strong>。它们本质上是低通滤波器，削弱图像中的高频成分（如边缘、噪声）。</p>
+                <ol>
+                <li>
+                <p><strong>均值滤波器 (Mean/Box Filter):</strong></p>
+                <ul>
+                <li><strong>原理：</strong> 输出像素的值是其邻域内所有像素的平均值。</li>
+                <li><strong>核：</strong> 滤波器核的所有系数都相等，通常为 $1/N^2$（对于 $N \times N$ 的核），以保证图像整体亮度不变。例如，一个 $3 \times 3$ 的均值核：
+                $$
+                h = \frac{1}{9} \begin{bmatrix} 1 & 1 & 1 \\ 1 & 1 & 1 \\ 1 & 1 & 1 \end{bmatrix}
+                $$</li>
+                <li><strong>特点：</strong> 实现简单，但模糊效果较生硬，可能会产生振铃效应。核越大，模糊效果越强。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>高斯滤波器 (Gaussian Filter):</strong></p>
+                <ul>
+                <li><strong>原理：</strong> 使用高斯函数作为权重。离中心像素越近的邻域像素，其权重越大。</li>
+                <li><strong>核：</strong> 系数由二维高斯函数生成：
+                $$
+                G(x, y) = \frac{1}{2\pi\sigma^2} e^{-\frac{x^2+y^2}{2\sigma^2}}
+                $$
+                其中 $\sigma$ (标准差) 控制了模糊的程度。$\sigma$ 越大，模糊越平滑。</li>
+                <li><strong>特点：</strong> 模糊效果非常平滑自然，是应用最广泛的平滑滤波器。高斯核具有可分离性，可以分解为两个一维高斯核的卷积，从而大大提高计算效率。</li>
+                </ul>
+                </li>
+                </ol>
+                <h4 id="23-%E7%BB%9F%E8%AE%A1%E6%8E%92%E5%BA%8F%E6%BB%A4%E6%B3%A2%E5%99%A8-%E9%9D%9E%E7%BA%BF%E6%80%A7"><strong>2.3 统计排序滤波器 (非线性)</strong></h4>
+                <p>这类滤波器的输出取决于邻域像素值的排序结果，而不是加权平均。</p>
+                <ul>
+                <li><strong>中值滤波器 (Median Filter):</strong>
+                <ul>
+                <li><strong>原理：</strong> 输出像素的值是其邻域内所有像素值排序后的<strong>中值</strong>。</li>
+                <li><strong>特点：</strong>
+                <ul>
+                <li><strong>强大的去噪能力：</strong> 对<strong>椒盐噪声 (Salt-and-pepper noise)</strong> 有特效，因为噪声点（极亮或极暗）在排序后通常位于序列的两端，不会被选中为中值。</li>
+                <li><strong>边缘保持性好：</strong> 相比均值滤波，中值滤波在去除噪声的同时能更好地保护图像的边缘，引入的模糊较少。</li>
+                </ul>
+                </li>
+                <li><strong>应用：</strong> 广泛用于去除脉冲噪声。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="24-%E7%BA%BF%E6%80%A7%E9%94%90%E5%8C%96%E6%BB%A4%E6%B3%A2%E5%99%A8-sharpening-filters"><strong>2.4 线性锐化滤波器 (Sharpening Filters)</strong></h4>
+                <p>锐化滤波器的目的是<strong>增强图像的细节和边缘</strong>，与平滑滤波器作用相反。它们是高通滤波器。其基本思想是利用<strong>微分算子</strong>。</p>
+                <ul>
+                <li><strong>微分与图像梯度：</strong>
+                <ul>
+                <li>一阶微分在图像中表现为梯度的变化。在灰度变化平缓的区域，导数小；在边缘、噪声点等灰度突变区域，导数值大。</li>
+                <li>二阶微分（拉普拉斯算子）对灰度变化的起始点和结束点响应更强烈，能更精确地定位边缘。</li>
+                </ul>
+                </li>
+                </ul>
+                <ol>
+                <li>
+                <p><strong>基于二阶微分：拉普拉斯算子 (Laplacian Operator)</strong></p>
+                <ul>
+                <li><strong>原理：</strong> 拉普拉斯算子是二阶导数的各向同性（旋转不变）形式。其离散形式为：
+                $$
+                \nabla^2 f = [f(x+1,y) + f(x-1,y) + f(x,y+1) + f(x,y-1)] - 4f(x,y)
+                $$</li>
+                <li><strong>核：</strong>
+                $$
+                h_1 = \begin{bmatrix} 0 & 1 & 0 \\ 1 & -4 & 1 \\ 0 & 1 & 0 \end{bmatrix} \quad \text{或 (包含对角线)} \quad h_2 = \begin{bmatrix} 1 & 1 & 1 \\ 1 & -8 & 1 \\ 1 & 1 & 1 \end{bmatrix}
+                $$</li>
+                <li><strong>图像锐化：</strong> 将拉普拉斯滤波的结果叠加回原图，可以增强边缘。
+                $$
+                g(x, y) = f(x, y) - c \cdot \nabla^2 f(x, y) \quad (\text{如果核中心为负})
+                $$
+                或者
+                $$
+                g(x, y) = f(x, y) + c \cdot \nabla^2 f(x, y) \quad (\text{如果核中心为正})
+                $$
+                这里的 $c$ 是一个缩放因子。这个过程可以合并为一个单一的锐化核，例如：
+                $$
+                h_{sharp} = \begin{bmatrix} 0 & -1 & 0 \\ -1 & 5 & -1 \\ 0 & -1 & 0 \end{bmatrix}
+                $$</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>基于一阶微分：梯度算子 (Gradient Operators)</strong></p>
+                <ul>
+                <li><strong>原理：</strong> 计算图像在x和y方向的梯度（一阶导数近似），然后合成梯度幅值来表示边缘强度。
+                $$
+                |\nabla f| = \sqrt{G_x^2 + G_y^2} \approx |G_x| + |G_y|
+                $$</li>
+                <li><strong>Sobel算子：</strong>
+                $$
+                G_x = \begin{bmatrix} -1 & 0 & 1 \\ -2 & 0 & 2 \\ -1 & 0 & 1 \end{bmatrix} * f \quad G_y = \begin{bmatrix} -1 & -2 & -1 \\ 0 & 0 & 0 \\ 1 & 2 & 1 \end{bmatrix} * f
+                $$
+                Sobel算子在计算梯度时考虑了中心像素的权重，具有一定的平滑作用，抗噪性较好。</li>
+                <li><strong>Prewitt算子</strong> 和 <strong>Roberts算子</strong> 也是常用的梯度算子，但Sobel效果更佳。</li>
+                </ul>
+                </li>
+                </ol>
+                <h4 id="25-c-%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B-%E4%BD%BF%E7%94%A8opencv"><strong>2.5 C++ 代码示例 (使用OpenCV)</strong></h4>
+                <pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;opencv2/opencv.hpp&gt;</span></span>
+
+                <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+                    cv::Mat src = cv::imread(<span class="hljs-string">"your_image.jpg"</span>, cv::IMREAD_GRAYSCALE);
+                    <span class="hljs-keyword">if</span> (src.empty()) <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
+
+                    cv::Mat dst_mean, dst_gaussian, dst_median;
+                    cv::Mat dst_laplacian, dst_sobel_x, dst_sobel_y, dst_sobel;
+
+                    <span class="hljs-comment">// 平滑滤波</span>
+                    cv::blur(src, dst_mean, cv::Size(<span class="hljs-number">5</span>, <span class="hljs-number">5</span>)); <span class="hljs-comment">// 均值滤波</span>
+                    cv::GaussianBlur(src, dst_gaussian, cv::Size(<span class="hljs-number">5</span>, <span class="hljs-number">5</span>), <span class="hljs-number">0</span>); <span class="hljs-comment">// 高斯滤波</span>
+                    cv::medianBlur(src, dst_median, <span class="hljs-number">5</span>); <span class="hljs-comment">// 中值滤波</span>
+
+                    <span class="hljs-comment">// 锐化滤波</span>
+                    cv::Mat laplacian_img;
+                    cv::Laplacian(src, laplacian_img, CV_16S, <span class="hljs-number">3</span>);
+                    cv::convertScaleAbs(laplacian_img, dst_laplacian); <span class="hljs-comment">// 转换为8位图显示</span>
+
+                    cv::Mat sharpened_img = src - laplacian_img; <span class="hljs-comment">// 简单的锐化</span>
+
+                    <span class="hljs-comment">// Sobel 梯度</span>
+                    cv::Sobel(src, dst_sobel_x, CV_16S, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>); <span class="hljs-comment">// X方向梯度</span>
+                    cv::Sobel(src, dst_sobel_y, CV_16S, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>); <span class="hljs-comment">// Y方向梯度</span>
+                    cv::convertScaleAbs(dst_sobel_x, dst_sobel_x);
+                    cv::convertScaleAbs(dst_sobel_y, dst_sobel_y);
+                    cv::addWeighted(dst_sobel_x, <span class="hljs-number">0.5</span>, dst_sobel_y, <span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>, dst_sobel); <span class="hljs-comment">// 合并梯度</span>
+
+                    <span class="hljs-comment">// 显示结果</span>
+                    cv::imshow(<span class="hljs-string">"Original"</span>, src);
+                    cv::imshow(<span class="hljs-string">"Mean Filter"</span>, dst_mean);
+                    cv::imshow(<span class="hljs-string">"Gaussian Filter"</span>, dst_gaussian);
+                    cv::imshow(<span class="hljs-string">"Median Filter"</span>, dst_median);
+                    cv::imshow(<span class="hljs-string">"Laplacian"</span>, dst_laplacian);
+                    cv::imshow(<span class="hljs-string">"Sharpened"</span>, sharpened_img);
+                    cv::imshow(<span class="hljs-string">"Sobel Edge"</span>, dst_sobel);
+                    cv::waitKey(<span class="hljs-number">0</span>);
+
+                    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+                }
+                </div></code></pre>
+                <h3 id="3-%E5%89%8D%E6%B2%BF%E6%8B%93%E5%B1%95%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-convolutional-neural-networks-cnn"><strong>3. 前沿拓展：卷积神经网络 (Convolutional Neural Networks, CNN)</strong></h3>
+                <ul>
+                <li><strong>卷积在CNN中的角色：</strong> CNN是现代计算机视觉的基石，其核心就是<strong>可学习的卷积层</strong>。</li>
+                <li><strong>传统滤波 vs. CNN：</strong>
+                <ul>
+                <li><strong>传统方法：</strong> 滤波器的核是<strong>手动设计</strong>的，例如Sobel核用于边缘检测，高斯核用于平滑。这些核是固定的，用于提取预定义的特征。</li>
+                <li><strong>CNN：</strong> 卷积层的核不再是固定的，而是<strong>模型的参数</strong>。在训练过程中，网络通过反向传播算法<strong>自动学习</strong>这些核的权重，以便最好地提取对当前任务（如图像分类、目标检测）有用的特征。</li>
+                </ul>
+                </li>
+                <li><strong>特征层次：</strong> 浅层的卷积核可能学会检测简单的模式，如边缘、角点和颜色块；深层的卷积核则在浅层特征的基础上组合，学会检测更复杂的模式，如眼睛、轮廓甚至整个物体。</li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
