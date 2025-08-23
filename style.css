@@ -410,6 +410,128 @@ footer {
     to { transform: translateY(-15px); }
 }
 
+/* Search Bar Styles */
+#search-container {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+#search-input {
+    width: 60%;
+    padding: 12px 20px;
+    border-radius: 25px;
+    border: 1px solid #FFB6C1;
+    font-size: 1em;
+    color: #333;
+    background-color: #FFF0F5;
+    transition: all 0.3s ease;
+}
+
+#search-input:focus {
+    outline: none;
+    border-color: #FF69B4;
+    box-shadow: 0 0 8px rgba(255, 105, 180, 0.5);
+    background-color: #FFFFFF;
+}
+
+/* Course Card Styles */
+#course-cards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.course-card {
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+}
+
+.course-card-pink {
+    background-color: #FFF0F5; /* Lavender Blush */
+}
+
+.course-card-white {
+    background-color: #FFFFFF; /* White */
+}
+
+.course-card h3 {
+    margin-top: 0;
+    font-size: 1.8em;
+    color: #D81B60;
+    border-bottom: 2px solid #FFC0CB;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.course-card ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.course-card ul li {
+    padding: 8px 0;
+    border-bottom: 1px dashed #FFDDE1;
+}
+
+.course-card ul li:last-child {
+    border-bottom: none;
+}
+
+.course-card ul li a {
+    font-size: 1.1em;
+    text-decoration: none;
+    color: #C2185B;
+    transition: color 0.2s;
+}
+
+.course-card ul li a:hover {
+    color: #AD1457;
+    text-decoration: underline;
+}
+
+/* Styles for collapsible cards */
+.card-header {
+    cursor: pointer;
+    position: relative;
+    padding-right: 25px; /* Space for the icon */
+}
+
+.card-header::before {
+    content: '▶';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8em;
+    color: #D81B60;
+    transition: transform 0.3s ease;
+}
+
+.course-card.expanded .card-header::before {
+    transform: translateY(-50%) rotate(90deg);
+}
+
+.card-intro {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
+    margin-bottom: 0;
+}
+
+.card-body {
+    padding-top: 15px;
+    border-top: 1px dashed #FFDDE1;
+    margin-top: 15px;
+}
+
 .side-quotes {
     position: absolute;
     right: 2vw;

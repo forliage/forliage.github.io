@@ -23,8 +23,20 @@
         </nav>
     </header>
     <div class="container">
-        <main id="article-list">
-            <!-- Articles will be listed here by JavaScript -->
+        <main>
+            <!-- Container for posts in non-learning categories -->
+            <div id="article-list">
+                <!-- Articles will be listed here by JavaScript -->
+            </div>
+            <!-- New container for learning notes, hidden by default -->
+            <div id="learning-notes-content" style="display: none;">
+                <div id="search-container">
+                    <input type="search" id="search-input" placeholder="在学习笔记中搜索标题...">
+                </div>
+                <div id="course-cards-container">
+                    <!-- Course cards will be generated here -->
+                </div>
+            </div>
         </main>
     </div>
     <footer>
@@ -33,55 +45,146 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const categoryNameElement = document.getElementById('category-name');
-            const articleListElement = document.getElementById('article-list');
             const params = new URLSearchParams(window.location.search);
             const category = params.get('category');
 
             if (category) {
                 categoryNameElement.textContent = category;
                 document.title = category + " - 分类文章";
-                articleListElement.innerHTML = `<p>正在加载“${category}”分类下的文章...</p>`;
                 fetchPostsForCategory(category);
             } else {
+                const articleListElement = document.getElementById('article-list');
                 categoryNameElement.textContent = '未指定分类';
                 articleListElement.innerHTML = '<p>没有指定分类，无法加载文章。</p>';
             }
         });
 
         async function fetchPostsForCategory(category) {
-            let posts;
+            const articleListElement = document.getElementById('article-list');
+            const learningNotesContainer = document.getElementById('learning-notes-content');
+            const courseCardsContainer = document.getElementById('course-cards-container');
+            const searchInput = document.getElementById('search-input');
+
+            let allPosts;
             try {
                 const res = await fetch('./posts.json');
                 if (!res.ok) throw new Error(res.statusText);
-                posts = await res.json();
+                allPosts = await res.json();
             } catch (err) {
                 if (window.postsData) {
-                    posts = window.postsData;
+                    allPosts = window.postsData;
                 } else {
-                    document.getElementById('article-list').innerHTML = '<p>加载文章列表时发生错误。</p>';
+                    articleListElement.innerHTML = '<p>加载文章列表时发生错误。</p>';
                     console.error(err);
                     return;
                 }
             }
-            const filtered = posts.filter(p => p.category === category);
-            const articleListElement = document.getElementById('article-list');
 
-            if (filtered.length === 0) {
-                articleListElement.innerHTML = `<p>“${category}”分类下暂无文章。</p>`;
+            const postsForCategory = allPosts.filter(p => p.category === category);
+
+            if (postsForCategory.length === 0) {
+                const container = category === '学习笔记' ? courseCardsContainer : articleListElement;
+                if (category === '学习笔记') {
+                    learningNotesContainer.style.display = 'block';
+                    articleListElement.style.display = 'none';
+                }
+                container.innerHTML = `<p>“${category}”分类下暂无文章。</p>`;
                 return;
             }
 
-            articleListElement.innerHTML = '';
-            filtered.forEach(post => {
-                const article = document.createElement('article');
-                article.innerHTML = `
+            if (category === '学习笔记') {
+                learningNotesContainer.style.display = 'block';
+                articleListElement.style.display = 'none';
+                renderLearningNotes(postsForCategory, courseCardsContainer);
+
+                searchInput.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const filteredPosts = postsForCategory.filter(post =>
+                        post.title.toLowerCase().includes(searchTerm)
+                    );
+                    renderLearningNotes(filteredPosts, courseCardsContainer);
+                });
+            } else {
+                articleListElement.innerHTML = '';
+                postsForCategory.forEach(post => {
+                    const article = document.createElement('article');
+                    article.innerHTML = `
                         <h3><a href="${post.path}">${post.title}</a></h3>
                         <p>${post.abstract}</p>
                     `;
-                articleListElement.appendChild(article);
-            });
+                    articleListElement.appendChild(article);
+                });
+            }
         }
-</script>
+
+        function renderLearningNotes(posts, container) {
+            const courseIntroductions = {
+                'ADS 课程笔记': '这里是关于高级数据结构课程的笔记，涵盖了从基础到进阶的各种数据结构和算法分析。',
+                'CUDA 学习笔记': '本专栏记录了 CUDA 并行计算的学习过程，包括基本概念、编程模型和性能优化技巧。',
+                '计算机动画学习笔记': '探索计算机动画的奥秘，从关键帧、粒子系统到物理模拟，记录了学习与实践的每一步。',
+                '其他': '一些尚未分类的学习笔记。'
+            };
+
+            const groupedByCourse = posts.reduce((acc, post) => {
+                let courseName = '其他';
+                const lowerTitle = post.title.toLowerCase();
+                if (lowerTitle.startsWith('ads')) {
+                    courseName = 'ADS 课程笔记';
+                } else if (lowerTitle.startsWith('cuda')) {
+                    courseName = 'CUDA 学习笔记';
+                } else if (lowerTitle.startsWith('计算机动画')) {
+                    courseName = '计算机动画学习笔记';
+                }
+                
+                if (!acc[courseName]) {
+                    acc[courseName] = [];
+                }
+                acc[courseName].push(post);
+                return acc;
+            }, {});
+
+            container.innerHTML = '';
+            
+            if (posts.length === 0) {
+                container.innerHTML = '<p style="text-align: center;">没有找到匹配的笔记。</p>';
+                return;
+            }
+
+            let isPink = true;
+            const courseNames = Object.keys(groupedByCourse).sort();
+
+            for (const courseName of courseNames) {
+                const coursePosts = groupedByCourse[courseName];
+                
+                const card = document.createElement('div');
+                card.className = `course-card ${isPink ? 'course-card-pink' : 'course-card-white'}`;
+                
+                const introText = courseIntroductions[courseName] || '暂无简介。';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h3>${courseName}</h3>
+                        <p class="card-intro">${introText}</p>
+                    </div>
+                    <div class="card-body" style="display: none;">
+                        <ul>
+                            ${coursePosts.sort((a,b) => a.title.localeCompare(b.title)).map(post => `<li><a href="${post.path}">${post.title}</a></li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+                
+                const header = card.querySelector('.card-header');
+                header.addEventListener('click', () => {
+                    const body = card.querySelector('.card-body');
+                    card.classList.toggle('expanded');
+                    body.style.display = card.classList.contains('expanded') ? 'block' : 'none';
+                });
+                
+                isPink = !isPink;
+            }
+        }
+    </script>
     <script src="posts.js"></script>
     <script src="script.js"></script>
     <script src="analytics.js"></script>
