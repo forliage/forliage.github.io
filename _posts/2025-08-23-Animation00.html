@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机动画00:数学基础、关键帧技术与速度控制</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8A%A8%E7%94%BB00%E6%95%B0%E5%AD%A6%E5%9F%BA%E7%A1%80%E5%85%B3%E9%94%AE%E5%B8%A7%E6%8A%80%E6%9C%AF%E4%B8%8E%E9%80%9F%E5%BA%A6%E6%8E%A7%E5%88%B6">计算机动画00:数学基础、关键帧技术与速度控制</h1>
+                <p>本次将分为两大核心部分：</p>
+                <ol>
+                <li><strong>变换和旋转表示</strong>：我们将深入探讨描述物体运动（特别是旋转）的各种数学工具，并最终找到一个能完美解决动画中旋转插值难题的终极方案。</li>
+                <li><strong>关键帧插值与速度控制</strong>：我们将学习如何用数学曲线（样条）来定义物体运动的<strong>路径</strong>，并精确控制其运动的<strong>节奏</strong>。</li>
+                </ol>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%8F%98%E6%8D%A2%E5%92%8C%E6%97%8B%E8%BD%AC%E8%A1%A8%E7%A4%BA%E9%A9%BE%E9%A9%AD%E7%89%A9%E4%BD%93%E7%9A%84%E5%A7%BF%E6%80%81"><strong>第一部分：变换和旋转表示——驾驭物体的姿态</strong></h3>
+                <p>我们知道如何定义一个点沿路径的运动了。但动画中的物体不仅仅是点，它们有大小、有形状、有朝向。我们需要一套数学工具来描述这些属性的变化，这就是<strong>几何变换 (Geometric Transformations)</strong>。</p>
+                <h4 id="11-%E5%9F%BA%E7%A1%80%E5%8F%98%E6%8D%A2%E4%B8%8E%E9%BD%90%E6%AC%A1%E5%9D%90%E6%A0%87"><strong>1.1 基础变换与齐次坐标</strong></h4>
+                <p>最基本的三维变换包括：</p>
+                <ul>
+                <li><strong>平移 (Translate)</strong>: $$\mathbf{p}' = \mathbf{p} + \mathbf{T}$$</li>
+                <li><strong>缩放 (Scale)</strong>: $$\mathbf{p}' = \mathbf{S} \mathbf{p}$$</li>
+                <li><strong>旋转 (Rotate)</strong>: $$\mathbf{p}' = \mathbf{R} \mathbf{p}$$</li>
+                </ul>
+                <p>这里，平移是加法，而缩放和旋转是乘法，形式不统一。为了将它们统一到矩阵乘法的框架下，我们引入<strong>齐次坐标 (Homogeneous Coordinates)</strong>。我们将一个三维点 $(x, y, z)$ 扩展为四维向量 $[x, y, z, 1]^T$。</p>
+                <p>这样，所有变换都可以用一个 $4 \times 4$ 的矩阵来表示：</p>
+                <ul>
+                <li><strong>平移矩阵</strong>: $$\begin{bmatrix} 1 & 0 & 0 & t_x \\ 0 & 1 & 0 & t_y \\ 0 & 0 & 1 & t_z \\ 0 & 0 & 0 & 1 \end{bmatrix}$$</li>
+                <li><strong>缩放矩阵</strong>: $$\begin{bmatrix} s_x & 0 & 0 & 0 \\ 0 & s_y & 0 & 0 \\ 0 & 0 & s_z & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$</li>
+                <li><strong>旋转矩阵</strong> (绕Z轴): $$\begin{bmatrix} \cos\theta & -\sin\theta & 0 & 0 \\ \sin\theta & \cos\theta & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}$$</li>
+                </ul>
+                <p><strong>变换的串联 (Concatenation)</strong>
+                使用齐次坐标的最大好处是，一系列复杂的变换（例如，先缩放，再旋转，最后平移）可以预先通过矩阵连乘，合并成<strong>一个</strong>单一的复合变换矩阵 $\mathbf{M} = \mathbf{M}_{translate} \mathbf{M}_{rotate} \mathbf{M}_{scale}$。然后用这个 $\mathbf{M}$ 去变换模型的所有顶点，极大地提高了效率。<strong>注意：矩阵乘法不满足交换律，变换的顺序至关重要！</strong></p>
+                <h4 id="12-%E6%97%8B%E8%BD%AC%E8%A1%A8%E7%A4%BA%E7%9A%84%E6%8C%91%E6%88%98"><strong>1.2 旋转表示的挑战</strong></h4>
+                <p>平移和缩放的插值很简单，直接对平移向量和缩放因子进行线性插值即可。但<strong>旋转的插值</strong>是一个非常棘手的问题。</p>
+                <p><strong>1. 旋转矩阵 (Rotation Matrix)</strong>
+                旋转矩阵是一个 $3 \times 3$ 的<strong>正交矩阵</strong>（行列向量都是单位向量且相互正交），行列式为1。</p>
+                <ul>
+                <li>
+                <p><strong>优点</strong>：数学上严谨，无奇异性。</p>
+                </li>
+                <li>
+                <p><strong>缺点</strong>：</p>
+                <ul>
+                <li><strong>冗余</strong>: 用9个数字表示只有3个自由度的旋转。</li>
+                <li><strong>插值困难</strong>: 直接对两个旋转矩阵的9个元素进行线性插值，得到的中间矩阵<strong>不再是正交矩阵</strong>，它会引入不希望的缩放和倾斜变形。</li>
+                </ul>
+                <p><strong>示例</strong>：从绕Z轴旋转90°到-90°。
+                $$\mathbf{R}(90^\circ) = \begin{bmatrix} 0 & -1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 1 \end{bmatrix}$$ $$\mathbf{R}(-90^\circ) = \begin{bmatrix} 0 & 1 & 0 \\ -1 & 0 & 0 \\ 0 & 0 & 1 \end{bmatrix}$$
+                线性插值到一半（权重0.5）：
+                $$\mathbf{R}_{half} = 0.5 \mathbf{R}(90^\circ) + 0.5 \mathbf{R}(-90^\circ) = \begin{bmatrix} 0 & 0 & 0 \\ 0 & 0 & 0 \\ 0 & 0 & 1 \end{bmatrix}$$
+                这是一个奇异矩阵，它会把物体压扁到Z轴上，完全不是我们想要的旋转0°（单位矩阵）！</p>
+                </li>
+                </ul>
+                <p><strong>2. 欧拉角/定角 (Euler Angles / Fixed Angles)</strong>
+                这是最直观的表示方法。它将任意一个三维旋转分解为绕三个坐标轴（例如X, Y, Z）的连续三次旋转。</p>
+                <ul>
+                <li>
+                <p><strong>定角 (Fixed Angle)</strong>：每次旋转都绕<strong>世界坐标系</strong>的轴。</p>
+                </li>
+                <li>
+                <p><strong>欧拉角 (Euler Angle)</strong>：第一次旋转绕世界坐标轴，后续旋转绕<strong>物体自身（局部）坐标系</strong>的轴。一个有趣的性质是：按(X, Y, Z)顺序的欧拉角旋转，等价于按(Z, Y, X)顺序的定角旋转。</p>
+                </li>
+                <li>
+                <p><strong>优点</strong>：</p>
+                <ul>
+                <li><strong>紧凑</strong>：只用3个数字 $(\theta_x, \theta_y, \theta_z)$。</li>
+                <li><strong>直观</strong>：容易被人类理解和编辑。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>缺点</strong>：</p>
+                <ul>
+                <li><strong>万向节死锁 (Gimbal Lock)</strong>：这是欧拉角的致命缺陷。当中间的旋转轴（例如Y轴）旋转90°时，第一个轴（X轴）和第三个轴（Z轴）会重合。此时，系统<strong>丢失了一个旋转自由度</strong>。无论我们改变X轴还是Z轴的角度，都只会产生绕同一个世界轴的旋转。这会导致动画中突然的、不自然的快速翻转。</li>
+                <li><strong>插值路径不唯一/不均匀</strong>：对三个角度进行线性插值，得到的旋转路径往往不是最短的，且角速度不均匀。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>3. 轴-角表示 (Axis-Angle)</strong>
+                根据欧拉旋转定理，任意三维旋转都可以表示为绕<strong>一个</strong>任意方向的轴 $\mathbf{a}$ 旋转一个角度 $\theta$。</p>
+                <ul>
+                <li><strong>优点</strong>：
+                <ul>
+                <li><strong>插值直观</strong>：可以在两个姿态间插值旋转轴和旋转角。</li>
+                <li><strong>无万向节死锁</strong>。</li>
+                </ul>
+                </li>
+                <li><strong>缺点</strong>：
+                <ul>
+                <li><strong>难以串联</strong>：两个轴-角表示的旋转，其复合旋转的轴和角没有简单的计算公式。</li>
+                <li>表示不唯一：$(\mathbf{a}, \theta)$ 和 $(-\mathbf{a}, -\theta)$ 表示同一个旋转。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="13-%E7%BB%88%E6%9E%81%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E5%9B%9B%E5%85%83%E6%95%B0-quaternions"><strong>1.3 终极解决方案：四元数 (Quaternions)</strong></h4>
+                <p>1843年，数学家哈密顿在都柏林的一座桥上散步时，灵光乍现，将四元数的乘法法则刻在了桥上：$i^2 = j^2 = k^2 = ijk = -1$。他可能未曾想到，这个抽象的数学工具，将在140多年后成为解决计算机图形学中旋转问题的完美方案。</p>
+                <p><strong>什么是四元数？</strong>
+                一个四元数 $q$ 是一个四维数，可以写成 $q = w + xi + yj + zk$，或更方便地表示为 $[w, \mathbf{v}]$，其中 $w$ 是标量部分，$\mathbf{v}=(x,y,z)$ 是矢量部分。</p>
+                <p><strong>四元数与旋转的联系</strong>
+                一个单位四元数（即模长 $|q| = \sqrt{w^2+x^2+y^2+z^2} = 1$）可以用来表示一个三维旋转。其与轴-角表示 $(\mathbf{a}, \theta)$ 的关系为：
+                $$q = \left[ \cos\left(\frac{\theta}{2}\right), \sin\left(\frac{\theta}{2}\right) \mathbf{a} \right]$$
+                其中 $\mathbf{a}$ 是单位旋转轴。</p>
+                <p><strong>为什么是 $\theta/2$？</strong> 这是四元数“双倍覆盖”性质的体现，也是它能避免许多欧拉角问题的根源之一。一个重要的推论是，四元数 $q$ 和 $-q$ 表示<strong>同一个</strong>三维旋转。</p>
+                <p><strong>四元数的运算</strong></p>
+                <ul>
+                <li><strong>乘法</strong>：$q_1 q_2 = [w_1, \mathbf{v}_1][w_2, \mathbf{v}_2] = [w_1w_2 - \mathbf{v}_1 \cdot \mathbf{v}_2, w_1\mathbf{v}_2 + w_2\mathbf{v}_1 + \mathbf{v}_1 \times \mathbf{v}_2]$。四元数乘法<strong>满足结合律，但不满足交换律</strong>。</li>
+                <li><strong>逆</strong>: 对于单位四元数 $q=[w, \mathbf{v}]$，其逆 $q^{-1} = [w, -\mathbf{v}]$，也叫共轭。</li>
+                </ul>
+                <p><strong>用四元数进行旋转</strong>
+                要用单位四元数 $q$ 来旋转一个三维向量 $\mathbf{p}$，首先将 $\mathbf{p}$ 提升为纯四元数 $p=[0, \mathbf{p}]$，然后执行以下运算：
+                $$\mathbf{p}' = q p q^{-1}$$
+                结果 $\mathbf{p}'$ 的标量部分将为0，其矢量部分就是旋转后的向量。</p>
+                <p><strong>证明概要</strong>:
+                这个乘法展开后非常复杂，但其核心思想是，这个运算保持了向量的模长，并且最终结果的标量部分为0，因此它是一个纯粹的旋转。</p>
+                <p><strong>复合旋转</strong>
+                先用 $q_1$ 旋转，再用 $q_2$ 旋转，其效果等价于用复合四元数 $q_{comp} = q_2 q_1$ 进行一次旋转。这比串联轴-角要简单得多！</p>
+                <p><strong>四元数插值：SLERP</strong>
+                四元数的最大优势在于提供了平滑、无奇异性的插值方法。单位四元数可以看作是四维空间中的<strong>单位超球面</strong>上的点。两个姿态就对应超球面上的两个点。</p>
+                <ul>
+                <li><strong>线性插值 (Lerp)</strong>：直接对四元数的四个分量进行线性插值，然后归一化。这在几何上相当于在连接两个点的<strong>弦</strong>上插值，速度不均匀。</li>
+                <li><strong>球面线性插值 (Spherical Linear Interpolation, SLERP)</strong>：这是正确的插值方法。它在连接两个点的<strong>大圆弧</strong>上进行匀速插值。</li>
+                </ul>
+                <p>给定两个单位四元数 $q_1, q_2$ 和插值参数 $u \in [0,1]$，SLERP公式为：
+                $$\text{slerp}(q_1, q_2, u) = \frac{\sin((1-u)\Omega)}{\sin\Omega} q_1 + \frac{\sin(u\Omega)}{\sin\Omega} q_2$$
+                其中 $\Omega = \arccos(q_1 \cdot q_2)$ 是两个四元数在四维空间中的夹角。</p>
+                <p><strong>实践技巧：“最短路径”</strong>
+                由于 $q$ 和 $-q$ 表示同一个旋转，从 $q_1$ 到 $q_2$ 的插值有两条路径（短弧和长弧）。我们通常想要走最短路径。这可以通过检查点积 $q_1 \cdot q_2$ 来判断。如果 $q_1 \cdot q_2 &lt; 0$，说明夹角大于90度，我们应该插值到 $-q_2$ 而不是 $q_2$，以保证走的是短的那条弧。</p>
+                <div class="code-container">
+                <pre><code class="language-cpp">// C++ Quaternion Slerp 伪代码
+Quaternion Quaternion::slerp(const Quaternion& q1, const Quaternion& q2, float u) {
+    Quaternion q2_temp = q2;
+    float dot = q1.dot(q2);
+
+    // 如果点积为负，使用q2的相反数以走最短路径
+    if (dot < 0.0f) {
+        q2_temp = -q2;
+        dot = -dot;
+    }
+
+    // 防止点积因浮点误差略大于1
+    if (dot > 0.9995f) {
+        // 角度非常小，直接线性插值并归一化，以避免除以0
+        return normalize(lerp(q1, q2_temp, u));
+    }
+
+    float theta_0 = acos(dot);        // 夹角
+    float theta = theta_0 * u;        // 插值后的夹角
+    float sin_theta = sin(theta);
+    float sin_theta_0 = sin(theta_0);
+
+    float s1 = cos(theta) - dot * sin_theta / sin_theta_0;
+    float s2 = sin_theta / sin_theta_0;
+
+    return (q1 * s1) + (q2_temp * s2);
+}
+</code></pre>
+                </div>
+                <h4 id="14-%E6%80%BB%E7%BB%93%E6%97%8B%E8%BD%AC%E8%A1%A8%E7%A4%BA%E5%A4%A7%E6%AF%94%E6%8B%BC"><strong>1.4 总结：旋转表示大比拼</strong></h4>
+                <table>
+                <thead>
+                <tr>
+                <th style="text-align:left">表示法</th>
+                <th style="text-align:left">优点</th>
+                <th style="text-align:left">缺点</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                <td style="text-align:left"><strong>旋转矩阵</strong></td>
+                <td style="text-align:left">无奇异性，应用变换快</td>
+                <td style="text-align:left">冗余（9个数），插值错误</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>欧拉角</strong></td>
+                <td style="text-align:left">紧凑（3个数），直观</td>
+                <td style="text-align:left"><strong>万向节死锁</strong>，插值路径不佳</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>轴-角</strong></td>
+                <td style="text-align:left">直观，插值好</td>
+                <td style="text-align:left">复合旋转困难</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>四元数</strong></td>
+                <td style="text-align:left"><strong>平滑插值(SLERP)</strong>，<strong>无死锁</strong>，复合旋转高效，紧凑（4个数）</td>
+                <td style="text-align:left">不直观，抽象</td>
+                </tr>
+                </tbody>
+                </table>
+                <p><strong>结论</strong>：在动画系统中，通常的做法是：<strong>对外</strong>，向动画师暴露直观的欧拉角进行编辑；<strong>对内</strong>，将欧拉角转换为四元数进行存储、插值和运算；<strong>最终</strong>，在需要应用到顶点时，再将四元数转换回旋转矩阵。四元数是<strong>内部表示旋转</strong>的黄金标准！</p>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%85%B3%E9%94%AE%E5%B8%A7%E6%8F%92%E5%80%BC%E4%B8%8E%E9%80%9F%E5%BA%A6%E6%8E%A7%E5%88%B6%E6%8F%8F%E7%BB%98%E8%BF%90%E5%8A%A8%E7%9A%84%E8%BD%A8%E8%BF%B9%E4%B8%8E%E8%8A%82%E5%A5%8F"><strong>第二部分：关键帧插值与速度控制——描绘运动的轨迹与节奏</strong></h3>
+                <h4 id="21-%E5%8A%A8%E7%94%BB%E4%B8%AD%E7%9A%84%E8%BF%90%E5%8A%A8%E6%8E%A7%E5%88%B6%E5%93%B2%E5%AD%A6"><strong>2.1 动画中的运动控制哲学</strong></h4>
+                <p>计算机动画的核心任务可以归结为三个层面：</p>
+                <ul>
+                <li><strong>运动的表示 (Representation)</strong>：如何用数学语言（函数、参数）来描述一个物体的运动状态。</li>
+                <li><strong>运动的控制与编辑 (Control &amp; Editing)</strong>：如何为动画师提供方便、直观的工具，让他们能够随心所欲地表达创作意图。</li>
+                <li><strong>运动的生成 (Generation)</strong>：如何根据动画师的设定，精确计算出动画序列中每一帧的运动参数。</li>
+                </ul>
+                <p>这其中，<strong>关键帧动画 (Keyframe Animation)</strong> 是最基础、也是最重要的技术。动画师只需定义少数几个“关键”时刻的状态（如位置、方向、颜色、形状等），计算机则负责自动“填充”中间的过程。这个“填充”的过程，就是我们今天要讲的<strong>插值 (Interpolation)</strong>。</p>
+                <p>在现代动画软件如Maya或Blender中，动画师面对的不是枯燥的数字，而是一个直观的<strong>曲线图编辑器 (Graph Editor)</strong>。每一条曲线都代表一个参数（如X方向平移）随时间的变化。通过编辑这些曲线的形状，动画师就能精确控制运动的每一个细节。</p>
+                <h4 id="22-%E5%85%B3%E9%94%AE%E5%B8%A7%E6%8F%92%E5%80%BC%E7%9A%84%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98"><strong>2.2 关键帧插值的核心问题</strong></h4>
+                <p>假设我们有一个简单的任务：让一个物体在第22帧位于点 <code>(-5, 0, 0)</code>，在第67帧位于点 <code>(5, 0, 0)</code>。这看似简单，但要做出富有表现力的动画，我们必须回答几个关键问题：</p>
+                <ol>
+                <li><strong>使用何种插值函数？</strong> 是简单的直线运动，还是平滑的曲线运动？</li>
+                <li><strong>如何参数化函数？</strong> 如何将“时间”映射到运动路径上？</li>
+                <li><strong>如何控制运动节奏？</strong> 比如，我们希望物体先静止，然后加速，中途达到最大速度，接着减速，最后在第67帧精确地停下来。</li>
+                </ol>
+                <p>一个糟糕的插值可能会产生不自然的效果，比如一个弹跳的小球，如果插值不当，可能会在落地时“穿透”地面再弹起，而不是形成一个平滑的触地反弹。</p>
+                <p>我们的解决方案分为两步：</p>
+                <ol>
+                <li><strong>生成空间曲线 (Space Curve)</strong>：首先，用一条平滑的数学曲线来定义物体运动的<strong>几何路径</strong>。</li>
+                <li><strong>速度控制 (Speed Control)</strong>：然后，定义一个函数来描述物体沿这条路径运动的<strong>快慢</strong>。</li>
+                </ol>
+                <h4 id="23-%E6%95%B0%E5%AD%A6%E5%B7%A5%E5%85%B7%E6%A0%B7%E6%9D%A1%E6%9B%B2%E7%BA%BF-splines"><strong>2.3 数学工具：样条曲线 (Splines)</strong></h4>
+                <p>为了生成平滑的运动路径，我们使用一种称为<strong>样条 (Spline)</strong> 的数学工具。样条本质上是<strong>分段多项式 (Piecewise Polynomials)</strong>，即用许多低阶的多项式曲线段拼接而成。</p>
+                <p><strong>为什么选择分段三次多项式 (Piecewise Cubic Polynomials)？</strong></p>
+                <ul>
+                <li><strong>低于三次？</strong> 二次多项式（抛物线）没有<strong>拐点 (inflection point)</strong>，形态单一，难以拟合复杂的形状。</li>
+                <li><strong>高于三次？</strong> 高次多项式虽然更灵活，但容易产生不必要的波动和振荡（称为<strong>龙格现象</strong>），且计算成本更高。</li>
+                <li><strong>三次多项式</strong>是完美的平衡点：它足够简单，计算高效；同时又足够灵活，拥有拐点，能够满足我们对位置和切线的约束，从而保证曲线段之间连接的平滑性。</li>
+                </ul>
+                <p><strong>连续性 (Continuity) 的概念</strong></p>
+                <p>当我们将曲线段拼接在一起时，连接点的平滑程度至关重要。我们用不同阶的连续性来描述它：</p>
+                <ul>
+                <li><strong>C⁰ 连续 (位置连续)</strong>：曲线段在连接点处相接，没有断开。这是最基本的要求。</li>
+                <li><strong>C¹ 连续 (切向连续)</strong>：在连接点处，两条曲线段不仅位置相同，它们的切线方向和大小也相同（即一阶导数相同）。这保证了运动方向的平滑过渡，不会有尖锐的转折。对于大多数动画应用，C¹连续已经足够。</li>
+                <li><strong>C² 连续 (曲率连续)</strong>：在连接点处，曲线的曲率也相同（即二阶导数相同）。这保证了加速度的平滑变化，对于模拟高速运动（如过山车）的摄像机路径非常重要。</li>
+                </ul>
+                <div class="mermaid">
+                graph LR
+                    subgraph "连续性等级"
+                        A("<b>C⁰ 连续</b><br>位置连续<br><i>(尖角)</i>") --> B("<b>C¹ 连续</b><br>切向连续<br><i>(平滑过渡)</i>") --> C("<b>C² 连续</b><br>曲率连续<br><i>(更平滑的力感)</i>")
+                    end
+                </div>
+                <p>接下来，我们将深入学习几种最重要、最经典的三次样条曲线。</p>
+                <h5 id="231-%E5%9F%83%E5%B0%94%E7%B1%B3%E7%89%B9%E6%A0%B7%E6%9D%A1-hermite-spline"><strong>2.3.1 埃尔米特样条 (Hermite Spline)</strong></h5>
+                <p>埃尔米特样条是一种非常基础和强大的插值样条。定义一条埃尔米特曲线段，我们需要四个几何约束：</p>
+                <ul>
+                <li>起始点位置 $\mathbf{P}_0$</li>
+                <li>终点位置 $\mathbf{P}_1$</li>
+                <li>起始点切向量 $\mathbf{P}'_0$</li>
+                <li>终点切向量 $\mathbf{P}'_1$</li>
+                </ul>
+                <p><strong>数学推导</strong>
+                我们的目标是找到一个参数范围为 $u \in [0, 1]$ 的三次多项式向量函数 $\mathbf{P}(u) = \mathbf{a}u^3 + \mathbf{b}u^2 + \mathbf{c}u + \mathbf{d}$，使其满足上述四个条件。</p>
+                <p>这里的 $\mathbf{P}(u)$ 是一个三维向量 $(P_x(u), P_y(u), P_z(u))$，系数 $\mathbf{a, b, c, d}$ 也是三维向量。我们可以对每个分量（x, y, z）独立进行推导。以 x 分量为例：
+                $$P_x(u) = a_x u^3 + b_x u^2 + c_x u + d_x$$
+                其一阶导数（切向量的x分量）为：
+                $$P'_x(u) = 3a_x u^2 + 2b_x u + c_x$$</p>
+                <p>我们将四个约束条件代入：</p>
+                <ol>
+                <li>$P_x(0) = d_x$</li>
+                <li>$P_x(1) = a_x + b_x + c_x + d_x$</li>
+                <li>$P'_x(0) = c_x$</li>
+                <li>$P'_x(1) = 3a_x + 2b_x + c_x$</li>
+                </ol>
+                <p>我们得到了一个关于未知系数 $(a_x, b_x, c_x, d_x)$ 的四元线性方程组。解这个方程组，得到：
+                $$d_x = P_x(0)$$
+                $$c_x = P'_x(0)$$
+                $$a_x = 2(P_x(0) - P_x(1)) + P'_x(0) + P'_x(1)$$
+                $$b_x = 3(P_x(1) - P_x(0)) - 2P'_x(0) - P'_x(1)$$</p>
+                <p><strong>矩阵形式</strong>
+                将解得的系数代回原多项式，可以得到更优雅的矩阵形式：
+                $$\mathbf{P}(u) = \begin{bmatrix} u^3 & u^2 & u & 1 \end{bmatrix} \begin{bmatrix} 2 & -2 & 1 & 1 \\ -3 & 3 & -2 & -1 \\ 0 & 0 & 1 & 0 \\ 1 & 0 & 0 & 0 \end{bmatrix} \begin{bmatrix} \mathbf{P}_0 \\ \mathbf{P}_1 \\ \mathbf{P}'_0 \\ \mathbf{P}'_1 \end{bmatrix}$$
+                这个公式可以简写为 $\mathbf{P}(u) = \mathbf{U}^T \mathbf{M}_H \mathbf{B}_H$，其中：</p>
+                <ul>
+                <li>$\mathbf{U}^T = [u^3, u^2, u, 1]$ 是参数向量。</li>
+                <li>$\mathbf{M}_H$ 是<strong>埃尔米特基矩阵 (Hermite Basis Matrix)</strong>。</li>
+                <li>$\mathbf{B}_H$ 是几何约束向量。</li>
+                </ul>
+                <p><strong>混合函数 (Blending Functions)</strong>
+                如果我们进一步展开矩阵，将 $\mathbf{P}(u)$ 写成几何约束的线性组合，我们会得到：
+                $$\mathbf{P}(u) = (2u^3 - 3u^2 + 1)\mathbf{P}_0 + (-2u^3 + 3u^2)\mathbf{P}_1 + (u^3 - 2u^2 + u)\mathbf{P}'_0 + (u^3 - u^2)\mathbf{P}'_1$$
+                这里的四个关于 $u$ 的多项式，就是<strong>埃尔米特混合函数</strong>。它们的作用就像“权重”，决定了在参数 $u$ 处，四个几何约束（两个点和两个切向量）分别对最终位置的贡献有多大。</p>
+                <p><strong>如何拼接？</strong>
+                要创建一条长的、平滑的复合埃尔米特曲线，我们只需让前一段的终点 $\mathbf{P}_1$ 和终点切向量 $\mathbf{P}'_1$ 作为后一段的起点 $\mathbf{P}_0$ 和起点切向量 $\mathbf{P}'_0$ 即可。这样就自动保证了 C¹ 连续性。</p>
+                <h5 id="232-%E8%B4%9D%E5%A1%9E%E5%B0%94%E6%9B%B2%E7%BA%BF-b%C3%A9zier-curve"><strong>2.3.2 贝塞尔曲线 (Bézier Curve)</strong></h5>
+                <p>直接指定切向量对于设计师来说可能不够直观。贝塞尔曲线提供了一种更符合直觉的控制方式。一条三次贝塞尔曲线由<strong>四个控制点</strong> $\mathbf{P}_0, \mathbf{P}_1, \mathbf{P}_2, \mathbf{P}_3$ 定义。</p>
+                <ul>
+                <li>曲线<strong>穿过</strong>起始点 $\mathbf{P}_0$ 和终点 $\mathbf{P}_3$。</li>
+                <li>中间的两个点 $\mathbf{P}_1, \mathbf{P}_2$ 不在曲线上，而是像“磁铁”一样<strong>吸引</strong>曲线，定义了曲线的形状。</li>
+                <li>起始切向量由 $\vec{\mathbf{P}_0 \mathbf{P}_1}$ 决定，终点切向量由 $\vec{\mathbf{P}_2 \mathbf{P}_3}$ 决定。</li>
+                </ul>
+                <p><strong>与埃尔米特的关系</strong>
+                贝塞尔曲线可以看作是埃尔米特曲线的一种特殊形式，其几何约束为：</p>
+                <ul>
+                <li>起始点：$\mathbf{P}_0$</li>
+                <li>终点：$\mathbf{P}_3$</li>
+                <li>起始切向量：$3(\mathbf{P}_1 - \mathbf{P}_0)$</li>
+                <li>终点切向量：$3(\mathbf{P}_3 - \mathbf{P}_2)$</li>
+                </ul>
+                <p>将这些代入埃尔米特的矩阵形式，可以推导出贝塞尔曲线的基矩阵 $\mathbf{M}_B$：
+                $$\mathbf{P}(u) = \begin{bmatrix} u^3 & u^2 & u & 1 \end{bmatrix} \begin{bmatrix} -1 & 3 & -3 & 1 \\ 3 & -6 & 3 & 0 \\ -3 & 3 & 0 & 0 \\ 1 & 0 & 0 & 0 \end{bmatrix} \begin{bmatrix} \mathbf{P}_0 \\ \mathbf{P}_1 \\ \mathbf{P}_2 \\ \mathbf{P}_3 \end{bmatrix}$$</p>
+                <p><strong>伯恩斯坦多项式形式 (Bernstein Polynomials)</strong>
+                贝塞尔曲线还有一种更经典、更具几何意义的定义方式，即使用伯恩斯坦多项式作为混合函数：
+                $$\mathbf{P}(u) = \sum_{k=0}^{n} B_{k,n}(u) \mathbf{P}_k$$
+                其中 $B_{k,n}(u) = C(n,k) u^k (1-u)^{n-k}$ 是伯恩斯坦基函数，$C(n,k) = \frac{n!}{k!(n-k)!}$ 是二项式系数。对于三次贝塞尔曲线（n=3），公式展开为：
+                $$\mathbf{P}(u) = (1-u)^3 \mathbf{P}_0 + 3u(1-u)^2 \mathbf{P}_1 + 3u^2(1-u) \mathbf{P}_2 + u^3 \mathbf{P}_3$$</p>
+                <p><strong>德卡斯特里奥算法 (De Casteljau's Algorithm)</strong>
+                这是一个非常优美的、用于计算贝塞尔曲线上任意一点的几何构造方法。其核心是<strong>递归线性插值</strong>。
+                要计算参数 $u$ 对应的点 $\mathbf{P}(u)$：</p>
+                <ol>
+                <li>在每条控制边 $\mathbf{P}_k \mathbf{P}_{k+1}$ 上，找到按比例 $u$ 内插的点。</li>
+                <li>将这些新点连接起来，形成新的线段。</li>
+                <li>在这些新线段上，再次按比例 $u$ 进行内插。</li>
+                <li>重复此过程，直到只剩下一个点，这个点就是 $\mathbf{P}(u)$。</li>
+                </ol>
+                <p><strong>全局控制 (Global Control)</strong>
+                贝塞尔曲线有一个特点：移动任何一个控制点，<strong>整条曲线</strong>的形状都会改变。这种性质称为全局控制。</p>
+                <h5 id="233-catmull-rom%E6%A0%B7%E6%9D%A1"><strong>2.3.3 Catmull-Rom样条</strong></h5>
+                <p>动画师通常希望曲线能<strong>穿过</strong>他们指定的所有关键点。埃尔米特需要指定切线，贝塞尔只穿过首尾点。Catmull-Rom样条解决了这个问题。
+                它是一种<strong>插值样条</strong>，能自动计算每个内部关键点的切向量，从而保证整条曲线 C¹ 连续。</p>
+                <ul>
+                <li>给定一系列控制点 $\mathbf{P}_{i-1}, \mathbf{P}_i, \mathbf{P}_{i+1}, \mathbf{P}_{i+2}$。</li>
+                <li>介于 $\mathbf{P}_i$ 和 $\mathbf{P}_{i+1}$ 之间的曲线段，其形状由这四个点共同决定。</li>
+                <li>$\mathbf{P}_i$ 点的切向量被巧妙地定义为其相邻两点 $\mathbf{P}_{i-1}$ 和 $\mathbf{P}_{i+1}$ 连线方向的向量：
+                $\mathbf{P}'_i = s(\mathbf{P}_{i+1} - \mathbf{P}_{i-1})$
+                其中 $s$ 是一个“张力”参数，通常取 $1/2$。</li>
+                </ul>
+                <p>这样，我们有了每个点的<strong>位置</strong>（来自输入）和<strong>切向量</strong>（自动计算），就可以直接使用埃尔米特样条的框架来构建每一段曲线了。这为动画师提供了极大的便利。</p>
+                <p><strong>局部控制 (Local Control)</strong>
+                与贝塞尔曲线不同，Catmull-Rom样条具有局部控制性。移动一个控制点 $\mathbf{P}_i$，只会影响到其邻近的几个曲线段，远处的曲线则不受影响。</p>
+                <h4 id="24-%E9%80%9F%E5%BA%A6%E6%8E%A7%E5%88%B6%E5%BC%A7%E9%95%BF%E5%8F%82%E6%95%B0%E5%8C%96"><strong>2.4 速度控制：弧长参数化</strong></h4>
+                <p>我们已经创建了平滑的运动路径 $\mathbf{P}(u)$，但还有一个问题：当参数 $u$ <strong>匀速</strong>变化时（例如从0到1），物体在空间中运动的速度<strong>不一定是匀速的</strong>。在曲线弯曲剧烈的地方，物体的速度会变慢；在曲线平缓的地方，速度会变快。</p>
+                <p>要实现精确的速度控制，我们必须解耦几何路径和运动速度。这需要引入<strong>弧长 (Arc Length)</strong> 的概念。</p>
+                <p><strong>弧长函数 $s(u)$</strong> 定义为从曲线起点到参数 $u$ 处所经过的路径长度：
+                $$s(u) = \int_0^u | \mathbf{P}'(t) | dt$$
+                其中 $| \mathbf{P}'(t) |$ 是参数 $t$ 处速度向量的大小，即速率。</p>
+                <p><strong>弧长参数化 (Arc-Length Reparameterization)</strong> 的目标是，找到一个新的参数化函数 $\mathbf{P}^*(s)$，使得当新的参数 $s$（弧长）匀速增加时，物体在空间中也以匀速运动。
+                这个过程分为两步：</p>
+                <ol>
+                <li>计算弧长函数 $s = S(u)$。</li>
+                <li>计算其反函数 $u = S^{-1}(s) = U(s)$。</li>
+                <li>得到新的曲线方程 $\mathbf{P}^*(s) = \mathbf{P}(U(s))$。</li>
+                </ol>
+                <p><strong>实际操作：数值方法</strong>
+                对于复杂的样条曲线，弧长积分通常没有解析解。因此，我们采用数值方法，最常用的是<strong>向前差分 (Forward Differencing)</strong>：</p>
+                <ol>
+                <li><strong>预计算</strong>：在曲线的参数 $u$ 从0到1的范围内，进行密集采样（比如1000个点）。</li>
+                <li><strong>构建查找表</strong>：计算每个采样点到起点的累计弧长，并存入一个查找表 <code>[u, arc_length]</code>。</li>
+                </ol>
+                <div class="code-container">
+                <pre><code class="language-cpp">struct ArcLengthTableEntry {
+    float u;
+    float arc_length;
+};
+
+std::vector&lt;ArcLengthTableEntry&gt; build_arc_length_table(const Spline& curve, int num_samples) {
+    std::vector&lt;ArcLengthTableEntry&gt; table;
+    table.push_back({0.0f, 0.0f});
+
+    glm::vec3 prev_point = curve.get_point(0.0f);
+    float accumulated_length = 0.0f;
+
+    for (int i = 1; i <= num_samples; ++i) {
+        float u = (float)i / num_samples;
+        glm::vec3 current_point = curve.get_point(u);
+        accumulated_length += glm::distance(current_point, prev_point);
+        table.push_back({u, accumulated_length});
+        prev_point = current_point;
+    }
+    return table;
+}
+</code></pre>
+                </div>
+                <p>有了这个表，我们就可以进行双向查询：</p>
+                <ul>
+                <li><strong>给定 u，求 s</strong>：直接在表中查找或插值。</li>
+                <li><strong>给定 s，求 u</strong>：在表的 <code>arc_length</code> 列中进行二分查找或线性查找，找到对应的 $u$。</li>
+                </ul>
+                <p><strong>速度控制曲线 (Speed Curve)</strong>
+                现在，我们可以引入最终的控制工具——速度控制曲线。这是一个2D函数 $s = S_{control}(t)$，它将归一化的<strong>时间</strong> $t \in [0,1]$ 映射到归一化的<strong>弧长</strong> $s \in [0,1]$。</p>
+                <ul>
+                <li><strong>匀速运动</strong>：$S_{control}(t) = t$，这是一条直线。</li>
+                <li><strong>缓入缓出 (Ease-in/Ease-out)</strong>：$S_{control}(t)$ 是一条S形曲线。它在开始和结束时斜率很小（速度慢），在中间斜率大（速度快）。这能产生非常自然、平滑的加减速效果。</li>
+                </ul>
+                <p><strong>最终动画生成流程</strong>
+                对于任意给定的时间 $t_{current}$（在总时间 $T_{total}$ 内）：</p>
+                <ol>
+                <li>计算归一化时间 $t = t_{current} / T_{total}$。</li>
+                <li>通过速度控制曲线，得到归一化的目标弧长 $s = S_{control}(t)$。</li>
+                <li>将 $s$ 乘以总弧长 $L_{total}$，得到实际的目标弧长 $s_{actual}$。</li>
+                <li>在预计算的弧长表中，查出 $s_{actual}$ 对应的曲线参数 $u$。</li>
+                <li>用这个 $u$ 计算出物体在空间曲线上的最终位置 $\mathbf{P}(u)$。</li>
+                </ol>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

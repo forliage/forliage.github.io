@@ -175,6 +175,13 @@ var postsData = [
       "abstract": "CUDA02:Compilation with nvcc"
     },
     {
+      "title": "计算机动画学习笔记0:数学基础、关键帧技术与速度控制",
+      "date": "2025-08-23",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-23-Animation00.html",
+      "abstract": "Computer Animation 01: 数学基础、关键帧技术与速度控制"
+    },
+    {
       "title": "计算机动画学习笔记1:粒子系统",
       "date": "2025-08-21",
       "category": "学习笔记",
