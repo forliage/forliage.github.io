@@ -410,6 +410,56 @@ footer {
     to { transform: translateY(-15px); }
 }
 
+/* Table of Contents Widget Styles */
+.toc-widget .toc-list {
+    list-style-type: none;
+    padding-left: 5px; /* A little base padding */
+    font-size: 0.9em;
+}
+
+.toc-widget .toc-list ul {
+    padding-left: 15px; /* For nested lists if ever implemented */
+}
+
+.toc-widget .toc-list li {
+    margin-bottom: 6px;
+    padding-left: 0; /* Base padding is on the list level */
+}
+
+.toc-widget .toc-list li a {
+    text-decoration: none;
+    color: #666;
+    transition: color 0.2s ease-in-out;
+    display: block; /* Make the whole area clickable */
+    padding: 2px 0;
+}
+
+.toc-widget .toc-list li a:hover {
+    color: #D81B60;
+    background-color: #FFFAFA;
+}
+
+/* Indentation for different levels */
+.toc-widget .toc-level-h1 {
+    font-weight: bold;
+    color: #333;
+}
+
+.toc-widget .toc-level-h2 {
+    padding-left: 10px;
+}
+
+.toc-widget .toc-level-h3 {
+    padding-left: 25px;
+    font-size: 0.95em;
+}
+
+.toc-widget .toc-level-h4 {
+    padding-left: 40px;
+    font-size: 0.9em;
+    color: #777;
+}
+
 /* Search Bar Styles */
 #search-container {
     margin-bottom: 30px;

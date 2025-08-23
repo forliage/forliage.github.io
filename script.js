@@ -104,9 +104,6 @@ window.onload = function() {
     let clouds = [];
     let hearts = [];
 
-    let bookmarks = [];
-    const MAX_BOOKMARKS = 5; // Optional: Limit the number of bookmarks
-
     function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -407,6 +404,7 @@ window.onload = function() {
     // 初始化侧栏功能（在 loadSidebar 完成后调用）
     function initSidebarFeatures() {
         updateArticleTitle();
+        generateTOC(); // Add this call
         const progressContainer = document.querySelector('.progress-bar-container-placeholder');
         if (progressContainer) {
             progressContainer.className = 'progress-bar-container';
@@ -417,13 +415,6 @@ window.onload = function() {
         }
         window.addEventListener('scroll', updateReadingProgress);
         updateReadingProgress();
-        const addBookmarkButton = document.getElementById('add-bookmark-button');
-        if (addBookmarkButton) {
-            addBookmarkButton.addEventListener('click', addBookmark);
-        } else {
-            console.error("Add bookmark button not found.");
-        }
-        renderBookmarks();
     }
 
     // Optional: Add new elements periodically if you want more than the initial set
@@ -468,93 +459,51 @@ function updateReadingProgress() {
     progressBarElement.style.width = progressPercentage + '%';
 }
 
-function addBookmark() {
-    const mainElement = document.querySelector('main');
-    if (!mainElement) {
-        console.error("Main element not found for bookmarking.");
-        return;
+function generateTOC() {
+    const tocContainer = document.getElementById('toc-container');
+    const mainArticle = document.querySelector('main article');
+
+    if (!tocContainer || !mainArticle) {
+        return; // No container or article found, so no TOC needed.
     }
 
-    if (bookmarks.length >= MAX_BOOKMARKS) {
-        alert(`最多只能添加 ${MAX_BOOKMARKS} 个书签。`);
-        return;
-    }
-
-    const currentScrollTop = window.scrollY;
-    let bookmarkName = `书签 ${bookmarks.length + 1} (位置: ${currentScrollTop}px)`;
+    const headings = mainArticle.querySelectorAll('h1, h2, h3, h4');
     
-    const headings = Array.from(mainElement.querySelectorAll('h1, h2, h3, h4, h5, h6'));
-    let closestHeading = null;
-    let smallestDiff = Infinity;
-
-    headings.forEach(h => {
-        const rect = h.getBoundingClientRect();
-        if (rect.top >= 0 && rect.top < window.innerHeight) {
-            const diff = Math.abs(rect.top - 0);
-            if (diff < smallestDiff) {
-                smallestDiff = diff;
-                closestHeading = h;
-            }
-        }
-    });
-
-    if (closestHeading) {
-        bookmarkName = `书签 ${bookmarks.length + 1}: ${closestHeading.textContent.substring(0, 20)}...`;
-    }
-
-    const newBookmark = {
-        name: bookmarkName,
-        scrollTop: currentScrollTop
-    };
-
-    bookmarks.push(newBookmark);
-    renderBookmarks();
-}
-
-function renderBookmarks() {
-    const bookmarksListElement = document.getElementById('bookmarks-list');
-    if (!bookmarksListElement) {
-        console.error("Bookmarks list element not found.");
+    if (headings.length === 0) {
+        tocContainer.innerHTML = '<p style="font-size: 0.9em; color: #666;">本文无目录。</p>';
         return;
     }
 
-    bookmarksListElement.innerHTML = ''; // Clear existing bookmarks
+    const tocList = document.createElement('ul');
+    tocList.className = 'toc-list';
 
-    bookmarks.forEach((bookmark, index) => {
+    headings.forEach(heading => {
+        if (!heading.id) {
+            return; 
+        }
+
         const listItem = document.createElement('li');
         const link = document.createElement('a');
-        link.href = '#'; 
-        link.textContent = bookmark.name;
-        link.title = `跳转到: ${bookmark.name}`;
-        link.addEventListener('click', (event) => {
-            event.preventDefault(); 
-            scrollToBookmark(bookmark.scrollTop);
+
+        listItem.className = `toc-level-${heading.tagName.toLowerCase()}`;
+        link.href = `#${heading.id}`;
+        link.textContent = heading.textContent;
+
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetElement = document.getElementById(heading.id);
+            if(targetElement) {
+                targetElement.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
         });
+        
         listItem.appendChild(link);
-        
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = '删除';
-        deleteButton.style.marginLeft = '10px';
-        deleteButton.style.fontSize = '0.8em';
-        deleteButton.onclick = () => {
-            deleteBookmark(index);
-        };
-        listItem.appendChild(deleteButton);
-        
-        bookmarksListElement.appendChild(listItem);
+        tocList.appendChild(listItem);
     });
-}
 
-function scrollToBookmark(scrollTopValue) {
-    window.scrollTo({
-        top: scrollTopValue,
-        behavior: 'smooth'
-    });
-}
-
-function deleteBookmark(index) {
-    bookmarks.splice(index, 1);
-    renderBookmarks(); // Re-render the list
+    tocContainer.appendChild(tocList);
 }
 
     // Mouse click effect to show "鑫"
