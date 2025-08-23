@@ -215,5 +215,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-23-Animation05.html",
       "abstract": "Computer Animation:群组动画(上) "
+    },
+    {
+      "title": "计算机动画学习笔记6:群组动画(中)",
+      "date": "2025-08-23",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-23-Animation06.html",
+      "abstract": "Computer Animation:群组动画(中) "
     }
   ];
