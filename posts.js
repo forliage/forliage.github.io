@@ -236,5 +236,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-23-Animation08.html",
       "abstract": "Computer Animation:关节(角色)动画·中 "
+    },
+    {
+      "title": "计算机动画学习笔记9:关节(角色)动画·下",
+      "date": "2025-08-23",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-23-Animation09.html",
+      "abstract": "Computer Animation:关节(角色)动画·下 "
     }
   ];

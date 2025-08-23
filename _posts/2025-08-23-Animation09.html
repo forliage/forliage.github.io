@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机动画09:关节(角色)动画·下</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8A%A8%E7%94%BB09%E5%85%B3%E8%8A%82%E8%A7%92%E8%89%B2%E5%8A%A8%E7%94%BB%E4%B8%8B">计算机动画09:关节(角色)动画·下</h1>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E8%BF%90%E5%8A%A8%E6%8D%95%E6%8D%89mocap"><strong>第一部分：运动捕捉(Mocap)</strong></h3>
+                <h4 id="11-mocap%E6%95%B0%E6%8D%AE%E5%AE%9D%E5%BA%93cmu-motion-capture-database"><strong>1.1 Mocap数据宝库：CMU Motion Capture Database</strong></h4>
+                <p>要想研究和使用运动数据，我们首先需要数据本身。学术界和工业界最著名、最宝贵的资源之一，就是<strong>卡内基梅隆大学图形学实验室的运动捕捉数据库 (CMU Graphics Lab Motion Capture Database)</strong>。</p>
+                <p>这个数据库包含了海量的、分门别类的真人运动数据，涵盖了：</p>
+                <ul>
+                <li><strong>人类交互 (Human Interaction)</strong>: 两个对象之间的互动，如握手、拥抱。</li>
+                <li><strong>与环境交互 (Interaction with Environment)</strong>: 在不同地形（如操场、不平坦地面）上的运动。</li>
+                <li><strong>移动 (Locomotion)</strong>: 各式各样的跑步、走路姿态。</li>
+                <li><strong>体育活动 (Physical Activities &amp; Sports)</strong>: 篮球、舞蹈等。</li>
+                <li><strong>情景与剧本 (Situations &amp; Scenarios)</strong>: 日常行为、表情、哑剧等。</li>
+                </ul>
+                <p>这是一个巨大的宝藏，为无数的动画研究和应用提供了基础。</p>
+                <h4 id="12-%E6%95%B0%E6%8D%AE%E6%98%AF%E5%A6%82%E4%BD%95%E8%A2%AB%E6%8D%95%E8%8E%B7%E7%9A%84"><strong>1.2 数据是如何被捕获的？</strong></h4>
+                <p>CMU的数据集是使用一套专业的<strong>Vicon光学运动捕捉系统</strong>来记录的。这个过程大致如下：</p>
+                <ol>
+                <li><strong>环境设置</strong>: 在一个约 3米 x 8米 的工作空间内，布置了12个红外MX-40摄像头。这些摄像头可以以120Hz的频率、400万像素的分辨率进行拍摄。</li>
+                <li><strong>演员准备</strong>: 演员穿上一件紧身的黑色衣服，并在全身的关键位置（关节、重要骨骼点）贴上<strong>41个反光标记点 (markers)</strong>。</li>
+                <li><strong>数据捕获</strong>: 演员开始表演。红外摄像头会发射红外光，这些光被标记点反射回摄像头。每个摄像头都会记录下标记点在它的二维图像上的位置。</li>
+                <li><strong>三维重建</strong>: 系统通过至少两个或更多摄像头捕捉到的同一标记点的二维位置，利用三角测量原理，可以精确地重建出该标记点在三维空间中的坐标。</li>
+                </ol>
+                <p>最终，我们得到的是一系列随时间变化的三维点云数据。</p>
+                <p><strong>“Garbage in, garbage out!”</strong>
+                这是一个在Mocap领域流传的至理名言，意思是“输入的是垃圾，输出的也是垃圾”。这强调了原始数据质量的极端重要性。如果捕捉过程中出现标记点脱落、遮挡、或者演员表演不到位，那么后期无论用多么先进的算法都难以修复，最终得到的动画效果也会大打折扣。</p>
+                <p><strong>数据格式</strong>:
+                捕获到的数据通常以特定的格式存储，最常见的有：</p>
+                <ul>
+                <li><strong>ASF/AMC (Acclaim Skeleton File / Acclaim Motion Capture)</strong>: 一种较早的格式，ASF文件定义骨架的层级结构和骨骼长度，AMC文件则存储每一帧的关节旋转数据。</li>
+                <li><strong>BVH (Biovision Hierarchy)</strong>: 目前更通用的格式。它在一个文件中同时包含了骨架的层次结构信息（Hierarchy）和随后的运动数据（Motion data）。</li>
+                </ul>
+                <h4 id="13-%E5%89%8D%E6%B2%BF%E8%BF%9B%E5%B1%95%E9%AB%98%E7%B2%BE%E5%BA%A6%E4%BA%BA%E4%BD%93%E8%BF%90%E5%8A%A8%E7%A5%9E%E7%BB%8F%E6%B1%82%E8%A7%A3%E5%99%A8"><strong>1.3 前沿进展：高精度人体运动神经求解器</strong></h4>
+                <p>传统的Mocap数据处理流程，在面对标记点被遮挡、丢失或标注错误时，常常会产生不准确的结果。近年来，随着深度学习的发展，研究者们开始利用神经网络来更智能、更鲁棒地解决这些问题。</p>
+                <p>近两年进展：</p>
+                <ul>
+                <li><strong>Siggraph Asia 2023</strong>: 提出了一个<strong>基于局部性的神经求解器</strong>。它结合了几何的局部性信息和从数据中学到的先验知识，能更好地处理复杂运动中（如翻滚、身体接触）的遮挡情况，并且能够准确求解精细的手部动作。</li>
+                <li><strong>Siggraph Asia 2024 (RoMo)</strong>: 提出了一个<strong>鲁棒的光学动作捕捉标注与解算器</strong>。这个系统能够应对更具挑战性的情况，比如<strong>未标记</strong>的Mocap点云（不知道哪个点对应哪个身体部位），并能处理异常值和遮挡。它通过一个混合神经网络，利用全局关节位置作为中间表示，有效避免了传统沿运动链累积误差的问题。</li>
+                </ul>
+                <p>这些工作表明，AI技术正在深刻地改变着Mocap数据的处理方式，使其变得更加自动化、精确和鲁棒。</p>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8mocap%E6%95%B0%E6%8D%AE"><strong>第二部分：如何使用Mocap数据？</strong></h3>
+                <p>拿到了原始的Mocap数据后，我们并不能直接使用。需要经过一系列处理，才能将其应用到我们的角色上。</p>
+                <h4 id="21-%E7%A6%BB%E7%BA%BFoff-line-vs-%E5%9C%A8%E7%BA%BFon-line"><strong>2.1 离线(Off-line) vs. 在线(On-line)</strong></h4>
+                <ul>
+                <li><strong>离线处理</strong>: 这是最常见的用法。数据被捕获后，会经过一系列的后期处理，如滤波去噪、数据修复，然后被存入一个<strong>运动数据库</strong>。动画师可以从中挑选、混合、修改这些动作，用于制作动画。</li>
+                <li><strong>在线处理 (表演动画)</strong>: 这是实时应用的场景，也叫<strong>表演捕捉 (Performance Capture)</strong>。演员的表演被实时捕捉，并直接驱动虚拟角色进行同步的动作。这在虚拟直播、实时预演等领域应用广泛。</li>
+                </ul>
+                <h4 id="22-mocap%E6%95%B0%E6%8D%AE%E7%9A%84%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B"><strong>2.2 Mocap数据的处理流程</strong></h4>
+                <ol>
+                <li>
+                <p><strong>运动信号处理 (Motion Signal Processing)</strong>
+                我们可以把一个角色的运动看作是一个高维的时间序列信号，其中每一维对应一个关节的旋转或位置。</p>
+                <ul>
+                <li><strong>把运动看成多维信号</strong>: 每个关节的旋转（如四元数的4个分量）随时间变化，构成了一条曲线。</li>
+                <li><strong>低通滤波</strong>: 原始Mocap数据中常有高频噪声（由设备或环境引起）。通过低通滤波器可以滤除这些噪声，使运动变得更平滑。这对应于运动的<strong>基本部分</strong>，如走路的整体姿态。</li>
+                <li><strong>高通滤波</strong>: 高频部分除了噪声，也可能包含有用的<strong>运动细节</strong>，如走路时轻微的跛行、身体的细微晃动等。高通滤波可以提取这些“风格”信息。</li>
+                <li><strong>挑战</strong>: 简单地用滤波来修改运动并非易事，因为它可能会破坏重要的物理约束（如脚接触地面）或运动的自然感。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>运动数据的重定向 (Motion Retargeting)</strong>
+                这是Mocap应用中最核心、最常见的问题：<strong>如何将为一个角色（如真人演员）捕获的运动，应用到一个体型、骨骼比例完全不同的虚拟角色（如一个卡通兽人）上？</strong></p>
+                <p><strong>问题的数学描述</strong>:</p>
+                <ul>
+                <li>设原始运动为 $m_o(t)$，这是一个描述所有关节随时间 $t$ 变化状态的函数。</li>
+                <li>我们想要求解一个新的运动 $m(t)$，它是对 $m_o(t)$ 的一种修改：$m(t) = m_o(t) + d(t)$，其中 $d(t)$ 是我们施加的偏移量。</li>
+                <li>这个新运动 $m(t)$ 必须满足一系列<strong>约束 (Constraints)</strong>。</li>
+                </ul>
+                <p><strong>约束的例子</strong>:</p>
+                <ul>
+                <li><strong>脚不能穿透地面 (Foot-skate prevention)</strong>: 脚部关节的Y坐标必须大于等于0。</li>
+                <li><strong>身体不能自交叉 (Self-penetration prevention)</strong>。</li>
+                <li><strong>保持与环境的交互</strong>: 如果原始运动是坐在椅子上，新角色也必须能准确地坐到目标椅子上。</li>
+                </ul>
+                <p><strong>优化问题的构建</strong>:
+                我们将运动重定向构建为一个<strong>带约束的优化问题</strong>：</p>
+                <ul>
+                <li><strong>目标函数 (Objective Function)</strong>: 我们希望新的运动与原始运动尽可能相似。因此，我们的目标是<strong>最小化</strong>它们之间的差异。一个常用的目标函数是两者差值的平方积分：
+                $$g(m) = \min \int_t ||m(t) - m_o(t)||^2 dt = \min \int_t ||d(t)||^2 dt$$</li>
+                <li><strong>约束条件 (Constraints)</strong>: 新运动 $m(t)$ 必须满足所有物理和几何约束。我们可以将这些约束写成函数形式：
+                $$f(m(t)) \diamond c$$
+                其中 $f(\cdot)$ 是约束函数（例如，计算脚底板的高度），$\diamond$ 是关系符（如 $\ge$），$c$ 是常数值（如0）。</li>
+                </ul>
+                <p>通过求解这个优化问题，我们就能找到一个既保留了原始运动风格，又适应了新角色身体比例和环境约束的全新运动。</p>
+                </li>
+                <li>
+                <p><strong>运动数据的合并与过渡 (Motion Blending and Transition)</strong></p>
+                <ul>
+                <li><strong>运动混合 (Motion Blending)</strong>: Mocap数据通常是一段段的短片。我们可以通过插值来混合不同的运动。例如，为了得到一个介于“走路”和“跑步”之间的“慢跑”动作，我们可以对走路动作 $m_0(t)$ 和跑步动作 $m_1(t)$ 进行线性插值：
+                $$m(t) = (1-\alpha) m_0(t) + \alpha m_1(t)$$
+                通过调整混合系数 $\alpha$ 从0到1，就可以得到从走到跑的平滑速度变化。</li>
+                <li><strong>运动过渡 (Motion Transition)</strong>: 如何将两个独立的运动片段（如“走路”和“停下”）平滑地连接起来？
+                <ul>
+                <li>如果两个运动在衔接处的姿态很接近，过渡会比较容易，简单的插值就能工作。</li>
+                <li>如果姿态相差很远（如从“跑步”直接切换到“坐下”），就需要更复杂的算法来生成一个自然的过渡动画。我们实验室在Siggraph 2022提出的 <strong>MIB (Motion In Between)</strong> 工作，就是研究如何为角色生成实时可控的、高质量的运动过渡。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ol>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E4%BA%BA%E8%84%B8%E8%A1%A8%E6%83%85%E5%8A%A8%E7%94%BB"><strong>第三部分：人脸表情动画</strong></h3>
+                <p>身体动画赋予了角色生命，而<strong>人脸动画</strong>则赋予了角色灵魂。它是计算机动画中最具挑战性，也最具感染力的领域。</p>
+                <h4 id="31-%E6%A0%B8%E5%BF%83%E6%8C%91%E6%88%98%E5%8F%82%E6%95%B0%E5%8C%96-parameterization"><strong>3.1 核心挑战：参数化 (Parameterization)</strong></h4>
+                <p>一个高精度的人脸模型有数万甚至数十万个顶点。我们不可能为每个顶点都去K帧。核心问题是：<strong>如何构建一个低维度的、直观的参数空间，用少数几个参数（比如几个滑条）来控制复杂的面部表情变化？</strong></p>
+                <p>这个过程在身体动画中叫 <strong>Rigging</strong>，在面部动画中也是如此。我们希望建立一个映射关系：
+                $E = E(w)$
+                其中，$w$ 是低维的控制参数（比如微笑、愤怒、张嘴的程度），$E$ 是高维的人脸顶点位置（表情空间）。</p>
+                <h4 id="32-%E7%BB%8F%E5%85%B8%E6%96%B9%E6%B3%953d%E5%8F%AF%E5%8F%98%E5%BD%A2%E4%BA%BA%E8%84%B8%E6%A8%A1%E5%9E%8B-morphable-3d-faces"><strong>3.2 经典方法：3D可变形人脸模型 (Morphable 3D Faces)</strong></h4>
+                <p>这是1999年SIGGRAPH上由Volker Blanz和Thomas Vetter提出的里程碑式的工作，它为基于数据驱动的人脸建模和动画奠定了基础。</p>
+                <p><strong>核心思想</strong>:
+                通过分析一个包含大量真人3D人脸扫描的数据库，学习到一个“平均脸”以及人脸形状和纹理的<strong>主要变化模式</strong>。任何一张新的人脸都可以被表示为“平均脸”与这些变化模式的线性组合。</p>
+                <p><strong>数学推导 (基于主成分分析PCA)</strong>:</p>
+                <ol>
+                <li>
+                <p><strong>数据表示</strong>:</p>
+                <ul>
+                <li>假设我们有 $m$ 个3D人脸扫描，每个模型都有 $n$ 个顶点，且顶点之间已经建立了<strong>稠密对应关系</strong>（即第 $i$ 个模型上的第 $j$ 个顶点，对应的是第 $k$ 个模型上的第 $j$ 个顶点，它们都代表脸上的同一个语义点，比如左眼角）。</li>
+                <li>我们可以将每个模型的几何形状 $S_i$ 和纹理 $T_i$ 展平成一个长向量：
+                $$S_i = (X_1, Y_1, Z_1, ..., X_n, Y_n, Z_n)^T \in \mathbb{R}^{3n}$$
+                $$T_i = (R_1, G_1, B_1, ..., R_n, G_n, B_n)^T \in \mathbb{R}^{3n}$$</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>计算平均脸</strong>:
+                计算所有样本的平均形状 $\bar{S}$ 和平均纹理 $\bar{T}$：
+                $$\bar{S} = \frac{1}{m}\sum_{i=1}^{m} S_i$$
+                $$\bar{T} = \frac{1}{m}\sum_{i=1}^{m} T_i$$</p>
+                </li>
+                <li>
+                <p><strong>计算差异</strong>:
+                计算每个样本与平均脸的差异：
+                $$\Delta S_i = S_i - \bar{S}$$
+                $$\Delta T_i = T_i - \bar{T}$$</p>
+                </li>
+                <li>
+                <p><strong>主成分分析 (PCA)</strong>:</p>
+                <ul>
+                <li>将所有差异向量 $\Delta S_i$ 构成一个数据矩阵。对这个矩阵进行PCA分析（本质上是计算数据协方差矩阵的特征向量）。</li>
+                <li>PCA会找到一组正交的基向量（特征脸）${s_1, s_2, ..., s_{m-1}}$，它们按重要性（特征值大小）排序。这些基向量代表了人脸形状最主要的变化方向（例如，第一个基向量可能控制脸的胖瘦，第二个控制脸的长短等）。</li>
+                <li>对纹理差异向量 $\Delta T_i$ 做同样的操作，得到纹理的基向量 ${t_1, t_2, ..., t_{m-1}}$。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>新的模型表示</strong>:
+                现在，任何一张新的人脸都可以通过下面的公式来合成：
+                $$S_{model} = \bar{S} + \sum_{i=1}^{m-1} a_i s_i$$
+                $$T_{model} = \bar{T} + \sum_{i=1}^{m-1} b_i t_i$$</p>
+                <p>这里的系数 ${a_i}$ 和 ${b_i}$ 就是我们想要的<strong>低维、直观的控制参数</strong>。通过调整这些系数，我们就可以在“人脸空间”中生成无穷无尽、千变万化的新面孔。</p>
+                </li>
+                </ol>
+                <p>这个强大的模型不仅可以用于人脸生成，还可以通过优化算法，从一张2D照片中反向求解出最匹配的系数，从而重建出三维人脸模型。这一思想也被扩展到了人体，催生了著名的<strong>SMPL (Skinned Multi-Person Linear body model)</strong> 模型。</p>
+                <h4 id="33-%E5%B7%A5%E4%B8%9A%E7%95%8C%E6%A0%87%E5%87%86blend-shapes"><strong>3.3 工业界标准：Blend Shapes</strong></h4>
+                <p>尽管可变形模型在学术上非常优雅，但在实际的动画制作流程中，<strong>Blend Shapes（融合变形）</strong> 是更常用、更直观、艺术家更友好的技术。</p>
+                <p><strong>核心思想</strong>:</p>
+                <ul>
+                <li>艺术家预先雕刻好一系列<strong>关键表情姿态 (Key Poses)</strong>，比如“微笑”、“愤怒”、“张大嘴”、“O”型嘴等。这些模型被称为 <strong>Blend Shapes</strong> 或 <strong>Targets</strong>。</li>
+                <li>所有这些Blend Shape模型都与一个中性的基础模型（Base Mesh）拥有完全相同的顶点数量和拓扑结构。它们之间的区别仅仅在于顶点位置。</li>
+                <li>任意一个复杂的、介于中间的表情，都可以通过对这些关键表情进行<strong>加权线性插值</strong>来得到。</li>
+                </ul>
+                <p><strong>数学表示</strong>:
+                设最终的表情网格为 $S_{final}$，基础网格为 $S_{base}$，我们有 $F$ 个Blend Shape目标 $S_1, S_2, ..., S_F$。那么：</p>
+                <p>$$S_{final} = S_{base} + \sum_{f=1}^{F} c_f (S_f - S_{base})$$
+                其中 $c_f$ 是第 $f$ 个Blend Shape的权重，通常在 $[0, 1]$ 区间内。</p>
+                <p>如果我们将每个表情表示为相对于基础网格的<strong>位移向量</strong> $\Delta_f = S_f - S_{base}$，公式可以简化为：</p>
+                <p>$$S_{final} = S_{base} + \sum_{f=1}^{F} c_f \Delta_f$$</p>
+                <p><strong>Face IK</strong>:
+                直接控制几十上百个Blend Shape权重对动画师来说依然是繁琐的。动画师更喜欢像操作木偶一样，直接拖拽脸上的几个控制点（比如嘴角、眉毛），然后让整个表情自然地形成。这就是 <strong>Face IK</strong>。</p>
+                <p><strong>数学原理 (最小二乘法求解)</strong>:</p>
+                <ul>
+                <li><strong>输入</strong>: 动画师在主模型上选择了 $L$ 个控制顶点，并指定了它们的目标位置 $\mathbf{P}_1, \mathbf{P}_2, ..., \mathbf{P}_L$。</li>
+                <li><strong>目标</strong>: 求解出一组Blend Shape权重 $c_1, c_2, ..., c_F$，使得这 $L$ 个顶点在混合后的位置最接近目标位置。</li>
+                <li><strong>方程建立</strong>: 对于每一个控制顶点 $l$，其混合后的位置为：
+                $$\mathbf{S}_{l,final} = \mathbf{S}_{l,base} + \sum_{f=1}^{F} c_f (\mathbf{S}_{l,f} - \mathbf{S}_{l,base})$$
+                我们希望 $\mathbf{S}_{l,final} = \mathbf{P}_l$。整理后得到：
+                $$\sum_{f=1}^{F} c_f \Delta_{l,f} = \mathbf{P}_l - \mathbf{S}_{l,base}$$
+                这是一个关于未知数 $c_f$ 的<strong>线性方程组</strong>。由于控制点数量 $L$ 通常远小于Blend Shape数量 $F$，这是一个欠定方程组。我们可以使用<strong>带约束的最小二乘法</strong>来求解，找到一个既满足控制点约束，又使权重变化尽可能平滑的解。</li>
+                </ul>
+                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6---the-digital-emily-project"><strong>第四部分：案例研究 - The Digital Emily Project</strong></h3>
+                <p>为了让大家更具体地理解照片级真实感人脸动画的制作流程，我们来看一个经典的案例：南加州大学ICT实验室的<strong>The Digital Emily Project</strong>。</p>
+                <p>这个项目完整地展示了从数据采集到最终动画的全过程，其工作流程至今仍是行业标杆。</p>
+                <p><strong>动画流程</strong>:</p>
+                <ol>
+                <li><strong>表演捕获 (Performance Capture)</strong>: 演员在一个布满摄像机和光源的特殊设备（Light Stage）中进行表演。</li>
+                <li><strong>表演分析 (Performance Analysis)</strong>: 利用计算机视觉技术，从拍摄的视频中跟踪演员面部的细微特征。</li>
+                <li><strong>角色构建与绑定 (Rigging)</strong>: 并行地，艺术家会为CG角色构建一个高质量的三维模型，并为其创建一套复杂的面部绑定系统（通常是基于Blend Shapes）。</li>
+                <li><strong>表情迁移 (Retargeting)</strong>: 将从真人表演中分析出的表情数据，迁移到CG角色的绑定系统上，驱动CG角色做出与真人相同的表情。</li>
+                <li><strong>关键帧动画 (Keyframe Animation)</strong>: 动画师在迁移结果的基础上进行手动的调整和精修，以达到最终的艺术效果。</li>
+                </ol>
+                <p><strong>数据获取的细节</strong>:</p>
+                <ul>
+                <li><strong>FACS (Facial Action Coding System)</strong>: 为了系统地捕捉所有可能的表情，项目采用了由心理学家Paul Ekman提出的面部动作编码系统。该系统将人脸肌肉运动分解为一系列<strong>动作单元 (Action Units, AU)</strong>。演员被要求依次做出33个基本的FACS表情，并保持几秒钟。</li>
+                <li><strong>Light Stage 5</strong>: 这是一个测地线穹顶，内部装有156个LED光源。它可以在极短的时间内（3秒），从不同角度、用不同光照（如Diffuse、Specular）拍摄演员的脸部，从而获取：
+                <ul>
+                <li><strong>高精度几何 (Geometry)</strong>: 通过投射条纹图案，重建出皮肤毛孔级别的细节。</li>
+                <li><strong>高精度纹理 (Texture)</strong>: 分离出漫反射贴图和高光贴图。</li>
+                <li><strong>反射属性 (Reflectance Properties)</strong>: 分析皮肤的次表面散射等光学特性。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>角色构建的挑战与解决方案</strong>:</p>
+                <ul>
+                <li><strong>原始扫描数据的问题</strong>: 原始扫描出的模型拓扑混乱、有破洞（如眼睛、牙齿区域）、覆盖范围不一致。</li>
+                <li><strong>构建流程</strong>:
+                <ol>
+                <li><strong>重新拓扑 (Re-mesh)</strong>: 美术师对一个中性表情的扫描模型进行手工的重新拓扑，创建一个干净、规则、适合绑定的<strong>主网格 (Master Mesh)</strong>。</li>
+                <li><strong>建立对应关系</strong>: 这是最关键的一步。需要找到主网格上的每一个顶点，与所有其他表情扫描模型上的对应点。这通常通过一个半自动的过程完成：
+                <ul>
+                <li>在脸上贴上标记点，提供<strong>稀疏对应</strong>。</li>
+                <li>使用光流等算法，结合稀疏标记点，计算出<strong>稠密对应</strong>。</li>
+                </ul>
+                </li>
+                <li><strong>建立Blend Shapes</strong>: 有了对应关系，就可以将每个表情扫描的形变信息，传递给主网格，生成一系列与主网格拓扑一致的Blend Shape目标。</li>
+                </ol>
+                </li>
+                </ul>
+                <p><strong>最终，我们就拥有了一套高质量的Blend Shape表情库，可以用于前面提到的Face IK或直接权重控制，来实现照片级的实时表情动画。</strong> 这一整套技术后来被广泛应用于电影《返老还童》等作品中。</p>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
