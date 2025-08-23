@@ -208,5 +208,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-23-Animation04.html",
       "abstract": "Computer Animation:三维Morphing技术 "
+    },
+    {
+      "title": "计算机动画学习笔记5:群组动画(上)",
+      "date": "2025-08-23",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-23-Animation05.html",
+      "abstract": "Computer Animation:群组动画(上) "
     }
   ];
