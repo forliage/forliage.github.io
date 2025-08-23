@@ -182,63 +182,63 @@ var postsData = [
       "abstract": "Computer Animation 01: 数学基础、关键帧技术与速度控制"
     },
     {
-      "title": "计算机动画学习笔记1:粒子系统",
+      "title": "计算机动画学习笔记01:粒子系统",
       "date": "2025-08-21",
       "category": "学习笔记",
       "path": "_posts/2025-08-21-Animation01.html",
       "abstract": "Computer Animation 01: Particle Systems"
     },
     {
-      "title": "计算机动画学习笔记2:二维图像Morphing",
+      "title": "计算机动画学习笔记02:二维图像Morphing",
       "date": "2025-08-21",
       "category": "学习笔记",
       "path": "_posts/2025-08-21-Animation02.html",
       "abstract": "Computer Animation 02: 2D Image Morphing"
     },
     {
-      "title": "计算机动画学习笔记3:基于StyleGan的肖像Morphing和二维多边形形状渐变",
+      "title": "计算机动画学习笔记03:基于StyleGan的肖像Morphing和二维多边形形状渐变",
       "date": "2025-08-21",
       "category": "学习笔记",
       "path": "_posts/2025-08-21-Animation03.html",
       "abstract": "Computer Animation:Portrait Morphing and 2D Polygon Shape Gradient Based on StyleGAN "
     },
     {
-      "title": "计算机动画学习笔记4:三维Morphing技术",
+      "title": "计算机动画学习笔记04:三维Morphing技术",
       "date": "2025-08-23",
       "category": "学习笔记",
       "path": "_posts/2025-08-23-Animation04.html",
       "abstract": "Computer Animation:三维Morphing技术 "
     },
     {
-      "title": "计算机动画学习笔记5:群组动画(上)",
+      "title": "计算机动画学习笔记05:群组动画(上)",
       "date": "2025-08-23",
       "category": "学习笔记",
       "path": "_posts/2025-08-23-Animation05.html",
       "abstract": "Computer Animation:群组动画(上) "
     },
     {
-      "title": "计算机动画学习笔记6:群组动画(下)",
+      "title": "计算机动画学习笔记06:群组动画(下)",
       "date": "2025-08-23",
       "category": "学习笔记",
       "path": "_posts/2025-08-23-Animation06.html",
       "abstract": "Computer Animation:群组动画(下) "
     },
     {
-      "title": "计算机动画学习笔记7:关节(角色)动画·上",
+      "title": "计算机动画学习笔记07:关节(角色)动画·上",
       "date": "2025-08-23",
       "category": "学习笔记",
       "path": "_posts/2025-08-23-Animation07.html",
       "abstract": "Computer Animation:关节(角色)动画·上 "
     },
     {
-      "title": "计算机动画学习笔记8:关节(角色)动画·中",
+      "title": "计算机动画学习笔记08:关节(角色)动画·中",
       "date": "2025-08-23",
       "category": "学习笔记",
       "path": "_posts/2025-08-23-Animation08.html",
       "abstract": "Computer Animation:关节(角色)动画·中 "
     },
     {
-      "title": "计算机动画学习笔记9:关节(角色)动画·下",
+      "title": "计算机动画学习笔记09:关节(角色)动画·下",
       "date": "2025-08-23",
       "category": "学习笔记",
       "path": "_posts/2025-08-23-Animation09.html",
