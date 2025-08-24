@@ -123,6 +123,7 @@
                 'CUDA 学习笔记': 'CUDA学习笔记,基于NVIDIA官网手册',
                 '计算机动画课程笔记': '这里是浙江大学研究生课程计算机动画的笔记',
                 'DIP图像信息处理课程笔记': '这里是浙江大学图像信息处理(DIP)课程的笔记，经修缮后重新上传',
+                '计算机组成课程笔记': '这里是浙江大学计算机组成(CO)课程的笔记，经修缮后重新上传',
                 '其他': '一些尚未分类的学习笔记。'
             };
 
@@ -137,6 +138,8 @@
                     courseName = '计算机动画课程笔记';
                 } else if (lowerTitle.startsWith('DIP') || lowerTitle.startsWith('图像信息处理') || lowerTitle.startsWith('dip')) {
                     courseName = 'DIP图像信息处理课程笔记';
+                } else if (lowerTitle.startsWith('CO') || lowerTitle.startsWith('计算机组成')) {
+                    courseName = '计算机组成课程笔记';
                 }
                 
                 if (!acc[courseName]) {
