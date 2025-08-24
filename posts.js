@@ -334,5 +334,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-24-co2-2.html",
       "abstract": "计算机组成2-2：数字的表示与指令的编码"
+    },
+    {
+      "title": "计算机组成2-3:逻辑运算与决策指令",
+      "date": "2025-08-24",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-24-co2-3.html",
+      "abstract": "计算机组成2-3:逻辑运算与决策指令"
     }
   ];
