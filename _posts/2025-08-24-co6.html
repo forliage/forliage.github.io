@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机组成6:计算机系统的完整生态</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%906%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AE%8C%E6%95%B4%E7%94%9F%E6%80%81">计算机组成6:计算机系统的完整生态</h1>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86io%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%A4%9A%E6%A0%B7%E6%80%A7%E4%B8%8E%E6%8C%91%E6%88%98"><strong>第一部分：I/O系统的多样性与挑战</strong></h3>
+                <h4 id="11-io%E8%AE%BE%E5%A4%87%E7%9A%84%E4%B8%89%E5%A4%A7%E7%89%B9%E5%BE%81"><strong>1.1 I/O设备的三大特征</strong></h4>
+                <p>我们可以从三个维度来描述任何一个I/O设备：</p>
+                <ol>
+                <li><strong>行为 (Behavior)</strong>：它是输入设备（如键盘，只能读）、输出设备（如打印机，只能写），还是存储设备（如磁盘，可读可写）？</li>
+                <li><strong>伙伴 (Partner)</strong>：设备交互的对象是人（Human）还是机器（Machine）？这通常决定了其数据速率的量级。</li>
+                <li><strong>数据速率 (Data Rate)</strong>：设备传输数据的速度。</li>
+                </ol>
+                <p><img src="../images/imagec72.png" alt="figure 72"></p>
+                <p>请大家仔细观察这张表。从键盘的0.01 KB/sec到高速网络和磁盘的数千乃至上万KB/sec，数据速率的跨度高达<strong>六个数量级以上</strong>！这种巨大的差异性，给设计一个统一、高效的I/O系统带来了巨大的挑战。</p>
+                <h4 id="12-io%E6%80%A7%E8%83%BD%E7%9A%84%E5%BA%A6%E9%87%8F%E5%90%9E%E5%90%90%E7%8E%87-vs-%E5%93%8D%E5%BA%94%E6%97%B6%E9%97%B4"><strong>1.2 I/O性能的度量：吞吐率 vs. 响应时间</strong></h4>
+                <p>评估I/O性能也比评估CPU性能复杂得多，因为它高度依赖于应用场景。主要有两个指标：</p>
+                <ol>
+                <li><strong>吞吐率 (Throughput) / 带宽 (Bandwidth)</strong>：单位时间内可以传输的数据总量。对于处理大文件、科学计算等应用至关重要。</li>
+                <li><strong>响应时间 (Response Time) / 延迟 (Latency)</strong>：从发起一个I/O请求到请求完成所需的时间。对于交互式应用，如个人电脑、数据库事务处理，响应时间是用户体验的关键。</li>
+                </ol>
+                <p>有时，我们会用<strong>IOPS</strong> (I/O Operations Per Second)来衡量性能，即每秒能完成多少次独立的I/O操作。这对于处理大量小文件的服务器（如税务系统）尤为重要。</p>
+                <h4 id="13-%E9%98%BF%E5%A7%86%E8%BE%BE%E5%B0%94%E5%AE%9A%E5%BE%8B%E7%9A%84%E8%AD%A6%E7%A4%BA"><strong>1.3 阿姆达尔定律的警示</strong></h4>
+                <p>我们必须再次请出计算机体系结构中的“幽灵”——<strong>阿姆达尔定律 (Amdahl's Law)</strong>。它无时无刻不在提醒我们：<strong>系统的整体性能，取决于其最慢的那个组件</strong>。</p>
+                <p><img src="../images/imagec73.png" alt="figure 73"></p>
+                <p>这个例子非常经典：假设一个程序运行100秒，其中CPU时间90秒，I/O时间10秒。即使我们让CPU性能在5年内提升了7.5倍（90秒 -&gt; 12秒），但I/O时间不变。最终的总执行时间只从100秒缩短到 <code>12 + 10 = 22</code> 秒，整体性能只提升了约4.5倍，远低于CPU的7.5倍。</p>
+                <p><strong>结论：忽视I/O，就是忽视系统性能的木桶短板。</strong></p>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E7%A3%81%E7%9B%98%E5%AD%98%E5%82%A8%E6%95%B0%E6%8D%AE%E7%9A%84%E6%9C%80%E7%BB%88%E5%BD%92%E5%AE%BF"><strong>第二部分：磁盘存储——数据的最终归宿</strong></h3>
+                <p>在存储器层次结构中，磁盘（特别是机械硬盘HDD）是传统的大容量、非易失性存储的基石。虽然SSD（固态硬盘）日益普及，但理解HDD的机械原理对于理解I/O性能瓶颈至关重要。</p>
+                <h4 id="21-%E7%A3%81%E7%9B%98%E7%9A%84%E7%89%A9%E7%90%86%E7%BB%93%E6%9E%84"><strong>2.1 磁盘的物理结构</strong></h4>
+                <p><img src="../images/imagec74.png" alt="figure 74">
+                <img src="../images/imagec75.png" alt="figure 75"></p>
+                <ul>
+                <li><strong>盘片 (Platters)</strong>：多个涂有磁性材料的金属或玻璃盘片，叠在一起高速旋转。</li>
+                <li><strong>磁头 (Heads)</strong>：每个盘面对应一个读写磁头，所有磁头被固定在同一个<strong>磁头臂 (Arm)</strong> 上，同步移动。</li>
+                <li><strong>磁道 (Tracks)</strong>：盘面上一圈圈的同心圆。</li>
+                <li><strong>扇区 (Sectors)</strong>：每个磁道被划分成若干个扇区，是磁盘读写的最小单位（通常为512字节或4KB）。</li>
+                <li><strong>柱面 (Cylinder)</strong>：所有盘面上半径相同的磁道共同组成一个虚拟的柱面。</li>
+                </ul>
+                <h4 id="22-%E7%A3%81%E7%9B%98%E8%AE%BF%E9%97%AE%E6%97%B6%E9%97%B4%E7%9A%84%E6%9E%84%E6%88%90"><strong>2.2 磁盘访问时间的构成</strong></h4>
+                <p>一次磁盘访问的总时间，由三部分机械延迟和一部分电子延迟构成：
+                $$
+                \text{Access Time} = \text{Seek Time} + \text{Rotational Latency} + \text{Transfer Time} + \text{Controller Overhead}
+                $$</p>
+                <ol>
+                <li><strong>寻道时间 (Seek Time)</strong>：将磁头臂移动到目标磁道正上方所需的时间。这是最耗时的部分，平均寻道时间在3-14毫秒（ms）之间。</li>
+                <li><strong>旋转延迟 (Rotational Latency)</strong>：等待磁盘盘片旋转，直到目标扇区的起始位置转到磁头下方所需的时间。平均旋转延迟是转一圈时间的一半。
+                <ul>
+                <li>例如，一个7200 RPM（每分钟转数）的硬盘，转一圈需要 <code>60s / 7200 = 8.33ms</code>。平均旋转延迟约为 <code>4.17ms</code>。</li>
+                </ul>
+                </li>
+                <li><strong>传输时间 (Transfer Time)</strong>：磁头扫过目标扇区，完成数据读/写所需的时间。这取决于磁盘的转速和数据密度。</li>
+                <li><strong>控制器开销 (Controller Overhead)</strong>：磁盘控制器处理命令所需的时间，通常较短。</li>
+                </ol>
+                <p><img src="../images/imagec76.png" alt="figure 76"></p>
+                <p><strong>关键洞察</strong>：寻道和旋转这两个机械动作的延迟，占据了磁盘访问时间的绝大部分。<strong>一旦磁头定位完成，读取连续的多个扇区（即整个磁道）的成本，远低于读取多个分散在不同磁道的扇区。</strong> 这就是为什么对磁盘的访问要极力追求<strong>顺序性</strong>。</p>
+                <h4 id="23-%E9%97%AA%E5%AD%98-flash-storage--%E5%9B%BA%E6%80%81%E7%A1%AC%E7%9B%98-ssd"><strong>2.3 闪存 (Flash Storage) / 固态硬盘 (SSD)</strong></h4>
+                <ul>
+                <li><strong>本质</strong>：一种非易失性的半导体存储器，没有机械部件。</li>
+                <li><strong>优势</strong>：
+                <ul>
+                <li><strong>速度</strong>：比HDD快100-1000倍，因为它没有寻道和旋转延迟。</li>
+                <li><strong>物理特性</strong>：更小、更省电、更抗震。</li>
+                </ul>
+                </li>
+                <li><strong>劣势</strong>：
+                <ul>
+                <li><strong>成本</strong>：每GB成本仍高于HDD。</li>
+                <li><strong>寿命</strong>：闪存单元有擦写次数限制（虽然通过<strong>磨损均衡 Wear Leveling</strong>技术可以大大延长寿命）。</li>
+                </ul>
+                </li>
+                <li><strong>类型</strong>：
+                <ul>
+                <li><strong>NOR Flash</strong>：支持随机读写，类似RAM，常用于存储固件（如BIOS）。</li>
+                <li><strong>NAND Flash</strong>：以块为单位进行访问，密度更高、成本更低，是SSD和U盘的主流技术。</li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E6%8F%90%E9%AB%98%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%8F%AF%E9%9D%A0%E6%80%A7raid%E6%8A%80%E6%9C%AF"><strong>第三部分：提高存储系统的可靠性——RAID技术</strong></h3>
+                <p>将数据全部存放在单一的磁盘上是极其危险的。磁盘是机械设备，总有损坏的一天。而当我们将多个磁盘组织起来提升性能时（例如，将文件条带化存储在多个磁盘上以实现并行读写），整个系统的可靠性会急剧下降。</p>
+                <ul>
+                <li><strong>可靠性数学</strong>：假设单个磁盘的可靠性为R，那么N个独立磁盘组成的阵列，其整体可靠性为 $R^N$。如果一个磁盘一年内不出故障的概率是99%，那么10个磁盘组成的阵列，一年内不出故障的概率就只有 <code>0.99^10 ≈ 90.4%</code>。</li>
+                <li><strong>MTTF (平均无故障时间)</strong>：N个磁盘阵列的MTTF，大约是单个磁盘MTTF的 <code>1/N</code>。</li>
+                </ul>
+                <p>为了解决这个问题，<strong>RAID (Redundant Arrays of Inexpensive Disks，廉价磁盘冗余阵列)</strong> 技术应运而生。其核心思想是：<strong>通过增加冗余信息，来容忍一个或多个磁盘的物理故障。</strong></p>
+                <h4 id="31-raid-0-%E6%9D%A1%E5%B8%A6%E5%8C%96-striping"><strong>3.1 RAID 0: 条带化 (Striping)</strong></h4>
+                <ul>
+                <li><strong>机制</strong>：将数据分成条带，交错地写入阵列中的各个磁盘。</li>
+                <li><strong>优点</strong>：通过并行读写，极大地提高了大文件访问的<strong>性能（吞吐率）</strong>。</li>
+                <li><strong>缺点</strong>：<strong>没有任何冗余</strong>。任何一个磁盘损坏，都会导致所有数据的丢失。因此，RAID 0的可靠性比单个磁盘还要差。它是一个纯粹的性能方案。</li>
+                </ul>
+                <h4 id="32-raid-1-%E9%95%9C%E5%83%8F-mirroring"><strong>3.2 RAID 1: 镜像 (Mirroring)</strong></h4>
+                <ul>
+                <li><strong>机制</strong>：将每一份数据，完整地复制一份，存放在一个独立的“镜像”磁盘上。</li>
+                <li><strong>优点</strong>：提供了极高的<strong>数据可靠性</strong>。只要阵列中还有一个磁盘是好的，数据就不会丢失。读性能也可以通过从两个副本中选择较快的一个来优化。</li>
+                <li><strong>缺点</strong>：<strong>成本极高</strong>。存储容量的开销是100%，即一半的磁盘空间都用来存放副本。</li>
+                </ul>
+                <h4 id="33-raid-34-%E4%B8%93%E7%94%A8%E5%A5%87%E5%81%B6%E6%A0%A1%E9%AA%8C%E7%9B%98-dedicated-parity-disk"><strong>3.3 RAID 3/4: 专用奇偶校验盘 (Dedicated Parity Disk)</strong></h4>
+                <p><strong>思想</strong>：镜像的成本太高，我们能否用更少的冗余信息来恢复数据？答案是<strong>奇偶校验（Parity）</strong>。</p>
+                <p><strong>机制</strong>：对于N个数据盘，额外增加一个校验盘。校验盘上每个条带的内容，是N个数据盘对应条带的**异或（XOR）**结果。</p>
+                <ul>
+                <li><code>P = D0 ⊕ D1 ⊕ D2 ⊕ ...</code></li>
+                </ul>
+                <p><strong>数据恢复</strong>：当任何一个数据盘（如D1）损坏时，可以通过其他所有数据盘和校验盘，再次进行异或运算来恢复丢失的数据。</p>
+                <ul>
+                <li><code>D1 = D0 ⊕ D2 ⊕ ... ⊕ P</code></li>
+                </ul>
+                <p><strong>RAID 4的瓶颈</strong>：对于<strong>小块随机写</strong>操作，每次写入一个数据块，都需要：(1) 读取旧的数据块；(2) 读取旧的校验块；(3) 计算新的校验块；(4) 写入新的数据块；(5) 写入新的校验块。所有写操作都会集中在唯一的那个<strong>校验盘</strong>上，使其成为整个阵列的性能瓶颈。</p>
+                <p><img src="../images/imagec77.png" alt="figure 77"></p>
+                <h4 id="34-raid-5-%E5%88%86%E5%B8%83%E5%BC%8F%E5%A5%87%E5%81%B6%E6%A0%A1%E9%AA%8C-distributed-parity"><strong>3.4 RAID 5: 分布式奇偶校验 (Distributed Parity)</strong></h4>
+                <ul>
+                <li><strong>机制</strong>：为了解决RAID 4的校验盘瓶颈问题，RAID 5将校验块<strong>交错地分布</strong>在阵列中的所有磁盘上。</li>
+                <li><strong>优点</strong>：对于小块随机写，写操作可以分布到不同的磁盘上，消除了单一校验盘的瓶颈，<strong>大大提高了小块写的性能</strong>。</li>
+                <li><strong>应用</strong>：RAID 5是在性能、容量和可靠性之间取得了最佳平衡的方案，是企业级存储中最广泛应用的技术之一。</li>
+                </ul>
+                <p><img src="../images/imagec78.png" alt="figure 78"></p>
+                <h4 id="35-raid-6-%E5%8F%8C%E9%87%8D%E6%A0%A1%E9%AA%8C-dual-parity"><strong>3.5 RAID 6: 双重校验 (Dual Parity)</strong></h4>
+                <ul>
+                <li><strong>机制</strong>：在RAID 5的基础上，增加<strong>第二个独立的校验块</strong>（使用不同于XOR的算法，如里德-所罗门码）。</li>
+                <li><strong>优点</strong>：可以容忍<strong>任意两个磁盘</strong>同时发生故障，提供了比RAID 5更高的可靠性。</li>
+                <li><strong>应用</strong>：随着磁盘容量越来越大，单盘故障后的数据重建时间（Rebuild Time）也越来越长（可能需要数小时甚至数天）。在重建期间，如果再坏一块盘，RAID 5就会崩溃。因此，对于大容量、高可靠性要求的系统，RAID 6正变得越来越流行。</li>
+                </ul>
+                <p><img src="../images/imagec79.png" alt="figure 79"></p>
+                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E6%80%BB%E7%BA%BF"><strong>第四部分：总线”</strong></h3>
+                <p>CPU、内存、各种I/O控制器，它们之间是如何通信的？答案是通过<strong>总线（Bus）</strong>。</p>
+                <h4 id="41-%E6%80%BB%E7%BA%BF%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><strong>4.1 总线的基本概念</strong></h4>
+                <ul>
+                <li><strong>定义</strong>：一组共享的、用于连接多个子系统的电子通路。</li>
+                <li><strong>组成</strong>：
+                <ul>
+                <li><strong>数据线</strong>：传输实际的数据。</li>
+                <li><strong>地址线</strong>：指明数据的来源或目的地。</li>
+                <li><strong>控制线</strong>：传输请求、应答、时钟等控制信号。</li>
+                </ul>
+                </li>
+                <li><strong>挑战</strong>：作为共享资源，总线可能成为系统的瓶颈。其设计需要在<strong>带宽、延迟、成本、物理长度、可连接设备数</strong>之间进行复杂的权衡。</li>
+                </ul>
+                <h4 id="42-%E6%80%BB%E7%BA%BF%E7%9A%84%E7%B1%BB%E5%9E%8B"><strong>4.2 总线的类型</strong></h4>
+                <ul>
+                <li><strong>处理器-内存总线</strong>：短、高速、专为CPU和内存通信定制。</li>
+                <li><strong>I/O总线</strong>：长、标准化、需要支持速率迥异的多种设备。如PCI, PCI-Express, USB, SATA。</li>
+                <li><strong>现代系统结构</strong>：通常采用分层的总线结构。高速的处理器-内存总线通过一个<strong>桥</strong>（Bridge）芯片连接到相对较慢的I/O总线。</li>
+                </ul>
+                <p><img src="../images/imagec80.png" alt="figure 80"></p>
+                <h4 id="43-%E6%80%BB%E7%BA%BF%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE"><strong>4.3 总线通信协议</strong></h4>
+                <ol>
+                <li><strong>同步总线 (Synchronous Bus)</strong>：
+                <ul>
+                <li>使用一个统一的时钟信号来协调所有通信。</li>
+                <li>协议固定、硬件简单、速度快。</li>
+                <li>缺点是所有设备必须工作在同一时钟频率下，且由于时钟偏移（Clock Skew）问题，总线长度受限。</li>
+                </ul>
+                </li>
+                <li><strong>异步总线 (Asynchronous Bus)</strong>：
+                <ul>
+                <li>不使用全局时钟，而是通过一套**“握手”（Handshaking）**协议来协调通信。</li>
+                <li>例如，主设备发出<code>ReadReq</code>信号，从设备收到后处理数据，数据准备好后发出<code>DataRdy</code>信号，主设备收到后取走数据并发回<code>Ack</code>信号。</li>
+                <li>优点是可靠，可以连接不同速度的设备，总线长度也可以更长。缺点是每次传输都需要多次握手，开销较大。</li>
+                </ul>
+                </li>
+                </ol>
+                <p><img src="../images/imagec81.png" alt="figure 81">
+                <img src="../images/imagec82.png" alt="figure 82"></p>
+                <h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86cpu%E4%B8%8Eio%E8%AE%BE%E5%A4%87%E7%9A%84%E4%BA%A4%E4%BA%92"><strong>第五部分：CPU与I/O设备的交互</strong></h3>
+                <p>CPU如何与一个具体的I/O设备（如网卡）进行通信？</p>
+                <h4 id="51-io%E5%AF%BB%E5%9D%80"><strong>5.1 I/O寻址</strong></h4>
+                <ul>
+                <li><strong>内存映射I/O (Memory-Mapped I/O)</strong>：将I/O设备的控制寄存器和数据寄存器，映射到物理内存地址空间的一部分。CPU访问这些设备，就像访问普通内存一样，使用标准的<code>load</code>和<code>store</code>指令。这是现代RISC架构的通用做法。</li>
+                <li><strong>专用I/O指令</strong>：一些架构（如x86）提供专门的<code>in</code>和<code>out</code>指令来访问一个独立的I/O地址空间。</li>
+                </ul>
+                <h4 id="52-%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93%E7%9A%84%E4%B8%89%E7%A7%8D%E6%96%B9%E5%BC%8F"><strong>5.2 数据传输的三种方式</strong></h4>
+                <ol>
+                <li>
+                <p><strong>轮询 (Polling)</strong>：</p>
+                <ul>
+                <li>CPU反复地、主动地去查询I/O设备的状态寄存器，看它是否已经准备好进行下一次数据传输。</li>
+                <li><strong>优点</strong>：实现简单。</li>
+                <li><strong>缺点</strong>：如果设备很慢，CPU将花费大量时间在空转查询上，极大地浪费了计算资源。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>中断驱动I/O (Interrupt-Driven I/O)</strong>：</p>
+                <ul>
+                <li>CPU向设备发出一个命令后，就去执行其他任务。当设备完成操作或需要服务时，它会主动向CPU发送一个<strong>中断信号</strong>。</li>
+                <li>CPU收到中断后，会暂停当前任务，保存现场，跳转到一段专门的**中断服务程序（Interrupt Service Routine, ISR）**去处理I/O事件，处理完毕后再返回原任务。</li>
+                <li><strong>优点</strong>：极大地提高了CPU的利用率，实现了计算与I/O的并行。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>直接内存访问 (Direct Memory Access, DMA)</strong>：</p>
+                <ul>
+                <li>对于大块数据的传输（如磁盘文件），如果让CPU逐字逐句地通过中断来搬运，开销依然很大。</li>
+                <li><strong>DMA</strong>允许I/O设备控制器，在获得总线控制权后，<strong>直接</strong>在设备和主存之间传输数据，<strong>完全无需CPU的干预</strong>。</li>
+                <li><strong>流程</strong>：CPU只需要告诉DMA控制器：(1)源地址 (2)目的地址 (3)传输长度 (4)传输方向。然后DMA控制器就会接管整个传输过程。传输完成后，DMA控制器再通过一次中断通知CPU。</li>
+                <li><strong>优点</strong>：将CPU从繁琐的数据搬运工作中彻底解放出来，是实现高吞吐率I/O的关键。</li>
+                </ul>
+                </li>
+                </ol>
+                <p><img src="../images/imagec83.png" alt="figure 83"></p>
+                <p><strong>总结</strong></p>
+                <p>今天，我们理解了：</p>
+                <ul>
+                <li><strong>I/O设备的多样性</strong>是系统设计的核心挑战。</li>
+                <li><strong>磁盘</strong>的机械特性决定了其性能瓶颈在于寻道和旋转。</li>
+                <li><strong>RAID</strong>技术通过冗余，巧妙地在性能、容量和可靠性之间取得了平衡。</li>
+                <li><strong>总线</strong>是连接系统的共享通道，其设计充满了权衡。</li>
+                <li><strong>中断</strong>和<strong>DMA</strong>是实现CPU与I/O设备高效并行工作的关键机制。</li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
