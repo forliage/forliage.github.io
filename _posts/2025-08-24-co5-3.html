@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机组成5-3:存储系统的性能优化与全局视角</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%905-3%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E4%B8%8E%E5%85%A8%E5%B1%80%E8%A7%86%E8%A7%92">计算机组成5-3:存储系统的性能优化与全局视角</h1>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86cache%E6%80%A7%E8%83%BD%E7%9A%84%E9%87%8F%E5%8C%96%E5%88%86%E6%9E%90amat%E7%9A%84%E5%A8%81%E5%8A%9B"><strong>第一部分：Cache性能的量化分析——AMAT的威力</strong></h3>
+                <p>我们不能仅仅停留在“组相联比直接映射好”这样的定性结论上。一个优秀的架构师，必须能够用数据说话。衡量存储系统性能的黄金公式——<strong>平均访存时间（AMAT）</strong>，是我们手中最锋利的解剖刀。</p>
+                <p>$$
+                \text{AMAT} = \text{Hit Time} + \text{Miss Rate} \times \text{Miss Penalty}
+                $$</p>
+                <p>这个公式告诉我们，性能优化有三条路径。但更重要的是，它揭示了三者之间的<strong>内在联系与制约</strong>。例如，增加相联度可以降低<code>Miss Rate</code>，但可能会略微增加<code>Hit Time</code>。我们的目标，是找到让AMAT最小化的“甜点区”。</p>
+                <h4 id="11-%E5%B0%86amat%E4%B8%8Ecpu%E6%80%A7%E8%83%BD%E5%85%AC%E5%BC%8F%E7%BB%93%E5%90%88"><strong>1.1 将AMAT与CPU性能公式结合</strong></h4>
+                <p>AMAT本身只是衡量存储系统的指标。要看它对整个计算机性能的影响，我们必须将它与CPU性能公式结合起来。内存访问导致的CPU停顿，是CPI（每指令周期数）的重要组成部分。</p>
+                <p>$$
+                \text{CPI}<em>{\text{total}} = \text{CPI}</em>{\text{execution}} + \frac{\text{Memory Stall Cycles}}{\text{Instruction Count}}
+                $$</p>
+                <p>而内存停顿周期又可以细分为：
+                $$
+                \text{Memory Stall Cycles} = (\text{Reads} \times \text{Read Miss Rate} \times \text{Read Miss Penalty}) + (\text{Writes} \times \text{Write Miss Rate} \times \text{Write Miss Penalty})
+                $$</p>
+                <p>或者更一般地：
+                $$
+                \text{Memory Stall Cycles} = \text{Instruction Count} \times \frac{\text{Memory Accesses}}{\text{Instruction}} \times \text{Miss Rate} \times \text{Miss Penalty}
+                $$</p>
+                <p><strong>示例分析</strong>：
+                假设一个处理器：</p>
+                <ul>
+                <li>基础CPI（假设Cache完美命中）= 2.0</li>
+                <li>指令Cache缺失率 = 2%</li>
+                <li>数据Cache缺失率 = 4%</li>
+                <li>访存指令（ld/sd）占所有指令的36%</li>
+                <li>缺失代价（Miss Penalty）= 100个时钟周期</li>
+                </ul>
+                <p><strong>计算停顿</strong>：</p>
+                <ul>
+                <li>每100条指令，有 <code>100 * 2% = 2</code> 次指令缺失，带来 <code>2 * 100 = 200</code> 周期停顿。</li>
+                <li>每100条指令，有 <code>100 * 36% = 36</code> 次数据访问，其中有 <code>36 * 4% = 1.44</code> 次数据缺失，带来 <code>1.44 * 100 = 144</code> 周期停顿。</li>
+                <li>总停顿 = <code>200 + 144 = 344</code> 周期。</li>
+                <li>平均每条指令的停顿 = <code>344 / 100 = 3.44</code> 周期。</li>
+                </ul>
+                <p><strong>最终CPI</strong>：</p>
+                <ul>
+                <li><code>CPI_total = 2.0 (基础) + 3.44 (停顿) = 5.44</code></li>
+                </ul>
+                <p><strong>结论</strong>：一个看似“还不错”（96%~98%命中率）的Cache，竟然让CPU的性能<strong>下降了一半以上</strong>！CPU有超过一半的时间（3.44 / 5.44 ≈ 63%）是在无聊地等待内存。这凸显了存储系统性能的极端重要性。</p>
+                <p>这个例子也引出了著名的<strong>Amdahl定律</strong>在存储系统中的体现：单纯地加速CPU（例如将基础CPI从2.0降到1.0），而存储系统不变，性能提升将非常有限。因为瓶颈会迅速转移到内存停顿上。</p>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E9%99%8D%E4%BD%8E%E7%BC%BA%E5%A4%B1%E7%8E%87miss-rate%E7%9A%84%E6%A0%B8%E5%BF%83%E6%AD%A6%E5%99%A8"><strong>第二部分：降低缺失率(Miss Rate)的核心武器</strong></h3>
+                <p>我们已经探讨了通过增加相联度来降低冲突缺失。另一个强大的武器是<strong>利用空间局部性</strong>。</p>
+                <h4 id="21-%E5%A2%9E%E5%A4%A7%E7%BC%93%E5%AD%98%E5%9D%97cache-block%E7%9A%84%E5%A4%A7%E5%B0%8F"><strong>2.1 增大缓存块（Cache Block）的大小</strong></h4>
+                <ul>
+                <li><strong>基本思想</strong>：当发生一次缺失时，我们不仅仅取回CPU当前需要的那个字，而是把它周围的一片数据（例如64字节）作为一个整体——一个<strong>块（Block）</strong>——都取回缓存。</li>
+                <li><strong>理论基础</strong>：<strong>空间局部性</strong>。既然CPU访问了<code>array[i]</code>，那么它很可能马上就要访问<code>array[i+1]</code>, <code>array[i+2]</code>... 将它们一次性取回，后续的访问就都会变成高速的Cache命中。</li>
+                <li><strong>效果</strong>：
+                <ul>
+                <li><strong>优点</strong>：可以显著降低<strong>强制性缺失（Compulsory Miss）</strong>。对于一段连续内存的首次访问，原本需要N次缺失，现在只需要一次缺失就能把整个区域的数据读入。</li>
+                <li><strong>缺点</strong>：
+                <ol>
+                <li><strong>增加了缺失代价（Miss Penalty）</strong>：从主存传输一个更大的块需要更长的时间。</li>
+                <li><strong>可能增加冲突缺失</strong>：如果块太大，而缓存总容量不变，那么缓存中的总块数就减少了。这会增加不同内存区域映射到同一个缓存块的概率。</li>
+                <li><strong>带宽浪费</strong>：如果程序没有表现出很好的空间局部性，那么取回一个大块中的大部分数据可能都是无用的，浪费了宝贵的内存带宽。</li>
+                </ol>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <p><img src="../images/imagec66.png" alt="figure 66"></p>
+                <h4 id="22-%E5%A6%82%E4%BD%95%E9%AB%98%E6%95%88%E5%9C%B0%E6%94%AF%E6%8C%81%E5%A4%A7%E5%9D%97%E4%BC%A0%E8%BE%93%E4%B8%80%E4%B8%BB%E5%AD%98%E7%9A%84%E7%BB%84%E7%BB%87"><strong>2.2 如何高效地支持大块传输？——主存的组织</strong></h4>
+                <p>增大大块的策略，对主存（DRAM）的设计提出了新的要求。如果主存每次只能传输一个字（4或8字节），那么传输一个64字节的块就需要8到16次操作，缺失代价会变得无法接受。因此，需要设计更“宽”的主存系统。</p>
+                <p><img src="../images/imagec67.png" alt="figure 67"></p>
+                <ol>
+                <li><strong>简单模型（窄内存）</strong>：内存总线一次只传一个字。传输4个字需要4次完整的访存周期。</li>
+                <li><strong>宽内存模型</strong>：将内存芯片并联，让内存控制器可以一次性读取多个字（例如，128位或256位总线宽度）。这可以成倍地减少传输次数，但增加了内存控制器的复杂度和成本。</li>
+                <li><strong>交叉/交错内存（Interleaved Memory）</strong>：将内存分成多个独立的<strong>体（Bank）</strong>。连续的地址被映射到不同的Bank上。当需要读取一个大块时，可以同时向多个Bank发出读请求，这些请求可以<strong>并行处理</strong>，然后数据依次（流水线式地）返回。这是一种在成本和性能之间取得良好平衡的高效设计，是现代DRAM模组的标准实践。</li>
+                </ol>
+                <p><img src="../images/imagec68.png" alt="figure 68"></p>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E9%99%8D%E4%BD%8E%E7%BC%BA%E5%A4%B1%E4%BB%A3%E4%BB%B7miss-penalty%E7%9A%84%E6%A0%B8%E5%BF%83%E6%AD%A6%E8%A7%A3%E5%86%B3%E5%A4%9A%E7%BA%A7%E7%BC%93%E5%AD%98"><strong>第三部分：降低缺失代价(Miss Penalty)的核心武解决——多级缓存</strong></h3>
+                <p>既然一次主存访问的延迟（几百个周期）是如此之高，我们能否在CPU和主存之间，再增加一个“中间人”？这就是**多级缓存（Multilevel Caches）**的思想。</p>
+                <h4 id="31-%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6%E4%B8%8E%E7%BB%93%E6%9E%84"><strong>3.1 设计哲学与结构</strong></h4>
+                <ul>
+                <li><strong>核心思想</strong>：在原有的L1 Cache和主存之间，插入一个容量更大、但速度比L1稍慢的<strong>L2 Cache</strong>。现在，L1的缺失，可以先由L2来服务。
+                <ul>
+                <li><strong>L1 Cache</strong>：设计目标是<strong>极低的命中时间（Hit Time）</strong>。因此它通常容量较小、相联度较低，与CPU核心紧密集成，追求1-2个周期的访问延迟。</li>
+                <li><strong>L2 Cache</strong>：设计目标是<strong>极低的缺失率（Miss Rate）</strong>。它负责捕获绝大多数从L1“漏掉”的访问。因此它的容量要大得多，相联度也更高。它的命中时间虽然比L1长（例如10-20个周期），但远小于访问主存的几百个周期。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="32-%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90%E5%85%A8%E5%B1%80%E4%B8%8E%E5%B1%80%E9%83%A8amat"><strong>3.2 性能分析：全局与局部AMAT</strong></h4>
+                <p>引入L2后，性能公式变得更加复杂：
+                $$
+                \text{AMAT}<em>{\text{L1}} = \text{HitTime}</em>{\text{L1}} + \text{MissRate}<em>{\text{L1}} \times \text{MissPenalty}</em>{\text{L1}}
+                $$
+                其中，L1的缺失代价，现在变成了访问L2的时间：
+                $$
+                \text{MissPenalty}<em>{\text{L1}} = \text{AMAT}</em>{\text{L2}} = \text{HitTime}<em>{\text{L2}} + \text{MissRate}</em>{\text{L2}} \times \text{MissPenalty}_{\text{L2}}
+                $$
+                <code>MissPenalty_L2</code> 才是真正访问主存的代价。</p>
+                <p><strong>示例分析</strong>：
+                假设：</p>
+                <ul>
+                <li>5GHz CPU（时钟周期0.2ns），基础CPI=1.0</li>
+                <li>L1 Cache: 2%缺失率</li>
+                <li>L2 Cache: 5ns命中时间，加入后，访问主存的全局缺失率降至0.5%</li>
+                <li>主存: 100ns访问延迟</li>
+                </ul>
+                <p><strong>只有L1时</strong>：</p>
+                <ul>
+                <li>主存缺失代价 = 100ns / 0.2ns/cycle = 500周期</li>
+                <li>Total CPI = 1.0 + 2% * 500 = 1.0 + 10 = 11.0</li>
+                </ul>
+                <p><strong>加入L2后</strong>：</p>
+                <ul>
+                <li>L2命中时间 = 5ns / 0.2ns/cycle = 25周期</li>
+                <li>主存缺失代价 = 500周期</li>
+                <li><strong>分析停顿</strong>：
+                <ul>
+                <li>L1的访问，有98%是L1命中（代价为0停顿）。</li>
+                <li>有2%是L1缺失。这2%的缺失中，大部分会在L2命中，少部分会L2也缺失。</li>
+                <li>访问L2的次数 = <code>MissRate_L1</code> = 2%</li>
+                <li>访问主存的次数 = <code>GlobalMissRate</code> = 0.5%</li>
+                </ul>
+                </li>
+                <li><strong>Total CPI</strong> = <code>CPI_base + (L1 Misses per Ins * L2 Hit Time) + (Global Misses per Ins * Main Mem Penalty)</code>
+                <ul>
+                <li>在本例的简化计算中: <code>Total CPI = 1.0 + (指令级L1缺失率 * L2命中时间) + (指令级L2缺失率 * 主存缺失代价) = 1.0 + (2% * 25) + (0.5% * 500) = 1.0 + 0.5 + 2.5 = 4.0</code></li>
+                </ul>
+                </li>
+                <li><strong>性能提升</strong> = 11.0 / 4.0 = 2.75倍！</li>
+                </ul>
+                <p><strong>结论</strong>：多级缓存是现代处理器应对“内存墙”问题的<strong>标配</strong>。通过L1和L2（以及L3）的协同工作，实现了对命中时间、缺失率和缺失代价的综合优化。</p>
+                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E6%80%9D%E6%83%B3%E7%9A%84%E5%8D%87%E5%8D%8E%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E4%BD%9C%E4%B8%BA%E4%B8%BB%E5%AD%98%E7%9A%84%E7%BC%93%E5%AD%98"><strong>第四部分：思想的升华——虚拟内存，作为主存的“缓存”</strong></h3>
+                <p>现在，让我们把视野拔高。我们已经建立了存储器层次结构的金字塔。我们一直在讨论金字塔顶端的SRAM Cache和DRAM主存。那么，DRAM主存和更下一层的磁盘之间，是否也存在着类似的关系？</p>
+                <p>答案是肯定的。这就是**虚拟内存（Virtual Memory）**的本质。</p>
+                <p><strong>核心思想</strong>：将<strong>主存（DRAM）<strong>看作是</strong>磁盘（或SSD）<strong>的一个</strong>全相联的、写回式的缓存</strong>。</p>
+                <p><img src="../images/imagec69.png" alt="figure 69"></p>
+                <h4 id="41-%E6%A6%82%E5%BF%B5%E7%9A%84%E7%B1%BB%E6%AF%94%E4%B8%8E%E6%98%A0%E5%B0%84"><strong>4.1 概念的类比与映射</strong></h4>
+                <p>让我们将Cache的术语，一一映射到虚拟内存中：</p>
+                <table>
+                <thead>
+                <tr>
+                <th style="text-align:left">Cache 概念</th>
+                <th style="text-align:left">虚拟内存 概念</th>
+                <th style="text-align:left">描述</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                <td style="text-align:left"><strong>块 (Block)</strong></td>
+                <td style="text-align:left"><strong>页 (Page)</strong></td>
+                <td style="text-align:left">数据传输的基本单位。Page非常大（通常4KB或更大）。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>缺失 (Miss)</strong></td>
+                <td style="text-align:left"><strong>页错误 (Page Fault)</strong></td>
+                <td style="text-align:left">CPU访问的虚拟地址所对应的页不在主存中。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>命中 (Hit)</strong></td>
+                <td style="text-align:left">(无特殊术语)</td>
+                <td style="text-align:left">页在主存中，地址翻译成功。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>地址</strong></td>
+                <td style="text-align:left"><strong>虚拟地址/物理地址</strong></td>
+                <td style="text-align:left">CPU生成的是虚拟地址，需要被翻译成DRAM中的物理地址。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>索引/标签</strong></td>
+                <td style="text-align:left"><strong>页表 (Page Table)</strong></td>
+                <td style="text-align:left">页表是存储虚拟页号到物理页号映射关系的数据结构。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>放置策略</strong></td>
+                <td style="text-align:left"><strong>全相联</strong></td>
+                <td style="text-align:left">任何一个虚拟页，可以被加载到物理内存的任何一个空闲的物理页框中。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>替换策略</strong></td>
+                <td style="text-align:left"><strong>近似LRU</strong></td>
+                <td style="text-align:left">由操作系统软件实现复杂的页替换算法。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>写策略</strong></td>
+                <td style="text-align:left"><strong>写回 (Write-Back)</strong></td>
+                <td style="text-align:left">使用“脏位”（Dirty Bit）来标记被修改的页。</td>
+                </tr>
+                </tbody>
+                </table>
+                <h4 id="42-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%9A%84%E8%AE%BE%E8%AE%A1%E9%80%89%E6%8B%A9%E5%A6%82%E6%AD%A4%E4%B8%8D%E5%90%8C"><strong>4.2 为什么虚拟内存的设计选择如此不同？</strong></h4>
+                <ol>
+                <li>
+                <p><strong>巨大的缺失代价</strong>：一次磁盘访问的延迟是毫秒（ms）级别，相当于<strong>数百万个</strong>CPU时钟周期！为了摊平如此巨大的代价，我们必须：</p>
+                <ul>
+                <li><strong>采用巨大的块（页）</strong>：4KB的页大小，是为了最大化利用磁盘I/O的效率。</li>
+                <li><strong>采用全相联放置</strong>：不惜一切代价降低缺失率，因为任何一次缺失都是灾难性的。</li>
+                <li><strong>采用复杂的软件替换算法</strong>：百万周期的停顿，足以让操作系统运行复杂的LRU近似算法，做出最明智的替换决策。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>地址翻译</strong>：</p>
+                <ul>
+                <li>这个映射关系（虚拟页号 -&gt; 物理页号）存储在内存中的<strong>页表</strong>里，由操作系统管理。</li>
+                <li>每次访存都需要先查页表，这本身就是一次内存访问，会让所有访存操作慢一倍！</li>
+                <li><strong>解决方案</strong>：再次应用缓存思想！我们为页表项建立一个专用的、高速的、全相联的硬件缓存，称之为<strong>TLB (Translation-Lookaside Buffer)</strong>。绝大多数地址翻译请求都会在TLB中命中，无需访问内存中的页表。</li>
+                </ul>
+                </li>
+                </ol>
+                <p><img src="../images/imagec70.png" alt="figure 70"></p>
+                <h4 id="43-%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%9D%A9%E5%91%BD%E6%80%A7%E4%BC%98%E5%8A%BF"><strong>4.3 虚拟内存带来的革命性优势</strong></h4>
+                <p>虚拟内存不仅仅是为了“缓存”磁盘，它还带来了三大革命性优势：</p>
+                <ol>
+                <li><strong>程序隔离与保护</strong>：每个进程都有自己独立的、私有的虚拟地址空间。操作系统通过控制页表，确保一个进程无法访问另一个进程的内存，提供了坚实的内存保护。</li>
+                <li><strong>内存管理简化</strong>：程序员和编译器可以假设自己拥有一大片连续的内存空间，而无需关心物理内存的碎片化问题。内存的分配和布局由操作系统全权负责。</li>
+                <li><strong>高效的进程间共享</strong>：操作系统可以让不同进程的虚拟页，映射到同一个物理页上，从而实现代码库或共享内存的高效共享。</li>
+                </ol>
+                <p><strong>总结：一个统一的框架</strong></p>
+                <p>我们从量化分析Cache性能出发，学习了通过增大块和构建多级缓存来优化存储系统性能的关键技术。</p>
+                <p>最重要的是，我们建立了一个<strong>统一的视角</strong>来看待整个存储器层次结构。无论是CPU Cache，还是虚拟内存，它们都遵循着相同的基本原则：利用局部性，将数据在不同速度、不同容量的存储介质之间进行分块、分级管理。它们的设计差异，仅仅源于它们在层次结构中所处的位置不同，从而导致了命中时间、缺失代价、块大小等关键参数的巨大差异，并最终决定了它们应该由硬件（Cache）还是软件（虚拟内存）来实现。</p>
+                <p><img src="../images/imagec71.png" alt="figure 71"></p>
+                <p>这个统一的框架，是理解现代计算机系统中从硬件到操作系统协同工作的核心。</p>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
