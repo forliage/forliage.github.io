@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>计算机组成4-1:处理器-数据通路与控制</title>
+    <title>计算机组成4-1:单周期CPU</title>
     
     <link rel="stylesheet" href="../style.css">
     
@@ -42,242 +42,325 @@
         <div id="sidebar-container"></div>
         <main>
             <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%904-1%E5%A4%84%E7%90%86%E5%99%A8-%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E4%B8%8E%E6%8E%A7%E5%88%B6">计算机组成4-1:处理器-数据通路与控制</h1>
-                <p>在前面的章节中，我们学习了计算机的“语言”——指令集体系结构（ISA），以及计算机如何表示和运算数字。现在，我们将进入最激动人心的部分：将这些零散的知识组合起来，构建一个真正能够执行指令的计算机核心——<strong>处理器 (Processor)</strong>。</p>
-                <p>本章的目标是理解一个简化的RISC-V处理器是如何工作的。我们将从最基本的组件开始，像搭积木一样，一步步构建出处理器的<strong>数据通路 (Datapath)</strong>，然后设计指挥这些通路工作的<strong>控制器 (Control)</strong>。</p>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%A4%84%E7%90%86%E5%99%A8%E8%AE%BE%E8%AE%A1%E5%9F%BA%E7%A1%80"><strong>第一部分：处理器设计基础</strong></h3>
-                <h4 id="11-%E6%8C%87%E4%BB%A4%E6%89%A7%E8%A1%8C%E5%91%A8%E6%9C%9F%E6%A6%82%E8%BF%B0"><strong>1.1 指令执行周期概述</strong></h4>
-                <p>无论多么复杂的程序，其在CPU中的执行都可以分解为一系列基本步骤的循环。这个循环通常被称为<strong>指令周期 (Instruction Cycle)</strong>。对于一个简单的单周期处理器，执行一条指令的所有操作都在一个时钟周期内完成。</p>
-                <p>我们将专注于一个简化的RISC-V指令子集，它包含了最核心的几类指令：</p>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%904-1%E5%8D%95%E5%91%A8%E6%9C%9Fcpu">计算机组成4-1:单周期CPU</h1>
+                <h5 id="%E8%AE%BE%E8%AE%A1%E7%9A%84%E7%BB%88%E6%9E%81%E7%9B%AE%E6%A0%87%E4%B8%8E%E5%BA%A6%E9%87%8F%E8%A1%A1"><strong>设计的终极目标与度量衡</strong></h5>
+                <p>我们评价一个处理器好坏的尺子是什么？是性能。经典的CPU性能公式是我们一切设计的出发点和最终归宿：</p>
+                <p>$$
+                \text{CPU执行时间} = \frac{\text{指令数}}{\text{程序}} \times \frac{\text{时钟周期数}}{\text{指令}} \times \frac{\text{秒数}}{\text{时钟周期}}
+                $$</p>
                 <ul>
-                <li><strong>算术逻辑指令 (R-Type):</strong> <code>add</code>, <code>sub</code>, <code>and</code>, <code>or</code>, <code>slt</code></li>
-                <li><strong>访存指令 (Load/Store):</strong> <code>ld</code>, <code>sd</code></li>
-                <li><strong>条件分支指令 (Branch):</strong> <code>beq</code></li>
+                <li><strong>指令数 (Instruction Count)</strong>：编译器和ISA的领域。我们作为硬件设计师，对此影响有限。</li>
+                <li><strong>CPI (Cycles Per Instruction)</strong>：每条指令平均耗时多少个“滴答”。这是衡量处理器架构效率的核心指标。</li>
+                <li><strong>时钟周期时间 (Clock Cycle Time)</strong>：每个“滴答”多长，即时钟频率的倒数。这取决于电路的物理实现，是我们设计的直接产物。</li>
                 </ul>
-                <p>我们的目标就是设计一个能够正确执行这些指令的数据通路和控制器。</p>
-                <h4 id="12-%E6%9E%84%E5%BB%BA%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%85%83%E4%BB%B6"><strong>1.2 构建数据通路的基本元件</strong></h4>
-                <p>一个处理器的数据通路是由一系列的<strong>组合逻辑元件 (Combinational Elements)</strong> 和<strong>状态元件 (State Elements)</strong> 构成的。</p>
-                <ul>
-                <li><strong>状态元件 (也称时序逻辑元件):</strong> 它们内部含有存储单元，其输出不仅取决于当前的输入，还与内部存储的状态有关。它们的状态只在<strong>时钟边沿 (clock edge)</strong> 发生变化。
-                <ul>
-                <li><strong>程序计数器 (Program Counter, PC):</strong> 一个寄存器，存放当前正在执行指令的内存地址。</li>
-                <li><strong>指令存储器 (Instruction Memory):</strong> 存放程序指令。</li>
-                <li><strong>寄存器堆 (Register File):</strong> 包含32个通用寄存器。</li>
-                <li><strong>数据存储器 (Data Memory):</strong> 存放程序数据。</li>
-                </ul>
-                </li>
-                <li><strong>组合逻辑元件:</strong> 其输出仅由当前输入决定，没有记忆功能。
-                <ul>
-                <li><strong>算术逻辑单元 (ALU):</strong> 执行算术（加、减）和逻辑（与、或）运算。</li>
-                <li><strong>加法器 (Adder):</strong> 专门用于地址计算等。</li>
-                <li><strong>多路选择器 (Multiplexer, MUX):</strong> 根据控制信号，从多个输入中选择一个作为输出。</li>
-                </ul>
-                </li>
-                </ul>
-                <div class="mermaid">graph TD
-                    subgraph "处理器核心组件"
-                        direction LR
-                        A["状态元件 (有记忆)"]
-                        B["组合逻辑元件 (无记忆)"]
-                    end
-                    A --> PC["程序计数器 (PC)"];
-                    A --> IM["指令存储器"];
-                    A --> RF["寄存器堆"];
-                    A --> DM["数据存储器"];
-                    B --> ALU["ALU"];
-                    B --> Adder["加法器"];
-                    B --> MUX["多路选择器"];
-                </div>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E6%9E%84%E5%BB%BA%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF"><strong>第二部分：构建一个简单的数据通路</strong></h3>
-                <p>我们将采用一种增量式的方法，逐一满足各类指令的需求，最终将它们组合成一个完整的数据通路。</p>
-                <h4 id="21-%E5%8F%96%E6%8C%87-instruction-fetch"><strong>2.1 取指 (Instruction Fetch)</strong></h4>
-                <p>任何指令执行的第一步都是<strong>取指</strong>。这个过程需要：</p>
+                <p>我们的使命，就是在保证功能正确的前提下，疯狂地<strong>压榨CPI和时钟周期时间</strong>。然而，这两者往往是相互矛盾的。一个简单的设计（比如我们今天要做的单周期处理器），CPI可以做到1，但其时钟周期会被最慢的指令拖累得非常长。一个复杂的设计（比如后续要学的流水线处理器），时钟周期可以很短，但可能会因为各种暂停（Hazard）导致CPI上升。</p>
+                <h5 id="%E6%96%B9%E6%B3%95%E8%AE%BA%E5%8C%96%E7%B9%81%E4%B8%BA%E7%AE%80%E5%BE%AA%E5%BA%8F%E6%B8%90%E8%BF%9B"><strong>方法论：化繁为简，循序渐进</strong></h5>
+                <p>面对现代处理器的亿万晶体管，直接上手无异于痴人说梦。因此，我们必须遵循计算机科学最伟大的设计原则之一：<strong>化繁为简 (Simplicity favors regularity)</strong>。</p>
                 <ol>
-                <li><strong>PC：</strong> 提供当前指令的地址。</li>
-                <li><strong>指令存储器：</strong> 根据PC提供的地址，读出对应的32位指令。</li>
-                <li><strong>加法器：</strong> 计算下一条指令的地址，即 <code>PC + 4</code>。</li>
+                <li>
+                <p><strong>从一个最小但完备的指令子集开始</strong>：我们将聚焦于几类最具代表性的RISC-V指令，它们足以揭示处理器设计的全部核心矛盾和解决方案。</p>
+                <ul>
+                <li><strong>算术逻辑指令</strong>: <code>add</code>, <code>sub</code>, <code>and</code>, <code>or</code> (R-Type) — 纯粹的计算。</li>
+                <li><strong>内存访问指令</strong>: <code>ld</code>, <code>sd</code> (I-Type, S-Type) — 与内存交互。</li>
+                <li><strong>条件分支指令</strong>: <code>beq</code> (SB-Type) — 改变控制流。</li>
+                <li><strong>无条件跳转指令</strong>: <code>jal</code> (UJ-Type) — 也是改变控制流。</li>
+                <li>这个子集虽然小，但它包含了数据处理、数据传输和控制流改变这三大类基本操作，足以构建任何复杂的程序。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>增量式构建</strong>：我们将像雕塑家一样，先搭建骨架，再填充肌肉，最后赋予神经系统。每一步都只解决一个问题，并观察它对现有系统的影响。</p>
+                </li>
                 </ol>
-                <p>在每个时钟周期的上升沿，PC的值会被更新为 <code>PC + 4</code>，从而为下一个周期的取指做好准备。</p>
-                <div class="mermaid">graph LR
-                    PC -- "指令地址" --> IM[指令存储器];
-                    IM -- "32位指令" --> Others[...]
-                    PC -- "+4" --> Adder
-                    Adder -- "下一指令地址" --> PC
-                </div>
-                <h4 id="22-r-%E5%9E%8B%E6%8C%87%E4%BB%A4%E7%9A%84%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF"><strong>2.2 R-Type指令的数据通路</strong></h4>
-                <p>R-Type指令，如 <code>add x5, x6, x7</code>，需要执行以下操作：</p>
+                <p>在动手之前，我们必须牢记任何指令在处理器中的生命周期五部分，这是我们构建的蓝图：</p>
                 <ol>
-                <li>从寄存器堆中读出两个源寄存器 (<code>rs1</code>, <code>rs2</code>) 的值。指令中的<code>rs1</code>和<code>rs2</code>字段（各5位）作为寄存器堆的读地址输入。</li>
-                <li>将这两个值送入ALU进行运算。ALU的操作类型由指令的<code>funct3</code>和<code>funct7</code>字段决定。</li>
-                <li>将ALU的运算结果写回到目标寄存器 (<code>rd</code>)。指令中的<code>rd</code>字段作为寄存器堆的写地址输入。</li>
+                <li><strong>取指 (Fetch)</strong></li>
+                <li><strong>译码 (Decode)</strong></li>
+                <li><strong>执行 (Execute)</strong></li>
+                <li><strong>访存 (Memory)</strong></li>
+                <li><strong>写回 (Write-back)</strong></li>
                 </ol>
-                <div class="mermaid">graph TD
-                    A[指令] --> B{解码};
-                    B -- rs1地址 --> C[寄存器堆];
-                    B -- rs2地址 --> C;
-                    C -- rs1数据 --> D[ALU];
-                    C -- rs2数据 --> D;
-                    B -- funct3/7 --> D;
-                    D -- 结果 --> C;
-                    B -- rd地址 --> C;
-                </div>
-                <h4 id="23-%E8%AE%BF%E5%AD%98%E6%8C%87%E4%BB%A4%E7%9A%84%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF"><strong>2.3 访存指令的数据通路</strong></h4>
-                <p>访存指令，如 <code>ld x5, 40(x6)</code> 或 <code>sd x5, 40(x6)</code>，需要：</p>
-                <ol>
-                <li><strong>地址计算：</strong>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E8%AE%BE%E8%AE%A1%E7%9A%84%E5%9F%BA%E7%A1%80%E8%AF%AD%E8%A8%80%E5%85%83%E4%BB%B6%E4%B8%8E%E6%B3%95%E5%88%99"><strong>第一部分：设计的基础：语言、元件与法则</strong></h3>
+                <h4 id="11-%E8%AE%BE%E8%AE%A1%E8%AF%AD%E8%A8%80%E4%BA%8C%E8%BF%9B%E5%88%B6%E7%BA%A6%E5%AE%9A"><strong>1.1 设计语言：二进制约定</strong></h4>
+                <p>我们的世界建立在二进制之上。硬件层面，这意味着：</p>
                 <ul>
-                <li>读出基址寄存器 (<code>rs1</code>, 即<code>x6</code>) 的值。</li>
-                <li>将指令中的12位立即数偏移量 (<code>40</code>) 进行<strong>符号扩展 (Sign-extension)</strong> 到64位。</li>
-                <li>将两者送入ALU相加，得到有效的内存地址。</li>
+                <li><strong>信息编码</strong>：逻辑<code>1</code>和<code>0</code>由电路的高、低电压表示。</li>
+                <li><strong>数据通路</strong>：一条导线承载1 bit信息。一个64位的整数，就需要64根平行的导线（即<strong>总线</strong>）来传输。总线的宽度是数据通路设计中的一个基本参数。</li>
+                </ul>
+                <h4 id="12-%E4%B8%A4%E7%B1%BB%E6%A0%B8%E5%BF%83%E5%85%83%E4%BB%B6%E6%97%A0%E8%AE%B0%E5%BF%86%E7%9A%84%E8%AE%A1%E7%AE%97%E8%80%85%E4%B8%8E%E6%9C%89%E8%AE%B0%E5%BF%86%E7%9A%84%E5%AD%98%E5%82%A8%E8%80%85"><strong>1.2 两类核心元件：无记忆的“计算者”与有记忆的“存储者”</strong></h4>
+                <p>我们的处理器由两种基本元件构成：</p>
+                <ol>
+                <li>
+                <p><strong>组合逻辑元件 (Combinational Logic)</strong></p>
+                <ul>
+                <li><strong>哲学定义</strong>：它们是“活在当下”的元件，没有记忆。其输出在任何时刻都<strong>严格地</strong>由当前输入决定。电路延迟是它们唯一的物理属性。</li>
+                <li><strong>角色</strong>：数据处理、转换和决策的核心。</li>
+                <li><strong>核心成员</strong>：
+                <ul>
+                <li><strong>算术逻辑单元 (ALU)</strong>：处理器的“瑞士军刀”。输入两个64位操作数，根据一个几位的控制信号，输出一个64位的结果（以及一些状态标志，如<code>Zero</code>信号）。它是执行阶段的核心。</li>
+                <li><strong>加法器 (Adder)</strong>：ALU的特例，只做加法。在我们的设计中，它将用于计算<code>PC+4</code>和分支目标地址。</li>
+                <li><strong>多路选择器 (Multiplexer, MUX)</strong>：<strong>这是数据通路设计的灵魂</strong>。它像一个铁路道岔，根据一个控制信号，从多个输入“轨道”中选择一个连接到唯一的输出“轨道”。<strong>每当你的数据通路中一个点的信号来源不唯一时，你就需要一个MUX。</strong>
+                <img src="../images/imagec01.png" alt="figure 1"></li>
                 </ul>
                 </li>
-                <li><strong>数据传输：</strong>
+                </ul>
+                </li>
+                <li>
+                <p><strong>时序逻辑元件 (Sequential Logic)</strong></p>
                 <ul>
-                <li>对于<strong>加载 (ld)</strong>：使用计算出的地址从数据存储器中读取数据，然后将数据写回目标寄存器 (<code>rd</code>, 即<code>x5</code>)。</li>
-                <li>对于<strong>存储 (sd)</strong>：使用计算出的地址，将源寄存器 (<code>rs2</code>, 即<code>x5</code>) 的值写入数据存储器。</li>
+                <li><strong>哲学定义</strong>：它们是拥有“记忆”和“历史”的元件。它们的输出不仅依赖于当前输入，更依赖于内部存储的状态。它们是系统状态的载体。</li>
+                <li><strong>角色</strong>：存储指令执行过程中的中间结果、程序状态和最终数据。</li>
+                <li><strong>核心成员</strong>：
+                <ul>
+                <li><strong>寄存器 (Register)</strong>：最基本的存储单元。它有一个数据输入D，一个数据输出Q，以及一个时钟输入Clk。<strong>关键特性</strong>：只有在时钟的<strong>上升沿</strong>到来时，Q的值才会更新为D的值。在其他时间，无论D如何变化，Q都保持不变。</li>
+                <li><strong>带写使能的寄存器</strong>：在实际应用中，我们并非每个时钟周期都想更新寄存器。因此，我们增加一个<code>Write Enable</code>控制信号。只有在时钟上升沿且<code>Write Enable</code>为高电平时，寄存器才会被更新。寄存器堆和PC的设计都基于此。</li>
+                <li><strong>存储器 (Memory)</strong>：可以看作一个巨大的寄存器数组。它有一个地址输入，一个数据输入（用于写），一个数据输出（用于读），以及读/写控制信号。
+                <img src="../images/imagec02.png" alt="figure 2">
+                <img src="../images/imagec03.png" alt="figure 3"></li>
+                </ul>
+                </li>
                 </ul>
                 </li>
                 </ol>
-                <div class="mermaid">graph TD
-                    A[指令] --> B{解码};
-                    B -- rs1地址 --> RF[寄存器堆];
-                    RF -- 基址 --> ALU;
-                    B -- 立即数 --> SE[符号扩展];
-                    SE -- 偏移量 --> ALU;
-                    ALU -- 内存地址 --> DM[数据存储器];
-                    
-                    subgraph "Load (ld)"
-                        DM -- 读出数据 --> RF;
-                        B -- rd地址 --> RF;
-                    end
-
-                    subgraph "Store (sd)"
-                        B -- rs2地址 --> RF;
-                        RF -- 写入数据 --> DM;
-                    end
-                </div>
-                <h4 id="24-%E6%9D%A1%E4%BB%B6%E5%88%86%E6%94%AF%E6%8C%87%E4%BB%A4%E7%9A%84%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF"><strong>2.4 条件分支指令的数据通路</strong></h4>
-                <p>条件分支指令，如 <code>beq x5, x6, Label</code>，需要：</p>
-                <ol>
-                <li><strong>比较：</strong> 读出两个源寄存器 (<code>rs1</code>, <code>rs2</code>) 的值，送入ALU进行减法运算。</li>
-                <li><strong>判断：</strong> 检查ALU的<code>Zero</code>输出。如果为1，说明两个寄存器相等，分支应该发生。</li>
-                <li><strong>目标地址计算：</strong>
+                <h4 id="13-%E6%A0%B8%E5%BF%83%E6%B3%95%E5%88%99%E6%97%B6%E9%92%9F%E5%90%8C%E6%AD%A5%E6%96%B9%E6%B3%95%E8%AE%BA-clocking-methodology"><strong>1.3 核心法则：时钟同步方法论 (Clocking Methodology)</strong></h4>
+                <p><strong>为什么需要时钟？</strong> 如果没有一个统一的节拍，数据在电路中传播的速度不一（快的信号可能已经到达下一站，慢的信号还在路上），会导致时序混乱，我们无法在确定的时刻获得一个稳定、正确的计算结果。时钟就像一个乐队指挥，确保所有乐手（逻辑元件）在同一节拍上行动。</p>
+                <p><strong>我们的工作模式</strong>：</p>
                 <ul>
-                <li>将指令中的12位立即数偏移量进行符号扩展并<strong>左移1位</strong>（因为偏移量是以半字为单位的）。</li>
-                <li>将这个偏移量与<strong>当前PC+4</strong>的值相加，得到分支目标地址。</li>
+                <li>在一个时钟周期的开始（上升沿），数据从一个状态元件（如PC，寄存器堆）中被读出。</li>
+                <li>这些数据流经一系列组合逻辑（如ALU，MUX），进行计算和选择。这是一个纯粹的物理传播过程，需要时间。</li>
+                <li>在下一个时钟周期的上升沿到来<strong>之前</strong>，组合逻辑的输出必须稳定下来，并准备好被写入下一个状态元件。</li>
+                <li>在下一个上升沿，新的计算结果被锁存到目标状态元件中。</li>
+                </ul>
+                <p><img src="../images/imagec04.png" alt="figure 4"></p>
+                <p>这个模型引出了处理器设计的<strong>第一个核心约束</strong>：
+                $$
+                T_{\text{clk}} \ge T_{\text{state_read}} + T_{\text{combinational_logic_max_delay}} + T_{\text{setup}}
+                $$
+                其中，$T_{\text{clk}}$是时钟周期时间。$T_{\text{combinational_logic_max_delay}}$ 是数据流经的最长组合逻辑路径的延迟，即<strong>关键路径延迟</strong>。$T_{\text{setup}}$ 是数据在时钟沿到来前必须保持稳定的建立时间。</p>
+                <p><strong>设计启示</strong>：你的数据通路设计得越复杂、串联的逻辑门越多，关键路径就越长，时钟频率就越低，处理器性能就越差。这是我们后续进行性能优化的关键所在。</p>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E4%B8%80%E6%AD%A5%E4%B8%80%E8%84%9A%E5%8D%B0%E7%9A%84%E6%9E%84%E5%BB%BA%E4%B9%8B%E6%97%85"><strong>第二部分：数据通路：一步一脚印的构建之旅</strong></h3>
+                <p>我们将以指令的生命周期为线索，逐步搭建数据通路。请大家时刻对照<strong>RISC-V指令格式图</strong> ，因为指令的每一个字段都是我们连接电路的“接线图”。
+                <img src="../images/imagec05.png" alt="figure 5"></p>
+                <h4 id="21-%E7%AC%AC%E4%B8%80%E6%AD%A5%E5%8F%96%E6%8C%87%E4%BB%A4-instruction-fetch---%E8%B5%B7%E7%82%B9"><strong>2.1 第一步：取指令 (Instruction Fetch) - 起点</strong></h4>
+                <ul>
+                <li><strong>任务需求</strong>：根据PC寄存器的地址，到指令存储器中取指令，并计算出下一条指令的地址 <code>PC+4</code>。</li>
+                <li><strong>所需元件</strong>：PC寄存器、指令存储器、一个加法器。</li>
+                <li><strong>数据流设计</strong>：
+                <ol>
+                <li>PC是一个64位的寄存器，它的输出端连接到指令存储器的“地址”输入端口。</li>
+                <li>指令存储器是一个组合逻辑（或至少可以模型化为组合逻辑），它根据输入的地址，立即输出存储在该地址的32位指令。</li>
+                <li>PC的输出同时被送到一个加法器的输入A。</li>
+                <li>加法器的输入B固定为常数<code>4</code>（因为RISC-V指令定长4字节）。</li>
+                <li>加法器的输出，连接回PC寄存器的“数据”输入端。</li>
+                <li>这样，在每个时钟上升沿，PC都会被更新为 <code>旧PC + 4</code>，从而自动地、顺序地完成取指。这是一个优雅的自驱动循环。
+                <img src="../images/imagec06.png" alt="figure 6"></li>
+                </ol>
+                </li>
+                </ul>
+                <h4 id="22-%E7%AC%AC%E4%BA%8C%E6%AD%A5%E6%94%AF%E6%8C%81r-type%E6%8C%87%E4%BB%A4-%E5%A6%82-add-x9-x20-x21---%E7%BA%AF%E7%B2%B9%E7%9A%84%E8%AE%A1%E7%AE%97"><strong>2.2 第二步：支持R-Type指令 (如 <code>add x9, x20, x21</code>) - 纯粹的计算</strong></h4>
+                <ul>
+                <li><strong>任务需求</strong>：从指令中解析出<code>rs1(x20)</code>, <code>rs2(x21)</code>和<code>rd(x9)</code>。从寄存器堆中读出<code>x20</code>和<code>x21</code>的值，送入ALU做加法，结果再写回寄存器堆的<code>x9</code>号寄存器。</li>
+                <li><strong>所需元件</strong>：寄存器堆、ALU。</li>
+                <li><strong>数据流设计</strong>：
+                <ol>
+                <li><strong>寄存器堆接口</strong>：它需要5个输入（读地址1，读地址2，写地址，写数据，写使能<code>RegWrite</code>）和2个输出（读数据1，读数据2）。</li>
+                <li>取出的32位指令中，<code>bits[19:15]</code> (rs1) 连接到寄存器堆的“读地址1”。</li>
+                <li><code>bits[24:20]</code> (rs2) 连接到“读地址2”。</li>
+                <li>寄存器堆的“读数据1”和“读数据2”输出端口，直接连接到ALU的两个64位数据输入端。</li>
+                <li>ALU的输出，连接到寄存器堆的“写数据”输入端口。</li>
+                <li>指令的<code>bits[11:7]</code> (rd) 连接到“写地址”。</li>
+                <li>我们需要一个控制信号<code>RegWrite</code>，对于<code>add</code>指令，它必须为<code>1</code>，以允许写操作发生。
+                <img src="../images/imagec07.png" alt="figure 7"></li>
+                </ol>
+                </li>
+                </ul>
+                <p>至此，我们的数据通路可以顺序取指并执行R-Type计算了。一切看起来很和谐。</p>
+                <h4 id="23-%E7%AC%AC%E4%B8%89%E6%AD%A5%E5%BC%95%E5%85%A5%E5%86%85%E5%AD%98%E8%AE%BF%E9%97%AE-ldsd---%E7%AC%AC%E4%B8%80%E4%B8%AA%E8%AE%BE%E8%AE%A1%E5%86%B2%E7%AA%81%E4%B8%8Emux%E7%9A%84%E7%99%BB%E5%9C%BA"><strong>2.3 第三步：引入内存访问 (<code>ld/sd</code>) - 第一个设计冲突与MUX的登场</strong></h4>
+                <ul>
+                <li><strong>任务需求 (<code>ld x9, 200(x1)</code>)</strong>：
+                <ol>
+                <li>读寄存器<code>x1</code>的值（基地址）。</li>
+                <li>将指令中的12位立即数<code>200</code>（偏移量）进行<strong>符号扩展</strong>至64位。</li>
+                <li>用ALU计算 <code>基地址 + 扩展后的偏移量</code>，得到内存地址。</li>
+                <li>访问数据存储器，读出数据。</li>
+                <li>将读出的数据写回寄存器<code>x9</code>。</li>
+                </ol>
+                </li>
+                <li><strong>引入新元件</strong>：数据存储器、立即数生成单元。</li>
+                <li><strong>设计冲突</strong>：
+                我们来看ALU的第二个输入。对于R-Type指令，它应该接收来自寄存器堆的“读数据2” (rs2的值)。但对于<code>ld</code>指令，它必须接收来自指令、经过符号扩展后的12位立即数。同一个输入端，有了两个不同的合法来源！</li>
+                <li><strong>工程解决方案：引入MUX</strong> (参考下图的R-Type/Load/Store Datapath图中的<code>ALUSrc</code> MUX)
+                <ol>
+                <li>我们在ALU的第二个输入端前放置一个2选1的MUX。</li>
+                <li>MUX的<code>0</code>号输入连接寄存器堆的“读数据2”。</li>
+                <li>MUX的<code>1</code>号输入连接立即数生成单元的输出。</li>
+                <li>我们创造一个新的1位控制信号，命名为<code>ALUSrc</code>。当<code>ALUSrc=0</code>时，选择寄存器数据（用于R-Type）；当<code>ALUSrc=1</code>时，选择立即数（用于<code>ld/sd</code>）。
+                <img src="../images/imagec08.png" alt="figure 8"></li>
+                </ol>
+                </li>
+                <li><strong>第二个设计冲突</strong>：
+                我们再看写回寄存器堆的数据来源。对于R-Type指令，它来自ALU的计算结果。但对于<code>ld</code>指令，它来自数据存储器的输出。又是一个二选一！</li>
+                <li><strong>解决方案：再来一个MUX！</strong> (参考下图中的<code>MemtoReg</code> MUX)
+                <ol>
+                <li>在寄存器堆的“写数据”端口前放置一个2选1的MUX。</li>
+                <li>MUX的<code>0</code>号输入连接ALU的结果。</li>
+                <li>MUX的<code>1</code>号输入连接数据存储器的“读数据”输出。</li>
+                <li>我们创造一个新的控制信号<code>MemtoReg</code>。当<code>MemtoReg=0</code>时，选择ALU结果（用于R-Type）；当<code>MemtoReg=1</code>时，选择内存数据（用于<code>ld</code>）。
+                <img src="../images/imagec08.png" alt="figure 8"></li>
+                </ol>
+                </li>
+                </ul>
+                <p><strong><code>sd</code>指令的补充</strong>：<code>sd</code>指令（存储）与<code>ld</code>类似，都是计算地址。但它不是从内存读数据，而是将<code>rs2</code>的值写入内存。因此，寄存器堆的“读数据2”输出需要连接到数据存储器的“写数据”输入。同时，需要一个<code>MemWrite</code>控制信号来使能内存的写操作。</p>
+                <h4 id="24-%E7%AC%AC%E5%9B%9B%E6%AD%A5%E6%94%AF%E6%8C%81%E6%9D%A1%E4%BB%B6%E5%88%86%E6%94%AF-beq---%E6%94%B9%E5%8F%98%E6%8E%A7%E5%88%B6%E6%B5%81%E7%9A%84%E6%8C%91%E6%88%98"><strong>2.4 第四步：支持条件分支 (<code>beq</code>) - 改变控制流的挑战</strong></h4>
+                <ul>
+                <li><strong>任务需求 (<code>beq x1, x2, offset</code>)</strong>：
+                <ol>
+                <li>比较寄存器<code>x1</code>和<code>x2</code>的值。</li>
+                <li>如果相等，PC要跳转到 <code>当前PC + (符号扩展后的offset &lt;&lt; 1)</code>。</li>
+                <li>如果不相等，PC正常更新为<code>PC + 4</code>。</li>
+                </ol>
+                </li>
+                <li><strong>设计哲学：最大化复用</strong>
+                <ul>
+                <li><strong>如何比较？</strong> 我们不需要专门的比较器。可以让ALU执行<code>x1 - x2</code>。如果结果为0，则<code>x1 == x2</code>。ALU需要提供一个<code>Zero</code>输出信号，当结果为0时，该信号为高电平。</li>
                 </ul>
                 </li>
-                <li><strong>更新PC：</strong> 如果分支发生，则用分支目标地址更新PC；否则，PC正常更新为 <code>PC + 4</code>。这需要一个MUX来选择下一个PC的值。</li>
-                </ol>
-                <div class="mermaid">graph TD
-                    A[指令] --> B{解码};
-                    B -- rs1 --> RF[寄存器堆];
-                    B -- rs2 --> RF;
-                    RF -- 数据1 --> ALU;
-                    RF -- 数据2 --> ALU;
-                    ALU -- Zero信号 --> MUX_PC[PC MUX];
-                    
-                    subgraph "分支目标地址计算"
-                       PC -- "+4" --> Adder1
-                       B -- 立即数 --> SE[符号扩展] -- "左移1位" --> Shift
-                       Adder1 -- PC+4 --> Adder2
-                       Shift -- 偏移量 --> Adder2
-                       Adder2 -- 目标地址 --> MUX_PC
-                    end
-                    
-                    Adder1 -- 正常PC+4 --> MUX_PC;
-                    MUX_PC -- "下一个PC地址" --> PC;
-                </div>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E5%BB%BA%E7%AB%8B%E4%B8%80%E4%B8%AA%E5%8D%95%E5%91%A8%E6%9C%9F%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF"><strong>第三部分：建立一个单周期数据通路</strong></h3>
-                <p>现在，我们需要将上面为不同类型指令设计的独立数据通路**合并**成一个统一的数据通路。合并的关键在于使用<strong>多路选择器 (MUX)</strong> 来根据指令类型选择正确的数据来源。</p>
-                <p><strong>关键的合并点：</strong></p>
+                <li><strong>引入新元件</strong>：一个用于计算分支目标地址的加法器，一个左移2位的移位器。</li>
+                <li><strong>设计冲突</strong>：
+                下一个PC的值现在有了两个可能的来源：顺序执行时来自<code>PC+4</code>加法器的输出，分支成功时来自新引入的分支目标地址加法器的输出。这是PC更新路径上的冲突。</li>
+                <li><strong>解决方案：又一个MUX！</strong> (参考下图的<code>PCSrc</code> MUX)
                 <ol>
-                <li><strong>ALU的第二个输入：</strong> 它可以来自寄存器堆的第二个读端口（用于R-Type和beq），也可以来自经过符号扩展的立即数（用于I-Type和S-Type）。我们需要一个MUX（称为<code>ALUSrc</code>）来选择。</li>
-                <li><strong>写回寄存器堆的数据：</strong> 它可以来自ALU的运算结果（用于R-Type和I-Type），也可以来自数据存储器的输出（用于ld）。我们需要一个MUX（称为<code>MemtoReg</code>）来选择。</li>
-                <li><strong>PC的下一个值：</strong> 它可以是 <code>PC+4</code>（正常执行），也可以是分支目标地址。我们需要一个MUX来选择，其选择信号由<code>beq</code>指令的比较结果和另一个控制信号（<code>Branch</code>）共同决定。</li>
+                <li>在PC的输入端前放置一个2选1的MUX。</li>
+                <li>MUX的<code>0</code>号输入连接<code>PC+4</code>的结果。</li>
+                <li>MUX的<code>1</code>号输入连接分支目标地址计算的结果。</li>
+                <li>这个MUX的选择信号如何产生？它必须同时满足两个条件：(1) 指令是<code>beq</code>；(2) ALU的<code>Zero</code>信号为1。所以，我们需要一个AND门，其输入是<code>Zero</code>信号和一个新的<code>Branch</code>控制信号（当指令为<code>beq</code>时，该信号为1）。这个AND门的输出，就是MUX的选择信号<code>PCSrc</code>。
+                <img src="../images/imagec09.png" alt="figure 9"></li>
                 </ol>
-                <p>将所有这些组件和MUX连接起来，我们就得到了一个可以处理我们指令子集的单周期数据通路。</p>
-                <div class="mermaid">graph TD
-                    subgraph "统一数据通路"
-                        PC -- 地址 --> IM[指令存储器]
-                        IM -- 指令 --> CU[控制器]
-                        IM -- 指令[31-0] --> Dec{解码}
-                        
-                        Dec -- rs1 --> RF[寄存器堆]
-                        Dec -- rs2 --> RF
-                        Dec -- rd --> RF
-                        
-                        RF -- 读数据1 --> ALU
-                        RF -- 读数据2 --> MUX_ALU
-                        Dec -- 立即数 --> SE[符号扩展]
-                        SE --> MUX_ALU
-                        
-                        MUX_ALU -- ALU输入2 --> ALU
-                        ALU -- 结果 --> MUX_WB
-                        ALU -- Zero --> BranchLogic
-                        
-                        ALU -- 地址 --> DM[数据存储器]
-                        RF -- 写数据 --> DM
-                        DM -- 读数据 --> MUX_WB
-                        
-                        MUX_WB -- 写回数据 --> RF
-                        
-                        CU -- 控制信号 --> MUX_ALU
-                        CU -- 控制信号 --> MUX_WB
-                        CU -- 控制信号 --> RF
-                        CU -- 控制信号 --> ALUControl
-                        CU -- 控制信号 --> DM
-                        CU -- 控制信号 --> BranchLogic
-                        
-                        PC -- "+4" --> PC_ADD4
-                        PC_ADD4 --> MUX_PC
-                        SE -- "左移1位" --> SHIFT_BRANCH
-                        PC_ADD4 -- "+偏移" --> ADD_BRANCH
-                        SHIFT_BRANCH --> ADD_BRANCH
-                        ADD_BRANCH -- 分支目标 --> MUX_PC
-                        
-                        BranchLogic -- 选择 --> MUX_PC
-                        MUX_PC -- 新PC值 --> PC
-                    end
-                </div>
-                <p><em>(上图是一个简化的单周期数据通路与控制逻辑的示意图)</em></p>
-                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E8%AE%BE%E8%AE%A1%E6%8E%A7%E5%88%B6%E5%99%A8"><strong>第四部分：设计控制器</strong></h3>
-                <p>数据通路已经搭建好了，但它还是一堆“死”的硬件。我们需要一个“大脑”——<strong>控制器 (Control Unit)</strong>——来根据当前指令，生成正确的控制信号，指挥数据通路中的各个MUX选择正确的输入，并告诉ALU、寄存器堆和存储器应该执行什么操作（读、写、运算类型等）。</p>
-                <p>控制器的输入是指令的<strong>操作码 (opcode)</strong> 字段。它是一个组合逻辑电路，其输出就是数据通路上所有的控制信号。</p>
-                <h4 id="41-alu-%E6%8E%A7%E5%88%B6%E5%99%A8"><strong>4.1 ALU 控制器</strong></h4>
-                <p>ALU本身可能支持很多种运算（如AND, OR, ADD, SUB, SLT等），它需要一个几位的控制信号来选择具体执行哪一种。</p>
-                <p>主控制器并不需要关心指令的具体运算是什么（例如，它不知道<code>add</code>和<code>sub</code>的区别）。它只需要根据<code>opcode</code>生成一个更上层的、2位的<code>ALUOp</code>信号：</p>
-                <ul>
-                <li><code>00</code>：用于访存指令（需要加法来计算地址）</li>
-                <li><code>01</code>：用于分支指令（需要减法来进行比较）</li>
-                <li><code>10</code>：用于R-Type指令</li>
+                </li>
                 </ul>
-                <p>然后，一个专门的<strong>ALU控制器</strong>，会结合这个2位的<code>ALUOp</code>信号和指令的<code>funct</code>字段（对于R-Type指令），生成最终送给ALU的、具体的4位操作选择信号。</p>
-                <div class="mermaid">graph TD
-                    A[主控制器] -- ALUOp(2位) --> B[ALU控制器];
-                    C[指令funct字段] --> B;
-                    B -- ALU控制信号(4位) --> D[ALU];
-                </div>
-                <p>这种分层设计使得主控制器更简单，并将与运算细节相关的逻辑局部化到了ALU控制器中。</p>
-                <h4 id="42-%E4%B8%BB%E6%8E%A7%E5%88%B6%E5%99%A8"><strong>4.2 主控制器</strong></h4>
-                <p>主控制器的设计可以通过一个<strong>真值表</strong>来完成。这个表的输入是指令的6位<code>opcode</code>，输出是数据通路上所有的控制信号（如<code>RegWrite</code>, <code>ALUSrc</code>, <code>MemtoReg</code>, <code>MemRead</code>, <code>MemWrite</code>, <code>Branch</code>, <code>ALUOp</code>等）。</p>
-                <p>例如：</p>
+                <p>至此，我们已经为所有指令类型设计好了各自的“管道”，并用MUX将它们巧妙地连接在了一起。</p>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E9%9B%86%E5%A4%A7%E6%88%90%E5%AE%8C%E6%95%B4%E7%9A%84%E5%8D%95%E5%91%A8%E6%9C%9F%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E4%B8%8E%E6%8E%A7%E5%88%B6%E5%8D%95%E5%85%83"><strong>第三部分：集大成：完整的单周期数据通路与控制单元</strong></h3>
+                <p>现在，是时候将所有碎片拼合，并为它注入灵魂——控制单元。</p>
+                <h4 id="31-%E5%AE%8C%E6%95%B4%E7%9A%84%E5%8D%95%E5%91%A8%E6%9C%9F%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF"><strong>3.1 完整的单周期数据通路</strong></h4>
+                <p><img src="../images/imagec09.png" alt="figure 9"></p>
+                <p>这张图就是我们前半节课的成果。让我们通过追踪不同指令的数据流，来彻底理解它。</p>
                 <ul>
-                <li>对于<strong>R-Type</strong>指令：<code>RegWrite=1</code>, <code>ALUSrc=0</code>, <code>MemtoReg=0</code>, <code>Branch=0</code>, <code>ALUOp=10</code>...</li>
-                <li>对于<strong>ld</strong>指令：<code>RegWrite=1</code>, <code>ALUSrc=1</code>, <code>MemtoReg=1</code>, <code>MemRead=1</code>, <code>MemWrite=0</code>, <code>Branch=0</code>, <code>ALUOp=00</code>...</li>
-                <li>对于<strong>sd</strong>指令：<code>RegWrite=0</code>, <code>ALUSrc=1</code>, <code>MemWrite=1</code>...</li>
-                <li>对于<strong>beq</strong>指令：<code>Branch=1</code>, <code>ALUOp=01</code>...</li>
-                </ul>
-                <p>这个真值表可以直接用逻辑门电路来实现，从而构成一个完整的、能够根据指令自动工作的控制器。</p>
-                <h3 id="%E6%80%BB%E7%BB%93"><strong>总结</strong></h3>
-                <p>在本讲中，我们从零开始，成功地构建了一个简化的单周期RISC-V处理器的数据通路和控制器。</p>
+                <li>
+                <p><strong>追踪<code>add</code>指令 (R-Type)</strong> (参考下图红色高亮路径)</p>
                 <ol>
-                <li>我们理解了处理器的基本组成部分：<strong>状态元件</strong>和<strong>组合逻辑元件</strong>。</li>
-                <li>我们通过增量式的方法，分别为<strong>取指、R-Type、访存和分支</strong>指令设计了数据通路。</li>
-                <li>我们学习了如何使用<strong>多路选择器 (MUX)</strong> 将这些独立的数据通路合并成一个统一的、功能完备的数据通路。</li>
-                <li>我们设计了分层的<strong>控制器</strong>，包括一个根据<code>opcode</code>生成高级控制信号的<strong>主控制器</strong>，和一个根据<code>funct</code>字段生成具体ALU操作信号的<strong>ALU控制器</strong>。</li>
+                <li><strong>取指</strong>：PC送入指令存储器，指令读出。PC+4计算完成。</li>
+                <li><strong>译码</strong>：指令[19:15]和[24:20]送入寄存器堆，读出两个操作数。</li>
+                <li><strong>执行</strong>：
+                <ul>
+                <li><code>ALUSrc</code>=0，MUX选择<code>Read data 2</code>。</li>
+                <li>两个操作数进入ALU，ALU控制器根据指令的<code>funct</code>字段，命令ALU执行加法。</li>
+                </ul>
+                </li>
+                <li><strong>访存</strong>：此阶段无操作。<code>MemRead</code>=0, <code>MemWrite</code>=0。</li>
+                <li><strong>写回</strong>：
+                <ul>
+                <li><code>MemtoReg</code>=0，MUX选择ALU的输出。</li>
+                <li><code>RegWrite</code>=1，结果被写入指令[11:7]指定的<code>rd</code>寄存器。</li>
+                </ul>
+                </li>
+                <li><strong>PC更新</strong>：<code>Branch</code>=0，所以<code>PCSrc</code>=0，PC被更新为<code>PC+4</code>。
+                <img src="../images/imagec10.png" alt="figure 10"></li>
                 </ol>
-                <p>虽然我们设计的只是一个简单的单周期处理器，但它已经包含了现代处理器最核心的设计思想和组件。在接下来的章节中，我们将在此基础上，学习如何通过<strong>流水线 (Pipelining)</strong> 技术来大幅提升处理器的性能。</p>
+                </li>
+                <li>
+                <p><strong>追踪<code>ld</code>指令 (I-Type)</strong> (参考下图紫色高亮路径)</p>
+                <ol>
+                <li><strong>取指、译码(rs1)</strong>：同上。</li>
+                <li><strong>执行</strong>：
+                <ul>
+                <li>立即数生成单元从指令中提取12位偏移量并符号扩展为64位。</li>
+                <li><code>ALUSrc</code>=1，MUX选择这个扩展后的立即数。</li>
+                <li>ALU控制器（根据主控的<code>ALUOp</code>）命令ALU执行加法，计算出内存地址。</li>
+                </ul>
+                </li>
+                <li><strong>访存</strong>：
+                <ul>
+                <li>ALU计算出的地址送入数据存储器。</li>
+                <li><code>MemRead</code>=1, <code>MemWrite</code>=0，数据从内存中读出。</li>
+                </ul>
+                </li>
+                <li><strong>写回</strong>：
+                <ul>
+                <li><code>MemtoReg</code>=1，MUX选择从数据存储器读出的数据。</li>
+                <li><code>RegWrite</code>=1，该数据被写入<code>rd</code>寄存器。</li>
+                </ul>
+                </li>
+                <li><strong>PC更新</strong>：<code>PCSrc</code>=0，PC更新为<code>PC+4</code>。
+                <img src="../images/imagec11.png" alt="figure 11"></li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>追踪<code>beq</code>指令 (SB-Type)</strong> (参考下图蓝色高亮路径)</p>
+                <ol>
+                <li><strong>取指、译码</strong>：同上。</li>
+                <li><strong>执行</strong>：
+                <ul>
+                <li><code>ALUSrc</code>=0，MUX选择<code>Read data 2</code>。</li>
+                <li>ALU控制器命令ALU执行减法。<code>Zero</code>信号输出比较结果。</li>
+                </ul>
+                </li>
+                <li><strong>访存、写回</strong>：无操作。<code>MemRead</code>, <code>MemWrite</code>, <code>RegWrite</code>均为0。</li>
+                <li><strong>PC更新</strong>：
+                <ul>
+                <li>分支目标地址加法器计算出跳转地址。</li>
+                <li><code>Branch</code>控制信号为1。它与ALU的<code>Zero</code>信号进行AND运算，结果作为<code>PCSrc</code>。</li>
+                <li>如果AND结果为1，<code>PCSrc</code>=1，MUX选择分支目标地址更新PC。</li>
+                <li>如果AND结果为0，<code>PCSrc</code>=0，MUX选择<code>PC+4</code>更新PC。
+                <img src="../images/imagec12.png" alt="figure 12"></li>
+                </ul>
+                </li>
+                </ol>
+                </li>
+                </ul>
+                <h4 id="32-%E6%8E%A7%E5%88%B6%E5%8D%95%E5%85%83%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E7%9A%84%E5%A4%A7%E8%84%91"><strong>3.2 控制单元：数据通路的大脑</strong></h4>
+                <p>数据通路本身是“哑”的，它需要一个指挥中心。这个中心就是<strong>控制单元</strong>。</p>
+                <ul>
+                <li><strong>本质</strong>：一个纯组合逻辑电路。</li>
+                <li><strong>输入</strong>：指令的<code>opcode</code>字段（<code>bits[6:0]</code>）。为什么是<code>opcode</code>？因为<code>opcode</code>是定义指令类型的最主要字段。</li>
+                <li><strong>输出</strong>：我们之前设计中用到的所有控制信号：<code>RegWrite</code>, <code>ALUSrc</code>, <code>MemRead</code>, <code>MemWrite</code>, <code>MemtoReg</code>, <code>Branch</code>，以及一个中间信号<code>ALUOp</code>。</li>
+                </ul>
+                <p><img src="../images/imagec13.png" alt="figure 13"></p>
+                <p><strong>3.2.1 两级控制的设计哲学</strong></p>
+                <p>我们面临一个设计选择：是让一个巨大的、复杂的控制单元根据<code>opcode</code>, <code>funct3</code>, <code>funct7</code>等所有信息直接产生所有最终控制信号，还是将其分解？</p>
+                <p>答案是<strong>分解</strong>。这体现了<strong>模块化设计 (Modularity)</strong> 的思想。</p>
+                <ol>
+                <li>
+                <p><strong>主控制单元</strong>：只负责“宏观决策”。它仅根据<code>opcode</code>来识别指令的大类（R-Type, load, store, branch），并生成除ALU具体操作外的所有控制信号。对于ALU，它只生成一个2位的<code>ALUOp</code>信号，告诉下游“这是一次R-Type运算”或“这是一次用于地址计算的加法”等。
+                <img src="../images/imagec14.png" alt="figure 14"></p>
+                </li>
+                <li>
+                <p><strong>ALU控制单元</strong>：负责“微观执行”。它的任务非常专一：接收主控传来的<code>ALUOp</code>和指令中的<code>funct</code>字段，然后翻译成ALU真正需要的4位控制码。</p>
+                </li>
+                </ol>
+                <p><img src="../images/imagec15.png" alt="figure 15"></p>
+                <p><strong>3.2.2 实现控制逻辑</strong></p>
+                <p>控制单元的实现，本质上就是填写真值表。</p>
+                <ul>
+                <li>
+                <p><strong>主控制单元真值表</strong>：
+                <img src="../images/imagec16.png" alt="figure 16"></p>
+                </li>
+                <li>
+                <p><strong>ALU控制单元真值表</strong>：
+                <img src="../images/imagec17.png" alt="figure 17"></p>
+                </li>
+                </ul>
+                <p>例如，当主控制器看到<code>opcode</code>是R-Type时，它输出<code>ALUOp</code>=<code>10</code>。ALU控制器看到<code>ALUOp</code>=<code>10</code>，就知道要去检查<code>funct</code>字段。如果<code>funct7</code>+<code>funct3</code>组合表示<code>add</code>，它就输出<code>0010</code>给ALU；如果表示<code>sub</code>，它就输出<code>0110</code>，以此类推。</p>
+                <p>有了这两张真值表，我们就可以用标准的逻辑电路（如PLA、ROM或一堆逻辑门）来实现这两个控制单元。至此，一个完整的、有大脑、有肌肉的单周期处理器就诞生了！</p>
+                <p><img src="../images/imagec18.png" alt="figure 18"></p>
+                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E6%80%BB%E7%BB%93%E4%B8%8E%E6%89%B9%E5%88%A4%E6%80%A7%E5%8F%8D%E6%80%9D"><strong>第四部分：总结与批判性反思</strong></h3>
+                <p>我们从零开始，基于对指令集的深刻理解，通过增量式构建和解决设计冲突，最终完成了一个可以正确执行多种指令的单周期处理器。我们学习了数据通路的设计方法、MUX的核心作用、以及两级控制的模块化思想。</p>
+                <p><strong>但是，请冷静下来思考一个问题：这个设计好吗？</strong></p>
+                <p><strong>它很优雅，因为它简单。</strong> 每条指令在一个时钟周期内完成，CPI=1，逻辑清晰。</p>
+                <p><strong>但它性能极差，因为它是一个“木桶”</strong>。木桶的容量由最短的木板决定，而我们单周期处理器的时钟周期，则由<strong>最长的那条指令的执行时间</strong>决定。通常是<code>ld</code>指令，因为它涉及的路径最长：取指 -&gt; 读寄存器 -&gt; ALU计算地址 -&gt; 读内存 -&gt; MUX选择 -&gt; 准备写回寄存器。</p>
+                <p>这意味着，一条执行路径很短的<code>add</code>指令，也必须浪费大量时间，去等待一个为<code>ld</code>指令量身定做的、漫长的时钟周期。所有指令都被迫与最慢的指令“同步”，这造成了巨大的资源浪费。</p>
+                <p>我们创造的这个“单周期处理器”，在教学上是完美的，但在现实世界中是低效的。它的简单性，牺牲了性能。</p>
+                <p>那么，<strong>如何打破这个瓶颈？</strong> 如何让快的指令跑得快，同时又不影响慢的指令？如何让处理器的各个部件（取指单元、ALU、数据存储器）不要在大部分时间里都处于空闲等待状态？</p>
+                <p>这就是我们下一讲要探讨的核心议题——<strong>流水线 (Pipelining)</strong>。我们将把指令的执行过程切分成多个阶段，让多条指令的不同阶段重叠执行，就像工厂里的流水线一样，从而极大地提高处理器的吞吐率。这将是一场全新的、更复杂的设计挑战。</p>
             </article>
         </main>
     </div>
