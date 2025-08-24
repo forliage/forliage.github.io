@@ -313,5 +313,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-23-dip7.html",
       "abstract": "图像信息处理7:图像特征提取与匹配"
+    },
+    {
+      "title": "计算机组成1:Introduction",
+      "date": "2025-08-24",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-24-co1.html",
+      "abstract": "计算机组成1:Introduction"
     }
   ];
