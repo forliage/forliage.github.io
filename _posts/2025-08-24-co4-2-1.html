@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机组成4-2-1:流水线的结构</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%904-2-1%E6%B5%81%E6%B0%B4%E7%BA%BF%E7%9A%84%E7%BB%93%E6%9E%84">计算机组成4-2-1:流水线的结构</h1>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%8D%95%E5%91%A8%E6%9C%9F%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%8E%9F%E7%BD%AA%E5%AF%B9%E6%97%B6%E9%97%B4%E7%9A%84%E6%B5%AA%E8%B4%B9"><strong>第一部分：单周期模型的“原罪”——对时间的浪费</strong></h3>
+                <p>在我们急于抛弃单周期模型之前，让我们先给它做一次精准的“尸检”，量化地分析它到底有多糟糕。这将为我们理解流水线的必要性提供最直接的动机。</p>
+                <h4 id="11-%E5%AE%9A%E9%87%8F%E5%88%86%E6%9E%90%E5%85%B3%E9%94%AE%E8%B7%AF%E5%BE%84%E4%B8%8E%E6%97%B6%E9%92%9F%E5%91%A8%E6%9C%9F%E7%9A%84%E7%A1%AE%E5%AE%9A"><strong>1.1 定量分析：关键路径与时钟周期的确定</strong></h4>
+                <p>我们假设处理器中不同功能单元的延迟如下（这是一个非常经典的、接近实际的简化模型）：</p>
+                <ul>
+                <li><strong>存储器访问 (Instruction/Data Memory)</strong>：200 ps (皮秒)</li>
+                <li><strong>ALU及加法器</strong>：200 ps</li>
+                <li><strong>寄存器堆读/写</strong>：100 ps</li>
+                <li>其他组合逻辑（如MUX, 控制单元）延迟忽略不计。</li>
+                </ul>
+                <p>根据上节课的知识，单周期处理器的时钟周期必须<strong>容纳下最长的那条指令的执行路径</strong>，这条路径被称为<strong>关键路径</strong>。让我们来分析几条典型指令的执行总耗时：</p>
+                <ol>
+                <li>
+                <p><strong>R-Type (<code>add</code>, <code>sub</code>等)</strong></p>
+                <ul>
+                <li>路径：取指(IM) -&gt; 读寄存器(Reg) -&gt; ALU计算 -&gt; 写寄存器(Reg)</li>
+                <li>耗时：<code>200ps (IM) + 100ps (Reg Read) + 200ps (ALU) + 100ps (Reg Write) = 600 ps</code></li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Load (<code>ld</code>)</strong></p>
+                <ul>
+                <li>路径：取指(IM) -&gt; 读寄存器(Reg) -&gt; ALU计算地址 -&gt; 访存(DM) -&gt; 写寄存器(Reg)</li>
+                <li>耗时：<code>200ps (IM) + 100ps (Reg Read) + 200ps (ALU) + 200ps (DM) + 100ps (Reg Write) = 800 ps</code>
+                <img src="../images/imagec19.png" alt="figure 19"></li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Store (<code>sd</code>)</strong></p>
+                <ul>
+                <li>路径：取指(IM) -&gt; 读寄存器(Reg) -&gt; ALU计算地址 -&gt; 访存(DM)</li>
+                <li>耗时：<code>200ps (IM) + 100ps (Reg Read) + 200ps (ALU) + 200ps (DM) = 700 ps</code></li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Branch (<code>beq</code>)</strong></p>
+                <ul>
+                <li>路径：取指(IM) -&gt; 读寄存器(Reg) -&gt; ALU比较</li>
+                <li>耗时：<code>200ps (IM) + 100ps (Reg Read) + 200ps (ALU) = 500 ps</code></li>
+                </ul>
+                </li>
+                </ol>
+                <p><img src="../images/imagec20.png" alt="figure 20"></p>
+                <p><strong>结论显而易见</strong>：<code>ld</code>指令是我们的“短板”，它需要800ps。因此，整个处理器的时钟周期 $T_{clk}$ 必须设置为 <strong>800ps</strong>。这意味着，即使是只需要500ps的<code>beq</code>指令，也必须占用一个完整的800ps周期，其中有300ps的时间，处理器是在“无所事事”地空转！</p>
+                <h4 id="12-%E9%97%AE%E9%A2%98%E7%9A%84%E6%9C%AC%E8%B4%A8%E4%B8%8E%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99%E7%9A%84%E8%BF%9D%E8%83%8C"><strong>1.2 问题的本质与设计原则的违背</strong></h4>
+                <p>单周期处理器的“原罪”在于：</p>
+                <ol>
+                <li><strong>资源利用率极低</strong>：在一个时钟周期内，当指令在执行ALU计算时，取指单元和数据存储器是空闲的；当在访存时，ALU是空闲的。每个功能单元在大部分时间里都在“摸鱼”。</li>
+                <li><strong>设计理念的违背</strong>：它违背了计算机设计的一个重要原则——<strong>加速大概率事件 (Making the common case fast)</strong>。在典型的程序中，简单的算术指令和分支指令出现的频率远高于访存指令。而我们却让这些“常客”去迁就最慢的“稀客”。</li>
+                <li><strong>扩展性差</strong>：如果我们想加入一条更复杂、更慢的指令（比如浮点乘法），整个处理器的时钟周期都会被进一步拉长，所有指令的性能都会因此下降。</li>
+                </ol>
+                <p><strong>能否为不同指令设置不同的时钟周期？</strong> 理论上可以，但硬件实现会变得异常复杂，需要复杂的异步电路设计，这在现代通用处理器中是不可行的。我们需要一个更通用、更优雅的解决方案。</p>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E6%B5%81%E6%B0%B4%E7%BA%BF%E7%9A%84%E6%80%9D%E6%83%B3%E4%BB%8E%E4%B8%B2%E8%A1%8C%E5%88%B0%E5%B9%B6%E8%A1%8C"><strong>第二部分：流水线的思想——从串行到并行</strong></h3>
+                <p>既然无法缩短最慢指令的总时长，也无法为不同指令定制周期，那我们能否换一个思路？我们能否让多个指令<strong>重叠执行</strong>，从而提高单位时间内的指令“吞吐率”？</p>
+                <p>这就是<strong>流水线 (Pipelining)</strong> 的核心思想。</p>
+                <h4 id="21-%E7%94%9F%E6%B4%BB%E4%B8%AD%E7%9A%84%E7%B1%BB%E6%AF%94%E6%B4%97%E8%A1%A3%E6%88%BF%E7%9A%84%E6%99%BA%E6%85%A7"><strong>2.1 生活中的类比：洗衣房的智慧</strong></h4>
+                <p>想象一下，有四位同学（A, B, C, D）要洗衣服，洗衣过程分为四个步骤：</p>
+                <ol>
+                <li>洗衣 (30分钟)</li>
+                <li>烘干 (40分钟)</li>
+                <li>叠衣 (20分钟)</li>
+                <li>放入衣柜 (10分钟)</li>
+                </ol>
+                <p><strong>串行（单周期）方案</strong>：
+                同学A完成所有四步后，同学B才能开始。总时长 = $4 \times (30+40+20+10) = 400$ 分钟。</p>
+                <p><strong>流水线方案</strong>：</p>
+                <ul>
+                <li>当同学A的衣服进入烘干机时，同学B就可以开始使用洗衣机了。</li>
+                <li>当A的衣服在叠衣，B的在烘干时，C就可以开始洗衣了。</li>
+                <li>各个设备（洗衣机、烘干机）得到了充分利用。</li>
+                </ul>
+                <p><img src="../images/imagec21.png" alt="figure 21"></p>
+                <p><strong>性能分析</strong>：</p>
+                <ul>
+                <li><strong>延迟 (Latency)</strong>：单个同学完成洗衣的总时间并没有减少，甚至可能因为切换的开销略有增加。</li>
+                <li><strong>吞吐率 (Throughput)</strong>：单位时间内完成洗衣任务的同学数量大大增加了！</li>
+                <li><strong>加速比 (Speedup)</strong>：理想情况下，如果每个步骤时间相同，N个任务的加速比将接近步骤的数量。</li>
+                </ul>
+                <p>这个简单的例子揭示了流水线的本质：<strong>通过将一个任务分解成多个独立的阶段，并让不同任务的不同阶段并行执行，从而提高系统的整体吞吐率，而不是降低单个任务的延迟。</strong></p>
+                <h4 id="22-%E5%B0%86%E6%B5%81%E6%B0%B4%E7%BA%BF%E6%80%9D%E6%83%B3%E5%BA%94%E7%94%A8%E4%BA%8Erisc-v%E5%A4%84%E7%90%86%E5%99%A8"><strong>2.2 将流水线思想应用于RISC-V处理器</strong></h4>
+                <p>我们的指令执行过程，天然就可以被划分为上节课提到的五个经典阶段：</p>
+                <ol>
+                <li><strong>IF (Instruction Fetch)</strong>: 取指</li>
+                <li><strong>ID (Instruction Decode)</strong>: 译码并读取寄存器</li>
+                <li><strong>EX (Execute)</strong>: 执行运算或计算地址</li>
+                <li><strong>MEM (Memory Access)</strong>: 访问数据存储器</li>
+                <li><strong>WB (Write Back)</strong>: 将结果写回寄存器</li>
+                </ol>
+                <p><strong>设计思路</strong>：</p>
+                <ul>
+                <li>我们将单周期的数据通路，沿着这五个阶段的边界，“切”成五段。</li>
+                <li>在每个阶段的末尾，我们插入一组特殊的寄存器，称为<strong>流水线寄存器 (Pipeline Registers)</strong>。</li>
+                <li>这些寄存器的作用，就像是洗衣房中不同步骤之间的“中转篮子”，它们负责<strong>暂存</strong>一个阶段的输出，并作为下一个阶段的输入，在下一个时钟周期提供给下一级。</li>
+                <li><strong>时钟周期</strong>不再由最长指令的总时间决定，而是由<strong>最长的那个流水线阶段的延迟</strong>决定。</li>
+                </ul>
+                <p><img src="../images/imagec22.png" alt="figure 22"></p>
+                <p>上图完美地展示了流水线的并行性。在时钟周期5，有五条不同的指令同时处于流水线的五个不同阶段，处理器的所有功能单元都在满负荷工作！</p>
+                <h4 id="23-%E6%B5%81%E6%B0%B4%E7%BA%BF%E7%9A%84%E6%80%A7%E8%83%BD%E6%BD%9C%E5%8A%9B%E5%AE%9A%E6%80%A7%E4%B8%8E%E5%AE%9A%E9%87%8F%E5%88%86%E6%9E%90"><strong>2.3 流水线的性能潜力：定性与定量分析</strong></h4>
+                <p><strong>定性分析</strong>：</p>
+                <ul>
+                <li><strong>CPI的变化</strong>：在充满指令的稳定状态下，每个时钟周期都有一条指令完成。因此，理想CPI从单周期的1（但周期很长），变成了流水线的1（但周期很短）。</li>
+                <li><strong>吞吐率的提升</strong>：假设单周期时钟为800ps，流水线每个阶段最长为200ps（即访存或ALU）。流水线的时钟周期可以缩短到200ps。吞吐率提升了 $800/200 = 4$ 倍！</li>
+                </ul>
+                <p><img src="../images/imagec23.png" alt="figure 23"></p>
+                <p><strong>定量分析</strong>：</p>
+                <ul>
+                <li>
+                <p><strong>加速比公式</strong>：
+                $$
+                \text{Speedup} = \frac{\text{Time}<em>{\text{non-pipelined}}}{\text{Time}</em>{\text{pipelined}}} = \frac{N \times T_{clk_single}}{(N + k - 1) \times T_{clk_pipe}}
+                $$
+                其中，$N$是指令数，$k$是流水线级数。当$N$很大时，$(N+k-1) \approx N$，公式简化为：
+                $$
+                \text{Speedup} \approx \frac{T_{clk_single}}{T_{clk_pipe}} = \frac{\text{最长指令总延迟}}{\text{最长阶段延迟}}
+                $$</p>
+                </li>
+                <li>
+                <p><strong>一个关键前提：阶段平衡</strong>
+                流水线的性能提升，高度依赖于各个阶段的延迟是否均衡。如果一个阶段耗时400ps，其他四个都耗时100ps，那么时钟周期只能是400ps，性能提升将大打折扣。<strong>平衡流水线阶段</strong>是设计中的一个重要艺术。</p>
+                </li>
+                </ul>
+                <p><strong>总结流水线的核心优势</strong>：
+                流水线并不减少单条指令的<strong>延迟 (Latency)</strong>，甚至会因为流水线寄存器的开销而略微增加。但是，它通过并行化，极大地提高了指令的<strong>吞吐率 (Throughput)</strong>。</p>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E6%B5%81%E6%B0%B4%E9%83%A8%E5%88%86%E7%9A%84%E8%AF%85%E5%92%92%E5%86%92%E9%99%A9-hazards"><strong>第三部分：流水部分的“诅咒”——冒险 (Hazards)</strong></h3>
+                <p>天下没有免费的午餐。流水线在带来巨大性能提升的同时，也引入了三种非常棘手的副作用，我们称之为<strong>冒险 (Hazards)</strong>。冒险是指在流水线中，下一条指令无法在下一个时钟周期正常开始执行的情况。它们是流水线设计者必须面对和解决的核心难题。</p>
+                <h4 id="31-%E7%BB%93%E6%9E%84%E5%86%92%E9%99%A9-structural-hazards"><strong>3.1 结构冒险 (Structural Hazards)</strong></h4>
+                <ul>
+                <li><strong>定义</strong>：当两条或多条指令在同一个时钟周期，需要<strong>争用同一个硬件资源</strong>时，就会发生结构冒险。</li>
+                <li><strong>经典例子：统一的存储器</strong>
+                <ul>
+                <li>假设我们的处理器只有一个存储器，既用于取指，也用于数据访问。</li>
+                <li>观察流水线时空图：在时钟周期4，指令<code>i</code>处于MEM阶段（需要访问数据存储器），而指令<code>i+3</code>处于IF阶段（需要访问指令存储器）。</li>
+                <li>如果只有一个存储器，它们就会发生冲突！指令<code>i+3</code>的取指操作必须<strong>暂停 (Stall)</strong> 一个周期，等待指令<code>i</code>用完存储器。</li>
+                </ul>
+                </li>
+                <li><strong>解决方案</strong>：
+                <ol>
+                <li><strong>资源复制</strong>：这是最简单粗暴但有效的方法。我们设计<strong>分离的指令存储器和数据存储器</strong>（或者在现代CPU中，是分离的指令Cache和数据Cache，即<strong>哈佛结构</strong>）。这样，IF阶段和MEM阶段的访存操作就可以并行进行，互不干扰。</li>
+                <li><strong>流水化资源</strong>：如果某个资源无法复制（例如一个复杂的浮点运算单元），可以尝试将其本身也设计成流水线式的，使其可以在多个周期内接收新的任务。</li>
+                </ol>
+                </li>
+                </ul>
+                <h4 id="32-%E6%95%B0%E6%8D%AE%E5%86%92%E9%99%A9-data-hazards"><strong>3.2 数据冒险 (Data Hazards)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>定义</strong>：当一条指令需要使用到<strong>前一条尚未执行完毕的指令的结果</strong>时，就会发生数据冒险。这是最常见也最需要精巧设计的冒险。</p>
+                </li>
+                <li>
+                <p><strong>代码示例</strong>：</p>
+                <pre class="hljs"><code><div>add x19, x0, x1   // 指令1: 计算x19
+                sub x2, x19, x3    // 指令2: 使用x19
+                </div></code></pre>
+                </li>
+                <li>
+                <p><strong>问题分析</strong>：</p>
+                <ul>
+                <li><code>add</code>指令在WB阶段（第5个周期）才会把结果写入寄存器<code>x19</code>。</li>
+                <li>但是，<code>sub</code>指令在ID阶段（第3个周期）就需要从寄存器堆中读出<code>x19</code>的值。</li>
+                <li>此时，<code>x19</code>中的值还是旧的！<code>sub</code>指令读到了一个错误的数据。
+                <img src="../images/imagec24.png" alt="figure 24"></li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>朴素的解决方案：暂停 (Stall / Bubble)</strong></p>
+                <ul>
+                <li>我们可以让流水线暂停。当检测到数据冒险时，让<code>sub</code>指令以及其后的所有指令在流水线中“冻结”几个周期，直到<code>add</code>指令完成WB阶段。</li>
+                <li>这种暂停在流水线中通常通过插入<strong>空操作 (NOP)</strong> 或称为<strong>气泡 (Bubble)</strong> 来实现。</li>
+                <li><strong>缺点</strong>：严重影响性能！为了等待一个数据，流水线可能要空转好几个周期，吞吐率急剧下降。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>更聪明的解决方案：数据前递/旁路 (Forwarding / Bypassing)</strong></p>
+                <ul>
+                <li><strong>核心思想</strong>：我们为什么非要等到数据被写回寄存器堆再使用呢？<code>add</code>指令的结果在<strong>EX阶段结束时</strong>就已经在ALU的出口处产生了。这个结果比WB阶段早了整整两个周期！</li>
+                <li><strong>实现</strong>：我们可以增加一些额外的数据通路和MUX，将ALU的输出结果**直接“转发”**给下一条指令的ALU输入端，绕过寄存器堆。</li>
+                <li><img src="../images/imagec25.png" alt="figure 25"></li>
+                <li>通过数据前递，<code>sub</code>指令可以在其EX阶段及时拿到<code>add</code>指令的计算结果，流水线无需暂停，继续全速运行！</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>数据冒险的特殊情况：Load-Use Hazard</strong></p>
+                <ul>
+                <li>数据前递虽好，但并非万能。考虑以下情况：<pre class="hljs"><code><div>ld x1, 0(x2)     // 指令1: 从内存加载数据到x1
+                sub x4, x1, x5   // 指令2: 立即使用x1
+                </div></code></pre>
+                </li>
+                <li><strong>问题分析</strong>：
+                <ul>
+                <li><code>ld</code>指令的数据，直到<strong>MEM阶段结束时</strong>才从数据存储器中准备好。</li>
+                <li>而<code>sub</code>指令在<strong>EX阶段开始时</strong>就需要这个数据。</li>
+                <li>即使我们从MEM阶段的输出进行前递，数据到达<code>sub</code>的ALU输入时也已经晚了一个周期。我们无法“向后穿越时间”来前递数据。
+                <img src="../images/imagec26.png" alt="figure 26"></li>
+                </ul>
+                </li>
+                <li><strong>解决方案：暂停+前递</strong>
+                <ul>
+                <li>这是唯一无法完全通过前递解决的数据冒险。我们必须让<code>sub</code>指令<strong>暂停一个周期</strong>。</li>
+                <li>暂停后，<code>ld</code>指令进入WB阶段，<code>sub</code>进入EX阶段。此时，<code>ld</code>在MEM阶段结束时产生的数据，就可以顺利地前递给<code>sub</code>的EX阶段了。</li>
+                <li>这种“加载后立即使用”的冒险需要一次<strong>强制的1周期停顿</strong>。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>编译器的角色：指令调度 (Instruction Scheduling)</strong></p>
+                <ul>
+                <li>既然硬件层面有1周期的停顿惩罚，我们能否在软件层面避免它？</li>
+                <li>优秀的编译器会进行<strong>指令调度</strong>，尝试在<code>ld</code>指令和使用其结果的指令之间，插入一条或多条不相关的指令，来填补这个“气泡”。</li>
+                <li><img src="../images/imagec27.png" alt="figure 27"></li>
+                <li>这是硬件和软件协同优化性能的绝佳范例。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="33-%E6%8E%A7%E5%88%B6%E5%86%92%E9%99%A9-control-hazards"><strong>3.3 控制冒险 (Control Hazards)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>定义</strong>：由分支、跳转等改变程序控制流的指令引起的冒险。处理器无法在分支结果出来之前，确定下一条要取指的指令的地址。</p>
+                </li>
+                <li>
+                <p><strong>问题分析</strong>：</p>
+                <ul>
+                <li>在我们的5级流水线中，<code>beq</code>指令在EX阶段（第3周期）才能计算出比较结果，在MEM阶段（第4周期）才能确定是否跳转并更新PC。</li>
+                <li>但是，取指单元（IF阶段）在第2个周期就需要知道下一条指令的地址。</li>
+                <li>当我们处理<code>beq</code>指令的ID阶段时，我们已经取了<code>beq</code>的下一条指令(PC+4)。当我们处理<code>beq</code>的EX阶段时，我们又取了<code>beq</code>的下下条指令(PC+8)。</li>
+                <li>如果<code>beq</code>最终判断需要跳转，那么我们刚刚辛苦取来的这两条指令都是<strong>错误的</strong>，必须被<strong>冲刷 (Flush)</strong> 掉，并从正确的分支目标地址重新开始取指。</li>
+                <li>这将导致多个周期的性能损失。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>解决方案（由简单到复杂）</strong>：</p>
+                <ol>
+                <li><strong>冻结或暂停流水线 (Stall)</strong>：在ID阶段译码出是分支指令后，立即冻结流水线，直到分支结果确定。简单但性能损失巨大。</li>
+                <li><strong>分支预测 (Branch Prediction)</strong>：与其傻等，不如<strong>猜测</strong>分支的结果。
+                <ul>
+                <li><strong>最简单的预测：预测不跳转 (Predict Not Taken)</strong>。我们总是假设分支不发生，继续取PC+4的指令。如果猜对了，流水线没有任何损失。如果猜错了（分支实际发生了），我们再冲刷掉错误路径上的指令，并从目标地址重新取指。这被称为<strong>分支预测惩罚 (Misprediction Penalty)</strong>。</li>
+                <li><strong>提前计算</strong>：为了减少惩罚，我们可以将分支判断和目标地址计算的硬件，从EX阶段<strong>提前到ID阶段</strong>。这样，如果猜错，只需要冲刷掉一条已经进入IF阶段的指令，惩罚减小。</li>
+                <li><strong>静态预测</strong>：编译器根据一些启发式规则进行预测。例如，向后跳转的循环分支，大概率会发生；向前跳转的错误处理分支，大概率不发生。</li>
+                <li><strong>动态预测</strong>：这是现代处理器的核心技术。用硬件（如<strong>分支历史表 Branch History Table, BHT</strong>）记录每条分支指令过去的执行行为，并据此预测它下一次的行为。例如，一个简单的<strong>1位预测器</strong>记录上次是否跳转。更强大的<strong>2位饱和计数器</strong>可以容忍一次偶然的错误行为，只有在连续两次预测错误时才翻转预测状态。
+                <img src="../images/imagec28.png" alt="figure 28"></li>
+                </ul>
+                </li>
+                <li><strong>延迟分支 (Delayed Branch)</strong>（一种历史性的 ISA 级解决方案）：在ISA层面规定，分支指令后面的那个指令槽位（称为<strong>延迟槽 Delay Slot</strong>）中的指令，无论分支是否发生，都<strong>总是被执行</strong>。编译器负责找到一条有用的、不影响分支结果的指令填充进去。如果找不到，就填充一个NOP。这种方法将分支的控制惩罚转移给了编译器，简化了早期流水线硬件的设计，但在现代深流水线中已不常用。</li>
+                </ol>
+                </li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
