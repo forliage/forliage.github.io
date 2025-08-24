@@ -362,5 +362,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-24-co3-2.html",
       "abstract": "计算机组成3-2:数字运算"
+    },
+    {
+      "title": "计算机组成4-1:处理器-数据通路与控制",
+      "date": "2025-08-24",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-24-co4-1.html",
+      "abstract": "计算机组成4-1:处理器-数据通路与控制"
     }
   ];
