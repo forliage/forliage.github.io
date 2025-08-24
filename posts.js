@@ -390,5 +390,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-24-co4-3.html",
       "abstract": "计算机组成4-3:RISC-V与流水线"
+    },
+    {
+      "title": "计算机组成5-1:存储器层次结构",
+      "date": "2025-08-24",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-24-co5-1.html",
+      "abstract": "计算机组成5-1:存储器层次结构"
     }
   ];
