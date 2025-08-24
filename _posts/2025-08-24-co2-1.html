@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机组成2-1：指令、操作与操作数</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%902-1%E6%8C%87%E4%BB%A4%E6%93%8D%E4%BD%9C%E4%B8%8E%E6%93%8D%E4%BD%9C%E6%95%B0">计算机组成2-1：指令、操作与操作数</h1>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E6%8C%87%E4%BB%A4%E6%93%8D%E4%BD%9C%E4%B8%8E%E6%93%8D%E4%BD%9C%E6%95%B0"><strong>第一部分：指令、操作与操作数</strong></h3>
+                <ol>
+                <li><strong>计算机指令集概论</strong>：我们将理解什么是指令集，以及为什么它是连接软件和硬件的关键桥梁。</li>
+                <li><strong>计算机的“大脑活动”——运算</strong>：我们将学习计算机是如何执行最基本的算术运算的，并引出RISC-V架构的第一条设计原则。</li>
+                <li><strong>运算的对象——操作数</strong>：我们将探讨指令操作的数据存放在哪里，重点学习计算机中两种最重要的数据存储区域：寄存器和内存，并引出另外两条重要的设计原则。</li>
+                </ol>
+                <h3 id="1-%E8%AE%A1%E7%AE%97%E6%9C%BA%E6%8C%87%E4%BB%A4%E9%9B%86%E6%A6%82%E8%AE%BA"><strong>1. 计算机指令集概论</strong></h3>
+                <h4 id="11-%E4%BB%8E%E6%88%91%E4%BB%AC%E5%86%99%E7%9A%84%E4%BB%A3%E7%A0%81%E5%88%B0%E6%9C%BA%E5%99%A8%E6%89%A7%E8%A1%8C%E7%9A%84%E6%8C%87%E4%BB%A4"><strong>1.1 从我们写的代码到机器执行的指令</strong></h4>
+                <p>很多同学都写过C、Java或者Python代码。但大家有没有想过，我们用高级语言写下的 <code>a = b + c;</code> 这样一行简单的代码，对于CPU这个由数十亿个开关（晶体管）组成的硅片来说，它到底意味着什么？CPU并不懂什么是变量 <code>a</code>，也不懂 <code>+</code> 这个符号。它只懂高低电平，也就是我们常说的0和1。</p>
+                <p>从我们能理解的高级语言，到机器能执行的二进制代码，需要经过一个“翻译”的过程。这个过程就像将一本中文小说翻译成英文一样，层层递进：</p>
+                <ol>
+                <li><strong>高级语言 (High-level Language)</strong>：例如C语言的<code>swap</code>函数。这是最接近人类自然语言的层面，程序员在这里思考和创造。</li>
+                <li><strong>编译器 (Compiler)</strong>：一个系统软件，它负责将高级语言代码“翻译”成功能上等价的<strong>汇编语言 (Assembly Language)</strong>。汇编语言是机器指令的符号化表示，例如用 <code>add</code> 这个助记符来代表加法操作，比直接看01串要容易得多。</li>
+                <li><strong>汇编语言 (Assembly Language)</strong>：例如 <code>add x5, x20, x21</code>。这是对机器指令的文本化、符号化表示。</li>
+                <li><strong>汇编器 (Assembler)</strong>：另一个系统软件，它将汇编语言代码“翻译”成<strong>机器语言 (Machine Language)</strong>。</li>
+                <li><strong>机器语言 (Machine Language)</strong>：例如 <code>00000000010110101000010110110011</code>。这是计算机硬件唯一能够直接识别和执行的语言，由0和1组成的二进制指令码。</li>
+                </ol>
+                <p>我们这门课的重点，就是深入理解这个翻译链条的终点——机器语言，以及它的符号化表示——汇编语言。</p>
+                <h4 id="12-%E4%BB%80%E4%B9%88%E6%98%AF%E6%8C%87%E4%BB%A4%E9%9B%86%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84-isa"><strong>1.2 什么是指令集体系结构 (ISA)?</strong></h4>
+                <p><strong>指令集体系结构 (Instruction Set Architecture, ISA)</strong> 是软件与硬件之间的接口和规约。它定义了处理器能够理解和执行的所有指令的集合。</p>
+                <p>你可以把ISA想象成一本“计算机语言词典和语法书”：</p>
+                <ul>
+                <li><strong>指令 (Instruction)</strong>：就像词典里的一个单词（动词），规定了计算机应该执行的一个基本操作，比如“加法”、“从内存读取数据”等。在高级语言中，这对应于一个<strong>语句 (Statement)</strong>。</li>
+                <li><strong>指令集 (Instruction Set)</strong>：就是这本词典的全部内容，包含了所有合法的指令。在高级语言中，这对应于这门语言的<strong>语法 (Syntax)</strong>。</li>
+                </ul>
+                <p>ISA规定了“做什么”，而不关心“怎么做”。例如，ISA会定义一条名为 <code>add</code> 的指令，规定它需要三个操作数，并完成两个数的相加操作。但是，具体实现这个加法操作的电路（加法器）是如何设计的，这是微体系结构（Microarchitecture）的范畴，不属于ISA。</p>
+                <p>因此，ISA是软件工程师能看到的计算机的抽象视图，也是硬件工程师需要去实现的具体规约。</p>
+                <h4 id="13-isa%E7%9A%84%E8%AE%BE%E8%AE%A1%E7%9B%AE%E6%A0%87"><strong>1.3 ISA的设计目标</strong></h4>
+                <p>设计一套优秀的ISA，通常需要权衡以下几个目标：</p>
+                <ol>
+                <li><strong>最大化性能 (Maximize Performance)</strong>：指令集的设计直接影响程序的执行速度。</li>
+                <li><strong>最小化成本 (Minimize Cost)</strong>：指令集的复杂程度会影响硬件设计的复杂度和制造成本。</li>
+                <li><strong>减少设计时间 (Reduce Design Time)</strong>：简洁规整的指令集能加快处理器的设计和验证流程。</li>
+                <li><strong>（现代目标）降低功耗 (Reduce Power Consumption)</strong>：对于移动设备和数据中心来说，能效比至关重要。</li>
+                </ol>
+                <p>这些目标之间常常存在冲突，好的设计需要在它们之间做出明智的折衷（Compromise）。</p>
+                <h4 id="14-%E6%88%91%E4%BB%AC%E9%80%89%E6%8B%A9%E7%9A%84%E8%8C%83%E4%BE%8Brisc-v"><strong>1.4 我们选择的范例：RISC-V</strong></h4>
+                <p>在本课程中，我们将使用 <strong>RISC-V</strong> 作为学习ISA的范例。为什么选择它？</p>
+                <ul>
+                <li><strong>开放免费</strong>：与Intel x86和ARM等商业指令集不同，RISC-V是完全开放和免费的，任何人都可以用它来设计处理器而无需支付授权费。</li>
+                <li><strong>现代与简洁</strong>：它由加州大学伯克利分校于2010年开始设计，吸收了过去几十年指令集设计的经验教训，设计非常简洁、规整、模块化。</li>
+                <li><strong>RISC理念</strong>：RISC是“精简指令集计算机 (Reduced Instruction Set Computer)”的缩写。其核心思想是，用一系列简单的、执行速度快的指令，来组合完成复杂的任务。这与CISC（复杂指令集计算机）形成了对比。</li>
+                <li><strong>应用广泛</strong>：RISC-V在嵌入式系统、物联网设备乃至高性能计算领域都展现出巨大的潜力。</li>
+                </ul>
+                <h4 id="15-%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E7%9A%84%E5%9F%BA%E7%9F%B3%E5%AD%98%E5%82%A8%E7%A8%8B%E5%BA%8F%E6%A6%82%E5%BF%B5"><strong>1.5 计算机体系结构的基石：存储程序概念</strong></h4>
+                <p>现代计算机的强大能力，源于一个看似简单的思想——<strong>存储程序概念 (Stored-Program Concept)</strong>，也常被称为冯·诺依曼结构的核心思想。它包含两个关键点：</p>
+                <ol>
+                <li><strong>指令以数字形式表示</strong>：我们前面看到的 <code>add</code> 指令，最终会被编码成一串二进制数字（如 <code>000000...</code>）。</li>
+                <li><strong>程序可以像数据一样被存储在内存中</strong>：指令和程序操作的数据（例如变量 <code>a</code>, <code>b</code>, <code>c</code> 的值）都存储在同一个内存中，可以像读写普通数据一样被读写。</li>
+                </ol>
+                <p>这个概念是革命性的！因为它意味着计算机的行为不再是固定写死的，而是由内存中的程序（一堆数字）决定的。我们可以通过加载不同的程序来让同一台计算机完成完全不同的任务，如文字处理、玩游戏或科学计算。这就是通用计算机的由来。</p>
+                <h3 id="2-%E8%BF%90%E7%AE%97"><strong>2. 运算</strong></h3>
+                <p>任何一台计算机最基本的功能就是进行运算。我们从最常见的算术运算开始。</p>
+                <h4 id="21-%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99%E4%B8%80%E5%A4%A7%E9%81%93%E8%87%B3%E7%AE%80%E8%A7%84%E6%95%B4%E7%BB%9F%E4%B8%80-simplicity-favors-regularity"><strong>2.1 设计原则一：大道至简，规整统一 (Simplicity Favors Regularity)</strong></h4>
+                <p>RISC-V的设计哲学深受这一原则影响。为了让硬件设计尽可能简单和快速，RISC-V的算术指令遵循以下规整的格式：</p>
+                <ul>
+                <li><strong>每条指令只执行一个操作</strong>：例如，一条指令只做加法，或者只做减法，不会把加法和数据移动等多个操作捆绑在一起。</li>
+                <li><strong>每条指令严格包含三个操作数</strong>：一个目标操作数和两个源操作数。</li>
+                </ul>
+                <p>例如，对于C语言语句 <code>a = b + c;</code>，其对应的RISC-V汇编指令是：</p>
+                <p><code>add a, b, c</code></p>
+                <p>这里，<code>add</code> 是<strong>操作码 (Opcode)</strong>，告诉CPU执行加法操作。<code>a</code> 是<strong>目标操作数 (Destination Operand)</strong>，用于存放结果。<code>b</code> 和 <code>c</code> 是<strong>源操作数 (Source Operands)</strong>，是参与运算的数。</p>
+                <p><strong>为什么规整性如此重要？</strong></p>
+                <ul>
+                <li><strong>简化硬件</strong>：规整的格式意味着硬件处理逻辑可以非常统一和简单，无需为各种奇特的指令格式设计复杂的解码和执行单元。</li>
+                <li><strong>提高性能</strong>：简单的硬件通常延迟更低，运行速度更快。这使得以更高的时钟频率运行成为可能。</li>
+                <li><strong>简化编译器</strong>：对于编译器设计者来说，目标指令格式越规整，生成代码的难度就越低。</li>
+                </ul>
+                <h4 id="22-%E7%BC%96%E8%AF%91%E7%A4%BA%E4%BE%8B%E5%A4%8D%E6%9D%82%E7%9A%84c%E8%AF%AD%E5%8F%A5"><strong>2.2 编译示例：复杂的C语句</strong></h4>
+                <p>如果我们要编译一条更复杂的C语句，比如：<code>f = (g + h) - (i + j);</code>
+                根据“每条指令只执行一个操作”的原则，我们不能用一条指令完成这个任务。编译器会将其分解为一系列简单的算术指令，并使用<strong>临时变量 (temporary variables)</strong> 来存储中间结果。</p>
+                <p>这个过程如下：</p>
+                <ol>
+                <li>计算 <code>g + h</code>，将结果存入一个临时变量 <code>t0</code>。
+                <ul>
+                <li>RISC-V指令: <code>add t0, g, h</code></li>
+                </ul>
+                </li>
+                <li>计算 <code>i + j</code>，将结果存入另一个临时变量 <code>t1</code>。
+                <ul>
+                <li>RISC-V指令: <code>add t1, i, j</code></li>
+                </ul>
+                </li>
+                <li>计算 <code>t0 - t1</code>，将最终结果存入 <code>f</code>。
+                <ul>
+                <li>RISC-V指令: <code>sub f, t0, t1</code> (sub是减法subtract的缩写)</li>
+                </ul>
+                </li>
+                </ol>
+                <p>通过这个例子，我们可以看到，即使是复杂的表达式，也可以通过简单的、规整的指令序列来完成。这就是RISC哲学的精髓。</p>
+                <table>
+                <thead>
+                <tr>
+                <th style="text-align:left">类别</th>
+                <th style="text-align:left">指令</th>
+                <th style="text-align:left">示例</th>
+                <th style="text-align:left">含义</th>
+                <th style="text-align:left">说明</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                <td style="text-align:left"><strong>算术运算</strong></td>
+                <td style="text-align:left"><code>add</code></td>
+                <td style="text-align:left"><code>add a,b,c</code></td>
+                <td style="text-align:left">$a \leftarrow b+c$</td>
+                <td style="text-align:left">两个源操作数相加</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"></td>
+                <td style="text-align:left"><code>subtract</code></td>
+                <td style="text-align:left"><code>sub a,b,c</code></td>
+                <td style="text-align:left">$a \leftarrow b-c$</td>
+                <td style="text-align:left">两个源操作数相减</td>
+                </tr>
+                </tbody>
+                </table>
+                <h3 id="3-%E8%BF%90%E7%AE%97%E7%9A%84%E5%AF%B9%E8%B1%A1%E6%93%8D%E4%BD%9C%E6%95%B0"><strong>3. 运算的对象——操作数</strong></h3>
+                <p>我们已经知道了计算机可以执行 <code>add</code>、<code>sub</code> 等操作。但新的问题来了：这些指令中的操作数 <code>a, b, c</code> 究竟存放在哪里？</p>
+                <p>在计算机体系结构中，操作数主要来源于三个地方：<strong>寄存器 (Registers)</strong>、<strong>内存 (Memory)</strong> 和指令本身（<strong>立即数 (Immediates)</strong>）。我们先来学习最重要的两个：寄存器和内存。</p>
+                <h4 id="31-%E6%93%8D%E4%BD%9C%E6%95%B0%E7%9A%84%E4%BD%8D%E7%BD%AE%E5%AF%84%E5%AD%98%E5%99%A8-registers"><strong>3.1 操作数的位置：寄存器 (Registers)</strong></h4>
+                <p>CPU内部包含了一些容量小但速度极快的存储单元，它们被称为<strong>寄存器</strong>。可以把寄存器想象成CPU的“草稿纸”或者工作台上的“工具架”，CPU执行运算时所需的数据会先被放到寄存器上。</p>
+                <p><strong>为什么需要寄存器？</strong> 这引出了我们的第二条设计原则。</p>
+                <h4 id="32-%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99%E4%BA%8C%E5%AE%B9%E9%87%8F%E5%B0%8F%E5%88%99%E9%80%9F%E5%BA%A6%E5%BF%AB-smaller-is-faster"><strong>3.2 设计原则二：容量小则速度快 (Smaller is Faster)</strong></h4>
+                <p>在硬件世界里，这是一个普遍规律。大规模的存储设备（如内存条、硬盘）由于物理尺寸大、线路长、驱动电路复杂，其访问速度远低于小规模的存储设备。</p>
+                <ul>
+                <li><strong>寄存器</strong>：直接集成在CPU芯片核心内部，访问延迟极低，通常在一个时钟周期内就能完成读写。现代CPU的寄存器访问时间可能在250皮秒（picoseconds）量级。</li>
+                <li><strong>内存 (DRAM)</strong>：位于CPU外部，通过总线连接。访问内存需要经过复杂的地址解码、行/列选通等过程，延迟很高。一次内存访问的时间可能在50纳秒（nanoseconds），也就是50,000皮秒，比访问寄存器慢<strong>数百倍</strong>！</li>
+                </ul>
+                <p>因此，为了追求高性能，处理器会尽可能地将频繁使用的数据保存在寄存器中。算术指令（如 <code>add</code> 和 <code>sub</code>）的源操作数和目标操作数<strong>必须是寄存器</strong>。这种架构被称为**“载入-存储”架构 (Load-Store Architecture)**。</p>
+                <p><strong>RISC-V寄存器文件 (Register File)</strong>：
+                RISC-V架构规定了<strong>32个通用的64位寄存器</strong>，编号为 <code>x0</code> 到 <code>x31</code>。</p>
+                <ul>
+                <li><strong>64位数据</strong>被称为一个“<strong>双字 (doubleword)</strong>”。</li>
+                <li><strong>32位数据</strong>被称为一个“<strong>字 (word)</strong>”。</li>
+                <li>其中，<code>x0</code> 寄存器非常特殊，它的值被硬件强制固定为0。这在汇编编程中非常有用，例如可以方便地实现数据清零、寄存器间移动等操作。</li>
+                </ul>
+                <h4 id="33-%E5%AF%84%E5%AD%98%E5%99%A8%E6%93%8D%E4%BD%9C%E6%95%B0%E7%A4%BA%E4%BE%8B"><strong>3.3 寄存器操作数示例</strong></h4>
+                <p>现在，我们把上一节的例子变得更具体。假设编译器做出如下决定：</p>
+                <ul>
+                <li>C语言变量 <code>f, g, h, i, j</code> 分别存储在寄存器 <code>x19, x20, x21, x22, x23</code> 中。</li>
+                <li>中间结果 <code>t0, t1</code> 使用临时寄存器 <code>x5, x6</code>。</li>
+                </ul>
+                <p>那么，<code>f = (g + h) - (i + j);</code> 的最终汇编代码就是：</p>
+                <pre class="hljs"><code><div># g in x20, h in x21
+                add x5, x20, x21   # 临时结果 t0 (g+h) 存入寄存器 x5
+
+                # i in x22, j in x23
+                add x6, x22, x23   # 临时结果 t1 (i+j) 存入寄存器 x6
+
+                # f in x19
+                sub x19, x5, x6    # 最终结果 f (t0-t1) 存入寄存器 x19
+                </div></code></pre>
+                <p>这就是一条C语言语句在RISC-V处理器上实际执行的指令序列。</p>
+                <h4 id="34-%E6%93%8D%E4%BD%9C%E6%95%B0%E7%9A%84%E4%BD%8D%E7%BD%AE%E5%86%85%E5%AD%98-memory"><strong>3.4 操作数的位置：内存 (Memory)</strong></h4>
+                <p>虽然寄存器速度飞快，但它们的数量非常有限（只有32个）。当我们需要处理大量数据时，比如一个包含数百万个元素的数组，或者复杂的结构体，显然无法全部放入寄存器。这些大型的、复合的数据结构都存储在<strong>主内存 (Main Memory)</strong> 中。</p>
+                <p><strong>内存的特点</strong>：</p>
+                <ul>
+                <li><strong>容量大</strong>：以GB为单位，可以存储海量数据。</li>
+                <li><strong>速度慢</strong>：相对于寄存器而言。</li>
+                <li><strong>字节寻址 (Byte-addressed)</strong>：内存被看作一个巨大的、一维的字节数组。每个字节都有一个唯一的地址。一个64位的双字会占用8个连续的字节地址。</li>
+                </ul>
+                <p><strong>载入 (Load) 和 存储 (Store) 指令</strong>：
+                由于算术指令不能直接操作内存，我们需要专门的指令来完成寄存器和内存之间的数据传输。</p>
+                <ul>
+                <li><strong>载入 (Load)</strong>：将内存中的数据复制到寄存器。</li>
+                <li><strong>存储 (Store)</strong>：将寄存器中的数据复制到内存。</li>
+                </ul>
+                <p>RISC-V中，<code>ld</code>（load doubleword）和 <code>sd</code>（store doubleword）是两条常用的指令。它们的地址计算方式为：<strong>基地址寄存器 (base register) + 偏移量 (offset)</strong>。</p>
+                <h4 id="35-%E5%86%85%E5%AD%98%E8%AE%BF%E9%97%AE%E7%A4%BA%E4%BE%8B"><strong>3.5 内存访问示例</strong></h4>
+                <p>假设我们要编译C语言语句：<code>A[12] = h + A[8];</code>
+                其中 <code>A</code> 是一个 <code>long long</code>（64位）类型的数组，变量 <code>h</code> 存放在寄存器 <code>x21</code> 中，数组 <code>A</code> 的基地址（首元素地址）存放在寄存器 <code>x22</code> 中。</p>
+                <p>编译过程如下：</p>
+                <ol>
+                <li><strong>计算 <code>A[8]</code> 的地址</strong>：每个元素占8个字节（64位），所以 <code>A[8]</code> 相对于基地址的偏移量是 $8 \times 8 = 64$ 字节。</li>
+                <li><strong>从内存加载 <code>A[8]</code></strong>：将地址为 <code>x22 + 64</code> 的内存单元中的数据加载到一个临时寄存器，例如 <code>x9</code>。
+                <ul>
+                <li>RISC-V指令: <code>ld x9, 64(x22)</code></li>
+                </ul>
+                </li>
+                <li><strong>执行加法</strong>：计算 <code>h + A[8]</code>，也就是 <code>x21 + x9</code>，结果仍然存放在 <code>x9</code> 中。
+                <ul>
+                <li>RISC-V指令: <code>add x9, x21, x9</code></li>
+                </ul>
+                </li>
+                <li><strong>计算 <code>A[12]</code> 的地址</strong>：偏移量是 $12 \times 8 = 96$ 字节。</li>
+                <li><strong>将结果存回内存</strong>：将寄存器 <code>x9</code> 的值存储到地址为 <code>x22 + 96</code> 的内存单元中。
+                <ul>
+                <li>RISC-V指令: <code>sd x9, 96(x22)</code></li>
+                </ul>
+                </li>
+                </ol>
+                <p>至此，一条看似简单的C语言数组操作，被成功地翻译成了三条RISC-V指令。</p>
+                <h4 id="36-%E7%AB%8B%E5%8D%B3%E6%95%B0%E6%93%8D%E4%BD%9C%E6%95%B0-immediate-operands"><strong>3.6 立即数操作数 (Immediate Operands)</strong></h4>
+                <p>在编程中，我们经常会用到常数，比如 <code>x = x + 4;</code>。如果为了一个常数 <code>4</code> 还要先把它从内存加载到寄存器，那就太低效了。这种情况非常普遍，因此需要一个更快的解决方案。</p>
+                <p>这引出了我们的第三条设计原则。</p>
+                <h4 id="37-%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99%E4%B8%89%E5%B8%B8%E7%94%A8%E5%8A%9F%E8%83%BD%E5%BF%AB%E9%80%9F%E5%8C%96-make-the-common-case-fast"><strong>3.7 设计原则三：常用功能快速化 (Make the Common Case Fast)</strong></h4>
+                <p>使用小常数进行运算是一个非常常见的场景。为了加速这个场景，ISA设计者们提供了一类特殊的指令，其操作数直接编码在指令本身当中，这个操作数被称为<strong>立即数 (Immediate)</strong>。</p>
+                <p>RISC-V提供了带有立即数的算术指令，通常在原指令后加 <code>i</code> 区分。例如 <code>addi</code> (add immediate)。</p>
+                <p><code>addi x22, x22, 4</code>  # 对应C代码 x = x + 4; (假设x在x22)</p>
+                <p>这条指令直接将寄存器 <code>x22</code> 的值与立即数 <code>4</code> 相加，结果写回 <code>x22</code>。这样就避免了一次 <code>load</code> 指令，大大提高了效率。</p>
+                <p><strong>本讲小结</strong></p>
+                <p>今天，我们深入了计算机的语言层面，学习了指令集体系结构（ISA）的基本概念，并围绕RISC-V架构探讨了计算机如何执行运算以及指令的操作数从何而来。我们还学习了计算机体系结构设计中三条非常重要的原则：</p>
+                <ol>
+                <li><strong>大道至简，规整统一 (Simplicity Favors Regularity)</strong>：这使得硬件更简单、更快。</li>
+                <li><strong>容量小则速度快 (Smaller is Faster)</strong>：解释了为什么我们需要寄存器这种高速存储。</li>
+                <li><strong>常用功能快速化 (Make the Common Case Fast)</strong>：解释了立即数指令存在的意义。</li>
+                </ol>
+                <p>我们已经掌握了RISC-V中最核心的几类指令：</p>
+                <table>
+                <thead>
+                <tr>
+                <th style="text-align:left">类别</th>
+                <th style="text-align:left">指令</th>
+                <th style="text-align:left">示例</th>
+                <th style="text-align:left">含义</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                <td style="text-align:left"><strong>算术运算</strong></td>
+                <td style="text-align:left"><code>add</code></td>
+                <td style="text-align:left"><code>add x5, x6, x7</code></td>
+                <td style="text-align:left"><code>x5 = x6 + x7</code></td>
+                </tr>
+                <tr>
+                <td style="text-align:left"></td>
+                <td style="text-align:left"><code>sub</code></td>
+                <td style="text-align:left"><code>sub x5, x6, x7</code></td>
+                <td style="text-align:left"><code>x5 = x6 - x7</code></td>
+                </tr>
+                <tr>
+                <td style="text-align:left"></td>
+                <td style="text-align:left"><code>addi</code></td>
+                <td style="text-align:left"><code>addi x5, x6, 20</code></td>
+                <td style="text-align:left"><code>x5 = x6 + 20</code></td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>数据传输</strong></td>
+                <td style="text-align:left"><code>ld</code></td>
+                <td style="text-align:left"><code>ld x5, 40(x6)</code></td>
+                <td style="text-align:left"><code>x5 = Memory[x6 + 40]</code></td>
+                </tr>
+                <tr>
+                <td style="text-align:left"></td>
+                <td style="text-align:left"><code>sd</code></td>
+                <td style="text-align:left"><code>sd x5, 40(x6)</code></td>
+                <td style="text-align:left"><code>Memory[x6 + 40] = x5</code></td>
+                </tr>
+                </tbody>
+                </table>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
