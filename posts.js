@@ -397,5 +397,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-24-co5-1.html",
       "abstract": "计算机组成5-1:存储器层次结构"
+    },
+    {
+      "title": "计算机组成5-2:Cache放置策略的演进",
+      "date": "2025-08-24",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-24-co5-2.html",
+      "abstract": "计算机组成5-2:Cache放置策略的演进"
     }
   ];

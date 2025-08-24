@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机组成5-2:Cache放置策略的演进</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%905-2cache%E6%94%BE%E7%BD%AE%E7%AD%96%E7%95%A5%E7%9A%84%E6%BC%94%E8%BF%9B">计算机组成5-2:Cache放置策略的演进</h1>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%85%A8%E7%9B%B8%E8%81%94%E7%BC%93%E5%AD%98-fully-associative-cache--%E6%9E%81%E8%87%B4%E7%9A%84%E7%81%B5%E6%B4%BB%E6%80%A7"><strong>第一部分：全相联缓存 (Fully Associative Cache) —— 极致的灵活性</strong></h3>
+                <p>既然直接映射因为“位置固定”而导致冲突，那么一个最自然的想法就是：<strong>废除所有位置限制！</strong></p>
+                <h4 id="11-%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6%E8%87%AA%E7%94%B1%E6%94%BE%E7%BD%AE"><strong>1.1 设计哲学：自由放置</strong></h4>
+                <ul>
+                <li><strong>放置策略</strong>：一个从主存取来的块，可以被放置到缓存中的<strong>任何一个</strong>空闲位置。</li>
+                <li><strong>生活化理解</strong>：这就像一个不划座位的开放式停车场，任何一辆车可以停在任何一个空的车位上。</li>
+                <li><strong>优势</strong>：<strong>完全消除了冲突缺失</strong>。只要缓存中还有一个空位，就不会因为地址映射冲突而发生缺失。在容量相同的情况下，全相联缓存的命中率是所有放置策略中最高的。</li>
+                </ul>
+                <h4 id="12-%E5%B8%A6%E6%9D%A5%E7%9A%84%E6%8C%91%E6%88%98%E5%A6%82%E4%BD%95%E6%89%BE%E5%88%B0%E6%88%91%E7%9A%84%E6%95%B0%E6%8D%AEblock-identification"><strong>1.2 带来的挑战：如何找到我的数据？(Block Identification)</strong></h4>
+                <p>自由是有代价的。在一个可以直接“对号入座”的直接映射缓存中，我们只需要比较一次标签。但在一个“随心所欲”的全相联缓存中，当CPU给出一个地址时，我们怎么知道它对应的块在不在缓存里？又在哪个位置呢？</p>
+                <p><strong>答案是：暴力搜索。</strong>
+                我们必须将CPU发出的地址的<strong>标签部分</strong>，与缓存中<strong>所有行</strong>的标签，进行<strong>并行的比较</strong>。</p>
+                <ul>
+                <li><strong>地址划分</strong>：
+                <ul>
+                <li>在一个全相联缓存中，地址不再有“索引”位。它只被划分为两部分：<strong>标签（Tag）<strong>和</strong>块内偏移（Byte Offset）</strong>。标签部分包含了几乎所有的地址位。</li>
+                </ul>
+                </li>
+                <li><strong>硬件实现</strong>：
+                <ul>
+                <li>假设缓存有<code>N</code>行，那么就需要<code>N</code>个<strong>比较器</strong>，同时工作。</li>
+                <li>所有比较器的结果会通过一个巨大的OR门（或类似的逻辑）汇总，来判断是否发生了命中（只要有一个比较器匹配成功就算命中）。</li>
+                <li>如果命中，还需要相应的逻辑来选出匹配成功的那一行的数据。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><img src="../images/imagec62.png" alt="figure 62"></p>
+                <h4 id="13-%E6%88%90%E6%9C%AC%E4%B8%8E%E6%80%A7%E8%83%BD%E7%9A%84%E6%9D%83%E8%A1%A1"><strong>1.3 成本与性能的权衡</strong></h4>
+                <ul>
+                <li><strong>优点</strong>：命中率最高。</li>
+                <li><strong>缺点</strong>：
+                <ol>
+                <li><strong>硬件成本极高</strong>：大量的并行比较器会消耗巨大的芯片面积和功耗。这使得构建一个大容量的全相联缓存变得不切实际。</li>
+                <li><strong>命中时间可能更长</strong>：虽然比较是并行的，但<code>N</code>个比较器的信号最终要汇总，这个过程本身就有延迟，而且随着<code>N</code>的增大，延迟也会增加。</li>
+                </ol>
+                </li>
+                </ul>
+                <p><strong>结论</strong>：全相联缓存提供了一种理论上的最优命中率，但其硬件代价过于高昂，通常只用于一些容量非常小的特殊缓存中，例如我们后面会讲到的TLB（Translation-Lookaside Buffer）。它代表了灵活性谱系的一个极端。</p>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E7%BB%84%E7%9B%B8%E8%81%94%E7%BC%93%E5%AD%98-set-associative-cache"><strong>第二部分：组相联缓存 (Set-Associative Cache)</strong></h3>
+                <p>我们现在有了两个极端：</p>
+                <ul>
+                <li><strong>直接映射</strong>：1路（1-way）相联。每个块只有一个选择，硬件简单快速，但冲突率高。</li>
+                <li><strong>全相联</strong>：N路（N-way）相联（假设缓存有N块）。每个块有N个选择，冲突率最低，但硬件复杂昂贵。</li>
+                </ul>
+                <p>有没有一种折中的方案，既能显著降低冲突，又不会带来无法接受的硬件成本？这就是<strong>组相联</strong>的智慧。</p>
+                <h4 id="21-%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6%E6%9C%89%E9%99%90%E7%9A%84%E8%87%AA%E7%94%B1"><strong>2.1 设计哲学：有限的自由</strong></h4>
+                <ul>
+                <li><strong>核心思想</strong>：将缓存中的块分成若干个<strong>组（Set）</strong>。每个主存块，仍然像直接映射一样，被唯一地映射到一个<strong>组</strong>。但是，在这个组<strong>内部</strong>，它可以被放置在<strong>任何一个空闲的块位置</strong>上。</li>
+                <li><strong>生活化理解</strong>：这就像一个电影院，你的票上只写了“第5排”，但没有指定具体座位。你只需要去第5排，然后在这一排里随便找个空位坐下即可。</li>
+                <li><strong>映射规则</strong>：
+                $$
+                (\text{Cache Set Index}) = (\text{Memory Block Address}) \pmod (\text{Number of Sets in Cache})
+                $$</li>
+                <li><strong>术语</strong>：如果一个组内包含<code>k</code>个块，我们就称之为<strong>k路组相联（k-way set-associative）</strong>。</li>
+                </ul>
+                <h4 id="22-%E5%9D%97%E8%AF%86%E5%88%AB%E7%BB%84%E5%86%85%E5%B9%B6%E8%A1%8C%E6%90%9C%E7%B4%A2"><strong>2.2 块识别：组内并行搜索</strong></h4>
+                <p>在组相联缓存中寻找一个数据，结合了直接映射和全相联的特点：</p>
+                <ol>
+                <li><strong>定位组（类似直接映射）</strong>：使用CPU地址中的<strong>索引（Index）位</strong>，直接定位到缓存中的某一个<strong>组</strong>。</li>
+                <li><strong>组内搜索（类似全相联）</strong>：将CPU地址中的<strong>标签（Tag）位</strong>，与该组内<strong>所有<code>k</code>个块</strong>的标签进行<strong>并行的比较</strong>。</li>
+                <li><strong>命中判断</strong>：如果组内有任何一个块的标签匹配，并且有效位为1，则为命中。</li>
+                </ol>
+                <p><img src="../images/imagec63.png" alt="figure 63"></p>
+                <ul>
+                <li><strong>地址划分</strong>：
+                <ul>
+                <li><strong>标签（Tag）</strong>：高位地址，用于组内比较。</li>
+                <li><strong>索引（Index）</strong>：中间地址，用于选择组。</li>
+                <li><strong>块内偏移（Byte Offset）</strong>：低位地址，用于在块内选数据。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><img src="../images/imagec64.png" alt="figure 64"></p>
+                <h4 id="23-%E6%80%A7%E8%83%BD%E4%B8%8E%E6%88%90%E6%9C%AC%E7%9A%84%E5%B9%B3%E8%A1%A1%E8%89%BA%E6%9C%AF"><strong>2.3 性能与成本的平衡艺术</strong></h4>
+                <ul>
+                <li><strong>相联度（Associativity）</strong>，即<code>k</code>的值，是组相联缓存设计的核心参数，它直接体现了性能和成本的权衡：
+                <ul>
+                <li><strong>增加相联度</strong>：
+                <ul>
+                <li><strong>好处</strong>：减少冲突缺失，<strong>提高命中率</strong>。</li>
+                <li><strong>坏处</strong>：
+                <ol>
+                <li><strong>增加硬件成本</strong>：需要更多的并行比较器和更复杂的数据选择逻辑。</li>
+                <li><strong>增加命中时间</strong>：并行比较和选择的延迟会略微增加。</li>
+                <li><strong>增加功耗</strong>：每次访问都需要驱动<code>k</code>个比较器工作。</li>
+                </ol>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li><strong>现实中的选择</strong>：现代CPU的L1缓存通常采用较低的相联度（如4路或8路），以追求极低的命中时间。而L2/L3缓存，由于对命中时间不那么敏感，但对命中率要求更高，因此会采用更高的相联度（如16路或更高）。</li>
+                </ul>
+                <p><img src="../images/imagec65.png" alt="figure 65"></p>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E7%BC%93%E5%AD%98%E8%AE%BE%E8%AE%A1%E7%9A%84%E7%AC%AC%E4%B8%89%E4%B8%AA%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98%E5%9D%97%E6%9B%BF%E6%8D%A2%E7%AD%96%E7%95%A5-block-replacement"><strong>第三部分：缓存设计的第三个核心问题——块替换策略 (Block Replacement)</strong></h3>
+                <p>在直接映射缓存中，当发生冲突缺失时，替换策略是唯一的——只有一个“受害者”。但在组相联和全相联缓存中，当一个组满了之后发生缺失，我们必须决定<strong>牺牲</strong>该组中的哪一个块来为新块腾出空间。这就是<strong>替换策略</strong>要解决的问题。一个好的替换策略，应该尽可能地保留那些“未来最有可能被访问”的块。</p>
+                <h4 id="31-%E6%9C%80%E8%BF%91%E6%9C%80%E5%B0%91%E4%BD%BF%E7%94%A8least-recently-used-lru"><strong>3.1 最近最少使用（Least Recently Used, LRU）</strong></h4>
+                <ul>
+                <li><strong>策略</strong>：替换掉那个<strong>在过去最长时间内没有被访问过</strong>的块。</li>
+                <li><strong>理论基础</strong>：LRU是<strong>时间局部性原理</strong>的直接应用。它假设，最近被访问过的块，在将来也最有可能被访问，所以应该保留它们。</li>
+                <li><strong>实现</strong>：
+                <ul>
+                <li><strong>2路组相联</strong>：实现非常简单。每个组只需要一个**“使用位”**。当访问第0个块时，将该位置<code>0</code>；当访问第1个块时，将该位置<code>1</code>。替换时，只需选择与该位值相反的那个块即可。</li>
+                <li><strong>更高相联度</strong>：实现变得复杂。需要为每个组维护一个访问顺序的记录。例如，一个4路组相联的组，需要用硬件实现一个4个元素的“访问时间排序链表”，每次访问都要更新这个链表，成本很高。因此，在实际硬件中，通常使用<strong>伪LRU</strong>（Pseudo-LRU）等简化算法来逼近LRU的效果。</li>
+                </ul>
+                </li>
+                <li><strong>优点</strong>：性能通常是最好的，因为它很好地利用了时间局部性。</li>
+                <li><strong>缺点</strong>：硬件实现复杂，且随着相联度的增加，复杂度急剧上升。</li>
+                </ul>
+                <h4 id="32-%E9%9A%8F%E6%9C%BA%E6%9B%BF%E6%8D%A2-random"><strong>3.2 随机替换 (Random)</strong></h4>
+                <ul>
+                <li><strong>策略</strong>：当需要替换时，随机选择组中的一个块作为“受害者”。</li>
+                <li><strong>实现</strong>：硬件实现非常简单，只需要一个随机数（或伪随机数）生成器。</li>
+                <li><strong>优点</strong>：硬件成本低，实现简单。</li>
+                <li><strong>缺点</strong>：性能略逊于LRU，因为它可能会“不幸地”换出一个马上就要被再次访问的块。但在高相联度下，其性能与LRU的差距并不大，因此在一些设计中被采用。</li>
+                </ul>
+                <h4 id="33-%E5%85%88%E8%BF%9B%E5%85%88%E5%87%BA-first-in-first-out-fifo"><strong>3.3 先进先出 (First-In, First-Out, FIFO)</strong></h4>
+                <ul>
+                <li><strong>策略</strong>：替换掉那个<strong>最早进入</strong>该组的块。</li>
+                <li><strong>实现</strong>：需要为每个组维护一个进入的顺序，类似一个循环队列。</li>
+                <li><strong>缺点</strong>：性能通常最差。因为它没有利用局部性原理。一个很早进入缓存但被频繁访问的热点数据块，可能会被一个刚刚进入但只被访问一次的冷数据块替换掉。</li>
+                </ul>
+                <p><strong>小结</strong>：LRU是理论上性能最好的替换策略，但实现成本高。在实际设计中，需要在LRU的性能优势和随机/FIFO的简单性之间做出权衡。</p>
+                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E7%BC%93%E5%AD%98%E8%AE%BE%E8%AE%A1%E7%9A%84%E7%AC%AC%E5%9B%9B%E4%B8%AA%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98%E5%86%99%E7%AD%96%E7%95%A5-write-strategy"><strong>第四部分：缓存设计的第四个核心问题——写策略 (Write Strategy)</strong></h3>
+                <p>到目前为止，我们主要讨论了读操作。但CPU的写操作（如<code>store</code>指令）带来了另一个关键的挑战：<strong>如何保证缓存中的数据和主存中的数据保持一致？</strong></p>
+                <h4 id="41-%E5%86%99%E5%91%BD%E4%B8%AD-write-hit-%E7%9A%84%E4%B8%A4%E7%A7%8D%E7%AD%96%E7%95%A5"><strong>4.1 写命中 (Write Hit) 的两种策略</strong></h4>
+                <p>当CPU要写入的数据，其地址在缓存中命中时，我们有两种选择：</p>
+                <ol>
+                <li>
+                <p><strong>写穿 (Write-Through)</strong></p>
+                <ul>
+                <li><strong>策略</strong>：数据<strong>同时写入</strong>缓存块和下一级的存储器（如主存）。</li>
+                <li><strong>优点</strong>：
+                <ul>
+                <li><strong>实现简单</strong>：控制逻辑简单。</li>
+                <li><strong>一致性好</strong>：主存永远保持着最新的数据，这对于多处理器系统和I/O设备的数据一致性非常有利。</li>
+                </ul>
+                </li>
+                <li><strong>缺点</strong>：
+                <ul>
+                <li><strong>速度慢</strong>：每次写操作都必须等待慢速的主存写入完成，这会极大地拖慢CPU。</li>
+                <li><strong>带宽占用高</strong>：频繁的写操作会占用大量的内存总线带宽。</li>
+                </ul>
+                </li>
+                <li><strong>优化：写缓冲 (Write Buffer)</strong>
+                <ul>
+                <li>为了缓解写穿策略的速度瓶颈，现代处理器会引入一个<strong>写缓冲</strong>。CPU将要写入的数据和地址快速地扔进这个小队列（通常是FIFO）中，然后就可以继续执行其他指令了。写缓冲器会在后台，慢慢地将数据写入主存。</li>
+                <li>这可以有效地隐藏大部分写操作的延迟，<strong>除非</strong>CPU的写操作速度太快，导致写缓冲被填满，此时CPU就不得不<strong>暂停（Write Stall）</strong>，等待写缓冲清空。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>写回 (Write-Back)</strong></p>
+                <ul>
+                <li><strong>策略</strong>：数据<strong>只写入</strong>缓存块。同时，用一个**“脏位”（Dirty Bit）**来标记这个块已经被修改过。</li>
+                <li>这个“脏”块会一直留在缓存中，直到它被替换策略选中，需要被换出时，硬件才会检查其脏位。如果脏位为1，才将该块的内容<strong>写回到</strong>下一级存储器。</li>
+                <li><strong>优点</strong>：
+                <ul>
+                <li><strong>速度快</strong>：写操作以缓存的速度完成，CPU无需等待主存。</li>
+                <li><strong>带宽占用低</strong>：如果一个块在被换出之前被多次写入（非常常见），那么实际上只需要在最后一次性地写回主存，大大节省了内存带宽。</li>
+                </ul>
+                </li>
+                <li><strong>缺点</strong>：
+                <ul>
+                <li><strong>控制逻辑复杂</strong>：需要实现脏位和在替换时写回的逻辑。</li>
+                <li><strong>一致性问题</strong>：在任何时刻，主存中的数据可能是“旧”的，这给多处理器缓存一致性带来了巨大的挑战（需要复杂的缓存一致性协议，如MESI）。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ol>
+                <h4 id="42-%E5%86%99%E7%BC%BA%E5%A4%B1-write-miss-%E7%9A%84%E4%B8%A4%E7%A7%8D%E7%AD%96%E7%95%A5"><strong>4.2 写缺失 (Write Miss) 的两种策略</strong></h4>
+                <p>当CPU要写入的地址在缓存中缺失时，同样有两种选择：</p>
+                <ol>
+                <li>
+                <p><strong>写分配 (Write Allocate) / 先取后写 (Fetch on Write)</strong></p>
+                <ul>
+                <li><strong>策略</strong>：首先，像读缺失一样，将包含目标地址的整个块从主存中<strong>加载到缓存</strong>中。然后，再像写命中一样，对这个新加载的缓存块执行写入操作。</li>
+                <li><strong>逻辑基础</strong>：利用了空间局部性。既然要写这个地址，那么很可能马上就要读/写它附近的地址，所以先把整个块取进来是值得的。</li>
+                <li><strong>通常与写回策略搭配使用</strong>。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>非写分配 (No-Write Allocate) / 写绕过 (Write Around)</strong></p>
+                <ul>
+                <li><strong>策略</strong>：数据<strong>直接写入</strong>下一级存储器（主存），而<strong>不将</strong>对应的块加载到缓存中。</li>
+                <li><strong>逻辑基础</strong>：如果一个程序只是大片地初始化内存而后续很少读取，那么把这些块加载到缓存中纯属浪费缓存空间和带宽。</li>
+                <li><strong>通常与写穿策略搭配使用</strong>。</li>
+                </ul>
+                </li>
+                </ol>
+                <p><strong>总结</strong>：写策略的选择，是在<strong>性能、带宽和一致性复杂性</strong>之间的权衡。高性能处理器通常在L1 Cache上采用<strong>写回 + 写分配</strong>的策略，以最大化性能和带宽利用率，并通过复杂的硬件协议来解决一致性问题。</p>
+                <p><strong>总结与展望</strong></p>
+                <p>我们完成了对缓存设计四大核心问题的全面探讨：</p>
+                <ul>
+                <li><strong>块放置</strong>：从直接映射的“刚性”，到全相联的“自由”，再到组相联的“平衡”。</li>
+                <li><strong>块识别</strong>：通过Tag, Index, Offset的地址划分，以及比较器和有效位实现。</li>
+                <li><strong>块替换</strong>：在LRU的性能和随机/FIFO的简单性之间权衡。</li>
+                <li><strong>写策略</strong>：在写穿的一致性/简单性和写回的性能/带宽效率之间权的全衡。</li>
+                </ul>
+                <p>我们现在应该深刻地认识到，一个看似简单的Cache，其背后是无数个设计决策的精妙组合。每一个决策，都直接影响着最终的AMAT——那个衡量存储系统性能的黄金指标。</p>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
