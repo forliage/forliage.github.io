@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机组成3-1:数字的表示</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%903-1%E6%95%B0%E5%AD%97%E7%9A%84%E8%A1%A8%E7%A4%BA">计算机组成3-1:数字的表示</h1>
+                <p>在高级编程语言（如C/C++或Java）中，我们习惯于直接使用 <code>int</code>, <code>unsigned int</code>, <code>float</code> 等数据类型，并理所当然地认为计算机“知道”如何对它们进行 <code>+</code>、<code>-</code>、<code>*</code>、<code>/</code> 等运算。但计算机本身只认识0和1。那么，这些我们习以为常的数据类型和运算是如何从底层的0和1构建起来的呢？</p>
+                <p>这就是我们这章要解决的核心问题。计算机中的<strong>字 (Word)</strong>，无论是32位还是64位，本质上都只是一个位的集合。这些位的组合本身没有任何意义，是<strong>我们（设计计算机的人）赋予了它们意义</strong>。这种“赋予意义”的过程，就是<strong>约定（Convention）</strong>。通过不同的约定，同一串二进制代码可以表示整数、浮点数、指令、内存地址，甚至是一段文字。</p>
+                <p>算术运算是计算机最核心的功能之一。它位于指令执行周期的核心环节：</p>
+                <ol>
+                <li><strong>取指 (Fetch):</strong> 程序计数器 (PC) 指向内存，取出一条指令。</li>
+                <li><strong>译码 (Decode):</strong> 指令译码器分析指令，确定要执行的操作（例如，加法）以及操作数来自哪里（例如，寄存器<code>x5</code>和<code>x6</code>）。</li>
+                <li><strong>执行 (Execute):</strong> <strong>算术逻辑单元 (ALU)</strong> 根据指令的要求，对从寄存器中读出的数据执行算术或逻辑运算。</li>
+                <li><strong>访存 (Memory):</strong> 如果需要，访问内存进行读写。</li>
+                <li><strong>写回 (Write-back):</strong> 将执行结果写回目标寄存器。</li>
+                </ol>
+                <p>我们就从理解ALU如何处理数字开始。</p>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E6%95%B0%E5%AD%97%E7%9A%84%E8%A1%A8%E7%A4%BA-representation-of-numbers"><strong>第一部分：数字的表示 (Representation of Numbers)</strong></h3>
+                <p>在深入算术运算之前，我们必须先解决一个更根本的问题：如何在计算机中用二进制表示我们熟悉的数字，特别是负数？</p>
+                <h4 id="11-%E6%97%A0%E7%AC%A6%E5%8F%B7%E6%95%B4%E6%95%B0-unsigned-integers"><strong>1.1 无符号整数 (Unsigned Integers)</strong></h4>
+                <p>这是最简单的表示法。对于一个n位的二进制数 $(b_{n-1}b_{n-2}...b_1b_0)_2$，它所代表的无符号整数的值为：</p>
+                <p>$Value = \sum_{i=0}^{n-1} b_i \times 2^i$</p>
+                <p>例如，一个8位的二进制数 <code>10011011</code>：
+                $Value = 1 \cdot 2^7 + 0 \cdot 2^6 + 0 \cdot 2^5 + 1 \cdot 2^4 + 1 \cdot 2^3 + 0 \cdot 2^2 + 1 \cdot 2^1 + 1 \cdot 2^0$
+                $Value = 128 + 16 + 8 + 2 + 1 = 155$</p>
+                <p>对于一个n位的无符号整数，其表示范围是 $[0, 2^n - 1]$。</p>
+                <ul>
+                <li>对于32位无符号整数，范围是 $[0, 2^{32}-1]$，大约是40亿。</li>
+                <li>这在计算机中常用于表示内存地址，因为地址没有负数的概念。</li>
+                </ul>
+                <h4 id="12-%E5%B8%A6%E7%AC%A6%E5%8F%B7%E6%95%B4%E6%95%B0-signed-integers"><strong>1.2 带符号整数 (Signed Integers)</strong></h4>
+                <p>现实世界充满了负数，计算机必须有能力处理它们。如何用二进制来表示正负呢？人们提出了多种方案，其中最重要的三种是：原码、反码和补码。</p>
+                <p><strong>1. 方案一：原码 (Sign and Magnitude)</strong></p>
+                <p>这是最符合人类直觉的一种表示法。我们将最高有效位（Most Significant Bit, MSB）用作<strong>符号位</strong>：0代表正数，1代表负数。其余的位表示数值的<strong>绝对值</strong>。</p>
+                <ul>
+                <li>例如，用8位原码表示：
+                <ul>
+                <li><code>+5</code> -&gt; <code>00000101</code> (符号位为0，数值为5)</li>
+                <li><code>-5</code> -&gt; <code>10000101</code> (符号位为1，数值为5)</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>原码的缺陷：</strong></p>
+                <ol>
+                <li><strong>存在两个零：</strong> <code>+0</code> -&gt; <code>00000000</code>，<code>-0</code> -&gt; <code>10000000</code>。这给判断一个数是否为零带来了不便。</li>
+                <li><strong>算术运算复杂：</strong> 在进行加法时，硬件需要先检查两个操作数的符号位。如果符号相同，则执行加法；如果符号不同，则需要执行减法，并且结果的符号取决于绝对值更大的那个数。这使得加法器的设计异常复杂。</li>
+                </ol>
+                <p>由于这些缺陷，现代计算机几乎不使用原码来表示整数。</p>
+                <p><strong>2. 方案二：反码 (One's Complement)</strong></p>
+                <p>反码是为了简化运算而提出的。</p>
+                <ul>
+                <li>
+                <p><strong>正数：</strong> 表示方法与原码和补码相同。</p>
+                </li>
+                <li>
+                <p><strong>负数：</strong> 将其对应正数的数值位（除符号位外）<strong>按位取反</strong>。</p>
+                </li>
+                <li>
+                <p>例如，用8位反码表示：</p>
+                <ul>
+                <li><code>+5</code> -&gt; <code>00000101</code></li>
+                <li><code>-5</code> -&gt; <code>11111010</code> (对<code>00000101</code>除符号位外取反，有时也约定为全部位取反)</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>反码的缺陷：</strong></p>
+                <ul>
+                <li><strong>仍然存在两个零：</strong> <code>+0</code> -&gt; <code>00000000</code>，<code>-0</code> -&gt; <code>11111111</code>。</li>
+                <li><strong>加法运算存在“循环进位”问题：</strong> 当最高位产生进位时，需要将这个进位加到最低位上，这同样增加了硬件的复杂性。</li>
+                </ul>
+                <p><strong>3. 方案三：补码 (Two's Complement) - 现代计算机的标准</strong></p>
+                <p>补码是目前计算机系统中最普遍采用的整数表示方法，因为它完美地解决了原码和反码的缺陷。</p>
+                <ul>
+                <li>
+                <p><strong>定义：</strong></p>
+                <ul>
+                <li><strong>正数：</strong> 表示方法与原码相同。</li>
+                <li><strong>负数：</strong> 将其对应正数的<strong>所有位按位取反，然后加1</strong>。</li>
+                </ul>
+                </li>
+                <li>
+                <p>例如，用8位补码表示 <code>-5</code>：</p>
+                <ol>
+                <li><code>+5</code> 的二进制表示是 <code>00000101</code>。</li>
+                <li>所有位按位取反得到 <code>11111010</code> (这其实是反码)。</li>
+                <li>加 1 得到 <code>11111011</code>。所以 <code>-5</code> 的8位补码表示是 <code>11111011</code>。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>从补码求原值：</strong> 如果一个补码的符号位是1，说明它是一个负数。要求它的绝对值，可以再次执行“按位取反，末位加1”的操作。</p>
+                <ul>
+                <li>对 <code>11111011</code> 操作：</li>
+                </ul>
+                <ol>
+                <li>按位取反 -&gt; <code>00000100</code></li>
+                <li>末位加 1 -&gt; <code>00000101</code>，即5。所以该数是-5。</li>
+                </ol>
+                </li>
+                </ul>
+                <p><strong>为什么补码如此优秀？</strong></p>
+                <p><strong>a. 唯一的零表示：</strong>
+                在补码中，<code>+0</code> 是 <code>00000000</code>。我们来计算一下 <code>-0</code>：</p>
+                <ol>
+                <li><code>+0</code> -&gt; <code>00000000</code></li>
+                <li>取反 -&gt; <code>11111111</code></li>
+                <li>加 1 -&gt; <code>(1)00000000</code>。对于8位表示，最高位的进位被舍弃，结果仍然是 <code>00000000</code>。
+                这样，零的表示就唯一了。</li>
+                </ol>
+                <p><strong>b. 统一的加减法运算：</strong>
+                这是补码最神奇的特性。<strong>硬件不需要区分加法和减法，也不需要关心操作数的符号</strong>。减法 $A-B$ 可以直接转换为加法 $A+(-B)$，然后使用同一个加法器完成。</p>
+                <ul>
+                <li>例如，计算 <code>5 - 3</code>，即 <code>5 + (-3)</code> (使用4位补码)：
+                <ul>
+                <li><code>+5</code> -&gt; <code>0101</code></li>
+                <li><code>+3</code> -&gt; <code>0011</code> -&gt; <code>-3</code> (取反<code>1100</code>，加1<code>1101</code>)</li>
+                <li><code>0101 + 1101 = (1)0010</code>。舍弃进位，结果是 <code>0010</code>，即 <code>+2</code>。完全正确！</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>c. 数学原理：模运算 (Modular Arithmetic)</strong>
+                补码的本质是模运算。可以把n位二进制数想象成一个容量为 $2^n$ 的时钟。</p>
+                <p>例如，对于一个4位系统（模为 $2^4=16$），数字 <code>15</code> (<code>1111</code>) 在这个时钟上与 <code>-1</code> 是等价的。因为从0点逆时针走1步（-1）和顺时针走15步（+15）到达的是同一个位置。
+                数学上，一个负数 $-X$ 的补码表示是 $2^n - X$。
+                我们知道 $X + \bar{X} = 2^n - 1$。所以 $\bar{X}+1 = 2^n - X$。这恰好就是“取反加一”的数学解释。</p>
+                <p><strong>补码的表示范围：</strong>
+                对于n位补码，其表示范围是 $[-2^{n-1}, 2^{n-1}-1]$。</p>
+                <ul>
+                <li>这是一个不对称的范围，负数比正数多一个。</li>
+                <li>例如8位补码范围是 $[-128, 127]$。<code>-128</code> 的补码是 <code>10000000</code>。</li>
+                </ul>
+                <p><strong>各种表示法对比 (以4位为例):</strong></p>
+                <table>
+                <thead>
+                <tr>
+                <th style="text-align:center">十进制</th>
+                <th style="text-align:center">原码</th>
+                <th style="text-align:center">反码</th>
+                <th style="text-align:center">补码</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                <td style="text-align:center">+7</td>
+                <td style="text-align:center">0111</td>
+                <td style="text-align:center">0111</td>
+                <td style="text-align:center">0111</td>
+                </tr>
+                <tr>
+                <td style="text-align:center">...</td>
+                <td style="text-align:center">...</td>
+                <td style="text-align:center">...</td>
+                <td style="text-align:center">...</td>
+                </tr>
+                <tr>
+                <td style="text-align:center">+1</td>
+                <td style="text-align:center">0001</td>
+                <td style="text-align:center">0001</td>
+                <td style="text-align:center">0001</td>
+                </tr>
+                <tr>
+                <td style="text-align:center">+0</td>
+                <td style="text-align:center">0000</td>
+                <td style="text-align:center">0000</td>
+                <td style="text-align:center">0000</td>
+                </tr>
+                <tr>
+                <td style="text-align:center">-0</td>
+                <td style="text-align:center">1000</td>
+                <td style="text-align:center">1111</td>
+                <td style="text-align:center">(不存在)</td>
+                </tr>
+                <tr>
+                <td style="text-align:center">-1</td>
+                <td style="text-align:center">1001</td>
+                <td style="text-align:center">1110</td>
+                <td style="text-align:center">1111</td>
+                </tr>
+                <tr>
+                <td style="text-align:center">...</td>
+                <td style="text-align:center">...</td>
+                <td style="text-align:center">...</td>
+                <td style="text-align:center">...</td>
+                </tr>
+                <tr>
+                <td style="text-align:center">-7</td>
+                <td style="text-align:center">1111</td>
+                <td style="text-align:center">1000</td>
+                <td style="text-align:center">1001</td>
+                </tr>
+                <tr>
+                <td style="text-align:center">-8</td>
+                <td style="text-align:center">(无法表示)</td>
+                <td style="text-align:center">(无法表示)</td>
+                <td style="text-align:center">1000</td>
+                </tr>
+                </tbody>
+                </table>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E6%95%B4%E6%95%B0%E7%9A%84%E7%AE%97%E6%9C%AF%E8%BF%90%E7%AE%97%E4%B8%8Ealu%E8%AE%BE%E8%AE%A1"><strong>第二部分：整数的算术运算与ALU设计</strong></h3>
+                <p>现在我们已经确立了使用补码来表示整数，接下来就可以设计能够执行运算的硬件了。</p>
+                <h4 id="21-%E6%95%B4%E6%95%B0%E5%8A%A0%E5%87%8F%E6%B3%95"><strong>2.1 整数加减法</strong></h4>
+                <ul>
+                <li><strong>加法:</strong> 两个补码数直接相加，就像无符号数一样，从最低位开始，逐位相加并处理进位。</li>
+                <li><strong>减法:</strong> 将减数B取补码（即求 $-B$），然后与被减数A相加。即 $A - B = A + (-B)$。</li>
+                </ul>
+                <h4 id="22-%E6%BA%A2%E5%87%BA-overflow"><strong>2.2 溢出 (Overflow)</strong></h4>
+                <p>当运算结果超出了n位补码所能表示的范围时，就会发生<strong>溢出</strong>。</p>
+                <ul>
+                <li>
+                <p><strong>无符号数溢出：</strong>
+                非常容易判断。当两个无符号数相加，<strong>最高位产生了进位</strong>（carry-out），就意味着发生了溢出。</p>
+                <ul>
+                <li>例如，8位无符号数 <code>255 + 1</code> (<code>11111111 + 00000001</code>)，结果是 <code>(1)00000000</code>，产生了进位，发生了溢出。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>带符号数（补码）溢出：</strong>
+                判断稍微复杂一些，<strong>不能简单地看最高位是否有进位</strong>。</p>
+                <ul>
+                <li><code>5 + (-3)</code> -&gt; <code>0101 + 1101 = (1)0010</code>。有进位，但结果<code>+2</code>是正确的，没有溢出。</li>
+                </ul>
+                <p><strong>溢出的根本原因：</strong> 结果的符号与我们期望的符号不一致。</p>
+                <ul>
+                <li><strong>正数 + 正数 = 负数</strong> -&gt; 溢出
+                <ul>
+                <li>例如，8位补码中 <code>127 + 1</code> (<code>01111111 + 00000001 = 10000000</code>)，结果是-128。</li>
+                </ul>
+                </li>
+                <li><strong>负数 + 负数 = 正数</strong> -&gt; 溢出
+                <ul>
+                <li>例如，8位补码中 <code>-128 + (-1)</code> (<code>10000000 + 11111111 = (1)01111111</code>)，结果是+127。</li>
+                </ul>
+                </li>
+                <li><strong>正数 + 负数</strong> -&gt; <strong>永远不会溢出</strong>。因为结果的绝对值一定小于或等于两个操作数中绝对值较大的那个。</li>
+                </ul>
+                <p><strong>硬件层面的判断方法：</strong>
+                一个更通用的判断方法是比较<strong>最高有效位（符号位）的进位（$C_{in}$）<strong>和</strong>从最高有效位产生的进位（$C_{out}$）</strong>。
+                <strong>如果 $C_{in} \neq C_{out}$，则发生溢出。</strong></p>
+                <ul>
+                <li>例1: <code>7 + 1</code> (4位) -&gt; <code>0111 + 0001</code>。符号位(第3位)的$C_{in}=1$, $C_{out}=0$。两者不等，发生溢出。</li>
+                <li>例2: <code>(-2) + (-7)</code> (4位) -&gt; <code>1110 + 1001</code>。符号位的$C_{in}=0$, $C_{out}=1$。两者不等，发生溢出。</li>
+                <li>例3: <code>2 + (-5)</code> (4位) -&gt; <code>0010 + 1011</code>。符号位的$C_{in}=0$, $C_{out}=0$。两者相等，未溢出。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>溢出处理：</strong></p>
+                <ul>
+                <li><strong>在某些语言（如C）中，</strong> 默认忽略整数溢出，这可能导致难以察觉的程序bug。</li>
+                <li><strong>在某些高级语言或特定模式下，</strong> 溢出会触发一个<strong>异常（Exception）<strong>或</strong>中断（Interrupt）</strong>。CPU会暂停当前程序，跳转到操作系统预设的异常处理程序。此时，CPU会将导致异常的指令地址存入一个特殊寄存器（如MIPS中的<code>EPC</code>），以便操作系统处理完毕后能返回或终止程序。</li>
+                </ul>
+                <h4 id="23-%E8%AE%BE%E8%AE%A1%E4%B8%80%E4%B8%AA%E7%AE%97%E6%9C%AF%E9%80%BB%E8%BE%91%E5%8D%95%E5%85%83-alu"><strong>2.3 设计一个算术逻辑单元 (ALU)</strong></h4>
+                <p>ALU是CPU的计算核心，它是一个组合逻辑电路，可以执行多种算术和逻辑运算。我们将从最简单的1位ALU开始，逐步构建一个完整的32位ALU。</p>
+                <p><strong>Step 1: 构造一个1位的逻辑单元</strong></p>
+                <p>我们希望ALU能执行<code>AND</code>和<code>OR</code>操作。我们可以用一个**多路选择器（MUX）**来实现。</p>
+                <ul>
+                <li>输入：<code>a</code>, <code>b</code>，以及一个选择信号<code>Operation</code>。</li>
+                <li>输出：<code>Result</code>。</li>
+                <li>当<code>Operation = 0</code>时，<code>Result = a AND b</code>。</li>
+                <li>当<code>Operation = 1</code>时，<code>Result = a OR b</code>。</li>
+                </ul>
+                <p><strong>Step 2: 构造一个1位的加法器</strong></p>
+                <p>要实现加法，我们需要一个<strong>全加器（Full Adder）</strong>。一个全加器有三个输入（<code>a</code>, <code>b</code>, <code>CarryIn</code>）和两个输出（<code>Sum</code>, <code>CarryOut</code>）。</p>
+                <ul>
+                <li>$Sum = A \oplus B \oplus CarryIn$</li>
+                <li>$CarryOut = (A \cdot B) + (CarryIn \cdot (A \oplus B))$</li>
+                </ul>
+                <p><strong>Step 3: 组合逻辑单元和加法器，构成1位ALU</strong></p>
+                <p>现在，我们把逻辑运算和加法运算组合起来。我们可以用一个更大的MUX来选择输出结果。</p>
+                <ul>
+                <li><code>Operation</code>控制线扩展到2位，例如：
+                <ul>
+                <li><code>00</code>: <code>a AND b</code></li>
+                <li><code>01</code>: <code>a OR b</code></li>
+                <li><code>10</code>: <code>a + b</code></li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>Step 4: 扩展1位ALU以支持减法</strong></p>
+                <p>我们知道 $A - B = A + (-B)$，而 $-B$ 的补码是 $\bar{B} + 1$。</p>
+                <ul>
+                <li><strong>$\bar{B}$</strong>：我们可以通过在b输入端增加一个反相器来实现。</li>
+                <li><strong>$+1$</strong>：这个“+1”可以通过将全加器的第一个<code>CarryIn</code>设置为1来实现。</li>
+                </ul>
+                <p>于是，我们引入一个新的控制信号<code>Bnegate</code>。</p>
+                <ul>
+                <li>当<code>Bnegate = 0</code>时，ALU执行加法。b直接输入，<code>CarryIn</code>来自前一位。</li>
+                <li>当<code>Bnegate = 1</code>时，ALU执行减法。b被取反后输入，并且将最低位的<code>CarryIn</code>强制设为1。</li>
+                </ul>
+                <p><strong>Step 5: 构造一个完整的32位ALU</strong></p>
+                <p>有了1位ALU的设计，我们就可以像搭积木一样把它串联起来，构成一个32位的ALU。这种最简单的设计被称为<strong>行波进位加法器（Ripple-Carry Adder）</strong>。</p>
+                <ul>
+                <li>将32个1位ALU连接起来。</li>
+                <li>第 <code>i</code> 位的<code>CarryOut</code>连接到第 <code>i+1</code> 位的<code>CarryIn</code>。</li>
+                <li>所有1位ALU共享相同的控制线（<code>Operation</code>, <code>Bnegate</code>）。</li>
+                </ul>
+                <p><strong>Step 6: 增加更多功能 - 比较和零检测</strong></p>
+                <ul>
+                <li><strong>比较 (Set on Less Than, <code>slt</code>)</strong>: <code>slt rd, rs, rt</code>指令的功能是：如果 <code>rs &lt; rt</code>，则 <code>rd = 1</code>，否则 <code>rd = 0</code>。
+                <ul>
+                <li>我们如何判断 <code>rs &lt; rt</code>？ 只要计算 <code>rs - rt</code>，然后检查结果的符号位即可。如果结果为负，则 <code>rs &lt; rt</code>。</li>
+                <li>我们可以在最高位（第31位）的ALU上增加一个额外的输出<code>Less</code>，它直接与加法结果的符号位相连。对于<code>slt</code>操作，我们将这个<code>Less</code>信号扩展到32位（即<code>00...01</code>或<code>00...00</code>）作为最终输出。</li>
+                </ul>
+                </li>
+                <li><strong>零检测 (Zero Detection)</strong>: 很多指令需要判断运算结果是否为零（例如分支指令<code>beq</code>）。
+                <ul>
+                <li>这可以通过一个巨大的或门（或者与非门）实现：将ALU所有32位的输出结果<code>Result</code>连接到这个门的输入。只有当<code>Result</code>所有位都为0时，<code>Zero</code>输出才为1。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>最终的ALU设计</strong>
+                一个功能相对完整的ALU会包含以下输入和输出：</p>
+                <ul>
+                <li><strong>输入:</strong>
+                <ul>
+                <li><code>A[31:0]</code>, <code>B[31:0]</code>: 两个32位操作数。</li>
+                <li><code>ALUControl[3:0]</code>: 控制信号，决定执行何种操作 (AND, OR, ADD, SUB, SLT等)。</li>
+                </ul>
+                </li>
+                <li><strong>输出:</strong>
+                <ul>
+                <li><code>Result[31:0]</code>: 32位运算结果。</li>
+                <li><code>Zero</code>: 1位信号，当结果为0时为1。</li>
+                <li><code>Overflow</code>: 1位信号，当发生有符号溢出时为1。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>行波进位加法器的性能瓶颈</strong>
+                虽然行波进位加法器设计简单，但它有一个致命的性能缺陷。计算最高位（例如第31位）的结果，必须等待第30位的<code>CarryOut</code>。而第30位又必须等待第29位，依此类推。这个进位信号就像波浪一样，从最低位“传播”到最高位。
+                因此，加法器的总延迟与位数 <code>n</code> 成正比，即 $O(n)$。对于64位甚至更宽的加法器，这种延迟是不可接受的。</p>
+                <p><strong>拓展思考：如何加速加法？</strong>
+                为了解决这个问题，工程师们设计了更复杂的<strong>高速加法器</strong>，如<strong>超前进位加法器 (Carry-Lookahead Adder, CLA)</strong>。其核心思想是：不等待进位信号逐位传播，而是通过更复杂的逻辑电路“预先计算”出每一位的进位。我们将在下一部分详细探讨这些高级设计。</p>
+                <p><strong>本讲小结</strong></p>
+                <p>今天，我们完成了从抽象数字到具体硬件运算的第一步。</p>
+                <ol>
+                <li>我们理解了数字在计算机中的表示方式，并明确了为何<strong>补码</strong>在现代计算机中占据主导地位。</li>
+                <li>我们探讨了整数加减法的实现，以及在运算中必须处理的<strong>溢出</strong>问题。</li>
+                <li>我们从零开始，一步步设计了一个功能性的32位ALU，并了解了其最基本的设计——<strong>行波进位加法器</strong>，及其性能局限性。</li>
+                </ol>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

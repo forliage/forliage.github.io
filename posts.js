@@ -348,5 +348,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-24-co2-4.html",
       "abstract": "计算机组成2-4:过程调用与指令寻址"
+    },
+    {
+      "title": "计算机组成3-1:数字的表示",
+      "date": "2025-08-24",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-24-co3-1.html",
+      "abstract": "计算机组成3-1:数字的表示"
     }
   ];
