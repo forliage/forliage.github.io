@@ -355,5 +355,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-24-co3-1.html",
       "abstract": "计算机组成3-1:数字的表示"
+    },
+    {
+      "title": "计算机组成3-2:数字运算",
+      "date": "2025-08-24",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-24-co3-2.html",
+      "abstract": "计算机组成3-2:数字运算"
     }
   ];
