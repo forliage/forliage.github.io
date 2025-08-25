@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>x86汇编06:分支与循环</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="x86%E6%B1%87%E7%BC%9606%E5%88%86%E6%94%AF%E4%B8%8E%E5%BE%AA%E7%8E%AF">x86汇编06:分支与循环</h1>
+                <h3 id="%E5%BC%95%E8%A8%80%E4%BB%8E%E9%A1%BA%E5%BA%8F%E6%89%A7%E8%A1%8C%E5%88%B0%E6%99%BA%E8%83%BD%E5%86%B3%E7%AD%96"><strong>引言：从顺序执行到智能决策</strong></h3>
+                <p>冯·诺依曼计算机体系结构的一个基本特征是<strong>顺序执行</strong>：CPU默认情况下会按照指令在内存中的存储顺序，一条接一条地执行。<code>IP</code>（指令指针）寄存器就像一个自动递增的计数器。</p>
+                <p>然而，程序的智能体现在它能够<strong>打破</strong>这种顺序性。<strong>分支</strong>允许程序在多个执行路径中选择一条，而<strong>循环</strong>则允许程序重复执行某段代码。这两种结构，都是通过<strong>有条件或无条件地修改<code>IP</code>寄存器</strong>来实现的。其核心工具，就是我们上一讲学过的<code>CMP</code>, <code>TEST</code>, <code>Jcc</code>和<code>JMP</code>指令。</p>
+                <h3 id="1-%E5%88%86%E6%94%AF%E7%BB%93%E6%9E%84-branching-structures"><strong>1 分支结构 (Branching Structures)</strong></h3>
+                <p>分支的本质是：<strong>比较 -&gt; 设置标志 -&gt; 条件跳转</strong>。</p>
+                <h4 id="11-%E7%94%A8jcc%E6%8C%87%E4%BB%A4%E5%AE%9E%E7%8E%B0%E5%88%86%E6%94%AF"><strong>1.1 用<code>Jcc</code>指令实现分支</strong></h4>
+                <p>这是实现分支最直接、最基本的方法。</p>
+                <h5 id="111-%E5%AE%9E%E7%8E%B0%E4%BA%8C%E5%88%86%E6%94%AF%E7%BB%93%E6%9E%84-if-else"><strong>1.1.1 实现二分支结构 (if-else)</strong></h5>
+                <p>这是最常见的分支结构。</p>
+                <ul>
+                <li>
+                <p><strong>高级语言伪代码:</strong></p>
+                <pre class="hljs"><code><div>if (condition) {
+                    // if_block
+                } else {
+                    // else_block
+                }
+                // after_if
+                </div></code></pre>
+                </li>
+                <li>
+                <p><strong>汇编实现思路 (逻辑转换):</strong>
+                汇编中没有<code>{}</code>代码块的概念，只有线性的指令流。我们的目标是根据条件<strong>跳过</strong>不想执行的代码块。</p>
+                <ol>
+                <li>评估 <code>condition</code>。</li>
+                <li>如果 <code>condition</code> <strong>不成立</strong>，则<strong>跳转</strong>到 <code>else_block</code>。</li>
+                <li>如果 <code>condition</code> 成立（即没有发生跳转），则顺序执行 <code>if_block</code>。</li>
+                <li>在 <code>if_block</code> 执行完毕后，必须用一个<strong>无条件跳转</strong> <code>JMP</code> <strong>跳过</strong> <code>else_block</code>，到达 <code>after_if</code>。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>例子</strong>: 实现 <code>if (eax &gt; ebx) { eax = 1; } else { ebx = 1; }</code></p>
+                <pre class="hljs"><code><div>; 1. 评估条件
+                CMP EAX, EBX
+                ; 2. 条件不成立 (eax &lt;= ebx) 则跳转到else部分
+                JLE else_block      ; JLE = Jump if Less or Equal
+
+                ; 3. if_block: eax &gt; ebx 的情况
+                MOV EAX, 1
+                ; 4. 无条件跳过else部分
+                JMP after_if
+
+                else_block:
+                ; else_block: eax &lt;= ebx 的情况
+                MOV EBX, 1
+
+                after_if:
+                ; 继续执行后续代码
+                NOP
+                </div></code></pre>
+                </li>
+                <li>
+                <p><strong>设计与CPU架构</strong>: 为什么汇编的逻辑看起来是“反”的（条件不成立才跳）？这是由CPU的分支预测（Branch Prediction）机制决定的。现代CPU为了提高流水线效率，会猜测条件跳转是否会发生。对于<code>if</code>语句，通常<code>if</code>块被执行的概率更高，因此CPU可能会预测<code>JLE</code><strong>不跳转</strong>，并提前开始执行<code>if_block</code>中的指令。如果预测正确，就没有性能损失；如果预测错误，才需要清空流水线，造成一点性能开销。编译器在生成代码时，会根据启发式规则（如将更可能执行的代码块放在不跳转的路径上）来优化性能。</p>
+                </li>
+                </ul>
+                <h5 id="112-%E5%AE%9E%E7%8E%B0%E4%B8%89%E5%88%86%E6%94%AF%E7%BB%93%E6%9E%84-if-elseif-else"><strong>1.1.2 实现三分支结构 (if-elseif-else)</strong></h5>
+                <ul>
+                <li>
+                <p><strong>高级语言伪代码:</strong></p>
+                <pre class="hljs"><code><div>if (condition1) {
+                    // block_1
+                } else if (condition2) {
+                    // block_2
+                } else {
+                    // block_3
+                }
+                // after_if
+                </div></code></pre>
+                </li>
+                <li>
+                <p><strong>汇编实现思路</strong>: 这是一个串联的二分支结构。</p>
+                <ol>
+                <li>评估 <code>condition1</code>。如果不成立，跳到 <code>elseif</code> 部分。</li>
+                <li>执行 <code>block_1</code>，然后无条件跳到 <code>after_if</code>。</li>
+                <li><code>elseif</code> 部分：评估 <code>condition2</code>。如果不成立，跳到 <code>else</code> 部分。</li>
+                <li>执行 <code>block_2</code>，然后无条件跳到 <code>after_if</code>。</li>
+                <li><code>else</code> 部分：执行 <code>block_3</code>。</li>
+                <li><code>after_if</code>。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>例子</strong>: 实现 <code>if (al == 'A') { ... } else if (al == 'B') { ... } else { ... }</code></p>
+                <pre class="hljs"><code><div>CMP AL, 'A'
+                JNE elseif_1        ; if (al != 'A') goto elseif_1
+
+                ; --- block_1 ---
+                ; al == 'A' 的代码
+                JMP after_if
+
+                elseif_1:
+                CMP AL, 'B'
+                JNE else_block      ; if (al != 'B') goto else_block
+
+                ; --- block_2 ---
+                ; al == 'B' 的代码
+                JMP after_if
+
+                else_block:
+                ; --- block_3 ---
+                ; 其他情况的代码
+
+                after_if:
+                NOP
+                </div></code></pre>
+                </li>
+                </ul>
+                <h5 id="113-%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E6%94%AF%E7%BB%93%E6%9E%84-switch-case"><strong>1.1.3 实现多分支结构 (switch-case)</strong></h5>
+                <p>当分支数量很多时，使用一长串的<code>if-elseif</code>在性能上是低效的，因为最坏情况下需要进行N次比较。<code>switch-case</code>结构在汇编层面通常有两种更高效的实现方式。</p>
+                <h4 id="114-%E7%94%A8%E6%95%B0%E6%8D%AE%E6%8C%87%E9%92%88%E8%A1%A8%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E6%94%AF%E7%BB%93%E6%9E%84-jump-table-with-address"><strong>1.1.4 用数据指针表实现多分支结构 (Jump Table with Address)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>设计哲学</strong>: <strong>将运行时的条件判断，转化为编译时的地址计算</strong>。这是一种典型的以空间换时间的优化策略。</p>
+                </li>
+                <li>
+                <p><strong>适用场景</strong>: <code>case</code> 的值是连续的、从0开始的小整数（如 <code>case 0, case 1, case 2, ...</code>）。</p>
+                </li>
+                <li>
+                <p><strong>实现思路</strong>:</p>
+                <ol>
+                <li>创建一个<strong>指针数组（表）</strong>，数组的每个元素是对应<code>case</code>代码块的地址。</li>
+                <li>在运行时，获取<code>switch</code>变量的值（作为索引）。</li>
+                <li>进行边界检查，确保索引在合法范围内。</li>
+                <li>用索引从表中取出对应的代码地址。</li>
+                <li><code>JMP</code>到这个地址。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>例子</strong>: 实现 <code>switch(eax)</code>，其中 <code>eax</code> 的值为 0, 1, 或 2。</p>
+                <pre class="hljs"><code><div>.DATA
+                    ; --- 跳转表 (Jump Table) ---
+                    jump_table DD case0_handler, case1_handler, case2_handler
+
+                .CODE
+                start:
+                    ; 假设 EAX 中是要判断的值 (0, 1, or 2)
+                    
+                    ; --- 边界检查 ---
+                    CMP EAX, 2
+                    JA default_case     ; JA = Jump if Above (无符号比较)
+                    
+                    ; --- 查表并跳转 ---
+                    ; EAX * 4 是因为每个地址占4个字节(DD)
+                    JMP [jump_table + EAX * 4]
+
+                case0_handler:
+                    ; EAX == 0 的代码
+                    JMP end_switch
+                case1_handler:
+                    ; EAX == 1 的代码
+                    JMP end_switch
+                case2_handler:
+                    ; EAX == 2 的代码
+                    JMP end_switch
+                default_case:
+                    ; 默认情况的代码
+                end_switch:
+                    NOP
+                </div></code></pre>
+                </li>
+                <li>
+                <p><strong>CPU/架构层面</strong>: <code>JMP [jump_table + EAX * 4]</code> 这条指令是关键。它使用了x86强大的内存寻址模式（<code>[base + index * scale]</code>）。CPU的地址生成单元（AGU）可以在一个时钟周期内完成 <code>EAX * 4 + jump_table_address</code> 的计算，然后从计算出的内存地址中加载目标跳转地址，最后更新<code>IP</code>。这比多次<code>CMP</code>/<code>Jcc</code>序列要快得多。</p>
+                </li>
+                </ul>
+                <h4 id="115-%E7%94%A8%E8%B7%B3%E8%BD%AC%E8%A1%A8%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E6%94%AF%E7%BB%93%E6%9E%84-jump-table-with-code"><strong>1.1.5 用跳转表实现多分支结构 (Jump Table with Code)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>设计哲学</strong>: 这是另一种跳转表，但它不是存储地址，而是直接将跳转指令本身排列在一起。</p>
+                </li>
+                <li>
+                <p><strong>适用场景</strong>: <code>case</code>值连续，且每个<code>case</code>的代码块都很短，可以直接放在跳转逻辑之后。</p>
+                </li>
+                <li>
+                <p><strong>实现思路</strong>:</p>
+                <ol>
+                <li>将一系列的 <code>JMP case_handler</code> 指令紧密排列，形成一个指令表。</li>
+                <li>通过计算偏移量，直接跳转到这个表中的某一条<code>JMP</code>指令上，由该指令再跳转到真正的处理代码。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>例子</strong>: 同上</p>
+                <pre class="hljs"><code><div>.CODE
+                start:
+                    ; 假设 EAX 中是要判断的值 (0, 1, or 2)
+                    
+                    ; --- 边界检查 ---
+                    CMP EAX, 2
+                    JA default_case
+                    
+                    ; --- 计算偏移并跳转 ---
+                    ; 假设每条JMP指令占2字节 (JMP short)
+                    SHL EAX, 1      ; EAX = EAX * 2
+                    JMP [jump_table_code + EAX]
+
+                jump_table_code:
+                    JMP short case0_handler
+                    JMP short case1_handler
+                    JMP short case2_handler
+                    
+                ; ... case handlers 和 default case 同上 ...
+                </div></code></pre>
+                </li>
+                </ul>
+                <h3 id="2-%E5%BE%AA%E7%8E%AF%E7%BB%93%E6%9E%84-looping-structures"><strong>2 循环结构 (Looping Structures)</strong></h3>
+                <p>循环的本质是：<strong>在代码块的末尾，有一个条件或无条件的跳转，跳回到代码块的开头</strong>。</p>
+                <h4 id="21-%E5%8D%95%E9%87%8D%E5%BE%AA%E7%8E%AF"><strong>2.1 单重循环</strong></h4>
+                <p>高级语言中的 <code>for</code>, <code>while</code>, <code>do-while</code> 循环，在汇编层面都可以用 <code>CMP</code>/<code>Jcc</code>/<code>JMP</code> 的组合来实现。</p>
+                <ul>
+                <li><strong><code>while</code> 循环模板:</strong><pre class="hljs"><code><div>while (condition) {
+                    // loop_body
+                }
+                </div></code></pre>
+                <strong>汇编实现:</strong><pre class="hljs"><code><div>loop_start:
+                    ; 1. 评估条件
+                    CMP ...
+                    ; 2. 条件不成立则跳出循环
+                    Jcc loop_end  
+
+                    ; --- loop_body ---
+                    ...
+
+                    ; 3. 无条件跳回循环开始处，进行下一次判断
+                    JMP loop_start
+                loop_end:
+                    NOP
+                </div></code></pre>
+                </li>
+                <li><strong><code>do-while</code> 循环模板:</strong><pre class="hljs"><code><div>do {
+                    // loop_body
+                } while (condition);
+                </div></code></pre>
+                <strong>汇编实现:</strong> (do-while至少执行一次，所以判断在尾部)<pre class="hljs"><code><div>loop_start:
+                    ; --- loop_body ---
+                    ...
+
+                    ; 1. 评估条件
+                    CMP ...
+                    ; 2. 条件成立则跳回循环开始处
+                    Jcc loop_start
+                loop_end:
+                    NOP
+                </div></code></pre>
+                </li>
+                <li><strong><code>for</code> 循环模板:</strong><pre class="hljs"><code><div>for (init; condition; update) {
+                    // loop_body
+                }
+                </div></code></pre>
+                <strong>汇编实现:</strong> (for循环是while循环的语法糖)<pre class="hljs"><code><div>; 1. init 部分
+                ...
+
+                loop_start:
+                    ; 2. 评估 condition
+                    CMP ...
+                    Jcc loop_end
+
+                    ; --- loop_body ---
+                    ...
+                    
+                    ; 3. update 部分
+                    ...
+
+                    ; 4. 无条件跳回循环开始处
+                    JMP loop_start
+                loop_end:
+                    NOP
+                </div></code></pre>
+                </li>
+                <li><strong>例子</strong>: 计算1到100的累加和 <code>sum = 0; for(i=1; i&lt;=100; i++) { sum += i; }</code><pre class="hljs"><code><div>XOR EAX, EAX        ; EAX 作为 sum, 初始化为 0
+                MOV ECX, 1          ; ECX 作为 i, 初始化为 1
+
+                loop_start:
+                CMP ECX, 100        ; 比较 i 和 100 (condition)
+                JG loop_end         ; 如果 i &gt; 100, 跳出循环
+
+                ; --- loop_body ---
+                ADD EAX, ECX        ; sum += i
+
+                ; --- update ---
+                INC ECX             ; i++
+
+                JMP loop_start      ; 跳回循环开始
+                loop_end:
+                ; 此时 EAX 中存放着结果 5050
+                NOP
+                </div></code></pre>
+                </li>
+                </ul>
+                <h4 id="22-%E5%8F%8C%E9%87%8D%E5%BE%AA%E7%8E%AF-nested-loops"><strong>2.2 双重循环 (Nested Loops)</strong></h4>
+                <ul>
+                <li><strong>高级语言伪代码:</strong><pre class="hljs"><code><div>for (i = 0; i &lt; 10; i++) {
+                    for (j = 0; j &lt; 5; j++) {
+                        // inner_loop_body
+                    }
+                }
+                </div></code></pre>
+                </li>
+                <li><strong>汇编实现思路</strong>: 将一个循环结构完整地嵌套在另一个循环的<code>loop_body</code>中。关键在于<strong>保存和恢复外层循环的状态</strong>，尤其是计数器。通常使用<strong>堆栈</strong>来完成。</li>
+                <li><strong>例子</strong>: 打印一个5x10的星号矩阵<pre class="hljs"><code><div>MOV ECX, 10         ; 外层循环计数器 i = 10
+
+                outer_loop:
+                PUSH ECX            ; **关键: 保存外层循环的计数器**
+                MOV ECX, 5          ; 内层循环计数器 j = 5
+
+                inner_loop:
+                ; --- inner_loop_body ---
+                ; (此处调用打印'*'的函数)
+                ...
+
+                LOOP inner_loop     ; 内层循环使用LOOP指令简化
+
+                ; (此处调用打印换行的函数)
+                ...
+
+                POP ECX             ; **关键: 恢复外层循环的计数器**
+                LOOP outer_loop     ; 外层循环
+
+                end_loops:
+                NOP
+                </div></code></pre>
+                </li>
+                <li><strong>设计与CPU架构</strong>: 在这个例子中，<code>PUSH ECX</code> 和 <code>POP ECX</code> 是至关重要的。因为内外层循环都想使用<code>ECX</code>作为计数器（<code>LOOP</code>指令强制使用<code>ECX</code>）。如果不进行保存和恢复，内层循环结束后<code>ECX</code>会变为0，外层循环将直接终止。堆栈提供了一种完美、高效的机制来保存和恢复寄存器上下文，这使得实现嵌套结构和递归成为可能。这是CPU堆栈机制在程序结构化中的核心应用。</li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

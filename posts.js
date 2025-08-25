@@ -481,5 +481,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-25-asm05-4.html",
       "abstract": "x86汇编05-4:字符串与控制转移指令"
+    },
+    {
+      "title": "x86汇编06:分支与循环",
+      "date": "2025-08-25",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-25-asm06.html",
+      "abstract": "x86汇编06:分支与循环"
     }
   ];
