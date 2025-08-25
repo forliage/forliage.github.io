@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>x86汇编02:数据</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="x86%E6%B1%87%E7%BC%9602%E6%95%B0%E6%8D%AE">x86汇编02:数据</h1>
+                <h3 id="1%E6%95%B0%E5%88%B6%E4%B8%8E%E6%9C%BA%E5%99%A8%E5%AF%B9%E8%AF%9D%E7%9A%84%E8%AF%AD%E8%A8%80"><strong>1.数制：与机器对话的语言</strong></h3>
+                <p>计算机的物理基础是晶体管，它只有两种稳定状态：开和关，对应电路中的高电平和低电平。这种二元性（Duality）是计算机世界最底层的设计约束。因此，一切上层建筑都必须建立在二进制之上。</p>
+                <p><strong>设计的核心问题：</strong> 如何用一种只有两个符号（0和1）的系统来表示世间万物？
+                <strong>答案：</strong> 采用<strong>位置计数法</strong>（Positional Notation）。一个符号的“值”不仅取决于符号本身，还取决于它所在的位置。</p>
+                <p>一个通用的位置计数法可以表示为：
+                $$D = \sum_{i=-m}^{n-1} d_i \cdot b^i$$
+                其中，$D$ 是数值，$b$ 是基数（Base），$d_i$ 是第 $i$ 位的数码（Digit）。</p>
+                <h4 id="11-%E4%BA%8C%E8%BF%9B%E5%88%B6-binary"><strong>1.1 二进制 (Binary)</strong></h4>
+                <p>这是机器的母语。基数 $b=2$，数码 $d_i \in {0, 1}$。</p>
+                <ul>
+                <li>例如，二进制数 <code>1101.1</code> 表示：
+                $1 \cdot 2^3 + 1 \cdot 2^2 + 0 \cdot 2^1 + 1 \cdot 2^0 + 1 \cdot 2^{-1} = 8 + 4 + 0 + 1 + 0.5 = 13.5$ (十进制)</li>
+                </ul>
+                <h4 id="12-%E5%8D%81%E5%85%AD%E8%BF%9B%E5%88%B6-hexadecimal"><strong>1.2 十六进制 (Hexadecimal)</strong></h4>
+                <p>二进制对人类来说太长、太容易出错。<code>1101010110111110</code> 这样的数字，你能一眼看出它的值吗？显然不能。我们需要一种更紧凑、更便于人类读写的二进制“速记法”。</p>
+                <p><strong>设计的选择：</strong> 为什么是十六进制，而不是八进制或四进制？
+                因为在现代计算机体系结构中，数据处理的基本单位是<strong>字节（Byte）</strong>，即8个比特。一个字节可以完美地被分成两组，每组4个比特。而4个比特能表示的数字范围是 $2^4 = 16$（从0000到1111）。这使得十六进制与字节的结构形成了完美的对应关系。</p>
+                <ul>
+                <li>基数 $b=16$，数码 $d_i \in {0, 1, ..., 9, A, B, C, D, E, F}$。</li>
+                <li><strong>核心关系</strong>：1位十六进制数 对应 4位二进制数。</li>
+                </ul>
+                <pre class="hljs"><code><div>  Hex | Binary || Hex | Binary
+                 -----|--------||-----|--------
+                   0  |  0000  ||  8  |  1000
+                   1  |  0001  ||  9  |  1001
+                   2  |  0010  ||  A  |  1010
+                   3  |  0011  ||  B  |  1011
+                   4  |  0100  ||  C  |  1100
+                   5  |  0101  ||  D  |  1101
+                   6  |  0110  ||  E  |  1110
+                   7  |  0111  ||  F  |  1111
+                </div></code></pre>
+                <h4 id="13-%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2-conversions"><strong>1.3 进制转换 (Conversions)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>二进制 $\leftrightarrow$ 十六进制 (最重要的转换！)</strong>
+                这是汇编程序员必须掌握的肌肉记忆。转换方法是简单的分组替换。</p>
+                <ul>
+                <li><strong>二进制转十六进制</strong>：从右向左，每4位一组，不足4位在左边补0，然后替换。
+                <code>1101010110111110</code> (二进制)
+                <code>1101 0101 1011 1110</code> (分组)
+                <code>D    5    B    E </code> (替换) -&gt; <code>0xD5BE</code></li>
+                <li><strong>十六进制转二进制</strong>：每1位扩展成4位。
+                <code>0x1AF</code>
+                <code>1     A     F </code>
+                <code>0001 1010 1111</code> -&gt; <code>000110101111</code> (二进制)</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>十进制 $\rightarrow$ 二进制/十六进制</strong>
+                方法：<strong>除基取余法</strong>（整数部分）。</p>
+                <ul>
+                <li>
+                <p><strong>十进制转二进制</strong>：连续除以2，直到商为0，余数倒序排列。
+                例：转换 $26_{10}$
+                $26 \div 2 = 13 ... 0$
+                $13 \div 2 = 6  ... 1$
+                $6  \div 2 = 3  ... 0$
+                $3  \div 2 = 1  ... 1$
+                $1  \div 2 = 0  ... 1$
+                倒序取余数：<code>11010</code>。所以 $26_{10} = 11010_2$。</p>
+                </li>
+                <li>
+                <p><strong>十进制转十六进制</strong>：同理，连续除以16。
+                例：转换 $427_{10}$
+                $427 \div 16 = 26 ... 11$ (B)
+                $26 \div 16 = 1  ... 10$ (A)
+                $1 \div 16 = 0  ... 1$  (1)
+                倒序取余数：<code>1AB</code>。所以 $427_{10} = 1AB_{16}$。</p>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>二进制/十六进制 $\rightarrow$ 十进制</strong>
+                方法：<strong>按权展开求和法</strong>。</p>
+                <ul>
+                <li>$11010_2 = 1 \cdot 2^4 + 1 \cdot 2^3 + 0 \cdot 2^2 + 1 \cdot 2^1 + 0 \cdot 2^0 = 16+8+2 = 26_{10}$</li>
+                <li>$1AB_{16} = 1 \cdot 16^2 + 10 \cdot 16^1 + 11 \cdot 16^0 = 256 + 160 + 11 = 427_{10}$</li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="2%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%95%B0%E6%8D%AE%E7%9A%84%E7%BB%84%E7%BB%87"><strong>2.二进制数据的组织</strong></h3>
+                <p>CPU和内存并不是逐个比特（bit）地处理数据，这样做效率太低。硬件设计者将比特捆绑成更大的、有固定尺寸的块来进行处理。这些尺寸单位的演化，本身就是一部x86体系结构的发展史。</p>
+                <p><strong>核心设计原则：</strong> 数据总线的宽度、寄存器的大小、ALU的处理能力，这三者共同决定了处理器“最喜欢”处理的数据尺寸，我们称之为<strong>机器字长（Word Size）</strong>。</p>
+                <div class="mermaid">graph TD
+                    subgraph "数据单位的层级"
+                        QWORD("<b>四字 Quad Word (64位)</b><br>x86-64 架构")
+                        DWORD("<b>双字 Double Word (32位)</b><br>IA-32 架构 (386+)")
+                        WORD("<b>字 Word (16位)</b><br>16位架构 (8086)")
+                        BYTE("<b>字节 Byte (8位)</b><br>最小可寻址单位")
+                        BIT("<b>位 Bit (1位)</b><br>基本信息单元")
+                    end
+                    QWORD --> DWORD --> WORD --> BYTE --> BIT
+                </div>
+                <ul>
+                <li><strong>位 (Bit, b)</strong>: 数据的最小单位，一个0或1。</li>
+                <li><strong>字节 (Byte, B)</strong>: <strong>8个位</strong>。这是现代计算机中<strong>最重要</strong>的数据单位。为什么？因为内存是以字节为单位进行编址的，即<strong>字节寻址（Byte-addressable）</strong>。内存中的每个字节都有一个唯一的地址。这是内存系统设计的基石。</li>
+                <li><strong>字 (Word)</strong>: <strong>2个字节 (16位)</strong>。这是Intel 8086处理器的原生数据大小，因此“字”在x86语境下特指16位。</li>
+                <li><strong>双字 (Double Word, DWORD)</strong>: <strong>4个字节 (32位)</strong>。随着80386处理器的出现，x86进入32位时代，双字成为当时主流的数据处理单位。</li>
+                <li><strong>四字 (Quad Word, QWORD)</strong>: <strong>8个字节 (64位)</strong>。在x86-64架构下，寄存器和数据通路扩展到64位，四字是其原生处理单位。</li>
+                <li><strong>十字节 (Ten Bytes)</strong>: 这是一个特殊的数据类型，<strong>10个字节 (80位)</strong>。它不是通用整数类型，而是x87浮点协处理器（FPU）使用的<strong>扩展精度浮点数格式</strong>。这种设计是为了在进行一系列浮点运算时，保持内部计算的高精度，以减小最终结果的舍入误差。我们将在浮点运算章节详细讨论它。</li>
+                </ul>
+                <h3 id="3-%E6%95%B4%E6%95%B0%E7%9A%84%E7%B1%BB%E5%88%AB"><strong>3. 整数的类别</strong></h3>
+                <p>一个字节 <code>10000001</code> 到底代表什么数字？是 $129$ 吗？还是 $-127$？这取决于我们如何<strong>解释</strong>最高位。</p>
+                <h4 id="31-%E9%9D%9E%E7%AC%A6%E5%8F%B7%E6%95%B0-unsigned-integers"><strong>3.1 非符号数 (Unsigned Integers)</strong></h4>
+                <p>最简单的解释方式：所有位都用来表示数值的大小。</p>
+                <ul>
+                <li>对于一个 N 位的非符号数，其表示范围是 $[0, 2^N - 1]$。</li>
+                <li><strong>8位非符号数 (Byte)</strong> : 范围是 $[0, 2^8 - 1] = [0, 255]$。</li>
+                <li><strong>16位非符号数 (Word)</strong> : 范围是 $[0, 2^{16} - 1] = [0, 65535]$。</li>
+                <li><strong>32位非符号数 (DWORD)</strong> : 范围是 $[0, 2^{32} - 1] \approx [0, 4 \times 10^9]$。</li>
+                </ul>
+                <h4 id="32-%E7%AC%A6%E5%8F%B7%E6%95%B0-signed-integers"><strong>3.2 符号数 (Signed Integers)</strong></h4>
+                <p><strong>核心设计问题：</strong> 如何在二进制中优雅地表示负数，并使得加减法运算尽可能简单？
+                历史上有过几种方案（原码、反码），但最终胜出的是<strong>补码（Two's Complement）</strong>。</p>
+                <p><strong>为什么是补码？</strong></p>
+                <ol>
+                <li><strong>唯一的零</strong>：原码和反码都有 <code>+0</code> 和 <code>-0</code> 两种表示，这既浪费编码空间，也给硬件判断是否为零带来麻烦。补码只有一个 <code>0</code> (<code>0000...0000</code>)。</li>
+                <li><strong>统一加减法</strong>：在补码体系中，减法可以转换为加法。即 $A - B$ 等价于 $A + (-B)$。这允许CPU使用同一套加法器电路来完成加法和减法，极大地简化了ALU的设计。这是一个无与伦比的工程优势。</li>
+                </ol>
+                <p><strong>补码的规则：</strong></p>
+                <ul>
+                <li>
+                <p><strong>最高位（Most Significant Bit, MSB）<strong>为</strong>符号位</strong>：0表示正数，1表示负数。</p>
+                </li>
+                <li>
+                <p><strong>正数</strong>：其补码、原码、反码相同。</p>
+                </li>
+                <li>
+                <p><strong>负数</strong>：其补码的计算方法为，其绝对值的原码<strong>按位取反，再加1</strong>。</p>
+                <ul>
+                <li>例：求 -3 的8位补码。
+                <ol>
+                <li><code>+3</code> 的原码: <code>00000011</code></li>
+                <li>按位取反: <code>11111100</code></li>
+                <li>加 1: <code>11111101</code>
+                所以，-3 的8位补码表示为 <code>11111101</code>。</li>
+                </ol>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p>对于一个 N 位的符号数，其补码表示范围是 $[-2^{N-1}, 2^{N-1} - 1]$。注意，负数比正数多一个。</p>
+                </li>
+                <li>
+                <p><strong>8位符号数 (Byte)</strong> (2.3.2.1): 范围是 $[-128, 127]$。</p>
+                </li>
+                <li>
+                <p><strong>16位符号数 (Word)</strong> (2.3.2.2): 范围是 $[-32768, 32767]$。</p>
+                </li>
+                <li>
+                <p><strong>32位符号数 (DWORD)</strong> (2.3.2.3): 范围是 $[-2^{31}, 2^{31}-1] \approx [-2 \times 10^9, 2 \times 10^9]$。</p>
+                </li>
+                </ul>
+                <h3 id="4-%E9%9B%B6%E6%89%A9%E5%85%85%E4%B8%8E%E7%AC%A6%E5%8F%B7%E6%89%A9%E5%85%85"><strong>4. 零扩充与符号扩充</strong></h3>
+                <p>当我们将一个小尺寸的数据（如byte）放入一个大尺寸的容器（如dword）时，必须填充多出来的高位。如何填充，取决于原始数据的类型（符号还是非符号）。</p>
+                <ul>
+                <li>
+                <p><strong>零扩充 (Zero Extension)</strong>: 用于<strong>非符号数</strong>。</p>
+                <ul>
+                <li>规则：用 <code>0</code> 填充所有高位。</li>
+                <li>这保证了数值大小不变。</li>
+                <li>例：将8位非符号数 <code>10000001</code> (129) 扩充到16位：<code>00000000 10000001</code> (还是129)。</li>
+                <li>x86指令：<code>MOVZX</code> (Move with Zero-Extend)</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>符号扩充 (Sign Extension)</strong>: 用于<strong>符号数</strong>。</p>
+                <ul>
+                <li>规则：用原始数据的<strong>符号位</strong>填充所有高位。</li>
+                <li>这保证了补码表示的数值大小不变。</li>
+                <li>例：将8位符号数 <code>10000001</code> (-127) 扩充到16位：
+                符号位是 <code>1</code>，所以用 <code>1</code> 填充：<code>11111111 10000001</code> (仍然是 -127)。</li>
+                <li>例：将8位符号数 <code>00000111</code> (7) 扩充到16位：
+                符号位是 <code>0</code>，所以用 <code>0</code> 填充：<code>00000000 00000111</code> (仍然是 7)。</li>
+                <li>x86指令：<code>MOVSX</code> (Move with Sign-Extend)</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>设计哲学：</strong> 处理器必须提供两种不同的指令来处理这两种情况，因为对于同一个二进制串 <code>10000001</code>，它有两种截然不同的解释。程序员有责任根据数据类型选择正确的指令。这是汇编语言精确性的体现。</p>
+                <h3 id="5-%E5%AD%97%E7%AC%A6%E7%9A%84%E8%A1%A8%E7%A4%BA"><strong>5. 字符的表示</strong></h3>
+                <p>计算机只能处理数字，为了表示文本，必须建立一套<strong>字符</strong>到<strong>数字</strong>的映射关系，这就是<strong>字符编码</strong>。</p>
+                <h4 id="251-ascii%E7%A0%81-american-standard-code-for-information-interchange"><strong>2.5.1 ASCII码 (American Standard Code for Information Interchange)</strong></h4>
+                <p>这是最基础、最经典的字符编码。它使用7位二进制数（通常存储在一个字节中，最高位为0）来表示128个字符，包括大小写字母、数字、标点符号和控制字符。</p>
+                <h4 id="252--253-ascii%E7%A0%81%E7%9A%84%E8%AE%BE%E8%AE%A1%E7%B2%BE%E9%AB%93"><strong>2.5.2 &amp; 2.5.3 ASCII码的设计精髓</strong></h4>
+                <p>ASCII码表的设计充满了智慧，使得很多常用操作变得异常简单高效：</p>
+                <ol>
+                <li>
+                <p><strong>数字字符与数值的转换</strong></p>
+                <ul>
+                <li>数字 '0' 到 '9' 的ASCII码是连续的 (<code>0x30</code> 到 <code>0x39</code>)。</li>
+                <li>将一个数字字符（如 '5'）转换为其对应的数值（5），只需减去 '0' 的ASCII码即可。
+                <code>'5' - '0' = 0x35 - 0x30 = 5</code></li>
+                <li>反之，数值转字符则加上 '0' 的ASCII码。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>大小写字母的转换</strong></p>
+                <ul>
+                <li>大写字母 'A' 到 'Z' 和小写字母 'a' 到 'z' 的ASCII码也是连续的。</li>
+                <li>同一个字母的大小写形式，其ASCII码值正好相差32 (<code>0x20</code>)。
+                <code>'A' = 0x41 = 0100 0001</code>
+                <code>'a' = 0x61 = 0110 0001</code></li>
+                <li>观察二进制，它们的区别仅在于第5位（从右数，第0位开始）。</li>
+                <li>因此，<strong>大写转小写，只需将第5位置为1</strong> (逻辑或 <code>OR</code> <code>0x20</code>)。</li>
+                <li><strong>小写转大写，只需将第5位清为0</strong> (逻辑与 <code>AND</code> <code>0xDF</code>)。</li>
+                <li>这种位操作比任何算术运算都快，体现了编码设计的效率。</li>
+                </ul>
+                </li>
+                </ol>
+                <h3 id="6-%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%95%B0%E6%8D%AE%E7%9A%84%E8%BF%90%E7%AE%97alu%E7%9A%84%E6%A0%B8%E5%BF%83%E8%83%BD%E5%8A%9B"><strong>6. 二进制数据的运算：ALU的核心能力</strong></h3>
+                <p>CPU的核心计算单元是<strong>算术逻辑单元（ALU）</strong>。它能执行的原子操作，构成了所有复杂计算的基础。</p>
+                <h4 id="61-%E7%AE%97%E6%9C%AF%E8%BF%90%E7%AE%97"><strong>6.1 算术运算</strong></h4>
+                <ul>
+                <li><code>ADD</code> (加), <code>SUB</code> (减), <code>MUL</code> (乘), <code>DIV</code> (除), <code>INC</code> (加1), <code>DEC</code> (减1)。</li>
+                <li>关键点：对于 <code>ADD</code> 和 <code>SUB</code>，ALU执行的位级运算对符号数和非符号数是完全一样的。但是运算结果的<strong>解释</strong>依赖于<strong>标志位（Flags）</strong>。例如，**进位标志(CF)<strong>用于非符号数溢出判断，而</strong>溢出标志(OF)**用于符号数溢出判断。我们后面会专门用一节课讲授标志寄存器。</li>
+                </ul>
+                <h4 id="62-%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97%E5%92%8C%E7%A7%BB%E4%BD%8D%E8%BF%90%E7%AE%97"><strong>6.2 逻辑运算和移位运算</strong></h4>
+                <p>这些运算是按位独立进行的，是汇编中进行精细位操作的强大工具。</p>
+                <ul>
+                <li>
+                <p><strong>逻辑运算 (Logical Operations)</strong></p>
+                <ul>
+                <li><code>AND</code> (与): 常用于<strong>清零</strong>特定位（位掩码 MASK 中为0的位）。<code>Value AND 0</code> -&gt; <code>0</code></li>
+                <li><code>OR</code> (或): 常用于<strong>置位</strong>特定位（位掩码 MASK 中为1的位）。<code>Value OR 1</code> -&gt; <code>1</code></li>
+                <li><code>XOR</code> (异或): 常用于<strong>翻转</strong>特定位，或判断两数是否相等（<code>A XOR A = 0</code>）。</li>
+                <li><code>NOT</code> (非): 按位取反。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>移位运算 (Shift Operations)</strong>
+                移位运算是一种非常高效的乘以或除以2的幂次方的方法。</p>
+                <ul>
+                <li><strong>逻辑移位</strong>:
+                <ul>
+                <li><code>SHL</code> (Shift Left): 左移，低位补0。每左移一位相当于乘以2。</li>
+                <li><code>SHR</code> (Shift Right): 右移，高位补0。用于<strong>非符号数</strong>的除法。</li>
+                </ul>
+                </li>
+                <li><strong>算术移位</strong>:
+                <ul>
+                <li><code>SAL</code> (Shift Arithmetic Left): 与 <code>SHL</code> 完全相同。</li>
+                <li><code>SAR</code> (Shift Arithmetic Right): 右移，高位用<strong>原符号位</strong>填充。用于<strong>符号数</strong>的除法，能保持数的正负。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <pre class="hljs"><code><div>// 示例：8位数字
+                  Original:      1101 0010 (-46)
+                  SHR 1 (逻辑):   0110 1001 (105, 符号改变!)
+                  SAR 1 (算术):   1110 1001 (-23, 符号保持, -46/2 = -23)
+                </div></code></pre>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

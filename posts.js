@@ -425,5 +425,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-25-asm01.html",
       "abstract": "x86汇编01:Introduction"
+    },
+    {
+      "title": "x86汇编02:数据",
+      "date": "2025-08-24",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-25-asm02.html",
+      "abstract": "x86汇编02:数据"
     }
   ];
