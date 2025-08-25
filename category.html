@@ -125,6 +125,7 @@
                 'DIP图像信息处理课程笔记': '这里是浙江大学图像信息处理(DIP)课程的笔记，经修缮后重新上传',
                 '计算机组成课程笔记': '这里是浙江大学计算机组成(CO)课程的笔记，经修缮后重新上传',
                 'x86汇编语言':'经学习浙江大学汇编语言(ASM)课程后整理的自己的一些理解',
+                '计算机体系结构课程笔记':'这里是浙江大学计算机体系结构(CA)课程的笔记，经修缮后重新上传',
                 '其他': '一些尚未分类的学习笔记。'
             };
 
@@ -143,6 +144,8 @@
                     courseName = '计算机组成课程笔记';
                 } else if (lowerTitle.startsWith('asm') || lowerTitle.startsWith('x86汇编')) {
                     courseName = 'x86汇编语言';
+                } else if (lowerTitle.startsWith('计算机体系结构')) {
+                    courseName = '计算机体系结构课程笔记';
                 }
                 
                 if (!acc[courseName]) {
