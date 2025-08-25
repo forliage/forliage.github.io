@@ -446,5 +446,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-25-asm03-2.html",
       "abstract": "x86汇编03-2:寄存器与端口"
+    },
+    {
+      "title": "x86汇编04:汇编器",
+      "date": "2025-08-25",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-25-asm04.html",
+      "abstract": "x86汇编04:汇编器"
     }
   ];
