@@ -453,5 +453,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-25-asm04.html",
       "abstract": "x86汇编04:汇编器"
+    },
+    {
+      "title": "x86汇编05-1:指令结构与数据传送指令",
+      "date": "2025-08-25",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-25-asm05-1.html",
+      "abstract": "x86汇编05-1:指令结构与数据传送指令"
     }
   ];
