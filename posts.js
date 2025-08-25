@@ -516,5 +516,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-25-asm10-1.html",
       "abstract": "x86汇编10-1:保护模式基础"
+    },
+    {
+      "title": "x86汇编10-2:保护模式进阶",
+      "date": "2025-08-25",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-25-asm10-2.html",
+      "abstract": "x86汇编10-2:保护模式进阶"
     }
   ];
