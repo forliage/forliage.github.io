@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>x86汇编05-4:字符串与控制转移指令</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="x86%E6%B1%87%E7%BC%9605-4%E5%AD%97%E7%AC%A6%E4%B8%B2%E4%B8%8E%E6%8E%A7%E5%88%B6%E8%BD%AC%E7%A7%BB%E6%8C%87%E4%BB%A4">x86汇编05-4:字符串与控制转移指令</h1>
+                <h3 id="1-%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%93%8D%E4%BD%9C%E6%8C%87%E4%BB%A4-string-instructions"><strong>1 字符串操作指令 (String Instructions)</strong></h3>
+                <p><strong>设计的核心哲学：自动化</strong>
+                在高级语言中，<code>memcpy</code>, <code>memset</code>, <code>strcmp</code> 等函数无处不在。这些操作的共同点是：它们都在一块内存上进行重复性的操作。Intel的设计师们意识到，如果能将这些重复的软件循环（<code>loop</code>, <code>dec cx</code>, <code>inc si</code>, <code>inc di</code>）固化到CPU的微码（microcode）中，用一条指令来触发，将能极大地提升性能。这就是字符串指令的由来。</p>
+                <p><strong>参与者（The Cast of Characters）:</strong>
+                所有字符串指令都依赖于一组固定的寄存器，你必须在使用前正确设置它们：</p>
+                <ul>
+                <li><strong><code>SI</code> / <code>ESI</code></strong>: <strong>源变址寄存器 (Source Index)</strong>。永远指向源操作数。段地址默认为 <code>DS</code>。</li>
+                <li><strong><code>DI</code> / <code>EDI</code></strong>: <strong>目的变址寄存器 (Destination Index)</strong>。永远指向目的操作数。段地址默认为 <code>ES</code>。<strong>注意是ES，不是DS！</strong> 你必须确保<code>ES</code>指向了正确的目标段。</li>
+                <li><strong><code>CX</code> / <code>ECX</code></strong>: <strong>计数器 (Counter)</strong>。用于<code>REP</code>前缀，决定了操作要重复多少次。</li>
+                <li><strong><code>DF</code> (Direction Flag)</strong>: <strong>方向标志</strong>。在<code>FLAGS</code>寄存器中，由你主动设置。
+                <ul>
+                <li><code>CLD</code> (Clear Direction Flag) -&gt; <code>DF=0</code> (推荐的默认状态)。<code>SI</code>和<code>DI</code>在每次操作后<strong>自动增加</strong>。</li>
+                <li><code>STD</code> (Set Direction Flag) -&gt; <code>DF=1</code>。<code>SI</code>和<code>DI</code>在每次操作后<strong>自动减少</strong>。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="11-%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%A4%8D%E5%88%B6%E6%8C%87%E4%BB%A4-movsb-movsw-movsd-%E4%B8%8E-rep-%E5%89%8D%E7%BC%80"><strong>1.1 字符串复制指令 (<code>MOVSB</code>, <code>MOVSW</code>, <code>MOVSD</code>) 与 <code>REP</code> 前缀</strong></h4>
+                <ul>
+                <li><strong><code>MOVSB/W/D</code> (Move String Byte/Word/Doubleword)</strong>
+                <ul>
+                <li><strong>高级描述</strong>: 从<code>DS:SI</code>复制一个字节/字/双字到<code>ES:DI</code>。</li>
+                <li><strong>CPU/架构层面</strong>: 这是一条“复合”微码指令。它的原子操作是：
+                <ol>
+                <li><code>MOV byte/word/dword ptr [ES:DI], [DS:SI]</code></li>
+                <li>根据<code>DF</code>标志位和操作宽度(1, 2, or 4)，更新<code>SI</code>和<code>DI</code>。</li>
+                </ol>
+                </li>
+                </ul>
+                </li>
+                <li><strong><code>REP</code> (Repeat) 前缀</strong>
+                <ul>
+                <li><strong>高级描述</strong>: 当<code>CX</code>不为0时，重复执行其后的字符串指令。</li>
+                <li><strong>CPU/架构层面</strong>: <code>REP</code>不是一条独立的指令，它是一个<strong>前缀字节</strong>，会改变下一条指令的行为。CPU看到<code>REP MOVSB</code>后，会进入一个特殊的、由硬件控制的高速循环状态：
+                <ol>
+                <li>执行<code>MOVSB</code>的微码。</li>
+                <li><code>DEC CX</code>。</li>
+                <li>如果<code>CX != 0</code>，则回到第1步。
+                这个循环完全在CPU内部进行，不需要从内存中反复取指、译码，因此效率远高于软件循环。</li>
+                </ol>
+                </li>
+                </ul>
+                </li>
+                <li><strong>系统层面</strong>: 这就是C语言标准库函数 <code>memcpy</code> 的最底层、最高效的实现。</li>
+                <li><strong>例子</strong>: 将 <code>source_buffer</code> 中的100个字节复制到 <code>dest_buffer</code><pre class="hljs"><code><div>.DATA
+                    source_buffer DB 100 DUP('S')
+                    dest_buffer   DB 100 DUP(?)
+                .CODE
+                    ; --- 设置段寄存器 ---
+                    MOV AX, @DATA
+                    MOV DS, AX
+                    MOV ES, AX      ; 必须确保DS和ES都指向数据段
+
+                    ; --- 设置参与者 ---
+                    LEA SI, [source_buffer] ; 源地址
+                    LEA DI, [dest_buffer]   ; 目标地址
+                    MOV CX, 100             ; 计数器
+                    CLD                     ; 确保从低地址向高地址复制
+
+                    ; --- 执行 ---
+                    REP MOVSB       ; 一条指令完成100字节的复制
+                </div></code></pre>
+                </li>
+                </ul>
+                <h4 id="12-%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%AF%94%E8%BE%83%E6%8C%87%E4%BB%A4-cmpsbwd-%E4%B8%8E-reperepne-%E5%89%8D%E7%BC%80"><strong>1.2 字符串比较指令 (<code>CMPSB/W/D</code>) 与 <code>REPE</code>/<code>REPNE</code> 前缀</strong></h4>
+                <ul>
+                <li><strong><code>CMPSB/W/D</code> (Compare String ...)</strong>
+                <ul>
+                <li><strong>高级描述</strong>: 比较<code>DS:SI</code>和<code>ES:DI</code>处的数据，并根据结果设置标志位。</li>
+                <li><strong>CPU/架构层面</strong>: 类似<code>CMP [DS:SI], [ES:DI]</code>，然后更新<code>SI</code>和<code>DI</code>。</li>
+                </ul>
+                </li>
+                <li><strong><code>REPE</code>/<code>REPZ</code> (Repeat while Equal / Repeat while Zero)</strong>
+                <ul>
+                <li><strong>高级描述</strong>: 当<code>CX != 0</code> <strong>并且</strong> <code>ZF == 1</code> (表示上次比较结果相等)时，重复。</li>
+                </ul>
+                </li>
+                <li><strong><code>REPNE</code>/<code>REPNZ</code> (Repeat while Not Equal / Repeat while Not Zero)</strong>
+                <ul>
+                <li><strong>高级描述</strong>: 当<code>CX != 0</code> <strong>并且</strong> <code>ZF == 0</code> (表示上次比较结果不相等)时，重复。</li>
+                </ul>
+                </li>
+                <li><strong>系统层面</strong>: <code>REPE CMPSB</code> 是 <code>memcmp</code> 的底层实现。循环退出的条件有两个：要么<code>CX</code>减到0（表示所有字节都相等），要么<code>ZF</code>变为0（表示找到了第一个不相等的字节）。</li>
+                <li><strong>例子</strong>: 比较两个字符串 <code>str1</code> 和 <code>str2</code> (最多比较50个字节)<pre class="hljs"><code><div>; (DS, ES, SI, DI, CX设置同上)
+                LEA SI, [str1]
+                LEA DI, [str2]
+                MOV CX, 50
+                CLD
+                REPE CMPSB      ; 重复比较，直到找到不同或CX=0
+
+                ; --- 检查结果 ---
+                JE strings_are_equal ; 如果循环是因为CX=0而结束 (ZF仍然为1)，说明相等
+                ; 否则，就是因为找到了不同
+                ; 此时 SI 和 DI 指向了第一个不相等字符的下一个位置
+                </div></code></pre>
+                </li>
+                </ul>
+                <h4 id="13-%E6%90%9C%E7%B4%A2%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%8C%87%E4%BB%A4-scasbwd"><strong>1.3 搜索字符串指令 (<code>SCASB/W/D</code>)</strong></h4>
+                <ul>
+                <li><strong><code>SCASB/W/D</code> (Scan String ...)</strong>
+                <ul>
+                <li><strong>高级描述</strong>: 将累加器(<code>AL</code>/<code>AX</code>/<code>EAX</code>)中的值与<code>ES:DI</code>处的数据进行比较，并设置标志位。</li>
+                <li><strong>CPU/架构层面</strong>: 类似<code>CMP [ES:DI], AL/AX/EAX</code>，然后更新<code>DI</code>。</li>
+                </ul>
+                </li>
+                <li><strong>系统层面</strong>: <code>REPNE SCASB</code> 是 <code>strlen</code> (计算空结尾字符串长度) 的经典实现。</li>
+                <li><strong>例子</strong>: 计算一个以0结尾的字符串的长度<pre class="hljs"><code><div>; (DS, ES, DI设置同上)
+                LEA DI, [my_string] ; 指向要计算的字符串
+                MOV CX, 0FFFFh      ; 设置一个足够大的计数器
+                XOR AL, AL          ; 将要搜索的字符(0)放入AL
+                CLD
+                REPNE SCASB         ; 重复扫描，直到找到AL(0)或CX=0
+
+                ; --- 计算长度 ---
+                ; 循环结束后, CX = 0FFFFh - (length + 1)
+                ; 所以 length = 0FFFFh - CX - 1
+                MOV AX, 0FFFFh
+                SUB AX, CX
+                DEC AX              ; AX中就是字符串长度
+                </div></code></pre>
+                </li>
+                </ul>
+                <h4 id="14-%E5%86%99%E5%85%A5%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%8C%87%E4%BB%A4-stosbwd"><strong>1.4 写入字符串指令 (<code>STOSB/W/D</code>)</strong></h4>
+                <ul>
+                <li><strong><code>STOSB/W/D</code> (Store String ...)</strong>
+                <ul>
+                <li><strong>高级描述</strong>: 将累加器(<code>AL</code>/<code>AX</code>/<code>EAX</code>)中的值存入<code>ES:DI</code>。</li>
+                <li><strong>CPU/架构层面</strong>: <code>MOV [ES:DI], AL/AX/EAX</code>，然后更新<code>DI</code>。</li>
+                </ul>
+                </li>
+                <li><strong>系统层面</strong>: <code>REP STOSB</code> 是 <code>memset</code> 的底层实现。</li>
+                <li><strong>例子</strong>: 将一个1024字节的缓冲区清零<pre class="hljs"><code><div>; (DS, ES, DI设置同上)
+                LEA DI, [buffer]
+                MOV CX, 1024
+                XOR AL, AL      ; 将要写入的值(0)放入AL
+                CLD
+                REP STOSB       ; 一条指令完成1024字节的填充
+                </div></code></pre>
+                </li>
+                </ul>
+                <h4 id="15-%E8%AF%BB%E5%8F%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%8C%87%E4%BB%A4-lodsbwd"><strong>1.5 读取字符串指令 (<code>LODSB/W/D</code>)</strong></h4>
+                <ul>
+                <li><strong><code>LODSB/W/D</code> (Load String ...)</strong>
+                <ul>
+                <li><strong>高级描述</strong>: 从<code>DS:SI</code>处加载一个数据到累加器(<code>AL</code>/<code>AX</code>/<code>EAX</code>)。</li>
+                <li><strong>CPU/架构层面</strong>: <code>MOV AL/AX/EAX, [DS:SI]</code>，然后更新<code>SI</code>。</li>
+                </ul>
+                </li>
+                <li><strong>系统层面</strong>: 这条指令不常与<code>REP</code>配合（因为每次都会覆盖AL），但它在软件循环中处理字符串时非常方便，因为它自动更新<code>SI</code>指针。</li>
+                </ul>
+                <h3 id="2-%E6%8E%A7%E5%88%B6%E8%BD%AC%E7%A7%BB%E6%8C%87%E4%BB%A4-control-transfer-instructions"><strong>2 控制转移指令 (Control Transfer Instructions)</strong></h3>
+                <p>这些指令通过直接或间接地修改指令指针寄存器 <code>IP</code> (或 <code>EIP</code>/<code>RIP</code>) 和/或代码段寄存器 <code>CS</code> 来改变程序的执行流程。</p>
+                <h4 id="21-%E6%97%A0%E6%9D%A1%E4%BB%B6%E8%B7%B3%E8%BD%AC%E6%8C%87%E4%BB%A4-jmp"><strong>2.1 无条件跳转指令: <code>JMP</code></strong></h4>
+                <ul>
+                <li><strong>高级描述</strong>: 立即、无条件地跳转到目标地址执行。</li>
+                <li><strong>CPU/架构层面</strong>: 直接修改 <code>IP</code> 和/或 <code>CS</code>。</li>
+                <li><strong>类型</strong>:
+                <ul>
+                <li><strong><code>short dest</code> (短跳转)</strong>: 目标地址与当前指令的距离在 <strong>-128到+127字节</strong> 之间。机器码只有2字节，非常高效。<code>dest</code>是一个8位有符号偏移量。<code>IP = IP + offset8</code>。</li>
+                <li><strong><code>near ptr dest</code> (近跳转)</strong>: <strong>段内跳转</strong>。目标地址在当前代码段内，但距离超过了short的范围。<code>dest</code>是一个16位或32位偏移量。<code>IP = IP + offset16/32</code>。这是最常用的跳转类型。</li>
+                <li><strong><code>far ptr dest</code> (远跳转)</strong>: <strong>段间跳转</strong>。跳转到另一个代码段。指令中包含了目标段地址和偏移地址。<code>CS = new_segment</code>, <code>IP = new_offset</code>。在现代平坦内存模型操作系统中，应用程序很少使用，但在操作系统内核或引导加载程序中用于切换代码段。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="22-%E6%9D%A1%E4%BB%B6%E8%B7%B3%E8%BD%AC%E6%8C%87%E4%BB%A4-jcc"><strong>2.2 条件跳转指令: <code>Jcc</code></strong></h4>
+                <ul>
+                <li><strong>高级描述</strong>: 根据<code>FLAGS</code>寄存器中的一个或多个标志位的状态，<strong>决定是否</strong>进行一个<strong>短跳转</strong>。</li>
+                <li><strong>CPU/架构层面</strong>: CPU检查<code>FLAGS</code>寄存器。如果条件满足，就执行一个 <code>JMP short dest</code>；否则，什么也不做，继续执行下一条指令。</li>
+                <li><strong>系统层面</strong>: 这是实现所有<code>if-else</code>, <code>switch-case</code>, <code>while/for</code>循环判断的基础。它总是跟在 <code>CMP</code> 或 <code>TEST</code> 等会修改标志位的指令之后。</li>
+                <li><strong>条件码 <code>cc</code> 分类</strong>:
+                <ul>
+                <li><strong>单个标志</strong>: <code>JZ</code> (Jump if Zero, ZF=1), <code>JNZ</code> (ZF=0), <code>JS</code> (SF=1), <code>JC</code> (CF=1), ...</li>
+                <li><strong>无符号比较 (基于 <code>CF</code> 和 <code>ZF</code>)</strong>:
+                <ul>
+                <li><code>JA</code> (Jump if Above) / <code>JNBE</code> (Not Below or Equal)</li>
+                <li><code>JB</code> (Jump if Below) / <code>JNAE</code> (Not Above or Equal)</li>
+                </ul>
+                </li>
+                <li><strong>有符号比较 (基于 <code>SF</code>, <code>OF</code> 和 <code>ZF</code>)</strong>:
+                <ul>
+                <li><code>JG</code> (Jump if Greater) / <code>JNLE</code> (Not Less or Equal)</li>
+                <li><code>JL</code> (Jump if Less) / <code>JNGE</code> (Not Greater or Equal)</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li><strong>例子</strong>: 实现 <code>if (eax &gt; ebx)</code><pre class="hljs"><code><div>CMP EAX, EBX
+                JLE skip_if_body   ; Jump if Less or Equal (eax &lt;= ebx)
+                ; --- if body ---
+                ; eax &gt; ebx 的代码
+                ...
+                skip_if_body:
+                ; --- afrer if ---
+                </div></code></pre>
+                </li>
+                </ul>
+                <h4 id="23-%E5%BE%AA%E7%8E%AF%E6%8C%87%E4%BB%A4"><strong>2.3 循环指令</strong></h4>
+                <ul>
+                <li><strong>高级描述</strong>: <code>JMP short</code> 和 <code>DEC CX</code> 的CISC风格组合。</li>
+                <li><strong>CPU/架构层面</strong>: <code>LOOP</code> 指令的微码会先递减<code>CX</code>，然后检查<code>CX</code>是否为0。</li>
+                <li><strong>指令</strong>:
+                <ul>
+                <li><strong><code>LOOP dest</code></strong>: <code>DEC CX; if(CX != 0) JMP short dest;</code></li>
+                <li><strong><code>LOOPZ</code>/<code>LOOPE dest</code></strong>: <code>DEC CX; if(CX != 0 &amp;&amp; ZF == 1) JMP short dest;</code></li>
+                <li><strong><code>LOOPNZ</code>/<code>LOOPNE dest</code></strong>: <code>DEC CX; if(CX != 0 &amp;&amp; ZF == 0) JMP short dest;</code></li>
+                </ul>
+                </li>
+                <li><strong>系统层面</strong>: 提供了一种比<code>DEC CX</code>/<code>JNZ</code>组合更紧凑（机器码更短）的循环方式。但现代CPU的流水线和分支预测机制非常先进，简单的<code>DEC/JNZ</code>组合性能可能反而更好。<code>LOOP</code>指令主要是历史遗产。</li>
+                </ul>
+                <h4 id="24-%E5%AD%90%E7%A8%8B%E5%BA%8F%E8%B0%83%E7%94%A8%E4%B8%8E%E8%BF%94%E5%9B%9E%E6%8C%87%E4%BB%A4"><strong>2.4 子程序调用与返回指令</strong></h4>
+                <p>这是实现函数/过程的基石，是结构化编程的核心。</p>
+                <ul>
+                <li>
+                <p><strong><code>CALL dest</code></strong></p>
+                <ul>
+                <li><strong>高级描述</strong>: 调用一个子程序。</li>
+                <li><strong>CPU/架构层面 (关键！)</strong>: <code>CALL</code>执行两个原子操作：
+                <ol>
+                <li><strong>压栈返回地址</strong>: 将<strong>下一条指令</strong>的地址压入堆栈 (<code>PUSH IP</code> 或 <code>PUSH CS</code> + <code>PUSH IP</code>)。</li>
+                <li><strong>跳转</strong>: 执行一个 <code>JMP</code> 到目标地址 <code>dest</code>。</li>
+                </ol>
+                </li>
+                <li><code>near</code>和<code>far</code>版本的区别与<code>JMP</code>相同。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong><code>RET [imm16]</code> (Return from Procedure)</strong></p>
+                <ul>
+                <li><strong>高级描述</strong>: 从子程序返回。</li>
+                <li><strong>CPU/架构层面</strong>: <code>RET</code>执行一个核心操作：
+                <ol>
+                <li><strong>出栈返回地址</strong>: 从栈顶弹出一个地址到<code>IP</code> (<code>POP IP</code> 或 <code>POP IP</code> + <code>POP CS</code>)。</li>
+                </ol>
+                </li>
+                <li><strong>可选的 <code>imm16</code></strong>: <code>RET 8</code> 表示在返回<strong>之后</strong>，再将堆栈指针<code>SP</code>增加8。</li>
+                <li><strong>系统层面 (调用约定)</strong>: 这个<code>imm16</code>是区分不同<strong>调用约定 (Calling Convention)</strong> 的关键。
+                <ul>
+                <li><strong>cdecl</strong> (C语言默认): <strong>调用者</strong>负责清理堆栈上的参数。子程序用 <code>RET</code>。</li>
+                <li><strong>stdcall</strong> (Win32 API): <strong>被调用者</strong>负责清理堆栈。子程序用 <code>RET imm16</code>，其中<code>imm16</code>是参数的总字节数。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p><strong><code>RETF</code> (Return Far)</strong>: 远返回，从堆栈弹出<code>IP</code>和<code>CS</code>。</p>
+                </li>
+                <li>
+                <p><strong>例子</strong>: 一个简单的函数调用</p>
+                <pre class="hljs"><code><div>main:
+                    PUSH 10         ; 参数2
+                    PUSH 5          ; 参数1
+                    CALL my_add     ; 1. PUSH address_after_call; 2. JMP my_add
+                address_after_call:
+                    ADD SP, 8       ; cdecl约定，调用者清理8字节参数
+                    ; AX中现在是返回值15
+                    ...
+                    
+                my_add:
+                    PUSH BP         ; 建立栈帧
+                    MOV BP, SP
+                    MOV AX, [BP+8]  ; 获取参数1 (5)
+                    ADD AX, [BP+12] ; 加上参数2 (10)
+                    POP BP          ; 恢复栈帧
+                    RET             ; POP address_after_call -&gt; IP
+                </div></code></pre>
+                </li>
+                </ul>
+                <h4 id="25-%E4%B8%AD%E6%96%AD%E5%92%8C%E4%B8%AD%E6%96%AD%E8%BF%94%E5%9B%9E%E6%8C%87%E4%BB%A4"><strong>2.5 中断和中断返回指令</strong></h4>
+                <p>中断是操作系统与硬件、应用程序与操作系统之间交互的核心机制。</p>
+                <ul>
+                <li>
+                <p><strong><code>INT imm8</code> (Software Interrupt)</strong></p>
+                <ul>
+                <li><strong>高级描述</strong>: 产生一个软件中断。</li>
+                <li><strong>CPU/架构层面 (比CALL更复杂)</strong>:
+                <ol>
+                <li><code>PUSH EFLAGS</code></li>
+                <li><code>PUSH CS</code></li>
+                <li><code>PUSH EIP</code></li>
+                <li>从<strong>中断描述符表 (IDT)</strong> 中查找第<code>imm8</code>号表项，获取中断服务程序的地址。</li>
+                <li>跳转到该地址。硬件通常会自动清除<code>IF</code>标志位，以防止中断嵌套。</li>
+                </ol>
+                </li>
+                <li><strong>系统层面</strong>: 这是应用程序执行<strong>系统调用 (System Call)</strong> 的主要方式。例如，Linux的<code>INT 80h</code>，Windows的<code>INT 2Eh</code>。应用程序通过中断陷入(trap)内核模式，请求操作系统提供服务（如文件读写）。</li>
+                <li><strong><code>INT 3</code></strong>: 一个特殊的、单字节的中断，专用于<strong>断点 (Breakpoint)</strong>。调试器通过将代码替换为<code>INT 3</code> (<code>0xCC</code>)来设置断点。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong><code>INTO</code> (Interrupt on Overflow)</strong></p>
+                <ul>
+                <li><strong>高级描述</strong>: 如果<code>OF</code>标志位为1，则产生4号中断。</li>
+                <li><strong>系统层面</strong>: 一个用于捕获算术溢出的专用指令，但现代编译器和操作系统很少使用它。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong><code>IRET</code>/<code>IRETD</code> (Interrupt Return)</strong></p>
+                <ul>
+                <li><strong>高级描述</strong>: 从中断服务程序返回。</li>
+                <li><strong>CPU/架构层面</strong>: <code>RET</code>的“超级版”，它按相反的顺序恢复所有状态：
+                <ol>
+                <li><code>POP EIP</code></li>
+                <li><code>POP CS</code></li>
+                <li><code>POP EFLAGS</code></li>
+                </ol>
+                </li>
+                <li><strong>系统层面</strong>: 恢复<code>EFLAGS</code>是至关重要的，因为它恢复了中断前的中断使能状态(<code>IF</code>)以及所有算术标志。这确保了被中断的程序能无缝地继续执行。</li>
+                </ul>
+                </li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
