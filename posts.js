@@ -421,23 +421,30 @@ var postsData = [
     },
     {
       "title": "x86汇编01:Introduction",
-      "date": "2025-08-24",
+      "date": "2025-08-25",
       "category": "学习笔记",
       "path": "_posts/2025-08-25-asm01.html",
       "abstract": "x86汇编01:Introduction"
     },
     {
       "title": "x86汇编02:数据",
-      "date": "2025-08-24",
+      "date": "2025-08-25",
       "category": "学习笔记",
       "path": "_posts/2025-08-25-asm02.html",
       "abstract": "x86汇编02:数据"
     },
     {
       "title": "x86汇编03-1:内存",
-      "date": "2025-08-24",
+      "date": "2025-08-25",
       "category": "学习笔记",
       "path": "_posts/2025-08-25-asm03-1.html",
       "abstract": "x86汇编03-1:内存"
+    },
+    {
+      "title": "x86汇编03-2:寄存器与端口",
+      "date": "2025-08-25",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-25-asm03-2.html",
+      "abstract": "x86汇编03-2:寄存器与端口"
     }
   ];
