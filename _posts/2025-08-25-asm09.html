@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>x86汇编09:与系统和高阶语言的交互</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="x86%E6%B1%87%E7%BC%9609%E4%B8%8E%E7%B3%BB%E7%BB%9F%E5%92%8C%E9%AB%98%E9%98%B6%E8%AF%AD%E8%A8%80%E7%9A%84%E4%BA%A4%E4%BA%92">x86汇编09:与系统和高阶语言的交互</h1>
+                <h3 id="%E5%BC%95%E8%A8%80%E7%A8%8B%E5%BA%8F%E7%9A%84%E5%B1%9E%E6%80%A7"><strong>引言：程序的属性</strong></h3>
+                <p>一个程序并非孤立地运行在硬件上。它运行在一个由<strong>操作系统（OS）<strong>精心管理的“社会”之中。在这个社会里，操作系统是最高管理者，它掌管着所有的公共资源，如内存、文件系统、网络设备等。我们的程序如果想使用这些资源，不能直接“抢占”，而必须通过一套规范的流程向OS“申请”。这套流程，就是</strong>系统调用（System Call）</strong>。</p>
+                <p>同时，在现代软件开发中，纯汇编项目非常罕见。汇编语言的角色，更多的是作为一种“特种兵”，与C/C++等“主力部队”协同作战。要实现这种协同，两种语言之间必须有一个共同遵守的“战场协议”。</p>
+                <p>本讲，我们将学习如何成为一个遵纪守法的“程序公民”，以及一个善于合作的“团队成员”。</p>
+                <h3 id="1-%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E4%B8%8E%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C-%E4%B8%8Eos%E4%BA%A4%E4%BA%92"><strong>1 内存分配与文件操作 (与OS交互)</strong></h3>
+                <p><strong>注意</strong>: 本章的例子将使用经典的 <strong>DOS <code>INT 21h</code></strong> 系统调用。为什么？因为DOS的API简单、直接，能让我们清晰地看到系统调用的本质，而不会被现代操作系统（如Windows/Linux）复杂的虚拟内存和多层API所迷惑。<strong>请大家重点理解其背后的设计思想，这些思想在所有操作系统中都是相通的。</strong></p>
+                <h4 id="11-%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D-memory-allocation"><strong>1.1 内存分配 (Memory Allocation)</strong></h4>
+                <p>在之前的程序中，我们所需的数据空间都是在编译时静态分配的（在<code>.DATA</code>段）。但如果程序在运行时需要一块大小不确定的内存（例如，根据用户输入读取一个文件），就需要<strong>动态内存分配</strong>。</p>
+                <ul>
+                <li>
+                <p><strong>设计哲学：资源委托管理</strong>
+                程序本身不应该、也没有能力去管理整个系统的物理内存。它不知道哪些内存空闲，哪些已被占用。这项工作必须由OS内核统一管理。程序只能向OS提出请求：“我需要 N 字节的内存”，OS则从它管理的“堆（Heap）”内存中划分出一块，并返回这块内存的<strong>地址</strong>。如果OS无法满足请求（比如内存不足），它会返回一个错误信息。</p>
+                </li>
+                <li>
+                <p><strong>DOS下的实现 (<code>INT 21h, AH=48h</code>)</strong></p>
+                <ul>
+                <li><strong>功能</strong>: 分配内存块。</li>
+                <li><strong>调用前</strong>:
+                <ul>
+                <li><code>AH = 48h</code> (功能号)</li>
+                <li><code>BX</code> = 需要分配的**段落（Paragraph）**数。1个段落 = 16字节。</li>
+                </ul>
+                </li>
+                <li><strong>返回后</strong>:
+                <ul>
+                <li><strong>成功</strong>: <code>CF = 0</code>，<code>AX</code> = 分配到的内存块的<strong>段地址</strong>。</li>
+                <li><strong>失败</strong>: <code>CF = 1</code>，<code>AX</code> = 错误码，<code>BX</code> = 可用的最大段落数。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>例子</strong>: 申请1KB (1024字节) 的内存</p>
+                <pre class="hljs"><code><div>; 1KB = 1024 bytes = 1024 / 16 = 64 paragraphs
+                MOV BX, 64
+                MOV AH, 48h
+                INT 21h
+
+                JC allocation_failed ; 如果CF=1, 跳转到错误处理
+
+                ; --- 成功 ---
+                ; AX 中是分配到的内存段地址
+                MOV ES, AX         ; 将段地址放入ES，准备访问这块新内存
+
+                ; 现在可以通过 ES:[offset] 来使用这1KB内存
+                MOV DI, 0
+                MOV BYTE PTR ES:[DI], 'H' ; 在新内存的第一个字节写入 'H'
+                ...
+
+                ; --- 使用完毕后，必须释放 ---
+                MOV ES, AX         ; ES 中需要有要释放的段地址
+                MOV AH, 49h        ; 功能号：释放内存
+                INT 21h
+                JC free_failed     ; 检查释放是否成功
+
+                JMP continue_program
+
+                allocation_failed:
+                ; ... 打印错误信息 ...
+                continue_program:
+                ...
+                </div></code></pre>
+                </li>
+                <li>
+                <p><strong>CPU/架构层面</strong>: <code>INT 21h</code>指令触发了一个到DOS内核的<strong>软中断</strong>。CPU自动保存<code>FLAGS</code>, <code>CS</code>, <code>IP</code>，然后跳转到DOS的内存管理代码。DOS内核执行分配算法，完成后，将结果（段地址或错误码）放入<code>AX</code>和<code>CF</code>，然后执行<code>IRET</code>返回。我们的程序从<code>INT 21h</code>的下一条指令恢复执行，并检查<code>AX</code>和<code>CF</code>来获知结果。</p>
+                </li>
+                </ul>
+                <h4 id="12-%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C-file-operations"><strong>1.2 文件操作 (File Operations)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>设计哲学：句柄抽象 (Handle Abstraction)</strong>
+                文件系统是一个极其复杂的结构。OS为了向应用程序隐藏这种复杂性，提供了一个简洁的抽象模型。程序不直接与文件名、目录或磁盘扇区打交道，而是通过一个称为<strong>文件句柄 (File Handle)</strong> 的小整数。</p>
+                <ol>
+                <li>你用文件名<strong>打开 (Open)</strong> 或<strong>创建 (Create)</strong> 一个文件。</li>
+                <li>OS成功后，会返回一个唯一的文件句柄。</li>
+                <li>后续所有对该文件的<strong>读 (Read)</strong>、<strong>写 (Write)</strong>、<strong>定位 (Seek)</strong> 操作，都通过这个句柄进行。</li>
+                <li>操作完成后，你用句柄<strong>关闭 (Close)</strong> 文件，释放资源。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>DOS下的核心文件操作 (<code>INT 21h</code>)</strong></p>
+                <ul>
+                <li><strong>创建文件 (<code>AH = 3Ch</code>)</strong>:
+                <ul>
+                <li><code>DS:DX</code> -&gt; 指向以0结尾的文件名字符串。</li>
+                <li><code>CX</code> -&gt; 文件属性（0为普通文件）。</li>
+                <li>成功: <code>CF=0</code>, <code>AX</code>=文件句柄。失败: <code>CF=1</code>, <code>AX</code>=错误码。</li>
+                </ul>
+                </li>
+                <li><strong>打开文件 (<code>AH = 3Dh</code>)</strong>:
+                <ul>
+                <li><code>DS:DX</code> -&gt; 文件名。</li>
+                <li><code>AL</code> -&gt; 打开模式（0=读，1=写，2=读写）。</li>
+                <li>成功/失败同上。</li>
+                </ul>
+                </li>
+                <li><strong>写文件 (<code>AH = 40h</code>)</strong>:
+                <ul>
+                <li><code>BX</code> -&gt; 文件句柄。</li>
+                <li><code>DS:DX</code> -&gt; 指向要写入的数据缓冲区。</li>
+                <li><code>CX</code> -&gt; 要写入的字节数。</li>
+                <li>成功: <code>CF=0</code>, <code>AX</code>=实际写入的字节数。失败: <code>CF=1</code>, <code>AX</code>=错误码。</li>
+                </ul>
+                </li>
+                <li><strong>读文件 (<code>AH = 3Fh</code>)</strong>:
+                <ul>
+                <li><code>BX</code> -&gt; 文件句柄。</li>
+                <li><code>DS:DX</code> -&gt; 存放读出数据的缓冲区地址。</li>
+                <li><code>CX</code> -&gt; 要读取的字节数。</li>
+                <li>成功: <code>CF=0</code>, <code>AX</code>=实际读到的字节数（可能小于<code>CX</code>，如到文件末尾）。失败: <code>CF=1</code>, <code>AX</code>=错误码。</li>
+                </ul>
+                </li>
+                <li><strong>关闭文件 (<code>AH = 3Eh</code>)</strong>:
+                <ul>
+                <li><code>BX</code> -&gt; 文件句柄。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>例子</strong>: 创建一个文件<code>test.txt</code>，写入&quot;Hello&quot;，然后关闭。</p>
+                <pre class="hljs"><code><div>.DATA
+                    filename DB 'test.txt', 0
+                    message  DB 'Hello'
+                    msg_len  EQU $ - message
+                    file_handle DW ?
+
+                .CODE
+                    ; --- 创建文件 ---
+                    MOV DX, OFFSET filename
+                    MOV CX, 0           ; 普通文件属性
+                    MOV AH, 3Ch
+                    INT 21h
+                    JC file_error
+                    MOV [file_handle], AX ; 保存文件句柄
+
+                    ; --- 写入文件 ---
+                    MOV BX, [file_handle]
+                    MOV DX, OFFSET message
+                    MOV CX, msg_len
+                    MOV AH, 40h
+                    INT 21h
+                    JC file_error
+                    ; 应该比较 AX 和 msg_len，确保所有字节都已写入
+
+                    ; --- 关闭文件 ---
+                    MOV BX, [file_handle]
+                    MOV AH, 3Eh
+                    INT 21h
+                    JC file_error
+
+                    JMP exit_program
+                file_error:
+                    ; ... 错误处理 ...
+                exit_program:
+                    ; ... 正常退出 ...
+                </div></code></pre>
+                </li>
+                </ul>
+                <h3 id="2-%E6%B7%B7%E5%90%88%E8%AF%AD%E8%A8%80%E7%BC%96%E7%A8%8B-bridging-worlds"><strong>2 混合语言编程 (Bridging Worlds)</strong></h3>
+                <h4 id="21-%E5%9C%A8c%E8%AF%AD%E8%A8%80%E6%BA%90%E7%A0%81%E4%B8%AD%E5%B5%8C%E5%85%A5%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4-inline-assembly"><strong>2.1 在C语言源码中嵌入汇编指令 (Inline Assembly)</strong></h4>
+                <ul>
+                <li><strong>设计哲学：外科手术式的优化</strong>
+                为什么C编译器要提供这个功能？因为在99%的情况下，C代码足够高效且可移植。但在那1%的极端性能热点、或需要直接访问硬件（如<code>IN</code>/<code>OUT</code>指令）、或利用CPU特定指令（如SIMD指令）的场景下，内联汇编提供了一个“逃生舱口”，允许程序员进行精准、底层的优化，而无需创建和链接单独的汇编文件。</li>
+                <li><strong>权衡</strong>: 获得极致性能和控制力的代价是<strong>丧失了可移植性</strong>（代码与特定CPU架构绑定）和<strong>增加了维护难度</strong>。</li>
+                </ul>
+                <h5 id="211-%E5%9C%A8tc%E6%BA%90%E7%A0%81%E4%B8%AD%E5%B5%8C%E5%85%A5%E6%B1%87%E7%BC%96-%E5%8E%86%E5%8F%B2"><strong>2.1.1 在TC源码中嵌入汇编 (历史)</strong></h5>
+                <ul>
+                <li>Turbo C 使用 <code>asm</code> 关键字。<pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+                    <span class="hljs-keyword">asm</span> {
+                        mov ax, <span class="hljs-number">10</span>
+                        mov bx, <span class="hljs-number">20</span>
+                        add ax, bx
+                    }
+                }
+                </div></code></pre>
+                </li>
+                </ul>
+                <h5 id="212-%E5%9C%A8vcgcc%E6%BA%90%E7%A0%81%E4%B8%AD%E5%B5%8C%E5%85%A5%E6%B1%87%E7%BC%96-%E7%8E%B0%E4%BB%A3"><strong>2.1.2 在VC/GCC源码中嵌入汇编 (现代)</strong></h5>
+                <ul>
+                <li>Visual C++ 和 GCC 使用 <code>__asm</code> 或 <code>asm</code>。现代语法更加强大，可以直接引用C语言的变量。</li>
+                <li><strong>例子</strong>: 用内联汇编实现一个加法函数。<pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span>
+
+                <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">asm_add</span><span class="hljs-params">(<span class="hljs-keyword">int</span> a, <span class="hljs-keyword">int</span> b)</span> </span>{
+                    <span class="hljs-keyword">int</span> sum = <span class="hljs-number">0</span>;
+                    __asm {
+                        mov eax, a      ; 将C变量a的值加载到eax
+                        add eax, b      ; 将C变量b的值加到eax
+                        mov sum, eax    ; 将结果eax存回C变量sum
+                    }
+                    <span class="hljs-keyword">return</span> sum; <span class="hljs-comment">// 实际上，可以直接通过eax返回，编译器知道</span>
+                }
+
+                <span class="hljs-comment">// 更优化的版本，利用eax作为返回值的约定</span>
+                <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">asm_add_optimized</span><span class="hljs-params">(<span class="hljs-keyword">int</span> a, <span class="hljs-keyword">int</span> b)</span> </span>{
+                    __asm {
+                        mov eax, a
+                        add eax, b
+                        <span class="hljs-comment">// 结果已经在eax中，函数返回时会自动使用eax</span>
+                    }
+                }
+
+                <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+                    <span class="hljs-keyword">int</span> result = asm_add_optimized(<span class="hljs-number">15</span>, <span class="hljs-number">30</span>); <span class="hljs-comment">// result will be 45</span>
+                    <span class="hljs-built_in">printf</span>(<span class="hljs-string">"Result: %d\n"</span>, result);
+                    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+                }
+                </div></code></pre>
+                </li>
+                <li><strong>CPU/架构层面</strong>: 编译器在解析<code>__asm</code>块时，会暂停自己的代码生成逻辑，几乎是原封不动地将汇编代码插入到生成的汇编文件中。它会智能地处理C变量的引用，将其转换为正确的基于栈帧（<code>[ebp+...]</code>）的内存访问。</li>
+                </ul>
+                <h4 id="22-%E7%94%A8c%E8%AF%AD%E8%A8%80%E8%B0%83%E7%94%A8%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9D%97%E4%B8%AD%E7%9A%84%E5%87%BD%E6%95%B0"><strong>2.2 用C语言调用汇编语言模块中的函数</strong></h4>
+                <p>这是更专业、更模块化的方法。我们将性能关键部分写成一个独立的汇编函数，然后从C语言中像调用普通C函数一样调用它。</p>
+                <ul>
+                <li>
+                <p><strong>设计哲学：接口与实现分离</strong>
+                这遵循了软件工程的基本原则。C程序（客户端）不需要知道汇编函数（服务端）的内部实现，它只需要知道函数的“接口”——函数名、参数和返回值。这种方式结构清晰，易于维护和团队协作。</p>
+                </li>
+                <li>
+                <p><strong>成功的关键：遵守“契约”</strong>
+                为了让C代码和汇编代码能够正确链接和通信，汇编函数必须严格遵守两个“契约”：</p>
+                <ol>
+                <li><strong>调用约定 (Calling Convention)</strong>: 必须与C编译器使用的约定完全一致（通常是 <strong><code>__cdecl</code></strong>）。这意味着：
+                <ul>
+                <li>参数从右到左压栈。</li>
+                <li>汇编函数<strong>不能</strong>自己清理堆栈（<code>RET</code>而非<code>RET n</code>）。</li>
+                <li>返回值通过<code>EAX</code>寄存器传递。</li>
+                <li>函数可以自由使用<code>EAX</code>, <code>ECX</code>, <code>EDX</code>。但如果使用了<code>EBX</code>, <code>ESI</code>, <code>EDI</code>, <code>EBP</code>，必须在函数返回前恢复它们的原值。</li>
+                </ul>
+                </li>
+                <li><strong>命名约定 (Name Mangling)</strong>: 大多数C编译器会在函数名的前面加上一个<strong>下划线 <code>_</code></strong>。因此，C语言中的<code>my_func</code>，在汇编中必须定义为<code>_my_func</code>。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>例子</strong>: 一个C程序调用汇编函数来计算 <code>a*b + c</code></p>
+                <p><strong>1. C源文件 (<code>main.c</code>)</strong></p>
+                <pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdio.h&gt;</span></span>
+
+                <span class="hljs-comment">// 声明外部的、用汇编编写的函数</span>
+                <span class="hljs-function"><span class="hljs-keyword">extern</span> <span class="hljs-keyword">int</span> <span class="hljs-title">calculate</span><span class="hljs-params">(<span class="hljs-keyword">int</span> a, <span class="hljs-keyword">int</span> b, <span class="hljs-keyword">int</span> c)</span></span>;
+
+                <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+                    <span class="hljs-keyword">int</span> result = calculate(<span class="hljs-number">10</span>, <span class="hljs-number">20</span>, <span class="hljs-number">30</span>); <span class="hljs-comment">// 10*20 + 30 = 230</span>
+                    <span class="hljs-built_in">printf</span>(<span class="hljs-string">"The result from ASM is: %d\n"</span>, result);
+                    <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+                }
+                </div></code></pre>
+                <p><strong>2. 汇编源文件 (<code>calc.asm</code>)</strong></p>
+                <pre class="hljs"><code><div>; 告诉汇编器我们要生成与C兼容的代码
+                .MODEL FLAT, C 
+
+                .CODE
+                    ; 声明这个函数对外部是可见的
+                    PUBLIC _calculate
+
+                _calculate PROC
+                    ; --- 建立栈帧 (cdecl契约的一部分) ---
+                    PUSH EBP
+                    MOV  EBP, ESP
+
+                    ; --- 从栈上获取参数 ---
+                    ; [EBP+8]  -&gt; a
+                    ; [EBP+12] -&gt; b
+                    ; [EBP+16] -&gt; c
+                    MOV EAX, [EBP+8]    ; EAX = a
+                    MOV ECX, [EBP+12]   ; ECX = b
+                    IMUL EAX, ECX       ; EAX = a * b
+                    ADD EAX, [EBP+16]   ; EAX = (a * b) + c
+
+                    ; 返回值已经在EAX中，符合cdecl约定
+
+                    ; --- 销毁栈帧 ---
+                    POP EBP
+                    RET                 ; 由调用者(C)清理堆栈
+                _calculate ENDP
+
+                END
+                </div></code></pre>
+                <p><strong>3. 编译和链接 (以GCC/MinGW为例)</strong></p>
+                <pre class="hljs"><code><div><span class="hljs-comment"># 1. 汇编 .asm 文件为 .o 目标文件</span>
+                nasm -f win32 calc.asm -o calc.o
+
+                <span class="hljs-comment"># 2. 编译 .c 文件</span>
+                gcc -c main.c -o main.o
+
+                <span class="hljs-comment"># 3. 将两个目标文件链接成一个可执行文件</span>
+                gcc main.o calc.o -o main.exe
+
+                <span class="hljs-comment"># 4. 运行</span>
+                ./main.exe
+                <span class="hljs-comment"># 输出: The result from ASM is: 230</span>
+                </div></code></pre>
+                </li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

@@ -502,5 +502,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-25-asm08.html",
       "abstract": "x86汇编08:中断程序设计"
+    },
+    {
+      "title": "x86汇编09:与系统和高阶语言的交互",
+      "date": "2025-08-25",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-25-asm09.html",
+      "abstract": "x86汇编09:与系统和高阶语言的交互"
     }
   ];
