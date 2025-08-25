@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>x86汇编01:Introduction</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="x86%E6%B1%87%E7%BC%9601introduction">x86汇编01:Introduction</h1>
+                <h3 id="1-%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%AF%AD%E8%A8%80%E7%9A%84%E5%B1%82%E7%BA%A7%E4%B8%8E%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6"><strong>1. 计算机语言的层级与设计哲学</strong></h3>
+                <p>要理解汇编语言是什么，我们不能孤立地看待它。我们必须将它置于整个计算机系统的宏大叙事中。计算机系统本质上是一个<strong>抽象层</strong>（Abstraction Layer）的堆叠，每一层都为上一层隐藏了不必要的复杂性，并提供清晰的服务接口。这是一种贯穿计算机科学始终的核心设计哲学。</p>
+                <p><strong>从设计者视角看这个层级：</strong></p>
+                <ul>
+                <li><strong>物理层 -&gt; 硬件逻辑层</strong>：我们不想直接和电压、电流打交道。于是，我们设计了逻辑门（与、或、非），将连续的物理信号抽象为离散的逻辑值（0和1）。这是第一次伟大的抽象。</li>
+                <li><strong>硬件逻辑层 -&gt; 微体系结构层</strong>：我们不想每次都从逻辑门开始搭建。于是，我们将它们组合成更有意义的部件，如算术逻辑单元（ALU）、寄存器（Registers）、控制器（Control Unit）。这是对功能的抽象。</li>
+                <li><strong>微体系结构层 -&gt; 指令集体系结构（ISA）层</strong>：这是<strong>硬件和软件的终极契约</strong>。硬件设计师承诺：“我向你（软件）提供这样一套原子操作（指令），比如‘把这个数加到那个数上’、‘从内存加载数据’，你只需要告诉我指令，我保证完成。” 软件设计师则说：“好的，我将基于你提供的这套指令来构建整个软件世界。” <strong>x86、ARM、MIPS、RISC-V都是不同的ISA，是不同的契约。</strong></li>
+                <li><strong>ISA -&gt; 机器语言</strong>：ISA定义的指令需要一种计算机能直接理解的格式，那就是二进制的机器码。例如，<code>10111000 00000001 00000000</code> 可能代表一条指令。这对人类来说是天书。</li>
+                <li><strong>机器语言 -&gt; 汇编语言</strong>：<strong>这正是我们这门课的主角。</strong> 汇编语言是机器语言的<strong>符号化表示（Symbolic Representation）</strong>。我们用易于记忆的助记符（Mnemonics）如 <code>MOV</code>、<code>ADD</code>、<code>JMP</code> 来代替毫无意义的二进制串。例如，<code>10111000 00000001 00000000</code> 可能会被写成 <code>MOV EAX, 1</code>。汇编器（Assembler）的工作就是将这些助记符翻译回机器码。</li>
+                </ul>
+                <p><strong>所以，什么是汇编语言？</strong></p>
+                <p><strong>定义</strong>：汇编语言是一种低级编程语言，它使用助记符来表示特定计算机体系结构的机器指令。它与机器语言几乎是一一对应的关系，为程序员提供了直接操控硬件（如CPU寄存器、内存地址）的能力。</p>
+                <p><strong>设计的合理性</strong>：为什么不直接让程序员用机器码？因为人类不擅长记忆和处理长串的二进制数字，极易出错。汇编语言的发明，是在<strong>不牺牲任何对硬件的控制力</strong>的前提下，为人类开发者提供的<strong>最高效、最直接</strong>的抽象层。它没有隐藏任何硬件细节，只是把机器码变得可读、可写。</p>
+                <h3 id="2-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%AD%A6%E4%B9%A0%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80"><strong>2. 为什么要学习汇编语言？</strong></h3>
+                <p>如果说高级语言让你成为一名能工巧匠，那么汇编语言则让你洞悉工具的原理，甚至能亲手打造工具。学习汇编，是为了获得一种<strong>根本性</strong>的视角。</p>
+                <h4 id="21-%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%E7%9A%84%E6%9C%AC%E8%B4%A8%E7%89%B9%E7%82%B9"><strong>2.1 汇编语言的本质特点</strong></h4>
+                <ul>
+                <li><strong>直接性与透明性</strong>：汇编指令直接映射到CPU操作。你写的每一行代码，几乎都精确对应CPU的一个动作。没有任何隐藏的开销或不确定的行为（相对于高级语言的垃圾回收、虚拟机等）。</li>
+                <li><strong>体系结构依赖性</strong>：这是它的“缺点”，也是其本质。为x86写的汇编无法在ARM上运行，因为它们的ISA（契约）完全不同。这恰恰说明汇编是紧贴硬件的。</li>
+                <li><strong>极致的性能与控制力</strong>：由于没有抽象层的开销，你可以编写出速度最快、体积最小的代码，并对内存、寄存器、中断等硬件资源进行最精细的控制。</li>
+                </ul>
+                <h4 id="22-%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%E5%9C%A8%E7%8E%B0%E4%BB%A3%E7%9A%84%E7%94%A8%E6%AD%A6%E4%B9%8B%E5%9C%B0"><strong>2.2 汇编语言在现代的“用武之地”</strong></h4>
+                <p>汇编远非“过时”，在某些关键领域，它无可替代。</p>
+                <ul>
+                <li>
+                <p><strong>2.2.1 系统软件的基石：操作系统、驱动、编译器</strong></p>
+                <ul>
+                <li><strong>操作系统 (OS)</strong>：计算机启动时的第一行代码（Bootloader）必须是汇编，因为它需要在C语言运行环境（如堆栈）建立之前，对硬件进行初始化。此外，OS内核中处理中断、任务切换、进程调度等最核心、对性能最敏感的部分，也常常用汇编实现。</li>
+                <li><strong>设备驱动 (Device Drivers)</strong>：驱动程序是OS与硬件之间的桥梁，需要通过特定的I/O端口或内存映射I/O与硬件设备直接通信，这些操作往往需要汇编指令（如 <code>IN</code>, <code>OUT</code>）才能完成。</li>
+                <li><strong>编译器与调试器 (Compilers &amp; Debuggers)</strong>：编译器后端的工作就是将高级语言代码转换成目标平台的汇编/机器码。要编写或优化一个编译器，你必须精通汇编。调试器（如GDB）需要在底层拦截和解析程序的执行状态（寄存器值、内存快照），这完全是汇编的领域。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>2.2.2 网络空间的攻防前线：逆向工程、病毒分析与软件保护</strong></p>
+                <ul>
+                <li><strong>逆向工程 (Reverse Engineering)</strong>：当你只有一个可执行文件（<code>.exe</code>, <code>.so</code>, <code>.dll</code>），但想知道它的工作原理、寻找漏洞或实现互操作时，你唯一的工具就是反汇编器（Disassembler）。它将机器码翻译回汇编代码。阅读汇编是逆向工程师的基本功。</li>
+                <li><strong>反病毒 (Anti-virus)</strong>：恶意软件为了追求效率、隐蔽性和底层控制能力，大量使用汇编。病毒分析师必须阅读恶意代码的汇编，才能理解其传播、感染和破坏的机制，并提取特征码。</li>
+                <li><strong>软件加密与保护 (Software Protection)</strong>：为了防止软件被破解，开发者会使用“加壳”（Packing）、代码混淆（Obfuscation）等技术，这些技术在汇编层面修改代码结构，增加逆向分析的难度。要制作或破解这类保护，汇编知识是必需的。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>2.2.3 透彻理解其他计算机语言</strong>
+                当你用C/C++写下 <code>int a = b + c;</code> 时，你知道它背后发生了什么吗？可能对应三条汇编指令：</p>
+                <pre class="hljs"><code><div>MOV EAX, [b]    ; 将内存地址b的值加载到EAX寄存器
+                ADD EAX, [c]    ; 将内存地址c的值加到EAX寄存器
+                MOV [a], EAX    ; 将EAX寄存器的结果存回内存地址a
+                </div></code></pre>
+                <p>学习汇编，能让你明白：</p>
+                <ul>
+                <li>为什么函数调用有开销？（因为涉及压栈、出栈、跳转等一系列指令）</li>
+                <li>为什么指针操作快？（因为指针直接对应内存地址，可以被加载指令高效使用）</li>
+                <li>为什么某些代码比其他代码快？（缓存命中、指令流水线等，都与生成的汇编指令序列有关）</li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="3-%E7%AC%AC%E4%B8%80%E4%B8%AA%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%E7%A8%8B%E5%BA%8F"><strong>3. 第一个汇编语言程序</strong></h3>
+                <p>让我们来看一个在64位Linux系统下，使用系统调用（syscall）在屏幕上打印 &quot;Hello, World!&quot; 的例子。这是最纯粹的汇编程序，不依赖任何C库。</p>
+                <p><strong>hello.asm</strong></p>
+                <pre class="hljs"><code><div>; --- 数据段 (Data Segment) ---
+                ; 定义程序中需要用到的静态数据
+                section .data
+                    msg db 'Hello, World!', 0x0A  ; 'db' stands for 'define byte'. 0x0A is the newline character.
+                    len equ $ - msg             ; 'equ' calculates the length of the message. '$' is the current address.
+
+                ; --- 代码段 (Text Segment) ---
+                ; 存放可执行指令
+                section .text
+                    global _start               ; '_start' is the default entry point for the linker. 'global' makes it visible.
+
+                _start:
+                    ; --- The write system call ---
+                    ; syscall number for 'write' is 1 in x86-64 Linux
+                    mov rax, 1                  ; rax holds the syscall number.
+                    
+                    ; argument 1: file descriptor (1 for stdout)
+                    mov rdi, 1                  ; rdi holds the first argument.
+                    
+                    ; argument 2: pointer to the message
+                    mov rsi, msg                ; rsi holds the second argument.
+                    
+                    ; argument 3: length of the message
+                    mov rdx, len                ; rdx holds the third argument.
+                    
+                    syscall                     ; Execute the system call. Kernel takes over.
+
+                    ; --- The exit system call ---
+                    ; syscall number for 'exit' is 60 in x86-64 Linux
+                    mov rax, 60                 ; rax holds the syscall number for exit.
+                    
+                    ; argument 1: exit code (0 for success)
+                    xor rdi, rdi                ; A fast way to set rdi to 0. (mov rdi, 0)
+                    
+                    syscall                     ; Execute the system call to exit the program.
+                </div></code></pre>
+                <p><strong>代码剖析：</strong></p>
+                <ol>
+                <li><strong>段（Sections）</strong>: 汇编程序通常分为 <code>.data</code> 段（存放初始化的数据）和 <code>.text</code> 段（存放代码）。这是一种逻辑划分，有助于操作系统管理内存。</li>
+                <li><strong>标签（Labels）</strong>: <code>msg:</code> 和 <code>_start:</code> 是标签，它们标记了内存中的一个地址。<code>_start</code> 是一个特殊的标签，链接器（linker）会把它作为程序的入口点。</li>
+                <li><strong>指令（Instructions）</strong>: <code>mov</code>, <code>syscall</code>, <code>xor</code> 是CPU指令的助记符。
+                <ul>
+                <li><code>mov destination, source</code>: 将 <code>source</code> 的值复制到 <code>destination</code>。</li>
+                </ul>
+                </li>
+                <li><strong>寄存器（Registers）</strong>: <code>rax</code>, <code>rdi</code>, <code>rsi</code>, <code>rdx</code> 是CPU内部的高速存储单元。在Linux x86-64的系统调用约定中，它们有特殊的用途：
+                <ul>
+                <li><code>rax</code>: 传递系统调用号。</li>
+                <li><code>rdi</code>, <code>rsi</code>, <code>rdx</code>, <code>r10</code>, <code>r8</code>, <code>r9</code>: 依次传递系统调用的第1至6个参数。</li>
+                </ul>
+                </li>
+                <li><strong>系统调用（Syscall）</strong>: 程序无法直接操作屏幕，这是操作系统的特权。程序通过 <code>syscall</code> 指令，请求操作系统内核代为执行特权操作（如写入文件、退出程序）。这是一种受控的、从用户态到内核态的切换。</li>
+                </ol>
+                <p><strong>如何编译和运行？</strong></p>
+                <pre class="hljs"><code><div><span class="hljs-comment"># 1. 使用NASM (Netwide Assembler) 汇编代码，生成目标文件 hello.o</span>
+                <span class="hljs-comment"># -f elf64 指定输出为64位的ELF格式文件</span>
+                nasm -f elf64 hello.asm -o hello.o
+
+                <span class="hljs-comment"># 2. 使用ld (linker) 链接目标文件，生成可执行文件 hello</span>
+                ld hello.o -o hello
+
+                <span class="hljs-comment"># 3. 运行程序</span>
+                ./hello
+                </div></code></pre>
+                <p><strong>输出：</strong></p>
+                <pre class="hljs"><code><div>Hello, World!
+                </div></code></pre>
+                <p>这个简单的例子已经向我们揭示了汇编编程的核心：<strong>精确、有序地操作寄存器和内存，并与操作系统规范地交互，以完成任务。</strong></p>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

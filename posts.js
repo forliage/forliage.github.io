@@ -418,5 +418,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-24-co6.html",
       "abstract": "计算机组成6:计算机系统的完整生态"
+    },
+    {
+      "title": "x86汇编01:Introduction",
+      "date": "2025-08-24",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-25-asm01.html",
+      "abstract": "x86汇编01:Introduction"
     }
   ];
