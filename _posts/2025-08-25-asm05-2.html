@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>x86汇编05-2:转换与算术运算指令</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="x86%E6%B1%87%E7%BC%9605-2%E8%BD%AC%E6%8D%A2%E4%B8%8E%E7%AE%97%E6%9C%AF%E8%BF%90%E7%AE%97%E6%8C%87%E4%BB%A4">x86汇编05-2:转换与算术运算指令</h1>
+                <h3 id="1-%E8%BD%AC%E6%8D%A2%E6%8C%87%E4%BB%A4-conversion-instructions"><strong>1 转换指令 (Conversion Instructions)</strong></h3>
+                <p>在进行算术运算之前，我们常常需要确保数据的类型和长度是匹配的。例如，不能将一个8位的数和一个16位的数直接相加。转换指令就是为了解决这类问题而生的，它们是算术运算的“数据预处理器”。</p>
+                <h4 id="11-%E6%89%A9%E5%85%85%E6%8C%87%E4%BB%A4-extension-instructions"><strong>1.1 扩充指令 (Extension Instructions)</strong></h4>
+                <p>这组指令用于将一个小尺寸的数据类型扩展为一个大尺寸的数据类型，我们在第二讲中已经介绍过其理论基础：零扩展（Zero Extension）和符号扩展（Sign Extension）。</p>
+                <h5 id="111-cbw-convert-byte-to-word"><strong>1.1.1 <code>cbw</code> (Convert Byte to Word)</strong></h5>
+                <h5 id="112-cwd-convert-word-to-doubleword"><strong>1.1.2 <code>cwd</code> (Convert Word to Doubleword)</strong></h5>
+                <h5 id="113-cdq-convert-doubleword-to-quadword"><strong>1.1.3 <code>cdq</code> (Convert Doubleword to Quadword)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: 这一族指令专门用于<strong>符号扩展</strong>累加器（<code>AX</code>/<code>EAX</code>/<code>RAX</code>）。
+                <ul>
+                <li><code>CBW</code>: 将 <code>AL</code> 中的8位有符号数扩展到 <code>AX</code> 中。</li>
+                <li><code>CWD</code>: 将 <code>AX</code> 中的16位有符号数扩展到 <code>DX:AX</code> 组成的32位数中。</li>
+                <li><code>CDQ</code>: 将 <code>EAX</code> 中的32位有符号数扩展到 <code>EDX:EAX</code> 组成的64位数中。</li>
+                </ul>
+                </li>
+                <li><strong>CPU/架构层面</strong>: 这些是零操作数指令，其操作数是<strong>隐式</strong>的（implicit）。CPU看到<code>CBW</code>，就知道要读取<code>AL</code>的符号位（bit 7），然后用这个位（0或1）填满<code>AH</code>的所有8位。<code>CWD</code>和<code>CDQ</code>同理，分别用<code>AX</code>的bit 15填充<code>DX</code>，用<code>EAX</code>的bit 31填充<code>EDX</code>。这种隐式操作数的设计是早期CISC为了缩短指令长度和简化特定任务而采用的经典手法。</li>
+                <li><strong>系统层面/设计哲学</strong>: 为什么需要<code>CWD</code>和<code>CDQ</code>将结果扩展到<code>DX</code>/<code>EDX</code>？这完全是为了给后续的<strong>有符号除法 <code>IDIV</code></strong> 做准备。<code>IDIV</code>指令要求被除数是操作数的两倍大小，并且高位部分必须存放在<code>DX</code>/<code>EDX</code>中。因此，<code>CWD</code>和<code>CDQ</code>是<code>IDIV</code>指令不可或缺的“伴侣”。</li>
+                <li><strong>例子</strong>:<pre class="hljs"><code><div>; CBW 示例
+                MOV AL, -5      ; AL = 0FBh (11111011b)
+                CBW             ; AX = 0FFFBh (-5 in 16-bit)
+
+                MOV AL, 100     ; AL = 64h (01100100b)
+                CBW             ; AX = 0064h (100 in 16-bit)
+
+                ; CWD/CDQ for IDIV
+                MOV AX, -1000   ; AX = 0FC18h
+                CWD             ; 准备用16位IDIV。DX将被AX的符号位(1)填满，DX = 0FFFFh
+                                ; 现在 DX:AX = 0FFFFFC18h, 这就是-1000的32位表示
+
+                MOV EAX, -50000
+                CDQ             ; 准备用32位IDIV。EDX将被EAX的符号位填满，EDX = 0FFFFFFFFh
+                                ; 现在 EDX:EAX 代表-50000的64位表示
+                </div></code></pre>
+                </li>
+                </ul>
+                <h5 id="114-movsx-dest-src-move-with-sign-extend"><strong>1.1.4 <code>movsx dest, src</code> (Move with Sign-Extend)</strong></h5>
+                <h5 id="115-movzx-dest-src-move-with-zero-extend"><strong>1.1.5 <code>movzx dest, src</code> (Move with Zero-Extend)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: <code>CBW</code>家族的通用、灵活版本。它们可以将任意寄存器或内存中的小尺寸数据，经过符号扩展或零扩展后，复制到更大的目标寄存器。
+                <ul>
+                <li><code>MOVSX</code>: 用于<strong>有符号数</strong>。</li>
+                <li><code>MOVZX</code>: 用于<strong>无符号数</strong>。</li>
+                </ul>
+                </li>
+                <li><strong>CPU/架构层面</strong>: 这两条指令在80386处理器中引入，是x86向32位演进的标志之一。它们体现了从“专用指令”（如CBW）到“通用指令”的设计思想转变，更符合现代编译器的需求。CPU硬件会根据指令是<code>MOVSX</code>还是<code>MOVZX</code>，来决定用源操作数的符号位还是用0来填充目标寄存器的高位部分。</li>
+                <li><strong>系统层面</strong>: 在高级语言中，当<code>char</code>或<code>short</code>类型向<code>int</code>类型转换时，编译器会根据变量是有符号还是无符号，自动生成<code>MOVSX</code>或<code>MOVZX</code>指令。</li>
+                <li><strong>例子</strong>:<pre class="hljs"><code><div>.DATA
+                    signedByte   DB -2     ; 0FEh
+                    unsignedByte DB 254    ; 0FEh
+                .CODE
+                    ; MOVSX 示例
+                    MOV AL, [signedByte]    ; AL = 0FEh
+                    MOVSX CX, AL            ; CX = 0FFFEh (-2 in 16-bit)
+
+                    ; MOVZX 示例
+                    MOV AL, [unsignedByte]  ; AL = 0FEh
+                    MOVZX CX, AL            ; CX = 00FEh (254 in 16-bit)
+                    
+                    ; 对比，同一个二进制串0FEh，两种不同解释
+                    MOVSX ECX, [signedByte]   ; ECX = 0FFFFFFFEh (-2)
+                    MOVZX ECX, [unsignedByte] ; ECX = 000000FEh (254)
+                </div></code></pre>
+                </li>
+                </ul>
+                <h4 id="12-%E6%8D%A2%E7%A0%81%E6%8C%87%E4%BB%A4-xlat-translate"><strong>1.2 换码指令: <code>xlat</code> (Translate)</strong></h4>
+                <ul>
+                <li><strong>高级描述</strong>: <strong>查表指令</strong>。它使用<code>AL</code>寄存器的值作为索引，在一个预先定义好的字节表中查找对应的元素，并将结果存回<code>AL</code>。</li>
+                <li><strong>CPU/架构层面</strong>: 这是一条非常“CISC”的指令。它将一个完整的查表操作（计算地址 -&gt; 读取内存）压缩到一条指令中。其隐式操作数是：<strong>源表基地址在<code>DS:BX</code> (16位)或<code>DS:EBX</code> (32位)中，索引在<code>AL</code>中</strong>。CPU执行<code>XLAT</code>时，内部微码会执行类似<code>MOV AL, [BX+AL]</code>的操作。</li>
+                <li><strong>系统层面</strong>:
+                <ol>
+                <li><strong>字符集转换</strong>: 比如从ASCII码转换为另一种编码（如EBCDIC）。</li>
+                <li><strong>数据加密</strong>: 实现简单的替换密码（Substitution Cipher）。</li>
+                <li><strong>快速计算</strong>: 对于某些复杂的函数，如果输入范围有限，可以预先计算好结果存成表格，用<code>XLAT</code>实现快速查询，以空间换时间。</li>
+                </ol>
+                </li>
+                <li><strong>例子</strong>: 将一个0-9的数字转换为其ASCII码<pre class="hljs"><code><div>.DATA
+                    ascii_table DB '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+                .CODE
+                    LEA BX, [ascii_table] ; 将表的基地址放入BX
+                    MOV AL, 7             ; 我们想转换数字7
+                    XLAT                  ; AL = ascii_table[7] = '7'
+                                          ; 执行后，AL = 37h (ASCII for '7')
+                </div></code></pre>
+                </li>
+                </ul>
+                <h3 id="2-%E7%AE%97%E6%9C%AF%E8%BF%90%E7%AE%97%E6%8C%87%E4%BB%A4-arithmetic-instructions"><strong>2 算术运算指令 (Arithmetic Instructions)</strong></h3>
+                <p>这些指令是ALU的核心功能。它们几乎都会<strong>根据运算结果修改标志寄存器</strong>，这是实现条件判断和程序流控制的基础。</p>
+                <h4 id="21-%E5%8A%A0%E6%B3%95%E6%8C%87%E4%BB%A4"><strong>2.1 加法指令</strong></h4>
+                <h5 id="211-add-dest-src-add"><strong>2.1.1 <code>add dest, src</code> (Add)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: <code>dest = dest + src</code></li>
+                <li><strong>CPU/架构层面</strong>: ALU执行二进制加法。运算结果会影响所有算术标志位：
+                <ul>
+                <li><strong>CF (进位标志)</strong>: 无符号数加法溢出时置1。 <code>255 + 1</code> -&gt; <code>CF=1</code></li>
+                <li><strong>OF (溢出标志)</strong>: 有符号数加法溢出时置1。 <code>127 + 1</code> -&gt; <code>OF=1</code></li>
+                <li><strong>ZF (零标志)</strong>: 结果为0时置1。 <code>-5 + 5</code> -&gt; <code>ZF=1</code></li>
+                <li><strong>SF (符号标志)</strong>: 结果为负数时置1。 <code>5 + (-10)</code> -&gt; <code>SF=1</code></li>
+                <li><strong>PF (奇偶标志)</strong>, <strong>AF (辅助进位标志)</strong> 也会被相应设置。</li>
+                </ul>
+                </li>
+                <li><strong>系统层面</strong>: 实现高级语言中的 <code>+</code> 运算符。</li>
+                <li><strong>例子</strong>: <code>MOV AX, 1000h; ADD AX, 2000h;</code> -&gt; <code>AX=3000h</code></li>
+                </ul>
+                <h5 id="212-inc-op-increment"><strong>2.1.2 <code>inc op</code> (Increment)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: <code>op = op + 1</code></li>
+                <li><strong>CPU/架构层面</strong>: 这是<code>ADD op, 1</code>的优化版本。它的机器码通常更短，执行速度也可能更快。<strong>一个至关重要的区别是：<code>INC</code>指令会影响除CF之外的所有算术标志位，但它从不改变CF标志！</strong></li>
+                <li><strong>设计哲学</strong>: 为什么不影响CF？这使得<code>INC</code>可以在多精度运算的循环中作为计数器使用，而不会干扰<code>ADC</code>指令所依赖的CF位。</li>
+                <li><strong>系统层面</strong>: 实现 <code>i++</code> 操作。常用于循环计数。</li>
+                <li><strong>例子</strong>: <code>MOV CX, 10; INC CX;</code> -&gt; <code>CX=11</code></li>
+                </ul>
+                <h5 id="213-adc-dest-src-add-with-carry"><strong>2.1.3 <code>adc dest, src</code> (Add with Carry)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: <code>dest = dest + src + CF</code></li>
+                <li><strong>CPU/架构层面</strong>: ALU在执行加法时，会将<code>FLAGS</code>寄存器中的CF位也加入运算。</li>
+                <li><strong>系统层面/设计哲学</strong>: 这是实现**多精度算术（Multi-precision Arithmetic）**的关键。当你要计算的数字超过了CPU的字长（如在32位CPU上计算64位数）时，你必须分块计算。低位相加产生的进位（存放在CF中），必须被传递到高位的加法中去。</li>
+                <li><strong>例子</strong>: 在32位模式下，计算 <code>12345678h:87654321h + 0ABCDEF0h:FEDCBA98h</code><pre class="hljs"><code><div>; 假设两个64位数分别存在 (EDX:EAX) 和 (ECX:EBX)
+                MOV EAX, 87654321h
+                MOV EDX, 12345678h
+                MOV EBX, 0FEDCBA98h
+                MOV ECX, 0ABCDEF0h
+
+                ; 1. 先加低32位
+                ADD EAX, EBX    ; EAX = 87654321h + FEDCBA98h = 18641ECB9h
+                                ; EAX中只能存32位, 所以EAX = 8641ECB9h, 并且CF=1
+
+                ; 2. 再加高32位，并带上进位
+                ADC EDX, ECX    ; EDX = EDX + ECX + CF = 12345678h + 0ABCDEF0h + 1
+                                ; EDX = 0BD024569h
+
+                ; 最终结果在 EDX:EAX 中
+                </div></code></pre>
+                </li>
+                </ul>
+                <h4 id="22-%E5%87%8F%E6%B3%95%E6%8C%87%E4%BB%A4"><strong>2.2 减法指令</strong></h4>
+                <h5 id="221-sub-dest-src-subtract"><strong>2.2.1 <code>sub dest, src</code> (Subtract)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: <code>dest = dest - src</code></li>
+                <li><strong>CPU/架构层面</strong>: ALU执行二进制减法（通常是<code>dest + (-src)</code>的补码加法）。同样影响所有算术标志。CF在这里作为<strong>借位标志</strong>：当无符号减法需要借位时（如<code>5 - 10</code>），CF置1。</li>
+                </ul>
+                <h5 id="222-sbb-dest-src-subtract-with-borrow"><strong>2.2.2 <code>sbb dest, src</code> (Subtract with Borrow)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: <code>dest = dest - src - CF</code>。<code>ADC</code>的减法版本，用于多精度减法。</li>
+                </ul>
+                <h5 id="223-dec-op-decrement"><strong>2.2.3 <code>dec op</code> (Decrement)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: <code>op = op - 1</code>。<code>INC</code>的减法版本，同样<strong>不影响CF标志</strong>。</li>
+                </ul>
+                <h5 id="224-neg-op-negate"><strong>2.2.4 <code>neg op</code> (Negate)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: <code>op = -op</code>。求操作数的二进制补码。</li>
+                <li><strong>CPU/架构层面</strong>: ALU执行<code>0 - op</code>的减法。其微操作等价于先按位取反（<code>NOT</code>），再加一（<code>INC</code>）。</li>
+                <li><strong>例子</strong>: <code>MOV AL, 5; NEG AL;</code> -&gt; <code>AL = -5</code> (0FBh)。</li>
+                </ul>
+                <h5 id="225-cmp-op1-op2-compare"><strong>2.2.5 <code>cmp op1, op2</code> (Compare)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: 比较<code>op1</code>和<code>op2</code>，并根据比较结果设置标志位。</li>
+                <li><strong>CPU/架构层面</strong>: 这是汇编语言中<strong>最重要的指令之一</strong>。它的本质是执行一次“隐藏”的减法：<code>op1 - op2</code>。CPU会计算出结果，用这个结果来<strong>设置标志位</strong>，然后<strong>立即丢弃计算结果</strong>。目标操作数<code>op1</code>的值不会被改变。</li>
+                <li><strong>系统层面</strong>: 这是所有高级语言中<code>if (a > b)</code>, <code>while (x != y)</code>等条件判断语句的硬件基础。<code>CMP</code>指令之后，必然会跟一条<strong>条件跳转指令</strong>（如 <code>JE</code>, <code>JG</code>, <code>JL</code> 等），这些跳转指令会检查<code>CMP</code>设置的标志位，来决定是否跳转。</li>
+                <li><strong>例子</strong>:<pre class="hljs"><code><div>MOV AX, 10
+                MOV BX, 5
+                CMP AX, BX      ; 计算 10 - 5。结果为5 (非零, 正数)
+                                ; ZF=0 (非零), SF=0 (正数), CF=0 (无借位), OF=0
+
+                ; 后面可以跟:
+                ; JG greater_label ; Jump if Greater (检查 SF==OF 且 ZF==0) -&gt; 会跳转
+                ; JE equal_label   ; Jump if Equal (检查 ZF==1) -&gt; 不会跳转
+                </div></code></pre>
+                </li>
+                </ul>
+                <h4 id="23-%E4%B9%98%E6%B3%95%E6%8C%87%E4%BB%A4"><strong>2.3 乘法指令</strong></h4>
+                <h5 id="231-mul-src-unsigned-multiply"><strong>2.3.1 <code>mul src</code> (Unsigned Multiply)</strong></h5>
+                <h5 id="232-imul-src-signed-multiply"><strong>2.3.2 <code>imul src</code> (Signed Multiply)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: 执行乘法。<code>MUL</code>用于无符号数，<code>IMUL</code>用于有符号数。</li>
+                <li><strong>CPU/架构层面</strong>:
+                <ul>
+                <li><strong>隐式操作数</strong>: 乘法的一个操作数是<code>src</code>，另一个操作数隐式地在累加器中。</li>
+                <li><strong>结果大小</strong>: 两个N位数相乘，结果最大可能是2N位。因此，结果会存放在一个两倍大小的寄存器对中。
+                <ul>
+                <li><code>mul r/m8</code>: <code>AX = AL * r/m8</code></li>
+                <li><code>mul r/m16</code>: <code>DX:AX = AX * r/m16</code></li>
+                <li><code>mul r/m32</code>: <code>EDX:EAX = EAX * r/m32</code></li>
+                </ul>
+                </li>
+                <li><strong>标志位</strong>: <code>CF</code>和<code>OF</code>用于指示结果是否“溢出”了低半部分。如果结果的高半部分（<code>AH</code>/<code>DX</code>/<code>EDX</code>）为0，则<code>CF</code>和<code>OF</code>清0；否则置1。</li>
+                </ul>
+                </li>
+                <li><strong><code>IMUL</code>的扩展</strong>: <code>IMUL</code>后来被扩展，支持更灵活的二操作数和三操作数格式，如<code>imul reg, r/m</code>和<code>imul reg, r/m, imm</code>，这使得它可以直接计算 <code>dest = dest * src</code> 或 <code>dest = src * const</code>，更受编译器欢迎。</li>
+                <li><strong>例子</strong>:<pre class="hljs"><code><div>; MUL示例
+                MOV AL, 100
+                MOV BL, 3
+                MUL BL          ; AX = AL * BL = 100 * 3 = 300 (012Ch)。AH=01, AL=2C
+                                ; 结果的高位AH不为0，所以 CF=1, OF=1
+
+                ; IMUL示例
+                MOV AL, -2      ; AL = 0FEh
+                MOV BL, 50      ; BL = 32h
+                IMUL BL         ; AX = AL * BL = -2 * 50 = -100 (0FF9Ch)
+                </div></code></pre>
+                </li>
+                </ul>
+                <h4 id="24-%E9%99%A4%E6%B3%95%E6%8C%87%E4%BB%A4"><strong>2.4 除法指令</strong></h4>
+                <h5 id="241-div-op-unsigned-divide"><strong>2.4.1 <code>div op</code> (Unsigned Divide)</strong></h5>
+                <h5 id="242-idiv-op-signed-divide"><strong>2.4.2 <code>idiv op</code> (Signed Divide)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: 执行除法。<code>DIV</code>用于无符号数，<code>IDIV</code>用于有符号数。</li>
+                <li><strong>CPU/架构层面</strong>:
+                <ul>
+                <li><strong>隐式被除数</strong>: 除数是<code>op</code>，被除数是隐式的，并且大小是除数的两倍。
+                <ul>
+                <li><code>div r/m8</code>: <code>AX / r/m8</code> -&gt; 商在<code>AL</code>，余数在<code>AH</code></li>
+                <li><code>div r/m16</code>: <code>DX:AX / r/m16</code> -&gt; 商在<code>AX</code>，余数在<code>DX</code></li>
+                <li><code>div r/m32</code>: <code>EDX:EAX / r/m32</code> -&gt; 商在<code>EAX</code>，余数在<code>EDX</code></li>
+                </ul>
+                </li>
+                <li><strong>除法异常</strong>: 如果除数为0，或者商太大无法容纳在目标寄存器中（如 <code>1000h / 2h</code>，商是<code>800h</code>，无法放入<code>AL</code>），CPU会触发一个<strong>0号中断</strong>，即“除法错误”异常，通常会导致程序崩溃。</li>
+                </ul>
+                </li>
+                <li><strong>系统层面</strong>: <code>IDIV</code>前必须确保被除数被正确地符号扩展，这就是<code>CBW</code>/<code>CWD</code>/<code>CDQ</code>的用武之地。</li>
+                <li><strong>例子</strong>: 计算 -48 / 5<pre class="hljs"><code><div>MOV AX, -48     ; AX = 0FFD0h
+                CWD             ; 符号扩展AX到DX:AX。DX = 0FFFFh
+                MOV BX, 5
+                IDIV BX         ; DX:AX / BX = -48 / 5
+                                ; 商在AX: AX = -9 (0FFF7h)
+                                ; 余数在DX: DX = -3 (0FFFDh)
+                </div></code></pre>
+                </li>
+                </ul>
+                <h4 id="25-%E6%B5%AE%E7%82%B9%E8%BF%90%E7%AE%97%E6%8C%87%E4%BB%A4-a-brief-introduction"><strong>2.5 浮点运算指令 (A Brief Introduction)</strong></h4>
+                <p>到目前为止，我们讨论的都是整数运算。对于小数和科学计算，x86架构提供了一个专门的部件——<strong>浮点运算单元 (FPU)</strong>，早期是作为x87协处理器存在的，后来被集成进CPU。</p>
+                <h5 id="251-%E6%B5%AE%E7%82%B9%E6%95%B0%E7%9A%84%E5%AD%98%E5%82%A8%E6%A0%BC%E5%BC%8F-ieee-754"><strong>2.5.1 浮点数的存储格式 (IEEE 754)</strong></h5>
+                <p>浮点数在内存中以一种科学记数法的二进制形式存储，通常是32位（单精度）或64位（双精度）。它由三部分组成：</p>
+                <ul>
+                <li><strong>符号位 (Sign)</strong>: 1位，表示正负。</li>
+                <li><strong>指数位 (Exponent)</strong>: 8位或11位，表示2的多少次方（有一个偏移量）。</li>
+                <li><strong>尾数位 (Mantissa/Significand)</strong>: 23位或52位，表示小数部分的有效数字。
+                其值约等于: $(-1)^{Sign} \times (1.Mantissa) \times 2^{(Exponent - Bias)}$</li>
+                </ul>
+                <h5 id="252-8%E4%B8%AA%E5%B0%8F%E6%95%B0%E5%AF%84%E5%AD%98%E5%99%A8-fpu-register-stack"><strong>2.5.2 8个小数寄存器 (FPU Register Stack)</strong></h5>
+                <p>FPU内部有8个80位的扩展精度浮点寄存器，它们被组织成一个<strong>堆栈</strong>结构，名为<code>ST(0)</code>到<code>ST(7)</code>。<code>ST(0)</code>永远是栈顶。</p>
+                <h5 id="253-%E6%B5%AE%E7%82%B9%E8%BF%90%E7%AE%97%E4%B8%BE%E4%BE%8B"><strong>2.5.3 浮点运算举例</strong></h5>
+                <p>FPU指令通常以'F'开头。</p>
+                <ul>
+                <li>
+                <p><strong><code>FLD src</code> (Float Load)</strong>: 将内存中的浮点数<code>src</code>压入FPU栈顶<code>ST(0)</code>。</p>
+                </li>
+                <li>
+                <p><strong><code>FADD</code>, <code>FSUB</code>, <code>FMUL</code>, <code>FDIV</code></strong>: 执行浮点加减乘除。它们可以操作FPU栈顶的两个数，或栈顶与内存中的数。</p>
+                </li>
+                <li>
+                <p><strong><code>FST dest</code> / <code>FSTP dest</code> (Float Store / Store and Pop)</strong>: 将<code>ST(0)</code>的值存回内存。<code>FSTP</code>还会将<code>ST(0)</code>从栈中弹出。</p>
+                </li>
+                <li>
+                <p><strong>例子</strong>: 计算 <code>3.14 * 2.0</code></p>
+                <pre class="hljs"><code><div>.DATA
+                    pi   DD 3.14   ; 汇编器会自动转换为IEEE 754格式
+                    two  DD 2.0
+                    result DD ?
+                .CODE
+                    FINIT           ; 初始化FPU
+                    FLD [pi]        ; FPU栈: ST(0)=3.14
+                    FLD [two]       ; FPU栈: ST(0)=2.0, ST(1)=3.14
+                    FMUL ST(0), ST(1); ST(0) = ST(0) * ST(1) = 2.0 * 3.14 = 6.28。ST(1)不变
+                    FSTP [result]   ; 将结果6.28存入result，并弹出FPU栈
+                                    ; FPU栈: ST(0)=3.14
+                    FSTP [result]   ; 清理堆栈
+                </div></code></pre>
+                </li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
