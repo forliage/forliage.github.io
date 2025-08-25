@@ -509,5 +509,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-25-asm09.html",
       "abstract": "x86汇编09:与系统和高阶语言的交互"
+    },
+    {
+      "title": "x86汇编10-1:保护模式基础",
+      "date": "2025-08-25",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-25-asm10-1.html",
+      "abstract": "x86汇编10-1:保护模式基础"
     }
   ];
