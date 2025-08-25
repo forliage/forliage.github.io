@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>x86汇编11:通往现代x8-64架构</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="x86%E6%B1%87%E7%BC%9611%E9%80%9A%E5%BE%80%E7%8E%B0%E4%BB%A3x8-64%E6%9E%B6%E6%9E%84">x86汇编11:通往现代x8-64架构</h1>
+                <h3 id="%E5%BC%95%E8%A8%80%E8%B6%85%E8%B6%8A%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%96%86%E7%95%8C"><strong>引言：超越保护模式的疆界</strong></h3>
+                <p>我们在前几讲建立的保护模式“城市”模型，虽然宏伟，但也存在局限。它的街道（段）大小不一，给市政规划（内存管理）带来了麻烦；它的城市广场（4GB地址空间）对于今天的摩天大楼（大型应用）来说也显得日益拥挤。为了解决这些问题，x86架构引入了更先进的城市规划理念。</p>
+                <h3 id="1-%E5%88%86%E9%A1%B5%E6%9C%BA%E5%88%B6-paging"><strong>1. 分页机制 (Paging)</strong></h3>
+                <p>虽然保护模式的段机制提供了保护，但它在内存管理上有一个天生的缺陷：<strong>外部碎片</strong>。由于段的大小是可变的，内存分配和释放久了之后，会产生大量不连续的小块空闲内存，虽然总和可能很大，但无法分配给一个需要连续大内存的程序。</p>
+                <p><strong>设计的解决方案：分页机制 (Paging)</strong>
+                分页机制是在分段机制<strong>之后</strong>的又一层地址转换。它将物理内存和程序的逻辑地址空间都划分为大小固定的、很小的块。</p>
+                <ul>
+                <li><strong>页 (Page)</strong>: 逻辑地址空间中的块，通常为4KB。</li>
+                <li><strong>页帧 (Page Frame)</strong>: 物理内存中的块，大小与页相同。</li>
+                </ul>
+                <p><strong>核心思想</strong>: 内存分配和管理的基本单位不再是大小不一的“段”，而是大小固定的“页”。一个程序的逻辑上连续的内存页，可以被映射到物理内存中任意离散的、不相邻的页帧上。</p>
+                <ol>
+                <li><strong>逻辑地址 -&gt; 线性地址</strong>: 这一步与我们之前学的保护模式分段机制完全相同。<code>线性地址 = 段基址 + 偏移</code>。</li>
+                <li><strong>线性地址 -&gt; 物理地址</strong>: 这一步由分页单元（MMU）完成。
+                <ol>
+                <li>一个32位的线性地址被拆分为三部分：<strong>页目录索引(10位)</strong>、<strong>页表索引(10位)</strong>、<strong>页内偏移(12位)</strong>。</li>
+                <li>CPU使用<code>CR3</code>寄存器找到<strong>页目录</strong>的物理基地址。</li>
+                <li>用<strong>页目录索引</strong>在页目录中找到一个<strong>页目录项 (PDE)</strong>，这个表项指向一个<strong>页表</strong>的物理基地址。</li>
+                <li>用<strong>页表索引</strong>在页表中找到一个<strong>页表项 (PTE)</strong>，这个表项包含了最终<strong>物理页帧</strong>的基地址。</li>
+                <li>将物理页帧的基地址与<strong>页内偏移</strong>相加，得到最终的物理地址。</li>
+                </ol>
+                </li>
+                </ol>
+                <p><strong>分页机制带来的革命性优势:</strong></p>
+                <ul>
+                <li><strong>虚拟内存 (Virtual Memory)</strong>: PTE中有一个<strong>存在位 (Present Bit)</strong>。如果P=0，表示该页不在物理内存中（可能被交换到硬盘上了）。此时CPU会触发一个<strong>缺页异常 (#PF)</strong>。操作系统捕获这个异常，从硬盘加载所需页面到内存，然后恢复程序执行。这对程序来说是完全透明的，程序仿佛拥有了远超物理内存大小的内存空间。</li>
+                <li><strong>进程隔离</strong>: 这是现代操作系统的核心。每个进程都有自己独立的页目录（OS在任务切换时，会切换<code>CR3</code>寄存器的值）。因此，进程A的虚拟地址<code>0x1000</code>和进程B的虚拟地址<code>0x1000</code>会被映射到完全不同的物理页帧，它们生活在互相隔离的“平行宇宙”中，无法互相干扰。</li>
+                <li><strong>写时复制 (Copy-on-Write)</strong>: <code>fork()</code>系统调用可以极快地创建子进程。OS只需复制父进程的页表，并将所有PTE标记为<strong>只读</strong>。当父进程或子进程尝试<strong>写入</strong>一个共享页面时，CPU会因权限检查而触发缺页异常。此时，OS内核才会真正复制一份该页面，并更新各自的页表项为可写。</li>
+                </ul>
+                <h3 id="2-64%E4%BD%8D%E8%AE%A1%E7%AE%97%E9%95%BF%E6%A8%A1%E5%BC%8F-long-mode"><strong>2. 64位计算——长模式 (Long Mode)</strong></h3>
+                <p>32位地址空间最多支持4GB内存，这在21世纪初已成为服务器和高性能计算的瓶颈。AMD率先推出了x86-64架构，后被Intel采纳，引入了<strong>长模式 (Long Mode)</strong>。</p>
+                <p><strong>长模式下的关键架构变革:</strong></p>
+                <ul>
+                <li><strong>64位通用寄存器</strong>: 所有通用寄存器（EAX, EBX...）扩展为64位（RAX, RBX...）。</li>
+                <li><strong>8个新增通用寄存器</strong>: 引入了<code>R8</code>到<code>R15</code>，极大地缓解了寄存器短缺问题，减少了函数调用中压栈/出栈的次数，提升了性能。</li>
+                <li><strong>REX前缀</strong>: 为了在保持指令格式基本不变的情况下，能够使用这些新寄存器和64位操作数，x86-64引入了一个新的<strong>REX (Register Extension)</strong> 前缀字节。它放在指令操作码之前，用于：
+                <ul>
+                <li><code>REX.W</code>: 指定操作数大小为64位。</li>
+                <li><code>REX.R</code>: 扩展ModR/M字节的<code>reg</code>字段，以访问R8-R15。</li>
+                <li><code>REX.X</code>: 扩展SIB字节的<code>index</code>字段。</li>
+                <li><code>REX.B</code>: 扩展ModR/M或SIB字节的<code>r/m</code>字段。</li>
+                </ul>
+                </li>
+                <li><strong>RIP相对寻址</strong>: 这是64位模式下最重要的寻址方式。代码可以访问相对于<strong>当前指令指针 (<code>RIP</code>)</strong> 的数据。
+                <ul>
+                <li><code>MOV RAX, [RIP + my_data_offset]</code></li>
+                <li><strong>设计哲学</strong>: 这使得编写<strong>位置无关代码 (Position-Independent Code, PIC)</strong> 变得极其简单和高效。共享库（<code>.so</code>, <code>.dll</code>）可以被加载到内存的任何位置，而无需修改其代码，因为所有对数据的访问都是相对于自身代码位置的。</li>
+                </ul>
+                </li>
+                <li><strong>分段机制的弱化</strong>: 在64位模式下，分段机制几乎被完全“废弃”。除了<code>FS</code>和<code>GS</code>（常用于线程局部存储TLS）外，其他段寄存器的基地址通常都被强制设为0。这创造了一个巨大的、平坦的64位线性地址空间，内存管理完全交给了更高效的分页机制。</li>
+                </ul>
+                <h3 id="3-simd%E6%8C%87%E4%BB%A4%E9%9B%86%E5%8D%95%E6%8C%87%E4%BB%A4%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%B5%81"><strong>3. SIMD指令集——单指令多数据流</strong></h3>
+                <p>随着多媒体、图形学和科学计算的发展，程序需要处理大量的数据并行任务（例如，同时对一张图片的几百万个像素执行相同的亮度调整）。</p>
+                <p><strong>设计的解决方案：SIMD (Single Instruction, Multiple Data)</strong></p>
+                <ul>
+                <li><strong>核心思想</strong>: 引入超宽的寄存器（64位、128位、256位甚至512位），将多个数据元素（如4个32位浮点数，或16个8位整数）<strong>打包 (Pack)</strong> 进一个寄存器。然后用一条指令，对这些打包的数据<strong>同时</strong>执行相同的操作。</li>
+                <li><strong>比喻</strong>: 传统指令（SISD）是“一个人用手一次搬一个箱子”，而SIMD是“一个人开着叉车一次搬一整个货盘的箱子”。</li>
+                </ul>
+                <p><strong>x86 SIMD的演进:</strong></p>
+                <ul>
+                <li><strong>MMX (MultiMedia eXtensions)</strong>: 64位寄存器，主要用于整数运算。</li>
+                <li><strong>SSE (Streaming SIMD Extensions)</strong>: 引入了全新的128位<code>XMM</code>寄存器，支持单精度浮点数的并行计算。</li>
+                <li><strong>AVX (Advanced Vector Extensions)</strong>: 将寄存器扩展到256位（<code>YMM</code>），后来又扩展到512位（<code>ZMM</code>），并引入了更丰富的指令。</li>
+                </ul>
+                <p><strong>例子</strong>: 使用SSE指令将两个浮点数数组并行相加</p>
+                <pre class="hljs"><code><div><span class="hljs-comment">// C Code</span>
+                <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">add_arrays</span><span class="hljs-params">(<span class="hljs-keyword">float</span>* a, <span class="hljs-keyword">float</span>* b, <span class="hljs-keyword">float</span>* result, <span class="hljs-keyword">int</span> n)</span> </span>{
+                    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; n; i++) {
+                        result[i] = a[i] + b[i];
+                    }
+                }
+                </div></code></pre>
+                <pre class="hljs"><code><div>; --- SSE汇编实现 (循环体) ---
+                ; ESI -&gt; a, EDI -&gt; b, EBX -&gt; result
+                movaps xmm0, [esi]      ; 加载4个浮点数从数组a到 xmm0
+                movaps xmm1, [edi]      ; 加载4个浮点数从数组b到 xmm1
+                addps xmm0, xmm1        ; 并行加法: xmm0[0]+=xmm1[0], xmm0[1]+=xmm1[1] ...
+                movaps [ebx], xmm0      ; 将4个结果存回result数组
+                add esi, 16             ; 指针移动16字节 (4 * 4字节)
+                add edi, 16
+                add ebx, 16
+                </div></code></pre>
+                <p>一条<code>addps</code>指令完成了传统方式下需要4条<code>FADD</code>指令才能完成的工作，吞吐量大大提高。</p>
+                <h3 id="4-%E7%8E%B0%E4%BB%A3%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8sysentersyscall"><strong>4. 现代系统调用——<code>SYSENTER</code>/<code>SYSCALL</code></strong></h3>
+                <p>我们知道，<code>INT</code>指令是传统的系统调用入口。但<code>INT</code>指令的执行过程很“重”：它需要查询IDT，进行多次权限检查，并压入大量的寄存器。对于频繁发生的系统调用，这个开销是不可忽视的。</p>
+                <p><strong>设计的解决方案：快速系统调用 (Fast System Call)</strong></p>
+                <ul>
+                <li>
+                <p><strong><code>SYSENTER</code> (Intel) / <code>SYSCALL</code> (AMD)</strong>:</p>
+                <ul>
+                <li><strong>核心思想</strong>: 绕过中断机制，为用户态到内核态的切换提供一条“快速通道”。</li>
+                <li><strong>工作原理</strong>: 操作系统在初始化时，将系统调用处理程序的入口地址（<code>CS</code>, <code>EIP</code>）和内核堆栈地址（<code>SS</code>, <code>ESP</code>）写入到一组专用的<strong>模型特定寄存器 (MSRs)</strong> 中。</li>
+                <li>当应用程序执行<code>SYSCALL</code>指令时，CPU硬件直接从这些MSR中加载新的<code>CS:EIP</code>和<code>SS:ESP</code>，并切换到Ring 0。这个过程<strong>不查询IDT，不压栈EFLAGS</strong>（<code>SYSCALL</code>会保存返回地址到<code>RCX</code>，<code>EFLAGS</code>到<code>R11</code>），因此速度比<code>INT</code>快得多。</li>
+                <li>内核处理完调用后，使用<code>SYSEXIT</code>/<code>SYSRET</code>指令快速返回。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Linux x86-64下的<code>SYSCALL</code>约定</strong>:</p>
+                <ol>
+                <li>将系统调用号放入<code>RAX</code>。</li>
+                <li>将前6个参数依次放入<code>RDI</code>, <code>RSI</code>, <code>RDX</code>, <code>R10</code>, <code>R8</code>, <code>R9</code>。</li>
+                <li>执行<code>SYSCALL</code>。</li>
+                <li>返回值在<code>RAX</code>中。</li>
+                </ol>
+                </li>
+                </ul>
+                <p>这套约定与函数调用的<code>fastcall</code>非常相似，完全基于寄存器，效率极高。</p>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
