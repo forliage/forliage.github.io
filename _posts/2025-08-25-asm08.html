@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>x86汇编08:中断程序设计</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="x86%E6%B1%87%E7%BC%9608%E4%B8%AD%E6%96%AD%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1">x86汇编08:中断程序设计</h1>
+                <h3 id="%E5%BC%95%E8%A8%80%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E4%B8%AD%E6%96%AD"><strong>引言：为什么需要中断？</strong></h3>
+                <p>想象一下，你要写一个程序，等待用户按下一个键。你该怎么做？</p>
+                <ul>
+                <li>
+                <p><strong>愚蠢的方法：轮询 (Polling)</strong></p>
+                <pre class="hljs"><code><div>wait_for_key:
+                    ; 检查键盘状态端口，看是否有按键
+                    IN AL, KEYBOARD_STATUS_PORT
+                    TEST AL, KEY_PRESSED_BIT
+                    JZ wait_for_key  ; 如果没有按键，就跳回去继续检查
+                ; ... 按键被按下，继续处理 ...
+                </div></code></pre>
+                <p>这种方法的致命缺陷是：在用户没有按键的漫长时间里，CPU 100% 都在执行这个无意义的循环，浪费了数以亿计的时钟周期。这就像一个焦急的门卫，每秒钟都要把门打开看看有没有人来，而不是在有人敲门时再去开门。</p>
+                </li>
+                <li>
+                <p><strong>智慧的方法：中断 (Interrupts)</strong>
+                CPU正常执行其他任务。当用户按下键盘时，键盘控制器会向CPU发送一个<strong>电信号</strong>。CPU会<strong>立即暂停</strong>当前正在执行的任务，自动跳转到一段专门处理键盘输入的代码（即中断服务程序），处理完毕后，再<strong>无缝地恢复</strong>到之前被暂停的任务。</p>
+                </li>
+                </ul>
+                <p><strong>设计的核心哲学</strong>: 中断机制将CPU从**“主动、持续的监视”<strong>中解放出来，使其可以专注于计算任务，只在有</strong>“事件”<strong>发生时才被动地响应。这是从“过程驱动”到</strong>“事件驱动”**编程模型的根本性转变，是所有现代操作系统和图形用户界面的基石。</p>
+                <p><strong>中断的分类:</strong></p>
+                <ol>
+                <li><strong>外部中断 (Hardware Interrupts)</strong>: 来自CPU外部的硬件设备（键盘、鼠标、时钟、网卡）。</li>
+                <li><strong>内部中断 (Software Interrupts &amp; Exceptions)</strong>:
+                <ul>
+                <li><strong>软件中断</strong>: 由<code>INT</code>指令主动触发，是应用程序请求操作系统服务的规范方式。</li>
+                <li><strong>异常 (Exceptions)</strong>: 由CPU在执行指令时检测到的错误或特殊情况（如除以零、访问无效内存）所引发。</li>
+                </ul>
+                </li>
+                </ol>
+                <h3 id="1-%E4%B8%AD%E6%96%AD%E5%A4%84%E7%90%86%E7%9A%84cpu%E7%BA%A7%E8%BF%87%E7%A8%8B"><strong>1 中断处理的CPU级过程”</strong></h3>
+                <p>当中断信号到达CPU时，CPU内部会发生一系列由硬件自动完成的、不可打断的精确操作：</p>
+                <ol>
+                <li><strong>完成当前指令</strong>: CPU会执行完当前正在执行的指令，以保证指令的原子性。</li>
+                <li><strong>保存断点 (Context Switching - Part 1)</strong>: 这是中断机制的精髓。CPU会自动将三个关键的寄存器<strong>压入堆栈</strong>：
+                <ul>
+                <li><strong>标志寄存器 (EFLAGS)</strong></li>
+                <li><strong>代码段寄存器 (CS)</strong></li>
+                <li><strong>指令指针 (EIP)</strong>
+                这个“断点”信息，是CPU能够完美回到被打断之处的唯一凭证。</li>
+                </ul>
+                </li>
+                <li><strong>查找中断处理程序地址</strong>:
+                <ul>
+                <li>在内存的最低地址处（实模式下从<code>0000:0000</code>开始），有一个256项的<strong>中断向量表 (Interrupt Vector Table, IVT)</strong>。</li>
+                <li>每个表项是一个4字节的远指针（<code>CS:IP</code>）。</li>
+                <li>中断号（0-255）被用作这个表的<strong>索引</strong>。例如，对于<code>INT 8h</code>，CPU会查找第8个表项。</li>
+                </ul>
+                </li>
+                <li><strong>跳转到处理程序</strong>: CPU从IVT中取出<code>CS:IP</code>地址，加载到自己的<code>CS</code>和<code>IP</code>寄存器中，从而跳转到中断服务程序（ISR）的入口点。</li>
+                <li><strong>（对于硬件中断）清除中断请求</strong>: CPU通常会自动清除内部的中断请求标志，并可能禁止响应同级或低级的中断（通过<code>IF</code>标志位），以防止中断风暴。</li>
+                </ol>
+                <h3 id="2-%E4%B8%AD%E6%96%AD%E6%9C%8D%E5%8A%A1%E7%A8%8B%E5%BA%8Fisr%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%87%86%E5%88%99"><strong>2 中断服务程序（ISR）的设计准则</strong></h3>
+                <p>一个合格的ISR必须像一个“优雅的客人”：悄悄地来，做完事，不留下一丝痕迹地离开。</p>
+                <ol>
+                <li><strong>保护现场</strong>: CPU只自动保存了<code>EFLAGS</code>, <code>CS</code>, <code>EIP</code>。ISR必须在开头<strong>手动保存</strong>所有它将要用到的通用寄存器（<code>PUSHAD</code>或逐个<code>PUSH</code>），并在结尾<strong>按相反顺序恢复</strong>（<code>POPAD</code>或逐个<code>POP</code>）。</li>
+                <li><strong>执行任务</strong>: 这是ISR的核心逻辑，应该<strong>尽可能地快</strong>。ISR执行期间，整个系统（或至少同级中断）可能是被阻塞的。</li>
+                <li><strong>（对于硬件中断）发送EOI</strong>: 必须向<strong>可编程中断控制器 (PIC, 8259A)</strong> 发送一个<strong>中断结束 (End Of Interrupt)</strong> 信号（通常是向端口<code>20h</code>写入<code>20h</code>），告知它可以继续发送下一个中断了。</li>
+                <li><strong>返回</strong>: <strong>必须</strong>使用<code>IRET</code> (Interrupt Return) 指令返回。<code>IRET</code>会自动恢复<code>EIP</code>, <code>CS</code>, <code>EFLAGS</code>，让被打断的程序恢复运行。</li>
+                </ol>
+                <h3 id="3-%E6%97%B6%E9%92%9F%E4%B8%AD%E6%96%AD%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1-timer-interrupt"><strong>3 时钟中断程序设计 (Timer Interrupt)</strong></h3>
+                <ul>
+                <li>
+                <p><strong>背景</strong>: PC中有一个可编程间隔定时器（PIT, 8253/4），它以约18.2次/秒（1193180Hz / 65536）的频率产生<strong>IRQ0</strong>硬件中断，对应**<code>INT 8h</code>**。</p>
+                </li>
+                <li>
+                <p><strong>系统用途</strong>: DOS利用这个中断来更新系统时间、日期计数器。</p>
+                </li>
+                <li>
+                <p><strong>我们的目标</strong>: 编写一个程序，在屏幕的固定位置显示一个每秒变化的“时钟”。</p>
+                </li>
+                <li>
+                <p><strong>设计模式：中断挂钩 (Hooking an Interrupt)</strong>
+                我们不能粗暴地直接用我们的ISR地址覆盖<code>INT 8h</code>的向量，因为那样系统时间就不走了。正确的做法是：</p>
+                <ol>
+                <li>用DOS功能调用(<code>INT 21h, AH=35h</code>)<strong>获取并保存</strong>原始<code>INT 8h</code>处理程序的地址。</li>
+                <li>用DOS功能调用(<code>INT 21h, AH=25h</code>)将<code>INT 8h</code>的向量<strong>设置为我们自己的ISR地址</strong>。</li>
+                <li>在我们的ISR的末尾，<strong>通过一个远跳转<code>JMP</code>来调用原始的ISR</strong>。这称为<strong>中断链 (Chaining)</strong>。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>例子</strong>:</p>
+                <pre class="hljs"><code><div>; --- 数据段 ---
+                old_timer_vector DD ?    ; 保存原始INT 8h向量
+                tick_count       DB 0    ; 我们的时钟计数器
+
+                ; --- 我们的时钟中断ISR ---
+                timer_isr PROC FAR
+                    ; 1. 保护现场
+                    PUSHAD
+                    PUSH DS
+                    MOV AX, @DATA
+                    MOV DS, AX
+
+                    ; 2. 执行任务
+                    INC [tick_count]
+                    CMP [tick_count], 18 ; 大约1秒 (18.2 ticks)
+                    JNE skip_display
+                    
+                    MOV [tick_count], 0  ; 重置计数器
+                    ; ... 此处添加在屏幕上显示时间的逻辑 ...
+                    
+                skip_display:
+                    ; 3. 发送EOI (可选，因为我们会链式调用)
+                    ; MOV AL, 20h
+                    ; OUT 20h, AL
+
+                    ; 4. 恢复现场 (除了要跳转的寄存器)
+                    POP DS
+                    POPAD
+
+                    ; 5. 链式调用原始ISR
+                    JMP [old_timer_vector]
+                timer_isr ENDP
+
+                ; --- 主程序 ---
+                main PROC
+                    ; --- 安装ISR ---
+                    MOV AX, 3508h       ; AH=35h, AL=08h (获取INT 8h向量)
+                    INT 21h             ; 返回在 ES:BX
+                    MOV WORD PTR [old_timer_vector], BX
+                    MOV WORD PTR [old_timer_vector+2], ES
+
+                    PUSH DS
+                    MOV DX, OFFSET timer_isr
+                    MOV AX, SEG timer_isr
+                    MOV DS, AX
+                    MOV AX, 2508h       ; AH=25h, AL=08h (设置INT 8h向量)
+                    INT 21h
+                    POP DS
+                    
+                    ; ... 主程序可以做其他事, 或进入一个等待退出的循环 ...
+                main ENDP
+                </div></code></pre>
+                </li>
+                </ul>
+                <h3 id="4-%E9%94%AE%E7%9B%98%E4%B8%AD%E6%96%AD%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1-keyboard-interrupt"><strong>4 键盘中断程序设计 (Keyboard Interrupt)</strong></h3>
+                <ul>
+                <li>
+                <p><strong>背景</strong>: 键盘控制器在有按键动作时，产生<strong>IRQ1</strong>硬件中断，对应**<code>INT 9h</code>**。</p>
+                </li>
+                <li>
+                <p><strong>系统用途</strong>: 原始的<code>INT 9h</code> ISR会从端口<code>60h</code>读取按键的<strong>扫描码 (Scan Code)</strong>，将其转换为ASCII码，然后放入键盘缓冲区。</p>
+                </li>
+                <li>
+                <p><strong>我们的目标</strong>: 编写一个程序，当用户按下<code>F1</code>键时，屏幕背景变色。</p>
+                </li>
+                <li>
+                <p><strong>设计模式</strong>: 与时钟中断完全相同，通过挂钩和链式调用来实现。</p>
+                </li>
+                <li>
+                <p><strong>例子</strong>:</p>
+                <pre class="hljs"><code><div>; --- 我们的键盘ISR ---
+                keyboard_isr PROC FAR
+                    ; 1. 保护现场 (至少需要保存AX)
+                    PUSH AX
+
+                    ; 2. 执行任务
+                    IN AL, 60h          ; 从端口60h读取扫描码
+                    CMP AL, 3Bh         ; 3Bh是F1键的扫描码
+                    JNE chain_to_old    ; 如果不是F1键，直接跳到链式调用
+                    
+                    ; ... 此处添加改变屏幕背景色的逻辑 ...
+
+                chain_to_old:
+                    POP AX
+                    ; 3. 链式调用
+                    JMP [old_keyboard_vector]
+                keyboard_isr ENDP
+
+                ; --- 主程序安装部分与时钟中断类似, 只是中断号是09h ---
+                </div></code></pre>
+                </li>
+                </ul>
+                <h3 id="5-%E5%8D%95%E6%AD%A5%E4%B8%AD%E6%96%AD%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1-single-step-interrupt"><strong>5 单步中断程序设计 (Single-Step Interrupt)</strong></h3>
+                <ul>
+                <li>
+                <p><strong>背景</strong>: 这是由CPU内部产生的<strong>异常</strong>，中断号为<strong>1</strong>。它不是由硬件设备触发的，而是由<code>EFLAGS</code>寄存器中的<strong>陷阱标志 (Trap Flag, TF)</strong> 控制的。</p>
+                </li>
+                <li>
+                <p><strong>CPU架构层面</strong>: 当<code>TF</code>位被置为1时，CPU在成功执行<strong>完</strong>一条指令后，在执行下一条指令<strong>前</strong>，会自动产生一个<code>INT 1</code>异常。</p>
+                </li>
+                <li>
+                <p><strong>系统用途</strong>: 这是所有<strong>调试器 (Debugger)</strong> 实现单步执行 (<code>F7</code>或<code>Step Into</code>) 功能的硬件基础。</p>
+                </li>
+                <li>
+                <p><strong>设计模式</strong>:</p>
+                <ol>
+                <li>调试器程序首先挂钩<code>INT 1</code>。</li>
+                <li>当需要单步执行被调试程序时，调试器会修改被调试程序在堆栈上的<code>EFLAGS</code>镜像（在<code>CALL</code>或<code>INT</code>后），将其<code>TF</code>位置为1。</li>
+                <li>当被调试程序通过<code>IRET</code>或<code>RETF</code>返回时，<code>TF=1</code>的<code>EFLAGS</code>被加载，单步模式启动。</li>
+                <li>被调试程序执行一条指令后，<code>INT 1</code>触发，控制权回到调试器的ISR。</li>
+                <li>调试器的ISR可以显示寄存器状态，然后再次设置<code>TF</code>位，让被调试程序继续执行下一条指令。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>例子</strong>: 一个简单的程序，每执行一条指令就打印一条消息</p>
+                <pre class="hljs"><code><div>; --- 我们的单步ISR ---
+                single_step_isr PROC
+                    ; 保护现场
+                    ; ... 打印 "One step executed!" 的逻辑 ...
+                    ; 恢复现场
+                    IRET  ; 直接IRET，因为TF在EFLAGS中，返回后会自动再次触发
+                single_step_isr ENDP
+
+                ; --- 主程序 ---
+                ; 1. 挂钩INT 1
+                ; ... (代码类似上面)
+
+                ; 2. 设置TF标志位
+                PUSHF               ; 将当前FLAGS压栈
+                POP AX              ; 放入AX
+                OR AX, 0100h        ; 将TF位置1 (bit 8)
+                PUSH AX             ; 压回
+                POPF                ; 恢复到FLAGS，单步模式开启！
+
+                ; --- 被调试的代码段 ---
+                MOV CX, 10          ; 执行完这条，INT 1触发
+                XOR BX, BX          ; 执行完这条，INT 1触发
+                ...
+                </div></code></pre>
+                </li>
+                </ul>
+                <h3 id="6-%E9%A9%BB%E7%95%99%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1-tsr---terminate-and-stay-resident"><strong>6 驻留程序设计 (TSR - Terminate and Stay Resident)</strong></h3>
+                <ul>
+                <li>
+                <p><strong>背景</strong>: 这是一个DOS时代的经典编程模型，但其思想影响深远。</p>
+                </li>
+                <li>
+                <p><strong>目标</strong>: 如何让一个程序（特别是它的ISR）在“终止”后，依然“存活”在内存中，继续响应中断？</p>
+                </li>
+                <li>
+                <p><strong>设计模式</strong>:</p>
+                <ol>
+                <li>程序正常加载到内存。</li>
+                <li>程序执行其初始化代码：挂钩它需要的中断（如时钟、键盘）。</li>
+                <li>程序计算出它的ISR和相关数据总共占用了多少内存。</li>
+                <li>程序不使用常规的<code>INT 21h, AH=4Ch</code>终止，而是调用一个特殊的DOS功能：<strong><code>INT 21h, AH=31h</code> (Keep Process)</strong>。</li>
+                <li>这个功能调用会告诉DOS：“请把控制权还给你，但不要回收我指定的这部分内存”。</li>
+                <li>DOS返回命令提示符，但我们的ISR代码块依然完好地留在内存中，像一个“幽灵”一样，每当时钟滴答或键盘按下时，它就会被硬件唤醒。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>系统层面</strong>: 这是一种原始的“后台服务”或“守护进程”的实现方式。输入法、病毒、内存管理工具等在DOS时代都广泛使用TSR技术。它展示了程序如何能与操作系统进行“协商”，修改系统的默认行为，并成为系统的一部分。</p>
+                </li>
+                <li>
+                <p><strong>例子</strong>: 一个简单的TSR，当用户在任何程序中按下<code>Ctrl+C</code>时，除了执行默认的终止操作外，还让PC喇叭响一声。</p>
+                <pre class="hljs"><code><div>; --- 程序的启动部分 ---
+                start:
+                    ; 1. 挂钩键盘中断 INT 9h
+                    ; ... (代码略)
+
+                    ; 2. 计算需要驻留的内存大小
+                    ; 假设我们的ISR代码和数据从_start到_end
+                    MOV DX, (OFFSET _end - OFFSET start + 15) / 16 + 1
+                    
+                    ; 3. 调用TSR终止功能
+                    MOV AX, 3100h       ; AH=31h (Keep), AL=00h (返回码)
+                    INT 21h
+
+                ; --- 驻留部分 (这部分代码会留在内存中) ---
+                keyboard_isr PROC FAR
+                    ; ...
+                    ; 检查是否是Ctrl+C组合键
+                    ; 如果是，执行发声逻辑
+                    ; ...
+                    ; 链式调用原始INT 9h
+                    JMP [old_keyboard_vector]
+                keyboard_isr ENDP
+                ; ... 其他数据和变量 ...
+                _end:
+                </div></code></pre>
+                </li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

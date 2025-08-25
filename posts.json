@@ -495,5 +495,12 @@
     "category": "学习笔记",
     "path": "_posts/2025-08-25-asm07.html",
     "abstract": "x86汇编07:函数"
+  },
+  {
+    "title": "x86汇编08:中断程序设计",
+    "date": "2025-08-25",
+    "category": "学习笔记",
+    "path": "_posts/2025-08-25-asm08.html",
+    "abstract": "x86汇编08:中断程序设计"
   }
 ]
