@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>x86汇编05-3:BCD、逻辑与移位指令</title>
+    
+    <link rel="stylesheet" href="../style.css">
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="x86%E6%B1%87%E7%BC%9605-3bcd%E9%80%BB%E8%BE%91%E4%B8%8E%E7%A7%BB%E4%BD%8D%E6%8C%87%E4%BB%A4">x86汇编05-3:BCD、逻辑与移位指令</h1>
+                <h3 id="1-%E5%8D%81%E8%BF%9B%E5%88%B6%E8%B0%83%E6%95%B4%E6%8C%87%E4%BB%A4-decimal-adjust-instructions"><strong>1 十进制调整指令 (Decimal Adjust Instructions)</strong></h3>
+                <p><strong>设计的动机：我们活在十进制世界</strong>
+                计算机内部的一切都是二进制，但人类社会（尤其是金融、商业领域）完全基于十进制。在二进制和十进制之间进行转换是有计算开销的，而且，浮点数表示十进制小数（如0.1）时会存在精度误差。为了解决这些问题，早期的计算机科学家们发明了<strong>BCD (Binary-Coded Decimal)</strong> 编码。</p>
+                <ul>
+                <li><strong>BCD核心思想</strong>: 用4个比特来表示一位十进制数（0-9）。
+                <ul>
+                <li><code>0</code> -&gt; <code>0000</code>, <code>1</code> -&gt; <code>0001</code>, ..., <code>9</code> -&gt; <code>1001</code></li>
+                <li><code>1010</code> (A) 到 <code>1111</code> (F) 在BCD中是<strong>非法</strong>的。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>两种BCD格式:</strong></p>
+                <ol>
+                <li><strong>压缩BCD (Packed BCD)</strong>: 一个字节存储两位十进制数。高4位存一个，低4位存一个。例如，十进制数<code>95</code>表示为字节<code>1001 0101b</code> (<code>95h</code>)。</li>
+                <li><strong>非压缩BCD (Unpacked BCD)</strong>: 一个字节只存储一位十进制数，通常放在低4位，高4位为0。例如，<code>95</code>需要两个字节：<code>0000 1001b</code> (<code>09h</code>) 和 <code>0000 0101b</code> (<code>05h</code>)。</li>
+                </ol>
+                <p>CPU的ALU并不知道什么是BCD，它只会做纯粹的二进制加减法。例如，计算BCD的<code>48 + 35</code>：</p>
+                <ul>
+                <li>二进制表示: <code>0100 1000b + 0011 0101b = 0111 1101b</code> (<code>7Dh</code>)</li>
+                <li><code>7Dh</code> 既不是十进制的 <code>83</code>，也不是BCD的 <code>83h</code>。结果是错误的。</li>
+                </ul>
+                <p>十进制调整指令的<strong>唯一目的</strong>，就是在二进制加减法<strong>之后</strong>，对结果进行“修复”，使其变回正确的BCD格式。</p>
+                <h4 id="11-%E5%8E%8B%E7%BC%A9bcd%E7%A0%81%E8%B0%83%E6%95%B4%E6%8C%87%E4%BB%A4"><strong>1.1 压缩BCD码调整指令</strong></h4>
+                <p>这两条指令都隐式地操作<code>AL</code>寄存器。</p>
+                <h5 id="111-daa-decimal-adjust-after-addition"><strong>1.1.1 <code>daa</code> (Decimal Adjust after Addition)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: 在执行了<code>ADD</code>或<code>ADC</code>指令后，如果<code>AL</code>中是两个压缩BCD码相加的结果，<code>DAA</code>负责将其调整为正确的压缩BCD码。</li>
+                <li><strong>CPU/架构层面</strong>: 这条指令是硬化的逻辑电路，它会检查两个条件来执行修复：
+                <ol>
+                <li><strong>低4位调整</strong>: 如果<code>AL</code>的低4位（低位BCD数）大于9，或者**<code>AF</code>标志位为1**（表示低4位相加时产生了进位），则<code>AL = AL + 6</code>。</li>
+                <li><strong>高4位调整</strong>: 调整完低4位后，如果<code>AL</code>的高4位（高位BCD数）大于9，或者**<code>CF</code>标志位为1**（表示整个字节相加时产生了进位），则<code>AL = AL + 60h</code>。</li>
+                </ol>
+                </li>
+                <li><strong>系统层面</strong>: 这条指令是早期商业应用（如会计软件、收银机系统）的福音。它将一个复杂的、需要多条指令判断和加法的软件逻辑，固化成一条硬件指令，极大地提升了BCD运算的效率。</li>
+                <li><strong>例子</strong>: 计算压缩BCD <code>48 + 35</code><pre class="hljs"><code><div>MOV AL, 48h     ; AL = BCD 48
+                ADD AL, 35h     ; AL = BCD 35
+                ; 执行后: AL = 48h + 35h = 7Dh (0111 1101b)
+                ; 此时，标志位AF=1 (因为8+5=13 &gt; 9，低4位有进位), CF=0
+
+                DAA             ; 开始调整
+                ; 1. 低4位: 因为AF=1, 所以 AL = 7Dh + 6 = 83h
+                ; 2. 高4位: 调整后AL的高4位是8(&lt;=9), 且CF=0, 所以高位不调整
+                ; 最终结果: AL = 83h (正确的压缩BCD码)
+                </div></code></pre>
+                </li>
+                </ul>
+                <h5 id="112-das-decimal-adjust-after-subtraction"><strong>1.1.2 <code>das</code> (Decimal Adjust after Subtraction)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: <code>DAA</code>的减法版本，用于<code>SUB</code>或<code>SBB</code>指令之后。</li>
+                <li><strong>CPU/架构层面</strong>: 逻辑与<code>DAA</code>类似，但执行的是减法修复：
+                <ol>
+                <li><strong>低4位调整</strong>: 如果<code>AL</code>的低4位大于9，或者**<code>AF</code>=1**（有借位），则<code>AL = AL - 6</code>。</li>
+                <li><strong>高4位调整</strong>: 调整完低4位后，如果<code>AL</code>的高4位大于9，或者**<code>CF</code>=1**（有借位），则<code>AL = AL - 60h</code>。</li>
+                </ol>
+                </li>
+                <li><strong>例子</strong>: 计算压缩BCD <code>82 - 37</code><pre class="hljs"><code><div>MOV AL, 82h
+                SUB AL, 37h
+                ; 执行后: AL = 82h - 37h = 4Bh (0100 1011b)
+                ; 此时, AF=1 (2-7需要借位), CF=0
+
+                DAS             ; 开始调整
+                ; 1. 低4位: 因为AF=1, 所以 AL = 4Bh - 6 = 45h
+                ; 2. 高4位: 调整后高位是4(&lt;=9), CF=0, 不调整
+                ; 最终结果: AL = 45h (正确的压缩BCD码)
+                </div></code></pre>
+                </li>
+                </ul>
+                <h4 id="12-%E9%9D%9E%E5%8E%8B%E7%BC%A9bcd%E7%A0%81%E8%B0%83%E6%95%B4%E6%8C%87%E4%BB%A4"><strong>1.2 非压缩BCD码调整指令</strong></h4>
+                <p>这组指令用于处理每个字节只存一个BCD位的非压缩BCD码。它们通常与ASCII码转换配合使用。</p>
+                <h5 id="121-aaa-ascii-adjust-after-addition--6522-aas-ascii-adjust-after-subtraction"><strong>1.2.1 <code>aaa</code> (ASCII Adjust after Addition)</strong> &amp; <strong>6.5.2.2 <code>aas</code> (ASCII Adjust after Subtraction)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: <code>ADD/ADC</code>或<code>SUB/SBB</code>之后，调整<code>AL</code>。它们假定操作数是合法的非压缩BCD码（<code>0-9</code>）。</li>
+                <li><strong>CPU/架构层面</strong>:
+                <ul>
+                <li><code>AAA</code>: 如果<code>AL</code>低4位 &gt; 9 或 <code>AF</code>=1，则<code>AL = AL + 6</code>，<code>AH = AH + 1</code>，并设置<code>AF</code>和<code>CF</code>。最后，<strong>总是将<code>AL</code>的高4位清零</strong>。</li>
+                <li><code>AAS</code>: 如果<code>AL</code>低4位 &gt; 9 或 <code>AF</code>=1，则<code>AL = AL - 6</code>，<code>AH = AH - 1</code>，并设置<code>AF</code>和<code>CF</code>。最后，<strong>总是将<code>AL</code>的高4位清零</strong>。</li>
+                </ul>
+                </li>
+                <li><strong>系统层面</strong>: 设计用于处理ASCII数字字符串的运算。例如，计算 <code>'7' + '8'</code>：
+                <code>37h + 38h = 6Fh</code>。运算后，<code>AL</code>的高4位需要被忽略，然后用<code>AAA</code>调整低4位。</li>
+                </ul>
+                <h5 id="123-aam-ascii-adjust-after-multiplication"><strong>1.2.3 <code>aam</code> (ASCII Adjust after Multiplication)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: 在<code>MUL</code>指令之后，将<code>AL</code>中的二进制结果转换为两位的非压缩BCD码，存放在<code>AH</code>和<code>AL</code>中。</li>
+                <li><strong>CPU/架构层面</strong>: 这条指令的本质是：<code>AH = AL / 10</code> (商)，<code>AL = AL % 10</code> (余数)。它实际上是一个<strong>硬件实现的8位无符号数除以10的指令</strong>。虽然名为ASCII调整，但它的通用性使其在需要快速除以10的场合非常有用。</li>
+                <li><strong>例子</strong>: BCD乘法 <code>9 * 8</code><pre class="hljs"><code><div>MOV AL, 9
+                MOV BL, 8
+                MUL BL          ; AX = 72 (48h)
+                AAM             ; AH = AL / 10 = 72 / 10 = 7
+                                ; AL = AL % 10 = 72 % 10 = 2
+                                ; 结果 AX = 0702h (非压缩BCD的72)
+                </div></code></pre>
+                </li>
+                </ul>
+                <h5 id="124-aad-ascii-adjust-before-division"><strong>1.2.4 <code>aad</code> (ASCII Adjust before Division)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: 在<code>DIV</code>指令<strong>之前</strong>，将<code>AH</code>和<code>AL</code>中的两位非压缩BCD码转换为一个二进制数存入<code>AL</code>，为除法做准备。</li>
+                <li><strong>CPU/架构层面</strong>: 其本质是：<code>AL = AH * 10 + AL</code>。<code>AH</code>随后被清零。这是一个硬件实现的乘10加法。</li>
+                <li><strong>例子</strong>: BCD除法 <code>72 / 9</code><pre class="hljs"><code><div>MOV AX, 0702h   ; AH=7, AL=2 (非压缩BCD 72)
+                AAD             ; AL = AH*10 + AL = 7*10 + 2 = 72 (48h), AH=0
+                MOV BL, 9
+                DIV BL          ; AL = AL / BL = 72 / 9 = 8 (商)
+                                ; AH = 0 (余数)
+                </div></code></pre>
+                </li>
+                </ul>
+                <h3 id="2-%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97%E5%92%8C%E7%A7%BB%E4%BD%8D%E6%8C%87%E4%BB%A4"><strong>2 逻辑运算和移位指令</strong></h3>
+                <p>这组指令直接操作数据的二进制位，是底层编程的基石。</p>
+                <h4 id="21-%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97%E6%8C%87%E4%BB%A4"><strong>2.1 逻辑运算指令</strong></h4>
+                <p>这些指令都会<strong>清零<code>CF</code>和<code>OF</code></strong>，并根据结果设置<code>SF</code>, <code>ZF</code>, <code>PF</code>。</p>
+                <h5 id="211-and-dest-src-bitwise-and"><strong>2.1.1 <code>and dest, src</code> (Bitwise AND)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: <code>dest = dest &amp; src</code>。对两个操作数的每一位执行逻辑与。</li>
+                <li><strong>CPU/架构层面</strong>: ALU按位执行AND操作。</li>
+                <li><strong>系统层面 (核心用途)</strong>: <strong>位屏蔽 (Masking)</strong> 或 <strong>清零特定位</strong>。</li>
+                <li><strong>例子</strong>: 将字符'g' (<code>01100111b</code>) 转换为大写'G' (<code>01000111b</code>)<pre class="hljs"><code><div>MOV AL, 'g'
+                AND AL, 11011111b ; or AND AL, 0DFh
+                ; 'g'        = 0110 0111
+                ; mask       = 1101 1111
+                ; --------------------
+                ; result (G) = 0100 0111
+                ; 该操作将第5位(大小写区别位)强制清零
+                </div></code></pre>
+                </li>
+                </ul>
+                <h5 id="212-or-dest-src-bitwise-or"><strong>2.1.2 <code>or dest, src</code> (Bitwise OR)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: <code>dest = dest | src</code>。按位逻辑或。</li>
+                <li><strong>系统层面 (核心用途)</strong>: <strong>设置特定位</strong>。</li>
+                <li><strong>例子</strong>: 将字符'G' (<code>01000111b</code>) 转换为小写'g' (<code>01100111b</code>)<pre class="hljs"><code><div>MOV AL, 'G'
+                OR AL, 00100000b ; or OR AL, 20h
+                ; 'G'        = 0100 0111
+                ; mask       = 0010 0000
+                ; --------------------
+                ; result (g) = 0110 0111
+                ; 该操作将第5位强制置1
+                </div></code></pre>
+                </li>
+                </ul>
+                <h5 id="213-xor-dest-src-bitwise-exclusive-or"><strong>2.1.3 <code>xor dest, src</code> (Bitwise Exclusive OR)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: <code>dest = dest ^ src</code>。按位异或。</li>
+                <li><strong>系统层面 (核心用途)</strong>:
+                <ol>
+                <li><strong>翻转特定位</strong>: <code>XOR AL, 10000000b</code> 会翻转<code>AL</code>的最高位。</li>
+                <li><strong>清零寄存器 (经典优化)</strong>: <code>XOR EAX, EAX</code>。
+                <ul>
+                <li><strong>设计哲学</strong>: 为什么比<code>MOV EAX, 0</code>更好？在很多CPU微架构中，<code>XOR reg, reg</code>指令的机器码更短，且不依赖于立即数单元，执行效率更高，消除了对之前<code>EAX</code>值的数据依赖。</li>
+                </ul>
+                </li>
+                <li><strong>简单加密/交换数值</strong>: <code>A = A^B; B = B^A; A = A^B;</code> 可以不通过第三个变量交换A和B的值。</li>
+                </ol>
+                </li>
+                </ul>
+                <h5 id="214-not-op-bitwise-not"><strong>2.1.4 <code>not op</code> (Bitwise NOT)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: <code>op = ~op</code>。按位取反（求一的补码）。</li>
+                <li><strong>CPU/架构层面</strong>: 这是唯一<strong>不影响任何标志位</strong>的逻辑运算指令。</li>
+                </ul>
+                <h5 id="215-test-dest-src-test-bits"><strong>2.1.5 <code>test dest, src</code> (Test Bits)</strong></h5>
+                <ul>
+                <li><strong>高级描述</strong>: <code>CMP</code>的逻辑运算版本。它执行<code>dest &amp; src</code>操作，但<strong>只设置标志位，不改变<code>dest</code>的值</strong>。</li>
+                <li><strong>CPU/架构层面</strong>: ALU执行AND，设置<code>SF</code>, <code>ZF</code>, <code>PF</code>（<code>CF</code>和<code>OF</code>清零），然后丢弃结果。</li>
+                <li><strong>系统层面 (核心用途)</strong>: 检查一个或多个位是否为1，而不破坏原始数据。</li>
+                <li><strong>例子</strong>: 检查<code>AX</code>是否为偶数 (检查最低位是否为0)<pre class="hljs"><code><div>MOV AX, 1234h ; 偶数
+                TEST AX, 1      ; 测试AX的最低位
+                ; 1234h = ...0b, 1 = ...1b. AND结果为0
+                ; 标志位ZF=1
+                JE is_even      ; 如果ZF=1 (结果为0), 则跳转
+
+                MOV BX, 1235h ; 奇数
+                TEST BX, 1
+                ; 1235h = ...1b, 1 = ...1b. AND结果为1
+                ; 标志位ZF=0
+                JNE is_odd      ; 如果ZF=0 (结果非0), 则跳转
+                </div></code></pre>
+                </li>
+                </ul>
+                <h4 id="22-%E7%A7%BB%E4%BD%8D%E5%92%8C%E5%BE%AA%E7%8E%AF%E7%A7%BB%E4%BD%8D%E6%8C%87%E4%BB%A4"><strong>2.2 移位和循环移位指令</strong></h4>
+                <p>这些指令将操作数的所有位向左或向右移动指定的次数（<code>count</code>）。<code>count</code>可以是1、<code>CL</code>寄存器或一个8位立即数（80186+）。移出的位通常会进入<strong>CF标志位</strong>。</p>
+                <h5 id="%E9%80%BB%E8%BE%91%E7%A7%BB%E4%BD%8D"><strong>逻辑移位</strong></h5>
+                <ul>
+                <li><strong>2.2.1 <code>shl dest, count</code> (Shift Logical Left)</strong> &amp; <strong>6.6.2.3 <code>sal dest, count</code> (Shift Arithmetic Left)</strong>
+                <ul>
+                <li><code>SHL</code>和<code>SAL</code>是<strong>完全相同</strong>的指令（操作码一样）。它们将位向左移动，空出的最低位用<strong>0</strong>填充。最高位移入<code>CF</code>。</li>
+                <li><strong>用途</strong>: 快速的无符号/有符号<strong>乘法</strong>。每左移一位，相当于乘以2。</li>
+                </ul>
+                </li>
+                <li><strong>2.2.2 <code>shr dest, count</code> (Shift Logical Right)</strong>
+                <ul>
+                <li>将位向右移动，空出的最高位用<strong>0</strong>填充。最低位移入<code>CF</code>。</li>
+                <li><strong>用途</strong>: 快速的<strong>无符号数除法</strong>。每右移一位，相当于除以2。</li>
+                </ul>
+                </li>
+                </ul>
+                <h5 id="%E7%AE%97%E6%9C%AF%E7%A7%BB%E4%BD%8D"><strong>算术移位</strong></h5>
+                <ul>
+                <li><strong>2.2.4 <code>sar dest, count</code> (Shift Arithmetic Right)</strong>
+                <ul>
+                <li>将位向右移动，但空出的最高位用<strong>原始的符号位</strong>填充。</li>
+                <li><strong>用途</strong>: 快速的<strong>有符号数除法</strong>。<code>SAR</code>能保持负数的符号。</li>
+                <li><strong>例子对比 <code>SHR</code> 和 <code>SAR</code></strong>:<pre class="hljs"><code><div>MOV AL, 0F0h    ; -16 in signed, 240 in unsigned
+                SHR AL, 1       ; AL = 01111000b = 78h (120). 符号变了！
+
+                MOV AL, 0F0h
+                SAR AL, 1       ; AL = 11111000b = 0F8h (-8). 符号保持正确！
+                </div></code></pre>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <h5 id="%E5%BE%AA%E7%8E%AF%E7%A7%BB%E4%BD%8D"><strong>循环移位</strong></h5>
+                <ul>
+                <li><strong>2.2.5 <code>rol dest, count</code> (Rotate Left)</strong> &amp; <strong>6.6.2.6 <code>ror dest, count</code> (Rotate Right)</strong>
+                <ul>
+                <li>将位循环移动。从一端移出的位会进入另一端，同时也会被复制到<code>CF</code>。数据不会丢失。</li>
+                <li><strong>用途</strong>: 在密码学、图形学中用于数据置换，或者在需要循环移动位域时使用。</li>
+                </ul>
+                </li>
+                </ul>
+                <h5 id="%E5%B8%A6%E8%BF%9B%E4%BD%8D%E7%9A%84%E5%BE%AA%E7%8E%AF%E7%A7%BB%E4%BD%8D"><strong>带进位的循环移位</strong></h5>
+                <ul>
+                <li><strong>2.2.7 <code>rcl dest, count</code> (Rotate through Carry Left)</strong> &amp; <strong>6.6.2.8 <code>rcr dest, count</code> (Rotate through Carry Right)</strong>
+                <ul>
+                <li>将<code>CF</code>标志位也作为操作数的一部分进行循环。这是一个N+1位的循环（如9位、17位、33位）。</li>
+                <li><strong>用途 (核心)</strong>: <strong>多精度移位</strong>。</li>
+                <li><strong>例子</strong>: 将一个32位数<code>EDX:EAX</code>逻辑右移一位<pre class="hljs"><code><div>; 我们想实现 SHR (EDX:EAX), 1
+                ; 1. 先移低位EAX，EAX的最低位会进入CF
+                SHR EAX, 1
+                ; 2. 再带进位移高位EDX。这样，EAX原来的最低位(现在在CF里)
+                ;    就会成为EDX的最高位。完美连接！
+                RCR EDX, 1
+                </div></code></pre>
+                </li>
+                </ul>
+                </li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
