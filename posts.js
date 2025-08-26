@@ -719,5 +719,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-26-db13.html",
       "abstract": "数据库系统设计08:并发控制(Concurrency Control)"
+    },
+    {
+      "title": "数据库系统设计09:恢复系统(Recovery System)",
+      "date": "2025-08-26",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-26-db14.html",
+      "abstract": "数据库系统设计09:恢复系统(Recovery System)"
     }
   ];
