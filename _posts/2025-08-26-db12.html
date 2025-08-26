@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数据库系统设计07:事务(Transactions)</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A107%E4%BA%8B%E5%8A%A1transactions">数据库系统设计07:事务(Transactions)</h1>
+                <p>问题：<strong>当事情出错时，会发生什么？</strong></p>
+                <p>想象一个最简单的银行转账场景：账户A要转100元给账户B。这个操作在数据库中至少需要两步：</p>
+                <div class="code-container">
+                    <pre><code><ol>
+<li><code>UPDATE accounts SET balance = balance - 100 WHERE account_id = 'A';</code></li>
+<li><code>UPDATE accounts SET balance = balance + 100 WHERE account_id = 'B';</code></li>
+</ol>
+</code></pre>
+                </div>
+                <p>现在，思考几个“意外”情况：</p>
+                <ul>
+                <li><strong>系统崩溃:</strong> 如果在执行完第一步后，服务器突然断电了，会发生什么？账户A的钱被扣了，但B的钱没到。银行凭空“吞”了100元！</li>
+                <li><strong>并发冲突:</strong> 如果在A扣款之后、B到账之前，另一个程序恰好在此时查询A和B的总额，它会发现总额少了100元。这个“不一致”的中间状态被暴露了，可能会引发错误的决策。</li>
+                <li><strong>并发修改:</strong> 如果在A转账的同时，另一个程序（比如银行结算利息）也在修改A或B的余额，最终的结果会是谁覆盖谁？</li>
+                </ul>
+                <p>这些问题揭示了一个残酷的现实：<strong>一系列相关的数据库操作，必须被视为一个不可分割的、逻辑上的整体。</strong> 这个“整体”，就是我们今天要学习的核心概念——<strong>事务 (Transaction)</strong>。</p>
+                <p>事务是数据库系统提供给应用程序的<strong>最重要的抽象</strong>。它向我们承诺：你可以将一组操作打包，然后放心地交给数据库。数据库会保证，这个包里的操作要么<strong>全部成功</strong>，要么<strong>全部失败</strong>，并且在执行过程中，不会被其他并发操作干扰，其结果一旦成功，就将<strong>永久保留</strong>。</p>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86acid"><strong>第一部分：ACID</strong></h3>
+                <p>ACID是<code>Atomicity</code> (原子性), <code>Consistency</code> (一致性), <code>Isolation</code> (隔离性), <code>Durability</code> (持久性) 四个单词的首字母缩写。它是衡量一个事务处理系统是否可靠的黄金标准。我们将逐一解构它们，理解其深刻含义和现实意义。</p>
+                <h4 id="11-a-for-atomicity-%E5%8E%9F%E5%AD%90%E6%80%A7"><strong>1.1 A for Atomicity (原子性)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>定义:</strong> 一个事务被视为一个<strong>不可分割的最小工作单元</strong>。事务中的所有操作，要么<strong>全部</strong>成功执行并提交，要么在任何一步失败后，<strong>全部</strong>回滚到事务开始前的状态，就好像这个事务从未发生过一样。</p>
+                </li>
+                <li>
+                <p><strong>解决的问题:</strong> 系统崩溃（如转账例子中的断电）。</p>
+                </li>
+                <li>
+                <p><strong>实现机制的预览:</strong> 原子性主要由数据库的<strong>恢复系统 (Recovery System)</strong> 来保证。其核心技术是<strong>日志 (Logging)</strong>。</p>
+                <ul>
+                <li>数据库在修改数据之前，会先将“要做什么”的意图（即操作日志）写入一个稳定存储（磁盘）上的日志文件中。</li>
+                <li>如果在执行过程中崩溃，当系统重启时，恢复管理器会读取日志：
+                <ul>
+                <li>对于已完成但未提交的事务，它会<strong>撤销 (Undo)</strong> 该事务所做的所有修改。</li>
+                <li>对于已提交但可能未完全写入数据文件的事务，它会<strong>重做 (Redo)</strong> 这些修改，确保其效果被体现。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>事务的状态变迁:</strong> 为了实现原子性，一个事务在其生命周期中会经历不同的状态。</p>
+                <ul>
+                <li><strong>Active (活动):</strong> 事务正在执行。</li>
+                <li><strong>Partially Committed (部分提交):</strong> 事务的最后一条语句已执行。此时它已“完成”工作，但结果可能还在内存缓冲区，尚未保证持久化。</li>
+                <li><strong>Committed (已提交):</strong> 事务已成功完成，其所有修改都已被安全地记录下来，保证持久。</li>
+                <li><strong>Failed (失败):</strong> 事务在执行中遇到错误（如违反约束、死锁），无法继续。</li>
+                <li><strong>Aborted (已中止):</strong> 事务失败后，其所有修改已被成功回滚。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="12-c-for-consistency-%E4%B8%80%E8%87%B4%E6%80%A7"><strong>1.2 C for Consistency (一致性)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>定义:</strong> 事务的执行，必须使数据库<strong>从一个一致的状态，转变到另一个一致的状态</strong>。</p>
+                </li>
+                <li>
+                <p><strong>“一致的状态”是什么意思？</strong> 这意味着数据必须满足所有预定义的<strong>完整性约束 (Integrity Constraints)</strong>，例如：</p>
+                <ul>
+                <li>主键唯一性 (<code>PRIMARY KEY</code>)</li>
+                <li>外键引用完整性 (<code>FOREIGN KEY</code>)</li>
+                <li>字段的类型、非空约束 (<code>NOT NULL</code>)</li>
+                <li>业务逻辑层面的约束（例如，银行账户余额不能为负；转账前后，所有账户总额不变）。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>谁的责任？</strong> 一致性是一个<strong>共担的责任</strong>：</p>
+                <ul>
+                <li><strong>数据库的责任:</strong> 保证<strong>原子性、隔离性和持久性</strong>。如果一个事务在中间失败，数据库必须通过回滚来恢复到前一个一致状态。</li>
+                <li><strong>应用程序的责任:</strong> 编写<strong>逻辑正确</strong>的事务。数据库无法阻止你写一个“从A账户扣100，给B账户加80”的错误转账事务。它只能保证这个错误的事务是原子地、隔离地执行的。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>总结:</strong> <strong>A, I, D 是数据库的承诺，C 是应用程序和数据库协同实现的目标。</strong> A, I, D 是因，C 是果。</p>
+                </li>
+                </ul>
+                <h4 id="13-i-for-isolation-%E9%9A%94%E7%A6%BB%E6%80%A7"><strong>1.3 I for Isolation (隔离性)</strong></h4>
+                <ul>
+                <li><strong>定义:</strong> 尽管多个事务可能在<strong>并发地</strong>执行，但对于任何一个事务来说，它都感觉不到其他事务的存在。每个事务都像是<strong>在整个数据库的一个私有副本上独立运行</strong>一样。一个事务的中间状态，对其他并发事务是不可见的。</li>
+                <li><strong>解决的问题:</strong> 并发执行时的数据冲突和不一致。</li>
+                <li><strong>并发异常 (Concurrency Anomalies):</strong> 如果没有隔离性，会发生以下典型问题：
+                <ol>
+                <li><strong>脏读 (Dirty Read):</strong> 事务$T_1$修改了一条数据但<strong>尚未提交</strong>，此时事务$T_2$读取了这条被修改的“脏”数据。如果$T_1$随后回滚，那么$T_2$读取的数据就是无效的、从未正式存在过的。</li>
+                <li><strong>不可重复读 (Non-Repeatable Read):</strong> 事务$T_1$在事务期间，两次读取同一条数据，但两次读取的结果不同。这是因为在两次读取之间，另一个事务$T_2$修改并<strong>提交</strong>了这条数据。</li>
+                <li><strong>幻读 (Phantom Read):</strong> 事务$T_1$在事务期间，两次执行<strong>范围查询</strong>（例如 <code>SELECT * FROM users WHERE age > 20</code>），但两次查询返回的<strong>记录行数</strong>不同。这是因为在两次查询之间，另一个事务$T_2$插入或删除了一些满足该范围条件的记录。</li>
+                </ol>
+                </li>
+                <li><strong>实现机制的预览:</strong> 隔离性主要由<strong>并发控制管理器 (Concurrency Control Manager)</strong> 保证。核心技术包括：
+                <ul>
+                <li><strong>锁 (Locking):</strong> 事务在访问数据前，先获取该数据的锁。其他事务如果想访问，就必须等待锁被释放。最常见的锁协议是<strong>两阶段封锁 (Two-Phase Locking, 2PL)</strong>。</li>
+                <li><strong>多版本并发控制 (Multi-Version Concurrency Control, MVCC):</strong> 不通过锁来阻塞，而是为数据维护多个历史版本。每个事务只能看到在它开始之前就已经提交的版本。这是PostgreSQL, Oracle, InnoDB等现代数据库的主流实现。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="14-d-for-durability-%E6%8C%81%E4%B9%85%E6%80%A7"><strong>1.4 D for Durability (持久性)</strong></h4>
+                <ul>
+                <li><strong>定义:</strong> 一旦事务被成功<strong>提交 (Commit)</strong>，它对数据库所做的所有修改都必须是<strong>永久性的</strong>。即使在提交之后系统立即发生崩溃（如断电、宕机），这些修改也必须能够被恢复。</li>
+                <li><strong>解决的问题:</strong> 保证已提交事务的结果在系统故障后的幸存。</li>
+                <li><strong>实现机制的预览:</strong> 持久性同样由<strong>恢复系统</strong>保证，其核心也是<strong>日志</strong>。
+                <ul>
+                <li><strong>预写日志 (Write-Ahead Logging, WAL):</strong> 这是实现持久性的黄金法则。其内容是：在将数据的修改<strong>写入数据文件之前</strong>，必须<strong>先</strong>将描述该修改的<strong>日志记录写入到稳定存储</strong>。</li>
+                <li><strong>工作流程:</strong> 当事务提交时，系统并不需要立即将所有修改过的数据页都刷到磁盘（这很慢），它只需要保证<strong>与该事务相关的所有日志记录</strong>都已经被安全地写入磁盘日志文件即可。</li>
+                <li><strong>崩溃恢复:</strong> 系统重启后，恢复管理器会通过扫描日志，<strong>重做 (Redo)</strong> 那些已经提交但其数据修改可能未写入数据文件的事务，从而保证其持久性。</li>
+                </ul>
+                </li>
+                <li><strong>[拓展] 影子分页 (Shadow Paging):</strong>
+                <ul>
+                <li>一种早期的、更简单的实现原子性和持久性的方法，但效率较低。</li>
+                <li><strong>思想:</strong> 从不原地修改数据页。当要修改一个页时，先将其复制一份，在新副本上进行修改。通过一个根指针<code>db_pointer</code>来维护当前一致的数据库版本。</li>
+                <li><strong>提交:</strong> 原子地更新<code>db_pointer</code>，使其指向包含新修改的页面树。</li>
+                <li><strong>回滚:</strong> 只需丢弃新副本，<code>db_pointer</code>保持不变即可。</li>
+                <li><strong>缺点:</strong> 破坏了数据的物理聚集性（新旧页散落各处）、提交开销大（需要复制路径上的所有节点）、并发控制复杂。因此，现代数据库普遍采用基于日志的恢复方案。</li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%B9%B6%E5%8F%91%E7%9A%84%E6%AD%A3%E7%A1%AE%E6%80%A7--%E5%8F%AF%E4%B8%B2%E8%A1%8C%E5%8C%96%E7%90%86%E8%AE%BA"><strong>第二部分：并发的“正确性” —— 可串行化理论</strong></h3>
+                <p>我们知道并发执行能提高系统吞吐率和资源利用率，但也引入了数据不一致的风险。那么，什么样的并发执行才是“正确”的呢？</p>
+                <h4 id="21-%E8%B0%83%E5%BA%A6-schedule"><strong>2.1 调度 (Schedule)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>定义:</strong> 一个<strong>调度</strong>是指示一组事务中所有操作的执行顺序的时间序列。</p>
+                </li>
+                <li>
+                <p><strong>串行调度 (Serial Schedule):</strong> 一个接一个地执行事务，中间没有任何交错。例如 $T_1 \rightarrow T_2$。</p>
+                </li>
+                <li>
+                <p><strong>并发调度 (Concurrent Schedule):</strong> 事务的操作是交错执行的。</p>
+                </li>
+                <li>
+                <p><strong>Schedule 1 ($T_1 \rightarrow T_2$):</strong> 串行。A+B=3000 -&gt; 3000。一致性得到保持。</p>
+                </li>
+                <li>
+                <p><strong>Schedule 2 ($T_2 \rightarrow T_1$):</strong> 串行。A+B=3000 -&gt; 3000。一致性得到保持。</p>
+                </li>
+                <li>
+                <p><strong>Schedule 3 (并发，但结果正确):</strong> $T_1$读A,写A -&gt; $T_2$读A,写A,读B,写B -&gt; $T_1$读B,写B。最终A=855, B=2145, A+B=3000。结果与某个串行调度($T_2 \rightarrow T_1$)等价。</p>
+                </li>
+                <li>
+                <p><strong>Schedule 4 (并发，但结果错误 - 丢失更新):</strong> $T_1$读A -&gt; $T_2$读A,写A -&gt; $T_1$写A。$T_2$的更新被$T_1$覆盖了。最终A+B != 3000。</p>
+                </li>
+                </ul>
+                <h4 id="22-%E5%8F%AF%E4%B8%B2%E8%A1%8C%E5%8C%96-serializability"><strong>2.2 可串行化 (Serializability)</strong></h4>
+                <ul>
+                <li><strong>基本假设:</strong> 我们相信每个独立事务本身是正确的（能保持一致性）。</li>
+                <li><strong>推论:</strong> 任何串行调度都一定是正确的。</li>
+                <li><strong>核心定义:</strong> 一个并发调度S，如果其执行结果与<strong>某个</strong>串行调度S'的执行结果完全等价，那么我们称调度S是<strong>可串行化的 (Serializable)</strong>。</li>
+                <li><strong>重要性:</strong> <strong>可串行化是数据库理论中定义的最高隔离级别</strong>。它为并发事务的正确性提供了一个简单而强大的判断标准：我们只需要证明一个并发调度等价于某个串行调度，就可以断定它是正确的，而无需关心事务的具体语义。</li>
+                </ul>
+                <h4 id="23-%E5%86%B2%E7%AA%81%E5%8F%AF%E4%B8%B2%E8%A1%8C%E5%8C%96-conflict-serializability"><strong>2.3 冲突可串行化 (Conflict Serializability)</strong></h4>
+                <p>如何判断一个调度是否可串行化？检查所有可能的最终状态太复杂了。我们需要一个更简单的、基于操作<strong>冲突 (Conflict)</strong> 的判断方法。</p>
+                <ul>
+                <li><strong>冲突操作的定义:</strong> 两个来自<strong>不同事务</strong>的操作，作用于<strong>同一个数据项</strong>上，并且<strong>至少有一个是写操作</strong>，那么这两个操作就是冲突的。
+                <ul>
+                <li><code>Read(Q) - Read(Q)</code>: 不冲突。</li>
+                <li><code>Read(Q) - Write(Q)</code>: <strong>冲突</strong>。</li>
+                <li><code>Write(Q) - Read(Q)</code>: <strong>冲突</strong>。</li>
+                <li><code>Write(Q) - Write(Q)</code>: <strong>冲突</strong>。</li>
+                </ul>
+                </li>
+                <li><strong>冲突的意义:</strong> 冲突操作的执行顺序<strong>不能随意交换</strong>，否则可能会改变最终结果。</li>
+                <li><strong>冲突等价 (Conflict Equivalence):</strong> 两个调度S1和S2，如果它们包含相同的事务集，并且所有冲突操作对的相对顺序在S1和S2中都完全相同，那么S1和S2是冲突等价的。</li>
+                <li><strong>冲突可串行化 (Conflict Serializable):</strong> 一个调度S，如果它与<strong>某个</strong>串行调度冲突等价，那么S就是冲突可串行化的。</li>
+                </ul>
+                <h4 id="24-%E4%BD%BF%E7%94%A8%E4%BC%98%E5%85%88%E5%9B%BE-precedence-graph-%E8%BF%9B%E8%A1%8C%E6%B5%8B%E8%AF%95"><strong>2.4 使用优先图 (Precedence Graph) 进行测试</strong></h4>
+                <p>这是一个用于判断一个调度是否<strong>冲突可串行化</strong>的简单图论方法。</p>
+                <ul>
+                <li>
+                <p><strong>构建方法:</strong></p>
+                <ol>
+                <li>图的<strong>顶点</strong>是参与调度的所有事务 ($T_1$, $T_2$, ...)。</li>
+                <li>如果调度中存在一个操作 $op_i(Q)$ (来自$T_i$) 在另一个操作 $op_j(Q)$ (来自$T_j$) 之前执行，并且这两个操作是冲突的，那么就在图中画一条从 $T_i$ 指向 $T_j$ 的有向边 $T_i \rightarrow T_j$。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>判断定理:</strong></p>
+                <ul>
+                <li>一个调度是<strong>冲突可串行化的，当且仅当 (if and only if) 它的优先图是无环的 (acyclic)</strong>。</li>
+                <li>如果图无环，那么该图的任意一个<strong>拓扑排序 (Topological Sort)</strong> 就对应一个与原调度等价的串行调度。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>[示例分析]</strong></p>
+                <ul>
+                <li>为上一节的Schedule 3和Schedule 4画优先图。</li>
+                <li>Schedule 3: $T_1$.write(A) 在 $T_2$.read(A) 之前 -&gt; 无冲突。 $T_2$.write(A)在$T_1$.read(B)之前 -&gt; 无冲突。$T_2$.write(B) 在$T_1$.write(B)之前 -&gt; $T_2 \rightarrow T_1$。最终只有一条边，无环。</li>
+                <li>Schedule 4 (假设$T_1$读A, $T_2$读A, $T_2$写A, $T_1$写A): $T_1$.read(A)在$T_2$.write(A)之前 -&gt; $T_1 \rightarrow T_2$。$T_2$.read(A)在$T_1$.write(A)之前 -&gt; $T_2 \rightarrow T_1$。<strong>图中存在 $T_1 \rightarrow T_2 \rightarrow T_1$ 的环！</strong> 因此，Schedule 4不是冲突可串行化的。</li>
+                </ul>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E4%B8%8E%E5%8F%AF%E6%81%A2%E5%A4%8D%E6%80%A7"><strong>第三部分：隔离级别与可恢复性</strong></h3>
+                <p>可串行化虽然提供了最强的保证，但实现它的并发控制协议（如严格两阶段封锁）通常会限制并发度，带来性能开销。因此，SQL标准和现实世界的数据库，定义了一系列<strong>更弱的隔离级别</strong>，允许应用程序在<strong>性能和一致性之间做出权衡</strong>。</p>
+                <h4 id="31-sql%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><strong>3.1 SQL隔离级别</strong></h4>
+                <table>
+                <thead>
+                <tr>
+                <th style="text-align:left">隔离级别</th>
+                <th style="text-align:left">允许的并发异常</th>
+                <th style="text-align:left">描述</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                <td style="text-align:left"><strong>READ UNCOMMITTED (读未提交)</strong></td>
+                <td style="text-align:left">脏读, 不可重复读, 幻读</td>
+                <td style="text-align:left">最低级别。一个事务可以读取到其他事务尚未提交的修改。性能最高，但一致性最差。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>READ COMMITTED (读已提交)</strong></td>
+                <td style="text-align:left">不可重复读, 幻读</td>
+                <td style="text-align:left">一个事务只能读取到其他事务<strong>已经提交</strong>的数据。这是大多数数据库（如PostgreSQL, Oracle）的<strong>默认隔离级别</strong>。它避免了脏读，但无法保证在同一个事务内重复读取的结果一致。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>REPEATABLE READ (可重复读)</strong></td>
+                <td style="text-align:left">幻读</td>
+                <td style="text-align:left">保证在同一个事务内，对同一数据的多次读取结果都是一致的。它通过锁或MVCC快照来防止其他事务修改正在被读取的数据。但它无法阻止其他事务插入新的、满足范围查询条件的“幻影”行。MySQL InnoDB的默认级别，并通过Next-Key Locking在一定程度上解决了幻读。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>SERIALIZABLE (可串行化)</strong></td>
+                <td style="text-align:left">(无)</td>
+                <td style="text-align:left">最高级别。完全模拟串行执行，杜绝所有并发异常。性能开销最大。</td>
+                </tr>
+                </tbody>
+                </table>
+                <h4 id="32-%E5%8F%AF%E6%81%A2%E5%A4%8D%E6%80%A7-recoverability"><strong>3.2 可恢复性 (Recoverability)</strong></h4>
+                <p>除了隔离性，一个“好”的调度还必须是<strong>可恢复的</strong>。</p>
+                <ul>
+                <li><strong>可恢复调度 (Recoverable Schedule):</strong>
+                <ul>
+                <li><strong>定义:</strong> 对于任意两个事务$T_i$和$T_j$，如果$T_j$读取了由$T_i$写入的数据，那么<strong>$T_i$必须在$T_j$提交之前提交</strong>。</li>
+                <li><strong>为什么需要？</strong> 试想一个不可恢复的调度：$T_1$写A -&gt; $T_2$读A -&gt; $T_2$提交 -&gt; $T_1$中止。$T_2$提交了一个基于“脏数据”的结果，而这个脏数据的来源$T_1$却回滚了，导致数据库进入一个不一致的状态，且无法修复。</li>
+                </ul>
+                </li>
+                <li><strong>无级联回滚调度 (Cascadeless Schedule):</strong>
+                <ul>
+                <li><strong>问题:</strong> 在一个可恢复调度中，如果 $T_1$写A -&gt; $T_2$读A -&gt; $T_1$中止，那么$T_2$也必须中止，因为它读了脏数据。如果$T_3$又读了$T_2$写的数据，那么$T_3$也要中止…… 这种连锁反应称为<strong>级联回滚 (Cascading Aborts)</strong>，代价高昂。</li>
+                <li><strong>定义:</strong> 对于任意两个事务$T_i$和$T_j$，如果$T_j$要读取由$T_i$写入的数据，那么<strong>$T_i$必须在$T_j$读取之前提交</strong>。</li>
+                <li><strong>优点:</strong> 避免了级联回滚。一个事务的中止，不会引发其他事务的中止。这通过**“读已提交”**的策略来实现。</li>
+                </ul>
+                </li>
+                <li><strong>严格调度 (Strict Schedule):</strong>
+                <ul>
+                <li><strong>定义:</strong> 要求更高，如果$T_j$要<strong>读取或写入</strong>由$T_i$写入的数据，那么<strong>$T_i$必须在$T_j$操作之前提交或中止</strong>。</li>
+                <li><strong>优点:</strong> 使得回滚操作变得非常简单。要回滚一个事务，只需恢复它修改过的数据的“前像” (before-image) 即可，无需担心其他并发事务。几乎所有基于锁的商业数据库都实现了严格调度。</li>
+                </ul>
+                </li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
