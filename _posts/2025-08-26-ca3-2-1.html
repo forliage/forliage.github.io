@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机体系结构3-2-1:静态并行</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%843-2-1%E9%9D%99%E6%80%81%E5%B9%B6%E8%A1%8C">计算机体系结构3-2-1:静态并行</h1>
+                <h4 id="11-%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6%E7%9A%84%E8%BD%AC%E5%8F%98">1.1 设计哲学的转变”</h4>
+                <p>如果说动态调度的信条是“<strong>延迟决策，实时最优</strong>”，那么静态调度的核心理念就是“<strong>未雨绸缪，编译时即优化</strong>”。</p>
+                <ul>
+                <li><strong>动态调度</strong>：将指令调度的复杂性交给硬件。处理器像一个经验丰富的现场指挥官，根据瞬息万变的“战况”（数据是否就绪、资源是否空闲）来动态调整指令的执行顺序。</li>
+                <li><strong>静态调度</strong>：将指令调度的重任交给编译器。编译器则像一个运筹帷幄的战略家，在战争开始前（程序编译时），就通过对整个“战场”（代码）的全局分析，精心编排好指令的“作战序列”，从而在硬件层面简化相关的处理逻辑。</li>
+                </ul>
+                <p>这两种哲学并非完全对立，现代处理器常常是二者结合的产物。但理解纯粹的静态并行思想，对于我们认识整个计算机体系结构的设计空间至关重要。静态并行的成败，几乎完全取决于编译器对程序“本质”的理解深度。这个“本质”，就是指令之间的<strong>依赖关系（Dependencies）</strong>。</p>
+                <h4 id="12-%E6%8C%87%E4%BB%A4%E9%97%B4%E4%BE%9D%E8%B5%96">1.2 指令间依赖</h4>
+                <p>对于编译器而言，一段程序不再是简单的指令序列，而是一张复杂的<strong>数据流图（Data-Flow Graph）</strong>。为了进行有效的调度，编译器必须精确地识别三类依赖关系，它们是指令重排的“法律与镣铐”。</p>
+                <h4 id="1-%E6%95%B0%E6%8D%AE%E4%BE%9D%E8%B5%96-data-dependence---raw">1. <strong>数据依赖 (Data Dependence) - RAW</strong></h4>
+                <ul>
+                <li><strong>定义</strong>：后一条指令 <code>j</code> 需要使用前一条指令 <code>i</code> 的计算结果。这构成了**写后读（Read After Write, RAW）**的数据流。</li>
+                <li><strong>本质</strong>：这是程序逻辑的<strong>根本体现</strong>，是“算法”本身。例如 <code>a = b + c; d = a * 2;</code>，<code>a</code> 的值必须从第一条指令流向第二条。</li>
+                <li><strong>设计原则</strong>：<strong>数据依赖是神圣不可侵犯的</strong>。任何调度都必须维持这个先后顺序，否则程序结果就会出错。这是编译器调度的<strong>硬性约束</strong>。</li>
+                </ul>
+                <p>让我们看一个经典的循环例子：</p>
+                <div class="code-container">
+                <pre><code class="language-plaintext">Loop:
+    fld     f0, 0(x1)     ; 指令 I1: 从内存加载值到 f0
+    fadd.d  f4, f0, f2    ; 指令 I2: 使用 f0
+    fsd     f4, 0(x1)     ; 指令 I3: 存储 f4 的结果
+    addi    x1, x1, -8    ; 指令 I4: 更新地址指针
+    bne     x1, x2, Loop  ; 指令 I5: 循环分支
+</code></pre>
+                </div>
+                <p>在这里，<code>fadd.d</code> 依赖于 <code>fld</code> 的结果 <code>f0</code>，<code>fsd</code> 依赖于 <code>fadd.d</code> 的结果 <code>f4</code>。这两对 RAW 依赖关系构成了循环体的核心计算链，编译器在重排时必须予以保证。</p>
+                <h4 id="2-%E5%90%8D%E4%BE%9D%E8%B5%96-name-dependence---waw--war">2. <strong>名依赖 (Name Dependence) - WAW &amp; WAR</strong></h4>
+                <ul>
+                <li><strong>定义</strong>：两条指令使用了相同的寄存器或内存地址的“名字”，但它们之间并没有直接的数据流动。</li>
+                <li><strong>本质</strong>：这是<strong>资源的偶然冲突</strong>，而非逻辑上的必然。它源于程序中有限的寄存器数量。</li>
+                <li><strong>设计原则</strong>：<strong>名依赖是可以通过“改名”来消除的镣铐</strong>。这是编译器大展身手的核心领域。
+                <ul>
+                <li><strong>反依赖 (Antidependence) - WAR</strong>：前一条指令 <code>i</code> 要读取一个寄存器，而后一条指令 <code>j</code> 要写入<strong>同一个</strong>寄存器。即<strong>读后写（Write After Read）</strong>。如果 <code>j</code> 被错误地调度到 <code>i</code> 之前，<code>i</code> 就会读到错误的新值。</li>
+                <li><strong>输出依赖 (Output Dependence) - WAW</strong>：两条指令 <code>i</code> 和 <code>j</code> 要写入<strong>同一个</strong>目标寄存器。即<strong>写后写（Write After Write）</strong>。如果它们的执行顺序被颠倒，最终留在寄存器里的将是错误的值。</li>
+                </ul>
+                </li>
+                </ul>
+                <p>硬件通过<strong>寄存器重命名</strong>来动态解决这个问题，而编译器则通过<strong>静态寄存器分配</strong>和<strong>指令调度</strong>来规避它。例如，如果编译器发现一个 WAW 依赖，它可能会尝试为其中一条指令分配一个不同的临时寄存器，从而打破这种伪相关。</p>
+                <h4 id="3-%E6%8E%A7%E5%88%B6%E4%BE%9D%E8%B5%96-control-dependence">3. <strong>控制依赖 (Control Dependence)</strong></h4>
+                <ul>
+                <li><strong>定义</strong>：一条指令 <code>i</code> 的执行与否，取决于前面某个分支指令 <code>j</code> 的结果。</li>
+                <li><strong>本质</strong>：定义了程序的<strong>执行路径</strong>。</li>
+                <li><strong>设计原则</strong>：<strong>控制依赖是调度的“围墙”</strong>。通常，编译器不能随意地将一条指令跨越它所依赖的分支进行移动。例如，不能将只在 <code>if</code> 块中执行的指令，移动到 <code>if</code> 语句之前。这样做可能会引发不必要的计算，甚至导致本不该发生的异常（例如，对一个空指针的解引用）。</li>
+                </ul>
+                <h4 id="13-%E5%A4%9A%E5%91%A8%E6%9C%9F%E6%B5%81%E6%B0%B4%E7%BA%BF">1.3 多周期流水线</h4>
+                <p>在简单的五级流水线中，所有指令的执行时间相同，停顿相对简单可控，静态调度的空间有限。然而，现实世界中的处理器，特别是带有强大浮点单元（FPU）的处理器，其流水线要复杂得多。这恰恰为静态调度提供了广阔的用武之地。</p>
+                <h4 id="131-%E4%B8%BA%E4%BD%95%E9%9C%80%E8%A6%81%E5%A4%8D%E6%9D%82%E7%9A%84%E6%B5%AE%E7%82%B9%E6%B5%81%E6%B0%B4%E7%BA%BF">1.3.1 为何需要复杂的浮点流水线？</h4>
+                <p>浮点运算（加、乘、除）的复杂度远高于整数运算。如果我们坚持所有指令的 EX 阶段都只占用一个时钟周期，会面临两个无法接受的选择：</p>
+                <ol>
+                <li><strong>极度拉长时钟周期</strong>：为了容纳最慢的浮点除法，时钟周期会变得非常长，导致那些简单的整数运算性能急剧下降。这违背了“<strong>优化大概率事件</strong>”的设计原则。</li>
+                <li><strong>堆砌海量硬件</strong>：在一个周期内完成复杂运算需要巨大的、不切实际的组合逻辑电路，成本和功耗都会失控。</li>
+                </ol>
+                <p>因此，唯一可行的设计是<strong>允许多周期操作</strong>，并为不同类型的运算提供专门的、流水化的功能单元。</p>
+                <p><img src="../images/imagea039.png" alt="figure 39"></p>
+                <p>这张图展示了一个典型的、支持静态调度的高性能流水线结构。我们必须深刻理解它的设计哲学：</p>
+                <ul>
+                <li><strong>并行与专业化</strong>：处理器不再是一条单行道，而是拥有了多条并行的“专业车道”：一个整数单元、一个流水化的 FP 加法器、一个更深流水线的 FP 乘法器，以及一个<strong>未完全流水化</strong>的 FP 除法器。</li>
+                <li><strong>可变延迟</strong>：不同“车道”的长度（流水线深度）不同。<code>fadd.d</code> 可能需要 4 个周期完成执行，而 <code>fmul.d</code> 需要 7 个周期，<code>fdiv.d</code> 则可能需要 24 个周期。</li>
+                <li><strong>乱序完成 (Out-of-Order Completion)</strong>：由于延迟不同，指令的完成顺序很可能与它们的发射顺序不同。一条后发射的 <code>fadd.d</code> 很有可能会比先发射的 <code>fmul.d</code> 更早完成。</li>
+                </ul>
+                <p>这个结构为提升 ILP 提供了硬件基础，但同时也给编译器带来了前所未有的挑战和机遇。为了精确地进行调度，编译器必须掌握两个核心的性能指标。</p>
+                <h4 id="132-%E8%B0%83%E5%BA%A6%E7%9A%84%E5%BA%A6%E9%87%8F%E8%A1%A衡%E5%BB%B6%E8%BF%9Flatency%E4%B8%8E%E5%8F%91%E5%B0%84%E9%97%B4%E9%9A%94initiation-interval">1.3.2 调度的度量衡：延迟(Latency)与发射间隔(Initiation Interval)</h4>
+                <ul>
+                <li>
+                <p><strong>延迟 (Latency)</strong></p>
+                <ul>
+                <li><strong>定义</strong>：从一条指令产生结果，到另一条<strong>依赖于该结果</strong>的指令可以开始使用该结果，所必须间隔的时钟周期数。</li>
+                <li><strong>设计解读</strong>：延迟反映了**真数据依赖（RAW）**导致的最小停顿时间。如果 <code>fmul.d</code> 的延迟是 6，意味着 <code>fmul.d</code> 指令进入 EX 阶段后的第 7 个周期，其结果才能被下一条指令使用。编译器需要在这 6 个周期的“空档”中，插入其他不相关的指令。</li>
+                <li><strong>计算</strong>：对于一个深度为 $N$ 的执行流水段（如乘法器的 M1-M7），结果在第 $N$ 阶段的末尾产生，可以通过前向通路在第 $N+1$ 个周期的开始被后续指令使用。因此，需要等待的周期数是 $(N+1) - 1 = N$ 个周期吗？不完全是。通常，我们将延迟定义为<strong>需要插入的 <code>nop</code> 指令数量</strong>。如果结果在第 $k$ 周期可用，而依赖指令在第 $k+1$ 周期就需要它，那么延迟为0。如果依赖指令需要停顿1个周期，延迟就是1。因此，<strong>延迟 = 产生结果的阶段 - 消耗结果的阶段</strong>。对于一个深度为 $N$ 的执行流水段，结果在 <code>EX_N</code> 阶段产生，而后续指令在 <code>EX</code> 阶段就需要，所以延迟为 $N-1$。</li>
+                <li>请看参考如下  表格，FP Add 的执行阶段有4级（A1-A4），其延迟为 $4-1=3$。FP Multiply 有7级（M1-M7），延迟为 $7-1=6$。
+                <img src="../images/imagea040.png" alt="figure 40"></li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>发射间隔 (Initiation/Repeat Interval)</strong></p>
+                <ul>
+                <li><strong>定义</strong>：在同一个功能单元上，连续发射两条<strong>同类型</strong>指令之间所需的最小时钟周期数。</li>
+                <li><strong>设计解读</strong>：发射间隔反映了功能单元的<strong>吞吐能力</strong>。
+                <ul>
+                <li><strong>如果功能单元是完全流水化的</strong>（Fully Pipelined），比如 FP 加法器和乘法器，那么它在每个时钟周期都可以接收一条新的指令。此时，发射间隔为 1。</li>
+                <li><strong>如果功能单元不是流水化的</strong>，比如这里的 FP 除法器，它在完成当前操作之前，不能接收新的操作。此时，发射间隔就等于它的总执行时间（例如 24 个周期）。这意味着在一条 <code>fdiv.d</code> 指令发射后，下一条 <code>fdiv.d</code> 必须等待 24 个周期才能发射，这会造成严重的<strong>结构相关</strong>。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="133-%E6%96%B0%E6%B5%81%E6%B0%B4%E7%BA%BF%E4%B8%8B%E7%9A%84%E5%8D%87%E7%BA%A7%E7%89%88%E7%9B%B8%E5%85%B3">1.3.3 新流水线下的“升级版”相关</h4>
+                <p>有了多周期、多功能单元的流水线，我们之前讨论的相关问题也变得更加复杂和频繁。</p>
+                <ul>
+                <li>
+                <p><strong>结构相关 (Structural Hazards)</strong></p>
+                <ul>
+                <li><strong>功能单元冲突</strong>：如上所述，对非流水化的除法器连续请求，会导致结构相关。</li>
+                <li><strong>写回端口冲突</strong>：这是更普遍的问题。想象一下，一条 <code>fmul.d</code> （延迟6）和一条 7 个周期前发射的 <code>integer op</code> （延迟0）可能会在<strong>同一个时钟周期</strong>完成执行，并都想进入 WB 阶段写回寄存器。如果寄存器堆只有一个写端口，就会发生冲突。
+                <img src="../images/imagea041.png" alt="figure 41">
+                这张图清晰地展示了 <code>fmul.d</code> 和 <code>fadd.d</code> 同时在第 10 周期到达 MEM/WB 阶段，<code>fld</code> 和另一条指令在第 11 周期也同时到达 WB 阶段，造成了资源冲突。编译器在调度时，必须像“排课表”一样，确保不会有两节“课”（指令写回）被安排在同一个“教室”（写回端口）和“时间”（时钟周期）。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>数据相关 (Data Hazards)</strong></p>
+                <ul>
+                <li><strong>RAW</strong>: 由于浮点操作的高延迟，RAW 导致的潜在停顿周期数大大增加。<code>fmul.d -&gt; fadd.d</code> 的依赖链意味着至少 6 个周期的停顿。这为编译器提供了巨大的优化空间去“填空”。
+                <img src="../images/imagea042.png" alt="figure 42">
+                这个例子展示了 <code>fadd.d</code> 因为依赖 <code>fmul.d</code> 的结果 <code>f0</code>，被迫在 ID 阶段停顿了整整 6 个周期的停顿，直到 <code>fmul.d</code> 的结果通过前向通路传递过来。</li>
+                <li><strong>WAW</strong>: 在乱序完成的流水线中，WAW 相关变得非常真实。</li>
+                </ul>
+                <div class="code-container">
+                <pre><code class="language-plaintext">DIV.D  F0, F2, F4   ; 慢指令
+...
+ADD.D  F0, F8, F10  ; 快指令
+</code></pre>
+                </div>
+                <p><code>ADD.D</code> 会比 <code>DIV.D</code> 早得多完成计算。如果没有合适的机制，<code>ADD.D</code> 会先写回 F0，然后这个正确的结果会被后完成的 <code>DIV.D</code> <strong>错误地覆盖掉</strong>。编译器必须检测这种 WAW 相关，并通过停顿后发射的 <code>ADD.D</code> 指令来保证正确的写入顺序。</p>
+                </li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
