@@ -698,5 +698,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-26-db10.html",
       "abstract": "数据库系统设计05:查询处理(下)"
+    },
+    {
+      "title": "数据库系统设计06:查询优化",
+      "date": "2025-08-26",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-26-db11.html",
+      "abstract": "数据库系统设计06:查询优化"
     }
   ];
