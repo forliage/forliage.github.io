@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机体系结构3-1-3:Tomasulo 算法</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%843-1-3tomasulo-%E7%AE%97%E6%B3%95">计算机体系结构3-1-3:Tomasulo 算法</h1>
+                <h3 id="%E7%AC%AC%E4%B8%89%E8%8A%82tomasulo-%E7%AE%97%E6%B3%95">第三节：Tomasulo 算法</h3>
+                <p>Tomasulo 算法由 Robert Tomasulo 于 1967 年为 IBM System/360 Model 91 的浮点运算单元设计。它不仅仅是记分牌的优化，更是一场设计哲学上的革命。如果说记分牌是“<strong>集中管控下的有限自由</strong>”，那么 Tomasulo 算法就是“<strong>基于规则的分布式自治</strong>”。</p>
+                <h4 id="31-%E6%A0%B8%E5%BF%83%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6%E4%BB%8E%E7%AD%89%E5%BE%85%E5%88%B0%E7%BB%95%E8%A1%8C">3.1 核心设计哲学：从“等待”到“绕行”</h4>
+                <p>Tomasulo 算法的精髓在于它解决了记分牌最棘手的三个问题，其设计哲学可以概括为以下三点：</p>
+                <ol>
+                <li>
+                <p><strong>控制逻辑的去中心化（Decentralization）</strong>：记分牌的“大脑”被分解了。危险检测和指令控制的逻辑不再集中于一处，而是分布到各个**保留站（Reservation Stations）**中。每个保留站就像一个独立的“调度员”，自己负责监控所需的操作数，一旦就绪就申请执行。这大大提高了系统的可扩展性。</p>
+                </li>
+                <li>
+                <p><strong>通过寄存器重命名消除伪相关（Eliminating Name Dependencies via Register Renaming）</strong>：这是 Tomasulo 算法最核心、最天才的贡献。它深刻地洞察到，WAW 和 WAR 相关的本质，是多条指令在不同时间点上对<strong>同一个寄存器名字</strong>的争用，而非对<strong>数据值</strong>的依赖。Tomasulo 的解决方案是：<strong>在硬件中动态地为指令结果分配临时的“存储空间”（即保留站条目），从而将指令与固定的架构寄存器名解耦。</strong></p>
+                </li>
+                <li>
+                <p><strong>通过公共数据总线实现高效数据广播（Data-Flow via Common Data Bus, CDB）</strong>：为了配合分布式控制和寄存器重命名，Tomasulo 引入了<strong>公共数据总线（CDB）</strong>。一旦某个功能单元计算出结果，它不会悄悄地写回寄存器，而是将结果连同一个“标签”（Tag）一起<strong>广播</strong>到 CDB 上。所有正在等待这个结果的单元（包括保留站和寄存器堆）都会“收听”这个广播，并取走自己需要的数据。这形成了一个真正意义上的**数据驱动执行（Data-Flow Execution）**模型：数据的产生直接触发后续的计算。</p>
+                </li>
+                </ol>
+                <h4 id="32-tomasulo-%E7%9A%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E6%96%B0%E7%BB%84%E4%BB%B6%E4%B8%8E%E6%96%B0%E8%A7%92%E8%89%B2">3.2 Tomasulo 的体系结构：新组件与新角色</h4>
+                <p>为了实现上述哲学，Tomasulo 引入了一套新的硬件结构。</p>
+                <p><img src="../images/imagea035.png" alt="figure 35"></p>
+                <p>让我们来认识一下图中的关键角色：</p>
+                <ul>
+                <li>
+                <p><strong>指令队列 (Instruction Queue)</strong>：从取指单元接收指令，按程序顺序（in-order）将它们送往发射逻辑。</p>
+                </li>
+                <li>
+                <p><strong>保留站 (Reservation Stations, RS)</strong>：这是 Tomasulo 的心脏。它取代了记分牌中 FU 状态表的大部分功能。</p>
+                <ul>
+                <li><strong>功能</strong>：这是一个分布式的缓冲池，用于暂存已被发射但尚未执行的指令。每个保留站都与一个或一类功能单元（如加法器、乘法器）关联。</li>
+                <li><strong>关键字段</strong>：
+                <ul>
+                <li><code>Op</code>：要执行的操作。</li>
+                <li><code>Qj</code>, <code>Qk</code>：源操作数的“状态”。如果操作数还未就绪，这里存放的是将要产生该操作数的<strong>保留站的标签（Tag）</strong>。如果已经就绪，则为空。</li>
+                <li><code>Vj</code>, <code>Vk</code>：源操作数的“值”。如果操作数已经就绪，这里存放的是它的<strong>实际数值</strong>。</li>
+                <li><code>Busy</code>：表示该保留站是否被占用。</li>
+                </ul>
+                </li>
+                <li><em>设计洞察：<code>Q</code> 和 <code>V</code> 字段的配合是关键。一个操作数要么有<code>V</code>（值），要么有<code>Q</code>（等待标签）。这种设计清晰地描绘了数据依赖链。</em></li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>加载/存储缓冲 (Load/Store Buffers)</strong>：由于访存操作分为地址计算和实际访存两步，且需要与内存系统交互，Tomasulo 为它们设置了专门的缓冲。加载缓冲用于跟踪正在进行的加载操作，存储缓冲用于暂存存储操作的地址和数据，直到可以安全地写入内存。</p>
+                </li>
+                <li>
+                <p><strong>公共数据总线 (Common Data Bus, CDB)</strong>：这是一条连接所有功能单元、保留站、加载/存储缓冲以及寄存器堆的广播总线。它是系统中已完成计算结果的唯一分发渠道。</p>
+                </li>
+                <li>
+                <p><strong>浮点寄存器堆 (FP Registers)</strong>：寄存器堆的角色发生了根本性变化。除了存储已经“退休”（committed）的稳定值之外，它还增加了一个关键状态字段：</p>
+                <ul>
+                <li><code>Qi</code>：如果该寄存器是某条尚未完成指令的目标，<code>Qi</code> 字段将保存正在为它计算结果的那个<strong>保留站的标签</strong>。如果寄存器中的值是有效的、最新的，则 <code>Qi</code> 字段为空。</li>
+                <li><em>设计洞察：<code>Qi</code> 字段是实现寄存器重命名的核心机制！它建立了一个从<strong>架构寄存器名</strong>（如 F6）到<strong>物理存储位置/生产者标签</strong>（如 <code>Add1</code>）的动态映射。</em></li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="33-%E5%AF%84%E5%AD%98%E5%99%A8%E9%87%8D%E5%91%BD%E5%90%8Dtomasulo-%E7%9A%84%E7%A5%9E%E6%9D%A5%E4%B9%8B%E7%AC%94">3.3 寄存器重命名：Tomasulo 的“神来之笔”</h4>
+                <p>在深入算法流程之前，我们必须彻底理解寄存器重命名是如何从根本上解决伪相关的。</p>
+                <p>让我们回顾一下这个存在 WAR 和 WAW 相关的例子：</p>
+                <div class="code-container">
+                <pre><code class="language-plaintext">1. DIV.D  F0, F2, F4
+2. ADD.D  F6, F0, F8      // RAW on F0
+3. SUB.D  F8, F10, F14    // WAR on F8 (被 ADD.D 读取)
+4. MUL.D  F6, F10, F8      // WAW on F6 (被 ADD.D 写入) &amp; RAW on F8 (被 SUB.D 写入)
+</code></pre>
+                </div>
+                <p>在<strong>记分牌</strong>中：</p>
+                <ul>
+                <li>指令 4 (<code>MUL.D</code>) 尝试发射时，会因为指令 2 (<code>ADD.D</code>) 也要写 F6 而导致 <strong>WAW 停顿</strong>。</li>
+                <li>指令 3 (<code>SUB.D</code>) 完成执行后，如果指令 2 (<code>ADD.D</code>) 还没读取 F8 的旧值，会导致 <strong>WAR 停顿</strong>。</li>
+                </ul>
+                <p>在 <strong>Tomasulo</strong> 中，这一切都改变了：</p>
+                <ol>
+                <li>
+                <p><strong>指令 2 (<code>ADD.D</code>) 发射</strong>：</p>
+                <ul>
+                <li>假设它被分配到保留站 <code>Add1</code>。</li>
+                <li>系统在寄存器状态表中记录：<code>RegisterStat[F6].Qi = Add1</code>。这相当于说：“从现在起，‘F6’这个名字的最新版本将由 <code>Add1</code> 产生。”</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>指令 3 (<code>SUB.D</code>) 发射</strong>：</p>
+                <ul>
+                <li>假设它被分配到 <code>Add2</code>。</li>
+                <li>系统记录：<code>RegisterStat[F8].Qi = Add2</code>。</li>
+                <li>这条指令需要 <code>F10</code> 和 <code>F14</code> 的旧值。假设它们是就绪的，<code>SUB.D</code> 会直接从寄存器堆拷贝这两个值到 <code>Add2</code> 的 <code>Vj</code>, <code>Vk</code> 字段。</li>
+                <li><strong>WAR 消除</strong>：由于 <code>SUB.D</code> 已经拿到了它需要的所有值（或者等待值的标签），它和指令 2 <code>ADD.D</code> 之间对 F8 的 WAR 关系就此了结。<code>ADD.D</code> 之后可以随时写回 F8，完全不会影响到 <code>SUB.D</code>。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>指令 4 (<code>MUL.D</code>) 发射</strong>：</p>
+                <ul>
+                <li>假设它被分配到 <code>Mult1</code>。</li>
+                <li>系统<strong>覆盖</strong>寄存器状态表：<code>RegisterStat[F6].Qi = Mult1</code>。这相当于一次“重命名”：“哦，最新的‘F6’版本现在要由 <code>Mult1</code> 产生了，之前那个 <code>Add1</code> 的版本已经是‘旧闻’了。”</li>
+                <li><strong>WAW 消除</strong>：<code>MUL.D</code> 和 <code>ADD.D</code> 不再争抢同一个物理目标。<code>ADD.D</code> 的结果会写到等待 <code>Add1</code> 标签的单元，<code>MUL.D</code> 的结果会写到等待 <code>Mult1</code> 标签的单元。它们各自有了自己的临时“家”。</li>
+                <li>对于源操作数 <code>F8</code>，<code>MUL.D</code> 查询寄存器状态表，发现 <code>RegisterStat[F8].Qi = Add2</code>，于是它知道自己需要等待 <code>Add2</code> 在 CDB 上广播结果。</li>
+                </ul>
+                </li>
+                </ol>
+                <p>通过这种方式，所有伪相关都被转换成了对不同临时存储位置（保留站）的数据流依赖，从而被彻底消除。</p>
+                <h4 id="34-tomasulo-%E7%AE%97%E6%B3%95%E6%B5%81%E7%A8%8B">3.4 Tomasulo 算法流程：</h4>
+                <p>现在，我们可以完整地描述 Tomasulo 算法的三个核心阶段了。</p>
+                <ol>
+                <li>
+                <p><strong>Issue (发射阶段)</strong></p>
+                <ul>
+                <li><strong>条件</strong>：从指令队列头部取指令，检查是否有对应类型的<strong>空闲保留站</strong>（结构相关）。如果没有，则停顿。</li>
+                <li><strong>动作</strong>：
+                a.  将指令信息（操作类型等）填入空闲的保留站。
+                b.  <strong>查找源操作数</strong>：对于每个源寄存器（如 <code>rs</code>, <code>rt</code>），查询<strong>寄存器结果状态表</strong>：
+                * <strong>如果 <code>Qi</code> 字段为空</strong>：说明操作数在寄存器堆中是有效的。直接将该值从寄存器堆复制到保留站的 <code>Vj</code>/<code>Vk</code> 字段。
+                * <strong>如果 <code>Qi</code> 字段不为空</strong>：说明操作数正在由另一个保留站计算。将 <code>Qi</code> 字段中的<strong>标签</strong>复制到当前保留站的 <code>Qj</code>/<code>Qk</code> 字段。
+                c.  <strong>更新目标寄存器状态（寄存器重命名）</strong>：将目标寄存器 <code>rd</code> 在寄存器结果状态表中的 <code>Qi</code> 字段，设置为当前保留站的标签。
+                d.  将保留站的 <code>Busy</code> 位置为 <code>Yes</code>。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Execute (执行阶段)</strong></p>
+                <ul>
+                <li><strong>条件</strong>：保留站中的指令可以开始执行的<strong>唯一条件</strong>是：它的 <code>Qj</code> 和 <code>Qk</code> 字段都为空（意味着它在 <code>Vj</code> 和 <code>Vk</code> 字段中拥有了全部的源操作数值）。</li>
+                <li><strong>动作</strong>：功能单元执行计算。对于访存指令，此阶段是计算有效地址。</li>
+                <li><em>设计洞察：这是一个纯粹的、分布式的<strong>数据驱动</strong>过程。没有任何中央控制。哪个保留站的数据齐了，哪个就执行。</em></li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Write Result (写回/广播阶段)</strong></p>
+                <ul>
+                <li><strong>条件</strong>：功能单元完成计算。</li>
+                <li><strong>动作</strong>：
+                a.  将<strong>计算结果</strong>和产生该结果的<strong>保留站标签</strong>一起放到 <strong>CDB</strong> 上进行广播。
+                b.  <strong>所有硬件单元“收听”CDB</strong>：
+                * <strong>寄存器结果状态表</strong>：检查是否有寄存器的 <code>Qi</code> 字段与 CDB 上的标签匹配。如果有，将 CDB 上的结果写入该寄存器，并<strong>清空 <code>Qi</code> 字段</strong>（表示该寄存器的值现在是稳定、有效的了）。
+                * <strong>所有保留站</strong>：检查自己的 <code>Qj</code> 和 <code>Qk</code> 字段是否与 CDB 上的标签匹配。如果有，将 CDB 上的结果存入对应的 <code>Vj</code>/<code>Vk</code> 字段，并<strong>清空 <code>Qj</code>/<code>Qk</code> 字段</strong>。
+                c.  完成广播后，释放产生结果的那个保留站（将其 <code>Busy</code> 位清零）。</li>
+                </ul>
+                </li>
+                </ol>
+                <h4 id="35-%E5%AE%9E%E4%BE%8B%E8%AF%A6%E8%A7%A3tomasulo-%E7%9A%84%E5%8A%A8%E6%80%81%E8%BF%BD%E8%B8%AA">3.5 实例详解：Tomasulo 的动态追踪</h4>
+                <p>让我们再次回到那个熟悉的指令序列，用 Tomasulo 的方式来分析如下的快照。</p>
+                <div class="code-container">
+                <pre><code class="language-plaintext">fld     f6, 32(x2)
+fld     f2, 44(x3)
+fmul.d  f0, f2, f4
+fsub.d  f8, f2, f6
+fdiv.d  f0, f0, f6
+fadd.d  f6, f8, f2
+</code></pre>
+                </div>
+                <p><img src="../images/imagea036.png" alt="figure 36"></p>
+                <p><strong>快照时刻设定</strong>：第一条 <code>fld f6</code> 已完成并写回，第二条 <code>fld f2</code> 已完成执行但其结果还在 CDB 上广播的路上。</p>
+                <p><strong>Reservation Stations 状态分析：</strong></p>
+                <ul>
+                <li><code>Load1</code> 和 <code>Load2</code>：已经完成任务，状态为空闲（<code>Busy=No</code>）。</li>
+                <li><code>Add1</code> (<code>fsub.d f8,f2,f6</code>)：
+                <ul>
+                <li><code>Op=SUB</code>。</li>
+                <li><code>Vj</code> 等待 F2，<code>Vk</code> 等待 F6。</li>
+                <li><code>Qj = Load2</code>：明确表示它在等待 <code>Load2</code> 的结果。</li>
+                <li><code>Qk</code> 为空，<code>Vk = Mem[32+Regs[x2]]</code>：因为第一条 <code>fld</code> 已经写回，F6 的值是就绪的，并且在 <code>fsub.d</code> 发射时被直接从寄存器堆拷贝过来了。</li>
+                </ul>
+                </li>
+                <li><code>Add2</code> (<code>fadd.d f6,f8,f2</code>)：
+                <ul>
+                <li><code>Op=ADD</code>。</li>
+                <li><code>Qj = Add1</code>：它在等待 <code>fsub.d</code> 的结果 F8，而 <code>fsub.d</code> 正在 <code>Add1</code> 中。</li>
+                <li><code>Qk = Load2</code>：它也在等待 <code>fld f2</code> 的结果 F2。</li>
+                </ul>
+                </li>
+                <li><code>Mult1</code> (<code>fmul.d f0,f2,f4</code>)：
+                <ul>
+                <li><code>Op=MUL</code>。</li>
+                <li><code>Qj = Load2</code>：等待 F2。</li>
+                <li><code>Vk = Regs[f4]</code>：F4 是就绪的。</li>
+                </ul>
+                </li>
+                <li><code>Mult2</code> (<code>fdiv.d f0,f0,f6</code>)：
+                <ul>
+                <li><code>Op=DIV</code>。</li>
+                <li><code>Qj = Mult1</code>：它在等待 <code>fmul.d</code> 的结果 F0。</li>
+                <li><code>Vk = Mem[32+Regs[x2]]</code>：等待 F6 的值。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>Register Status (Qi) 状态分析：</strong></p>
+                <ul>
+                <li><code>F0 -&gt; Mult2</code>：F0 的最终值将由 <code>Mult2</code> (即 <code>fdiv.d</code>) 产生。注意，<code>fmul.d</code> 也要写 F0，但在 <code>fdiv.d</code> 发射时，这个映射就被覆盖了，完美处理了 WAW。</li>
+                <li><code>F2 -&gt; Load2</code>：F2 的值正在由 <code>Load2</code> 产生。</li>
+                <li><code>F6 -&gt; Add2</code>：F6 的最终值将由 <code>Add2</code> (即 <code>fadd.d</code>) 产生。</li>
+                <li><code>F8 -&gt; Add1</code>：F8 的值将由 <code>Add1</code> (即 <code>fsub.d</code>) 产生。</li>
+                </ul>
+                <p><strong>下一拍会发生什么？</strong>
+                当 <code>Load2</code> 将 F2 的结果广播到 CDB 上时：</p>
+                <ol>
+                <li><code>RegisterStat[F2].Qi</code> 因为匹配 <code>Load2</code> 标签，会把结果写入 F2 寄存器，并清空 <code>Qi</code> 字段。</li>
+                <li><code>Add1</code> 的 <code>Qj</code> 匹配，会把 F2 的值写入 <code>Vj</code>，并清空 <code>Qj</code>。现在 <code>Add1</code> 的操作数 (<code>Vj</code>, <code>Vk</code>) 都齐了，<strong>下一周期就可以开始执行 <code>SUB</code> 操作</strong>。</li>
+                <li><code>Add2</code> 的 <code>Qk</code> 匹配，会把 F2 的值写入 <code>Vk</code>，清空 <code>Qk</code>。但它还在等 <code>Add1</code> 的结果，所以继续等待。</li>
+                <li><code>Mult1</code> 的 <code>Qj</code> 匹配，会把 F2 的值写入 <code>Vj</code>，清空 <code>Qj</code>。现在 <code>Mult1</code> 操作数也齐了，<strong>下一周期也可以开始执行 <code>MUL</code> 操作</strong>。</li>
+                </ol>
+                <p>你看，<code>SUB</code> 和 <code>MUL</code> 两条指令可以<strong>并行执行</strong>，这就是 Tomasulo 算法发掘出的指令级并行！</p>
+                <h4 id="%E6%80%BB%E7%BB%93">总结：</h4>
+                <p>Tomasulo 算法是计算机体系结构发展史上的一座丰碑。它通过<strong>分布式保留站、寄存器重命名和公共数据总线</strong>这三大法宝，构建了一个优雅而强大的动态调度框架：</p>
+                <ul>
+                <li>它将对<strong>名字的依赖（伪相关）<strong>彻底转化为对</strong>数据的依赖（真相关）</strong>，从根源上消除了 WAR 和 WAW 带来的停顿。</li>
+                <li>它创建了一个真正的数据流执行模型，指令的执行由数据的可用性驱动，而非其在程序中的位置，从而<strong>最大化地发掘了指令级并行</strong>。</li>
+                <li>分布式的设计使得硬件实现更加模块化和可扩展。</li>
+                </ul>
+                <p>当然，Tomasulo 算法本身并不完美。它没有解决一个关键问题：当出现<strong>分支预测失败</strong>或者<strong>异常</strong>（Exception）时，如何处理那些已经乱序执行、甚至已经完成的“错误路径”上的指令？它们可能已经修改了某些状态，如何精确地“回滚”到错误发生前的状态？</p>
+                <p>要解决这个问题，我们需要在 Tomasulo 的基础上，引入另一个关键机制——<strong>硬件推测（Hardware Speculation）<strong>和</strong>重排序缓冲（Reorder Buffer）</strong>。</p>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
