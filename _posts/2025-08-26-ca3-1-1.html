@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机体系结构3-1-1:动态并行机制</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%843-1-1%E5%8A%A8%E6%80%81%E5%B9%B6%E8%A1%8C%E6%9C%BA%E5%88%B6">计算机体系结构3-1-1:动态并行机制</h1>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E4%BB%8E%E7%BC%96%E8%AF%91%E5%99%A8%E7%9A%84%E9%9D%99%E6%80%81%E6%99%BA%E6%85%A7%E5%88%B0%E7%A1%AC%E4%BB%B6%E7%9A%84%E5%8A%A8%E6%80%81%E5%86%B3%E7%AD%96">第一部分：从编译器的“静态智慧”到硬件的“动态决策”</h3>
+                <h4 id="11-%E6%80%A7%E8%83%BD%E7%93%B6%E9%A2%88%E7%9A%84%E6%9C%AC%E8%B4%A8%E5%83%B5%E5%8C%96%E7%9A%84%E6%8C%87%E4%BB%A4%E6%B5%81">1.1 性能瓶颈的本质：僵化的指令流</h4>
+                <p>我们先来思考一个根本问题：为什么一个程序不能无限快地执行？</p>
+                <p>因为指令之间存在着<strong>依赖关系（Dependencies）</strong>。<code>a = b + c; d = a * 2;</code> 这两条指令，第二条必须等待第一条完成，因为它需要 <code>a</code> 的计算结果。这是<strong>真数据依赖（True Data Dependency）</strong>。除了数据依赖，还有因为分支、跳转指令带来的<strong>控制依赖（Control Dependency）</strong>。这些依赖关系构成了程序固有的逻辑顺序，打破它就会导致错误。</p>
+                <p>面对这些依赖，我们的基础流水线是**按序执行（In-Order Execution）**的。也就是说，指令严格按照它们在程序中出现的顺序进入流水线，也严格按顺序完成。这种方式简单、易于实现，但非常“死板”。</p>
+                <p>想象一下下面这段代码：</p>
+                <div class="code-container">
+                <pre><code class="language-plaintext">fdiv.d  f0, f2, f4   // 浮点除法，耗时很长
+fadd.d  f10, f0, f8  // 依赖 f0
+fsub.d  f12, f8, f14 // 不依赖 f0 和 f10
+</code></pre>
+                </div>
+                <p>在按序执行的流水线中，<code>fdiv.d</code> 是一条高延迟指令，它可能会在执行阶段（EX）停留几十个时钟周期。由于 <code>fadd.d</code> 依赖于 <code>fdiv.d</code> 的结果 <code>f0</code>，它必须停顿，等待 <code>f0</code> 被写回。</p>
+                <p>但最令人惋惜的是 <code>fsub.d</code> 这条指令。它和前两条指令没有任何数据依赖关系，完全可以“插队”到前面去执行。但在僵化的按序执行模型下，它只能眼睁睁地在译码（ID）阶段等待，直到 <code>fdiv.d</code> 和 <code>fadd.d</code> 这两位“老大哥”慢悠悠地走完流程。这种由于数据相关而阻塞了后续无关指令执行的情况，正是按序执行的性能瓶颈所在。</p>
+                <h4 id="12-%E4%B8%A4%E7%A7%8D%E8%A7%A3%E5%86%B3%E6%80%9D%E8%B7%AF%E9%9D%99%E6%80%81%E8%B0%83%E5%BA%A6-vs-%E5%8A%A8%E6%80%81%E8%B0%83%E5%BA%A6">1.2 两种解决思路：静态调度 vs. 动态调度</h4>
+                <p>如何打破这种僵局，让 <code>fsub.d</code> 这样的独立指令能够提前执行？业界提出了两种截然不同的设计哲学：</p>
+                <ol>
+                <li>
+                <p><strong>静态调度（Static Scheduling）</strong>：</p>
+                <ul>
+                <li><strong>核心思想</strong>：在程序运行<strong>之前</strong>，由“聪明的”编译器来解决问题。</li>
+                <li><strong>工作方式</strong>：编译器在编译阶段对代码进行深入分析，找出指令间的依赖关系，然后对指令进行重排序（Instruction Reordering/Scheduling），将那些独立的指令尽可能地提前，插入到因为数据相关而产生的“空泡（bubble）”中，从而填补流水线的停顿。</li>
+                <li><strong>优点</strong>：硬件设计相对简单，因为复杂的逻辑判断都由软件完成了。</li>
+                <li><strong>致命弱点</strong>：编译器是“静态”的，它无法预知程序在**运行时（Runtime）**才会确定的信息。比如，内存访问的地址（指针）、分支跳转的方向等。对于 <code>if (a &gt; 0)</code> 这样的分支，编译器只能进行猜测。对于 <code>*p = 10;</code> 这样的访存，如果编译器不能确定指针 <code>p</code> 和其他访存指令的地址是否冲突，就必须做出最保守的选择，即假设它们可能冲突，从而限制了重排序的自由度。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>动态调度（Dynamic Scheduling）</strong>：</p>
+                <ul>
+                <li><strong>核心思想</strong>：在程序运行<strong>之中</strong>，由“更聪明的”硬件来实时决策。</li>
+                <li><strong>工作方式</strong>：硬件在运行时动态地检查指令的依赖关系。一旦某条指令的操作数准备就绪，并且执行单元空闲，这条指令就可以被发射（Issue）执行，即使它前面的指令还在等待操作数。这实现了<strong>乱序执行（Out-of-Order Execution, OoOE）</strong>。</li>
+                <li><strong>优点</strong>：能够处理静态调度无法解决的、依赖于运行时信息的相关性，从而最大程度地发掘ILP。</li>
+                <li><strong>挑战</strong>：硬件逻辑变得异常复杂，需要额外的硬件结构来跟踪指令状态、处理依赖关系，并确保最终结果与按序执行一致。</li>
+                </ul>
+                </li>
+                </ol>
+                <p>现代高性能处理器无一例外都采用了动态调度的思想。因为静态调度的天花板太低了，它无法克服“信息不对称”的根本性障碍。接下来，我们将从一个最典型的例子——<strong>分支预测</strong>——来深入理解从静态到动态的演进过程，以及其背后的设计思想。</p>
+                <h4 id="13-%E6%8E%A7%E5%88%B6%E7%9B%B8%E5%85%B3%E7%9A%84%E6%8B%A6%E8%B7%AF%E8%99%8E%E5%88%86%E6%94%AF%E6%8C%87%E4%BB%A4">1.3 控制相关的“拦路虎”：分支指令</h4>
+                <p>控制相关是高性能流水线最头疼的问题。一条分支指令，比如 <code>beq x1, x2, L1</code>，在它被执行并确定跳转方向之前，我们根本不知道下一条应该取指（Fetch）的指令是紧随其后的那条（<code>PC+4</code>），还是跳转目标 <code>L1</code> 处的指令。</p>
+                <p>在深度流水线中，从取指到分支结果确定的延迟（称为<strong>分支延迟</strong>）可能长达十几个甚至几十个周期。如果我们什么都不做，只是等待，那这几十个周期就完全浪费了。因此，我们必须进行<strong>猜测</strong>，也就是<strong>分支预测（Branch Prediction）</strong>。</p>
+                <h4 id="131-%E9%9D%99%E6%80%81%E5%88%86%E6%94%AF%E9%A2%84%E6%B5%8B%E7%BC%96%E8%AF%91%E5%99%A8%E7%9A%84%E7%BB%8F%E9%AA%8C%E4%B9%8B%E8%B0%88">1.3.1 静态分支预测：编译器的“经验之谈”</h4>
+                <p>静态分支预测依赖于编译器或简单的硬件逻辑做出固定的预测。</p>
+                <ul>
+                <li><strong>最简单的策略</strong>：永远预测“不跳转”（Predict-Not-Taken）。这种策略实现简单，但对于循环（<code>for</code>, <code>while</code>）结尾的跳转指令来说，几乎每次都是错的。</li>
+                <li><strong>编译器辅助的策略</strong>：编译器在分析代码结构后，可以给出一些有根据的提示。
+                <ul>
+                <li><strong>后向分支预测为跳转（Backward branches predicted taken）</strong>：循环的跳转指令通常是跳回到循环的开头，即向后的跳转。这种分支绝大多数情况都会发生跳转。</li>
+                <li><strong>前向分支预测为不跳转（Forward branches predicted not-taken）</strong>：<code>if</code> 语句产生的条件跳转通常是跳过一小段代码块，是向前的跳转。在很多情况下，<code>if</code> 条件不成立的概率更高。</li>
+                </ul>
+                </li>
+                </ul>
+                <p>这些策略比盲目猜测要好，但它们依然是<strong>静态的、一成不变的</strong>。一个循环可能只执行一次，一个 <code>if</code> 语句可能在某个阶段总是成立。静态预测无法适应程序在不同执行阶段的行为变化。</p>
+                <p>为了配合预测，硬件上引入了<strong>分支目标缓冲（Branch Target Buffer, BTB）</strong>。</p>
+                <p><img src="../images/imagea027.png" alt="figure 27"></p>
+                <p><strong>BTB 的设计哲学：</strong></p>
+                <ul>
+                <li><strong>它是什么？</strong> BTB 本质上是一个专门为分支指令服务的<strong>地址缓存（Cache）</strong>。它的索引（Index）是指令的地址（PC值），存放的内容是该分支指令的<strong>跳转目标地址（Target Address）</strong>。</li>
+                <li><strong>它解决了什么问题？</strong> 即使我们预测分支会“跳转”，我们也需要知道“跳到哪里去”。计算跳转目标地址也需要时间（至少在译码阶段之后）。BTB 在取指阶段就提供了这个目标地址，让我们能够立即去新的地址取指，而不需要等待译码。</li>
+                <li><strong>工作流程</strong>：
+                <ol>
+                <li>CPU 根据当前 PC 值去取指。</li>
+                <li>同时，用 PC 值查询 BTB。</li>
+                <li><strong>若 BTB 未命中（Miss）</strong>：说明这很可能不是一条分支指令，或者是一条我们从未见过的分支。流水线正常按 <code>PC+4</code> 继续取指。</li>
+                <li><strong>若 BTB 命中（Hit）</strong>：说明 PC 对应的指令<strong>曾经是</strong>一条分支指令。此时，我们才需要动用**方向预测器（Direction Predictor）**来判断这次是跳转还是不跳转。
+                <ul>
+                <li><strong>预测跳转</strong>：下一条指令的地址从 BTB 中提供的 <code>target address</code> 获取。</li>
+                <li><strong>预测不跳转</strong>：下一条指令的地址仍然是 <code>PC+inst size</code>。</li>
+                </ul>
+                </li>
+                </ol>
+                </li>
+                </ul>
+                <p>请注意，在静态预测方案中，这个“方向预测器”可能非常简单，比如就是 ISA 中编码的一个比特位，由编译器设定。</p>
+                <p><strong>静态预测的局限性（Why we need something better）：</strong></p>
+                <p>问题:how to handle branches dynamically switching from taken/untaken?</p>
+                <p>静态预测无法处理那些在运行时<strong>动态改变行为模式</strong>的分支。例如，一个分支可能在程序的前半段总是跳转，在后半段总是不跳转。静态策略只能猜对一半。这种无力感迫使我们转向硬件，让它在运行时<strong>学习和适应</strong>。</p>
+                <h4 id="132-%E5%8A%A8%E6%80%81%E5%88%86%E6%94%AF%E9%A2%84%E6%B5%8B%E4%BB%8E%E5%8E%86%E5%8F%B2%E4%B8%AD%E5%AD%A6%E4%B9%A0">1.3.2 动态分支预测：从历史中学习</h4>
+                <p>动态分支预测的核心思想是：<strong>程序的过去行为，在很大程度上预示着它未来的行为。</strong> 这其实是计算机科学中<strong>局部性原理</strong>（Principle of Locality）在控制流上的体现。</p>
+                <p><strong>1. 1-bit 动态预测器（最后一次预测器）</strong></p>
+                <p>这是最简单的动态预测器。我们为每个分支维护一个状态位。这个状态位记录了该分支<strong>上一次</strong>的执行结果（跳转了还是没跳转）。</p>
+                <ul>
+                <li><strong>硬件结构</strong>：一个<strong>分支历史表（Branch History Table, BHT）</strong>。它是一个用分支指令地址的低位来索引的小型存储器，每个条目（entry）只有一个比特。
+                <ul>
+                <li><code>1</code>：预测为“跳转”（Taken）</li>
+                <li><code>0</code>：预测为“不跳转”（Not-Taken）</li>
+                </ul>
+                </li>
+                <li><strong>更新逻辑</strong>：每次分支执行完毕后，用其实际结果（Actual Outcome）来更新 BHT 中对应的条目。</li>
+                </ul>
+                <p>我们可以用一个简单的**有限状态机（Finite State Machine, FSM）**来描述它的行为。</p>
+                <p><img src="../images/imagea028.png" alt="figure 28"></p>
+                <ul>
+                <li>
+                <p><strong>状态分析</strong>：</p>
+                <ul>
+                <li>当前状态为“预测不跳转”（<code>predict not taken</code>），如果实际发生了跳转（<code>actually taken</code>），则下次预测“跳转”，状态转移。</li>
+                <li>当前状态为“预测跳转”（<code>predict taken</code>），如果实际未发生跳转（<code>actually not taken</code>），则下次预测“不跳转”，状态转移。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>性能评估——“为什么1-bit还不够好？”</strong>
+                让我们来看两个经典的例子：</p>
+                <ol>
+                <li>
+                <p><strong>典型循环</strong>：一个循环执行10次，其分支行为序列是 <code>T, T, T, T, T, T, T, T, T, N</code>。</p>
+                <ul>
+                <li>假设初始状态预测为 N。第一次执行是 T，预测错误。之后 BHT 更新为 T。</li>
+                <li>接下来的 8 次 T 都能预测正确。</li>
+                <li>最后一次是 N，但 BHT 的状态是 T，预测错误。</li>
+                <li>总共 10 次分支，错了 2 次，正确率 80%。对于高度规律的循环，表现尚可。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>交替模式</strong>：一个分支的行为是 <code>T, N, T, N, T, N, ...</code></p>
+                <ul>
+                <li>假设初始状态预测为 N。第一次执行是 T，预测错误。BHT 更新为 T。</li>
+                <li>第二次执行是 N，但 BHT 状态是 T，预测错误。BHT 更新为 N。</li>
+                <li>第三次执行是 T，但 BHT 状态是 N，预测错误。BHT 更新为 T。</li>
+                <li>... 如此循环，它<strong>每一次都会预测错误！</strong> 正确率为 0%。</li>
+                </ul>
+                </li>
+                </ol>
+                <p><strong>设计缺陷</strong>：1-bit 预测器<strong>太敏感</strong>了。它只记住了上一次的结果，一次偶然的例外（比如循环结束的那一次）就会让它立刻“叛变”，改变自己的预测。它缺乏“信念感”和“惯性”。</p>
+                </li>
+                </ul>
+                <p><strong>2. 2-bit 饱和计数器（Saturating Counter）</strong></p>
+                <p>为了解决 1-bit 预测器过于敏感的问题，我们引入了“惯性”或者说“滞后性（Hysteresis）”。核心思想是：<strong>只有当一个分支连续两次预测错误时，我们才彻底改变对它的预测方向。</strong></p>
+                <ul>
+                <li><strong>硬件结构</strong>：BHT 的每个条目从 1 bit 扩展到 2 bits。这两个 bit 可以表示 4 个状态。</li>
+                <li><strong>状态定义与 FSM</strong>：</li>
+                </ul>
+                <p><img src="../images/imagea029.png" alt="figure 29"></p>
+                <div class="code-container">
+                <pre><code>* `11`: **强跳转 (Strongly Taken)** - 坚定地预测跳转
+* `10`: **弱跳转 (Weakly Taken)** - 倾向于预测跳转
+* `01`: **弱不跳转 (Weakly Not-Taken)** - 倾向于不跳转
+* `00`: **强不跳转 (Strongly Not-Taken)** - 坚定地预测不跳转
+</code></pre>
+                </div>
+                <ul>
+                <li>
+                <p><strong>预测逻辑</strong>：查看这两个 bit 的<strong>最高位（Most Significant Bit, MSB）</strong>。MSB 为 <code>1</code> 则预测跳转，为 <code>0</code> 则预测不跳转。</p>
+                </li>
+                <li>
+                <p><strong>更新逻辑</strong>：</p>
+                <ul>
+                <li>如果实际跳转了，计数器就向 <code>11</code> 的方向移动一步（饱和在<code>11</code>）。</li>
+                <li>如果实际未跳转，计数器就向 <code>00</code> 的方向移动一步（饱和在<code>00</code>）。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>性能再评估——“2-bit好在哪里？”</strong></p>
+                <ul>
+                <li><strong>典型循环 (<code>T, T, ..., T, N</code>)</strong>：对于循环结束的那一次 N，预测器状态会从 <code>11</code> (强跳转) 变为 <code>10</code> (弱跳转)。下次循环开始时，它依然预测跳转（因为 MSB 还是 <code>1</code>），这就对了！它只在循环的第一次（如果初始状态不对）和最后一次出错。对于嵌套循环，这种“纠错”能力至关重要。</li>
+                <li><strong>交替模式 (<code>T, N, T, N, ...</code>)</strong>：我们来追踪一下（假设从<code>00</code>开始）。
+                <ol>
+                <li><code>T</code> (实际) vs <code>N</code> (预测) -&gt; 错, 状态 -&gt; <code>01</code></li>
+                <li><code>N</code> (实际) vs <code>N</code> (预测) -&gt; 对, 状态 -&gt; <code>00</code></li>
+                <li><code>T</code> (实际) vs <code>N</code> (预测) -&gt; 错, 状态 -&gt; <code>01</code></li>
+                <li><code>N</code> (实际) vs <code>N</code> (预测) -&gt; 对, 状态 -&gt; <code>00</code>
+                ...
+                它的正确率变成了 50%。虽然也不理想，但比 0% 已经好了太多。</li>
+                </ol>
+                </li>
+                </ul>
+                <p><strong>设计权衡</strong>：2-bit 预测器以<strong>双倍的存储开销</strong>（2 bits per entry vs 1 bit）换来了对程序动态行为更好的适应性。这是一个典型的<strong>时空权衡</strong>。
+                如图表所示，在真实的基准测试中，一个拥有 4096 个条目的 2-bit 预测器可以将整数程序的平均误判率降低到 11%，浮点程序更是低至 4%，效果非常显著。
+                <img src="../images/imagea031.png" alt="figure 31"></p>
+                </li>
+                </ul>
+                <p><strong>3. N-bit 预测器与更高阶的预测</strong></p>
+                <p>我们可以将 2-bit 的思想推广到 N-bit。但研究和实践表明，2-bit 预测器在成本和效益之间取得了很好的平衡，继续增加位数带来的性能提升越来越小。</p>
+                <p>更重要的发展方向是<strong>关联预测（Correlating Predictors）</strong>。</p>
+                <ul>
+                <li>
+                <p><strong>设计动机——“一个分支的行为是否是孤立的？”</strong>
+                至今为止，我们都假设一个分支的未来只和它自己的过去有关（这被称为<strong>局部历史 Local History</strong>）。但很多时候，一个分支的行为依赖于<strong>其他分支</strong>的执行结果。</p>
+                <p><code>eqntott</code> 基准测试代码就是一个绝佳的例子：</p>
+                <div class="code-container">
+                <pre><code class="language-c">if (aa == 2) { aa = 0; } // 分支 b1
+if (bb == 2) { bb = 0; } // 分支 b2
+if (aa != bb) { ... }   // 分支 b3
+</code></pre>
+                </div>
+                <p>分支 <code>b3</code> 的结果完全取决于 <code>b1</code> 和 <code>b2</code> 是否被执行。</p>
+                <ul>
+                <li>如果 <code>b1</code> 和 <code>b2</code> 都不跳转，<code>aa</code> 和 <code>bb</code> 不变，<code>b3</code> 的结果未知。</li>
+                <li>如果 <code>b1</code> 跳转而 <code>b2</code> 不跳转，<code>aa</code> 变为 <code>0</code>，<code>b3</code> 的结果依赖 <code>bb</code> 的原值。</li>
+                <li>如果 <code>b1</code> 和 <code>b2</code> 都跳转了，那么 <code>aa</code> 和 <code>bb</code> 都变成了 <code>0</code>，<code>aa != bb</code> 这个条件<strong>必然为假</strong>，<code>b3</code> <strong>必然不跳转</strong>。</li>
+                </ul>
+                <p>只看 <code>b3</code> 自己的历史，是无法发现这个规律的。我们需要记录<strong>全局的分支历史（Global History）</strong>。</p>
+                </li>
+                <li>
+                <p><strong>两级自适应预测器 (Two-Level Adaptive Predictor)</strong>
+                这是一种经典的关联预测器。
+                <img src="../images/imagea030.png" alt="figure 30"></p>
+                <ol>
+                <li><strong>第一级：全局历史寄存器 (Global History Register, GHR)</strong>：这是一个 <code>m</code>-bit 的移位寄存器，记录最近 <code>m</code> 次所有分支的结果（例如 <code>1</code> for Taken, <code>0</code> for Not-Taken）。这个 <code>m</code>-bit 的向量代表了最近的程序执行<strong>路径</strong>。</li>
+                <li><strong>第二级：模式历史表 (Pattern History Table, PHT)</strong>：这是一个拥有 $2^m$ 个条目的表，每个条目都是一个 2-bit 饱和计数器。</li>
+                </ol>
+                <p><strong>工作流程</strong>：当遇到一个分支时，我们不再用分支的 PC 地址去索引 BHT，而是用 GHR 中的 <code>m</code>-bit 全局历史向量作为索引，去 PHT 中找到对应的那个 2-bit 计数器，然后用这个计数器来进行预测。</p>
+                <p><strong>设计哲学</strong>：这种设计的本质是，我们不再为“某个分支”维护一个预测器，而是为“某条执行路径下的某个分支”维护一个预测器。它将预测与程序的上下文（Context）关联了起来，极大地提升了预测的精度。</p>
+                <p>当然，还存在将局部历史和全局历史结合的各种<strong>混合预测器（Hybrid Predictor）</strong>，如 Gshare、Tournament Predictor 等，这些我们将在后续课程中详细介绍。它们的设计思想都是为了在不同的程序行为模式下，都能找到最合适的预测策略，可谓是“集众家之所长”。</p>
+                </li>
+                </ul>
+                <h4 id="14-%E4%BB%8E%E6%8E%A7%E5%88%B6%E6%B5%81%E5%88%B0%E6%95%B0%E6%8D%AE%E6%B5%81%E5%8A%A8%E6%80%81%E8%B0%83%E5%BA%A6%E7%9A%84%E5%BC%95%E5%85%A5">1.4 从控制流到数据流：动态调度的引入</h4>
+                <p>我们花了很长时间讨论分支预测，因为它完美地诠释了硬件如何通过“动态学习”来解决一个核心的性能瓶颈。现在，让我们回到本节开头提出的那个数据相关的问题：</p>
+                <div class="code-container">
+                <pre><code class="language-plaintext">fdiv.d  f0, f2, f4   // 高延迟
+fadd.d  f10, f0, f8  // 依赖 f0
+fsub.d  f12, f8, f14 // 独立
+</code></pre>
+                </div>
+                <p>即使我们完美地预测了所有分支，如果流水线因为数据依赖而频繁停顿，性能依然上不去。<code>fsub.d</code> 指令的“等待”是完全不必要的。</p>
+                <p>为了解决这个问题，我们需要让硬件有能力“看穿”指令间的依赖关系，并<strong>动态地重新安排执行顺序</strong>。这就是<strong>动态调度（Dynamic Scheduling）</strong>。</p>
+                <p><strong>核心思想</strong>：将指令的执行过程与它们在程序中的顺序解耦。允许指令<strong>乱序执行（Out-of-Order Execution）</strong>，但必须保证最终结果的正确性，即看起来像是**按序完成（In-Order Completion/Commit）**的。</p>
+                <p><strong>如何实现？——改造流水线</strong></p>
+                <p>传统的五级流水线 <code>IF -&gt; ID -&gt; EX -&gt; MEM -&gt; WB</code> 的结构过于刚性。ID 阶段一旦发现数据相关，整个流水线就停滞不前。动态调度的第一步，就是拆分 ID 阶段的功能，引入一个“缓冲地带”。</p>
+                <p>我们将原来的 ID 阶段拆分为两个新的阶段：</p>
+                <ol>
+                <li>
+                <p><strong>发射 (Issue)</strong>：</p>
+                <ul>
+                <li>从 IF 阶段获取指令，进行译码。</li>
+                <li>检查<strong>结构相关</strong>：是否有可用的执行单元和缓冲资源。</li>
+                <li>如果资源可用，就将指令发射到一个称为**保留站（Reservation Station）**的硬件缓冲池中。</li>
+                <li><strong>关键点</strong>：指令仍然是<strong>按序发射</strong>的。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>读操作数 (Read Operands)</strong>：</p>
+                <ul>
+                <li>指令在保留站中“安营扎寨”，并监视其所需的操作数是否就绪。</li>
+                <li>一旦所有操作数都准备好了（可能是从寄存器文件中直接读到，也可能是从其他正在执行的指令的结果总线“旁路”而来），这条指令就可以被送往 EX 阶段执行。</li>
+                <li><strong>关键点</strong>：这个过程是<strong>乱序</strong>的。<code>fsub.d</code> 发现自己的操作数 <code>f8</code> 和 <code>f14</code> 都已就绪，它就可以立刻开始执行，而 <code>fadd.d</code> 则继续在保留站里等待 <code>f0</code> 的结果。</li>
+                </ul>
+                </li>
+                </ol>
+                <p>通过这种方式，硬件自动地在保留站中对指令流进行了“重排序”，发掘出了数据无关指令的并行性，从而有效地隐藏了高延迟操作带来的停顿。</p>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
