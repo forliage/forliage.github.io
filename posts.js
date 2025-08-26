@@ -656,5 +656,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-26-db04.html",
       "abstract": "数据库系统04:实体-关系模型(E-R Model)"
+    },
+    {
+      "title": "数据库系统05:关系数据库设计理论",
+      "date": "2025-08-26",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-26-db05.html",
+      "abstract": "数据库系统05:关系数据库设计理论"
     }
   ];

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数据库系统05:关系数据库设计理论</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F05%E5%85%B3%E7%B3%BB%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1%E7%90%86%E8%AE%BA">数据库系统05:关系数据库设计理论</h1>
+                <h3 id="%E5%BC%95%E8%A8%80%E4%BB%8E%E8%83%BD%E7%94%A8%E5%88%B0%E5%A5%BD%E7%94%A8%E8%AE%BE%E8%AE%A1%E7%9A%84%E8%BF%9B%E5%8C%96"><strong>引言：从“能用”到“好用”——设计的进化</strong></h3>
+                <p>上一讲，我们学会了如何将E-R模型转换为关系模式（一系列的表）。这解决了“从无到有”的问题，我们的数据库现在“能用”了。但“能用”距离“好用”甚至“健壮”还相去甚远。</p>
+                <p>让我们来看一个看似合理的“大一统”表设计：</p>
+                <p><strong>Lending-Schema</strong> (<code>branch_name</code>, <code>branch_city</code>, <code>assets</code>, <code>customer_name</code>, <code>loan_number</code>, <code>amount</code>)</p>
+                <p>这个表包含了银行分支、客户和贷款的所有信息。直觉上，把相关信息放在一起似乎很方便。但这种“方便”背后隐藏着巨大的危机。</p>
+                <p><strong>探究“坏设计”的症状 (The Symptoms of Bad Design):</strong></p>
+                <ol>
+                <li><strong>数据冗余 (Data Redundancy):</strong> 如果一个分行（如'Perryridge'分行）有多笔贷款，那么它的<code>branch_city</code>和<code>assets</code>信息将在每一条贷款记录中重复出现。</li>
+                <li><strong>更新异常 (Update Anomaly):</strong> 如果'Perryridge'分行搬迁到了一个新的城市，你需要修改<strong>所有</strong>与该分行相关的贷款记录。如果遗漏了任何一条，就会导致数据不一致（同一个分行在数据库里显示在两个不同的城市）。</li>
+                <li><strong>插入异常 (Insertion Anomaly):</strong> 如果银行新开设了一个分行，但在该分行还没有任何贷款业务之前，我们<strong>无法</strong>将这个分行的信息（<code>branch_name</code>, <code>branch_city</code>, <code>assets</code>）存入这张表。因为没有贷款，<code>customer_name</code>, <code>loan_number</code>等字段将为<code>NULL</code>，而这些可能是主键的一部分，从而无法插入。我们被迫在没有业务发生时，无法记录一个客观存在的事物。</li>
+                <li><strong>删除异常 (Deletion Anomaly):</strong> 如果客户还清了'Perryridge'分行的最后一笔贷款，我们在删除这条贷款记录的同时，可能会不经意地把'Perryridge'分行本身的所有信息（城市、资产）也从数据库中<strong>永远抹去</strong>了。</li>
+                </ol>
+                <p><strong>设计哲学的核心问题：</strong> 我们能否设计一种模式，使得“<strong>一件事实在数据库中只被记录一次</strong>”？这就是关系规范化理论（Normalization Theory）要解决的根本问题。其核心思想是<strong>分解 (Decomposition)</strong>：将一个大的、有问题的关系模式，拆分成多个小的、结构良好的关系模式。</p>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%87%BD%E6%95%B0%E4%BE%9D%E8%B5%96-functional-dependencies"><strong>第一部分：函数依赖 (Functional Dependencies)</strong></h3>
+                <p>要科学地进行分解，我们不能凭感觉。我们需要一个数学工具来精确描述属性之间的约束关系。这就是<strong>函数依赖 (FD)</strong>。</p>
+                <h4 id="11-%E4%BB%80%E4%B9%88%E6%98%AF%E5%87%BD%E6%95%B0%E4%BE%9D%E8%B5%96"><strong>1.1 什么是函数依赖？</strong></h4>
+                <ul>
+                <li><strong>直观定义：</strong> 如果属性集 $\alpha$ 的值可以<strong>唯一确定</strong>属性集 $\beta$ 的值，那么我们说 $\beta$ <strong>函数依赖于</strong> $\alpha$，记作 $\alpha \rightarrow \beta$。</li>
+                <li><strong>形式化定义：</strong> 在关系模式 $R$ 的任意一个合法实例 $r$ 中，对于任意两个元组 $t_1, t_2 \in r$，如果 $t_1[\alpha] = t_2[\alpha]$，那么必然有 $t_1[\beta] = t_2[\beta]$。</li>
+                </ul>
+                <p><strong>在Lending-Schema中的例子：</strong></p>
+                <ul>
+                <li><code>branch_name</code> $\rightarrow$ <code>branch_city</code>, <code>assets</code> (分行名称唯一确定了其所在城市和资产)</li>
+                <li><code>loan_number</code> $\rightarrow$ <code>amount</code>, <code>branch_name</code> (贷款号唯一确定了贷款金额和所属分行)</li>
+                </ul>
+                <p><strong>FD与键的关系：</strong></p>
+                <ul>
+                <li><strong>超键 (Superkey):</strong> 如果 $K \rightarrow R$（即K能决定关系R中的所有属性），则K是R的一个超键。</li>
+                <li>函数依赖是比“键”更普遍、更精细的约束。一个表中可能存在大量非键的函数依赖，而这些正是导致异常的“罪魁祸首”。</li>
+                </ul>
+                <h4 id="12-%E6%8E%A8%E7%90%86%E7%9A%84%E6%B3%95%E5%88%99armstrong%E5%85%AC%E7%90%86"><strong>1.2 推理的法则：Armstrong公理</strong></h4>
+                <p>给定的FD集合（如从业务需求中直接得出的）通常是不完备的。我们可以从已知的FD推导出更多隐含的FD。Armstrong公理是这个推理系统的基础，它<strong>是可靠的（sound）和完备的（complete）</strong>。</p>
+                <ul>
+                <li><strong>自反律 (Reflexivity):</strong> 若 $\beta \subseteq \alpha$，则 $\alpha \rightarrow \beta$。（平凡依赖）</li>
+                <li><strong>增补律 (Augmentation):</strong> 若 $\alpha \rightarrow \beta$，则 $\gamma\alpha \rightarrow \gamma\beta$。（在等式两边加上相同属性）</li>
+                <li><strong>传递律 (Transitivity):</strong> 若 $\alpha \rightarrow \beta$ 且 $\beta \rightarrow \gamma$，则 $\alpha \rightarrow \gamma$。（依赖的传递）</li>
+                </ul>
+                <p><strong>由这三条基本公理可以推导出一些非常有用的次要规则：</strong></p>
+                <ul>
+                <li><strong>合并律 (Union):</strong> 若 $\alpha \rightarrow \beta$ 且 $\alpha \rightarrow \gamma$，则 $\alpha \rightarrow \beta\gamma$。</li>
+                <li><strong>分解律 (Decomposition):</strong> 若 $\alpha \rightarrow \beta\gamma$，则 $\alpha \rightarrow \beta$ 且 $\alpha \rightarrow \gamma$。</li>
+                </ul>
+                <h4 id="13-%E5%B1%9E%E6%80%A7%E9%97%AD%E5%8C%85-alpha-%E4%B8%8E-%E4%BE%9D%E8%B5%96%E9%9B%86%E9%97%AD%E5%8C%85-f"><strong>1.3 属性闭包 ($\alpha^+$) 与 依赖集闭包 ($F^+$)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>属性集闭包 ($\alpha^+$):</strong> 给定FD集 $F$，属性集 $\alpha$ 的闭包 $\alpha^+$ 是指所有能被 $\alpha$ 函数决定的属性的集合。</p>
+                <ul>
+                <li><strong>计算算法：</strong>
+                <ol>
+                <li><code>result = α</code></li>
+                <li><code>repeat</code></li>
+                <li>
+                    <div class="code-container"><pre><code>`for each FD β → γ in F do`
+</code></pre></div>
+                </li>
+                <li>
+                    <div class="code-container"><pre><code>   `if β ⊆ result then result = result ∪ γ`
+</code></pre></div>
+                </li>
+                <li><code>until result does not change</code></li>
+                </ol>
+                </li>
+                <li><strong>设计哲学应用：</strong> 属性闭包是极其有用的计算工具。
+                <ul>
+                <li><strong>判断超键：</strong> 如果 $\alpha^+$ 包含了关系模式R的所有属性，那么 $\alpha$ 就是R的一个超键。</li>
+                <li><strong>检查FD：</strong> 要判断 $\alpha \rightarrow \beta$ 是否被F所蕴含，只需计算 $\alpha^+$，然后检查是否 $\beta \subseteq \alpha^+$。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>规范覆盖 (Canonical Cover):</strong> 一个FD集F可能包含冗余信息。规范覆盖 $F_c$ 是与F等价的、<strong>最小化</strong>的FD集。寻找规范覆盖的过程，就像给一个复杂的代数表达式进行化简，这对于后续的分解算法至关重要。</p>
+                </li>
+                </ul>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%88%86%E8%A7%A3"><strong>第二部分：分解</strong></h3>
+                <p>将一个关系 $R$ 分解成 $R_1, R_2, \ldots, R_n$。什么样的分解才是“好”的分解？我们必须遵循两个黄金准则。</p>
+                <h4 id="21-%E5%87%86%E5%88%99%E4%B8%80%E6%97%A0%E6%8D%9F%E8%BF%9E%E6%8E%A5%E5%88%86%E8%A7%A3-lossless-join-decomposition"><strong>2.1 准则一：无损连接分解 (Lossless-Join Decomposition)</strong></h4>
+                <ul>
+                <li><strong>要求：</strong> 分解后的关系，通过自然连接，必须能够<strong>精确地、不多不少地</strong>恢复出原始关系。
+                <ul>
+                <li>$r = \Pi_{R_1}(r) \bowtie \Pi_{R_2}(r) \bowtie \ldots \bowtie \Pi_{R_n}(r)$</li>
+                </ul>
+                </li>
+                <li><strong>为什么重要？</strong> 如果连接是有损的（即连接后的结果比原始表多出了 spurious tuples——伪元组），那么我们就<strong>丢失了信息</strong>——我们不再知道哪些是原始的、合法的关联。这破坏了数据的完整性。</li>
+                <li><strong>判定定理 (针对两表分解):</strong> 将R分解为$R_1$和$R_2$是无损的，当且仅当 $(R_1 \cap R_2) \rightarrow R_1$ 或 $(R_1 \cap R_2) \rightarrow R_2$ 在F中成立。
+                <ul>
+                <li><strong>直观解释：</strong> 两个子模式的<strong>公共属性</strong>，必须是其中至少一个子模式的<strong>超键</strong>。这个公共属性就像一个“拉链”，能够保证在连接时，每一部分都能准确地找到它唯一的对应部分。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="22-%E5%87%86%E5%88%99%E4%BA%8C%E4%BE%9D%E8%B5%96%E4%BF%9D%E6%8C%81%E5%88%86%E8%A7%A3-dependency-preserving-decomposition"><strong>2.2 准则二：依赖保持分解 (Dependency-Preserving Decomposition)</strong></h4>
+                <ul>
+                <li><strong>要求：</strong> 原始关系R上的所有函数依赖F，在分解后，仍然可以在<strong>单个</strong>子关系 $R_i$ 上进行检查。</li>
+                <li><strong>为什么重要？</strong> 这是<strong>性能</strong>和<strong>数据一致性</strong>的关键。如果一个FD $\alpha \rightarrow \beta$ 在分解后，$\alpha$ 和 $\beta$ 分散在不同的表中，那么每次插入或更新数据时，为了检查这个FD是否被违反，DBMS将不得不执行一个<strong>昂贵的JOIN操作</strong>来把它们重新组合起来。如果依赖是保持的，检查就可以在单个表内部高效完成。</li>
+                </ul>
+                <p><strong>设计哲学中的核心权衡：</strong>
+                追求最高范式（如BCNF）可以最大程度消除冗余，但有时会<strong>牺牲依赖保持</strong>。而稍作妥协（如降到3NF）则可以<strong>保证依赖保持</strong>，但可能<strong>引入少量冗余</strong>。这是数据库设计中一个永恒的、需要根据具体场景进行权衡的经典问题。</p>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E8%8C%83%E5%BC%8F-normal-forms"><strong>第三部分：范式 (Normal Forms)</strong></h3>
+                <p>范式是一系列逐步增强的“健康标准”，用来衡量一个关系模式的设计质量。</p>
+                <h4 id="31-%E7%AC%AC%E4%B8%80%E8%8C%83%E5%BC%8F-1nf"><strong>3.1 第一范式 (1NF)</strong></h4>
+                <ul>
+                <li><strong>定义：</strong> 关系中所有属性的域都必须是<strong>原子的</strong>。</li>
+                <li><strong>设计哲学：</strong> 这是关系模型的基石。它确保了表是一个真正的二维结构，简化了数据处理。我们在E-R模型转换时已经讨论过如何通过创建新表来处理多值属性，从而满足1NF。</li>
+                </ul>
+                <h4 id="32-boyce-codd%E8%8C%83%E5%BC%8F-bcnf"><strong>3.2 Boyce-Codd范式 (BCNF)</strong></h4>
+                <ul>
+                <li><strong>定义：</strong> 对于关系模式R上成立的<strong>每一个</strong>非平凡函数依赖 $\alpha \rightarrow \beta$，$\alpha$都必须是R的一个<strong>超键</strong>。</li>
+                <li><strong>直观解释：</strong> 任何一个属性或属性组，都不能决定其他任何属性，除非它本身就是（包含）一个候选键。<strong>“键值决定一切，非键不能决定任何东西”</strong>。</li>
+                <li><strong>优点：</strong> BCNF能够消除所有由函数依赖引起的冗余。</li>
+                <li><strong>BCNF分解算法：</strong>
+                <ol>
+                <li><code>result = {R}</code></li>
+                <li><code>while result 中存在不满足 BCNF 的模式 Ri:</code></li>
+                <li>
+                    <div class="code-container"><pre><code> `在 Ri 中找到一个违反 BCNF 的 FD α → β`
+</code></pre></div>
+                </li>
+                <li>
+                    <div class="code-container"><pre><code> `将 Ri 分解为 R1 = (αβ) 和 R2 = (Ri - β)`
+</code></pre></div>
+                </li>
+                <li>
+                    <div class="code-container"><pre><code> `result = (result - Ri) ∪ {R1, R2}`
+</code></pre></div>
+                </li>
+                </ol>
+                <ul>
+                <li>这个算法保证是<strong>无损连接</strong>的，并且最终结果中的所有关系都满足BCNF。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="33-%E7%AC%AC%E4%B8%89%E8%8C%83%E5%BC%8F-3nf"><strong>3.3 第三范式 (3NF)</strong></h4>
+                <ul>
+                <li><strong>BCNF的问题：</strong> 存在一种情况，BCNF分解无法同时满足无损连接和依赖保持。
+                <ul>
+                <li><strong>经典例子：</strong> <code>(J, K, L)</code>，<code>F = {JK → L, L → K}</code>。这个模式不满足BCNF因为 <code>L → K</code> 中 <code>L</code> 不是超键。但任何将其分解为BCNF的尝试都会破坏 <code>JK → L</code> 这个依赖的保持性。</li>
+                </ul>
+                </li>
+                <li><strong>3NF的定义：</strong> 对于关系模式R上成立的<strong>每一个</strong>非平凡函数依赖 $\alpha \rightarrow \beta$，必须满足以下<strong>之一</strong>：
+                <ol>
+                <li>$\alpha$ 是R的一个超键。（同BCNF）</li>
+                <li>$\beta - \alpha$ 中的每一个属性，都包含在R的<strong>某个候选键</strong>中。（即 $\beta$ 的每个非 $\alpha$ 属性都是“主属性”）</li>
+                </ol>
+                </li>
+                <li><strong>设计哲学：</strong> 3NF是对BCNF的一个<strong>微小放宽</strong>。它允许一种特殊的、不会引起太多问题的依赖存在：<strong>非主属性对键的传递依赖</strong>。这种放宽的唯一目的，就是为了<strong>确保分解总是能保持依赖</strong>。</li>
+                <li><strong>BCNF vs. 3NF：</strong>
+                <ul>
+                <li>所有BCNF模式都是3NF模式。</li>
+                <li>BCNF消除了所有FD冗余，但可能不保持依赖。</li>
+                <li>3NF保证无损连接和依赖保持，但可能存在少量冗余。在现实世界中，如果依赖保持至关重要，设计到3NF通常是更务实的选择。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="34-%E7%AC%AC%E5%9B%9B%E8%8C%83%E5%BC%8F-4nf---%E8%B6%85%E8%B6%8A%E5%87%BD%E6%95%B0%E4%BE%9D%E8%B5%96"><strong>3.4 第四范式 (4NF) - 超越函数依赖</strong></h4>
+                <ul>
+                <li><strong>问题引入：</strong> 即使一个模式达到了BCNF，它仍可能存在冗余。
+                <ul>
+                <li><strong>示例：</strong> <code>classes(course, teacher, book)</code>。假设一门课可以由多个老师教，同时需要多本参考书，且老师和参考书之间没有直接关系。例如：'数据库'课由Avi和Hank教，需要《DB Concepts》和《Ullman》两本书。</li>
+                <li><strong>冗余：</strong> 为了记录这些信息，我们必须存储所有组合：<code>(database, Avi, DB Concepts)</code>, <code>(database, Avi, Ullman)</code>, <code>(database, Hank, DB Concepts)</code>, <code>(database, Hank, Ullman)</code>。这造成了大量的冗余。</li>
+                </ul>
+                </li>
+                <li><strong>多值依赖 (Multivalued Dependency - MVD):</strong>
+                <ul>
+                <li><strong>概念：</strong> 如果给定一个 $\alpha$ 的值，有一组与之关联的 $\beta$ 值，这组 $\beta$ 值<strong>完全独立于</strong>关系中的任何其他属性 $\gamma$。记作 $\alpha \twoheadrightarrow \beta$。</li>
+                <li><strong>在示例中：</strong> <code>course</code> $\twoheadrightarrow$ <code>teacher</code> 且 <code>course</code> $\twoheadrightarrow$ <code>book</code>。</li>
+                </ul>
+                </li>
+                <li><strong>第四范式 (4NF) 定义：</strong> 对于关系模式R上成立的<strong>每一个</strong>非平凡多值依赖 $\alpha \twoheadrightarrow \beta$，$\alpha$都必须是R的一个<strong>超键</strong>。</li>
+                <li><strong>设计哲学：</strong> 4NF旨在消除由多值依赖引起的冗余。其解决方案仍然是分解：将 <code>(course, teacher, book)</code> 分解为 <code>(course, teacher)</code> 和 <code>(course, book)</code>。</li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
