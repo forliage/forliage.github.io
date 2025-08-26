@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数据库系统设计04:查询处理(上)</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A104%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86%E4%B8%8A">数据库系统设计04:查询处理(上)</h1>
+                <p>当用户通过SQL发出一个指令，比如“查询所有在杭州、过去一个月内购买过手机、且消费总额超过5000元的VIP客户”，数据库内部究竟发生了什么？</p>
+                <p>这个从一条SQL语句到一个结果集的旅程，就是<strong>查询处理 (Query Processing)</strong> 的全部内容。它通常分为两个宏大的阶段：</p>
+                <ol>
+                <li><strong>查询优化 (Query Optimization):</strong> 数据库的“大脑”，负责将用户的SQL翻译成一个高效的<strong>执行计划 (Execution Plan)</strong>。它会探索成千上万种可能的执行方式，并选择成本最低的一种。这是我们下一讲的主题。</li>
+                <li><strong>查询执行 (Query Execution):</strong> 数据库的“肌肉”，负责忠实地、高效地执行优化器给出的计划。</li>
+                </ol>
+                <p>今天，我们的焦点是<strong>查询执行</strong>。我们将打开查询执行引擎的“工具箱”，检视里面用于实现关系代数操作（如<code>SELECT</code>, <code>PROJECT</code>, <code>JOIN</code>, <code>SORT</code>, <code>GROUP BY</code>）的各种算法。我们会发现，对于同一个逻辑操作，存在多种物理实现算法，它们的性能在不同数据规模、分布和索引条件下，有着天壤之别。</p>
+                <p>这节课的目标，是让你们掌握评估和选择这些算法的能力。我们将学会像数据库内核一样思考：<strong>如何用最少的I/O，完成最复杂的计算任务？</strong></p>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E6%9F%A5%E8%AF%A2%E6%88%90%E6%9C%AC%E6%A8%A1%E5%9E%8B"><strong>第一部分：查询成本模型</strong></h3>
+                <p>在比较算法优劣之前，我们必须先建立一把统一的“度量衡”，这就是<strong>成本模型 (Cost Model)</strong>。</p>
+                <h4 id="11-%E6%88%90%E6%9C%AC%E7%9A%84%E4%B8%BB%E8%A6%81%E6%9D%A5%E6%BA%90io"><strong>1.1 成本的主要来源：I/O”</strong></h4>
+                <p>正如我们在存储课上反复强调的，CPU的速度远超磁盘。因此，在传统的、以磁盘为主要存储的数据库中，<strong>磁盘I/O是成本的主要矛盾</strong>。我们的首要目标是最小化I/O。</p>
+                <ul>
+                <li>
+                <p><strong>成本单位:</strong></p>
+                <ul>
+                <li>$B$: 数据关系占用的<strong>数据块 (Blocks)</strong> 数量。</li>
+                <li>$T$: 数据关系拥有的<strong>元组 (Tuples)</strong> 数量。</li>
+                <li>$M$: 内存中可用于操作的<strong>缓冲区块 (Memory Blocks/Pages)</strong> 数量。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>I/O操作成本:</strong></p>
+                <ul>
+                <li><strong>顺序读/写 (Sequential I/O):</strong> 读写物理上连续的块。成本主要在于传输时间。</li>
+                <li><strong>随机读/写 (Random I/O):</strong> 读写物理上不连续的块。成本 = 寻道时间 + 旋转延迟 + 传输时间。随机I/O比顺序I/O昂贵得多。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>简化的成本公式:</strong> 我们的分析将主要关注<strong>I/O成本</strong>，即算法执行过程中需要读写多少个磁盘块。我们会忽略CPU成本，但在分析哈希连接等计算密集型算法时会提及。</p>
+                </li>
+                </ul>
+                <h4 id="12-%E7%9B%AE%E5%BD%95%E4%BF%A1%E6%81%AF-catalog-%E7%9A%84%E9%87%8D%E8%A6%81%E6%80%A7"><strong>1.2 目录信息 (Catalog) 的重要性</strong></h4>
+                <p>数据库不是在“黑暗”中做决策。它维护着一个名为<strong>系统目录 (System Catalog)</strong> 或<strong>数据字典</strong>的元数据仓库，里面存储着关于数据库所有对象的“统计信息”，例如：</p>
+                <ul>
+                <li>每个关系 $R$ 的块数 $B(R)$ 和元组数 $T(R)$。</li>
+                <li>每个属性的<strong>值基数 (Cardinality)</strong>，即不同值的数量。</li>
+                <li>每个属性值的<strong>分布直方图 (Histograms)</strong>。</li>
+                <li>索引信息，如索引的高度、叶子节点数等。</li>
+                </ul>
+                <p>这些统计信息，是成本估算的基石，也是查询优化器做出明智选择的依据。</p>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E9%80%89%E6%8B%A9-selection-%E4%B8%8E%E6%8A%95%E5%BD%B1-projection"><strong>第二部分：选择 (Selection) 与投影 (Projection)</strong></h3>
+                <p><code>SELECT</code> 和 <code>PROJECT</code> 是关系代数中最基本的操作，对应SQL中的<code>WHERE</code>和<code>SELECT &lt;column_list&gt;</code>子句。</p>
+                <h4 id="21-%E9%80%89%E6%8B%A9%E6%93%8D%E4%BD%9C-selection-sigmapr"><strong>2.1 选择操作 (Selection, $\sigma_P(R)$)</strong></h4>
+                <p>目标：从关系 $R$ 中找出所有满足谓词条件 $P$ 的元组。</p>
+                <h5 id="%E7%AE%97%E6%B3%95s1%E5%85%A8%E6%96%87%E4%BB%B6%E6%89%AB%E6%8F%8F-full-file-scan"><strong>算法S1：全文件扫描 (Full File Scan)</strong></h5>
+                <ul>
+                <li><strong>描述:</strong> 简单粗暴。逐块读取关系 $R$ 的所有数据块，对块中的每个元组检查其是否满足条件 $P$。</li>
+                <li><strong>适用场景:</strong> <strong>万能算法</strong>。无论有无索引、数据是否排序，它总能工作。</li>
+                <li><strong>I/O成本:</strong> $B(R)$ 次读I/O。</li>
+                <li><strong>设计思考:</strong> 这是<strong>最坏情况下的保底方案</strong>。如果没有任何捷径可走，就只能全盘扫描。</li>
+                </ul>
+                <h5 id="%E7%AE%97%E6%B3%95s2%E5%9F%BA%E4%BA%8E%E6%8E%92%E5%BA%8F%E7%9A%84%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE"><strong>算法S2：基于排序的二分查找</strong></h5>
+                <ul>
+                <li><strong>前提:</strong>
+                <ol>
+                <li>选择条件 $P$ 是一个<strong>等值比较</strong>，如 <code>attr = value</code>。</li>
+                <li>关系 $R$ 的文件<strong>物理上</strong>按照 <code>attr</code> 排序。</li>
+                </ol>
+                </li>
+                <li><strong>描述:</strong> 利用二分查找，在 $B(R)$ 个块中定位到第一个可能包含目标元组的块。</li>
+                <li><strong>I/O成本:</strong>
+                <ul>
+                <li><strong>定位成本:</strong> $\lceil \log_2 B(R) \rceil$ 次随机I/O。</li>
+                <li><strong>获取成本:</strong> 如果 <code>attr</code> 是唯一键，找到后即可停止。如果非唯一，还需要顺序读取所有包含该值的后续块。设满足条件的元组分布在 $S$ 个块中，则总成本为 $\lceil \log_2 B(R) \rceil + S$。</li>
+                </ul>
+                </li>
+                <li><strong>设计思考:</strong> 用物理有序性换取了 $O(\log N)$ 的查找效率，但付出了极高的维护成本（插入/删除困难）。</li>
+                </ul>
+                <h5 id="%E7%AE%97%E6%B3%95s3%E5%9F%BA%E4%BA%8Eb%E6%A0%91%E7%B4%A2%E5%BC%95%E7%9A%84%E6%9F%A5%E6%89%BE"><strong>算法S3：基于B+树索引的查找</strong></h5>
+                <ul>
+                <li><strong>前提:</strong> 在选择条件的属性上，存在一个B+树索引。</li>
+                <li><strong>场景A: 等值选择 <code>attr = value</code></strong>
+                <ul>
+                <li><strong>I/O成本:</strong>
+                <ul>
+                <li><strong>主索引/聚集索引 (Primary/Clustered):</strong> 从B+树根节点走到叶子节点，成本为 <code>树高 + S</code> 次I/O，其中 $S$ 是存放结果的块数。因为数据物理连续，所以 $S$ 很小。</li>
+                <li><strong>辅助索引 (Secondary):</strong> 成本为 <code>树高 + T(P)</code> 次I/O，其中 $T(P)$ 是满足条件的元组数。因为每个元组都可能需要一次<strong>回表</strong>，导致一次随机I/O。<strong>这是辅助索引最坏的情况</strong>。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li><strong>场景B: 范围选择 <code>value1 &lt;= attr &lt;= value2</code></strong>
+                <ul>
+                <li><strong>描述:</strong>
+                <ol>
+                <li>使用B+树找到第一个满足 <code>attr &gt;= value1</code> 的叶子节点条目。</li>
+                <li>利用叶子节点的<strong>双向链表</strong>，向右顺序扫描，直到 <code>attr &gt; value2</code>。</li>
+                </ol>
+                </li>
+                <li><strong>I/O成本:</strong>
+                <ul>
+                <li><strong>主索引:</strong> <code>树高 + 结果块数</code>。因为数据物理连续，所以性能极高。</li>
+                <li><strong>辅助索引:</strong> <code>树高 + 索引叶子块数 + T(P)</code>。每次回表都是随机I/O，当 $T(P)$ 很大时，成本可能比全表扫描还高！</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li><strong>设计思考:</strong> B+树是通用且高效的选择。但优化器必须清醒地认识到<strong>使用非聚集索引进行大范围扫描的巨大代价</strong>。它会根据统计信息估算 $T(P)$ 的大小，如果选择率（$T(P)/T(R)$）很高（比如超过5-10%），它可能会明智地<strong>放弃使用索引，退化为全表扫描</strong>。</li>
+                </ul>
+                <h5 id="%E7%AE%97%E6%B3%95s4%E5%9F%BA%E4%BA%8E%E5%93%88%E5%B8%8C%E7%B4%A2%E5%BC%95%E7%9A%84%E6%9F%A5%E6%89%BE"><strong>算法S4：基于哈希索引的查找</strong></h5>
+                <ul>
+                <li><strong>前提:</strong>
+                <ol>
+                <li>选择条件 $P$ 必须是<strong>等值比较</strong>。</li>
+                <li>在 <code>attr</code> 上存在哈希索引。</li>
+                </ol>
+                </li>
+                <li><strong>描述:</strong> 计算 <code>value</code> 的哈希值，直接定位到对应的桶。</li>
+                <li><strong>I/O成本:</strong> 平均情况下是<strong>1到2次I/O</strong>。如果存在长的溢出链，成本会增加。</li>
+                <li><strong>设计思考:</strong> 等值查询的“核武器”，但功能单一，不支持范围查询。</li>
+                </ul>
+                <h4 id="22-%E5%A4%8D%E6%9D%82%E9%80%89%E6%8B%A9%E6%9D%A1%E4%BB%B6%E7%9A%84%E5%AE%9E%E7%8E%B0"><strong>2.2 复杂选择条件的实现</strong></h4>
+                <ul>
+                <li><strong>合取 (Conjunction, AND):</strong> <code>P1 AND P2</code>
+                <ul>
+                <li><strong>策略1:</strong> 选择一个“选择性最高”（返回结果最少）的谓词（如<code>P1</code>），用它先过滤出中间结果集，然后再在内存中检查<code>P2</code>。</li>
+                <li><strong>策略2 (索引合并/交集):</strong> 如果<code>P1</code>和<code>P2</code>的属性上都有索引，可以分别用两个索引得到满足条件的RID列表，然后在内存中求这两个列表的<strong>交集</strong>，最后统一回表。</li>
+                </ul>
+                </li>
+                <li><strong>析取 (Disjunction, OR):</strong> <code>P1 OR P2</code>
+                <ul>
+                <li><strong>策略 (索引合并/并集):</strong> 如果<code>P1</code>和<code>P2</code>都有索引，可以分别获取RID列表，求<strong>并集</strong>后回表。如果其中一个没有索引，通常只能退化为全表扫描。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="23-%E6%8A%95%E5%BD%B1%E6%93%8D%E4%BD%9C-projection-pia1-a2-r"><strong>2.3 投影操作 (Projection, $\pi_{A1, A2, ...}(R)$)</strong></h4>
+                <p>目标：从关系 $R$ 中选择指定的列。</p>
+                <ul>
+                <li><strong>核心挑战：去重 (Duplicate Elimination)</strong>，对应SQL中的<code>SELECT DISTINCT</code>。</li>
+                <li><strong>算法P1：基于排序的去重</strong>
+                <ol>
+                <li><strong>扫描与投影:</strong> 扫描整个关系 $R$，对每个元组，只保留需要的列，写入一个临时中间文件。</li>
+                <li><strong>排序:</strong> 对这个巨大的中间文件进行<strong>外部排序 (External Sorting)</strong>。</li>
+                <li><strong>去重:</strong> 再次扫描已排序的中间文件，只输出不与前一个元组重复的元组。</li>
+                </ol>
+                </li>
+                <li><strong>I/O成本:</strong> 外部排序的成本通常是 $O(B(R) \log_M B(R))$，非常昂贵。</li>
+                <li><strong>算法P2：基于哈希的去重</strong>
+                <ol>
+                <li><strong>分区 (Partitioning):</strong> 类似哈希连接的分区阶段。使用哈希函数 <code>h1</code> 将元组按需投影后，散列到 $M-1$ 个磁盘分区中。</li>
+                <li><strong>去重 (Duplicate Elimination):</strong> 逐一将每个分区读入内存，使用内存哈希表 <code>h2</code> 进行去重。</li>
+                </ol>
+                </li>
+                <li><strong>I/O成本:</strong> 读写一遍数据，成本约为 $3 \times B(R)$。通常比排序法快。</li>
+                <li><strong>设计思考:</strong> 如果投影操作<strong>不需要去重</strong> (<code>SELECT</code> 而非 <code>SELECT DISTINCT</code>)，且所需列上存在一个<strong>覆盖索引 (Covering Index)</strong>，那么数据库就可以<strong>只扫描索引，完全避免访问数据文件</strong>，这是极大的性能提升。</li>
+                </ul>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E8%BF%9E%E6%8E%A5-join"><strong>第三部分：连接 (Join)</strong></h3>
+                <p>连接操作是关系数据库的灵魂，也是性能开销最大的操作之一。我们将探索四种主流的连接算法。假设我们要连接关系 $R$ 和 $S$ (<code>R JOIN S ON R.a = S.b</code>)。</p>
+                <h4 id="31-%E5%B5%8C%E5%A5%97%E5%BE%AA%E7%8E%AF%E8%BF%9E%E6%8E%A5-nested-loop-join-nlj"><strong>3.1 嵌套循环连接 (Nested Loop Join, NLJ)</strong></h4>
+                <p>这是最朴素、最暴力的算法，就像两层<code>for</code>循环。</p>
+                <h5 id="%E7%AE%97%E6%B3%95j1%E5%85%83%E7%BB%84%E7%BA%A7%E5%B5%8C%E5%A5%97%E5%BE%AA%E7%8E%AF%E8%BF%9E%E6%8E%A5-tuple-based-nlj"><strong>算法J1：元组级嵌套循环连接 (Tuple-based NLJ)</strong></h5>
+                <div class="code-container">
+                    <pre class="hljs"><code><div>FOR each tuple r in R:
+  FOR each tuple s in S:
+    IF r.a == s.b THEN
+      output &lt;r, s&gt;
+</div></code></pre>
+                </div>
+                <ul>
+                <li><strong>I/O成本:</strong> $T(R) \times B(S) + B(R)$。这是一个<strong>灾难性</strong>的成本，因为对 $R$ 的每一个元组，我们都要把整个 $S$ 扫描一遍。</li>
+                </ul>
+                <h5 id="%E7%AE%97%E6%B3%95j2%E5%9D%97%E7%BA%A7%E5%B5%8C%E5%A5%97%E5%BE%AA%E7%8E%AF%E8%BF%9E%E6%8E%A5-block-based-nlj--page-oriented-nlj"><strong>算法J2：块级嵌套循环连接 (Block-based NLJ / Page-oriented NLJ)</strong></h5>
+                <ul>
+                <li><strong>改进:</strong> 我们不是逐元组，而是逐块地进行循环。</li>
+                </ul>
+                <div class="code-container">
+                    <pre class="hljs"><code><div>FOR each block br in R:
+  FOR each block bs in S:
+    FOR each tuple r in br:
+      FOR each tuple s in bs:
+        IF r.a == s.b THEN
+          output &lt;r, s&gt;
+</div></code></pre>
+                </div>
+                <ul>
+                <li><strong>I/O成本:</strong> $B(R) \times B(S) + B(R)$。仍然非常高昂。</li>
+                </ul>
+                <h5 id="%E7%AE%97%E6%B3%95j3%E4%BC%98%E5%8C%96%E7%9A%84%E5%9D%97%E7%BA%A7%E5%B5%8C%E5%A5%97%E5%BE%AA%E7%8E%AF-buffered-nlj"><strong>算法J3：优化的块级嵌套循环 (Buffered NLJ)</strong></h5>
+                <ul>
+                <li><strong>核心思想:</strong> 最大化利用内存。</li>
+                <li><strong>描述:</strong>
+                <ol>
+                <li>将外层关系 $R$ 的 $M-2$ 个块读入内存缓冲区。</li>
+                <li>扫描一遍内层关系 $S$，将其每个块与内存中 $R$ 的所有块进行连接。</li>
+                <li>重复此过程，直到 $R$ 的所有块都被处理完。</li>
+                </ol>
+                </li>
+                <li><strong>I/O成本:</strong> $B(R) + (\lceil B(R) / (M-2) \rceil \times B(S))$。</li>
+                <li><strong>选角的重要性:</strong> 应该选择<strong>较小的关系作为外层关系</strong>，以减少外层循环的次数。</li>
+                <li><strong>设计思考:</strong> NLJ是<strong>唯一可以处理任何连接条件</strong>（包括非等值连接如<code>&gt;</code>）的通用算法。在内层关系上有索引时，它会蜕变成下面要讲的索引嵌套循环。</li>
+                </ul>
+                <h4 id="32-%E7%B4%A2%E5%BC%95%E5%B5%8C%E5%A5%97%E5%BE%AA%E7%8E%AF%E8%BF%9E%E6%8E%A5-index-nested-loop-join-inlj"><strong>3.2 索引嵌套循环连接 (Index Nested Loop Join, INLJ)</strong></h4>
+                <ul>
+                <li><strong>前提:</strong> 在内层关系 $S$ 的连接属性 <code>S.b</code> 上有一个索引。</li>
+                <li><strong>描述:</strong></li>
+                </ul>
+                <div class="code-container">
+                    <pre class="hljs"><code><div>FOR each tuple r in R:
+  use index on S.b to find all tuples s where s.b == r.a
+  FOR each matching tuple s:
+    output &lt;r, s&gt;
+</div></code></pre>
+                </div>
+                <ul>
+                <li><strong>I/O成本:</strong> $B(R) + T(R) \times (\text{索引查找成本})$。</li>
+                <li><strong>设计思考:</strong> 当外层关系 $R$ 非常小，或者索引的选择性极高（每次查找只返回极少数记录）时，INLJ的性能极佳。它特别适合于OLTP场景下的点查询关联。</li>
+                </ul>
+                <h4 id="33-%E6%8E%92%E5%BA%8F%E5%BD%92%E5%B9%B6%E8%BF%9E%E6%8E%A5-sort-merge-join-smj"><strong>3.3 排序归并连接 (Sort-Merge Join, SMJ)</strong></h4>
+                <ul>
+                <li><strong>前提:</strong> 必须是<strong>等值连接</strong>或<strong>范围连接</strong>。</li>
+                <li><strong>描述:</strong>
+                <ol>
+                <li><strong>排序阶段 (Sort Phase):</strong> 如果关系 $R$ 和 $S$ 尚未按连接键（<code>R.a</code> 和 <code>S.b</code>）排序，则分别使用外部排序将它们排序。</li>
+                <li><strong>归并阶段 (Merge Phase):</strong>
+                <ul>
+                <li>使用两个指针，分别指向已排序的 $R$ 和 $S$ 的开头。</li>
+                <li>类似归并排序的合并过程，同步地向前扫描两个关系：
+                <ul>
+                <li><code>IF R.a &lt; S.b</code>, 前进 $R$ 的指针。</li>
+                <li><code>IF R.a &gt; S.b</code>, 前进 $S$ 的指针。</li>
+                <li><code>IF R.a == S.b</code>, 找到了一个匹配。输出结果。<strong>处理重复键是这里的关键和难点</strong>：需要标记当前匹配的起始位置，然后将一个关系的指针扫描完所有重复值，再将另一个关系的指针重置回起始位置，进行交叉匹配。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ol>
+                </li>
+                <li><strong>I/O成本:</strong>
+                <ul>
+                <li><strong>排序成本:</strong> $O(B(R)\log_M B(R)) + O(B(S)\log_M B(S))$</li>
+                <li><strong>归并成本:</strong> $B(R) + B(S)$ (只需扫描一遍)</li>
+                <li><strong>总成本:</strong> 主要由排序阶段决定。</li>
+                </ul>
+                </li>
+                <li><strong>设计思考:</strong> SMJ对<strong>预排序</strong>的数据（例如通过聚集索引或前一个查询的<code>ORDER BY</code>结果）非常友好。它的一个巨大优势是，<strong>连接的结果本身也是有序的</strong>，这对于后续的<code>ORDER BY</code>或<code>GROUP BY</code>操作可能非常有价值。</li>
+                </ul>
+                <h4 id="34-%E5%93%88%E5%B8%8C%E8%BF%9E%E6%8E%A5-hash-join-hj"><strong>3.4 哈希连接 (Hash Join, HJ)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>前提:</strong> 必须是<strong>等值连接</strong>。</p>
+                </li>
+                <li>
+                <p><strong>描述:</strong> 分为两个阶段：</p>
+                <ol>
+                <li><strong>构建阶段 (Build Phase):</strong>
+                <ul>
+                <li>选择较小的关系（比如 $S$）作为<strong>构建输入 (Build Input)</strong>。</li>
+                <li>扫描 $S$，使用哈希函数 <code>h1</code>，在内存中构建一个关于连接键 <code>S.b</code> 的哈希表。</li>
+                </ul>
+                </li>
+                <li><strong>探测阶段 (Probe Phase):</strong>
+                <ul>
+                <li>扫描较大的关系 $R$ (探测输入, Probe Input)。</li>
+                <li>对于 $R$ 中的每个元组 $r$，计算 <code>h1(r.a)</code>，然后去内存中的哈希表中查找匹配的 $S$ 元组。</li>
+                <li>找到匹配则输出。</li>
+                </ul>
+                </li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>内存的挑战:</strong> 如果构建输入的哈希表<strong>无法完全放入内存</strong> ($B(S) > M$) 怎么办？</p>
+                <ul>
+                <li><strong>Grace Hash Join (分区哈希连接):</strong>
+                a. <strong>分区阶段 (Partitioning):</strong>
+                <ul>
+                <li>使用一个分区哈希函数 $h_p$，将 $R$ 和 $S$ 都分别散列到 $k$ 个磁盘分区中 ($R_1, ..., R_k$ 和 $S_1, ..., S_k$) 。</li>
+                <li>$h_p$ 保证了所有可能匹配的元组（<code>r.a = s.b</code>）必定落在对应的分区中（$R_i$ 和 $S_i$）。</li>
+                </ul>
+                b. <strong>连接阶段 (Joining):</strong>
+                <ul>
+                <li>对每一对分区 <code>(R_i, S_i)</code>，执行内存哈希连接算法。此时，我们只需要保证每个 $S_i$ 的大小小于 $M$ 即可。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>I/O成本:</strong></p>
+                <ul>
+                <li><strong>分区阶段:</strong> 读写 $R$ 和 $S$ 一遍，成本为 $2 \times (B(R) + B(S))$。</li>
+                <li><strong>连接阶段:</strong> 再读一遍 $R$ 和 $S$，成本为 $B(R) + B(S)$。</li>
+                <li><strong>总成本:</strong> 约为 $3 \times (B(R) + B(S))$。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>设计思考:</strong></p>
+                <ul>
+                <li>哈希连接是处理<strong>大规模数据等值连接</strong>的<strong>主力算法</strong>，尤其是在数据无序且没有合适索引的情况下。它的平均性能通常优于排序归并连接。</li>
+                <li>它对<strong>数据倾斜 (Data Skew)</strong> 非常敏感。如果某个哈希值对应的分区过大，无法放入内存，就会导致性能问题（需要递归分区或退化到其他连接算法）。</li>
+                </ul>
+                </li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
