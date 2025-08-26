@@ -712,5 +712,12 @@
     "category": "学习笔记",
     "path": "_posts/2025-08-26-db12.html",
     "abstract": "数据库系统设计07:事务(Transactions)"
+  },
+  {
+    "title": "数据库系统设计08:并发控制(Concurrency Control)",
+    "date": "2025-08-26",
+    "category": "学习笔记",
+    "path": "_posts/2025-08-26-db13.html",
+    "abstract": "数据库系统设计08:并发控制(Concurrency Control)"
   }
 ]

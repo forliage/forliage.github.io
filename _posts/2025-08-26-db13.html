@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数据库系统设计08:并发控制(Concurrency Control)</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A108%E5%B9%B6%E5%8F%91%E6%8E%A7%E5%88%B6concurrency-control">数据库系统设计08:并发控制(Concurrency Control)</h1>
+                <p>并发控制的<strong>核心使命</strong>就是：<strong>设计一套协议 (Protocols)，在允许多个事务尽可能“交错”执行以提高并发度的同时，严格保证这种交错执行的结果，等价于某个串行执行的结果（即可串行化）。</strong></p>
+                <p>这就像是在指挥一场复杂的空中交通管制。我们希望飞机（事务）能够同时起飞降落，以最大化机场（数据库）的吞吐量，但我们又必须通过一套严格的规则（并发控制协议），确保它们绝不会在空中相撞（产生数据不一致）。</p>
+                <p>今天，我们将深入探索最主流的几种“空管”策略，主要聚焦于<strong>基于锁 (Lock-based)</strong> 的协议。我们将从最简单的锁开始，不断遭遇问题（如死锁、幻读），然后引入更复杂的机制（如两阶段锁、多粒度锁）来解决它们。这将是一次充满挑战，但收获巨大的旅程。</p>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E4%B8%A4%E9%98%B6%E6%AE%B5%E5%B0%81%E9%94%81%E5%8D%8F%E8%AE%AE-2pl"><strong>第一部分：两阶段封锁协议 (2PL)</strong></h3>
+                <p>基于锁的并发控制是最古老、最直观，也是应用最广泛的技术。其基本思想是：<strong>事务在访问任何数据项之前，必须先获得该数据项的“锁”，访问结束后再释放锁。</strong></p>
+                <h4 id="11-%E5%9F%BA%E7%A1%80%E9%94%81%E6%A8%A1%E5%BC%8F"><strong>1.1 基础锁模式</strong></h4>
+                <ul>
+                <li><strong>共享锁 (Shared Lock / S-Lock):</strong>
+                <ul>
+                <li>也称为<strong>读锁</strong>。</li>
+                <li><strong>规则:</strong> 如果事务 $T$ 持有数据项 $Q$ 的S锁，那么 $T$ 可以<strong>读取</strong> $Q$，但不能<strong>修改</strong> $Q$。</li>
+                <li><strong>兼容性:</strong> 多个事务可以<strong>同时</strong>持有同一个数据项的S锁。S锁与S锁是兼容的。</li>
+                </ul>
+                </li>
+                <li><strong>排他锁 (Exclusive Lock / X-Lock):</strong>
+                <ul>
+                <li>也称为<strong>写锁</strong>。</li>
+                <li><strong>规则:</strong> 如果事务 $T$ 持有数据项 $Q$ 的X锁，那么 $T$ 可以<strong>读取并修改</strong> $Q$。</li>
+                <li><strong>兼容性:</strong> 任何时候，最多只有一个事务能持有数据项 $Q$ 的X锁。X锁与任何其他锁（S锁或X锁）都<strong>不兼容</strong>。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>锁兼容性矩阵:</strong></p>
+                <table>
+                <thead>
+                <tr>
+                <th style="text-align:left">已持有 \ 请求</th>
+                <th style="text-align:left">S (共享)</th>
+                <th style="text-align:left">X (排他)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                <td style="text-align:left"><strong>S (共享)</strong></td>
+                <td style="text-align:left"><strong>Yes</strong></td>
+                <td style="text-align:left">No</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>X (排他)</strong></td>
+                <td style="text-align:left">No</td>
+                <td style="text-align:left">No</td>
+                </tr>
+                </tbody>
+                </table>
+                <h4 id="12-%E9%9A%8F%E7%94%A8%E9%9A%8F%E6%94%BE%E7%9A%84%E9%94%81"><strong>1.2 随用随放的锁</strong></h4>
+                <p>一个初学者可能会想：我需要读/写数据时就加锁，用完了就马上释放，这样并发度不是最高吗？</p>
+                <p>考虑转账事务 $T_3$ (A-&gt;B) 和 $T_4$ (查询A, B)：</p>
+                <ol>
+                <li><strong>$T_3$: lock-x(B), read(B), B:=B-50, write(B), unlock(B)</strong>  <em>($T_3$以为B用完了，提前释放了锁)</em></li>
+                <li><strong>$T_4$: lock-s(A), read(A), unlock(A)</strong></li>
+                <li><strong>$T_4$: lock-s(B), read(B), unlock(B)</strong> <em>($T_4$此时读取了B的中间值)</em></li>
+                <li><strong>$T_3$: lock-x(A), read(A), A:=A+50, write(A), unlock(A)</strong></li>
+                </ol>
+                <ul>
+                <li><strong>问题:</strong> $T_4$在$T_3$的两次写操作之间读取了数据，看到了一个“A还没加钱，B已经扣钱”的<strong>不一致</strong>状态。这个调度显然不是可串行化的。</li>
+                <li><strong>根源:</strong> <strong>锁的过早释放</strong> 破坏了事务的隔离性。</li>
+                </ul>
+                <h4 id="13-%E4%B8%A4%E9%98%B6%E6%AE%B5%E5%B0%81%E9%94%81%E5%8D%8F%E8%AE%AE-two-phase-locking-2pl"><strong>1.3 两阶段封锁协议 (Two-Phase Locking, 2PL)</strong></h4>
+                <p>为了解决上述问题，伟大的Jim Gray提出了里程碑式的<strong>2PL协议</strong>。它规定，每个事务的加锁和解锁过程必须分为两个<strong>严格分开的阶段</strong>：</p>
+                <ol>
+                <li><strong>增长阶段 (Growing Phase):</strong> 事务<strong>只能申请锁</strong>，不能释放任何锁。</li>
+                <li><strong>缩减阶段 (Shrinking Phase):</strong> 事务<strong>只能释放锁</strong>，不能再申请任何新的锁。</li>
+                </ol>
+                <p><strong>[图示2PL的阶段]</strong></p>
+                <div class="code-container">
+                    <pre class="hljs"><code><div>      ▲
+      |   (可以获取锁)
+锁的数量 |   Growing Phase
+      |  /
+      ▼ /
+      Lock Point
+            \
+             \ Shrinking Phase
+              \ (只能释放锁)
+               ▼
+      ----------------------&gt; 时间
+</div></code></pre>
+                </div>
+                <ul>
+                <li><strong>锁点 (Lock Point):</strong> 事务获得其最后一个锁的那个时间点，标志着增长阶段的结束和缩减阶段的开始。</li>
+                </ul>
+                <p><strong>2PL的黄金定理:</strong>
+                <strong>任何遵守2PL协议的调度，都一定是冲突可串行化的。</strong> 事务的等价串行顺序，就是由它们的<strong>锁点 (Lock Point)</strong> 顺序决定的。</p>
+                <h4 id="14-2pl%E7%9A%84%E5%8F%98%E4%BD%93%E4%B8%8E%E7%8E%B0%E5%AE%9E%E4%B8%96%E7%95%8C%E7%9A%84%E9%80%89%E6%8B%A9"><strong>1.4 2PL的变体与现实世界的选择</strong></h4>
+                <p>2PL虽然保证了可串行化，但它本身仍然存在问题。</p>
+                <ul>
+                <li><strong>级联回滚 (Cascading Aborts):</strong>
+                <ul>
+                <li><strong>问题:</strong> 在基本的2PL中，事务可以在缩减阶段释放锁，而此时事务本身可能还未提交。如果另一个事务获取了这个锁，读取了数据，而第一个事务随后中止了，就会引发级联回滚。</li>
+                </ul>
+                </li>
+                <li><strong>解决方案：严格两阶段封锁 (Strict 2PL)</strong>
+                <ul>
+                <li><strong>规则:</strong> 事务必须<strong>持有其所有的排他锁 (X-Locks)</strong>，直到它<strong>提交或中止</strong>。S锁可以在缩减阶段释放。</li>
+                <li><strong>优点:</strong> 避免了级联回滚。因为写操作的结果只在事务结束后才对外界可见。</li>
+                </ul>
+                </li>
+                <li><strong>解决方案：强两阶段封锁 (Rigorous 2PL / Strong Strict 2PL)</strong>
+                <ul>
+                <li><strong>规则:</strong> 事务必须<strong>持有其所有的锁（包括S锁和X锁）</strong>，直到它<strong>提交或中止</strong>。</li>
+                <li><strong>优点:</strong> 实现最简单，并且可以保证事务按其<strong>提交的顺序</strong>进行串行化。这是<strong>绝大多数商业数据库实际采用的协议</strong>。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="15-%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0%E9%94%81%E7%AE%A1%E7%90%86%E5%99%A8%E4%B8%8E%E9%94%81%E8%A1%A8"><strong>1.5 锁的实现：锁管理器与锁表</strong></h4>
+                <ul>
+                <li><strong>锁管理器 (Lock Manager):</strong> 数据库中一个专门处理加锁、解锁请求的组件。</li>
+                <li><strong>锁表 (Lock Table):</strong>
+                <ul>
+                <li>一个内存中的哈希表，<code>key</code>是被锁的数据项标识（如<code>PageID</code>, <code>RowID</code>），<code>value</code>是一个包含了“谁持有锁”、“锁的模式”、“等待队列”等信息的复杂结构。</li>
+                <li>当一个锁请求到来时，锁管理器查询锁表：
+                <ul>
+                <li>如果数据项无锁，或请求的锁模式兼容，则授予锁。</li>
+                <li>如果不兼容，则将该请求放入该数据项的等待队列中，事务阻塞。</li>
+                </ul>
+                </li>
+                <li>当一个事务释放锁时，锁管理器会从等待队列中唤醒一个或多个兼容的请求。</li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%A4%9A%E7%B2%92%E5%BA%A6%E9%94%81%E5%8D%8F%E8%AE%AE-mgl"><strong>第二部分：多粒度锁协议 (MGL)</strong></h3>
+                <p>到目前为止，我们假设锁是加在单个数据项（如一行记录）上的。但这并不总是最高效的。</p>
+                <h4 id="21-%E7%B2%92%E5%BA%A6%E7%9A%84%E6%9D%83%E8%A1%A1"><strong>2.1 粒度的权衡</strong></h4>
+                <ul>
+                <li><strong>细粒度 (Fine Granularity)</strong> (e.g., 行锁 Row-level lock):
+                <ul>
+                <li><strong>优点:</strong> <strong>并发度高</strong>。两个事务只要不访问同一行，就可以并行执行。</li>
+                <li><strong>缺点:</strong> <strong>锁开销大</strong>。如果一个事务要更新一整张表，它需要获取数百万个行锁，锁管理本身的开销会成为瓶颈。</li>
+                </ul>
+                </li>
+                <li><strong>粗粒度 (Coarse Granularity)</strong> (e.g., 表锁 Table-level lock):
+                <ul>
+                <li><strong>优点:</strong> <strong>锁开销小</strong>。一个事务更新全表，只需一个表锁。</li>
+                <li><strong>缺点:</strong> <strong>并发度低</strong>。只要有一个事务持有表锁，其他任何想访问该表的事务都必须等待。</li>
+                </ul>
+                </li>
+                </ul>
+                <p>我们需要一个机制，允许系统根据事务的需求，在不同粒度（如数据库、表、页、行）上进行加锁。</p>
+                <h4 id="22-%E5%A4%9A%E7%B2%92%E5%BA%A6%E9%94%81%E5%8D%8F%E8%AE%AE-multiple-granularity-locking-mgl"><strong>2.2 多粒度锁协议 (Multiple Granularity Locking, MGL)</strong></h4>
+                <p>MGL将数据项组织成一个<strong>层次结构（树）</strong>，例如：
+                <code>Database -&gt; Tables -&gt; Pages -&gt; Rows</code></p>
+                <ul>
+                <li>
+                <p><strong>规则:</strong> 在这个层次结构上加锁，必须遵循自顶向下的原则。要在一个子节点上加锁，必须先在其所有祖先节点上持有某种形式的“意向锁”。</p>
+                </li>
+                <li>
+                <p><strong>意向锁 (Intention Locks):</strong></p>
+                <ul>
+                <li><strong>意向共享锁 (Intention Shared, IS):</strong> 表明事务<strong>意图</strong>在下层节点请求<strong>S锁</strong>。</li>
+                <li><strong>意向排他锁 (Intention Exclusive, IX):</strong> 表明事务<strong>意图</strong>在下层节点请求<strong>X锁</strong>。</li>
+                <li><strong>共享意向排他锁 (Shared with Intention Exclusive, SIX):</strong>
+                <ul>
+                <li>一个组合锁，比较特殊。它表示，当前事务要<strong>读取整个子树</strong>（持有S锁），并且<strong>意图在子树的某些低层节点进行更新</strong>（持有IX意向）。</li>
+                <li><strong>典型场景:</strong> <code>UPDATE table SET salary = salary * 1.1 WHERE age > 30</code>。这个查询需要读取表中的每一行来检查<code>age</code>（需要对表加S锁），但只会更新满足条件的行（需要在这些行上加X锁）。此时在表上加一个SIX锁是最高效的。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>MGL兼容性矩阵 (扩展版):</strong></p>
+                </li>
+                </ul>
+                <table>
+                <thead>
+                <tr>
+                <th style="text-align:left">已持有 \ 请求</th>
+                <th style="text-align:left">IS</th>
+                <th style="text-align:left">IX</th>
+                <th style="text-align:left">S</th>
+                <th style="text-align:left">SIX</th>
+                <th style="text-align:left">X</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                <td style="text-align:left"><strong>IS</strong></td>
+                <td style="text-align:left"><strong>Y</strong></td>
+                <td style="text-align:left"><strong>Y</strong></td>
+                <td style="text-align:left"><strong>Y</strong></td>
+                <td style="text-align:left"><strong>Y</strong></td>
+                <td style="text-align:left">N</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>IX</strong></td>
+                <td style="text-align:left"><strong>Y</strong></td>
+                <td style="text-align:left"><strong>Y</strong></td>
+                <td style="text-align:left">N</td>
+                <td style="text-align:left">N</td>
+                <td style="text-align:left">N</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>S</strong></td>
+                <td style="text-align:left"><strong>Y</strong></td>
+                <td style="text-align:left">N</td>
+                <td style="text-align:left"><strong>Y</strong></td>
+                <td style="text-align:left">N</td>
+                <td style="text-align:left">N</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>SIX</strong></td>
+                <td style="text-align:left"><strong>Y</strong></td>
+                <td style="text-align:left">N</td>
+                <td style="text-align:left">N</td>
+                <td style="text-align:left">N</td>
+                <td style="text-align:left">N</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>X</strong></td>
+                <td style="text-align:left">N</td>
+                <td style="text-align:left">N</td>
+                <td style="text-align:left">N</td>
+                <td style="text-align:left">N</td>
+                <td style="text-align:left">N</td>
+                </tr>
+                </tbody>
+                </table>
+                <ul>
+                <li>
+                <p><strong>加锁流程示例 (<code>UPDATE a row</code>):</strong></p>
+                <ol>
+                <li>请求对 <code>Database</code> 加 <code>IX</code> 锁。</li>
+                <li>请求对 <code>Table</code> 加 <code>IX</code> 锁。</li>
+                <li>请求对 <code>Page</code> 加 <code>IX</code> 锁。</li>
+                <li>请求对 <code>Row</code> 加 <code>X</code> 锁。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>解锁流程:</strong> <strong>自底向上</strong>释放。</p>
+                </li>
+                </ul>
+                <p>MGL通过引入意向锁，巧妙地解决了在层次结构中检查锁冲突的问题。例如，当一个事务想对整张表加X锁时，它只需要检查表节点是否有不兼容的锁即可。如果另一个事务正持有某行的S锁，那么它必然在表节点上持有一个IS锁，X锁请求会因为与IS锁冲突而被阻塞。无需去检查每一行。</p>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E6%AD%BB%E9%94%81-deadlocks"><strong>第三部分：死锁 (Deadlocks)</strong></h3>
+                <p>2PL协议虽然保证了可串行化，但它无法避免一个经典的问题——<strong>死锁</strong>。</p>
+                <h4 id="31-%E6%AD%BB%E9%94%81%E7%9A%84%E4%BA%A7%E7%94%9F"><strong>3.1 死锁的产生</strong></h4>
+                <ul>
+                <li><strong>定义:</strong> 两个或多个事务，相互等待对方持有的资源（锁），形成一个<strong>循环等待</strong>，导致所有事务都无法继续执行。
+                <ul>
+                <li>$T_3$持有B的X锁，请求A的锁。</li>
+                <li>$T_4$持有A的S锁，请求B的锁。</li>
+                <li>$T_3$等待$T_4$，$T_4$等待$T_3$，形成死锁。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="32-%E6%AD%BB%E9%94%81%E5%A4%84%E7%90%86%E7%9A%84%E4%B8%89%E7%A7%8D%E7%AD%96%E7%95%A5"><strong>3.2 死锁处理的三种策略</strong></h4>
+                <p>数据库系统通常采用以下三种策略之一来处理死锁。</p>
+                <h5 id="%E7%AD%96%E7%95%A51%E6%AD%BB%E9%94%81%E9%A2%84%E9%98%B2-deadlock-prevention"><strong>策略1：死锁预防 (Deadlock Prevention)</strong></h5>
+                <ul>
+                <li><strong>思想:</strong> 在系统设计阶段，通过施加某些限制，从根本上<strong>杜绝</strong>死锁发生的可能性。</li>
+                <li><strong>方法:</strong>
+                <ol>
+                <li><strong>预先声明 (Pre-declaration):</strong> 事务在开始执行前，必须<strong>一次性获取它所需的所有锁</strong>。如果无法全部获取，则一个也不获取，等待。
+                <ul>
+                <li><strong>缺点:</strong> 很难预知所有需要的锁，并且会严重降低并发度。</li>
+                </ul>
+                </li>
+                <li><strong>锁序 (Lock Ordering) / 图协议:</strong>
+                <ul>
+                <li>对所有可加锁的数据项定义一个<strong>全局的线性顺序</strong>（例如，按表名排序，再按主键排序）。</li>
+                <li><strong>规则:</strong> 所有事务必须<strong>按照这个预定义的顺序</strong>来申请锁。</li>
+                <li><strong>优点:</strong> 简单有效，绝对不会产生死锁（因为无法形成循环等待）。</li>
+                <li><strong>缺点:</strong> 强制的加锁顺序可能与业务逻辑的自然访问顺序不符，导致编程困难。</li>
+                </ul>
+                </li>
+                </ol>
+                </li>
+                </ul>
+                <h5 id="%E7%AD%96%E7%95%A52%E6%AD%BB%E9%94%81%E9%81%BF%E5%85%8D-deadlock-avoidance"><strong>策略2：死锁避免 (Deadlock Avoidance)</strong></h5>
+                <ul>
+                <li><strong>思想:</strong> 系统在<strong>授予每一个锁请求之前</strong>，都会先进行“安全检查”，预测授予这个锁是否<strong>可能</strong>导致未来的死锁。如果可能，则不授予，让事务等待。</li>
+                <li><strong>方法:</strong>
+                <ul>
+                <li><strong>Wait-Die (等待-死亡):</strong>
+                <ul>
+                <li>基于事务的时间戳。$TS(T_i)$表示事务$T_i$的开始时间。假设$T_i$请求一个由$T_j$持有的锁。</li>
+                <li>如果$TS(T_i) < TS(T_j)$ ($T_i$是<strong>老</strong>事务)，则$T_i$<strong>等待</strong>$T_j$。</li>
+                <li>如果$TS(T_i) > TS(T_j)$ ($T_i$是<strong>新</strong>事务)，则$T_i$<strong>死亡</strong> (回滚)。</li>
+                </ul>
+                </li>
+                <li><strong>Wound-Wait (伤害-等待):</strong>
+                <ul>
+                <li>如果$TS(T_i) < TS(T_j)$ ($T_i$是<strong>老</strong>事务)，则$T_i$<strong>伤害</strong>$T_j$ (强制$T_j$回滚并释放锁)，$T_i$获取锁。</li>
+                <li>如果$TS(T_i) > TS(T_j)$ ($T_i$是<strong>新</strong>事务)，则$T_i$<strong>等待</strong>$T_j$。</li>
+                </ul>
+                </li>
+                <li><strong>优点:</strong> 这两种方案都能有效避免死锁，并且不会产生饥饿（因为总是偏向于老事务）。</li>
+                </ul>
+                </li>
+                </ul>
+                <h5 id="%E7%AD%96%E7%95%A53%E6%AD%BB%E9%94%81%E6%A3%80%E6%B5%8B%E4%B8%8E%E6%81%A2%E5%A4%8D-deadlock-detection--recovery"><strong>策略3：死锁检测与恢复 (Deadlock Detection &amp; Recovery)</strong></h5>
+                <ul>
+                <li><strong>思想:</strong> <strong>不预防也不避免，而是允许死锁发生</strong>。系统有一个后台的“侦探”，定期检查是否存在死锁。如果发现，就采取行动打破它。这是<strong>最常用</strong>的策略。</li>
+                <li><strong>检测方法：等待图 (Waits-For Graph)</strong>
+                <ul>
+                <li>图的顶点是事务。</li>
+                <li>如果事务$T_i$正在等待$T_j$释放锁，就在图中画一条边 $T_i \rightarrow T_j$。</li>
+                <li><strong>死锁存在的充要条件是：等待图中存在一个环。</strong></li>
+                <li>死锁检测器就是定期地在等待图中<strong>运行环检测算法</strong>。</li>
+                </ul>
+                </li>
+                <li><strong>恢复方法：打破循环</strong>
+                <ol>
+                <li><strong>选择牺牲品 (Victim Selection):</strong> 选择环中的一个或多个事务作为“牺牲品”，将其中止。选择标准通常是：回滚代价最小的、执行时间最短的、持有锁最少的等。</li>
+                <li><strong>回滚 (Rollback):</strong>
+                <ul>
+                <li><strong>完全回滚:</strong> 中止整个牺牲品事务。</li>
+                <li><strong>部分回滚:</strong> 只回滚到足以打破死锁的那一步操作。</li>
+                </ul>
+                </li>
+                </ol>
+                </li>
+                </ul>
+                <h4 id="34-%E5%B9%BB%E8%AF%BB%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><strong>3.4 幻读与解决方案</strong></h4>
+                <ul>
+                <li><strong>问题回顾 (幻读):</strong> 一个事务$T_1$执行范围查询，$T_2$在$T_1$的两次查询之间，插入了一条满足该范围的新记录。$T_1$第二次查询时，会看到这条“幻影”记录。</li>
+                <li><strong>为什么行锁不够？</strong> $T_2$插入的是一条<strong>全新的记录</strong>，它不存在于$T_1$第一次查询时，因此$T_1$无法对一个“不存在”的行加锁。</li>
+                <li><strong>解决方案：</strong>
+                <ol>
+                <li><strong>表锁:</strong> 简单粗暴，直接锁住整张表，阻止任何插入。但并发度太差。</li>
+                <li><strong>谓词锁 (Predicate Locking):</strong>
+                <ul>
+                <li>对查询的<code>WHERE</code>条件本身加锁。例如，对<code>age > 20</code>这个谓词加锁。任何想插入<code>age > 20</code>的新记录的事务，都会被阻塞。</li>
+                <li><strong>理论上完美，但实现开销极大</strong>，商业数据库很少直接实现。</li>
+                </ul>
+                </li>
+                <li><strong>索引范围锁 / Next-Key Locking (MySQL InnoDB的实现):</strong>
+                <ul>
+                <li>一个非常聪明的工程近似。</li>
+                <li>它不是锁数据行，而是<strong>锁索引中的范围</strong>。当$T_1$查询<code>age > 20</code>时，它会在<code>age</code>索引上，锁定所有<code>age > 20</code>的现有条目，以及<strong>这些条目之间的“间隙” (Gaps)</strong>，和最后一个条目到无穷大之间的间隙。</li>
+                <li>当$T_2$想插入一条<code>age = 25</code>的新记录时，它必须先在索引中插入这条记录，但它会发现<code>20</code>到下一个键之间的“间隙”已经被锁住了，于是只能等待。</li>
+                <li>这有效地防止了幻读，同时提供了比表锁高得多的并发度。</li>
+                </ul>
+                </li>
+                </ol>
+                </li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
