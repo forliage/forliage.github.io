@@ -579,5 +579,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-26-ca3-1-1.html",
       "abstract": "计算机体系结构3-1-1:动态并行机制"
+    },
+    {
+      "title": "计算机体系结构3-1-2:Scoreboarding",
+      "date": "2025-08-26",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-26-ca3-1-2.html",
+      "abstract": "计算机体系结构3-1-2:Scoreboarding"
     }
   ];
