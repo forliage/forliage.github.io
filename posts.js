@@ -635,5 +635,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-26-db01.html",
       "abstract": "数据库系统01:关系模型(The Relational Model)"
+    },
+    {
+      "title": "数据库系统02:SQL",
+      "date": "2025-08-26",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-26-db02.html",
+      "abstract": "数据库系统02:SQL"
     }
   ];
