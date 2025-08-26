@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数据库系统设计03:索引(下)—— 哈希与LSM树</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A103%E7%B4%A2%E5%BC%95%E4%B8%8B-%E5%93%88%E5%B8%8C%E4%B8%8Elsm%E6%A0%91">数据库系统设计03:索引(下)—— 哈希与LSM树</h1>
+                <p>回忆一下B+树的插入操作：每次插入都可能引发节点的<strong>分裂</strong>，这是一个<strong>随机写</strong>操作。在高并发、写密集型的场景下——比如双十一的订单系统、社交网络的消息流、物联网设备的海量数据上报——成千上万的并发写请求，都可能在B+树这棵参天大树的各个角落引发随机I/O的风暴。这种“写惩罚”可能会成为整个系统的瓶颈。</p>
+                <p>此外，B+树的优势在于支持<strong>范围查询</strong> (<code>&gt; &lt; BETWEEN</code>)。但如果我们99%的查询都只是简单的<strong>等值查询</strong> (<code>WHERE id = ?</code>)，我们是否还需要维护B+树复杂的有序结构呢？有没有一种更直接、更暴力、更快速的方法？</p>
+                <p>今天，我们将探索两个截然不同的答案：</p>
+                <ol>
+                <li><strong>哈希索引 (Hash Indexing):</strong> 为追求极致的等值查询速度，我们能否放弃“有序”，实现真正的 $O(1)$ 查找？</li>
+                <li><strong>日志结构合并树 (Log-Structured Merge-Tree, LSM-Tree):</strong> 为应对海量的写入，我们能否彻底抛弃“原地更新”，将所有随机写转化为顺序写？</li>
+                </ol>
+                <p>这两条路径，将带领我们进入一个全新的设计范式，让我们看到在不同业务需求下，索引结构是如何演化出截然不同的形态。</p>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%93%88%E5%B8%8C"><strong>第一部分：哈希</strong></h3>
+                <p>哈希的思想，在计算机科学中无处不在。它的核心是：<strong>通过一个哈希函数，将一个任意长度的输入（我们的搜索键），映射成一个固定长度的、看似随机的输出（哈希值），并以此作为数据存储位置的“门牌号”。</strong></p>
+                <h4 id="11-%E9%9D%99%E6%80%81%E5%93%88%E5%B8%8C"><strong>1.1 静态哈希</strong></h4>
+                <p>让我们从最简单的<strong>静态哈希 (Static Hashing)</strong> 开始。</p>
+                <ul>
+                <li>
+                <p><strong>组件:</strong></p>
+                <ol>
+                <li><strong>桶 (Buckets):</strong> 一组固定数量（$N$）的数据页/块，用于存储数据记录。它们就像一个数组，<code>Bucket[0], Bucket[1], ..., Bucket[N-1]</code>。</li>
+                <li><strong>哈希函数 (Hash Function):</strong> $h(K)$，它接受一个搜索键 <code>K</code>，返回一个桶号 <code>i</code>，其中 $0 \le i < N$。一个简单的例子是 $h(K) = K \pmod{N}$。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>操作流程:</strong></p>
+                <ul>
+                <li><strong>插入 <code>&lt;K, V&gt;</code>:</strong> 计算 <code>i = h(K)</code>，然后将记录 <code>&lt;K, V&gt;</code> 放入 <code>Bucket[i]</code>。</li>
+                <li><strong>查找 <code>K</code>:</strong> 计算 <code>i = h(K)</code>，然后<strong>只</strong>在 <code>Bucket[i]</code> 中查找。</li>
+                <li><strong>删除 <code>K</code>:</strong> 计算 <code>i = h(K)</code>，在 <code>Bucket[i]</code> 中找到并删除。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>理想情况下的性能:</strong></p>
+                <ul>
+                <li>如果每个桶只对应一个磁盘块，且从不溢出，那么<strong>任何操作都只需要一次I/O</strong>！这看起来是 $O(1)$ 的终极梦想。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="12-%E5%93%88%E5%B8%8C%E5%86%B2%E7%AA%81%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%A2%9E%E9%95%BF"><strong>1.2 哈希冲突与数据增长</strong></h4>
+                <h5 id="121-%E5%93%88%E5%B8%8C%E5%86%B2%E7%AA%81-hash-collisions-%E4%B8%8E%E6%BA%A2%E5%87%BA%E9%93%BE-overflow-chaining"><strong>1.2.1 哈希冲突 (Hash Collisions) 与溢出链 (Overflow Chaining)</strong></h5>
+                <ul>
+                <li><strong>问题:</strong> 完美的哈希函数（能将不同键均匀映射到不同桶）是不存在的。总会有多个不同的键 <code>K1</code>, <code>K2</code>，使得 <code>h(K1) = h(K2)</code>。这就是<strong>哈希冲突</strong>。</li>
+                <li><strong>后果:</strong> 当一个桶被装满后，新的冲突记录无处可放，这就产生了<strong>溢出 (Overflow)</strong>。</li>
+                <li><strong>解决方案：溢出链 (Overflow Chaining)</strong>
+                <ul>
+                <li>每个主桶(Primary Bucket)都有一个指针，指向一个由溢出块(Overflow Pages)组成的链表。</li>
+                <li>当主桶满了，新记录就放入链表的第一个溢出块。如果溢出块也满了，就再挂一个新的。</li>
+                </ul>
+                </li>
+                <li><strong>性能退化:</strong> 查找一个键时，如果主桶未命中，就必须沿着溢出链顺序扫描。在最坏情况下（数据分布极不均匀，或负载因子过高），哈希索引的性能会退化成<strong>线性扫描</strong>。</li>
+                </ul>
+                <h5 id="122-%E9%9D%99%E6%80%81%E7%BB%93%E6%9E%84%E7%9A%84%E5%8E%9F%E7%BD%AA%E6%95%B0%E6%8D%AE%E5%A2%9E%E9%95%BF%E4%B8%8E%E7%BC%A9%E5%87%8F"><strong>1.2.2 静态结构的“原罪”：数据增长与缩减</strong></h5>
+                <ul>
+                <li><strong>问题:</strong> 静态哈希的桶数量 $N$ 是固定的。
+                <ul>
+                <li><strong>如果数据量暴增:</strong> 桶的数量太少，导致负载因子（记录数/桶数）过高，哈希冲突激增，溢出链变得很长，性能急剧下降。</li>
+                <li><strong>如果数据量骤减:</strong> 大量的桶会变空，浪费大量空间。</li>
+                </ul>
+                </li>
+                <li><strong>解决方案？—— Rehash:</strong> 当性能下降到某个阈值时，暂停所有操作，创建一个新的、更大（或更小）的桶数组，然后将所有旧数据重新哈希到新数组中。</li>
+                <li><strong>代价:</strong> <strong>Rehash是一个成本极高的“世界暂停” (Stop-the-World) 事件</strong>，对于需要7x24小时服务的在线系统是不可接受的。</li>
+                </ul>
+                <p>静态哈希，就像一个为特定尺寸设计的完美西装，一旦身材变化，就完全无法穿着。我们需要一种能够<strong>动态、平滑地</strong>适应数据量变化的哈希方案。</p>
+                <h4 id="13-%E5%8A%A8%E6%80%81%E5%93%88%E5%B8%8C%E6%96%B9%E6%A1%88%E7%9A%84%E6%BC%94%E5%8C%96"><strong>1.3 动态哈希方案的演化</strong></h4>
+                <h5 id="131-%E5%8F%AF%E6%89%A9%E5%B1%95%E5%93%88%E5%B8%8C-extendible-hashing"><strong>1.3.1 可扩展哈希 (Extendible Hashing)</strong></h5>
+                <ul>
+                <li>
+                <p><strong>核心思想:</strong> 解耦哈希函数的输出空间和桶数组的实际大小，通过一个<strong>目录 (Directory)</strong> 实现间接寻址。</p>
+                <ol>
+                <li><strong>哈希函数:</strong> $h(K)$ 返回一个很长的二进制串 (e.g., 32位)。</li>
+                <li><strong>目录:</strong> 一个指针数组。目录的大小为 $2^i$，其中 $i$ 被称为<strong>全局深度 (Global Depth)</strong>。我们只使用 $h(K)$ 的<strong>前 $i$ 位</strong>来索引这个目录。</li>
+                <li><strong>桶:</strong> 每个桶有一个<strong>局部深度 (Local Depth) $j$</strong> ($j \le i$)。这意味着，这个桶内所有键的哈希值，其前 $j$ 位都相同。</li>
+                <li><strong>映射关系:</strong> 目录中的多个条目可以指向<strong>同一个桶</strong>。具体来说，如果一个桶的局部深度为 $j$，那么会有 $2^{(i-j)}$ 个目录条目指向它。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>插入与分裂 (Split) 过程:</strong></p>
+                <ul>
+                <li><strong>当一个桶满了:</strong>
+                a. <strong>检查局部深度 $j$ 和全局深度 $i$:</strong>
+                <ul>
+                <li><strong>Case 1: $j &lt; i$ (目录有“富余”):</strong>
+                <ol>
+                <li>创建一个新桶。</li>
+                <li>两个桶的局部深度都增加到 $j+1$。</li>
+                <li>将旧桶中的数据根据其哈希值的第 $j+1$ 位，重新分配到新旧两个桶中。</li>
+                <li><strong>只修改目录指针</strong>：将原来指向旧桶的那些目录条目中的一半，改指向新桶。<strong>目录本身大小不变！</strong> 这是一个非常轻量的操作。</li>
+                </ol>
+                </li>
+                <li><strong>Case 2: $j = i$ (目录已“饱和”):</strong>
+                <ol>
+                <li><strong>目录翻倍:</strong> 将全局深度 $i$ 增加到 $i+1$，目录大小从 $2^i$ 变为 $2^{i+1}$。</li>
+                <li>复制旧目录的指针到新目录。</li>
+                <li>现在情况转化为 Case 1，继续分裂桶和修改目录指针。</li>
+                </ol>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>优点:</strong></p>
+                <ul>
+                <li>插入操作最多只会分裂一个桶，Rehash的范围被局限在单个桶内。</li>
+                <li>数据增长是平滑的，没有“世界暂停”。</li>
+                <li>查找通常只需要两次I/O（一次读目录，一次读桶）。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>缺点:</strong></p>
+                <ul>
+                <li>目录本身可能会变得非常大，如果无法放入内存，会增加一次额外的I/O。</li>
+                <li>数据分布不均时，可能导致目录大小急剧增长，而实际桶的数量增长不多。</li>
+                </ul>
+                </li>
+                </ul>
+                <h5 id="132-%E7%BA%BF%E6%80%A7%E5%93%88%E5%B8%8C-linear-hashing"><strong>1.3.2 线性哈希 (Linear Hashing)</strong></h5>
+                <ul>
+                <li>
+                <p><strong>核心思想:</strong> 不使用目录，以一种<strong>线性的、可预测的</strong>方式来增加桶。</p>
+                <ol>
+                <li><strong>哈希函数族:</strong> 使用两个哈希函数 $h_i(K) = K \pmod{2^i N}$ 和 $h_{i+1}(K) = K \pmod{2^{i+1} N}$，其中 $N$ 是初始桶数，$i$ 是当前的“轮次”(level)。</li>
+                <li><strong>分裂指针 (Split Pointer):</strong> 一个指针 <code>next</code>，指向下一个即将被分裂的桶，从0开始。</li>
+                <li><strong>分裂时机:</strong> 当任何一个桶发生溢出时，就触发一次分裂，但分裂的<strong>不是</strong>当前溢出的桶，而是 <code>next</code> 指向的那个桶。</li>
+                <li><strong>分裂过程:</strong>
+                a. 将 <code>Bucket[next]</code> 中的所有记录，用新的哈希函数 $h_{i+1}$ 重新哈希。
+                b. 一部分记录会留在 <code>Bucket[next]</code>，另一部分会移动到新创建的 <code>Bucket[N+next]</code>。
+                c. <code>next</code> 指针加1。
+                d. 当 <code>next</code> 达到 $2^i N$ 时，一轮分裂完成，<code>next</code> 重置为0，轮次 $i$ 增加1。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>查找过程的复杂性:</strong></p>
+                <ul>
+                <li>要查找键 <code>K</code>，先用 $h_i(K)$ 计算桶号 <code>b</code>。</li>
+                <li>如果 $b < \text{next}$，说明这个桶已经被分裂过了，应该用 $h_{i+1}(K)$ 来确定最终的桶号。</li>
+                <li>如果 $b \ge \text{next}$，说明这个桶还没分裂，直接在 <code>Bucket[b]</code> 查找。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>优点:</strong></p>
+                <ul>
+                <li>不需要目录，空间开销更小。</li>
+                <li>桶的扩展是平滑、线性的。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>缺点:</strong></p>
+                <ul>
+                <li>负载因子可能暂时不均匀，因为分裂是按顺序的，而不是按需的。</li>
+                <li>可能需要处理更长的溢出链。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="14-b%E6%A0%91-vs-%E5%93%88%E5%B8%8C%E7%B4%A2%E5%BC%95"><strong>1.4 B+树 vs. 哈希索引</strong></h4>
+                <table>
+                <thead>
+                <tr>
+                <th style="text-align:left">特性</th>
+                <th style="text-align:left">B+树索引</th>
+                <th style="text-align:left">哈希索引</th>
+                <th style="text-align:left"><strong>设计权衡 (Trade-off)</strong></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                <td style="text-align:left"><strong>优化查询类型</strong></td>
+                <td style="text-align:left"><strong>等值查询 &amp; 范围查询</strong></td>
+                <td style="text-align:left"><strong>仅等值查询</strong></td>
+                <td style="text-align:left"><strong>功能性 vs. 专一性</strong>：哈希放弃了范围查询的能力，换取了等值查询的极致性能。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>数据有序性</strong></td>
+                <td style="text-align:left"><strong>有序 (物理或逻辑)</strong></td>
+                <td style="text-align:left"><strong>无序</strong></td>
+                <td style="text-align:left">有序性是支持范围查询、排序、MIN/MAX等操作的基础，但维护它有成本。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>性能 (理想)</strong></td>
+                <td style="text-align:left">$O(\log_B N)$</td>
+                <td style="text-align:left">$O(1)$</td>
+                <td style="text-align:left">哈希在理想情况下的常数时间性能是无与伦比的。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>性能 (最坏)</strong></td>
+                <td style="text-align:left">$O(\log_B N)$ (稳定)</td>
+                <td style="text-align:left">$O(N)$ (退化为线性)</td>
+                <td style="text-align:left"><strong>稳定性 vs. 峰值性能</strong>：B+树性能稳定可预测，而哈希性能依赖于数据分布和哈希函数。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>空间开销</strong></td>
+                <td style="text-align:left">相对较高，内部节点有开销</td>
+                <td style="text-align:left">相对较低，但溢出页和目录是额外开销</td>
+                <td style="text-align:left">两者都需要权衡填充率和空间浪费。</td>
+                </tr>
+                </tbody>
+                </table>
+                <p><strong>结论:</strong> 在数据库世界中，<strong>B+树是默认的、通用的索引选择</strong>，因为它能应对更多样的查询模式。哈希索引则作为一种<strong>特种武器</strong>，用在那些可以确定查询模式为纯等值查找，且对性能要求极为苛刻的场景中（例如，某些内存数据库的内部实现）。</p>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E5%B9%95lsm%E6%A0%91"><strong>第二幕：LSM树</strong></h3>
+                <p>B+树和哈希索引都属于**“原地更新” (Update-in-place)** 的思想范畴。而LSM树，则代表了一种完全不同的哲学：<strong>“追加写入，延迟合并” (Append-only &amp; Deferred Merge)</strong>。</p>
+                <h4 id="21-%E5%86%99%E5%AF%86%E9%9B%86%E5%9E%8B%E8%B4%9F%E8%BD%BD%E7%9A%84%E6%8C%91%E6%88%98"><strong>2.1 写密集型负载的挑战</strong></h4>
+                <ul>
+                <li><strong>HDD时代:</strong> 随机写意味着昂贵的寻道，LSM树通过将随机写转化为顺序写来优化。</li>
+                <li><strong>SSD时代:</strong> 随机写意味着“读-修改-擦除-写”循环，导致<strong>写放大</strong>。LSM树的顺序追加模型，完美契合了SSD的物理特性。</li>
+                <li><strong>应用场景:</strong> 日志分析、时序数据、消息队列、NoSQL数据库 (Google Bigtable, Cassandra, RocksDB) 等。</li>
+                </ul>
+                <h4 id="22-lsm%E6%A0%91%E7%9A%84%E6%A0%B8%E5%BF%83%E7%BB%93%E6%9E%84"><strong>2.2 LSM树的核心结构</strong></h4>
+                <p>LSM树不是一棵“树”，而是一个<strong>分层的、级联的存储系统</strong>。</p>
+                <ul>
+                <li>
+                <p><strong>L0: MemTable (内存)</strong></p>
+                <ul>
+                <li><strong>结构:</strong> 一个内存中的、有序的数据结构，通常是<strong>跳表 (Skip List)</strong> 或<strong>红黑树</strong>。</li>
+                <li><strong>所有写操作（插入、更新、删除）首先进入这里</strong>。</li>
+                <li><strong>优点:</strong> 内存操作，速度极快。</li>
+                <li><strong>阈值:</strong> 当MemTable的大小达到一个预设阈值（如几十MB）时，它会被<strong>冻结 (freeze)</strong>，并被一个<strong>后台线程</strong>刷写到磁盘。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>L1, L2, ..., Lk: SSTables (磁盘)</strong></p>
+                <ul>
+                <li><strong>SSTable (Sorted String Table):</strong> 一个磁盘上的、<strong>不可变的 (Immutable)</strong>、有序的文件块。</li>
+                <li><strong>Flush (刷写):</strong> 冻结的MemTable被顺序地写入磁盘，形成一个新的L1层的SSTable。</li>
+                <li><strong>层次结构:</strong>
+                <ul>
+                <li>从L1到Lk，每一层的总容量通常是上一层的<strong>N倍</strong>（N被称为<strong>Size Ratio</strong>，通常为10）。</li>
+                <li>每一层由一个或多个SSTable文件组成。</li>
+                </ul>
+                </li>
+                <li><strong>Compaction (合并):</strong> 当某一层 $L_i$ 的文件总大小超过其容量阈值时，会触发<strong>合并过程</strong>。后台线程会选择 $L_i$ 层的一个或多个SSTable，连同 $L_{i+1}$ 层中与它们键范围重叠的SSTable，一起读入内存，进行一次<strong>多路归并排序</strong>，然后将合并后的结果，写成一个新的、更大的SSTable，放入 $L_{i+1}$ 层。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="23-lsm%E6%A0%91%E7%9A%84%E6%93%8D%E4%BD%9C%E6%B5%81%E7%A8%8B"><strong>2.3 LSM树的操作流程</strong></h4>
+                <h5 id="231-%E5%86%99%E6%93%8D%E4%BD%9C-insert--update"><strong>2.3.1 写操作 (Insert / Update)</strong></h5>
+                <ol>
+                <li><strong>写入WAL (Write-Ahead Log):</strong> 为了持久性，写操作首先被顺序追加到日志文件中。</li>
+                <li><strong>写入MemTable:</strong> 然后在内存中的MemTable里插入或更新。</li>
+                <li><strong>向客户端返回成功。</strong></li>
+                </ol>
+                <ul>
+                <li><strong>性能分析:</strong> 写操作 = 1次顺序磁盘写 (WAL) + 1次内存操作。<strong>极快！</strong> 这就是LSM树“写优化”的根源。所有昂贵的磁盘I/O都被推迟到后台的Compaction中。</li>
+                </ul>
+                <h5 id="232-%E5%88%A0%E9%99%A4%E6%93%8D%E4%BD%9C-delete"><strong>2.3.2 删除操作 (Delete)</strong></h5>
+                <ul>
+                <li><strong>LSM树从不原地删除！</strong></li>
+                <li><strong>墓碑 (Tombstone):</strong> 当请求删除一个键 <code>K</code> 时，LSM树会向MemTable中插入一个特殊的标记 <code>&lt;K, TOMBSTONE&gt;</code>。</li>
+                <li><strong>在Compaction时清理:</strong> 当Compaction过程同时遇到一个键 <code>K</code> 的正常值和它的墓碑时，两者会“同归于尽”，这个键就从新生成的SSTable中被物理清除了。</li>
+                </ul>
+                <h5 id="233-%E8%AF%BB%E6%93%8D%E4%BD%9C-query"><strong>2.3.3 读操作 (Query)</strong></h5>
+                <p>这是LSM树为写性能付出的<strong>代价</strong>。</p>
+                <ul>
+                <li>
+                <p><strong>查找流程:</strong></p>
+                <ol>
+                <li><strong>先查MemTable。</strong> 如果找到（且不是墓碑），直接返回。</li>
+                <li>如果MemTable中未找到或找到的是墓碑，<strong>再依次从L1, L2, ..., Lk层查找</strong>。</li>
+                <li>在每一层，可能需要查找该层的多个SSTable。</li>
+                <li>查找以<strong>第一次找到</strong>的记录为准（因为层数越小，数据越新）。如果先找到墓碑，则表示数据已被删除，立即停止并返回空。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>读放大的问题 (Read Amplification):</strong> 一次点查询，在最坏情况下，可能需要检查每一层的每一个SSTable，引发多次磁盘I/O。</p>
+                </li>
+                <li>
+                <p><strong>读性能优化策略:</strong></p>
+                <ol>
+                <li><strong>布隆过滤器 (Bloom Filter):</strong>
+                <ul>
+                <li>每个SSTable都关联一个布隆过滤器。这是一种概率性数据结构，可以<strong>快速地判断一个元素“肯定不存在”</strong>，或者“可能存在”。</li>
+                <li>在查询SSTable之前，先查其布隆过滤器。如果过滤器说“不存在”，我们就可以<strong>100%确定地跳过</strong>对这个文件的昂贵I/O。</li>
+                <li>布隆过滤器极大地减少了读放大，是LSM树读性能的关键。</li>
+                </ul>
+                </li>
+                <li><strong>SSTable内部索引:</strong> 每个SSTable文件内部都有自己的索引块，可以快速定位到数据块。</li>
+                <li><strong>Compaction策略优化:</strong> 选择合适的Compaction策略（如Leveled vs. Tiered）来平衡读、写和空间放大。</li>
+                </ol>
+                </li>
+                </ul>
+                <h4 id="24-compaction"><strong>2.4 Compaction</strong></h4>
+                <p>Compaction是LSM树的后台管家，也是其最复杂、最消耗资源的部分。</p>
+                <ul>
+                <li>
+                <p><strong>Compaction的职责:</strong></p>
+                <ol>
+                <li>控制树的形状，确保层次结构。</li>
+                <li>合并小文件，减少读放大。</li>
+                <li>清理被覆盖和被删除的数据，回收空间。</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>两大主流策略:</strong></p>
+                <ul>
+                <li><strong>Tiered Compaction (分层合并 / Size-tiered):</strong>
+                <ul>
+                <li>当一层有 $N$ 个大小相似的SSTable时，将它们合并成一个大的SSTable，放入下一层。</li>
+                <li><strong>优点:</strong> 写放大较小（一个数据只会被合并几次）。</li>
+                <li><strong>缺点:</strong> <strong>空间放大</strong>严重（同一键的多个版本可能同时存在于不同层的SSTable中），<strong>读放大</strong>也较严重（一层内有多个文件）。</li>
+                </ul>
+                </li>
+                <li><strong>Leveled Compaction (分级合并):</strong>
+                <ul>
+                <li>每一层 $L_i$ (i>0) 的SSTable都被切分成固定大小、键范围不重叠的文件。</li>
+                <li>当 $L_i$ 超限时，选择一个文件，连同它在 $L_{i+1}$ 中重叠的所有文件，合并成 $L_{i+1}$ 中的几个新文件。</li>
+                <li><strong>优点:</strong> <strong>空间放大和读放大都得到了很好的控制</strong>（一个键最多只存在于一层）。</li>
+                <li><strong>缺点:</strong> <strong>写放大</strong>较大（数据在下沉过程中，会被反复读出和重写）。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="25-b%E6%A0%91-vs-lsm%E6%A0%91"><strong>2.5 B+树 vs. LSM树</strong></h4>
+                <table>
+                <thead>
+                <tr>
+                <th style="text-align:left">特性</th>
+                <th style="text-align:left">B+树 (Read-Optimized)</th>
+                <th style="text-align:left">LSM树 (Write-Optimized)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                <td style="text-align:left"><strong>写操作</strong></td>
+                <td style="text-align:left"><strong>随机写 (原地更新/分裂)</strong></td>
+                <td style="text-align:left"><strong>顺序写 (追加日志/MemTable)</strong></td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>写性能</strong></td>
+                <td style="text-align:left">稳定，但受限于随机I/O</td>
+                <td style="text-align:left"><strong>极高</strong>，写操作基本在内存完成</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>读操作</strong></td>
+                <td style="text-align:left"><strong>点查、范围查都高效</strong></td>
+                <td style="text-align:left"><strong>点查性能依赖优化(Bloom Filter)，范围查较复杂</strong></td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>读性能</strong></td>
+                <td style="text-align:left"><strong>稳定可预测 ($O(\log N)$)</strong></td>
+                <td style="text-align:left">可能较高 (缓存命中) 或较低 (穿透多层)</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>空间放大</strong></td>
+                <td style="text-align:left">较小 (只有约50%的填充率)</td>
+                <td style="text-align:left">较大 (Tiered Compaction) 或较小 (Leveled)</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>并发控制</strong></td>
+                <td style="text-align:left">复杂 (Latch/Lock树的节点)</td>
+                <td style="text-align:left">相对简单 (写操作不冲突，用MVCC处理读)</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>适用场景</strong></td>
+                <td style="text-align:left"><strong>OLTP (在线事务处理)，读多写少</strong></td>
+                <td style="text-align:left"><strong>OLAP (在线分析处理)，写密集，时序数据</strong></td>
+                </tr>
+                </tbody>
+                </table>
+                <p><strong>[拓展] 缓冲树 (Buffer Tree / Fractal Tree Index):</strong> 可以看作是B+树和LSM树思想的结合。它是一棵B+树，但每个<strong>内部节点</strong>都带有一个<strong>缓冲区</strong>。插入操作只写入路径上节点的缓冲区，当缓冲区满时，再批量“下推”到下一层。它试图在B+树的优秀读性能和LSM树的写性能之间找到一个平衡点。</p>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
