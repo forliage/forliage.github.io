@@ -621,5 +621,12 @@
     "category": "学习笔记",
     "path": "_posts/2025-08-26-ca4.html",
     "abstract": "计算机体系结构4:数据级并行"
+  },
+  {
+    "title": "计算机体系结构5:线程级并行(Thread-Level Parallelism, TLP)",
+    "date": "2025-08-26",
+    "category": "学习笔记",
+    "path": "_posts/2025-08-26-ca5.html",
+    "abstract": "计算机体系结构5:线程级并行(Thread-Level Parallelism, TLP)"
   }
 ]
