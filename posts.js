@@ -642,5 +642,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-26-db02.html",
       "abstract": "数据库系统02:SQL"
+    },
+    {
+      "title": "数据库系统03:高级SQL",
+      "date": "2025-08-26",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-26-db03.html",
+      "abstract": "数据库系统03:高级SQL"
     }
   ];

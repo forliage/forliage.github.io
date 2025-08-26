@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数据库系统03:高级SQL</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F03%E9%AB%98%E7%BA%A7sql">数据库系统03:高级SQL</h1>
+                <h3 id="%E5%BC%95%E8%A8%80%E4%BB%8E%E9%97%AE%E9%97%AE%E9%A2%98%E5%88%B0%E5%AE%9A%E8%A7%84%E5%88%99"><strong>引言：从“问问题”到“定规则”</strong></h3>
+                <p>在前几讲，我们学习了如何使用SQL向数据库“提问”。但一个真正强大的数据库系统，不仅仅是一个被动的问答机。它应该是一个有原则、有纪律、能自我保护的智能体。</p>
+                <ul>
+                <li>如果一项业务规则（例如，“员工工资不能超过其经理的工资”）需要在100个不同的应用程序中被遵守，我们应该在哪里强制执行这条规则？是在100个应用程序里分别编写代码，还是在数据的源头——数据库中，只定义一次？</li>
+                <li>如果一个用户只需要查看员工的姓名和部门，我们应该如何防止他接触到敏感的薪资信息？</li>
+                <li>当我们的应用程序（用Java或C++编写）需要与数据库进行复杂的数据交换时，最佳的“翻译”和“沟通”方式是什么？</li>
+                </ul>
+                <p>这些问题，将我们带入了高级SQL的世界。本讲，我们将学习如何使用SQL来<strong>定义规则、保障安全、并与外部世界无缝集成</strong>。</p>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E6%89%A9%E5%B1%95%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E4%B8%8E%E6%A8%A1%E5%BC%8F"><strong>第一部分：扩展数据类型与模式</strong></h3>
+                <p>标准的数据类型（INT, VARCHAR等）是数据库的“基本词汇”，但现实世界远比这复杂。高级SQL允许我们创造自己的“词汇”，让数据模型更精确地反映业务领域。</p>
+                <h4 id="11-%E5%9F%9F%E7%BA%A6%E6%9D%9F-create-domain"><strong>1.1 域约束 (<code>CREATE DOMAIN</code>)</strong></h4>
+                <p>想象一下，在你的系统中，有多个表都包含“时薪”这个字段，并且业务规定时薪必须大于等于4.00。</p>
+                <p><strong>糟糕的设计</strong>：在每个表的<code>hourly_wage</code>列上都写一个<code>CHECK (hourly_wage &gt;= 4.00)</code>。</p>
+                <ul>
+                <li><strong>问题</strong>：代码重复。如果未来业务规则改变（比如最低时薪提高到5.00），你需要在所有地方手动修改，极易出错和遗漏。</li>
+                </ul>
+                <p><strong>优雅的设计 (<code>CREATE DOMAIN</code>)</strong>:</p>
+                <div class="code-container">
+                    <pre class="hljs"><code><div><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">DOMAIN</span> hourly_wage <span class="hljs-keyword">AS</span> <span class="hljs-built_in">NUMERIC</span>(<span class="hljs-number">5</span>, <span class="hljs-number">2</span>)
+    <span class="hljs-keyword">CONSTRAINT</span> value_test <span class="hljs-keyword">CHECK</span> (<span class="hljs-keyword">VALUE</span> &gt;= <span class="hljs-number">4.00</span>);
+
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> employee (
+    emp_id    <span class="hljs-built_in">CHAR</span>(<span class="hljs-number">10</span>) PRIMARY <span class="hljs-keyword">KEY</span>,
+    <span class="hljs-comment">-- ...</span>
+    wage      hourly_wage  <span class="hljs-comment">-- 使用我们定义的域</span>
+);
+</div></code></pre>
+                </div>
+                <ul>
+                <li><strong>设计哲学：DRY (Don't Repeat Yourself)。</strong> <code>CREATE DOMAIN</code> 本质上是创建了一个<strong>带约束的、可复用的自定义类型别名</strong>。它将数据类型和与之关联的完整性规则封装在一起。当业务规则变化时，只需修改<code>DOMAIN</code>的定义，所有使用该域的列将自动继承新规则。这是将业务语义与物理实现分离的绝佳体现。</li>
+                </ul>
+                <h4 id="12-%E7%94%A8%E6%88%B7%E5%AE%9A%E4%B9%89%E7%B1%BB%E5%9E%8B-create-type"><strong>1.2 用户定义类型 (<code>CREATE TYPE</code>)</strong></h4>
+                <p>关系模型要求原子性（第一范式），但有时现实世界的实体本身就是结构化的（比如地址，包含国家、省、市、街道）。</p>
+                <div class="code-container">
+                    <pre class="hljs"><code><div><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TYPE</span> person_name <span class="hljs-keyword">AS</span> (
+    first_name <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">50</span>),
+    last_name  <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">50</span>)
+);
+
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> student (
+    sno   <span class="hljs-built_in">CHAR</span>(<span class="hljs-number">10</span>) PRIMARY <span class="hljs-keyword">KEY</span>,
+    sname person_name, <span class="hljs-comment">-- 使用结构化类型</span>
+    <span class="hljs-comment">-- ...</span>
+);
+
+<span class="hljs-comment">-- 查询时可以访问其内部结构</span>
+<span class="hljs-keyword">SELECT</span> (sname).first_name <span class="hljs-keyword">FROM</span> student <span class="hljs-keyword">WHERE</span> sno = <span class="hljs-string">'...'</span>;
+</div></code></pre>
+                </div>
+                <ul>
+                <li><strong>设计哲学：从关系到对象关系的演进。</strong> UDT是SQL对面向对象思想的一种接纳，允许我们以更自然的方式对复杂实体建模。这使得SQL的能力从处理简单的标量值扩展到了处理结构化数据。这在PostgreSQL等现代对象-关系数据库中得到了广泛支持。</li>
+                </ul>
+                <h4 id="13-%E5%A4%A7%E5%AF%B9%E8%B1%A1-lobs%E5%AE%B9%E7%BA%B3%E9%9D%9E%E7%BB%93%E6%9E%84%E5%8C%96%E6%95%B0%E6%8D%AE"><strong>1.3 大对象 (LOBs)：容纳非结构化数据</strong></h4>
+                <p>关系数据库的核心是结构化数据，但我们如何存储像用户头像（图片）、简历（PDF）、视频这样的二进制文件？</p>
+                <ul>
+                <li><code>BLOB</code> (Binary Large Object): 存储二进制数据。</li>
+                <li><code>CLOB</code> (Character Large Object): 存储大量的文本数据。</li>
+                </ul>
+                <div class="code-container">
+                    <pre class="hljs"><code><div><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> students (
+    <span class="hljs-keyword">sid</span>   <span class="hljs-built_in">CHAR</span>(<span class="hljs-number">10</span>) PRIMARY <span class="hljs-keyword">KEY</span>,
+    photo <span class="hljs-built_in">BLOB</span>(<span class="hljs-number">20</span>M),
+    cv    <span class="hljs-keyword">CLOB</span>(<span class="hljs-number">10</span>K)
+);
+</div></code></pre>
+                </div>
+                <ul>
+                <li><strong>设计哲学：指针与实体的分离。</strong> 在数据库表中直接存储一个20MB的文件是灾难性的，这会使表扫描变得极其缓慢。LOBs的实现机制是，在表中只存储一个指向实际大对象数据的<strong>定位器（locator）或指针</strong>。数据本身则存储在数据库管理的另一个专门区域。
+                <ul>
+                <li><strong>优点</strong>：保持主表记录的短小精悍，查询和扫描主表非常快。</li>
+                <li><strong>缺点</strong>：获取LOB数据需要一次额外的I/O操作（通过指针去读取）。</li>
+                <li>这是空间和时间效率之间的一个经典权衡。</li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E9%AB%98%E7%BA%A7%E5%AE%8C%E6%95%B4%E6%80%A7%E7%BA%A6%E6%9D%9F"><strong>第二部分：高级完整性约束</strong></h3>
+                <p>这是本讲的核心。我们将探讨如何定义超越单一表、甚至全局性的复杂业务规则。</p>
+                <h4 id="21-%E5%8F%82%E7%85%A7%E5%AE%8C%E6%95%B4%E6%80%A7-foreign-key-%E7%9A%84%E9%AB%98%E7%BA%A7%E7%AD%96%E7%95%A5"><strong>2.1 参照完整性 (<code>FOREIGN KEY</code>) 的高级策略</strong></h4>
+                <p>当被参照表（如<code>department</code>）中的一行被删除或主键被更新时，参照表（如<code>employee</code>）中依赖于它的行该何去何从？SQL提供了精细的控制策略：</p>
+                <div class="code-container">
+                    <pre class="hljs"><code><div><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> employee (
+    <span class="hljs-comment">-- ...</span>
+    <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> (dept_id) <span class="hljs-keyword">REFERENCES</span> department(dept_id)
+        <span class="hljs-keyword">ON</span> <span class="hljs-keyword">DELETE</span> <span class="hljs-keyword">SET</span> <span class="hljs-literal">NULL</span>
+        <span class="hljs-keyword">ON</span> <span class="hljs-keyword">UPDATE</span> <span class="hljs-keyword">CASCADE</span>
+);
+</div></code></pre>
+                </div>
+                <ul>
+                <li>
+                <p><strong><code>ON DELETE</code>/<code>ON UPDATE</code> 策略：</strong></p>
+                <ul>
+                <li><strong><code>RESTRICT</code> (或 <code>NO ACTION</code>，默认行为)</strong>：<strong>保守策略</strong>。如果存在引用的行，则禁止删除/更新操作。这是最安全的，但可能不符合业务需求。</li>
+                <li><strong><code>CASCADE</code></strong>: <strong>级联策略</strong>。如果<code>department</code>中某部门被删除，所有属于该部门的<code>employee</code>记录也<strong>自动被删除</strong>。如果部门ID更新，员工表中的<code>dept_id</code>也<strong>自动更新</strong>。适用于强“拥有”关系（如订单与订单项）。</li>
+                <li><strong><code>SET NULL</code></strong>: <strong>解绑策略</strong>。如果某部门被删除，属于该部门的员工的<code>dept_id</code>字段被<strong>自动设为NULL</strong>。适用于可选的、非关键的联系。</li>
+                <li><strong><code>SET DEFAULT</code></strong>: <strong>回退策略</strong>。将<code>dept_id</code>设为一个预定义的默认值（如“未分配部门”）。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>设计哲学：将业务逻辑编码到数据模型中。</strong> 这些策略允许数据库设计者将“当X发生时，Y应该如何处理”这类业务流程，直接声明在表结构中。这比在每个可能删除部门的应用代码中去手动处理员工记录要可靠得多。</p>
+                </li>
+                </ul>
+                <h4 id="22-%E6%96%AD%E8%A8%80-create-assertion"><strong>2.2 断言 (<code>CREATE ASSERTION</code>)</strong></h4>
+                <p><code>CHECK</code>和<code>FOREIGN KEY</code>都是针对一张或两张表的约束。如果一个约束需要横跨多张表，甚至涉及聚合计算呢？</p>
+                <p><strong>场景示例：</strong></p>
+                <ol>
+                <li>“一个班级的学生总数不能超过30人。” (涉及<code>student</code>和<code>takes</code>表)</li>
+                <li>“所有员工的总工资不能超过公司年度预算的70%。” (涉及<code>employee</code>和<code>budget</code>表)</li>
+                </ol>
+                <p>这些约束无法用常规手段表达。断言应运而生：</p>
+                <div class="code-container">
+                    <pre class="hljs"><code><div><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">ASSERTION</span> sum_credits_assertion <span class="hljs-keyword">CHECK</span> (
+    <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">EXISTS</span> (
+        <span class="hljs-keyword">SELECT</span> *
+        <span class="hljs-keyword">FROM</span> student s
+        <span class="hljs-keyword">WHERE</span> <span class="hljs-number">100</span> &lt;&gt; (<span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">SUM</span>(credits)
+                      <span class="hljs-keyword">FROM</span> takes t, course c
+                      <span class="hljs-keyword">WHERE</span> t.s_id = s.s_id <span class="hljs-keyword">AND</span> t.course_id = c.course_id)
+    )
+);
+</div></code></pre>
+                </div>
+                <p><em>(这是一个复杂的例子，意在说明其能力)</em></p>
+                <ul>
+                <li><strong>设计哲学：全局不变性的保证。</strong> 断言是数据库级别的、全局的谓词，它必须在<strong>任何</strong>数据修改操作（<code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>）之后都保持为真。如果任何操作可能导致断言失败，该操作将被<strong>回滚</strong>。</li>
+                <li><strong>现实世界的权衡：性能的巨大代价。</strong> 因为断言的全局性，DBMS在每次可能影响断言的数据修改后，都必须重新对断言的查询进行求值。对于复杂的断言，这个开销是极其巨大的，可能导致系统性能急剧下降。因此，<strong>尽管断言在理论上非常强大，但在商业数据库系统中很少被完整实现和使用。</strong> 现实世界中，这类复杂约束通常通过<strong>触发器</strong>或在<strong>应用层</strong>的事务中来保证。</li>
+                </ul>
+                <h4 id="23-%E8%A7%A6%E5%8F%91%E5%99%A8-trigger"><strong>2.3 触发器 (<code>TRIGGER</code>)</strong></h4>
+                <p>如果说断言是静态的“法律”，那么触发器就是动态的“行为规则”。它定义了当特定事件发生时，数据库应<strong>自动执行</strong>的一系列操作。</p>
+                <p><strong>触发器的核心组成：</strong></p>
+                <ol>
+                <li><strong>事件 (Event):</strong> <code>INSERT</code>, <code>DELETE</code>, <code>UPDATE</code>。</li>
+                <li><strong>时机 (Timing):</strong> <code>BEFORE</code> (事件发生前) 或 <code>AFTER</code> (事件发生后)。</li>
+                <li><strong>粒度 (Granularity):</strong> <code>FOR EACH ROW</code> (行级触发器) 或 <code>FOR EACH STATEMENT</code> (语句级触发器)。</li>
+                <li><strong>条件 (Condition):</strong> (可选) <code>WHEN (...)</code> 子句，只有满足条件时才触发。</li>
+                <li><strong>动作 (Action):</strong> 一个SQL代码块 (<code>BEGIN ... END;</code>)。</li>
+                </ol>
+                <p><strong>经典示例：银行账户透支自动转为贷款</strong></p>
+                <div class="code-container">
+                    <pre class="hljs"><code><div><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TRIGGER</span> overdraft_trigger
+<span class="hljs-keyword">AFTER</span> <span class="hljs-keyword">UPDATE</span> <span class="hljs-keyword">ON</span> <span class="hljs-keyword">account</span>
+<span class="hljs-keyword">REFERENCING</span> <span class="hljs-keyword">NEW</span> <span class="hljs-keyword">ROW</span> <span class="hljs-keyword">AS</span> nrow, <span class="hljs-keyword">OLD</span> <span class="hljs-keyword">ROW</span> <span class="hljs-keyword">AS</span> orow <span class="hljs-comment">-- 引用新旧行数据</span>
+<span class="hljs-keyword">FOR</span> <span class="hljs-keyword">EACH</span> <span class="hljs-keyword">ROW</span>
+<span class="hljs-keyword">WHEN</span> (nrow.balance &lt; <span class="hljs-number">0</span>) <span class="hljs-comment">-- 只有当新余额为负时</span>
+<span class="hljs-keyword">BEGIN</span> ATOMIC
+    <span class="hljs-comment">-- 1. 将客户信息和贷款号插入borrower表</span>
+    <span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> borrower(customer_name, loan_number)
+        <span class="hljs-keyword">SELECT</span> D.customer_name, nrow.account_number
+        <span class="hljs-keyword">FROM</span> depositor D
+        <span class="hljs-keyword">WHERE</span> D.account_number = nrow.account_number;
+
+    <span class="hljs-comment">-- 2. 创建一笔与透支额等值的贷款</span>
+    <span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> loan(loan_number, branch_name, amount)
+        <span class="hljs-keyword">VALUES</span>(nrow.account_number, nrow.branch_name, -nrow.balance);
+
+    <span class="hljs-comment">-- 3. 将原账户余额重置为0</span>
+    <span class="hljs-keyword">UPDATE</span> <span class="hljs-keyword">account</span> <span class="hljs-keyword">SET</span> balance = <span class="hljs-number">0</span> <span class="hljs-keyword">WHERE</span> account_number = nrow.account_number;
+<span class="hljs-keyword">END</span>;
+</div></code></pre>
+                </div>
+                <ul>
+                <li>
+                <p><strong>设计哲学与权衡：数据库 vs. 应用层逻辑</strong></p>
+                <ul>
+                <li><strong>何时使用触发器？</strong>
+                <ul>
+                <li><strong>数据为中心的逻辑：</strong> 当一个业务规则与数据本身紧密相关，且无论通过哪个应用访问都必须被强制执行时（如审计日志、维护冗余的汇总数据）。</li>
+                <li><strong>原子性要求高：</strong> 当一系列操作必须作为一个不可分割的整体发生时。</li>
+                </ul>
+                </li>
+                <li><strong>触发器的陷阱（“隐形逻辑”）：</strong>
+                <ul>
+                <li><strong>可维护性差：</strong> 业务逻辑被隐藏在数据库深处，对不熟悉数据库的开发者来说如同“黑魔法”，难以调试和理解。</li>
+                <li><strong>性能问题：</strong> 设计不佳的触发器（特别是行级触发器处理大量更新时）会严重拖慢DML操作。</li>
+                <li><strong>级联噩梦：</strong> 一个触发器可能触发另一个表的更新，进而触发第三个触发器，形成复杂的“触发器链”，极难追踪。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>行级 vs. 语句级：</strong></p>
+                <ul>
+                <li><strong>行级 (<code>FOR EACH ROW</code>)</strong>: 每次修改一行，触发器动作就执行一次。可以访问被修改行的<code>NEW</code>和<code>OLD</code>值。适合需要对每一行进行精细化处理的场景。</li>
+                <li><strong>语句级 (<code>FOR EACH STATEMENT</code>)</strong>: 一条DML语句（即使影响了1000行）只触发一次。无法访问单行的<code>NEW</code>/<code>OLD</code>值，但可以访问到一个包含所有被修改行的临时表（如SQL Server中的<code>inserted</code>/<code>deleted</code>表）。适合进行批量统计和汇总。</li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E6%8E%88%E6%9D%83%E4%B8%8E%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6"><strong>第三部分：授权与访问控制</strong></h3>
+                <p>数据库安全的核心是<strong>最小权限原则</strong>：只授予用户完成其工作所必需的最少权限。</p>
+                <h4 id="31-grant-%E5%92%8C-revoke%E6%9D%83%E9%99%90%E7%9A%84%E6%8E%88%E4%BA%88%E4%B8%8E%E5%9B%9E%E6%94%B6"><strong>3.1 <code>GRANT</code> 和 <code>REVOKE</code>：权限的授予与回收</strong></h4>
+                <ul>
+                <li>
+                <p><strong>授权 (<code>GRANT</code>):</strong></p>
+                <div class="code-container">
+                    <pre class="hljs"><code><div><span class="hljs-comment">-- 授予Alice对student表的查询和插入权限</span>
+<span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">SELECT</span>, <span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">ON</span> student <span class="hljs-keyword">TO</span> alice;
+
+<span class="hljs-comment">-- 允许Bob创建表</span>
+<span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> <span class="hljs-keyword">TO</span> bob;
+
+<span class="hljs-comment">-- 授予所有用户对某个视图的查询权限</span>
+<span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">ON</span> public_student_info <span class="hljs-keyword">TO</span> <span class="hljs-keyword">PUBLIC</span>;
+
+<span class="hljs-comment">-- 允许Charlie将他获得的权限再授予别人</span>
+<span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">ON</span> department <span class="hljs-keyword">TO</span> charlie <span class="hljs-keyword">WITH</span> <span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">OPTION</span>;
+</div></code></pre>
+                </div>
+                </li>
+                <li>
+                <p><strong>回收 (<code>REVOKE</code>):</strong></p>
+                <div class="code-container">
+                    <pre class="hljs"><code><div><span class="hljs-keyword">REVOKE</span> <span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">ON</span> student <span class="hljs-keyword">FROM</span> alice;
+
+<span class="hljs-comment">-- 级联回收</span>
+<span class="hljs-keyword">REVOKE</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">ON</span> department <span class="hljs-keyword">FROM</span> charlie <span class="hljs-keyword">CASCADE</span>; <span class="hljs-comment">-- 会同时回收charlie授予出去的权限</span>
+</div></code></pre>
+                </div>
+                </li>
+                <li>
+                <p><strong>设计哲学：精确到操作级的权限控制。</strong> SQL的授权模型非常精细，可以控制到表/视图级别上的<code>SELECT</code>, <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>等具体操作。<code>WITH GRANT OPTION</code>引入了权限的委托和传递，但也带来了级联回收的复杂性。</p>
+                </li>
+                </ul>
+                <h4 id="32-%E8%A7%92%E8%89%B2-role"><strong>3.2 角色 (<code>ROLE</code>)</strong></h4>
+                <p>为每个用户单独<code>GRANT</code>权限是一场管理噩梦。当一个新员工入职时，你需要知道他应该拥有哪20种权限。</p>
+                <p><strong>角色 (<code>ROLE</code>)</strong> 是解决这个问题的关键。</p>
+                <div class="code-container">
+                    <pre class="hljs"><code><div><span class="hljs-comment">-- 1. 创建角色</span>
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">ROLE</span> instructor_role;
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">ROLE</span> student_role;
+
+<span class="hljs-comment">-- 2. 给角色授权</span>
+<span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">ON</span> department <span class="hljs-keyword">TO</span> instructor_role;
+<span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">UPDATE</span>(grade) <span class="hljs-keyword">ON</span> takes <span class="hljs-keyword">TO</span> instructor_role;
+<span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">ON</span> course <span class="hljs-keyword">TO</span> student_role;
+
+<span class="hljs-comment">-- 3. 将角色授予用户</span>
+<span class="hljs-keyword">GRANT</span> instructor_role <span class="hljs-keyword">TO</span> <span class="hljs-string">'einstein'</span>;
+<span class="hljs-keyword">GRANT</span> student_role <span class="hljs-keyword">TO</span> <span class="hljs-string">'alan_turing'</span>;
+</div></code></pre>
+                </div>
+                <ul>
+                <li><strong>设计哲学：用户与权限的解耦。</strong> 角色是权限的<strong>集合</strong>。管理员不再直接管理用户的权限，而是管理角色的权限，然后将角色分配给用户。这极大地简化了权限管理：
+                <ul>
+                <li>新员工入职：授予一个角色即可。</li>
+                <li>员工离职：回收其角色即可。</li>
+                <li>职位权限变更：修改角色的权限，所有拥有该角色的用户权限自动更新。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="33-%E8%A7%86%E5%9B%BE-view-%E4%BD%9C%E4%B8%BA%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6"><strong>3.3 视图 (<code>VIEW</code>) 作为安全机制</strong></h4>
+                <p>视图不仅可以简化查询，更是一个强大的<strong>行级/列级安全控制工具</strong>。</p>
+                <p><strong>场景</strong>：HR助理只能看到自己所在部门员工的非敏感信息。</p>
+                <div class="code-container">
+                    <pre class="hljs"><code><div><span class="hljs-comment">-- 假设HR助理 'hr_asst_1' 属于 'HR' 部门</span>
+<span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">VIEW</span> hr_employee_view <span class="hljs-keyword">AS</span>
+<span class="hljs-keyword">SELECT</span> emp_id, emp_name, <span class="hljs-keyword">position</span>
+<span class="hljs-keyword">FROM</span> employee
+<span class="hljs-keyword">WHERE</span> dept_name = <span class="hljs-string">'HR'</span>; <span class="hljs-comment">-- 行级安全</span>
+
+<span class="hljs-comment">-- 只授予对视图的查询权限</span>
+<span class="hljs-keyword">GRANT</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">ON</span> hr_employee_view <span class="hljs-keyword">TO</span> hr_asst_1;
+
+<span class="hljs-comment">-- 禁止其直接访问基表</span>
+<span class="hljs-keyword">REVOKE</span> <span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">ON</span> employee <span class="hljs-keyword">FROM</span> hr_asst_1;
+</div></code></pre>
+                </div>
+                <ul>
+                <li><strong>设计哲学：数据访问的“幕布”。</strong> 视图为用户创建了一个定制化的、受限的数据视窗。用户以为自己在查询一张表，但实际上其访问被视图定义中的<code>WHERE</code>子句（行级安全）和<code>SELECT</code>列表（列级安全）悄无声息地过滤了。</li>
+                </ul>
+                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E5%BA%94%E7%94%A8%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%BA%A4%E4%BA%92"><strong>第四部分：应用与数据库的交互</strong></h3>
+                <p>SQL本身不具备流程控制、UI交互、网络通信等能力。它必须与通用的宿主语言（如C++, Java, Python）协同工作。</p>
+                <h4 id="41-%E5%B5%8C%E5%85%A5%E5%BC%8Fsql-embedded-sql%E8%80%81%E6%B4%BE%E7%9A%84%E8%9E%8D%E5%90%88"><strong>4.1 嵌入式SQL (Embedded SQL)：“老派”的融合</strong></h4>
+                <p>这是一种将SQL语句直接“嵌入”到C或COBOL等语言源代码中的技术。</p>
+                <div class="code-container">
+                    <pre class="hljs"><code><div><span class="hljs-comment">/* C code with Embedded SQL */</span>
+EXEC SQL BEGIN DECLARE SECTION;
+    <span class="hljs-keyword">char</span> student_name[<span class="hljs-number">50</span>];
+    <span class="hljs-keyword">int</span>  student_id;
+EXEC SQL END DECLARE SECTION;
+
+...
+student_id = <span class="hljs-number">12345</span>;
+EXEC SQL SELECT s_name INTO :student_name FROM student WHERE s_id = :student_id;
+...
+</div></code></pre>
+                </div>
+                <ul>
+                <li>
+                <p><strong>工作流与设计哲学：预编译。</strong></p>
+                <ol>
+                <li><strong>编写</strong>: 程序员编写带有<code>EXEC SQL ...</code>块的源代码。</li>
+                <li><strong>预编译</strong>: SQL预编译器扫描代码，将<code>EXEC SQL</code>块转换成对应数据库的API函数调用（如OCI调用），并将宿主语言变量（如<code>:student_name</code>）处理成函数参数。</li>
+                <li><strong>编译链接</strong>: 标准的C/C++编译器编译生成的纯C/C++代码，并链接数据库客户端库。</li>
+                </ol>
+                <ul>
+                <li><strong>游标 (Cursor) 的必要性</strong>: 宿主语言一次只能处理一行数据，而SQL查询可能返回一个庞大的结果集。<strong>游标</strong>就是这个矛盾的解决方案，它扮演了结果集的“迭代器”角色。
+                <ul>
+                <li><code>DECLARE CURSOR</code>: 定义一个查询。</li>
+                <li><code>OPEN CURSOR</code>: 执行查询，准备好结果集。</li>
+                <li><code>FETCH ... INTO ...</code>: 从结果集中取出<strong>一行</strong>数据，放入宿主语言变量中。</li>
+                <li><code>CLOSE CURSOR</code>: 释放资源。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>优缺点：</strong></p>
+                <ul>
+                <li><strong>优点</strong>：在编译时可以对SQL进行语法检查和优化，性能可能很高。</li>
+                <li><strong>缺点</strong>：代码可移植性差（与特定数据库的预编译器绑定），开发流程繁琐，不符合现代软件工程的模块化思想。如今已较少使用。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="42-odbc--jdbc%E7%8E%B0%E4%BB%A3%E7%9A%84%E6%A0%87%E5%87%86%E8%BF%9E%E6%8E%A5%E5%99%A8"><strong>4.2 ODBC &amp; JDBC：现代的“标准连接器”</strong></h4>
+                <p><strong>核心设计哲学：通过驱动程序实现统一的API抽象层。</strong> 应用程序不再关心它连接的是Oracle、MySQL还是PostgreSQL。它只需要面向一个标准的API（ODBC或JDBC）编程。</p>
+                <ul>
+                <li>
+                <p><strong>ODBC (Open Database Connectivity):</strong></p>
+                <ul>
+                <li>C语言风格的API，是事实上的跨语言标准。</li>
+                <li>面向过程，通过句柄（handle）管理连接、语句等资源。</li>
+                <li>需要配置DSN（数据源名称）来存储连接信息。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>JDBC (Java Database Connectivity):</strong></p>
+                <ul>
+                <li>Java平台的标准API，定义在<code>java.sql</code>包中。</li>
+                <li>面向对象，核心类包括：
+                <ul>
+                <li><code>DriverManager</code>/<code>DataSource</code>: 获取数据库连接。</li>
+                <li><code>Connection</code>: 代表与数据库的一个会话。</li>
+                <li><code>Statement</code>/<code>PreparedStatement</code>: 执行SQL语句。<code>PreparedStatement</code>是<strong>首选</strong>，因为它预编译SQL，性能更好，并且能从根本上<strong>防止SQL注入攻击</strong>。</li>
+                <li><code>ResultSet</code>: 结果集的迭代器，功能类似于游标。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>JDBC 核心编程范式:</strong></p>
+                <div class="code-container">
+                    <pre class="hljs"><code><div><span class="hljs-comment">// 1. 加载驱动 &amp; 获取连接 (try-with-resources for automatic closing)</span>
+<span class="hljs-keyword">try</span> (Connection conn = DriverManager.getConnection(URL, USER, PASS)) {
+    <span class="hljs-comment">// 2. 创建 PreparedStatement</span>
+    String sql = <span class="hljs-string">"SELECT s_name FROM student WHERE dept_name = ?"</span>;
+    <span class="hljs-keyword">try</span> (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        <span class="hljs-comment">// 3. 绑定参数</span>
+        pstmt.setString(<span class="hljs-number">1</span>, <span class="hljs-string">"Comp. Sci."</span>);
+
+        <span class="hljs-comment">// 4. 执行查询 &amp; 获取 ResultSet</span>
+        <span class="hljs-keyword">try</span> (ResultSet rs = pstmt.executeQuery()) {
+            <span class="hljs-comment">// 5. 遍历结果</span>
+            <span class="hljs-keyword">while</span> (rs.next()) {
+                String studentName = rs.getString(<span class="hljs-string">"s_name"</span>);
+                System.out.println(studentName);
+            }
+        }
+    }
+} <span class="hljs-keyword">catch</span> (SQLException e) {
+    e.printStackTrace();
+}
+</div></code></pre>
+                </div>
+                <ul>
+                <li><strong>ODBC vs. JDBC 对比</strong>
+                <ul>
+                <li>强调JDBC的面向对象特性、异常处理机制、以及与Java语言的无缝集成是如何让它比ODBC更易用、更健壮。</li>
+                </ul>
+                </li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
