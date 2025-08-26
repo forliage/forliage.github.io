@@ -649,5 +649,12 @@
     "category": "学习笔记",
     "path": "_posts/2025-08-26-db03.html",
     "abstract": "数据库系统03:高级SQL"
+  },
+  {
+    "title": "数据库系统04:实体-关系模型(E-R Model)",
+    "date": "2025-08-26",
+    "category": "学习笔记",
+    "path": "_posts/2025-08-26-db04.html",
+    "abstract": "数据库系统04:实体-关系模型(E-R Model)"
   }
 ]
