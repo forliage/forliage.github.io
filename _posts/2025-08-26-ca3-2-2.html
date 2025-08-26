@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机体系结构3-2-2:流水线调度和循环展开</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%843-2-2%E6%B5%81%E6%B0%B4%E7%BA%BF%E8%B0%83%E5%BA%A6%E5%92%8C%E5%BE%AA%E7%8E%AF%E5%B1%95%E5%BC%80">计算机体系结构3-2-2:流水线调度和循环展开</h1>
+                <h4 id="14-%E6%B5%81%E6%B0%B4%E7%BA%BF%E8%B0%83%E5%BA%A6-pipeline-scheduling">1.4 流水线调度 (Pipeline Scheduling)</h4>
+                <p>流水线调度的核心思想非常朴素：<strong>在保证程序逻辑正确的前提下，通过移动指令的位置，来分离相互依赖的指令，从而用独立的指令去填充因数据相关而产生的“空泡（bubbles）”</strong>。</p>
+                <ul>
+                <li><strong>C 语言代码</strong>：
+                <div class="code-container">
+                <pre><code class="language-c">for (i = 999; i &gt;= 0; i = i - 1)
+    x[i] = x[i] + s;
+</code></pre>
+                </div>
+                </li>
+                <li><strong>未经优化的 RISC-V 汇编代码</strong>：
+                <div class="code-container">
+                <pre><code class="language-plaintext">Loop:
+    fld     f0, 0(x1)       ; I1: 加载 x[i]
+    fadd.d  f4, f0, f2      ; I2: 计算 x[i] + s (s 在 f2)
+    fsd     f4, 0(x1)       ; I3: 存储新值
+    addi    x1, x1, -8      ; I4: 指针递减 (i--)
+    bne     x1, x2, Loop    ; I5: 循环判断与跳转
+</code></pre>
+                </div>
+                </li>
+                </ul>
+                <p>为了分析其性能，我们需要一份功能单元延迟的“价目表”</p>
+                <table>
+                <thead>
+                <tr>
+                <th style="text-align:left">产生结果的指令类型</th>
+                <th style="text-align:left">使用结果的指令类型</th>
+                <th style="text-align:left">延迟 (个停顿周期)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                <td style="text-align:left">FP ALU op</td>
+                <td style="text-align:left">FP ALU op</td>
+                <td style="text-align:left">3</td>
+                </tr>
+                <tr>
+                <td style="text-align:left">FP ALU op</td>
+                <td style="text-align:left">Store double</td>
+                <td style="text-align:left">2</td>
+                </tr>
+                <tr>
+                <td style="text-align:left">Load double</td>
+                <td style="text-align:left">FP ALU op</td>
+                <td style="text-align:left">1</td>
+                </tr>
+                <tr>
+                <td style="text-align:left">Load double</td>
+                <td style="text-align:left">Store double</td>
+                <td style="text-align:left">0</td>
+                </tr>
+                <tr>
+                <td style="text-align:left">Integer op</td>
+                <td style="text-align:left">Integer op</td>
+                <td style="text-align:left">0</td>
+                </tr>
+                </tbody>
+                </table>
+                <p>现在，我们来分析一下未经优化的代码中存在的停顿：</p>
+                <ol>
+                <li><code>fld</code> -&gt; <code>fadd.d</code>：<code>fadd.d</code> 需要 <code>fld</code> 加载到 <code>f0</code> 的结果。这是一个 Load-use 依赖，延迟为 <strong>1 个周期</strong>。所以 <code>fadd.d</code> 必须在 <code>fld</code> 之后停顿 1 拍。</li>
+                <li><code>fadd.d</code> -&gt; <code>fsd</code>：<code>fsd</code> 需要 <code>fadd.d</code> 计算出的 <code>f4</code>。这是一个 FP ALU op -&gt; Store double 依赖，延迟为 <strong>2 个周期</strong>。所以 <code>fsd</code> 必须在 <code>fadd.d</code> 之后停顿 2 拍。</li>
+                <li><code>addi</code> -&gt; <code>bne</code>：这是一个 Integer op -&gt; Integer op (branch test) 依赖，延迟为 0，无停顿。</li>
+                <li><code>bne</code>：分支指令本身会带来延迟。假设分支在 EX 阶段解析，那么在 <code>bne</code> 指令之后会有一个<strong>分支延迟槽</strong>，需要停顿 <strong>1 个周期</strong>。</li>
+                </ol>
+                <p><strong>总周期计算</strong>：
+                <code>fld</code>(1) + <code>stall</code>(1) + <code>fadd.d</code>(1) + <code>stall</code>(2) + <code>fsd</code>(1) + <code>addi</code>(1) + <code>bne</code>(1) + <code>stall</code>(1 for branch) = 9 个时钟周期。</p>
+                <p>一个循环迭代需要 9 个周期，而其中只有 5 条是有效指令，性能损失了将近一半！这些停顿就是编译器施展“魔法”的目标。</p>
+                <p><strong>如何调度？</strong></p>
+                <p>编译器的目标是找到可以移动的<strong>独立指令</strong>。观察一下，<code>addi x1, x1, -8</code> 这条指令干了什么？它只是修改了指针 <code>x1</code>。它与核心的浮点计算 (<code>fld</code>, <code>fadd.d</code>, <code>fsd</code>) 有没有关系？</p>
+                <ul>
+                <li>它不依赖于 <code>fld</code> 或 <code>fadd.d</code> 的结果。</li>
+                <li><code>fld</code> 和 <code>fsd</code> 依赖于 <code>x1</code> 的<strong>旧值</strong>，而 <code>addi</code> 产生的是 <code>x1</code> 的<strong>新值</strong>。这是一个<strong>读后写（WAR）<strong>的</strong>名依赖</strong>！</li>
+                </ul>
+                <p>编译器意识到，只要在 <code>fld</code> 和 <code>fsd</code> 读取完旧的 <code>x1</code> 地址之后，<code>addi</code> 就可以被执行。因此，一个绝佳的移动机会出现了：将 <code>addi</code> 提前！</p>
+                <ul>
+                <li><strong>调度后的代码</strong>：
+                <div class="code-container">
+                <pre><code class="language-plaintext">Loop:
+    fld     f0, 0(x1)       ; I1
+    addi    x1, x1, -8      ; I4' (提前)
+    fadd.d  f4, f0, f2      ; I2
+    fsd     f4, 8(x1)       ; I3' (偏移量修改)
+    bne     x1, x2, Loop    ; I5
+</code></pre>
+                </div>
+                </li>
+                </ul>
+                <p><strong>关键改动</strong>：</p>
+                <ol>
+                <li><code>addi</code> 被移动到了 <code>fld</code> 之后。它完美地填补了 <code>fld</code> 和 <code>fadd.d</code> 之间的那个停顿周期！</li>
+                <li><strong>一个非常重要的细节</strong>：因为 <code>addi</code> 提前执行了，当 <code>fsd</code> 执行时，<code>x1</code> 的值已经是 <code>x1_old - 8</code>。为了存到正确的位置（原来的 <code>0(x1_old)</code>），<code>fsd</code> 的立即数偏移量必须被相应地修改为 <code>8</code>，即 <code>8(x1_new)</code>。这是编译器必须保证的<strong>语义等价性</strong>。</li>
+                </ol>
+                <p><strong>新代码的性能分析</strong>：</p>
+                <ol>
+                <li><code>fld</code> -&gt; <code>fadd.d</code>：<code>addi</code> 在中间执行，但 <code>fadd.d</code> 仍需等待 <code>fld</code> 的结果，所以它依然需要停顿 1 周期。但是，<code>addi</code> 已经在这个周期里执行了，所以这个停顿被<strong>有效利用</strong>了。</li>
+                <li><code>fadd.d</code> -&gt; <code>fsd</code>：延迟是 2 周期。现在这两条指令之间没有其他指令，所以会产生 <strong>2 个周期的停顿</strong>。</li>
+                <li>分支延迟：仍然存在 1 个周期的停顿。</li>
+                </ol>
+                <p><strong>总周期计算</strong>：
+                <code>fld</code>(1) + <code>addi</code>(1) + <code>fadd.d</code>(1) + <code>stall</code>(2) + <code>fsd</code>(1) + <code>bne</code>(1) + <code>stall</code>(1) = 8 周期。
+                相比原来的 9 周期，我们通过一次简单的调度就节省了 1 个周期。</p>
+                <p><strong>还能更好吗？</strong> 我们发现，<code>bne</code> 依赖于 <code>addi</code> 的结果，而它们之间隔着 <code>fadd.d</code> 和 <code>fsd</code>，有足够的时间让 <code>addi</code> 完成。但是，<code>fsd</code> 和 <code>bne</code> 之间仍然没有指令来填充分支延迟槽。</p>
+                <h4 id="15-%E5%BE%AA%E7%8E%AF%E5%B1%95%E5%BC%80-loop-unrolling">1.5 循环展开 (Loop Unrolling)</h4>
+                <p>流水线调度的效果受限于一个基本块（在这里是循环体）内独立指令的数量。在我们的例子中，5 条指令的循环体内，调度空间非常有限。</p>
+                <p>如何创造更多的调度机会？答案是：<strong>扩大基本块的范围</strong>。对于循环，最有效的方法就是<strong>循环展开</strong>。</p>
+                <ul>
+                <li><strong>核心思想</strong>：将循环体复制多份（例如 4 份），然后相应地调整循环控制逻辑。</li>
+                <li><strong>带来的好处</strong>：
+                <ol>
+                <li><strong>减少循环开销</strong>：原来执行 4 次迭代需要 4 次 <code>addi</code> 和 4 次 <code>bne</code>。展开后，我们可以在一个大的循环体里完成 4 次迭代的工作，而只需要 1 次 <code>addi</code> (步长变为 -32) 和 1 次 <code>bne</code>。<strong>循环控制指令在总指令数中的占比急剧下降</strong>。</li>
+                <li><strong>创造巨大的指令调度空间</strong>：展开后的循环体变成了一个包含大量指令的大基本块。原来属于不同迭代的指令，现在“共处一室”。由于不同迭代间的计算通常是独立的（例如 <code>x[i]</code> 的计算和 <code>x[i-1]</code> 的计算），这为编译器提供了海量的、不相关的指令来进行交叉调度。</li>
+                </ol>
+                </li>
+                </ul>
+                <p>让我们展开 4 次：</p>
+                <ul>
+                <li><strong>未经调度的展开代码 (逻辑上)</strong>
+                <div class="code-container">
+                <pre><code class="language-plaintext">Loop:
+    fld     f0, 0(x1)
+    fadd.d  f4, f0, f2
+    fsd     f4, 0(x1)      ; 第一次迭代
+    fld     f6, -8(x1)
+    fadd.d  f8, f6, f2
+    fsd     f8, -8(x1)     ; 第二次迭代
+    fld     f10, -16(x1)
+    fadd.d  f12, f10, f2
+    fsd     f12, -16(x1)   ; 第三次迭代
+    fld     f14, -24(x1)
+    fadd.d  f16, f14, f2
+    fsd     f16, -24(x1)   ; 第四次迭代
+    addi    x1, x1, -32
+    bne     x1, x2, Loop
+</code></pre>
+                </div>
+                <strong>注意</strong>：为了避免 WAW 和 WAR 伪相关，编译器必须为每次迭代使用不同的寄存器（<code>f0, f6, f10, f14</code> 等）。这正是<strong>静态的寄存器重命名</strong>！</li>
+                </ul>
+                <p>现在，编译器面对的是一个包含 14 条指令的巨大“棋盘”。它可以进行如下的极限调度：</p>
+                <ul>
+                <li><strong>调度后的展开代码</strong>
+                <div class="code-container">
+                <pre><code class="language-plaintext">Loop:
+    fld     f0, 0(x1)       ; 1. 先把所有加载指令放在一起
+    fld     f6, -8(x1)
+    fld     f10, -16(x1)
+    fld     f14, -24(x1)
+    fadd.d  f4, f0, f2      ; 2. 然后放所有加法，它们分别依赖上面的加载
+    fadd.d  f8, f6, f2
+    fadd.d  f12, f10, f2
+    fadd.d  f16, f14, f2
+    fsd     f4, 0(x1)       ; 3. 然后放所有存储，它们依赖加法结果
+    fsd     f8, -8(x1)
+    addi    x1, x1, -32     ; 4. 把循环控制指令藏在存储指令的延迟槽里
+    fsd     f12, -16(x1)
+    bne     x1, x2, Loop
+    fsd     f16, -24(x1)    ; 5. 把最后一条存储指令放在分支延迟槽中
+</code></pre>
+                </div>
+                </li>
+                </ul>
+                <p><strong>性能分析</strong>：</p>
+                <ol>
+                <li>四个 <code>fld</code> 可以背靠背地发射（假设访存单元是流水化的）。</li>
+                <li>第一个 <code>fadd.d f4,f0,f2</code> 必须等待 <code>fld f0</code> 1 个周期。但在这 1 个周期里，其他三个 <code>fld</code> 正在执行。</li>
+                <li>四个 <code>fadd.d</code> 之间没有依赖，可以背靠背发射。</li>
+                <li>第一个 <code>fsd f4,0(x1)</code> 必须等待 <code>fadd.d f4</code> 2 个周期。但这期间，其他 <code>fadd.d</code> 和 <code>fsd</code> 正在执行。</li>
+                </ol>
+                <p>通过这种精妙的重排，指令间的延迟被其他独立指令完美地隐藏了。原来每个迭代需要 9 周期，4 个迭代需要 36 周期。现在，14 条指令，加上最初的 <code>fld</code>-&gt;<code>fadd</code> 停顿和 <code>fadd</code>-&gt;<code>fsd</code> 的停顿，总周期数可能只需要 14 + 1 + 2 = 17 周期左右（这是一个粗略估算，精确值需要画时序图）。每个迭代的平均周期从 9 降到了 $17/4 \approx 4.25$！性能提升超过一倍。</p>
+                <p><strong>循环展开的权衡：</strong></p>
+                <ul>
+                <li><strong>优点</strong>：极大地提升了 ILP，降低了循环开销。</li>
+                <li><strong>缺点</strong>：
+                <ul>
+                <li><strong>代码体积膨胀 (Code Size Increase)</strong>：可能会导致指令缓存（I-Cache）的命中率下降。</li>
+                <li><strong>寄存器压力 (Register Pressure)</strong>：需要更多的寄存器来支持重命名，如果寄存器不足，反而会因为需要将值存入/取出内存（spilling）而降低性能。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="16-%E8%B6%85%E8%B6%8A%E5%9F%BA%E6%9C%AC%E5%9D%97trace-scheduling-%E4%B8%8E-superblock">1.6 超越基本块：Trace Scheduling 与 Superblock</h4>
+                <p>循环展开非常适合于结构简单的循环。但如果代码中充满了复杂的 <code>if-else</code> 结构呢？</p>
+                <p><img src="../images/imagea043.png" alt="figure 43"></p>
+                <ul>
+                <li><strong>挑战</strong>：传统的编译器一次只能在一个**基本块（Basic Block）**内进行调度。基本块是以跳转指令结束、没有跳转指令进入的连续指令序列。<code>if</code> 语句会把代码切分成多个小基本块，调度空间很小。</li>
+                <li><strong>洞察</strong>：根据程序的动态行为，<strong>某些执行路径被执行的概率远高于其他路径</strong>。例如，一个错误处理分支可能 99% 的时间都不会被走到。</li>
+                <li><strong>Trace Scheduling (踪迹调度)</strong>：
+                <ol>
+                <li><strong>踪迹选择 (Trace Selection)</strong>：通过性能分析（Profiling）或启发式规则，找出程序中最可能被执行的路径，这个路径被称为“踪迹（Trace）”。</li>
+                <li><strong>踪迹压紧 (Trace Compaction)</strong>：将这个踪迹上的所有指令<strong>视为一个大的基本块</strong>，进行积极的指令调度，就好像那些小概率的分支不存在一样。</li>
+                <li><strong>修复代码 (Fix-up Code)</strong>：为了保证逻辑的正确性，对于那些从踪迹中间“跳出”（trace exit）或“跳入”（trace entrance）的控制流，编译器需要生成额外的“修复代码”来补偿和纠正因为调度而打乱的状态。</li>
+                </ol>
+                </li>
+                <li><strong>Superblock (超块)</strong>：Trace Scheduling 的一个改进。它通过**代码复制（Tail Duplication）**来消除所有“跳入”踪迹中间的边，使得超块只有一个唯一的入口，但可以有多个出口。这简化了调度过程，因为编译器不必担心有控制流会“半路杀入”一个已经被重排过的指令序列。</li>
+                </ul>
+                <p><img src="../images/imagea044.png" alt="figure 44"></p>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
