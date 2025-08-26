@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机体系结构2-1-2: 软硬协同与虚拟内存的保护屏障</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%842-1-2-%E8%BD%AF%E7%A1%AC%E5%8D%8F%E5%90%8C%E4%B8%8E%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%9A%84%E4%BF%9D%E6%8A%A4%E5%B1%8F%E9%9A%9C">计算机体系结构2-1-2: 软硬协同与虚拟内存的保护屏障</h1>
+                <p><strong>课程衔接</strong></p>
+                <p>在上一讲中，我们探讨了六种旨在优化平均内存访问时间（AMAT）的硬件技术。我们分别从降低命中时间、提升带宽和减少缺失代价三个方面入手，理解了每一个设计决策背后的精妙权衡。</p>
+                <p>然而，架构师的工具箱远不止于此。今天，我们将探索另外四大高级优化技术，其中最引人注见的是 <strong>软硬件协同</strong> 的力量。我们将看到，聪明的<strong>编译器</strong>如何能够在不改变一行硬件代码的情况下，通过重塑程序的访问模式，奇迹般地降低缓存缺失率。我们还将学习 <strong>预取（Prefetching）</strong> 技术，这是一种试图预测未来、提前将数据载入缓存的“魔法”，它同时存在于硬件和软件两个层面。最后，我们会接触到代表着存储技术未来的 <strong>高带宽内存（HBM）</strong>，看看它是如何为超大容量缓存的设计带来新的机遇与挑战。</p>
+                <p>最后，我们将从性能的追求转向安全的保障，引入计算机系统中另一个至关重要的抽象层——<strong>虚拟内存（Virtual Memory）</strong>。我们将理解虚拟内存的设计动机，以及它如何利用存储器层次结构的理念，为现代多任务操作系统提供了坚不可摧的 <strong>内存保护和隔离</strong> 机制。</p>
+                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E9%87%8D%E5%A1%91%E8%AE%BF%E9%97%AE%E6%A8%A1%E5%BC%8F"><strong>第四部分：重塑访问模式</strong></h3>
+                <p>到目前为止，我们讨论的优化都集中在硬件层面，但软件——特别是编译器——同样可以在优化缓存性能方面发挥巨大作用。编译器优化的最大优势在于：<strong>它可以在不增加任何硬件成本的情况下，显著降低程序的缓存缺失率</strong>。</p>
+                <h4 id="%E4%BC%98%E5%8C%96%E6%8A%80%E6%9C%AF-7%E7%BC%96%E8%AF%91%E5%99%A8%E4%BC%98%E5%8C%96-compiler-optimizations"><strong>优化技术 #7：编译器优化 (Compiler Optimizations)</strong></h4>
+                <ul>
+                <li>
+                <p><strong>设计动机</strong>：硬件看到的是一连串无差别的内存访问指令。而编译器拥有更高层次的程序结构信息（如循环、数组）。利用这些信息，编译器可以重新组织代码，使其数据访问模式更加“缓存友好”，即最大化地利用空间和时间局部性。</p>
+                </li>
+                <li>
+                <p><strong>实现策略1：循环交换 (Loop Interchange)</strong></p>
+                <ul>
+                <li><strong>问题</strong>：考虑一个按行存储的二维数组<code>x[i][j]</code>。观察以下C代码片段：</li>
+                </ul>
+                <div class="code-container">
+                <pre><code class="language-c">/* Before */
+for (j = 0; j &lt; 100; j = j + 1)
+    for (i = 0; i &lt; 5000; i = i + 1)
+        x[i][j] = 2 * x[i][j];
+</code></pre>
+                </div>
+                <p>这段代码的内存访问模式是 <code>x[0][0], x[1][0], x[2][0], ...</code>。由于数组是按行存储的，这意味着每次访问都会跳跃一大段内存（一整行），这严重破坏了<strong>空间局部性</strong>，会导致大量的缓存缺失。</p>
+                <ul>
+                <li><strong>解决方案</strong>：编译器只需简单地交换内外层循环：</li>
+                </ul>
+                <div class="code-container">
+                <pre><code class="language-c">/* After */
+for (i = 0; i &lt; 5000; i = i + 1)
+    for (j = 0; j &lt; 100; j = j + 1)
+        x[i][j] = 2 * x[i][j];
+</code></pre>
+                </div>
+                <p>现在，内存访问模式变成了 <code>x[0][0], x[0][1], x[0][2], ...</code>，完美地按照数据在内存中的存储顺序进行访问。当第一个元素<code>x[0][0]</code>导致Cache Miss时，整个缓存块（包含<code>x[0][1]</code>, <code>x[0][2]</code>等）会被加载进来，后续的多次访问都会命中。</p>
+                </li>
+                <li>
+                <p><strong>实现策略2：分块 (Blocking / Tiling)</strong></p>
+                <ul>
+                <li><strong>问题</strong>：矩阵乘法 <code>C = A * B</code> 是一个更复杂的例子。在计算<code>C[i][j]</code>时，需要访问A的第<code>i</code>行和B的第<code>j</code>列。无论循环顺序如何，总会有一个矩阵是按列访问的，破坏空间局部性。更糟糕的是，当矩阵很大时，计算完一行C之后，再去计算下一行时，之前加载的A或B的数据可能早已被从缓存中替换出去了，这又破坏了<strong>时间局部性</strong>。
+                <img src="../images/imagea016.png" alt="figure 16"></li>
+                <li><strong>解决方案</strong>：不要一次计算一整行或一整列，而是将矩阵<strong>分块</strong>，计算一个个小的子矩阵。</li>
+                </ul>
+                <div class="code-container">
+                <pre><code class="language-c">/* Simplified Blocking Concept */
+for (ii = 0; ii &lt; N; ii += B) // Iterate over blocks
+    for (jj = 0; jj &lt; N; jj += B)
+        for (kk = 0; kk &lt; N; kk += B)
+            for (i = ii; i &lt; ii + B; i++) // Compute on the block
+                for (j = jj; j &lt; jj + B; j++)
+                    for (k = kk; k &lt; kk + B; k++)
+                        C[i][j] += A[i][k] * B[k][j];
+</code></pre>
+                </div>
+                <p>通过将计算限制在一个小的“块”（Block/Tile）内，我们可以确保这个块的数据在计算完成前都驻留在缓存中。这样，我们<strong>最大化了加载到缓存中的数据的使用次数</strong>，极大地提升了时间和空间局部性。</p>
+                </li>
+                <li>
+                <p><strong>权衡</strong>：</p>
+                <ul>
+                <li><strong>优点</strong>：零硬件成本，效果显著。</li>
+                <li><strong>缺点</strong>：依赖于编译器对程序行为的静态分析能力。对于复杂的、通过指针进行的间接内存访问，编译器往往难以分析和优化。</li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E9%A2%84%E5%8F%96"><strong>第五部分：预取</strong></h3>
+                <p>与其在发生Cache Miss后被动地等待，我们能否像先知一样，在CPU<strong>需要</strong>某个数据之前，就<strong>提前</strong>将它从慢速内存取到缓存中？这就是<strong>预取 (Prefetching)</strong> 的核心思想。</p>
+                <h4 id="%E4%BC%98%E5%8C%96%E6%8A%80%E6%9C%AF-8%E7%A1%AC%E4%BB%B6%E9%A2%84%E5%8F%96-hardware-prefetching"><strong>优化技术 #8：硬件预取 (Hardware Prefetching)</strong></h4>
+                <ul>
+                <li><strong>设计动机</strong>：许多程序的内存访问模式非常有规律（例如，顺序访问数组）。硬件可以动态地识别这些模式，并自动发起预取请求。</li>
+                <li><strong>实现策略</strong>：
+                <ol>
+                <li><strong>流缓冲 (Stream Buffer)</strong>：最经典的硬件预取器。它会监视缓存的缺失地址。当检测到一个或多个连续地址的缺失（例如，访问了块<code>B</code>，然后是块<code>B+1</code>），预取器就会判断这是一个“流”（stream），并自动发出对块<code>B+2</code>, <code>B+3</code>...的预取请求。</li>
+                <li>预取的数据通常被放入一个独立的流缓冲中，而不是直接放入主缓存。当CPU真正访问该数据时，如果它在流缓冲中，就将其快速移入缓存并提供给CPU，同时取消掉原来的内存请求。</li>
+                </ol>
+                </li>
+                <li><strong>权衡</strong>：
+                <ul>
+                <li><strong>优点</strong>：对软件完全透明，无需修改代码。能有效捕捉简单的、规则的访问模式。</li>
+                <li><strong>缺点</strong>：
+                <ul>
+                <li><strong>时机问题</strong>：预取太早，可能会在CPU使用前就被替换出去；预取太晚，则无法完全隐藏延迟。</li>
+                <li><strong>准确性问题</strong>：错误的预取（CPU最终并未使用该数据）不仅浪费了宝贵的内存带宽，还可能“污染”缓存，将有用的数据替换出去。</li>
+                <li><strong>资源开销</strong>：预取逻辑本身需要消耗芯片面积和功耗。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="%E4%BC%98%E5%8C%96%E6%8A%80%E6%9C%AF-9%E7%BC%96%E8%AF%91%E5%99%A8%E6%8E%A7%E5%88%B6%E7%9A%84%E9%A2%84%E5%8F%96-compiler-controlled-prefetching"><strong>优化技术 #9：编译器控制的预取 (Compiler-Controlled Prefetching)</strong></h4>
+                <ul>
+                <li><strong>设计动机</strong>：硬件预取器只能看到地址流，而编译器能理解程序的语义。对于不规则但有规律的访问模式（如链表遍历、稀疏矩阵计算），编译器可以比硬件做出更精准的预测。</li>
+                <li><strong>实现策略</strong>：
+                <ol>
+                <li>ISA提供专门的<code>prefetch</code>指令。</li>
+                <li>编译器在分析循环等结构后，在代码中<strong>显式插入<code>prefetch</code>指令</strong>。例如，在一个循环处理数组<code>a[i]</code>时，编译器可以在处理<code>a[i]</code>的计算代码之前，插入一条<code>prefetch(a[i+N])</code>指令，提前加载未来第N次迭代将要用到的数据。</li>
+                </ol>
+                </li>
+                <li><strong>权衡</strong>：
+                <ul>
+                <li><strong>优点</strong>：比硬件预取更灵活，能处理更复杂的访问模式。</li>
+                <li><strong>缺点</strong>：
+                <ul>
+                <li><code>prefetch</code>指令本身会占用CPU的执行资源，增加了指令开销。</li>
+                <li>确定预取的“提前量”（lookahead distance）非常困难，需要精确地知道缺失代价才能做出最优决策，而这在不同系统上是变化的。</li>
+                <li>增加了编译器的复杂性。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="%E7%AC%AC%E5%85%AD%E9%83%A8%E5%88%86%E9%AB%98%E5%B8%A6%E5%AE%BD%E5%86%85%E5%AD%98hbm%E7%9A%84%E5%BA%94%E7%94%A8"><strong>第六部分：高带宽内存（HBM）的应用</strong></h3>
+                <h4 id="%E4%BC%98%E5%8C%96%E6%8A%80%E6%9C%AF-10%E4%BD%BF%E7%94%A8hbm%E4%BD%9C%E4%B8%BA%E5%A4%A7%E5%AE%B9%E9%87%8F%E7%BC%93%E5%AD%98-hbm-as-a-large-cache"><strong>优化技术 #10：使用HBM作为大容量缓存 (HBM as a Large Cache)</strong></h4>
+                <ul>
+                <li><strong>设计动机</strong>：我们正进入一个数据密集型计算的时代，无论是AI训练还是科学计算，都对内存带宽和容量提出了前所未有的要求。传统DDR内存受限于物理引脚数量，带宽增长已达瓶颈。</li>
+                <li><strong>技术突破：高带宽内存 (High-Bandwidth Memory, HBM)</strong>
+                <ul>
+                <li>HBM通过<strong>3D堆叠</strong>技术，将多个DRAM裸片垂直堆叠起来，并通过极宽的接口（如1024位）与CPU/GPU连接。这使得它能在极小的物理面积内，提供比DDR内存高出一个数量级的带宽。</li>
+                </ul>
+                </li>
+                <li><strong>新的设计可能性</strong>：我们可以利用HBM的巨大容量（数GB到数十GB）和高带宽，将其作为CPU的最后一级缓存（LLC，如L4 Cache）。</li>
+                <li><strong>设计挑战</strong>：
+                <ol>
+                <li><strong>标签存储开销</strong>：一个1GiB的缓存，如果块大小为64B，那么需要存储的标签（Tag）本身就高达96MiB！将这么多标签存储在高速SRAM中是不现实的。</li>
+                <li><strong>访问延迟</strong>：如果将标签也存在HBM中，那么一次缓存命中就需要两次HBM访问：一次读Tag，一次读Data。这会大大增加命中延迟。</li>
+                </ol>
+                </li>
+                <li><strong>创新解决方案</strong>：
+                <ul>
+                <li><strong>同行列优化</strong>：将一个缓存块的Tag和Data存储在HBM的同一个物理行（row）中。虽然DRAM打开一个新行的延迟很高，但访问已打开行内的数据则快得多。我们可以先访问Tag，如果命中，再快速访问同一行的数据。</li>
+                <li><strong>Alloy Cache</strong>：一种更激进的直接映射缓存设计。它将Tag和Data在物理上紧邻存放，并通过一次HBM的突发传输（burst transfer）将两者同时读出，从而实现单周期访问。</li>
+                </ul>
+                </li>
+                <li><strong>前景</strong>：使用HBM作为缓存是当前高性能计算领域的一个重要研究方向，它有望极大地缓解内存墙问题，但也带来了全新的架构设计挑战。</li>
+                </ul>
+                <h3 id="%E7%AC%AC%E4%B8%83%E9%83%A8%E5%88%86%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E4%B8%8E%E5%86%85%E5%AD%98%E4%BF%9D%E6%8A%A4"><strong>第七部分：虚拟内存与内存保护</strong></h3>
+                <p>到目前为止，我们的讨论都围绕着性能。但现代计算机系统还有一个同等重要的目标：<strong>安全与可靠</strong>。在一个同时运行着操作系统、多个用户程序、网页浏览器等复杂软件的系统上，我们如何确保一个进程的错误（或恶意行为）不会影响到其他进程或操作系统本身？答案是：<strong>虚拟内存 (Virtual Memory, VM)</strong>。</p>
+                <h4 id="71-%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E4%B9%8B%E5%89%8D%E7%9A%84%E6%B7%B7%E6%B2%8C%E4%B8%96%E7%95%8C"><strong>7.1 虚拟内存之前的混沌世界</strong></h4>
+                <p>在虚拟内存出现之前，程序直接使用<strong>物理地址</strong>访问内存。操作系统负责为每个程序分配一块<strong>连续的</strong>物理内存。</p>
+                <p><img src="../images/imagea017.png" alt="figure 17"></p>
+                <p>这种方式存在致命缺陷：</p>
+                <ul>
+                <li><strong>内存浪费</strong>：程序申请了1GB内存，但可能只用了100MB，剩余的900MB就被浪费了（内部碎片）。同时，由于要求连续分配，即使总空闲内存足够，也可能因为没有足够大的连续块而分配失败（外部碎片）。</li>
+                <li><strong>缺乏保护</strong>：程序中的一个指针错误，就可能意外地修改到另一个程序的内存空间，甚至操作系统内核的数据，导致整个系统崩溃。恶意程序更是可以为所欲为。
+                <img src="../images/imagea018.png" alt="figure 18"></li>
+                </ul>
+                <h4 id="72-%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%9A%84%E9%9D%A9%E5%91%BD%E6%80%A7%E6%8A%BD%E8%B1%A1"><strong>7.2 虚拟内存的革命性抽象</strong></h4>
+                <p>虚拟内存的设计思想，是<strong>在程序和物理内存之间增加一个间接层</strong>。</p>
+                <ul>
+                <li>每个进程都拥有自己<strong>私有的、独立的、从0开始的、连续的</strong>虚拟地址空间。</li>
+                <li>CPU发出的地址是<strong>虚拟地址</strong>。这个虚拟地址会经过一个由硬件（<strong>内存管理单元，MMU</strong>）和操作系统共同管理的<strong>地址翻译 (Address Translation)</strong> 过程，转换成一个<strong>物理地址</strong>，最终才被送到内存总线。</li>
+                </ul>
+                <p><img src="../images/imagea019.png" alt="figure 19"></p>
+                <h4 id="73-%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%B8%A6%E6%9D%A5%E7%9A%84%E5%9B%9B%E5%A4%A7%E5%A5%BD%E5%A4%84"><strong>7.3 虚拟内存带来的四大好处</strong></h4>
+                <ol>
+                <li><strong>内存管理简化与效率提升</strong>：
+                <ul>
+                <li>操作系统可以为进程分配<strong>非连续的</strong>物理内存页（Page），但在进程看来，它的地址空间仍然是连续的。这极大地减少了内存碎片，提高了内存利用率。</li>
+                <li>进程可以共享物理内存。例如，多个进程可以将其虚拟地址空间中的C标准库部分，映射到物理内存中的同一个C库副本上，节省了大量内存。</li>
+                </ul>
+                </li>
+                <li><strong>坚不可摧的内存保护</strong>：
+                <ul>
+                <li>地址翻译机制是实现保护的核心。MMU中的页表（Page Table）不仅存储了虚拟页到物理页的映射关系，还存储了该页的<strong>访问权限</strong>（读、写、执行）。</li>
+                <li>如果一个进程试图写入一个只读的页（如代码段），或者访问一个不属于它的页，MMU会立即检测到并触发一个<strong>硬件异常（缺页故障 Page Fault）</strong>，将控制权交给操作系统。操作系统会判断这是一个非法访问，并终止该进程。</li>
+                <li><strong>这就在硬件层面实现了进程间的完全隔离</strong>。</li>
+                </ul>
+                </li>
+                <li><strong>按需分页 (Demand Paging)</strong>：
+                <ul>
+                <li>程序启动时，无需将整个程序都加载到内存。只需加载开始执行所必需的几个页。当程序访问到一个尚未在内存中的页时，会触发Page Fault，操作系统再负责从磁盘上将该页加载进来。这使得程序可以运行即使其大小超过了物理内存的总量。</li>
+                </ul>
+                </li>
+                <li><strong>安全基石</strong>：虚拟内存为现代安全机制如<strong>地址空间布局随机化（ASLR）</strong> 提供了基础。</li>
+                </ol>
+                <h4 id="74-%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E4%B8%8E%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><strong>7.4 虚拟内存与体系结构</strong></h4>
+                <p>为了支持虚拟内存，计算机体系结构必须提供四个核心机制：</p>
+                <ol>
+                <li><strong>两种处理器模式</strong>：至少要有<strong>用户模式 (User Mode)</strong> 和 <strong>内核模式 (Supervisor/Kernel Mode)</strong>。用户程序运行在用户模式，权限受限。操作系统运行在内核模式，拥有最高权限，可以访问所有硬件资源和修改页表。</li>
+                <li><strong>受保护的处理器状态</strong>：必须有一部分处理器状态（如页表基地址寄存器），用户程序只能读不能写。</li>
+                <li><strong>模式切换机制</strong>：提供从用户模式陷入（trap）到内核模式的机制（如<strong>系统调用 System Call</strong>），以及从内核模式返回用户模式的机制。</li>
+                <li><strong>地址翻译与保护机制</strong>：即MMU硬件，用于高效地进行地址翻译和权限检查。</li>
+                </ol>
+                <h4 id="75-%E8%99%9A%E6%8B%9F%E6%9C%BA%E4%BF%9D%E6%8A%A4%E7%9A%84%E5%86%8D%E5%8D%87%E7%BA%A7"><strong>7.5 虚拟机：保护的再升级</strong></h4>
+                <p>操作系统的代码量极其庞大（数千万行），其中不可避免地存在成千上万的bug。如果操作系统内核本身被攻破，那么基于虚拟内存的保护机制也就土崩瓦解了。</p>
+                <p><strong>虚拟机 (Virtual Machine, VM)</strong> 提供了一个更强的隔离层。</p>
+                <ul>
+                <li>一个称为<strong>虚拟机监视器 (VMM) 或 Hypervisor</strong> 的、代码量远小于操作系统的软件层，直接运行在硬件之上。</li>
+                <li>VMM可以创建多个虚拟机，每个虚拟机都可以运行一个完整的、未经修改的客户操作系统（Guest OS）。</li>
+                <li>VMM负责虚拟化CPU、内存和I/O设备，并确保<strong>虚拟机之间的绝对隔离</strong>。一个虚拟机内的操作系统崩溃或被攻破，完全不会影响到其他虚拟机或宿主系统。</li>
+                <li>这对于云计算和数据中心的多租户环境至关重要。</li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
