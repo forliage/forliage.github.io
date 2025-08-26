@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>计算机体系结构1-2:趋势、量化与设计原则</title>
-    
     <link rel="stylesheet" href="../style.css">
-    
     <script>
       MathJax = {
         tex: {
@@ -43,9 +41,9 @@
         <main>
             <article>
                 <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%841-2%E8%B6%8B%E5%8A%BF%E9%87%8F%E5%8C%96%E4%B8%8E%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99">计算机体系结构1-2:趋势、量化与设计原则</h1>
-                <h4 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E9%A9%B1%E5%8A%A8%E6%9E%B6%E6%9E%84%E6%BC%94%E8%BF%9B%E7%9A%84%E6%8A%80%E6%9C%AF%E8%B6%8B%E5%8A%BF"><strong>第五部分：驱动架构演进的技术趋势</strong></h4>
+                <h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E9%A9%B1%E5%8A%A8%E6%9E%B6%E6%9E%84%E6%BC%94%E8%BF%9B%E7%9A%84%E6%8A%80%E6%9C%AF%E8%B6%8B%E5%8A%BF"><strong>第五部分：驱动架构演进的技术趋势</strong></h3>
                 <p>架构师并非在真空中进行设计，我们所有的奇思妙想都必须建立在坚实的物理和技术基础之上。技术的演进速度和方向，决定了我们设计空间的边界。</p>
-                <h5 id="51-%E5%8D%8A%E5%AF%BC%E4%BD%93%E6%8A%80%E6%9C%AF%E7%9A%84%E6%BC%94%E8%BF%9B"><strong>5.1 半导体技术的演进</strong></h5>
+                <h4 id="51-%E5%8D%8A%E5%AF%BC%E4%BD%93%E6%8A%80%E6%9C%AF%E7%9A%84%E6%BC%94%E8%BF%9B"><strong>5.1 半导体技术的演进</strong></h4>
                 <p>计算机系统由五大关键技术构成：集成电路逻辑、DRAM、闪存、磁盘和网络。它们的发展速度并不均衡，这种不均衡恰恰是架构师面临的最大挑战和机遇。</p>
                 <ol>
                 <li>
@@ -78,7 +76,7 @@
                 </ul>
                 </li>
                 </ol>
-                <h5 id="52-%E6%80%A7%E8%83%BD%E8%B6%8B%E5%8A%BF%E7%9A%84%E6%A0%B8%E5%BF%83%E7%9F%9B%E7%9B%BE%E5%B8%A6%E5%AE%BD-vs-%E5%BB%B6%E8%BF%9F"><strong>5.2 性能趋势的核心矛盾：带宽 vs. 延迟</strong></h5>
+                <h4 id="52-%E6%80%A7%E8%83%BD%E8%B6%8B%E5%8A%BF%E7%9A%84%E6%A0%B8%E5%BF%83%E7%9F%9B%E7%9B%BE%E5%B8%A6%E5%AE%BD-vs-%E5%BB%B6%E8%BF%9F"><strong>5.2 性能趋势的核心矛盾：带宽 vs. 延迟</strong></h4>
                 <p>如果我们审视所有这些技术的发展，会发现一个惊人的共同规律：<strong>带宽的提升速度远远超过延迟的降低速度</strong>。</p>
                 <p><img src="../images/imagea011.png" alt="figure 11"></p>
                 <ul>
@@ -92,15 +90,15 @@
                 <li><strong>对内存和磁盘而言</strong>：容量是首要目标。因此其带宽提升相对温和，延迟改善更是微乎其微。</li>
                 </ul>
                 <p><strong>架构师的挑战与应对</strong>：正是这种巨大的差异（CPU越来越快，内存和磁盘相对越来越慢），催生了我们在上一讲讨论的复杂存储器层次结构（Cache）。<strong>缓存的本质，就是用高带宽、低延迟的SRAM来掩盖高延迟的DRAM和磁盘，从而弥合这种技术发展的不均衡性。</strong></p>
-                <h4 id="%E7%AC%AC%E5%85%AD%E9%83%A8%E5%88%86%E5%8A%9F%E8%80%97%E4%B8%8E%E8%83%BD%E6%BA%90%E7%9A%84%E6%8C%91%E6%88%98"><strong>第六部分：功耗与能源的挑战</strong></h4>
+                <h3 id="%E7%AC%AC%E5%85%AD%E9%83%A8%E5%88%86%E5%8A%9F%E8%80%97%E4%B8%8E%E8%83%BD%E6%BA%90%E7%9A%84%E6%8C%91%E6%88%98"><strong>第六部分：功耗与能源的挑战</strong></h3>
                 <p>如果说技术是引擎，那么功耗就是刹车。21世纪以来，<strong>功耗和能源已经取代性能，成为计算机设计的首要限制因素</strong>。</p>
-                <h5 id="61-%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8A%9F%E8%80%97%E5%A6%82%E6%AD%A4%E9%87%8D%E8%A6%81"><strong>6.1 为什么功耗如此重要？</strong></h5>
+                <h4 id="61-%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8A%9F%E8%80%97%E5%A6%82%E6%AD%A4%E9%87%8D%E8%A6%81"><strong>6.1 为什么功耗如此重要？</strong></h4>
                 <ul>
                 <li><strong>对于数据中心</strong>：功耗直接等同于<strong>运营成本</strong>。电费和为服务器散热的费用是巨大开销。</li>
                 <li><strong>对于移动设备</strong>：功耗决定了<strong>电池续航</strong>，这是用户体验的核心。</li>
                 <li><strong>对于所有设备</strong>：功耗最终转化为<strong>热量</strong>。散热系统的成本、体积和噪音都是设计的关键考量。无法散出的热量会导致芯片过热、性能下降甚至永久性损坏。</li>
                 </ul>
-                <h5 id="62-%E5%8A%9F%E8%80%97%E7%9A%84%E6%9D%A5%E6%BA%90%E5%8A%A8%E6%80%81%E4%B8%8E%E9%9D%99%E6%80%81"><strong>6.2 功耗的来源：动态与静态</strong></h5>
+                <h4 id="62-%E5%8A%9F%E8%80%97%E7%9A%84%E6%9D%A5%E6%BA%90%E5%8A%A8%E6%80%81%E4%B8%8E%E9%9D%99%E6%80%81"><strong>6.2 功耗的来源：动态与静态</strong></h4>
                 <p>芯片的功耗主要来自两部分：</p>
                 <ol>
                 <li>
@@ -122,7 +120,7 @@
                 </ul>
                 </li>
                 </ol>
-                <h5 id="63-%E5%8A%9F%E8%80%97%E4%BC%98%E5%8C%96%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6"><strong>6.3 功耗优化的设计哲学</strong></h5>
+                <h4 id="63-%E5%8A%9F%E8%80%97%E4%BC%98%E5%8C%96%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6"><strong>6.3 功耗优化的设计哲学</strong></h4>
                 <p>面对功耗墙，架构师发展出了一系列精妙的节能技术：</p>
                 <ol>
                 <li><strong>无为而治 (Do Nothing Well)</strong>：一个最简单的哲理是，不工作的部件就不应该耗电。<strong>时钟门控 (Clock Gating)</strong> 技术可以关闭芯片中处于空闲状态模块的时钟信号，从而消除这部分的动态功耗。</li>
@@ -135,15 +133,15 @@
                 <li><strong>短时超频 (Turbo Mode / Overclocking)</strong>：利用芯片的<strong>热容</strong>。在短时间内，允许芯片以超过其额定TDP（热设计功耗）的更高频率运行，只要其温度还没达到上限。一旦温度过高，再降回正常频率。这可以在不改变散热设计的前提下，有效提升短时任务的响应速度。</li>
                 <li><strong>奔向停机 (Race-to-Halt)</strong>：这是一个反直觉的系统级节能策略。与其用一个低功耗但慢的处理器长时间工作，不如用一个高功耗但快的处理器迅速完成任务，然后让整个系统（包括内存、屏幕等其他耗电大户）进入深度睡眠状态。在很多场景下，后者消耗的总能量更少。</li>
                 </ol>
-                <h4 id="%E7%AC%AC%E4%B8%83%E9%83%A8%E5%88%86%E6%88%90%E6%9C%AC%E7%9A%84%E8%80%83%E9%87%8F"><strong>第七部分：成本的考量</strong></h4>
+                <h3 id="%E7%AC%AC%E4%B8%83%E9%83%A8%E5%88%86%E6%88%90%E6%9C%AC%E7%9A%84%E8%80%83%E9%87%8F"><strong>第七部分：成本的考量</strong></h3>
                 <p>成本是计算机设计中最现实的约束。一个无法以市场可接受的价格制造出来的设计，即使再完美也毫无意义。</p>
-                <h5 id="71-%E6%88%90%E6%9C%AC%E7%9A%84%E5%8A%A8%E6%80%81%E6%80%A7"><strong>7.1 成本的动态性</strong></h5>
+                <h4 id="71-%E6%88%90%E6%9C%AC%E7%9A%84%E5%8A%A8%E6%80%81%E6%80%A7"><strong>7.1 成本的动态性</strong></h4>
                 <ul>
                 <li><strong>学习曲线 (Learning Curve)</strong>：任何制造工艺随着时间推移都会变得更成熟，从而降低成本。</li>
                 <li><strong>产量 (Volume)</strong>：产量每翻一番，单位成本大约会下降10%。这就是为什么高产量的消费级芯片可以做到非常便宜。</li>
                 <li><strong>商品化 (Commoditization)</strong>：当多种产品实现相同功能时（如PC主板），激烈的竞争会进一步压低价格。</li>
                 </ul>
-                <h5 id="72-%E9%9B%86%E6%88%90%E7%94%B5%E8%B7%AF%E7%9A%84%E6%88%90%E6%9C%AC%E6%9E%84%E6%88%90"><strong>7.2 集成电路的成本构成</strong></h5>
+                <h4 id="72-%E9%9B%86%E6%88%90%E7%94%B5%E8%B7%AF%E7%9A%84%E6%88%90%E6%9C%AC%E6%9E%84%E6%88%90"><strong>7.2 集成电路的成本构成</strong></h4>
                 <p>芯片的制造成本主要由单个裸片（Die）的成本决定。
                 $$
                 \text{Cost of die} = \frac{\text{Cost of wafer}}{\text{Dies per wafer} \times \text{Die yield}}
@@ -174,7 +172,7 @@
                 <li><strong>控制芯片面积</strong>：在设计时，架构师会极力避免不必要的复杂性以减小芯片面积。</li>
                 <li><strong>模块化与冗余</strong>：现代大型芯片（如GPU和服务器CPU）通常采用模块化设计。如果一个模块有缺陷，可以屏蔽它，将芯片降级出售（如12核CPU屏蔽2个坏核心后作为10核CPU卖）。内存芯片（DRAM/SRAM）内部会集成备用的行和列，用于替换有缺陷的存储单元，从而大大提高良率。</li>
                 </ul>
-                <h5 id="73-%E6%88%90%E6%9C%AC-vs-%E4%BB%B7%E6%A0%BC-%E4%B8%8E-%E8%B5%84%E6%9C%AC%E6%94%AF%E5%87%BA-vs-%E8%BF%90%E8%90%A5%E6%94%AF%E5%87%BA"><strong>7.3 成本 vs. 价格 与 资本支出 vs. 运营支出</strong></h5>
+                <h4 id="73-%E6%88%90%E6%9C%AC-vs-%E4%BB%B7%E6%A0%BC-%E4%B8%8E-%E8%B5%84%E6%9C%AC%E6%94%AF%E5%87%BA-vs-%E8%BF%90%E8%90%A5%E6%94%AF%E5%87%BA"><strong>7.3 成本 vs. 价格 与 资本支出 vs. 运营支出</strong></h4>
                 <ul>
                 <li><strong>成本 (Cost)</strong> 是制造成本，<strong>价格 (Price)</strong> 是销售价格。<code>价格 = 成本 + 利润</code>。利润中包含了研发、市场、销售等费用。</li>
                 <li>对于大型数据中心，我们还需要区分：
@@ -185,9 +183,9 @@
                 </ul>
                 </li>
                 </ul>
-                <h4 id="%E7%AC%AC%E5%85%AB%E9%83%A8%E5%88%86%E5%8F%AF%E9%9D%A0%E6%80%A7%E4%B8%8E%E5%8F%AF%E4%BE%9D%E8%B5%96%E6%80%A7"><strong>第八部分：可靠性与可依赖性</strong></h4>
+                <h3 id="%E7%AC%AC%E5%85%AB%E9%83%A8%E5%88%86%E5%8F%AF%E9%9D%A0%E6%80%A7%E4%B8%8E%E5%8F%AF%E4%BE%9D%E8%B5%96%E6%80%A7"><strong>第八部分：可靠性与可依赖性</strong></h3>
                 <p>随着晶体管尺寸缩小到纳米级别，以及系统日益复杂，单个组件发生故障的概率在增加。如何构建一个在面对故障时仍能提供正确服务的系统？这就是<strong>可依赖性 (Dependability)</strong> 设计要解决的问题。</p>
-                <h5 id="81-%E6%95%85%E9%9A%9C%E9%94%99%E8%AF%AF%E4%B8%8E%E5%A4%B1%E6%95%88%E7%9A%84%E8%BF%9E%E9%94%81%E5%8F%8D%E5%BA%94"><strong>8.1 故障、错误与失效的连锁反应</strong></h4>
+                <h4 id="81-%E6%95%85%E9%9A%9C%E9%94%99%E8%AF%AF%E4%B8%8E%E5%A4%B1%E6%95%88%E7%9A%84%E8%BF%9E%E9%94%81%E5%8F%8D%E5%BA%94"><strong>8.1 故障、错误与失效的连锁反应</strong></h4>
                 <p>这三个概念的区分至关重要：</p>
                 <ul>
                 <li><strong>故障 (Fault)</strong>：系统的物理缺陷或设计上的 bug。例如，一段代码里 <code>60 + 35 = 90</code> 是错误的。这是一个<strong>潜在</strong>的、静态的问题。</li>
@@ -195,7 +193,7 @@
                 <li><strong>失效 (Failure)</strong>：是错误<strong>外显</strong>出来，导致系统提供的服务不符合其规约。例如，由于计算结果是90，学生的最终绩点被错误地判定为4.5，而不是正确的4.0。</li>
                 </ul>
                 <p><strong>关键点</strong>：故障不一定会导致错误（如果错误代码段从未被执行），错误也不一定会导致失效（如果错误的中间结果在后续计算中被纠正或未使用）。可靠性设计的核心，就是<strong>切断这个连锁反应</strong>。</p>
-                <h5 id="82-%E9%87%8F%E5%8C%96%E5%8F%AF%E9%9D%A0%E6%80%A7"><strong>8.2 量化可靠性</strong></h5>
+                <h4 id="82-%E9%87%8F%E5%8C%96%E5%8F%AF%E9%9D%A0%E6%80%A7"><strong>8.2 量化可靠性</strong></h4>
                 <ul>
                 <li><strong>模块可靠性 (Reliability)</strong>：衡量系统能<strong>持续</strong>提供正确服务的能力。
                 <ul>
@@ -213,14 +211,14 @@
                 </ul>
                 </li>
                 </ul>
-                <h5 id="83-%E5%8F%AF%E9%9D%A0%E6%80%A7%E8%AE%BE%E8%AE%A1%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3%E5%86%97%E4%BD%99-redundancy"><strong>8.3 可靠性设计的核心思想：冗余 (Redundancy)</strong></h5>
+                <h4 id="83-%E5%8F%AF%E9%9D%A0%E6%80%A7%E8%AE%BE%E8%AE%A1%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3%E5%86%97%E4%BD%99-redundancy"><strong>8.3 可靠性设计的核心思想：冗余 (Redundancy)</strong></h4>
                 <p>“不要把所有鸡蛋放在一个篮子里”。冗余是构建可靠系统的唯一途径。</p>
                 <ul>
                 <li><strong>空间冗余</strong>：部署多个相同的组件。一个坏了，另一个可以顶上。</li>
                 <li><strong>时间冗余</strong>：重复执行一次操作。如果第一次因为瞬时干扰（如宇宙射线）而出错，第二次很可能就是对的。</li>
                 <li><strong>信息冗余</strong>：增加额外的数据位（如ECC、奇偶校验），用于检测和纠正数据错误。</li>
                 </ul>
-                <h5 id="84-%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%E7%A3%81%E7%9B%98%E9%98%B5%E5%88%97-raid"><strong>8.4 案例研究：磁盘阵列 RAID</strong></h5>
+                <h4 id="84-%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%E7%A3%81%E7%9B%98%E9%98%B5%E5%88%97-raid"><strong>8.4 案例研究：磁盘阵列 RAID</strong></h4>
                 <p>RAID（廉价磁盘冗余阵列）是冗余设计思想的经典范例。它将多个独立的磁盘组合起来，以提供比单个磁盘更高的性能、更大的容量和更强的可靠性。</p>
                 <ul>
                 <li><strong>RAID 0 (条带化)</strong>：只为性能，不提供冗余。数据被分散写入多个磁盘，可以并行读写，吞吐率很高。但任何一个磁盘损坏，所有数据都会丢失。</li>
@@ -233,9 +231,9 @@
                 <li><strong>RAID 5 (分布式奇偶校验)</strong>：对RAID 4的完美改进。它将校验信息<strong>分散存储</strong>在所有磁盘上，消除了单一校验盘的瓶颈。这是目前应用最广泛的RAID级别之一。</li>
                 <li><strong>RAID 6 (双重校验)</strong>：随着磁盘容量越来越大，在单盘损坏后进行数据重构（Rebuild）需要很长时间，期间如果再坏一块盘，数据就会丢失。RAID 6通过增加第二种独立的校验信息（如里德-所罗门码），可以容忍<strong>任意两块磁盘同时损坏</strong>，提供了更高的可靠性。</li>
                 </ul>
-                <h4 id="%E7%AC%AC%E4%B9%9D%E9%83%A8%E5%88%86%E6%80%A7%E8%83%BD%E7%9A%84%E6%B5%8B%E9%87%8F%E4%B8%8E%E6%8A%A5%E5%91%8A"><strong>第九部分：性能的测量与报告</strong></h4>
+                <h3 id="%E7%AC%AC%E4%B9%9D%E9%83%A8%E5%88%86%E6%80%A7%E8%83%BD%E7%9A%84%E6%B5%8B%E9%87%8F%E4%B8%8E%E6%8A%A5%E5%91%8A"><strong>第九部分：性能的测量与报告</strong></h3>
                 <p>我们所有的设计和优化，最终都需要一个客观的标尺来衡量。如何科学地测量和比较计算机的性能？</p>
-                <h5 id="91-%E6%80%A7%E8%83%BD%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%AE%9A%E4%B9%89"><strong>9.1 性能的基本定义</strong></h5>
+                <h4 id="91-%E6%80%A7%E8%83%BD%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%AE%9A%E4%B9%89"><strong>9.1 性能的基本定义</strong></h4>
                 <p>对于一个给定的任务：
                 $$
                 \text{Performance} = \frac{1}{\text{Execution Time}}
@@ -252,7 +250,7 @@
                 </ul>
                 </li>
                 </ul>
-                <h5 id="92-%E6%80%A7%E8%83%BD%E8%AF%84%E6%B5%8B%E7%9A%84%E5%9F%BA%E7%9F%B3%E5%9F%BA%E5%87%86%E6%B5%8B%E8%AF%95%E7%A8%8B%E5%BA%8F-benchmarks"><strong>9.2 性能评测的基石：基准测试程序 (Benchmarks)</strong></h5>
+                <h4 id="92-%E6%80%A7%E8%83%BD%E8%AF%84%E6%B5%8B%E7%9A%84%E5%9F%BA%E7%9F%B3%E5%9F%BA%E5%87%86%E6%B5%8B%E8%AF%95%E7%A8%8B%E5%BA%8F-benchmarks"><strong>9.2 性能评测的基石：基准测试程序 (Benchmarks)</strong></h4>
                 <p>我们不能用单一的指标（如MIPS, MFLOPS）来评价性能，因为这无法反映真实应用的复杂性。唯一科学的方法是运行<strong>真实的应用或者能够代表真实应用负载的程序</strong>。</p>
                 <ul>
                 <li><strong>SPEC (Standard Performance Evaluation Corporation)</strong>：最权威的CPU性能评测基准套件。
@@ -263,7 +261,7 @@
                 </li>
                 <li><strong>TPC (Transaction Processing Council)</strong>：服务器领域，特别是数据库和在线交易处理的基准测试，如TPC-C, TPC-E。</li>
                 </ul>
-                <h5 id="93-%E6%80%A7%E8%83%BD%E7%9A%84%E6%8A%A5%E5%91%8A%E4%B8%8E%E6%80%BB%E7%BB%93"><strong>9.3 性能的报告与总结</strong></h4>
+                <h4 id="93-%E6%80%A7%E8%83%BD%E7%9A%84%E6%8A%A5%E5%91%8A%E4%B8%8E%E6%80%BB%E7%BB%93"><strong>9.3 性能的报告与总结</strong></h4>
                 <ul>
                 <li><strong>可复现性 (Reproducibility)</strong>：是性能报告的黄金准则。必须详细列出测试环境的所有细节（硬件配置、操作系统版本、编译器、编译选项等），以便他人能够复现你的结果。</li>
                 <li><strong>如何总结多个程序的性能？</strong>
@@ -277,7 +275,7 @@
                 </ul>
                 </li>
                 </ul>
-                <h5 id="94-%E5%A4%84%E7%90%86%E5%99%A8%E6%80%A7%E8%83%BD%E7%9A%84%E9%93%81%E5%BE%8B"><strong>9.4 处理器性能的“铁律”</strong></h4>
+                <h4 id="94-%E5%A4%84%E7%90%86%E5%99%A8%E6%80%A7%E8%83%BD%E7%9A%84%E9%93%81%E5%BE%8B"><strong>9.4 处理器性能的“铁律”</strong></h4>
                 <p>最后，我们给出一个分解处理器性能的经典公式，它将硬件技术、组织结构和指令集/编译器联系在一起，是体系结构分析的核心工具。</p>
                 <p>$$
                 \text{CPU time} = \text{Instruction count} \times \text{CPI} \times \text{Clock cycle time}
@@ -292,16 +290,15 @@
                 <li><strong>时钟周期时间 (Clock cycle time)</strong>：由<strong>硬件实现技术</strong>和<strong>微体系结构</strong>（如最长流水线级延迟）决定。</li>
                 </ul>
                 <p><strong>架构师的日常，就是在优化这三个变量的乘积</strong>。例如，RISC架构可能会增加IC，但它能显著降低CPI和时钟周期时间，从而获得总体性能的提升。</p>
-              </article>
-            </main>
-        </div>
-        
-        <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-        <script>
-          mermaid.initialize({
-            startOnLoad: true
-          });
-        </script>
-        <script src="../script.js"></script>
-    </body>
-    </html>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
