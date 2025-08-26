@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数据库系统设计05:查询处理(下)</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A105%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86%E4%B8%8B">数据库系统设计05:查询处理(下)</h1>
+                <p>想象一下，你是一位城市的交通总规划师，你的任务是为市民规划从A点到B点的最佳路线。你可以选择步行、骑车、坐公交、乘地铁，还可以组合使用它们。不同的路线有不同的时间成本、金钱成本和换乘复杂度。你的大脑会做什么？你会基于地图、实时路况、票价等信息，快速地在大脑中模拟几条看似合理的路线，然后选择一条综合最优的。</p>
+                <p>数据库的<strong>查询优化器</strong>，做的就是完全一样的事情。当它收到一条SQL，它看到的不是一条简单的指令，而是一个巨大的“可能路径”的搜索空间。比如一个三张表的连接查询 <code>R JOIN S JOIN T</code>，它至少需要考虑：</p>
+                <ul>
+                <li><strong>连接顺序 (Join Order):</strong> 是 <code>(R JOIN S) JOIN T</code> 还是 <code>R JOIN (S JOIN T)</code>？两种顺序的中间结果集大小可能天差地别，导致后续成本的巨大差异。</li>
+                <li><strong>连接算法 (Join Algorithm):</strong> 对于每一次连接，是使用哈希连接、排序归并连接还是索引嵌套循环连接？</li>
+                <li><strong>访问路径 (Access Path):</strong> 对于每个表的访问，是使用全表扫描还是某个可用的索引？</li>
+                </ul>
+                <p>对于一个包含 $N$ 个表的连接查询，可能的连接顺序就有 $(2(N-1))! / (N-1)!$ 种（卡特兰数相关），这是一个随着 $N$ 爆炸性增长的数字。查询优化器的使命，就是<strong>在不花费太多时间的前提下，从这个浩瀚的搜索空间中，找到一个足够好（不一定是绝对最优）的执行计划</strong>。</p>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E9%80%BB%E8%BE%91%E4%BC%98%E5%8C%96%E4%B8%8E%E5%85%B3%E7%B3%BB%E4%BB%A3%E6%95%B0%E7%AD%89%E4%BB%B7%E5%8F%98%E6%8D%A2"><strong>第一部分：逻辑优化与关系代数等价变换</strong></h3>
+                <p>查询优化的第一步，不是立即去计算成本，而是对输入的查询进行<strong>逻辑上的“整容”</strong>。这个阶段的目标是：<strong>利用关系代数的等价变换规则，将初始的、可能很低效的查询逻辑，转化为一个执行上更优的、但逻辑上完全等价的新形式。</strong></p>
+                <p>这个过程也被称为<strong>启发式优化 (Heuristic Optimization)</strong> 或<strong>基于规则的优化 (Rule-Based Optimization, RBO)</strong>。</p>
+                <h4 id="11-%E6%9F%A5%E8%AF%A2%E7%9A%84%E5%86%85%E9%83%A8%E8%A1%A8%E7%A4%BA%E4%BB%8Esql%E5%88%B0%E9%80%BB%E8%BE%91%E6%9F%A5%E8%AF%A2%E8%AE%A1%E5%88%92"><strong>1.1 查询的内部表示：从SQL到逻辑查询计划</strong></h4>
+                <ol>
+                <li><strong>解析 (Parsing):</strong> SQL语句被解析成一棵<strong>解析树 (Parse Tree)</strong>，检查语法正确性。</li>
+                <li><strong>验证 (Validation):</strong> 检查解析树中的表名、列名是否存在，进行类型检查等。</li>
+                <li><strong>转化为逻辑查询计划:</strong> 将解析树转化为一个内部的、与具体算法无关的<strong>逻辑查询计划 (Logical Query Plan)</strong>。这通常是一棵由关系代数算子（$\sigma$, $\pi$, $\bowtie$, $\times$, ...）组成的树。</li>
+                </ol>
+                <p><strong>[示例]</strong>
+                SQL:</p>
+                <div class="code-container">
+                    <pre class="hljs"><code><div><span class="hljs-keyword">SELECT</span> T.name <span class="hljs-keyword">FROM</span> Reserves R, Sailors S, Boats B <span class="hljs-keyword">WHERE</span> R.sid = S.sid <span class="hljs-keyword">AND</span> R.bid = B.bid <span class="hljs-keyword">AND</span> B.color = <span class="hljs-string">'red'</span> <span class="hljs-keyword">AND</span> S.rating &gt; <span class="hljs-number">7</span>;
+</div></code></pre>
+                </div>
+                <p><strong>初始逻辑计划 (可能由解析器直接生成):</strong></p>
+                <div class="mermaid">
+                    graph TD
+                        A[π T.name] --&gt; B(σ R.sid=S.sid AND R.bid=B.bid AND B.color='red' AND S.rating&gt;7)
+                        B --&gt; C(×)
+                        C --&gt; D[Reserves R]
+                        C --&gt; E[Sailors S]
+                        C --&gt; F[Boats B]
+                </div>
+                <p>这个计划极其糟糕：它先对三张表做<strong>笛卡尔积</strong>，生成一个无比巨大的中间结果，然后再在这个结果上做选择。我们的目标就是避免这种情况。</p>
+                <h4 id="12-%E6%A0%B8%E5%BF%83%E4%BC%98%E5%8C%96%E6%B3%95%E5%88%99%E5%B0%86%E9%80%89%E6%8B%A9%E5%92%8C%E6%8A%95%E5%BD%B1%E4%B8%8B%E6%8E%A8-push-down"><strong>1.2 核心优化法则：将选择和投影“下推” (Push Down)</strong></h4>
+                <p>这是逻辑优化中<strong>最重要、最有效</strong>的法则。其核心思想是：<strong>尽可能早地执行选择 ($\sigma$) 和投影 ($\pi$) 操作，以减小后续操作（尤其是昂贵的连接）处理的中间结果集的大小。</strong></p>
+                <h5 id="%E6%B3%95%E5%88%991%E9%80%89%E6%8B%A9%E4%B8%8B%E6%8E%A8-pushing-selections"><strong>法则1：选择下推 (Pushing Selections)</strong></h5>
+                <ul>
+                <li>$\sigma_{P1 \land P2}(R) \equiv \sigma_{P1}(\sigma_{P2}(R))$ (分解选择条件)</li>
+                <li>$\sigma_P(R \times S) \equiv \sigma_P(R) \times S$ (如果P只涉及R的属性)</li>
+                <li>$\sigma_P(R \bowtie S) \equiv \sigma_P(R) \bowtie S$ (如果P只涉及R的属性)</li>
+                <li>$\sigma_{P_R \land P_S}(R \bowtie S) \equiv \sigma_{P_R}(R) \bowtie \sigma_{P_S}(S)$ (最重要的规则)</li>
+                </ul>
+                <p><strong>[应用示例]</strong> 对上面的初始计划应用选择下推：</p>
+                <ol>
+                <li>将四个<code>AND</code>条件分解。</li>
+                <li>将 <code>B.color = 'red'</code> 下推到 <code>Boats</code> 表之上。</li>
+                <li>将 <code>S.rating > 7</code> 下推到 <code>Sailors</code> 表之上。</li>
+                <li>连接条件 <code>R.sid = S.sid</code> 和 <code>R.bid = B.bid</code> 不能再下推，它们定义了连接本身。</li>
+                </ol>
+                <p><strong>优化后的逻辑计划:</strong></p>
+                <div class="mermaid">
+                    graph TD
+                        A[π S.name] --&gt; B(⋈ R.bid=B.bid)
+                        B --&gt; C(⋈ R.sid=S.sid)
+                        C --&gt; D[Reserves R]
+                        C --&gt; E[σ S.rating &gt; 7]
+                        E --&gt; F[Sailors S]
+                        B --&gt; G[σ B.color = 'red']
+                        G --&gt; H[Boats B]
+                </div>
+                <p>这个计划的效率天差地别：它先对<code>Boats</code>和<code>Sailors</code>进行过滤，用<strong>小得多的结果集</strong>去和<code>Reserves</code>表进行连接。</p>
+                <h5 id="%E6%B3%95%E5%88%992%E6%8A%95%E5%BD%B1%E4%B8%8B%E6%8E%A8-pushing-projections"><strong>法则2：投影下推 (Pushing Projections)</strong></h5>
+                <ul>
+                <li><strong>核心思想:</strong> 尽早地丢弃掉那些在后续计算和最终结果中都用不到的列。</li>
+                <li>$\pi_A(R \bowtie S) \equiv \pi_A(\pi_{A \cup J}(R) \bowtie \pi_{B \cup J}(S))$ (其中J是连接属性，A和B是R和S中最终需要的属性)</li>
+                </ul>
+                <p><strong>[应用示例]</strong> 在上一个优化计划的基础上，我们发现最终只需要<code>S.name</code>。</p>
+                <ul>
+                <li>对于<code>Sailors</code>表，在<code>σ</code>之后，我们只需要保留<code>sid</code>（用于连接）和<code>name</code>（最终输出）。</li>
+                <li>对于<code>Boats</code>表，在<code>σ</code>之后，我们只需要保留<code>bid</code>（用于连接）。</li>
+                <li>对于<code>Reserves</code>表，我们只需要<code>sid</code>和<code>bid</code>（用于连接）。</li>
+                </ul>
+                <p><strong>最终的逻辑计划:</strong></p>
+                <div class="mermaid">
+                    graph TD
+                        subgraph "最终逻辑查询计划 (左深树结构)"
+                            A[π S.name] --&gt; B[⋈ R.bid = B.bid]
+                            
+                            B --&gt; C[⋈ R.sid = S.sid]
+                            
+                            C --&gt; D["π sid, bid<br/>(Reserves R)"]
+                            
+                            C --&gt; E["π sid, name<br/>(σ S.rating > 7<br/>(Sailors S))"]
+                            
+                            B --&gt; F["π bid<br/>(σ B.color = 'red'<br/>(Boats B))"]
+                        end
+                </div>
+                <h4 id="13-%E5%85%B6%E4%BB%96%E9%87%8D%E8%A6%81%E7%9A%84%E7%AD%89%E4%BB%B7%E5%8F%98%E6%8D%A2%E8%A7%84%E5%88%99"><strong>1.3 其他重要的等价变换规则</strong></h4>
+                <ul>
+                <li><strong>连接的交换律与结合律:</strong>
+                <ul>
+                <li>$R \bowtie S \equiv S \bowtie R$</li>
+                <li>$(R \bowtie S) \bowtie T \equiv R \bowtie (S \bowtie T)$</li>
+                <li><strong>重要性:</strong> 这两条规则是<strong>连接顺序优化 (Join Order Optimization)</strong> 的理论基础。优化器可以自由地探索不同的连接树形状。</li>
+                </ul>
+                </li>
+                <li><strong>将笛卡尔积与选择合并为连接:</strong>
+                <ul>
+                <li>$\sigma_{R.a=S.b}(R \times S) \equiv R \bowtie_{R.a=S.b} S$</li>
+                <li>这是最开始那个糟糕计划的核心优化点。优化器会自动识别出这种模式，并将其转化为更高效的连接操作。</li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E7%89%A9%E7%90%86%E4%BC%98%E5%8C%96%E4%B8%8E%E5%9F%BA%E4%BA%8E%E6%88%90%E6%9C%AC%E7%9A%84%E9%80%89%E6%8B%A9"><strong>第二部分：物理优化与基于成本的选择</strong></h3>
+                <p>逻辑优化给我们提供了一个或多个结构上更优的逻辑计划。现在，进入<strong>物理优化 (Physical Optimization)</strong> 阶段，也称为<strong>基于成本的优化 (Cost-Based Optimization, CBO)</strong>。</p>
+                <p>这个阶段的目标是：<strong>为逻辑计划中的每一个算子，选择一个具体的物理实现算法，并确定最佳的连接顺序，使得总成本最小。</strong></p>
+                <h4 id="21-%E6%88%90%E6%9C%AC%E4%BC%B0%E7%AE%97%E7%9A%84%E6%A0%B8%E5%BF%83%E9%80%89%E6%8B%A9%E7%8E%87%E4%B8%8E%E7%BB%93%E6%9E%9C%E5%9F%BA%E6%95%B0"><strong>2.1 成本估算的核心：选择率与结果基数</strong></h4>
+                <p>为了估算一个操作的成本，我们必须先估算它<strong>输出结果的大小 (Cardinality Estimation)</strong>。</p>
+                <ul>
+                <li><strong>选择操作的基数估算 ($\sigma_{attr=value}(R)$):</strong>
+                <ul>
+                <li><strong>假设:</strong> 值在属性域内均匀分布。</li>
+                <li><strong>估算公式:</strong> $T(\sigma_{attr=value}(R)) = T(R) / V(attr, R)$
+                <ul>
+                <li>$T(R)$: 关系R的总元组数。</li>
+                <li>$V(attr, R)$: 属性<code>attr</code>的不同值的个数（基数）。</li>
+                </ul>
+                </li>
+                <li><strong>选择率 (Selectivity Factor, SF):</strong> $1 / V(attr, R)$。</li>
+                </ul>
+                </li>
+                <li><strong>范围选择的基数估算 ($\sigma_{attr > value}(R)$):</strong>
+                <ul>
+                <li><strong>均匀分布假设:</strong> $T(\sigma_{attr > value}(R)) = T(R) \times (\text{MaxValue} - value) / (\text{MaxValue} - \text{MinValue})$。</li>
+                <li><strong>直方图 (Histograms):</strong> 现实世界数据分布极不均匀。现代优化器使用直方图来更精确地描述数据分布。
+                <ul>
+                <li><strong>等宽直方图 (Equi-width):</strong> 将值域划分为等宽的桶，记录每个桶内的元组数。</li>
+                <li><strong>等高直方图 (Equi-depth):</strong> 将值域划分为桶，使得每个桶内的元组数大致相等。等高直方图能更好地处理数据倾斜。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li><strong>连接操作的基数估算 ($R \bowtie_{R.a=S.b} S$):</strong>
+                <ul>
+                <li><strong>简化假设:</strong>
+                <ul>
+                <li>$a$ 是 $R$ 的外键，引用 $S$ 的主键 $b$：结果大小为 $T(R)$。</li>
+                <li>$b$ 是 $S$ 的外键，引用 $R$ 的主键 $a$：结果大小为 $T(S)$。</li>
+                </ul>
+                </li>
+                <li><strong>通用公式 (基于值域重叠):</strong>
+                <ul>
+                <li>$T(R \bowtie S) = T(R) \times T(S) / \max(V(a,R), V(b,S))$</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="22-%E6%90%9C%E7%B4%A2%E6%9C%80%E4%BD%B3%E8%AE%A1%E5%88%92%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E7%9A%84%E6%99%BA%E6%85%A7"><strong>2.2 搜索最佳计划：动态规划的智慧</strong></h4>
+                <p>面对连接顺序的组合爆炸问题，穷举搜索是不可行的。现代优化器（如System R风格的优化器）通常采用<strong>动态规划 (Dynamic Programming)</strong> 算法。</p>
+                <p><strong>算法思想（以自底向上为例）：</strong></p>
+                <ol>
+                <li>
+                <p><strong>Pass 1 (单个关系的最佳访问路径):</strong></p>
+                <ul>
+                <li>对于每个单表 <code>R</code>，找出访问它的最佳计划。</li>
+                <li>例如，对于 $\sigma_{P}(R)$，计算：
+                <ul>
+                <li>成本(全表扫描)</li>
+                <li>成本(使用<code>P</code>上的索引A)</li>
+                <li>成本(使用<code>P</code>上的索引B)</li>
+                <li>...</li>
+                </ul>
+                </li>
+                <li>选择成本最低的那个，记录下来（例如 <code>BestPlan({R})</code>）。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Pass 2 (两个关系的连接):</strong></p>
+                <ul>
+                <li>对于所有可能的两表连接组合（如 <code>{R, S}</code>），找出连接它们的最佳计划。</li>
+                <li>要计算 <code>BestPlan({R, S})</code>，考虑两种可能：
+                <ul>
+                <li><strong>路径1:</strong> <code>BestPlan({R}) JOIN S</code>
+                <ul>
+                <li>对这个连接，再评估所有可能的连接算法（Hash Join, Merge Join, Index Join...）和访问S的路径（Scan, Index...），取成本最低者。</li>
+                </ul>
+                </li>
+                <li><strong>路径2:</strong> <code>BestPlan({S}) JOIN R</code>
+                <ul>
+                <li>同理，评估所有可能。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li>比较路径1和路径2的总成本，选择更优的，记录为 <code>BestPlan({R, S})</code>。</li>
+                <li><strong>剪枝 (Pruning):</strong> 在这个过程中，优化器会利用一个重要的**“有趣顺序” (Interesting Order)** 概念。如果一个计划的输出结果是排好序的，而这个顺序可能对后续的<code>JOIN</code>（如Sort-Merge Join）或<code>ORDER BY</code>有利，那么即使这个计划的成本稍高，它也可能被保留下来作为候选。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Pass $k$ ($k$个关系的连接):</strong></p>
+                <ul>
+                <li>对于所有大小为 $k$ 的关系子集 <code>{R1, ..., Rk}</code>，找出连接它们的最佳计划。</li>
+                <li>要计算 <code>BestPlan({R1, ..., Rk})</code>，可以将其分解为连接一个大小为 $k-1$ 的子集和一个单表。例如：
+                <ul>
+                <li><code>BestPlan({R1, ..., Rk-1}) JOIN Rk</code></li>
+                </ul>
+                </li>
+                <li>遍历所有可能的分解方式，计算每种方式的最低成本，最终找到 <code>BestPlan({R1, ..., Rk})</code>。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>最终结果:</strong> <code>BestPlan({R1, ..., RN})</code> 就是我们想要的最终执行计划。</p>
+                </li>
+                </ol>
+                <p><strong>[拓展] 左深树 vs. 浓密树 (Left-Deep vs. Bushy Trees):</strong></p>
+                <ul>
+                <li><strong>左深连接树:</strong> <code>((R1 JOIN R2) JOIN R3) JOIN R4</code>。所有连接的内层关系都是一个单表。
+                <ul>
+                <li><strong>优点:</strong> 搜索空间大大减小，易于优化，并且中间结果可以很好地被<strong>流水线化 (Pipelining)</strong> 执行。</li>
+                <li><strong>缺点:</strong> 可能错过某些更优的浓密树计划。</li>
+                </ul>
+                </li>
+                <li><strong>浓密连接树:</strong> <code>(R1 JOIN R2) JOIN (R3 JOIN R4)</code>。
+                <ul>
+                <li><strong>优点:</strong> 搜索空间更大，可能找到绝对最优解。</li>
+                <li><strong>缺点:</strong> 优化过程更复杂，中间结果 <code>(R3 JOIN R4)</code> 可能需要<strong>物化 (Materialize)</strong> 到磁盘，打断流水线。</li>
+                </ul>
+                </li>
+                </ul>
+                <p>大多数优化器（如PostgreSQL）默认只搜索左深树，但提供选项来探索更复杂的浓密树。</p>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86-%E4%BB%8E%E7%94%9F%E6%88%90%E5%88%B0%E6%89%A7%E8%A1%8C"><strong>第三部分： 从生成到执行</strong></h3>
+                <h4 id="31-%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92%E7%9A%84%E7%9C%9F%E9%9D%A2%E7%9B%AE"><strong>3.1 执行计划的真面目</strong></h4>
+                <p>优化器最终输出的物理执行计划，是一棵由<strong>物理算子 (Physical Operators)</strong> 组成的树。每个算子都实现了<code>open()</code>, <code>next()</code>, <code>close()</code>这三个接口（<strong>迭代器模型 / Volcano模型</strong>）。</p>
+                <ul>
+                <li><code>open()</code>: 初始化算子，分配内存，打开子算子的迭代器。</li>
+                <li><code>next()</code>: 从子算子获取一个或多个元组，进行处理，然后返回一个结果元组。如果处理完毕，返回<code>NULL</code>。</li>
+                <li><code>close()</code>: 清理资源。</li>
+                </ul>
+                <p><strong>[示例物理计划]</strong></p>
+                <div class="mermaid">
+                    graph TD
+                        subgraph "物理执行计划 (迭代器模型)"
+                            direction TB
+                            Root[Client] -- next() --&gt; HJ1[Hash Join<br/>on R.bid = B.bid]
+                    
+                            subgraph "探测端 (Probe Input)"
+                                HJ1 -- next() --&gt; HJ2[Hash Join<br/>on R.sid = S.sid]
+                                
+                                subgraph "探测端 (Probe Input)"
+                                     HJ2 -- next() --&gt; FSCAN_R[Table Scan<br/>Reserves R]
+                                end
+                                
+                                subgraph "构建端 (Build Input)"
+                                     HJ2 -- next() --&gt; IXSCAN_S[Index Scan<br/>Sailors S<br/>where rating &gt; 7]
+                                end
+                            end
+                            
+                            subgraph "构建端 (Build Input)"
+                                HJ1 -- next() --&gt; IXSCAN_B[Index Scan<br/>Boats B<br/>where color = 'red']
+                            end
+                        end
+                </div>
+                <ul>
+                <li><strong>执行流程:</strong> 根节点调用<code>next()</code>，这个调用会级联地向下传递，直到叶子节点（扫描算子）。叶子节点从磁盘读取元组返回，上层算子处理后，再向上返回，数据就像被“拉” (Pull) 上来一样。</li>
+                </ul>
+                <h4 id="32-%E6%B5%81%E6%B0%B4%E7%BA%BF-vs-%E7%89%A9%E5%8C%96-pipelining-vs-materialization"><strong>3.2 流水线 vs. 物化 (Pipelining vs. Materialization)</strong></h4>
+                <ul>
+                <li><strong>流水线执行 (Pipelining):</strong>
+                <ul>
+                <li>一个算子的输出，<strong>直接作为</strong>另一个算子的输入，中间结果不写入磁盘。</li>
+                <li>例如，<code>σ(R)</code>的结果可以直接流入<code>JOIN</code>算子。</li>
+                <li><strong>优点:</strong> 极大地节省I/O，降低延迟。</li>
+                </ul>
+                </li>
+                <li><strong>物化执行 (Materialization):</strong>
+                <ul>
+                <li>一个算子的全部输出结果，先<strong>完整地写入</strong>一个临时文件，然后再由下一个算子读取。</li>
+                <li><strong>何时需要物化？</strong>
+                <ul>
+                <li><strong>阻塞算子 (Blocking Operators):</strong> 像<code>SORT</code>这样的算子，必须看到所有输入后才能产生第一个输出。</li>
+                <li><strong>浓密树的右子树:</strong> <code>(R1 JOIN R2)</code>的结果可以流水线给下一个JOIN，但<code>(R3 JOIN R4)</code>必须先计算完毕并物化。</li>
+                <li><strong>内存不足:</strong> 哈希连接的构建阶段，如果哈希表太大，就需要将分区物化到磁盘。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="33-%E7%8E%B0%E4%BB%A3%E4%BC%98%E5%8C%96%E5%99%A8%E7%9A%84%E6%BC%94%E8%BF%9B"><strong>3.3 现代优化器的演进</strong></h4>
+                <ul>
+                <li><strong>随机化算法 (Randomized Algorithms):</strong> 当连接表数量非常多时（&gt;15-20），动态规划的开销也无法承受。优化器会退化为随机化算法，如<strong>模拟退火 (Simulated Annealing)</strong> 或<strong>遗传算法 (Genetic Algorithms)</strong>，来在巨大的搜索空间中进行随机“跳跃”，以期找到一个足够好的局部最优解。</li>
+                <li><strong>自适应查询处理 (Adaptive Query Processing):</strong> 传统的优化器在查询开始前就制定了一个<strong>静态的、固定不变</strong>的计划。但它的基数估算可能出错。自适应查询处理允许执行引擎在<strong>运行时</strong>监测实际的中间结果大小，如果发现与估算偏差巨大，可以动态地<strong>修改或重新优化</strong>后续的执行计划。</li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
