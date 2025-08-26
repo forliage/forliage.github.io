@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>计算机体系结构1-1:设计原则与性能演进</title>
-    
     <link rel="stylesheet" href="../style.css">
-    
     <script>
       MathJax = {
         tex: {
@@ -54,12 +52,12 @@
                 <li><strong>硬件 (Hardware)</strong>：微体系结构的物理实现。这包括具体的逻辑门设计、芯片封装技术、散热方案等。</li>
                 </ol>
                 <p><img src="../images/imagea001.png" alt="figure 1"></p>
-                <h4 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E6%88%91%E4%BB%AC%E5%A6%82%E4%BD%95%E8%AE%A9%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8F%98%E5%BE%97%E5%A6%82%E6%AD%A4%E4%B9%8B%E5%BF%AB"><strong>第一部分：我们如何让计算机变得如此之快？</strong></h4>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E6%88%91%E4%BB%AC%E5%A6%82%E4%BD%95%E8%AE%A9%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8F%98%E5%BE%97%E5%A6%82%E6%AD%A4%E4%B9%8B%E5%BF%AB"><strong>第一部分：我们如何让计算机变得如此之快？</strong></h3>
                 <p>我们先来看一张震撼人心的图表。</p>
                 <p><img src="../images/imagea002.png" alt="figure 2"></p>
                 <p>这张图展示了过去40年处理器性能的指数级增长。从1980年到21世纪初，我们见证了每年超过50%的性能复合增长率，这是一个技术史上的奇迹。问题是，<strong>这个奇迹是如何发生的？</strong></p>
                 <p>答案并非单一的，而是两大核心技术支柱共同作用的结果：<strong>指令级并行 (Instruction-Level Parallelism, ILP)</strong> 和 <strong>高速缓存 (Caching)</strong>。</p>
-                <h5 id="11-risc%E7%9A%84%E5%85%B4%E8%B5%B7%E4%B8%8E%E6%8C%87%E4%BB%A4%E7%BA%A7%E5%B9%B6%E8%A1%8C"><strong>1.1 RISC的兴起与指令级并行</strong></h5>
+                <h4 id="11-risc%E7%9A%84%E5%85%B4%E8%B5%B7%E4%B8%8E%E6%8C%87%E4%BB%A4%E7%BA%A7%E5%B9%B6%E8%A1%8C"><strong>1.1 RISC的兴起与指令级并行</strong></h4>
                 <p>在80年代，主流的CISC（复杂指令集计算机）设计哲学是让指令尽可能强大，一条指令完成复杂的操作，以缩小所谓“语义鸿沟”。但这种复杂的指令解码困难，执行时间不一，极大地阻碍了硬件效率的提升。</p>
                 <p>这时，一种全新的设计哲学——<strong>RISC（精简指令集计算机）</strong> 应运而生。RISC的核心思想并非简单地“减少指令数量”，而是：</p>
                 <ul>
@@ -68,7 +66,7 @@
                 <li><strong>依赖编译器</strong>：将CISC中由硬件完成的复杂操作，转交给编译器用简单的RISC指令序列来组合实现。</li>
                 </ul>
                 <p><strong>为什么这个哲学是革命性的？</strong> 因为一个简单、规整的指令集，为硬件实现指令级的“并行”处理铺平了道路，就像标准化的零件让工厂的流水线作业成为可能一样。</p>
-                <p><strong>1.1.1 流水线 (Pipelining)：指令执行的“装配线”</strong></p>
+                <h4 id="111-%E6%B5%81%E6%B0%B4%E7%BA%BF-pipelining%E6%8C%87%E4%BB%A4%E6%89%A7%E8%A1%8C%E7%9A%84%E8%A3%85%E9%85%8D%E7%BA%BF"><strong>1.1.1 流水线 (Pipelining)：指令执行的“装配线”</strong></h4>
                 <p>如果一条指令的执行需要多个步骤（如取指IF、译码ID、执行EX、访存MEM、写回WB），我们为什么要等一条指令走完全部流程再开始下一条呢？</p>
                 <p>流水线技术将指令执行过程切分成多个阶段，让不同指令的不同阶段重叠执行。就像汽车装配线一样，当一辆车在安装轮胎时，下一辆车可以同时在安装引擎。</p>
                 <p><img src="../images/imagea003.png" alt="figure 3">
@@ -77,7 +75,7 @@
                 <ul>
                 <li><strong>设计权衡</strong>：流水线的深度不是越深越好。更深的流水线意味着更高的时钟频率潜力，但也会增加因分支预测失败等导致的流水线排空（flush）惩罚，同时增加了级间锁存器的开销。</li>
                 </ul>
-                <p><strong>1.1.2 多发射 (Multiple Issue) / 超标量 (Superscalar)：更宽的流水线</strong></p>
+                <h4 id="112-%E5%A4%9A%E5%8F%91%E5%B0%84-multiple-issue--%E8%B6%85%E6%A0%87%E9%87%8F-superscalar%E6%9B%B4%E5%AE%BD%E7%9A%84%E6%B5%81%E6%B0%B4%E7%BA%BF"><strong>1.1.2 多发射 (Multiple Issue) / 超标量 (Superscalar)：更宽的流水线</strong></h4>
                 <p>当CPI已经接近1时，如何进一步提升性能？答案是：如果一条流水线不够，那就用多条。</p>
                 <p>超标量处理器在一个时钟周期内可以同时取指、译码和发射多条指令到不同的执行单元（如两个ALU、一个FPU等）。这使得CPI可以小于1，即平均每个时钟周期完成超过一条指令。</p>
                 <p><img src="../images/imagea005.png" alt="figure 5"></p>
@@ -85,7 +83,7 @@
                 <ul>
                 <li><strong>设计权衡</strong>：多发射的代价是巨大的。硬件需要处理指令间的依赖关系（数据依赖、控制依赖、结构依赖），需要更复杂的调度逻辑、更多的端口和总线，功耗和芯片面积都急剧增加。这也是为什么从单发射到2发射/4发射提升显著，但继续增加宽度会遇到收益递减的瓶颈。</li>
                 </ul>
-                <h5 id="12-%E5%AD%98%E5%82%A8%E5%99%A8%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84%E4%B8%8E%E7%BC%93%E5%AD%98"><strong>1.2 存储器层次结构与缓存</strong></h5>
+                <h4 id="12-%E5%AD%98%E5%82%A8%E5%99%A8%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84%E4%B8%8E%E7%BC%93%E5%AD%98"><strong>1.2 存储器层次结构与缓存</strong></h4>
                 <p>CPU性能的狂飙突进，很快遇到了一个巨大的障碍——<strong>内存墙 (The Memory Wall)</strong>。CPU的速度增长远超DRAM内存的速度增长。即使CPU能在一瞬间处理完数据，如果数据还在遥远的内存里，它也只能“无所事事地等待”。</p>
                 <p>解决这个问题的设计哲学是<strong>局部性原理 (Principle of Locality)</strong>：</p>
                 <ul>
@@ -110,18 +108,18 @@
                 <ul>
                 <li><strong>设计权衡</strong>：缓存的设计充满了取舍。缓存大小、相联度、替换策略（如LRU）、写策略（写穿/写回）等都会影响命中率、延迟和硬件复杂度。我们将在后续课程中深入探讨。</li>
                 </ul>
-                <h4 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E8%8C%83%E5%BC%8F%E8%BD%AC%E7%A7%BB%E5%90%8E%E6%91%A9%E5%B0%94%E5%AE%9A%E5%BE%8B%E6%97%B6%E4%BB%A3%E7%9A%84%E6%8C%91%E6%88%98%E4%B8%8E%E6%9C%BA%E9%81%87"><strong>第二部分：范式转移：后摩尔定律时代的挑战与机遇</strong></h4>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E8%8C%83%E5%BC%8F%E8%BD%AC%E7%A7%BB%E5%90%8E%E6%91%A9%E5%B0%94%E5%AE%9A%E5%BE%8B%E6%97%B6%E4%BB%A3%E7%9A%84%E6%8C%91%E6%88%98%E4%B8%8E%E6%9C%BA%E9%81%87"><strong>第二部分：范式转移：后摩尔定律时代的挑战与机遇</strong></h3>
                 <p>21世纪初，持续了近20年的性能盛宴戛然而止。性能增长曲线明显放缓。</p>
                 <p><img src="../images/imagea002.png" alt="figure 2"></p>
                 <p>为什么？因为两个经典的“定律”走到了尽头。</p>
-                <h5 id="21-%E4%B8%A4%E5%A4%A7%E5%A2%99%E5%A3%81%E5%8A%9F%E8%80%97%E5%A2%99%E4%B8%8E%E9%A2%91%E7%8E%87%E5%A2%99"><strong>2.1 两大“墙壁”：功耗墙与频率墙</strong></h5>
+                <h4 id="21-%E4%B8%A4%E5%A4%A7%E5%A2%99%E5%A3%81%E5%8A%9F%E8%80%97%E5%A2%99%E4%B8%8E%E9%A2%91%E7%8E%87%E5%A2%99"><strong>2.1 两大“墙壁”：功耗墙与频率墙</strong></h4>
                 <ul>
                 <li><strong>登纳德缩放定律 (Dennard Scaling) 的终结</strong>：该定律指出，随着晶体管尺寸缩小，其功耗密度保持不变。这意味着我们可以在同样面积和功耗下集成更多更快的晶体管。然而，在2004年左右，由于漏电流等物理极限，即使晶体管尺寸继续缩小，其功耗也无法同比例下降。这导致了<strong>功耗墙 (The Power Wall)</strong>——我们无法在可接受的散热范围内继续提高芯片的功耗。</li>
                 <li><strong>摩尔定律 (Moore's Law) 的放缓</strong>：虽然晶体管数量的增长仍在延续（尽管变慢），但我们已无法简单地通过提高时钟频率来获得性能提升（<strong>频率墙</strong>）。过高的频率会带来指数级增长的功耗和散热问题。</li>
                 </ul>
                 <p><img src="../images/imagea007.png" alt="figure 7"></p>
                 <p><strong>设计哲学的根本转变</strong>：既然无法让<strong>单个核心</strong>变得更快（提高ILP的收益递减，频率无法提升），唯一的出路就是在一个芯片上集成<strong>多个核心</strong>，即走向<strong>多核处理器 (Multi-Core Processor)</strong>。</p>
-                <h5 id="22-%E6%96%B0%E7%9A%84%E6%8C%91%E6%88%98%E5%B9%B6%E8%A1%8C%E7%BC%96%E7%A8%8B%E4%B8%8E%E9%98%BF%E5%A7%86%E8%BE%BE%E5%B0%94%E5%AE%9A%E5%BE%8B"><strong>2.2 新的挑战：并行编程与阿姆达尔定律</strong></h5>
+                <h4 id="22-%E6%96%B0%E7%9A%84%E6%8C%91%E6%88%98%E5%B9%B6%E8%A1%8C%E7%BC%96%E7%A8%8B%E4%B8%8E%E9%98%BF%E5%A7%86%E8%BE%BE%E5%B0%94%E5%AE%9A%E5%BE%8B"><strong>2.2 新的挑战：并行编程与阿姆达尔定律</strong></h4>
                 <p>多核处理器的出现，将性能提升的压力从硬件设计师部分转移给了软件开发者。仅仅增加核心数量并不能自动加速程序，除非程序本身可以被有效地并行化。</p>
                 <p>而并行加速的理论上限，被<strong>阿姆达尔定律 (Amdahl's Law)</strong> 精准地刻画。</p>
                 <p>该定律指出，一个程序在多处理器系统上的加速比，受限于程序中<strong>必须串行执行</strong>的部分的比例。</p>
@@ -147,9 +145,9 @@
                 </li>
                 </ul>
                 <p>此外，我们还要警惕“<strong>拉德玛定律</strong>”（Lhadma's Law，Amdahl的反写，一个玩笑式的说法）：<strong>不要为了优化常见情况而过度损害非常见情况的性能</strong>，否则总体性能可能会下降。</p>
-                <h4 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E4%B8%8D%E5%90%8C%E8%AE%BE%E8%AE%A1%E7%9B%AE%E6%A0%87%E7%9A%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><strong>第三部分：不同设计目标的体系结构</strong></h4>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E4%B8%8D%E5%90%8C%E8%AE%BE%E8%AE%A1%E7%9B%AE%E6%A0%87%E7%9A%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><strong>第三部分：不同设计目标的体系结构</strong></h3>
                 <p>我们已经理解了驱动计算机发展的核心技术和限制。现在，让我们看看这些设计原则和权衡在现实世界中催生了怎样多样化的计算机形态。我们将计算机分为五大类。</p>
-                <h5 id="31-%E4%BA%94%E5%A4%A7%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B1%BB%E5%88%AB%E5%8F%8A%E5%85%B6%E6%A0%B8%E5%BF%83%E8%AE%BE%E8%AE%A1%E7%9B%AE%E6%A0%87"><strong>3.1 五大计算机类别及其核心设计目标</strong></h5>
+                <h4 id="31-%E4%BA%94%E5%A4%A7%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B1%BB%E5%88%AB%E5%8F%8A%E5%85%B6%E6%A0%B8%E5%BF%83%E8%AE%BE%E8%AE%A1%E7%9B%AE%E6%A0%87"><strong>3.1 五大计算机类别及其核心设计目标</strong></h4>
                 <ol>
                 <li>
                 <p><strong>个人移动设备 (PMD - Personal Mobile Device)</strong></p>
@@ -188,9 +186,9 @@
                 </li>
                 </ol>
                 <p>这五类计算机完美地展示了体系结构设计中的“取舍”艺术。没有一种“最好”的架构，只有“最适合”特定场景的架构。</p>
-                <h4 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E6%B7%B1%E5%85%A5%E6%8C%87%E4%BB%A4%E9%9B%86%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84-isa"><strong>第四部分：深入指令集体系结构 (ISA)</strong></h4>
+                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E6%B7%B1%E5%85%A5%E6%8C%87%E4%BB%A4%E9%9B%86%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84-isa"><strong>第四部分：深入指令集体系结构 (ISA)</strong></h3>
                 <p>现在，我们回到体系结构的核心——ISA。ISA是计算机的“灵魂”，它定义了硬件能做什么，以及软件如何指挥硬件。我们将从7个维度来剖析ISA的设计。</p>
-                <h5 id="41-isa%E7%9A%84%E7%B1%BB%E5%88%AB-class-of-isa"><strong>4.1 ISA的类别 (Class of ISA)</strong></h5>
+                <h4 id="41-isa%E7%9A%84%E7%B1%BB%E5%88%AB-class-of-isa"><strong>4.1 ISA的类别 (Class of ISA)</strong></h4>
                 <ul>
                 <li><strong>设计抉择</strong>：计算指令的操作数从哪里来？
                 <ul>
@@ -206,7 +204,7 @@
                 </ul>
                 </li>
                 </ul>
-                <h5 id="42-%E5%86%85%E5%AD%98%E5%AF%BB%E5%9D%80-memory-addressing"><strong>4.2 内存寻址 (Memory Addressing)</strong></h5>
+                <h4 id="42-%E5%86%85%E5%AD%98%E5%AF%BB%E5%9D%80-memory-addressing"><strong>4.2 内存寻址 (Memory Addressing)</strong></h4>
                 <ul>
                 <li><strong>字节寻址 (Byte Addressing)</strong>：现代计算机内存的最小可寻址单位是一个字节（8位），每个字节都有唯一的地址。</li>
                 <li><strong>数据对齐 (Alignment)</strong>：一个大小为<code>s</code>字节的对象，其地址<code>A</code>若是<code>s</code>的整数倍（<code>A mod s = 0</code>），则称之为对齐的。</li>
@@ -217,7 +215,7 @@
                 </ul>
                 </li>
                 </ul>
-                <h5 id="43-%E5%AF%BB%E5%9D%80%E6%A8%A1%E5%BC%8F-addressing-modes"><strong>4.3 寻址模式 (Addressing Modes)</strong></h5>
+                <h4 id="43-%E5%AF%BB%E5%9D%80%E6%A8%A1%E5%BC%8F-addressing-modes"><strong>4.3 寻址模式 (Addressing Modes)</strong></h4>
                 <p>寻址模式定义了指令如何指定其操作数的位置。
                 <img src="../images/imagea008.png" alt="figure 8"></p>
                 <ul>
@@ -236,10 +234,10 @@
                 </ul>
                 </li>
                 </ul>
-                <h5 id="44-%E6%93%8D%E4%BD%9C%E6%95%B0%E7%B1%BB%E5%9E%8B%E4%B8%8E%E5%A4%A7%E5%B0%8F-types-and-sizes-of-operands"><strong>4.4 操作数类型与大小 (Types and Sizes of Operands)</strong></h5>
+                <h4 id="44-%E6%93%8D%E4%BD%9C%E6%95%B0%E7%B1%BB%E5%9E%8B%E4%B8%8E%E5%A4%A7%E5%B0%8F-types-and-sizes-of-operands"><strong>4.4 操作数类型与大小 (Types and Sizes of Operands)</strong></h4>
                 <p>ISA需要支持高级语言中的各种数据类型，如8位的<code>char</code>，16位的<code>short</code>，32位的<code>int</code>，64位的<code>long</code>，以及32位和64位的浮点数（遵循IEEE 754标准）。</p>
                 <p><img src="../images/imagea009.png" alt="figure 9"></p>
-                <h5 id="45-%E6%93%8D%E4%BD%9C-operations"><strong>4.5 操作 (Operations)</strong></h5>
+                <h4 id="45-%E6%93%8D%E4%BD%9C-operations"><strong>4.5 操作 (Operations)</strong></h4>
                 <p>ISA提供的操作通常可分为四大类：</p>
                 <ol>
                 <li><strong>数据传输 (Data Transfer)</strong>：<code>load</code>, <code>store</code>, <code>move</code>。</li>
@@ -247,7 +245,7 @@
                 <li><strong>控制 (Control)</strong>：分支 (<code>branch</code>)、跳转 (<code>jump</code>)、过程调用 (<code>call</code>)、返回 (<code>return</code>)。</li>
                 <li><strong>浮点 (Floating Point)</strong>：浮点加、减、乘、除等。</li>
                 </ol>
-                <h5 id="46-%E6%8E%A7%E5%88%B6%E6%B5%81%E6%8C%87%E4%BB%A4-control-flow-instructions"><strong>4.6 控制流指令 (Control Flow Instructions)</strong></h5>
+                <h4 id="46-%E6%8E%A7%E5%88%B6%E6%B5%81%E6%8C%87%E4%BB%A4-control-flow-instructions"><strong>4.6 控制流指令 (Control Flow Instructions)</strong></h4>
                 <ul>
                 <li><strong>关键技术：PC相对寻址 (PC-relative addressing)</strong>
                 <ul>
@@ -256,7 +254,7 @@
                 </ul>
                 </li>
                 </ul>
-                <h5 id="47-isa%E7%9A%84%E7%BC%96%E7%A0%81-encoding-an-isa"><strong>4.7 ISA的编码 (Encoding an ISA)</strong></h5>
+                <h4 id="47-isa%E7%9A%84%E7%BC%96%E7%A0%81-encoding-an-isa"><strong>4.7 ISA的编码 (Encoding an ISA)</strong></h4>
                 <ul>
                 <li><strong>设计抉择</strong>：指令在内存中如何表示成二进制位？
                 <ul>
@@ -272,7 +270,7 @@
                 </ul>
                 </li>
                 </ul>
-                <h5 id="48-%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%E7%8E%B0%E4%BB%A3isa%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%85%B8%E8%8C%83risc-v"><strong>4.8 案例研究：现代ISA的设计典范——RISC-V</strong></h5>
+                <h4 id="48-%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%E7%8E%B0%E4%BB%A3isa%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%85%B8%E8%8C%83risc-v"><strong>4.8 案例研究：现代ISA的设计典范——RISC-V</strong></h4>
                 <p>RISC-V是近年来学术界和工业界备受瞩目的一个开源ISA。它的设计完美体现了现代RISC哲学：</p>
                 <ul>
                 <li><strong>模块化 (Modular)</strong>：RISC-V有一个非常小的基础整数指令集（RV32I或RV64I），其他功能（如乘除法'M'、原子操作'A'、单精度浮点'F'、双精度浮点'D'）都作为标准扩展提供。用户可以根据需求自由组合，这对于嵌入式系统到高性能服务器的设计都极具吸引力。<code>RV64G</code> 是 <code>RV64IMAFD</code> 的简写，代表一个通用的64位配置。</li>
@@ -282,16 +280,15 @@
                 </ul>
                 </li>
                 </ul>
-              </article>
-            </main>
-        </div>
-        
-        <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-        <script>
-          mermaid.initialize({
-            startOnLoad: true
-          });
-        </script>
-        <script src="../script.js"></script>
-    </body>
-    </html>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
