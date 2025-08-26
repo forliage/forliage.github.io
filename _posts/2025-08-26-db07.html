@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数据库系统设计02:索引(上)——B+树</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A102%E7%B4%A2%E5%BC%95%E4%B8%8Ab%E6%A0%91">数据库系统设计02:索引(上)——B+树</h1>
+                <p>在上一讲，我们深入了存储系统的“地基”，理解了数据是如何被“安放”的。我们看到了磁盘的笨拙，也领略了缓冲池的智慧。但仅仅把数据放好是远远不够的。想象一下，我们拥有了一座藏书亿万的巨型图书馆（数据文件），但馆内没有任何索引、目录或管理员。现在，我需要你找到一本名为《数据库系统概念》的书。你该怎么做？</p>
+                <p>你唯一的选择，就是从第一排书架的第一本书开始，一本一本地翻看，直到找到它，或者翻完整座图书馆后失望而归。这个过程，在数据库中被称为<strong>全表扫描（Full Table Scan）</strong>。如果我们的数据有1TB，磁盘读取速度是100MB/s，那么你的一次简单查询，就需要等待 <code>1TB / 100MB/s = 1000GB / 0.1GB/s = 10000秒</code>，将近3个小时！这在任何现实应用中都是不可接受的。</p>
+                <p>今天，我们的任务，就是为这座混乱的图书馆建立一套无与伦比的“导航系统”。这个系统，就是<strong>索引 (Indexing)</strong>。我们将共同踏上一段设计之旅，从最朴素的想法开始，不断遭遇问题，不断迭代优化，最终亲手“发明”出那个支撑了现代关系型数据库半壁江山的、几乎完美的索引结构——B+树。</p>
+                <p>这节课的核心，是理解<strong>它为何是今天这个样子</strong>。每一个设计细节背后，都是对物理定律的深刻洞察和对性能的极致追求。</p>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E6%9C%89%E5%BA%8F"><strong>第一部分：有序</strong></h3>
+                <h4 id="11-%E5%A0%86%E6%96%87%E4%BB%B6-heap-file-%E4%B8%8E%E7%BA%BF%E6%80%A7%E6%89%AB%E6%8F%8F"><strong>1.1 堆文件 (Heap File) 与线性扫描</strong></h4>
+                <p>最原始的数据组织方式，就是<strong>堆文件</strong>。记录被随意地插入到文件的末尾，没有任何顺序可言。</p>
+                <ul>
+                <li><strong>查找成本:</strong> 要查找满足 <code>WHERE P</code> 条件的记录，必须检查文件中的<strong>每一条记录</strong>。</li>
+                <li><strong>I/O成本分析:</strong> 假设文件有 $N$ 个数据块，查找的成本就是 $N$ 次磁盘I/O。对于刚才1TB的例子，如果块大小为8KB，那么 $N = 1TB / 8KB = 2^{40} / 2^{13} = 2^{27} \approx 1.3$ 亿个块。这是一场I/O的灾难。</li>
+                </ul>
+                <h4 id="12-%E6%8E%92%E5%BA%8F%E6%96%87%E4%BB%B6-sorted-file-%E4%B8%8E%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE"><strong>1.2 排序文件 (Sorted File) 与二分查找</strong></h4>
+                <p>既然无序是问题的根源，那么最直观的改进就是——<strong>让数据有序</strong>。我们将数据文件本身，按照某个<strong>搜索键 (Search Key)</strong>（例如 <code>StudentID</code>）进行物理排序。</p>
+                <ul>
+                <li><strong>查找的飞跃:</strong> 数据有序后，我们可以使用<strong>二分查找 (Binary Search)</strong>。</li>
+                <li><strong>I/O成本分析:</strong>
+                <ul>
+                <li>每次查找，我们访问中间的块，比较后舍弃一半。这个过程不断重复。</li>
+                <li>查找成本从 $O(N)$ 骤降到 $O(\log_2 N)$ 次磁盘I/O。</li>
+                <li>对于1.3亿个块，成本是 $\log_2(1.3 \times 10^8) \approx 27$ 次I/O。从3小时锐减到 <code>27 * 10ms ≈ 0.27秒</code>！这是一个革命性的进步。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="13-%E6%9B%B4%E6%96%B0%E6%93%8D%E4%BD%9C%E7%9A%84%E7%BC%BA%E7%82%B9"><strong>1.3 更新操作的缺点</strong></h4>
+                <ul>
+                <li><strong>插入操作 (Insertion):</strong>
+                <ul>
+                <li><strong>问题:</strong> 假设我们要插入一条新的学生记录，根据<code>StudentID</code>排序，它应该位于文件的正中间。</li>
+                <li><strong>代价:</strong> 为了维持文件的物理有序性，我们必须将插入点之后的所有记录（平均半个文件）向后移动，为新记录腾出空间。这是一个<strong>规模巨大、成本高昂的写操作</strong>。</li>
+                </ul>
+                </li>
+                <li><strong>删除操作 (Deletion):</strong>
+                <ul>
+                <li><strong>问题:</strong> 删除一条记录后，会留下一个“空洞”。</li>
+                <li><strong>代价:</strong> 为了填补这个空洞，要么将后续记录向前移动（同样是巨大的写操作），要么使用额外的指针链表来管理空闲空间，使文件变得碎片化和复杂化。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>设计的第一个核心权衡：</strong>
+                <strong>我们通过强制数据物理有序，获得了极快的查找性能，但却付出了近乎无法接受的更新（插入/删除）代价。</strong> 这种结构，被称为<strong>聚集索引 (Clustered Index)</strong> 或<strong>主索引 (Primary Index)</strong>，因为数据本身就是索引。它只适用于<strong>极少更新、频繁查找</strong>的场景（例如，数据仓库中的事实表）。</p>
+                <h4 id="14-%E8%A7%A3%E8%80%A6%E6%9E%84%E5%BB%BA%E7%8B%AC%E7%AB%8B%E7%9A%84%E7%B4%A2%E5%BC%95%E6%96%87%E4%BB%B6"><strong>1.4 解耦：构建独立的索引文件</strong></h4>
+                <p>既然修改数据文件本身太昂贵，那么我们能否将“有序的导航信息”和“无序的实际数据”分离开？—— 当然可以，这就是<strong>索引文件</strong>思想的诞生。</p>
+                <p>数据文件仍然是一个堆文件（插入/删除成本低），我们为其创建一个独立的、有序的索引文件。索引文件由一系列<strong>索引条目 (Index Entry)</strong> 组成，每个条目通常是 <code>&lt;搜索键, 指针&gt;</code> 的形式，其中指针指向数据文件中实际记录的位置（即<code>RID = &lt;PageID, Slot#&gt;</code>）。</p>
+                <p><img src="../images/imagea054.png" alt="figure 54"></p>
+                <ul>
+                <li><strong>稠密索引 (Dense Index):</strong>
+                <ul>
+                <li><strong>定义:</strong> 为数据文件中的<strong>每一条记录</strong>，都在索引文件中创建一个对应的索引条目。</li>
+                <li><strong>优点:</strong> 查找时，只需在（更小的）索引文件上进行二分查找，找到对应指针，然后一次I/O即可获取数据记录。</li>
+                <li><strong>新问题:</strong> 如果原表有10亿条记录，那么稠密索引也有10亿条记录。虽然每条记录变小了，但索引文件本身可能依然非常巨大，大到无法放入内存。这意味着我们必须在<strong>磁盘上对索引文件进行二分查找</strong>，这依然会产生 $O(\log_2 N_{index})$ 次I/O。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><img src="../images/imagea055.png" alt="figure 55"></p>
+                <ul>
+                <li><strong>稀疏索引 (Sparse Index):</strong>
+                <ul>
+                <li><strong>定义:</strong> 只为数据文件中的<strong>每个数据块</strong>创建一个索引条目。该条目通常包含该数据块中的<strong>最小搜索键值</strong>，以及指向该数据块的指针。</li>
+                <li><strong>前提条件:</strong> <strong>数据文件必须按照该搜索键物理排序！</strong> 否则，我们无法保证一个块内的所有键都大于等于索引键。</li>
+                <li><strong>优点:</strong> 索引文件变得极小。例如，如果一个块能装100条记录，稀疏索引的大小就只有稠密索引的1%。</li>
+                <li><strong>查找过程:</strong>
+                <ol>
+                <li>在稀疏索引中找到<strong>小于等于</strong>目标键的最大索引键。</li>
+                <li>通过指针定位到对应的数据块。</li>
+                <li>在数据块内部进行顺序或二分查找。</li>
+                </ol>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>设计的第二个核心权衡：</strong></p>
+                <table>
+                <thead>
+                <tr>
+                <th style="text-align:left">索引类型</th>
+                <th style="text-align:left">优点</th>
+                <th style="text-align:left">缺点</th>
+                <th style="text-align:left">适用场景</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                <td style="text-align:left"><strong>稠密索引</strong></td>
+                <td style="text-align:left">数据文件无需排序</td>
+                <td style="text-align:left">索引文件大，占用空间多</td>
+                <td style="text-align:left"><strong>辅助索引 (Secondary Index)</strong>，用于为非排序键建立索引。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>稀疏索引</strong></td>
+                <td style="text-align:left">索引文件极小，空间效率高</td>
+                <td style="text-align:left"><strong>数据文件必须排序</strong></td>
+                <td style="text-align:left"><strong>主索引 (Primary Index)</strong>，用于为排序键建立索引。</td>
+                </tr>
+                </tbody>
+                </table>
+                <h4 id="15-%E7%B4%A2%E5%BC%95%E7%9A%84%E9%97%AE%E9%A2%98"><strong>1.5 索引的问题</strong></h4>
+                <p>无论是稠密还是稀疏索引，当数据量达到一定规模，索引文件本身也会大到无法装入内存。</p>
+                <ul>
+                <li><strong>问题:</strong> 我们又回到了需要在磁盘上进行二分查找的窘境。</li>
+                <li><strong>解决方案的萌芽：多级索引 (Multilevel Index)</strong>
+                <ul>
+                <li>既然一个索引太大，那我们就为这个“一级索引”再创建一个**“二级索引”**！</li>
+                <li>这个二级索引是一个针对一级索引的<strong>稀疏索引</strong>。</li>
+                <li>我们可以不断“套娃”，创建三级、四级索引……直到最顶层的索引小到可以完全载入内存。</li>
+                <li>
+                <ul>
+                <li>Level 2 (in memory): <code>&lt;K1, Ptr_L1_Block1&gt;</code>, <code>&lt;K1001, Ptr_L1_Block2&gt;</code>, ...</li>
+                <li>Level 1 (on disk): <code>&lt;K1, Ptr_D_Block1&gt;</code>, <code>&lt;K2, Ptr_D_Block2&gt;</code>, ...</li>
+                <li>Data File (on disk): Actual data records.</li>
+                </ul>
+                </li>
+                <li><strong>查找过程:</strong> 从顶层内存中的索引开始，逐级向下，每次I/O都将搜索范围缩小一个维度，最终定位到数据。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>多级索引的致命缺陷：</strong> 它是一个<strong>静态结构</strong>。插入或删除一条记录，可能会导致某一级索引块的分裂或合并，进而引发上层索引块的连锁更新，维护成本极高，就像推倒第一块多米诺骨牌。</p>
+                <p>我们已经走到了传统有序索引的尽头。我们拥有了有序的力量，却被其僵化的结构所束缚。我们需要一种全新的数据结构，它必须：</p>
+                <ol>
+                <li><strong>保持多级索引的查找效率。</strong></li>
+                <li><strong>能够高效地、动态地处理插入和删除，而无需大规模重建。</strong></li>
+                <li><strong>为磁盘I/O量身定制。</strong></li>
+                </ol>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86b%E6%A0%91"><strong>第二部分：B+树</strong></h3>
+                <p>B+树不是凭空发明的，它是多级索引思想的<strong>动态化、平衡化</strong>的终极形态。它的一切设计，都服务于一个目标：<strong>在保证动态更新能力的前提下，最大限度地减少磁盘I/O次数</strong>。</p>
+                <h4 id="21-b%E6%A0%91%E7%9A%84%E6%A0%B8%E5%BF%83%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6"><strong>2.1 B+树的核心设计哲学</strong></h4>
+                <ul>
+                <li>
+                <p><strong>哲学一：I/O按块，而非按字节。</strong> 磁盘I/O的成本在于寻道和旋转，而非传输量。所以，我们应该让每次I/O都尽可能“物有所值”。B+树的<strong>节点 (Node)</strong> 大小被设计为与磁盘块或内存页的大小（如4KB, 8KB, 16KB）相匹配。我们一次I/O就读入一个完整的、信息量巨大的节点。</p>
+                </li>
+                <li>
+                <p><strong>哲学二：树的高度决定I/O次数。</strong> 从根节点到叶节点的路径上，每经过一个节点，通常就对应一次磁盘I/O。因此，<strong>要降低I/O，就必须降低树的高度</strong>。</p>
+                </li>
+                <li>
+                <p><strong>哲学三：如何降低树的高度？—— 增加“扇出” (Fanout)。</strong> 要让树变得“矮胖”而非“瘦高”（像二叉树），唯一的办法就是让每个节点拥有尽可能多的孩子。这个“孩子数量”就是扇出。B+树通过在一个大节点内存储大量的键和指针，实现了巨大的扇出（通常是几百上千）。</p>
+                </li>
+                </ul>
+                <h4 id="22-b%E6%A0%91%E7%9A%84%E7%BB%93%E6%9E%84%E8%A7%A3%E5%89%96"><strong>2.2 B+树的结构解剖</strong></h4>
+                <p>一棵阶为 $n$ 的B+树满足以下性质：</p>
+                <ul>
+                <li>
+                <p><strong>节点类型:</strong></p>
+                <ul>
+                <li><strong>内部节点 (Internal Nodes):</strong> 存储 $<P_i, K_i>$ 序列。$K_i$ 是“路标”或“分隔符”(Separator)，$P_i$ 是指向下一层子树的指针。一个内部节点不存储真实数据，它只用于导航。</li>
+                <li><strong>叶子节点 (Leaf Nodes):</strong> 存储真正的索引条目，即 $<K_i, RID_i>$（对于辅助索引）或 $<K_i, Record_i>$（对于聚集索引）。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>核心特性:</strong></p>
+                <ol>
+                <li><strong>平衡性 (Balanced):</strong> 所有叶子节点都处于同一深度。这保证了任何查找的I/O次数都是稳定且可预测的。</li>
+                <li><strong>扇出与填充率:</strong>
+                <ul>
+                <li>根节点至少有2个孩子（除非它也是叶子）。</li>
+                <li>每个内部节点有 $\lceil n/2 \rceil$ 到 $n$ 个孩子（指针）。</li>
+                <li>每个叶子节点有 $\lceil (n-1)/2 \rceil$ 到 $n-1$ 个键值对。</li>
+                <li>**“半满策略”**是B+树能够优雅地进行分裂与合并，并保持平衡的关键。</li>
+                </ul>
+                </li>
+                <li><strong>数据全在叶子:</strong> 所有的数据指针（RIDs）都只存在于叶子节点。内部节点纯粹是导航用的稀疏索引。</li>
+                <li><strong>叶子节点链表:</strong> 所有叶子节点通过指针相互连接，形成一个有序的双向链表。<strong>这是B+树支持高效范围查询的“神来之笔”！</strong></li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>B+树的高度有多低？</strong></p>
+                <ul>
+                <li>假设：块大小=4KB，键大小=8B，指针大小=8B。</li>
+                <li>一个内部节点可以容纳 $m$ 个指针，则 $m \times 8 + (m-1) \times 8 \approx 4096 \Rightarrow m \approx 256$。扇出约为256。</li>
+                <li>一棵高度为 $h=4$ 的B+树可以索引多少条记录？
+                <ul>
+                <li>$N = (\text{fanout})^h \approx 256^4 \approx 4.3 \times 10^9$。</li>
+                </ul>
+                </li>
+                <li><strong>结论：</strong> 只需要4次I/O，我们就能在<strong>43亿</strong>条记录中定位到任何一条！这就是矮胖树的威力。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="23-b%E6%A0%91%E7%9A%84%E6%93%8D%E4%BD%9C"><strong>2.3 B+树的操作</strong></h4>
+                <h5 id="231-%E6%9F%A5%E8%AF%A2-query"><strong>2.3.1 查询 (Query)</strong></h5>
+                <p>这是最简单的操作，一个从上到下的递归过程：</p>
+                <ol>
+                <li>从根节点开始。</li>
+                <li>在当前内部节点中，通过二分查找找到合适的指针（找到第一个 $K_i > V$，选择 $P_i$；若都小于V，选最后一个指针）。</li>
+                <li>加载该指针指向的下一层节点。</li>
+                <li>重复步骤2和3，直到到达叶子节点。</li>
+                <li>在叶子节点中，查找键V。如果找到，返回对应的RID。</li>
+                </ol>
+                <h5 id="232-%E6%8F%92%E5%85%A5-insertion"><strong>2.3.2 插入 (Insertion)</strong></h5>
+                <p><strong>核心流程:</strong></p>
+                <ol>
+                <li>
+                <p><strong>定位:</strong> 首先像查询一样，找到应该插入新键的叶子节点 L。</p>
+                </li>
+                <li>
+                <p><strong>尝试插入:</strong></p>
+                <ul>
+                <li><strong>Case 1: 叶子节点 L 未满。</strong>
+                <ul>
+                <li>太棒了！直接将新键值对插入L，并保持节点内有序。操作结束。</li>
+                </ul>
+                </li>
+                <li><strong>Case 2: 叶子节点 L 已满。</strong>
+                <ul>
+                <li>这是魔法发生的地方——<strong>分裂 (Split)</strong>。</li>
+                <li>a. 创建一个全新的叶子节点 L'。</li>
+                <li>b. 将L中原有的 $n-1$ 个键和新插入的键，总共 $n$ 个键，进行排序。</li>
+                <li>c. 前 $\lceil n/2 \rceil$ 个键留在L，后 $\lfloor n/2 \rfloor$ 个键移动到L'。</li>
+                <li>d. 更新叶子链表指针，将L'插入到L的后面。</li>
+                <li>e. <strong>传播 (Propagate):</strong> 将L'的<strong>第一个键</strong>（即最小键）作为新的分隔符，连同指向L'的指针，<strong>向上插入到父节点中</strong>。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>递归分裂:</strong></p>
+                <ul>
+                <li>向上插入新的分隔符时，如果父节点也满了怎么办？</li>
+                <li><strong>父节点也分裂！</strong> 分裂过程与叶子节点类似，但中间的那个键被“提升”到它的父节点，左右两半形成两个新的内部节点。</li>
+                <li>这个分裂过程可能像多米诺骨牌一样，一路向上传播，直到根节点。</li>
+                <li>如果<strong>根节点分裂</strong>，B+树的<strong>高度就增加1</strong>。这就是B+树“长高”的唯一方式。</li>
+                </ul>
+                </li>
+                </ol>
+                <h5 id="233-%E5%88%A0%E9%99%A4-deletion"><strong>2.3.3 删除 (Deletion)</strong></h5>
+                <p><strong>核心流程:</strong></p>
+                <ol>
+                <li>
+                <p><strong>定位:</strong> 找到包含要删除键的叶子节点 L。</p>
+                </li>
+                <li>
+                <p><strong>删除:</strong> 从L中删除该键值对。</p>
+                </li>
+                <li>
+                <p><strong>检查下溢 (Underflow):</strong></p>
+                <ul>
+                <li><strong>Case 1: 删除后，L的键数量仍 $\ge \lceil (n-1)/2 \rceil$。</strong>
+                <ul>
+                <li>完美！操作结束。</li>
+                </ul>
+                </li>
+                <li><strong>Case 2: 删除后，L的键数量 $< \lceil (n-1)/2 \rceil$（下溢）。</strong>
+                <ul>
+                <li>我们必须修复这个违反约束的节点。</li>
+                <li>a. <strong>尝试重分配 (Redistribution) / 借用 (Borrowing):</strong>
+                <ul>
+                <li>查看L的左兄弟或右兄弟（通过父节点指针可以找到）。</li>
+                <li>如果某个兄弟节点有多余的键（填充率 > 50%），就从它那里“借”一个键。</li>
+                <li>这个过程需要通过父节点来“旋转”：将兄弟的边界键移动到L，并更新父节点中的分隔符。</li>
+                <li>重分配的开销远小于合并，是首选方案。</li>
+                </ul>
+                </li>
+                <li>b. <strong>如果无法重分配（兄弟节点也都刚好半满）：</strong>
+                <ul>
+                <li><strong>合并 (Merge):</strong> 将L和它的一个兄弟节点合并成一个节点。</li>
+                <li>这个过程还需要从父节点中<strong>删除</strong>那两个节点之间的分隔符。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>递归合并:</strong></p>
+                <ul>
+                <li>从父节点中删除分隔符，可能会导致<strong>父节点也下溢</strong>。</li>
+                <li>此时，对父节点重复上述的“重分配或合并”的逻辑。</li>
+                <li>这个合并过程也可能一路向上传播。</li>
+                <li>如果<strong>根节点的两个仅有的孩子被合并</strong>，那么这个旧的根节点被删除，合并后的节点成为新的根，树的<strong>高度减1</strong>。</li>
+                </ul>
+                </li>
+                </ol>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86b%E6%A0%91%E7%9A%84%E5%BA%94%E7%94%A8%E4%B8%8E%E5%8F%98%E4%BD%93"><strong>第三部分：B+树的应用与变体</strong></h3>
+                <h4 id="31-%E8%81%9A%E9%9B%86%E7%B4%A2%E5%BC%95-vs-%E8%BE%85%E5%8A%A9%E7%B4%A2%E5%BC%95%E7%9A%84%E5%86%8D%E6%8E%A2%E8%AE%A8"><strong>3.1 聚集索引 vs. 辅助索引的再探讨</strong></h4>
+                <ul>
+                <li><strong>聚集索引 (Clustered Index / IOT in Oracle):</strong>
+                <ul>
+                <li>B+树的叶子节点<strong>就是数据本身</strong>。数据行的物理顺序与索引键顺序完全一致。</li>
+                <li>优点：对于基于索引键的<strong>范围查询</strong>性能极高，因为数据是连续存放的。</li>
+                <li>缺点：一张表只能有一个聚集索引。</li>
+                <li><strong>实现 (MySQL InnoDB):</strong> 主键索引就是聚集索引。叶子节点包含主键和所有其他列的数据。</li>
+                </ul>
+                </li>
+                <li><strong>辅助索引 (Secondary Index):</strong>
+                <ul>
+                <li>B+树的叶子节点存储的是 <code>&lt;索引键, 主键值&gt;</code>（或RID）。</li>
+                <li>查找过程：先在辅助索引中找到目标记录的主键，然后再用主键去聚集索引（主键索引）中查找完整的数据行。这个过程被称为**“回表” (Key Lookup)**。</li>
+                <li>优点：一张表可以有多个辅助索引。</li>
+                <li>缺点：每次查找都需要两次索引搜索（除非所需数据可以仅从辅助索引中获得，即<strong>覆盖索引 (Covering Index)</strong>）。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="32-%E5%A4%8D%E5%90%88%E7%B4%A2%E5%BC%95-composite-index-%E7%9A%84%E5%A8%81%E5%8A%9B"><strong>3.2 复合索引 (Composite Index) 的威力</strong></h4>
+                <ul>
+                <li>索引可以建立在多个列上，例如 <code>CREATE INDEX idx_name ON users (last_name, first_name)</code>。</li>
+                <li>B+树中的键会按照 <code>(last_name, first_name)</code> 的<strong>字典序</strong>进行排序。</li>
+                <li><strong>最左前缀原则 (Leftmost Prefix Principle):</strong>
+                <ul>
+                <li>这个索引可以高效地服务于 <code>WHERE last_name = 'Smith'</code> 的查询。</li>
+                <li>也可以服务于 <code>WHERE last_name = 'Smith' AND first_name = 'John'</code>。</li>
+                <li>但<strong>不能</strong>高效服务于 <code>WHERE first_name = 'John'</code> 的查询，因为 <code>first_name</code> 不是最左前缀。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="33-b%E6%A0%91-vs-b%E6%A0%91"><strong>3.3 B树 vs. B+树</strong></h4>
+                <table>
+                <thead>
+                <tr>
+                <th style="text-align:left">特性</th>
+                <th style="text-align:left">B树</th>
+                <th style="text-align:left">B+树</th>
+                <th style="text-align:left">为什么B+树在数据库中胜出？</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                <td style="text-align:left"><strong>数据存储</strong></td>
+                <td style="text-align:left">内部节点和叶子节点都存数据指针</td>
+                <td style="text-align:left">只有叶子节点存数据指针</td>
+                <td style="text-align:left">1. <strong>更高的扇出</strong>：B+树内部节点不存数据，可以放更多键，树更矮胖，I/O更少。 <br> 2. <strong>更稳定的查询性能</strong>：所有查询都必须走到叶子节点，路径长度稳定。 <br> 3. <strong>范围查询极快</strong>：只需在叶子链表上顺序扫描，无需回溯树。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>范围查询</strong></td>
+                <td style="text-align:left">效率低，需要中序遍历</td>
+                <td style="text-align:left">效率极高，沿叶子链表扫描</td>
+                <td style="text-align:left"></td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>空间利用率</strong></td>
+                <td style="text-align:left">略高（某些数据可能在浅层）</td>
+                <td style="text-align:left">略低（键在内部节点和叶子冗余）</td>
+                <td style="text-align:left">B+树的性能优势远比这点空间开销重要。</td>
+                </tr>
+                </tbody>
+                </table>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
