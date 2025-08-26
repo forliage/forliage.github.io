@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数据库系统设计01:存储与文件结构</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A101%E5%AD%98%E5%82%A8%E4%B8%8E%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84">数据库系统设计01:存储与文件结构</h1>
+                <p>数据库系统，它的核心使命是<strong>持久化</strong>，这意味着它必须生活在磁盘的“炼狱”里。在这个炼狱中，空间不是连续的，访问不是瞬时的，延迟是巨大的，失败是常态。</p>
+                <p>这节课，我们将扮演一个数据库内核设计师的角色，直面四大“元问题” (Meta-Problems)：</p>
+                <ol>
+                <li><strong>时空鸿沟 (The Space-Time Gulf):</strong> 如何弥合CPU与磁盘之间高达$10^7$倍的速度差异？</li>
+                <li><strong>逻辑与物理的转换 (The Logical-Physical Translation):</strong> 如何将逻辑上的“表”和“行”映射到物理上的磁道和闪存单元？</li>
+                <li><strong>无序中的有序 (The Order within Chaos):</strong> 如何在充满随机更新和删除的混乱操作中，维持数据的有序性和高性能访问？</li>
+                <li><strong>信任与控制的博弈 (The Trust vs. Control Dilemma):</strong> 我们应该在多大程度上信任并利用操作系统，又在何处必须“夺权”，构建自己的王国？</li>
+                </ol>
+                <p>这四个问题，就是我们今天探索的路线图。每一种技术，每一个算法，都是对这些问题的一个回答。</p>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%AD%98%E5%82%A8%E4%BB%8B%E8%B4%A8%E7%9A%84%E7%89%A9%E7%90%86%E7%9C%9F%E7%9B%B8%E4%B8%8E%E5%AD%98%E5%82%A8%E4%BD%93%E7%B3%BB%E7%9A%84%E5%BF%85%E7%84%B6%E6%80%A7"><strong>第一部分：存储介质的物理真相与存储体系的必然性</strong></h3>
+                <h4 id="11-%E5%AD%98%E5%82%A8%E4%BB%8B%E8%B4%A8%E7%9A%84%E7%89%A9%E7%90%86%E5%AE%BF%E5%91%BD"><strong>1.1 存储介质的“物理宿命”</strong></h4>
+                <p>一切设计的起点，是对工具的深刻理解。我们的工具就是物理存储介质，它们各自带有无法摆脱的“宿命”。</p>
+                <p><strong>深度对比：HDD vs. SSD vs. NVM (新兴技术)</strong></p>
+                <table>
+                <thead>
+                <tr>
+                <th style="text-align:left">特性维度</th>
+                <th style="text-align:left">机械硬盘 (HDD)</th>
+                <th style="text-align:left">固态硬盘 (SSD)</th>
+                <th style="text-align:left">非易失性内存 (NVM / PMem)</th>
+                <th style="text-align:left"><strong>设计哲学启示</strong></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                <td style="text-align:left"><strong>物理原理</strong></td>
+                <td style="text-align:left">磁性涂层，机械臂</td>
+                <td style="text-align:left">浮栅晶体管，电荷囚禁</td>
+                <td style="text-align:left">相变材料(PCM), MRAM</td>
+                <td style="text-align:left">物理原理决定了性能模型，软件必须适配。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>访问单元</strong></td>
+                <td style="text-align:left"><strong>扇区(Sector)</strong>, 512B/4KB</td>
+                <td style="text-align:left"><strong>页(Page)</strong>, 4-16KB (读/写) <br> <strong>块(Block)</strong>, 512KB-4MB (擦除)</td>
+                <td style="text-align:left"><strong>字节(Byte)</strong></td>
+                <td style="text-align:left"><strong>“阻抗不匹配”</strong>：CPU按字节思考，存储按块工作。这是DBMS需要解决的核心矛盾。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>性能模型</strong></td>
+                <td style="text-align:left"><strong>寻道+旋转+传输</strong> <br> 随机I/O: ~10ms <br> 顺序I/O: &gt;150MB/s</td>
+                <td style="text-align:left"><strong>电路延迟</strong> <br> 随机读: ~100μs <br> 随机写: 更慢, 受GC影响</td>
+                <td style="text-align:left"><strong>内存总线速度</strong> <br> 随机访问: ~200-300ns</td>
+                <td style="text-align:left"><strong>HDD的世界：顺序为王。SSD的世界：随机读廉价，但写操作有陷阱。NVM的世界：存储即内存，彻底颠覆。</strong></td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>核心瓶颈</strong></td>
+                <td style="text-align:left"><strong>机械移动 (Seek/Rotation)</strong></td>
+                <td style="text-align:left"><strong>垃圾回收 (GC), 写放大 (WAF)</strong></td>
+                <td style="text-align:left"><strong>有限的写寿命，更高的延迟</strong></td>
+                <td style="text-align:left">软件优化的目标，就是规避这些核心瓶颈。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>原地更新</strong></td>
+                <td style="text-align:left"><strong>可以，但性能差</strong> (引发随机I/O)</td>
+                <td style="text-align:left"><strong>不可以 (物理上)</strong></td>
+                <td style="text-align:left"><strong>可以，且速度快</strong></td>
+                <td style="text-align:left">SSD的这个特性是催生LSM-Tree等现代存储引擎的根本原因。</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>数据一致性</strong></td>
+                <td style="text-align:left">扇区写失败(Torn Write)</td>
+                <td style="text-align:left">页写失败, 块擦除失败</td>
+                <td style="text-align:left">处理器缓存行与PMem的原子性问题</td>
+                <td style="text-align:left">数据库必须在硬件之上构建自己的原子写协议(如Doublewrite Buffer)。</td>
+                </tr>
+                </tbody>
+                </table>
+                <p><strong>[拓展讨论] Zoned Namespace (ZNS) SSDs 和 SMR HDDs:</strong> 这些是“更诚实”的硬件。它们向软件暴露了其内部的顺序写入限制。DBMS可以利用这些信息进行更底层的优化，但这要求软件承担更多管理责任。这是“控制权”从硬件向软件转移的趋势。</p>
+                <h4 id="12-%E5%9F%BA%E4%BA%8E%E6%95%B0%E6%8D%AE%E6%B8%A9%E5%BA%A6%E7%9A%84%E5%AD%98%E5%82%A8%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84"><strong>1.2 基于“数据温度”的存储层次结构</strong></h4>
+                <p>面对如此多样且充满缺陷的介质，将所有数据一视同仁地放在一种介质上是愚蠢的。<strong>数据的访问模式并非均匀分布</strong>，而是遵循<strong>帕累托法则（80/20法则）</strong>：少量数据（热数据）承担了绝大部分访问。</p>
+                <p>这个洞察催生了存储层次结构，其本质是一个<strong>基于成本和性能的自动数据分层系统</strong>。</p>
+                <ul>
+                <li><strong>Cache/DRAM:</strong> “VIP休息室”。只为当前最活跃的数据服务。易失性决定了它只能是“临时”工作区。</li>
+                <li><strong>SSD:</strong> “市区地产”。为频繁访问的温数据提供快速存取，成本较高。</li>
+                <li><strong>HDD:</strong> “郊区仓库”。为不常访问的冷数据提供廉价的海量存储。</li>
+                <li><strong>Tape/Cloud Archive:</strong> “地下金库”。为极少访问的归档数据提供最低成本的长期保存。</li>
+                </ul>
+                <p><strong>设计的精髓：</strong> 整个体系的效率，取决于<strong>数据在层级间流动的策略</strong>。这个策略的优劣，直接决定了用户感受到的平均访问延迟。而这个策略的核心，就是我们下一幕要讲的——缓冲区管理器。</p>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E7%BC%93%E5%86%B2%E5%8C%BA%E7%AE%A1%E7%90%86%E5%99%A8%E7%9A%84%E5%86%85%E6%A0%B8"><strong>第二部分：缓冲区管理器的内核</strong></h3>
+                <p>如果说数据库是连接应用和磁盘的桥梁，那么缓冲区管理器就是这座桥的<strong>总工程师和调度中心</strong>。它管理着数据库最宝贵的资源：<strong>内存</strong>。</p>
+                <h4 id="21-%E7%BC%93%E5%86%B2%E6%B1%A0"><strong>2.1 缓冲池”</strong></h4>
+                <p>DBMS为什么要自己管理内存，而不是直接依赖操作系统的文件缓存（Page Cache）？这是关于“控制权”的第一个核心问题。</p>
+                <ul>
+                <li><strong>操作系统缓存的问题 (Why bypass OS Cache?):</strong>
+                <ol>
+                <li><strong>通用而非专用:</strong> OS的LRU策略对数据库的复杂查询模式（如全表扫描）是灾难性的。</li>
+                <li><strong>缺乏语义信息:</strong> OS不知道一个页是索引页、数据页还是日志页。但DBMS知道，索引页通常比数据页更“有价值”，应该有更高的缓存优先级。</li>
+                <li><strong>双重缓冲 (Double Buffering):</strong> 数据同时存在于DBMS缓冲池和OS Page Cache中，浪费内存。</li>
+                <li><strong>无法控制写回时机:</strong> DBMS需要精确控制数据何时刷盘（<code>fsync</code>），以满足事务的持久性（Durability），而OS的缓存写回时机通常是异步且不可预测的。</li>
+                </ol>
+                </li>
+                </ul>
+                <p>因此，几乎所有高性能数据库都选择<strong>直接I/O (Direct I/O)</strong>，绕过OS缓存，建立自己的缓冲池。</p>
+                <h4 id="22-%E7%BC%93%E5%86%B2%E9%A1%B5%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><strong>2.2 缓冲页的生命周期</strong></h4>
+                <div class="mermaid">
+                    stateDiagram-v2
+                        [*] --&gt; Free: System Startup
+                        Free --&gt; Reading: Miss & Alloc Frame
+                        Reading --&gt; Pinned_Clean: I/O Complete
+                        state Pinned {
+                            Pinned_Clean --&gt; Pinned_Dirty: Page is Modified
+                            Pinned_Dirty --&gt; Pinned_Clean: Abort/Undo
+                        }
+                        Pinned_Clean --&gt; Unpinned_Clean: Unpin
+                        Pinned_Dirty --&gt; Unpinned_Dirty: Unpin
+                        Unpinned_Clean --&gt; Pinned_Clean: Pin (Hit)
+                        Unpinned_Dirty --&gt; Pinned_Dirty: Pin (Hit)
+                        
+                        Unpinned_Clean --&gt; Writing: Victim (Clean)
+                        Unpinned_Dirty --&gt; Writing: Victim (Dirty)
+                        Writing --&gt; Free: Flush Complete
+                </div>
+                <p><strong>核心控制结构剖析:</strong></p>
+                <ul>
+                <li><strong><code>pin_count</code> (钉住计数):</strong> 这是<strong>并发正确性的基石</strong>。它像一个引用计数，只要&gt;0，就意味着“有人正在使用，不许动！”。任何替换算法在选择牺牲品时，第一条规则就是<strong>跳过所有<code>pin_count &gt; 0</code>的页</strong>。</li>
+                <li><strong><code>dirty_bit</code> (脏位):</strong> 这是<strong>性能与持久性的权衡开关</strong>。它告诉我们，这个页是否需要写回磁盘。没有它，每次换出干净的页也需要写盘，造成无谓的I/O。</li>
+                <li><strong>页表 (Page Table):</strong> <code>PageID -&gt; FrameID</code>的哈希表，实现O(1)的缓存查找。</li>
+                <li><strong>空闲列表 (Free List):</strong> 链接所有空闲帧的链表，用于快速分配。</li>
+                <li><strong>替换队列 (Replacer):</strong> 一个独立的数据结构（如LRU链表），只管理**<code>pin_count = 0</code>**的页，用于高效地选择牺牲品。</li>
+                </ul>
+                <h4 id="23-%E6%9B%BF%E6%8D%A2%E7%AD%96%E7%95%A5%E7%9A%84%E6%BC%94%E5%8C%96"><strong>2.3 替换策略的演化</strong></h4>
+                <p>页面替换策略的目标是：<strong>预测未来，保留最有价值的页</strong>。这是一场没有完美答案的博弈。</p>
+                <ul>
+                <li>
+                <p><strong>Level 1: LRU/Clock</strong></p>
+                <ul>
+                <li><strong>优点:</strong> 简单，通用。</li>
+                <li><strong>致命缺陷:</strong> <strong>扫描不友好</strong>。一次大表扫描可以“污染”整个缓存，驱逐所有热点数据。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Level 2: 改进型LRU</strong></p>
+                <ul>
+                <li><strong>LRU-K:</strong> 记录一个页<strong>最近K次</strong>的访问历史，而不是仅仅最后一次。K=2能有效区分一次性扫描和真正频繁访问的页。</li>
+                <li><strong>2Q (Two-Queue):</strong> 将缓冲池分为两个队列：一个FIFO的“入门”队列(A1)，一个LRU的“长期”队列(Am)。新页先入A1，只有被再次访问才能“晋升”到Am。这能有效过滤掉扫描数据。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Level 3: 感知工作负载的智能策略</strong></p>
+                <ul>
+                <li><strong>缓冲池分区 (Buffer Pool Partitioning):</strong> 现代DBMS（如PostgreSQL, MySQL/InnoDB）会将缓冲池分为多个区域。例如：
+                <ul>
+                <li>一个大的“主区域”给普通数据，采用LRU类策略。</li>
+                <li>一个小的“扫描区域”给大表扫描，采用MRU或循环策略。</li>
+                <li>甚至为不同类型的页（索引、数据）设置不同分区。</li>
+                </ul>
+                </li>
+                <li><strong>查询优化器提示:</strong> 允许优化器在生成执行计划时，向缓冲管理器提供“元信息”，如“这是一个一次性查询，请不要污染主缓存”。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="24-%E5%86%99%E7%AD%96%E7%95%A5"><strong>2.4 写策略</strong></h4>
+                <ul>
+                <li><strong>预读/提前读 (Read-Ahead):</strong> 当DBMS检测到顺序扫描模式时，它会<strong>主动、异步地</strong>将即将被访问的页提前读入缓存。这是将随机I/O转化为顺序I/O的又一利器。</li>
+                <li><strong>写回/刷盘 (Flushing Dirty Pages):</strong>
+                <ul>
+                <li><strong>Checkpointing:</strong> 数据库会定期（或在日志文件满时）触发一个检查点，强制将<strong>某个时间点之前</strong>的所有脏页写回磁盘。这是为了缩短崩溃恢复(Crash Recovery)时需要重做(Redo)的日志量。</li>
+                <li><strong>后台写者 (Background Writer):</strong> 一个或多个后台线程，持续不断地、小批量地将脏页刷盘，以确保缓冲池中有足够的干净页可供替换，避免前台查询线程因为要等待刷盘而阻塞。</li>
+                <li><strong><code>fsync()</code>的代价:</strong> 每次事务提交时，为了保证<code>D</code>(Durability)，必须将对应的日志记录<code>fsync</code>到磁盘。这是一个极其昂贵的操作。因此，<strong>组提交 (Group Commit)</strong> 技术应运而生：将多个并发事务的日志一次性打包提交，用一次<code>fsync</code>的成本服务多个事务，极大提高写密集型应用的TPS。</li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E6%95%B0%E6%8D%AE%E5%9C%A8%E9%A1%B5%E4%B8%8A%E7%BB%93%E6%9E%84"><strong>第三部分：数据在页上结构</strong></h3>
+                <p>我们已经把页调入内存，现在要深入其内部，看看字节是如何被排布的。页内布局的设计目标是：<strong>空间利用率最大化、页内操作效率最高化、支持变长数据和并发控制</strong>。</p>
+                <h4 id="31-%E6%A7%BD%E9%A1%B5-slotted-page"><strong>3.1 槽页 (Slotted Page)</strong></h4>
+                <div class="code-container">
+                    <pre class="hljs"><code><div>+-----------------------------------------------------------------+
+| Page Header (e.g., 24 bytes)                                    |
+| - Page LSN (8 bytes)         - Num of Slots (2 bytes)           |
+| - Free Space Pointer (2 bytes) - ... other metadata ...         |
++-----------------------------------------------------------------+
+| Slot Array (or Line Pointer Array) (grows downwards ---&gt;)       |
+| Slot 1: (Offset, Length) | Slot 2: (Offset, Length) | ...     |
++-----------------------------------------------------------------+
+|                                                                 |
+|                          Free Space                             |
+|                                                                 |
++-----------------------------------------------------------------+
+| Record Data (&lt;--- grows upwards)                                |
+| ... | Record 2 Data | Record 1 Data                             |
++-----------------------------------------------------------------+
+^                                                                 ^
+0                                                               8191 (for 8KB page)
+</div></code></pre>
+                </div>
+                <p><strong>设计的精髓再剖析：</strong></p>
+                <ul>
+                <li><strong>指针的稳定性：</strong> <code>RID = &lt;PageID, Slot#&gt;</code> 是一个<strong>逻辑指针</strong>。只要记录还在这个页上，无论它在页内如何移动，它的RID都<strong>永不改变</strong>。这解耦了记录的逻辑身份和物理位置，是所有上层索引结构能够稳定工作的基础。这个**“间接层” (Layer of Indirection)** 是计算机科学中解决复杂问题的万能钥匙。</li>
+                <li><strong>无页内碎片：</strong> 槽数组和记录数据从两端相向生长，中间的空闲空间永远是连续的。这使得空间分配和回收极其高效。</li>
+                <li><strong>原子性：</strong> 对一个页的修改（如插入一条记录）可以被设计成一个<strong>物理上原子</strong>的操作。例如，最后一步才更新页头中的槽数量。如果在更新过程中崩溃，页的状态也是可恢复的。</li>
+                </ul>
+                <h4 id="32-%E8%AE%B0%E5%BD%95%E7%9A%84%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84"><strong>3.2 记录的内部结构</strong></h4>
+                <p>一条记录本身也是一个微缩的结构：</p>
+                <div class="code-container">
+                    <pre class="hljs"><code><div>[ Record Header ] [ Column 1 Data ] [ Column 2 Data ] ...
+</div></code></pre>
+                </div>
+                <ul>
+                <li><strong>记录头 (Record Header):</strong>
+                <ul>
+                <li><strong>NULL 位图:</strong> 紧凑地表示哪些列是NULL。</li>
+                <li><strong>变长字段偏移量数组:</strong> 对于VARCHAR、TEXT等类型，记录头会存储一个数组，指出每个变长字段在记录数据区的真实起始位置。</li>
+                <li><strong>事务信息:</strong> 在支持多版本并发控制(MVCC)的系统中（如PostgreSQL, InnoDB），记录头还会包含创建该版本的事务ID (<code>xmin</code>)、删除该版本的事务ID (<code>xmax</code>)等信息。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>定长 vs. 变长数据的存储艺术：</strong></p>
+                <ul>
+                <li>先存储所有定长字段，再存储所有变长字段。这样，定长字段的访问可以通过固定的偏移量计算，非常快。而变长字段的访问需要先从记录头读取偏移量。</li>
+                </ul>
+                <h4 id="33-%E8%B6%85%E8%B6%8A%E9%A1%B5"><strong>3.3 超越页</strong></h4>
+                <ul>
+                <li><strong>溢出页 (Overflow Pages):</strong>
+                <ul>
+                <li>当一个记录太大时，会使用一个页链表来存储它。</li>
+                <li><strong>性能警示：</strong> 这意味着读取一条记录可能需要多次（随机）I/O。这是数据库设计中的一个<strong>巨大红灯</strong>。应用开发者应极力避免在频繁访问的表中设计超大字段。</li>
+                </ul>
+                </li>
+                <li><strong>TOAST (The Oversized-Attribute Storage Technique):</strong> PostgreSQL的独门绝技，它在溢出之前，会先尝试两件事：
+                <ol>
+                <li><strong>压缩 (Compression):</strong> 对大字段进行行内压缩。</li>
+                <li><strong>切片 (Slicing):</strong> 如果压缩后仍然太大，就将其切成多个小块(chunks)，存入一个专门的TOAST表中。主表只保留一个指向TOAST表的指针。这使得对主表的扫描不会因为大字段而变得缓慢。</li>
+                </ol>
+                </li>
+                </ul>
+                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86dbms%E4%B8%8E%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%85%B3%E7%B3%BB"><strong>第四部分：DBMS与操作系统的关系</strong></h3>
+                <p>这部分是本讲的升华。一个数据库系统，是运行在操作系统之上的一个应用程序，但它又渴望成为一个“迷你操作系统”。</p>
+                <h4 id="41-%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><strong>4.1 文件系统：</strong></h4>
+                <ul>
+                <li><strong>选项A: 使用OS文件系统 (Files on a File System)</strong>
+                <ul>
+                <li><strong>优点:</strong> 方便、可移植、易于管理（文件可以复制、备份）。</li>
+                <li><strong>缺点:</strong>
+                <ul>
+                <li><strong>性能开销:</strong> 文件系统的日志(Journaling)、权限检查、元数据更新都会带来额外开销。</li>
+                <li><strong>布局不可控:</strong> DBMS无法精确控制文件块在磁盘上的物理布局，可能导致碎片化。</li>
+                <li><strong>双重缓冲:</strong> 如前所述。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                <li><strong>选项B: 使用裸设备 (Raw Disk Partitions)</strong>
+                <ul>
+                <li><strong>优点:</strong>
+                <ul>
+                <li><strong>极致控制:</strong> DBMS完全接管磁盘块的分配和布局，可以实现最优的顺序I/O。</li>
+                <li><strong>绕过OS缓存:</strong> 天然避免双重缓冲。</li>
+                </ul>
+                </li>
+                <li><strong>缺点:</strong>
+                <ul>
+                <li><strong>管理复杂:</strong> 备份、迁移等操作变得非常困难。</li>
+                <li><strong>可移植性差:</strong> 与特定设备和OS紧密绑定。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>现代的折中方案:</strong> 大多数现代DBMS默认使用文件系统，但通过<code>O_DIRECT</code>等标志位来绕过OS缓存，并使用<code>fallocate</code>等接口来预分配连续空间，从而在便利性和控制力之间取得平衡。</p>
+                <h4 id="42-%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84-mmap"><strong>4.2 内存映射 (mmap)</strong></h4>
+                <p><code>mmap</code>可以将一个文件直接映射到进程的虚拟地址空间，之后就可以像访问内存数组一样访问文件，读写操作由OS的虚拟内存系统自动处理。</p>
+                <ul>
+                <li><strong>诱惑之处:</strong> 极大地简化了代码。缓冲区管理器的很多复杂逻辑似乎都“消失”了。</li>
+                <li><strong>陷阱之处:</strong>
+                <ol>
+                <li><strong>失去控制:</strong> 何时读页、何时写回脏页，完全由OS决定。DBMS无法实现自己的高级替换策略，也无法精确控制<code>fsync</code>。</li>
+                <li><strong>错误处理困难:</strong> I/O错误会以信号（如<code>SIGBUS</code>）的形式出现，难以优雅地处理。</li>
+                <li><strong>性能抖动:</strong> OS的缺页中断和后台刷盘行为可能导致不可预测的性能抖动。</li>
+                </ol>
+                </li>
+                </ul>
+                <p><strong>结论:</strong> 对于需要高性能、高可靠性和可预测行为的数据库内核，<code>mmap</code>通常是一个需要避开的陷阱。SQLite和一些内存数据库可能会使用它，但大型事务型数据库几乎都选择自己手动管理I/O。</p>
+                <h3 id="%E6%80%BB%E7%BB%93"><strong>总结</strong></h3>
+                <p>我们看到所有复杂的设计都围绕着几条永恒的原则：</p>
+                <ol>
+                <li><strong>I/O是瓶颈，最小化它:</strong> 这是第一原则。缓存、预读、压缩、索引……一切都是为了减少访问磁盘的次数。</li>
+                <li><strong>顺序优于随机:</strong> 拥抱顺序I/O，规避随机I/O。数据布局、电梯算法、LSM-Tree，都是这一原则的体现。</li>
+                <li><strong>用间接层解耦:</strong> 槽页中的RID就是一个完美的例子。增加一个间接层，可以换来巨大的灵活性和稳定性。</li>
+                <li><strong>批量处理摊销成本:</strong> 组提交、一次I/O读取一个大块而非一个字节，都是用“批发”的思路来降低单位操作的固定成本。</li>
+                <li><strong>为最坏情况设计:</strong> 数据库必须能在任何时刻断电后恢复。这意味着需要日志、原子写协议(WAL, ARIES)等机制来保证持久性和一致性。</li>
+                </ol>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
