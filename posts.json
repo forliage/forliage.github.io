@@ -593,5 +593,12 @@
     "category": "学习笔记",
     "path": "_posts/2025-08-26-ca3-1-3.html",
     "abstract": "计算机体系结构3-1-3:Tomasulo 算法"
+  },
+  {
+    "title": "计算机体系结构3-1-4:硬件推测(Hardware Speculation)",
+    "date": "2025-08-26",
+    "category": "学习笔记",
+    "path": "_posts/2025-08-26-ca3-1-4.html",
+    "abstract": "计算机体系结构3-1-4:硬件推测(Hardware Speculation)"
   }
 ]

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机体系结构3-1-4:硬件推测（Hardware Speculation）</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%843-1-4%E7%A1%AC%E4%BB%B6%E6%8E%A8%E6%B5%8Bhardware-speculation">计算机体系结构3-1-4:硬件推测（Hardware Speculation）</h1>
+                <h3 id="%E7%AC%AC%E5%9B%9B%E8%8A%82%E7%A1%AC%E4%BB%B6%E6%8E%A8%E6%B5%8B">第四节：硬件推测</h3>
+                <p>硬件推测的核心思想非常直观，就像一位深思熟虑的将军在指挥战斗：</p>
+                <p><strong>“让先锋部队（指令）大胆地向前探索（乱序执行），去攻占据点（计算结果），但不要立即向总部汇报战果并改变整个战线的部署（修改架构状态）。所有战果都先记录在临时日志上。等到后方确认这条进攻路线是正确的（分支预测正确、无异常），我们再根据日志，按照原定的作战计划顺序，正式宣布这些战果（按序提交）。”</strong></p>
+                <p>这个策略将指令的执行过程分为了三个明确的阶段：</p>
+                <ol>
+                <li><strong>乱序执行 (Out-of-Order Execution)</strong>：指令可以像在 Tomasulo 中那样，一旦操作数就绪就执行。</li>
+                <li><strong>乱序写结果 (Out-of-Order Write Result)</strong>：执行完的结果被存放到一个<strong>临时的、安全的缓冲结构</strong>中，而不是直接写入最终的目的地（寄存器堆或内存）。</li>
+                <li><strong>按序提交 (In-Order Commit/Retirement)</strong>：系统会按照指令在<strong>原始程序中的顺序</strong>，逐一检查它们的执行结果。只有当一条指令和它之前的所有指令都被确认是正确的，它的结果才会被从临时缓冲中取出，<strong>永久性地写入</strong>架构状态（寄存器或内存）。</li>
+                </ol>
+                <p>这个设计完美地结合了乱序执行的高性能和按序执行的正确性保障。而实现这一宏伟蓝图的关键硬件部件，就是那位将军手中的“临时作战日志”——<strong>重排序缓冲（Reorder Buffer, ROB）</strong>。</p>
+                <h4 id="41-%E9%87%8D%E6%8E%92%E5%BA%8F%E7%BC%93%E5%86%B2-rob-%E7%9A%84%E8%AE%BE%E8%AE%A1">4.1 重排序缓冲 (ROB) 的设计</h4>
+                <p>ROB 是一个<strong>先进先出（FIFO）<strong>的循环队列，它位于 Tomasulo 核心和最终的架构状态（寄存器堆/内存）之间。当一条指令被</strong>发射（Issue）<strong>时，它不仅会进入保留站，还会在 ROB 的</strong>队尾</strong>被分配一个条目。这条指令将“拥有”这个条目，直到它最终被<strong>提交（Commit）</strong>。</p>
+                <p><img src="../images/imagea037.png" alt="figure 37"></p>
+                <h4 id="411-rob-%E7%9A%84%E8%A7%92%E8%89%B2%E8%BD%AC%E5%8F%98">4.1.1 ROB 的角色转变</h4>
+                <p>ROB 的引入，深刻地改变了 Tomasulo 体系结构中各个部件的角色和数据流：</p>
+                <ol>
+                <li><strong>结果的目的地变了</strong>：当一个功能单元在 CDB 上广播结果时，这个结果的主要目的地<strong>不再是寄存器堆</strong>，而是<strong>ROB 中对应的条目</strong>。当然，保留站仍然会监听 CDB 以获取等待的操作数。</li>
+                <li><strong>操作数的来源多了</strong>：当一条指令在发射阶段查找源操作数时，它不仅要查寄存器状态表，如果发现操作数未就绪，它还要从 ROB 中获取（如果那个产生操作数的指令已经执行完但尚未提交）。因此，操作数的来源可以是<strong>寄存器堆</strong>或<strong>ROB</strong>。</li>
+                <li><strong>寄存器重命名的“后台”变了</strong>：在 Tomasulo 中，寄存器状态表（Qi 字段）指向保留站。在引入 ROB 后，它直接指向<strong>产生结果的指令在 ROB 中的条目号</strong>。ROB 成为了所有未提交结果的唯一、集中的“物理存储”。</li>
+                <li><strong>存储缓冲被“吸收”了</strong>：存储指令在提交之前不能修改内存。ROB 天然地提供了这种“暂存”能力。因此，独立的存储缓冲的功能可以被整合进 ROB。</li>
+                </ol>
+                <h4 id="412-rob-%E6%9D%A1%E7%9B%AE%E7%9A%84%E5%85%B3%E9%94%AE%E5%AD%97%E6%AE%B5">4.1.2 ROB 条目的关键字段</h4>
+                <p>ROB 的每个条目都需要记录足够的信息，来管理指令从执行到提交的整个过程。</p>
+                <ul>
+                <li><strong>Instruction Type (指令类型)</strong>：指明这是一条分支、存储、还是普通的寄存器操作（ALU/Load）。这决定了在提交阶段需要执行何种操作。</li>
+                <li><strong>Destination (目标)</strong>：
+                <ul>
+                <li>对于寄存器操作，这里是<strong>目标寄存器的编号</strong>（如 F6）。</li>
+                <li>对于存储操作，这里是计算出的<strong>目标内存地址</strong>。</li>
+                </ul>
+                </li>
+                <li><strong>Value (值)</strong>：存放指令执行完成后的<strong>结果</strong>。</li>
+                <li><strong>Ready (就绪)</strong>：一个比特位，<code>1</code> 表示指令已经执行完毕，其 <code>Value</code> 字段是有效的。</li>
+                </ul>
+                <h4 id="42-%E7%BB%93%E5%90%88-rob-%E7%9A%84%E6%96%B0%E6%8C%87%E4%BB%A4%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F">4.2 结合 ROB 的新指令生命周期</h4>
+                <p>引入 ROB 后，指令的生命周期扩展为四个阶段：</p>
+                <ol>
+                <li>
+                <p><strong>Issue (发射)</strong></p>
+                <ul>
+                <li><strong>条件</strong>：指令队列头部有指令，且有空闲的<strong>保留站</strong>和空闲的<strong>ROB 条目</strong>。</li>
+                <li><strong>动作</strong>：
+                a.  在 ROB <strong>队尾</strong>为指令分配一个条目，记录其类型和目标寄存器。
+                b.  将该 ROB 条目的索引号（ROB tag）作为重命名的标识。更新寄存器状态表，使其指向这个 ROB tag。
+                c.  将指令发往保留站。在保留站中，不仅记录操作，还记录对应的 ROB tag。
+                d.  从寄存器堆或 ROB 中查找源操作数，填入保留站的 V/Q 字段。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Execute (执行)</strong></p>
+                <ul>
+                <li><strong>条件</strong>：保留站的操作数就绪（V 字段有效）。</li>
+                <li><strong>动作</strong>：功能单元执行计算。这个阶段和 Tomasulo 基本一致。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Write Result (写结果)</strong></p>
+                <ul>
+                <li><strong>条件</strong>：执行完成。</li>
+                <li><strong>动作</strong>：
+                a.  功能单元将<strong>结果</strong>和<strong>对应的 ROB tag</strong> 广播到 CDB。
+                b.  ROB 监听到匹配的 tag，将结果写入相应条目的 <code>Value</code> 字段，并将其 <code>Ready</code> 位置 <code>1</code>。
+                c.  其他正在等待这个结果的保留站，也从 CDB 获取数据。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Commit (提交)</strong></p>
+                <ul>
+                <li><strong>这是整个推测执行的核心</strong>，必须<strong>严格按序</strong>进行。</li>
+                <li><strong>条件</strong>：ROB <strong>队头</strong>的指令，其 <code>Ready</code> 位为 <code>1</code>。</li>
+                <li><strong>动作</strong>：
+                <ul>
+                <li><strong>对于普通寄存器指令</strong>：将 <code>Value</code> 字段中的结果写入 <code>Destination</code> 字段指定的寄存器。</li>
+                <li><strong>对于存储指令</strong>：将 <code>Value</code>（要存储的数据）写入 <code>Destination</code>（内存地址）。</li>
+                <li><strong>对于正确预测的分支</strong>：什么都不做，因为它只是一个控制流标记。</li>
+                <li><strong>对于错误预测的分支</strong>：<strong>这是关键！</strong>
+                i.  <strong>冲刷（Flush）</strong> 整个 ROB 和所有保留站。
+                ii.  恢复寄存器映射表到分支指令执行前的状态。
+                iii. 告诉取指单元从正确的分支目标地址重新开始取指。</li>
+                <li><strong>无论何种情况，只要提交完成（或被冲刷），就将该条目从 ROB 队头移除。</strong></li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ol>
+                <h4 id="43-%E5%AE%9E%E4%BE%8B%E8%AF%A6%E8%A7%A3rob-%E5%9C%A8%E8%A1%8C%E5%8A%A8">4.3 实例详解：ROB 在行动</h4>
+                <p>让我们用以下的例子来具体感受一下 ROB 是如何工作的。</p>
+                <div class="code-container">
+                <pre><code class="language-plaintext">L.D     f6, 32(x2)
+L.D     f2, 44(x3)
+fmul.d  f0, f2, f4
+fsub.d  f8, f2, f6
+fdiv.d  f0, f0, f6
+fadd.d  f6, f8, f2
+</code></pre>
+                </div>
+                <p><img src="../images/imagea038.png" alt="figure 38"></p>
+                <p><strong>快照时刻设定</strong>：两条 <code>fld</code> 指令已经完成并<strong>提交</strong>。<code>fmul.d</code> 已经执行完，结果在 ROB 中，准备提交。<code>fsub.d</code> 也执行完了。<code>fdiv.d</code> 还在漫长的执行过程中。<code>fadd.d</code> 也执行完了。</p>
+                <p><strong>Reorder Buffer (ROB) 状态分析：</strong></p>
+                <ul>
+                <li><code>Entry 1, 2</code>：<code>Busy=No</code>。两条 <code>fld</code> 已经成功提交并从 ROB 队头移除。它们的 <code>Value</code> 已经永久写入了寄存器 F6 和 F2。</li>
+                <li><code>Entry 3</code> (<code>fmul.d</code>)：<strong>这是当前的 ROB 队头</strong>。
+                <ul>
+                <li><code>State=Write result</code> (应理解为 <code>Ready=Yes</code>)，<code>Value</code> 字段里是 <code>#2 x Regs[f4]</code> 的结果。因为它在队头且已就绪，所以<strong>在下一个时钟周期，它就可以被提交</strong>。提交时，它的值会被写入寄存器 F0。</li>
+                </ul>
+                </li>
+                <li><code>Entry 4</code> (<code>fsub.d</code>)：<code>State=Write result</code>, <code>Ready=Yes</code>。它也执行完了，但它不是队头，必须等待 <code>fmul.d</code> 提交。</li>
+                <li><code>Entry 5</code> (<code>fdiv.d</code>)：<code>State=Execute</code>。由于除法延迟很长，它还在执行中，<code>Ready</code> 位为 <code>0</code>。</li>
+                <li><code>Entry 6</code> (<code>fadd.d</code>)：<code>State=Write result</code>, <code>Ready=Yes</code>。它虽然执行快，但也必须排在 <code>fdiv.d</code> 后面等待提交。</li>
+                </ul>
+                <p><strong>FP Register Status (Reorder #) 状态分析：</strong></p>
+                <p>这张表现在是“寄存器重命名表”，或者叫“别名表（Alias Table）”。</p>
+                <ul>
+                <li><code>f0 -&gt; 3</code>：当前对 F0 的最新引用，应该去 ROB 的第 3 号条目 (<code>fmul.d</code>) 找。等等，例子里是 <code>fdiv.d f0, f0, f6</code>，所以最新的 F0 应该是 <code>fdiv.d</code>，即 ROB #5。</li>
+                <li><code>f6 -&gt; 6</code>：最新版本的 F6 将由 ROB #6 (<code>fadd.d</code>) 产生。</li>
+                <li><code>f8 -&gt; 4</code>：最新版本的 F8 将由 ROB #4 (<code>fsub.d</code>) 产生。</li>
+                <li><code>f2</code>, <code>f4</code> 等寄存器没有指向 ROB 条目，说明它们的值是稳定的，可以直接从寄存器堆读取。</li>
+                </ul>
+                <p><strong>推演下一步的 Commit 过程：</strong></p>
+                <ol>
+                <li>
+                <p><strong>Clock N</strong>：ROB #3 (<code>fmul.d</code>) 在队头且 <code>Ready=1</code>。<strong>Commit!</strong></p>
+                <ul>
+                <li>将 ROB[3].Value 写入寄存器 F0。</li>
+                <li>更新寄存器状态表，如果 <code>RegisterStat[f0].Reorder # == 3</code>，则清空它。</li>
+                <li>ROB #3 出队。ROB #4 (<code>fsub.d</code>) 成为新的队头。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Clock N+1</strong>：ROB #4 (<code>fsub.d</code>) 在队头且 <code>Ready=1</code>。<strong>Commit!</strong></p>
+                <ul>
+                <li>将 ROB[4].Value 写入寄存器 F8。</li>
+                <li>更新寄存器状态表 <code>RegisterStat[f8]</code>。</li>
+                <li>ROB #4 出队。ROB #5 (<code>fdiv.d</code>) 成为新的队头。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Clock N+2</strong>：ROB #5 (<code>fdiv.d</code>) 在队头，但它的 <code>Ready</code> 位还是 <code>0</code>！它还在执行。</p>
+                <ul>
+                <li><strong>流水线停顿在提交阶段！</strong> 即使后面的 <code>fadd.d</code> (ROB #6) 早已准备就绪，它也必须等待 <code>fdiv.d</code> 完成。</li>
+                </ul>
+                </li>
+                </ol>
+                <p>这个例子清晰地展示了硬件推测是如何<strong>强制维持按序提交</strong>的，即使这会导致停顿。这是为<strong>精确异常（Precise Exceptions）<strong>和</strong>正确恢复</strong>付出的必要代价。如果 <code>fdiv.d</code> 在执行中发生了除零异常，由于它之前的指令都已经安全提交，而它和它之后的所有指令都还在 ROB 中，处理器可以简单地冲刷 ROB #5 及之后的所有条目，然后跳转到异常处理程序，状态非常干净。</p>
+                <h4 id="%E6%80%BB%E7%BB%93%E6%8E%A8%E6%B5%8B%E6%89%A7%E8%A1%8C%E7%9A%84%E4%BC%9F%E5%A4%A7%E5%B9%B3%E8%A1%A1">总结：推测执行的伟大平衡</h4>
+                <p>硬件推测与重排序缓冲（ROB）的结合，是现代高性能处理器设计的巅峰之作。它在 Tomasulo 算法的基础上，构建了一个近乎完美的动态调度框架：</p>
+                <ul>
+                <li><strong>性能</strong>：通过允许指令在分支解析和异常点确认前提早、乱序地执行，最大限度地隐藏了各种延迟，发掘了深层次的指令级并行。</li>
+                <li><strong>正确性</strong>：通过严格的按序提交机制，确保了无论内部执行顺序如何“混乱”，最终呈现给程序员的架构状态都与程序顺序完全一致，并保证了在发生分支预测失败或异常时，系统可以恢复到一个精确、无误的状态。</li>
+                </ul>
+                <p>它在“激进的乱序执行”和“保守的按序语义”之间，取得了一种精妙的平衡。从记分牌到 Tomasulo，再到硬件推测，我们看到了计算机体系结构如何一步步地从简单的流水线，演化成一个复杂的、分布式的、具备学习和预测能力的智能执行引擎。</p>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
