@@ -796,5 +796,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-27-na10.html",
       "abstract": "数值分析10:数值微积分与最佳多项式逼近"
+    },
+    {
+      "title": "数值分析11:复合求积、收敛加速与自适应积分",
+      "date": "2025-08-27",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-27-na11.html",
+      "abstract": "数值分析11:复合求积、收敛加速与自适应积分"
     }
   ];

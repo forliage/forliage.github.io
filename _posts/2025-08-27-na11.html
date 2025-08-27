@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数值分析11:复合求积、收敛加速与自适应积分</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E6%95%B0%E5%80%BC%E5%88%86%E6%9E%9011%E5%A4%8D%E5%90%88%E6%B1%82%E7%A7%AF%E6%94%B6%E6%95%9B%E5%8A%A0%E9%80%9F%E4%B8%8E%E8%87%AA%E9%80%82%E5%BA%94%E7%A7%AF%E5%88%86">数值分析11:复合求积、收敛加速与自适应积分</h1>
+                <h3 id="%E5%BC%95%E8%A8%80%E4%BB%8E%E5%9F%BA%E6%9C%AC%E5%85%AC%E5%BC%8F%E5%88%B0%E5%AE%9E%E7%94%A8%E7%AE%97%E6%B3%95"><strong>引言：从基本公式到实用算法</strong></h3>
+                <p>在上一讲中，我们开启了数值微积分的探索之旅，学习了如何通过对插值多项式进行积分来构造数值求积（Quadrature）公式。我们推导了两种最基本的 <strong>Newton-Cotes</strong> 公式：<strong>梯形法则</strong>和<strong>辛普森法则</strong>。</p>
+                <p>我们看到，这些低阶公式为我们提供了一种近似计算定积分的简单方法。然而，它们本身的应用是有限的。为什么？</p>
+                <ol>
+                <li><strong>精度与区间：</strong> 梯形法则的误差是 $O(h^3)$，辛普森法则是 $O(h^5)$，其中 $h=b-a$ 是整个积分区间的长度。如果积分区间很大，即使是辛普森法则，误差也可能大到无法接受。</li>
+                <li><strong>高阶公式的陷阱：</strong> 我们可能会想，是否可以通过使用更高阶的 Newton-Cotes 公式（即在整个区间上使用更高次的插值多项式）来提高精度？答案是否定的。我们从插值理论中得知，高次多项式插值在等距节点上会产生剧烈的<strong>龙格振荡现象 (Runge's Phenomenon)</strong>。同样，高阶的 Newton-Cotes 公式会出现<strong>负权</strong>，导致数值不稳定，实际应用中几乎从不使用。</li>
+                </ol>
+                <p><strong>那么，如何在保证稳定性的前提下，获得高精度的积分结果呢？</strong></p>
+                <p>今天的课程将围绕这个问题，介绍三种将简单求积公式转化为强大实用算法的核心技术：</p>
+                <ol>
+                <li><strong>复合求积法 (Composite Integration):</strong> 这是最直观、最常用的方法。其思想是“分而治之”——将大区间切分成许多小区间，在每个小区间上应用低阶的、稳定的求积公式，然后将结果累加。</li>
+                <li><strong>收敛加速技术 (Acceleration Techniques):</strong> 我们会发现复合梯形法则的误差具有一个非常规则的结构。利用这一结构，我们可以通过一种名为<strong>理查森外推 (Richardson's Extrapolation)</strong> 的“事后处理”技术，从低精度结果中“提炼”出高精度的结果。这一思想的系统性应用便构成了<strong>龙贝格积分 (Romberg Integration)</strong>。</li>
+                <li><strong>自适应求积法 (Adaptive Quadrature):</strong> 现实中的被积函数在不同区域的“复杂程度”可能差异巨大。在函数平缓的区域使用过密的分割是一种浪费，在函数剧烈变化的区域使用过疏的分割则会导致精度不足。自适应求积通过<strong>动态调整</strong>步长，将计算资源智能地分配到最需要的地方。</li>
+                </ol>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%A4%8D%E5%90%88%E6%95%B0%E5%80%BC%E7%A7%AF%E5%88%86"><strong>第一部分：复合数值积分</strong></h3>
+                <h4 id="441-%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3%E5%88%86%E8%80%8C%E6%B2%BB%E4%B9%8B"><strong>4.4.1 核心思想：分而治之</strong></h4>
+                <p>&quot;Due to the oscillatory nature of high-degree polynomials, piecewise interpolation is applied...&quot;这正是复合求积的根本动机。我们放弃在整个 $[a,b]$ 区间上使用单一高次插值多项式的想法，转而采用更稳健的<strong>分段低次插值</strong>。</p>
+                <p><strong>通用策略：</strong></p>
+                <ol>
+                <li>将积分区间 $[a,b]$ 分割成 $n$ 个等宽的子区间 $[x_{k-1}, x_k]$，其中 $x_k = a+kh$，$h=(b-a)/n$。</li>
+                <li>在<strong>每一个</strong>子区间上，应用一个简单的低阶 Newton-Cotes 公式（如梯形或辛普森法则）。</li>
+                <li>将所有子区间上的积分近似值相加，得到整个区间上的积分近似值。</li>
+                </ol>
+                <h4 id="442-%E5%A4%8D%E5%90%88%E6%A2%AF%E5%BD%A2%E6%B3%95%E5%88%99-composite-trapezoidal-rule"><strong>4.4.2 复合梯形法则 (Composite Trapezoidal Rule)</strong></h4>
+                <p>在每个子区间 $[x_{k-1}, x_k]$ 上应用梯形法则：
+                $$\int_{x_{k-1}}^{x_k} f(x)dx \approx \frac{h}{2}[f(x_{k-1}) + f(x_k)]$$</p>
+                <p>将所有子区间的结果相加：</p>
+                <p>
+                $$
+                \begin{aligned}
+                \int_a^b f(x)dx &= \sum_{k=1}^n \int_{x_{k-1}}^{x_k} f(x)dx \approx \sum_{k=1}^n \frac{h}{2}[f(x_{k-1}) + f(x_k)]\\
+                &= \frac{h}{2} [ (f(x_0)+f(x_1)) + (f(x_1)+f(x_2)) + \dots + (f(x_{n-1})+f(x_n)) ]
+                \end{aligned}
+                $$
+                </p>
+                <p>观察到，除了首尾两个端点 $f(x_0)=f(a)$ 和 $f(x_n)=f(b)$ 只出现了一次外，所有的内部节点 $f(x_k)$ ($k=1, \dots, n-1$) 都被加了两次。</p>
+                <p><strong>复合梯形法则公式：</strong>
+                $$\int_a^b f(x)dx \approx T_n(h) = \frac{h}{2} \left[ f(a) + 2\sum_{k=1}^{n-1} f(x_k) + f(b) \right]$$</p>
+                <p><strong>误差分析：</strong>
+                总误差是每个子区间误差之和。第 $k$ 个子区间的误差为 $E_k = -\frac{h^3}{12}f''(\xi_k)$。
+                $$R[f] = \sum_{k=1}^n E_k = -\frac{h^3}{12} \sum_{k=1}^n f''(\xi_k)$$
+                根据推广的<strong>中值定理 (MVT)</strong>，存在一个 $\xi \in (a,b)$，使得 $\sum_{k=1}^n f''(\xi_k) = n \cdot f''(\xi)$。
+                $$R[f] = -\frac{h^3}{12} n f''(\xi) = -\frac{h^2}{12} (nh) f''(\xi)$$
+                因为 $nh = b-a$，我们得到：
+                <strong>复合梯形法则误差：</strong> $E_T(h) = -\frac{b-a}{12} h^2 f''(\xi) = O(h^2)$
+                这是一个<strong>二阶方法</strong>。步长 $h$ 减半，误差减为原来的 $1/4$。</p>
+                <h4 id="443-%E5%A4%8D%E5%90%88%E8%BE%9B%E6%99%AE%E6%A3%AE%E6%B3%95%E5%88%99-composite-simpsons-rule"><strong>4.4.3 复合辛普森法则 (Composite Simpson's Rule)</strong></h4>
+                <p><strong>注意：</strong> 辛普森法则需要3个点，因此它作用在一个“大”区间 $[x_k, x_{k+2}]$ 上，这个大区间的宽度是 $2h$。为了应用复合辛普森法则，总的分割数 $n$ <strong>必须是偶数</strong>。</p>
+                <p>我们将 $[a,b]$ 分成 $n$ 个子区间（$n$为偶数），然后成对地应用辛普森法则在 $[x_{2k-2}, x_{2k}]$ 上，共 $n/2$ 次。
+                在区间 $[x_{2k-2}, x_{2k}]$ 上应用辛普森法则（步长仍为 $h$）：
+                $$\int_{x_{2k-2}}^{x_{2k}} f(x)dx \approx \frac{h}{3}[f(x_{2k-2}) + 4f(x_{2k-1}) + f(x_{2k})]$$
+                将所有这些成对区间的结果相加，会发现：</p>
+                <ul>
+                <li>偶数下标的内部节点 $f(x_{2k})$ 被加了两次。</li>
+                <li>奇数下标的内部节点 $f(x_{2k-1})$ 的系数总是4。</li>
+                </ul>
+                <p><strong>复合辛普森法则公式：</strong>
+                $$\int_a^b f(x)dx \approx S_n(h) = \frac{h}{3} \left[ f(a) + 4\sum_{k=1}^{n/2} f(x_{2k-1}) + 2\sum_{k=1}^{n/2-1} f(x_{2k}) + f(b) \right]$$</p>
+                <p><strong>误差分析：</strong>
+                单个辛普森法则作用在宽度为 $2h$ 的区间上，误差为 $-\frac{(2h)^5}{2880}f^{(4)}(\xi_k)$。总误差为 $n/2$ 个这样的误差之和。
+                <strong>复合辛普森法则误差：</strong> $E_S(h) = -\frac{b-a}{180} h^4 f^{(4)}(\xi) = O(h^4)$
+                这是一个<strong>四阶方法</strong>，精度非常高。</p>
+                <h4 id="444-%E6%95%B0%E5%80%BC%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%88%86%E6%9E%90"><strong>4.4.4 数值稳定性分析</strong></h4>
+                <p>&quot;Composite integration techniques are all stable.&quot;为什么？
+                考虑在计算函数值时存在舍入误差，即我们用 $f^*(x_i) = f(x_i) + \epsilon_i$ 代替 $f(x_i)$，其中 $|\epsilon_i| \le \epsilon$。
+                以复合辛普森法则为例，累积的舍入误差为：
+                $$e(h) = \frac{h}{3} \left[ \epsilon_0 + 4\sum_{\text{odd}} \epsilon_k + 2\sum_{\text{even}} \epsilon_k + \epsilon_n \right]$$
+                其绝对值的上界为：
+                $$|e(h)| \le \frac{h}{3} \left[ \epsilon + 4\frac{n}{2}\epsilon + 2(\frac{n}{2}-1)\epsilon + \epsilon \right] = \frac{h}{3} [ \epsilon + 2n\epsilon + (n-2)\epsilon + \epsilon ] = \frac{h}{3} [3n\epsilon] = nh\epsilon = (b-a)\epsilon$$</p>
+                <p><strong>关键结论：</strong>
+                总的舍入误差上界 $(b-a)\epsilon$ <strong>与分割数 $n$ (或步长 $h$) 无关</strong>！这意味着，即使我们为了减小截断误差而疯狂地增加分割数 $n$，累积的舍入误差也<strong>不会被放大</strong>。这与数值微分中舍入误差 $\propto 1/h$ 的灾难性行为形成了鲜明对比。这就是数值积分的<strong>稳定性</strong>所在。</p>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E6%94%B6%E6%95%9B%E5%8A%A0%E9%80%9F%E7%90%86%E6%9F%A5%E6%A3%AE%E5%A4%96%E6%8E%A8%E4%B8%8E%E9%BE%99%E8%B4%9D%E6%A0%BC%E7%A7%AF%E5%88%86"><strong>第二部分：收敛加速：理查森外推与龙贝格积分</strong></h3>
+                <h4 id="42-%E7%90%86%E6%9F%A5%E6%A3%AE%E5%A4%96%E6%8E%A8-richardsons-extrapolation"><strong>4.2 理查森外推 (Richardson's Extrapolation)</strong></h4>
+                <p><strong>核心思想：</strong>
+                假设我们有一个计算方法 $N(h)$，它近似于真值 $M$，并且其误差可以表示为一个关于步长 $h$ 的幂级数：
+                $M = N(h) + K_1 h^{\alpha_1} + K_2 h^{\alpha_2} + \dots$  ($\alpha_1 < \alpha_2 < \dots$)</p>
+                <p>现在，我们用两个不同的步长，比如 $h$ 和 $h/2$，进行两次计算：
+                $$M = N(h) + K_1 h^{\alpha_1} + O(h^{\alpha_2})$$
+                $$M = N(h/2) + K_1 (h/2)^{\alpha_1} + O(h^{\alpha_2}) = N(h/2) + K_1 \frac{h^{\alpha_1}}{2^{\alpha_1}} + O(h^{\alpha_2})$$</p>
+                <p>这是一个关于未知数 $M$ 和 $K_1 h^{\alpha_1}$ 的二元线性方程组！我们可以解出 $M$，消去主要的误差项 $O(h^{\alpha_1})$：
+                $$N_1(h) = \frac{2^{\alpha_1} N(h/2) - N(h)}{2^{\alpha_1} - 1}$$
+                这个新的近似值 $N_1(h)$ 的误差是 $O(h^{\alpha_2})$，精度比原来的 $N(h)$ 更高！</p>
+                <p>这个过程被称为<strong>理查森外推</strong>。它是一种通用的<strong>事后处理</strong>技术，可以从一系列低精度计算中提取出高精度的结果，只要误差结构是已知的。</p>
+                <h4 id="45-%E9%BE%99%E8%B4%9D%E6%A0%BC%E7%A7%AF%E5%88%86-romberg-integration"><strong>4.5 龙贝格积分 (Romberg Integration)</strong></h4>
+                <p>龙贝格积分就是将理查森外推<strong>系统地、反复地</strong>应用于<strong>复合梯形法则</strong>。</p>
+                <p><strong>为什么是梯形法则？</strong>
+                一个非常深刻的数学结果（<strong>欧拉-麦克劳林公式</strong>）指出，复合梯形法则的误差，如果被积函数足够光滑，可以表示为一个关于 $h^2$ 的偶次幂级数：
+                $$I = T(h) + K_1 h^2 + K_2 h^4 + K_3 h^6 + \dots$$</p>
+                <p>这正是应用理查森外推的完美场景！这里的 $\alpha_1=2, \alpha_2=4, \dots$。</p>
+                <p><strong>龙贝格算法步骤：</strong></p>
+                <ol>
+                <li>
+                <p><strong>第一列 (梯形法则计算):</strong></p>
+                <ul>
+                <li>选择一个初始步长 $h_0 = b-a$。计算 $R_{1,1} = T(h_0) = \frac{h_0}{2}[f(a)+f(b)]$。</li>
+                <li>步长减半 $h_1 = h_0/2$。计算 $R_{2,1} = T(h_1) = \frac{1}{2}R_{1,1} + h_1 \sum f(x_{\text{new}})$。</li>
+                <li>继续步长减半 $h_k = h_{k-1}/2$，计算 $R_{k+1, 1} = T(h_k)$。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>后续列 (外推):</strong>
+                应用理查森外推公式（这里 $\alpha$ 每次都不同，是 $2j$）：
+                $$R_{k, j} = R_{k, j-1} + \frac{R_{k, j-1} - R_{k-1, j-1}}{4^{j-1}-1}$$</p>
+                </li>
+                </ol>
+                <p>我们可以构造一个<strong>龙贝格表</strong>：
+                $R_{1,1} = T_1^{(0)}$
+                $R_{2,1} = T_2^{(0)} \quad R_{2,2} = T_1^{(1)}$
+                $R_{3,1} = T_4^{(0)} \quad R_{3,2} = T_2^{(1)} \quad R_{3,3} = T_1^{(2)}$
+                $R_{4,1} = T_8^{(0)} \quad R_{4,2} = T_4^{(1)} \quad R_{4,3} = T_2^{(2)} \quad R_{4,4} = T_1^{(3)}$</p>
+                <p><strong>表中元素的含义：</strong></p>
+                <ul>
+                <li><strong>第一列 ($R_{k,1}$):</strong> 复合梯形法则的结果，精度为 $O(h^{2})$。</li>
+                <li><strong>第二列 ($R_{k,2}$):</strong> 误差为 $O(h^{4})$。可以证明，这一列的结果与<strong>复合辛普森法则</strong>完全等价！</li>
+                <li><strong>第三列 ($R_{k,3}$):</strong> 误差为 $O(h^{6})$。这等价于更高阶的复合 Newton-Cotes 公式（Boole's Rule）。</li>
+                <li><strong>沿对角线</strong> $R_{k,k}$ 的收敛速度最快。</li>
+                </ul>
+                <p>龙贝格积分是一种非常强大和流行的积分方法，它结合了梯形法则的简单性、理查森外推的加速能力，并且通过观察对角线元素的收敛情况，可以自动判断何时停止计算。</p>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E8%87%AA%E9%80%82%E5%BA%94%E6%B1%82%E7%A7%AF"><strong>第三部分：自适应求积</strong></h3>
+                <p><strong>动机：</strong>
+                对于像 $\int_1^3 \frac{100}{x^2}\sin(\frac{10}{x})dx$ 这样的积分，被积函数在 $x$ 较小的时候剧烈振荡，在 $x$ 较大的时候非常平滑。</p>
+                <ul>
+                <li><strong>标准复合方法：</strong> 为了捕捉振荡区域的细节，必须在整个积分区间上都使用非常小的步长 $h$，这在平滑区域造成了巨大的计算浪费。</li>
+                <li><strong>自适应思想：</strong> &quot;Predict the amount of functional variation and adapt the step size.&quot;我们希望算法能“智能”地在振荡区域加密采样点，在平滑区域使用稀疏的采样点，同时保证总误差在给定的容差 $\epsilon$ 之内。</li>
+                </ul>
+                <h4 id="461-%E6%A0%B8%E5%BF%83%E7%AD%96%E7%95%A5%E8%AF%AF%E5%B7%AE%E4%BC%B0%E8%AE%A1%E4%B8%8E%E9%80%92%E5%BD%92"><strong>4.6.1 核心策略：误差估计与递归</strong></h4>
+                <p><strong>如何在没有真值的情况下估计误差？</strong>
+                以辛普森法则为例。</p>
+                <ol>
+                <li>
+                <p>在区间 $[a,b]$ 上，用步长 $h=(b-a)/2$ 应用一次辛普森法则，得到一个“粗略”的近似值 $S(a,b)$。
+                $\int_a^b f(x)dx \approx S(a,b)$, 其误差约为 $-\frac{h^5}{90}f^{(4)}(\xi_1)$。</p>
+                </li>
+                <li>
+                <p>将区间一分为二 $[a, (a+b)/2]$ 和 $[(a+b)/2, b]$。在每个子区间上应用辛普森法则（步长变为 $h/2$），然后相加，得到一个“精细”的近似值 $S(a, \frac{a+b}{2}) + S(\frac{a+b}{2}, b)$。
+                $\int_a^b f(x)dx \approx S_{\text{fine}}$, 其误差约为 $2 \times \left( -\frac{(h/2)^5}{90}f^{(4)}(\xi_2) \right) = -\frac{1}{16} \frac{h^5}{90}f^{(4)}(\xi_2)$。</p>
+                </li>
+                <li>
+                <p>假设 $f^{(4)}(x)$ 在区间内变化不大，则 $\int_a^b f(x)dx \approx S(a,b) - 16E_{\text{fine}}$ 且 $\int_a^b f(x)dx \approx S_{\text{fine}} - E_{\text{fine}}$。
+                联立解出误差的<strong>可计算估计</strong>：
+                $$|E_{\text{fine}}| = \left| \int_a^b f(x)dx - S_{\text{fine}} \right| \approx \frac{1}{15} |S_{\text{fine}} - S(a,b)|$$</p>
+                </li>
+                </ol>
+                <p><strong>自适应算法 (基于递归):</strong>
+                <code>FUNCTION AdaptiveQuadrature(f, a, b, TOL):</code></p>
+                <ol>
+                <li>计算粗略积分 $S_{coarse} = S(a,b)$。</li>
+                <li>计算精细积分 $S_{fine} = S(a, (a+b)/2) + S((a+b)/2, b)$。</li>
+                <li><strong>估计误差</strong> $Error \approx \frac{1}{15}|S_{fine} - S_{coarse}|$。</li>
+                <li><strong>IF</strong> $Error < TOL$:
+                <strong>RETURN</strong> $S_{fine}$  (当前区间的精度足够，返回结果)</li>
+                <li><strong>ELSE</strong>:
+                // 精度不足，将容差减半，递归地处理左右两个子区间
+                <code>mid = (a+b)/2</code>
+                <code>left_integral = AdaptiveQuadrature(f, a, mid, TOL/2)</code>
+                <code>right_integral = AdaptiveQuadrature(f, mid, b, TOL/2)</code>
+                <strong>RETURN</strong> <code>left_integral + right_integral</code></li>
+                </ol>
+                <p>自适应求积通过这种递归的“分治”策略，确保了计算量被有效地用在最需要的地方，是一种非常高效和智能的数值积分方法。</p>
+                <h3 id="%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93"><strong>课程总结</strong></h3>
+                <p><strong>本讲核心要点：</strong></p>
+                <ol>
+                <li><strong>复合求积</strong>通过在小区间上重复使用低阶稳定公式（梯形、辛普森）来获得高精度，是数值积分最基本和可靠的方法。复合梯形法则是 $O(h^2)$，复合辛普森法则是 $O(h^4)$。</li>
+                <li>数值积分是<strong>稳定</strong>的，增加计算点数不会放大舍入误差。</li>
+                <li><strong>理查森外推</strong>是一种强大的通用技术，能从具有规则误差结构的低精度结果中消除主误差项，从而“凭空”获得更高精度的结果。</li>
+                <li><strong>龙贝格积分</strong>是理查森外推在复合梯形法则上的系统应用，它能高效地生成一系列精度越来越高的积分近似值，并且可以自动判断收敛。</li>
+                <li><strong>自适应求积</strong>是一种更智能的方法，它通过局部误差估计来动态调整采样密度，将计算力集中在被积函数变化剧烈的区域，从而在满足总体精度要求的前提下，最大限度地节省计算量。</li>
+                </ol>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
