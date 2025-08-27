@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数值分析06:线性系统的误差分析与多项式插值</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E6%95%B0%E5%80%BC%E5%88%86%E6%9E%9006%E7%BA%BF%E6%80%A7%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%AF%AF%E5%B7%AE%E5%88%86%E6%9E%90%E4%B8%8E%E5%A4%9A%E9%A1%B9%E5%BC%8F%E6%8F%92%E5%80%BC">数值分析06:线性系统的误差分析与多项式插值</h1>
+                <h3 id="%E5%BC%95%E8%A8%80%E9%97%AE%E9%A2%98%E7%9A%84%E6%95%8F%E6%84%9F%E6%80%A7%E4%B8%8E%E5%87%BD%E6%95%B0%E7%9A%84%E8%BF%91%E4%BC%BC"><strong>引言：问题的敏感性与函数的近似</strong></h3>
+                <p>在前几讲中，我们投入了大量精力学习如何求解方程组，包括直接法（高斯消元、LU分解）和迭代法（Jacobi, Gauss-Seidel, SOR）。我们关注算法的<strong>效率</strong>（计算量）、<strong>鲁棒性</strong>（主元选择）和<strong>收敛性</strong>（谱半径）。</p>
+                <p>至今为止，我们暗中作了一个理想化的假设：<strong>输入的矩阵 $A$ 和向量 $\mathbf{b}$ 是完全精确的。</strong> 在现实世界中，这几乎是不可能的。输入数据往往来源于测量（带有测量误差）或前一步的计算（带有舍入误差）。</p>
+                <p>这就引出了一个至关重要的问题：<strong>如果输入数据有微小的误差，我们求出的解 $\mathbf{x}$ 会有多大的误差？</strong> 这个问题与算法无关，而是关乎<strong>问题本身</strong>的“好坏”或“敏感性”。一个微小的输入扰动导致输出巨大变化的问题，我们称之为<strong>病态 (ill-conditioned)</strong> 问题。衡量这种敏感性的工具，就是我们今天要讲的第一个核心概念——<strong>条件数 (Condition Number)</strong>。</p>
+                <p>课程的第二部分，我们将切换到一个全新的，但同样是数值分析基石的领域。在科学计算中，我们经常遇到这样一些情况：</p>
+                <ol>
+                <li>我们不知道一个函数的具体表达式，只知道它在一系列离散点上的函数值（例如，通过实验测量得到的数据）。</li>
+                <li>我们知道函数的表达式，但它过于复杂，不便于求导、积分或进一步的计算（例如 $f(x) = \int_0^x e^{-t^2} dt$）。</li>
+                </ol>
+                <p>面对这些情况，我们的核心策略是：<strong>用一个简单的、我们熟知的函数（通常是多项式）来近似或“代替”这个未知的或复杂的函数。</strong> 这个过程就是<strong>插值 (Interpolation)</strong>。今天，我们将学习最经典的多项式插值方法——<strong>拉格朗日多项式插值</strong>，并分析其近似效果。</p>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E8%AF%AF%E5%B7%AE%E7%95%8C%E4%B8%8E%E6%9D%A1%E4%BB%B6%E6%95%B0"><strong>第一部分：误差界与条件数</strong></h3>
+                <h4 id="741-%E9%97%AE%E9%A2%98%E7%9A%84%E6%8F%90%E5%87%BA"><strong>7.4.1 问题的提出</strong></h4>
+                <p>我们考虑线性系统 $A\mathbf{x} = \mathbf{b}$。假设由于某种原因，我们的输入存在扰动，求解的是一个略有不同的系统。我们将分析两种情况。</p>
+                <p><strong>研究课题6: 扰动分析</strong></p>
+                <ol>
+                <li><strong>右端项 $\mathbf{b}$ 的扰动：</strong> 假设 $A$ 精确，但 $\mathbf{b}$ 有误差 $\delta\mathbf{b}$。我们实际求解的是 $A(\mathbf{x}+\delta\mathbf{x}) = \mathbf{b}+\delta\mathbf{b}$。我们想知道解的相对误差 $\frac{|\delta\mathbf{x}|}{|\mathbf{x}|}$ 和数据相对误差 $\frac{|\delta\mathbf{b}|}{|\mathbf{b}|}$ 之间的关系。</li>
+                <li><strong>系数矩阵 $A$ 的扰动：</strong> 假设 $\mathbf{b}$ 精确，但 $A$ 有误差 $\delta A$。我们实际求解的是 $(A+\delta A)(\mathbf{x}+\delta\mathbf{x}) = \mathbf{b}$。这两种情况的分析是数值线性代数稳定性的核心。</li>
+                </ol>
+                <h4 id="742-%E5%8F%B3%E7%AB%AF%E9%A1%B9%E6%89%B0%E5%8A%A8%E5%88%86%E6%9E%90"><strong>7.4.2 右端项扰动分析</strong></h4>
+                <p>从 $A(\mathbf{x}+\delta\mathbf{x}) = \mathbf{b}+\delta\mathbf{b}$ 和 $A\mathbf{x} = \mathbf{b}$ 两式相减，得到：
+                $A\delta\mathbf{x} = \delta\mathbf{b} \implies \delta\mathbf{x} = A^{-1}\delta\mathbf{b}$</p>
+                <p>现在我们引入范数来衡量误差的大小。使用任意相容的向量和矩阵范数：
+                $|\delta\mathbf{x}| = |A^{-1}\delta\mathbf{b}| \le |A^{-1}| |\delta\mathbf{b}|$</p>
+                <p>为了得到相对误差，我们还需要 $|\mathbf{x}|$ 的一个下界。从 $A\mathbf{x} = \mathbf{b}$ 可得：
+                $|\mathbf{b}| = |A\mathbf{x}| \le |A| |\mathbf{x}| \implies |\mathbf{x}| \ge \frac{|\mathbf{b}|}{|A|}$ (假设 $\mathbf{b}\neq \mathbf{0}$)</p>
+                <p>将这两个不等式组合起来：
+                $\frac{|\delta\mathbf{x}|}{|\mathbf{x}|} \le \frac{|A^{-1}| |\delta\mathbf{b}|}{|\mathbf{b}| / |A|} = (|A||A^{-1}|) \frac{|\delta\mathbf{b}|}{|\mathbf{b}|}$</p>
+                <p>这个结果极为重要。它表明，解的相对误差被右端项的相对误差放大了，其放大系数正是括号中的那一项。</p>
+                <h4 id="743-%E6%9D%A1%E4%BB%B6%E6%95%B0-condition-number"><strong>7.4.3 条件数 (Condition Number)</strong></h4>
+                <p><strong>定义：</strong> 对于一个非奇异矩阵 $A$，其<strong>条件数</strong> $K(A)$ 定义为：
+                $K(A) = |A| |A^{-1}|$</p>
+                <p>使用这个定义，上面的误差界可以写成：
+                $\frac{|\delta\mathbf{x}|}{|\mathbf{x}|} \le K(A) \frac{|\delta\mathbf{b}|}{|\mathbf{b}|}$</p>
+                <p><strong>条件数的意义：</strong></p>
+                <ul>
+                <li><strong>误差放大器：</strong> 条件数是衡量线性系统 $A\mathbf{x}=\mathbf{b}$ 对右端项 $\mathbf{b}$ 扰动的<strong>敏感度</strong>的指标。</li>
+                <li><strong>$K(A)$ 很大 (&gt;&gt; 1):</strong> 系统是<strong>病态的 (ill-conditioned)</strong>。这意味着即使 $\mathbf{b}$ 中一个非常小的相对误差，也可能导致解 $\mathbf{x}$ 中一个巨大的相对误差。在这种情况下，即使使用数值上最稳定的算法，得到的解也可能是不可靠的。</li>
+                <li><strong>$K(A)$ 很小 (接近 1):</strong> 系统是<strong>良态的 (well-conditioned)</strong>。解的相对误差与数据的相对误差在同一个数量级。</li>
+                </ul>
+                <p><strong>条件数的重要性质：</strong></p>
+                <ol>
+                <li><strong>$K(A) \ge 1$</strong> for any natural norm。（因为 $1 = |I| = |AA^{-1}| \le |A||A^{-1}| = K(A)$）</li>
+                <li>对于对称矩阵，谱条件数 $K_2(A) = \frac{|\lambda_{\max}|}{|\lambda_{\min}|}$，即最大和最小特征值绝对值之比。</li>
+                <li>对于正交矩阵 $Q$ ($Q^{-1}=Q^T$)， $K_2(Q)=1$。这是条件数能达到的最小值，正交矩阵对应的系统是数值上最理想的。</li>
+                <li>$K(\alpha A) = K(A)$ for any scalar $\alpha \neq 0$。条件数与矩阵的尺度无关。</li>
+                </ol>
+                <h4 id="744-%E7%9F%A9%E9%98%B5-a-%E7%9A%84%E6%89%B0%E5%8A%A8%E5%88%86%E6%9E%90"><strong>7.4.4 矩阵 $A$ 的扰动分析</strong></h4>
+                <p>当矩阵 $A$ 存在扰动 $\delta A$ 时，分析更为复杂。可以证明（假设 $|\delta A| < 1/|A^{-1}|$ 以保证 $A+\delta A$ 非奇异），我们有如下误差界：
+                $\frac{|\delta\mathbf{x}|}{|\mathbf{x}+\delta\mathbf{x}|} \le K(A) \frac{|\delta A|}{|A|}$
+                （注意这里的解的相对误差分母是扰动后的解 $\mathbf{x}+\delta\mathbf{x}$）
+                这同样表明，条件数 $K(A)$ 也控制着系统对系数矩阵 $A$ 扰动的敏感度。</p>
+                <p><strong>综合误差界：</strong>
+                当 $A$ 和 $\mathbf{b}$ 同时存在扰动时，有如下定理：
+                <strong>定理：</strong> 假设 $A$ 非奇异且 $K(A)\frac{|\delta A|}{|A|} < 1$，则
+                $\frac{|\delta\mathbf{x}|}{|\mathbf{x}|} \le \frac{K(A)}{1 - K(A)\frac{|\delta A|}{|A|}} \left( \frac{|\delta A|}{|A|} + \frac{|\delta\mathbf{b}|}{|\mathbf{b}|} \right)$</p>
+                <p>这个公式是数值线性代数的<strong>核心结果</strong>之一。它精确地量化了输入数据的相对误差是如何通过条件数被放大，并最终体现在解的相对误差中。</p>
+                <p><strong>Discussion 15: 一个病态系统的例子</strong>
+                给定 $A = \begin{pmatrix} 1 & 0.99 \\ 0.99 & 0.98 \end{pmatrix}$。
+                这是一个对称矩阵，其特征值为 $\lambda_1 \approx 1.98$ 和 $\lambda_2 \approx -0.00005$。
+                谱条件数为 $K_2(A) = \frac{|\lambda_1|}{|\lambda_2|} \approx 39206 \gg 1$。这是一个<strong>高度病态</strong>的矩阵。
+                即使我们给右端项一个小于 $0.01%$ 的微小扰动，最终解的相对误差却超过了 $200%$！
+                <strong>结论：</strong> 对于病态系统，解的精度损失是<strong>不可避免</strong>的，这是问题本身的特性，而非算法的过错。我们能做的就是：</p>
+                <ol>
+                <li>识别病态问题（通过估算条件数）。</li>
+                <li>尽可能提高计算精度（例如使用双精度甚至更高精度）。</li>
+                <li>如果可能，从问题建模的角度重新构造方程，以降低条件数。</li>
+                </ol>
+                <h4 id="745-%E8%BF%AD%E4%BB%A3%E6%94%B9%E5%96%84-iterative-refinement"><strong>7.4.5 迭代改善 (Iterative Refinement)</strong></h4>
+                <p>如果我们用直接法（如LU分解）得到了一个解 $\mathbf{x}^{(0)}$，但由于病态性或舍入误差，它不够精确，我们能做什么？
+                <strong>迭代改善</strong>提供了一种修正解的有效方法。</p>
+                <ol>
+                <li><strong>计算残差 (Compute Residual):</strong>
+                $\mathbf{r}^{(0)} = \mathbf{b} - A\mathbf{x}^{(0)}$
+                <strong>关键：</strong> 这一步必须用<strong>更高精度</strong>（例如双精度）的算术来计算，以避免相近数相减的误差完全淹没真实的残差信息。</li>
+                <li><strong>求解误差方程 (Solve for Error):</strong>
+                真实解 $\mathbf{x}$ 满足 $A\mathbf{x} = \mathbf{b}$。令 $\mathbf{x} = \mathbf{x}^{(0)} + \delta\mathbf{x}$，则 $A(\mathbf{x}^{(0)} + \delta\mathbf{x}) = \mathbf{b}$，即 $A\delta\mathbf{x} = \mathbf{b} - A\mathbf{x}^{(0)} = \mathbf{r}^{(0)}$。
+                我们现在求解关于误差修正量 $\delta\mathbf{x}$ 的线性系统 $A\delta\mathbf{x} = \mathbf{r}^{(0)}$。由于我们已经有了 $A$ 的 LU 分解，这一步非常快，只需 $O(n^2)$ 的计算。</li>
+                <li><strong>修正解 (Correct the Solution):</strong>
+                $\mathbf{x}^{(1)} = \mathbf{x}^{(0)} + \delta\mathbf{x}^{(0)}$</li>
+                </ol>
+                <p>这个过程可以重复进行，直到解的精度不再显著提高。迭代改善是一种非常廉价而有效的方法，可以将一个中等精度的解提升到机器精度所允许的最高水平。</p>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E6%8F%92%E5%80%BC%E4%B8%8E%E6%8B%89%E6%A0%BC%E6%9C%97%E6%97%A5%E5%A4%9A%E9%A1%B9%E5%BC%8F"><strong>第二部分：插值与拉格朗日多项式</strong></h3>
+                <h4 id="30-%E6%8F%92%E5%80%BC%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><strong>3.0 插值的基本概念</strong></h4>
+                <p><strong>问题背景：</strong>
+                我们有一组离散的数据点 $(x_0, y_0), (x_1, y_1), \dots, (x_n, y_n)$，其中 $y_i = f(x_i)$。我们希望找到一个<strong>简单的函数 $P(x)$</strong>，它能够<strong>穿过</strong>所有这些数据点，即满足<strong>插值条件</strong>：
+                $P(x_i) = y_i$, for $i=0, 1, \dots, n$.</p>
+                <p>我们称 $P(x)$ 为 $f(x)$ 在节点 $x_0, \dots, x_n$ 上的<strong>插值函数</strong>。</p>
+                <p><strong>为什么选择多项式？</strong>
+                多项式 $P(x) = a_n x^n + \dots + a_1 x + a_0$ 具有许多优良性质：</p>
+                <ul>
+                <li>它们在任意点都无穷次可微，性质良好。</li>
+                <li>它们的求导和积分非常容易，结果仍然是多项式。</li>
+                <li><strong>魏尔斯特拉斯逼近定理 (Weierstrass Approximation Theorem)</strong> 保证了任何定义在闭区间上的连续函数，都可以被多项式以任意精度一致逼近。</li>
+                </ul>
+                <h4 id="31-%E6%8B%89%E6%A0%BC%E6%9C%97%E6%97%A5%E6%8F%92%E5%80%BC%E5%A4%9A%E9%A1%B9%E5%BC%8F"><strong>3.1 拉格朗日插值多项式</strong></h4>
+                <p><strong>目标：</strong> 给定 $n+1$ 个数据点 $(x_0, y_0), \dots, (x_n, y_n)$（其中所有 $x_i$ 互不相同），找到一个<strong>次数最高为 $n$</strong> 的多项式 $P_n(x)$，满足插值条件。</p>
+                <p><strong>构造思想：</strong> 我们不直接去求系数 $a_i$，而是采用一种更具构造性的方法。我们将 $P_n(x)$ 写成一种线性组合的形式：
+                $P_n(x) = y_0 L_{n,0}(x) + y_1 L_{n,1}(x) + \dots + y_n L_{n,n}(x) = \sum_{i=0}^n y_i L_{n,i}(x)$
+                其中，$L_{n,i}(x)$ 是一组多项式，称为<strong>拉格朗日基函数 (Lagrange Basis Polynomials)</strong>。</p>
+                <p>为了让 $P_n(x_j) = y_j$ 成立，我们对基函数 $L_{n,i}(x)$ 提出一个巧妙的要求：
+                $L_{n,i}(x_j) = \delta_{ij} = \begin{cases} 1, & \text{if } j=i \\ 0, & \text{if } j \neq i \end{cases}$
+                ($\delta_{ij}$ 是克罗内克符号)
+                如果基函数满足这个性质，那么当 $x=x_j$ 时，求和式中只有第 $j$ 项 $y_j L_{n,j}(x_j)$ 非零，且等于 $y_j \cdot 1 = y_j$，插值条件自然满足。</p>
+                <p><strong>构造基函数 $L_{n,i}(x)$:</strong></p>
+                <ul>
+                <li>为了让 $L_{n,i}(x_j)=0$ 对于所有 $j \neq i$，这个多项式必须包含因子 $(x-x_0), (x-x_1), \dots, (x-x_{i-1}), (x-x_{i+1}), \dots, (x-x_n)$。
+                即 $L_{n,i}(x) = C \prod_{j=0, j \neq i}^{n} (x-x_j)$。</li>
+                <li>为了满足 $L_{n,i}(x_i)=1$，我们用 $x=x_i$ 代入来确定常数 $C$：
+                $1 = C \prod_{j=0, j \neq i}^{n} (x_i-x_j) \implies C = \frac{1}{\prod_{j=0, j \neq i}^{n} (x_i-x_j)}$</li>
+                </ul>
+                <p><strong>拉格朗日基函数公式：</strong>
+                $L_{n,i}(x) = \prod_{j=0, j \neq i}^{n} \frac{x-x_j}{x_i-x_j}$</p>
+                <p><strong>最终的拉格朗日插值多项式：</strong>
+                $P_n(x) = \sum_{i=0}^n y_i \left( \prod_{j=0, j \neq i}^{n} \frac{x-x_j}{x_i-x_j} \right)$</p>
+                <p><strong>定理 (唯一性):</strong>
+                对于 $n+1$ 个相异节点，次数<strong>不超过</strong> $n$ 的插值多项式是<strong>唯一</strong>的。</p>
+                <ul>
+                <li><strong>证明思路 (反证法):</strong> 假设存在两个不同的次数 $\le n$ 的插值多项式 $P_n(x)$ 和 $Q_n(x)$。令 $D(x) = P_n(x) - Q_n(x)$。$D(x)$ 是一个次数 $\le n$ 的多项式。但由于 $P_n(x_i)=Q_n(x_i)=y_i$，所以 $D(x_i)=0$ for $i=0, \dots, n$。这意味着 $D(x)$ 有 $n+1$ 个根。一个次数不超过 $n$ 的非零多项式不可能有 $n+1$ 个根，除非它恒为零多项式。因此 $D(x) \equiv 0$，即 $P_n(x) \equiv Q_n(x)$。矛盾。</li>
+                </ul>
+                <h4 id="311-%E6%8F%92%E5%80%BC%E8%AF%AF%E5%B7%AE%E5%88%86%E6%9E%90"><strong>3.1.1 插值误差分析</strong></h4>
+                <p>我们用 $P_n(x)$ 近似 $f(x)$，其截断误差为 $R_n(x) = f(x) - P_n(x)$。
+                可以证明（通过巧妙构造辅助函数并反复应用罗尔定理），如果 $f$ 在包含所有插值节点和 $x$ 的区间上具有 $n+1$ 阶连续导数，则插值误差为：</p>
+                <p><strong>插值误差公式：</strong>
+                对于任意 $x$，存在一个依赖于 $x$ 的点 $\xi_x$ 在插值节点所在的区间内，使得：
+                $R_n(x) = f(x) - P_n(x) = \frac{f^{(n+1)}(\xi_x)}{(n+1)!} \prod_{i=0}^n (x-x_i)$</p>
+                <p><strong>误差分析：</strong>
+                插值误差由三部分决定：</p>
+                <ol>
+                <li><strong>$f^{(n+1)}(\xi_x)$:</strong> 函数的高阶导数。如果函数本身很“平滑”（高阶导数小），则误差小。</li>
+                <li>$\frac{1}{(n+1)!}$:阶乘项。随着插值点数 $n$ 的增加，这一项迅速减小。</li>
+                <li><strong>$\prod_{i=0}^n (x-x_i)$:</strong> 节点多项式。这一项的大小和震荡行为与<strong>插值节点的分布</strong>密切相关。</li>
+                </ol>
+                <p><strong>重要结论：</strong></p>
+                <ul>
+                <li><strong>插值多项式是精确的：</strong> 如果被插函数 $f(x)$ 本身就是一个次数 $\le n$ 的多项式，那么其 $n+1$ 阶导数恒为零，因此插值误差 $R_n(x) \equiv 0$。</li>
+                <li><strong>误差上界：</strong> 在实际应用中，我们通常不知道 $\xi_x$ 的具体位置，但可以找到 $|f^{(n+1)}(t)|$ 在整个区间上的一个上界 $M_{n+1}$。
+                $|f(x) - P_n(x)| \le \frac{M_{n+1}}{(n+1)!} \left| \prod_{i=0}^n (x-x_i) \right|$</li>
+                </ul>
+                <p><strong>Discussion 17: 线性插值步长选择</strong></p>
+                <ul>
+                <li><strong>问题：</strong> 为 $f(x)=e^x$ 在 $[0, 1]$ 上制表，要求使用线性插值（$n=1$）时的绝对误差不超过 $10^{-6}$，应如何选择步长 $h$？</li>
+                <li><strong>分析：</strong>
+                <ul>
+                <li>线性插值使用两个节点 $x_k, x_{k+1}$，其中 $x_{k+1}-x_k = h$。</li>
+                <li>误差公式为 $|f(x)-P_1(x)| = \left| \frac{f^{(2)}(\xi)}{2!} (x-x_k)(x-x_{k+1}) \right|$。</li>
+                <li>$f(x)=e^x$, $f''(x)=e^x$。在 $[0,1]$ 上，$|f''(\xi)| \le e^1 = e$。</li>
+                <li>函数 $|(x-x_k)(x-x_{k+1})|$ 在区间 $[x_k, x_{k+1}]$ 中点的绝对值最大，为 $h^2/4$。</li>
+                <li>误差上界为 $\frac{e}{2} \cdot \frac{h^2}{4} = \frac{e h^2}{8}$。</li>
+                <li>解不等式 $\frac{e h^2}{8} \le 10^{-6}$，得到 $h \le \sqrt{\frac{8 \times 10^{-6}}{e}} \approx 1.72 \times 10^{-3}$。</li>
+                <li>为了方便，我们可以选择一个更小的、整洁的步长，例如 $h=0.001$ ($n=1000$)。</li>
+                </ul>
+                </li>
+                </ul>
+                <h3 id="%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93"><strong>课程总结</strong></h3>
+                <p><strong>本讲核心要点：</strong></p>
+                <ol>
+                <li><strong>条件数 $K(A)$</strong> 是衡量线性系统对输入扰动敏感性的关键指标。病态系统（$K(A)$ 巨大）即使使用稳定算法也可能得到不可靠的解。</li>
+                <li><strong>迭代改善</strong> 是一种利用高精度计算残差来有效修正数值解的方法。</li>
+                <li><strong>多项式插值</strong> 是用一个简单的多项式来穿过一系列离散数据点的基本技术，是函数逼近的基石。</li>
+                <li><strong>拉格朗日插值多项式</strong> 提供了一种直观的、具有构造性的方法来找到唯一的、次数不超过 $n$ 的插值多项式。</li>
+                <li><strong>插值误差</strong> 取决于函数的高阶导数和插值节点的分布，我们可以通过误差公式来估计近似的精度。</li>
+                </ol>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
