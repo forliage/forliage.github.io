@@ -922,5 +922,12 @@
     "category": "学习笔记",
     "path": "_posts/2025-08-27-cg12.html",
     "abstract": "计算机图形学12:纹理映射"
+  },
+  {
+    "title": "计算机图形学13:全局光照",
+    "date": "2025-08-27",
+    "category": "学习笔记",
+    "path": "_posts/2025-08-27-cg13.html",
+    "abstract": "计算机图形学13:全局光照"
   }
 ]

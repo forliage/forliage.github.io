@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机图形学13:全局光照</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A613%E5%85%A8%E5%B1%80%E5%85%89%E7%85%A7">计算机图形学13:全局光照</h1>
+                <h3 id="1-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%85%A8%E5%B1%80%E5%85%89%E7%85%A7"><strong>1. 为什么需要全局光照？</strong></h3>
+                <p>局部光照模型有几个无法克服的根本性缺陷：</p>
+                <ul>
+                <li><strong>无法产生阴影：</strong> 物体无法遮挡光线，光会“穿透”所有物体。</li>
+                <li><strong>没有相互反射：</strong> 场景中的物体都是孤立的，一个物体的颜色不会影响到另一个物体。</li>
+                <li><strong>无法模拟折射与焦散：</strong> 无法表现透明物体（如水、玻璃）扭曲光线的效果，也无法模拟光线透过透镜汇聚形成的亮斑（焦散）。</li>
+                </ul>
+                <p>要解决这些问题，我们必须跳出“一次光照”的框架，去模拟光线在整个场景中的完整传播路径。这就是全局光照的目标。</p>
+                <h3 id="2-%E9%98%B4%E5%BD%B1-shadows"><strong>2. 阴影 (Shadows)</strong></h3>
+                <p>阴影可能是全局光照中最直观、最重要的一个元素。它能：</p>
+                <ul>
+                <li><strong>提供空间关系：</strong> 阴影能明确物体与地面（或其他表面）的接触关系，避免物体看起来像“漂浮”在空中。</li>
+                <li><strong>增强立体感：</strong> 阴影的形状和方向揭示了光源的位置和物体的三维形态。</li>
+                <li><strong>区分软硬：</strong>
+                <ul>
+                <li><strong>硬阴影 (Hard Shadows):</strong> 由点光源（无限小的光源）产生，边缘清晰锐利。</li>
+                <li><strong>软阴影 (Soft Shadows):</strong> 由面光源（有体积的光源，如窗户、灯管）产生，边缘模糊，有<strong>本影 (Umbra)</strong> 和<strong>半影 (Penumbra)</strong> 的过渡区域。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="%E5%AE%9E%E6%97%B6%E9%98%B4%E5%BD%B1%E6%8A%80%E6%9C%AF%E9%98%B4%E5%BD%B1%E8%B4%B4%E5%9B%BE-shadow-mapping"><strong>实时阴影技术：阴影贴图 (Shadow Mapping)</strong></h4>
+                <p>在实时渲染（如游戏）中，最常用的阴影生成技术是<strong>阴影贴图 (Shadow Mapping)</strong>，也称为Shadow Z-buffering。</p>
+                <ul>
+                <li><strong>核心思想：</strong> 一个点是否在阴影中，取决于<strong>它是否能被光源“看见”</strong>。</li>
+                <li><strong>算法流程（两步法）：</strong>
+                <ol>
+                <li><strong>Pass 1 (从光源视角渲染):</strong>
+                <ul>
+                <li>将虚拟相机移动到<strong>光源的位置</strong>，朝光源的方向看。</li>
+                <li>对整个场景进行一次渲染。但这次我们不关心颜色，只关心<strong>深度</strong>。我们将渲染出的深度信息存储到一张特殊的纹理中，这张纹理就是<strong>阴影贴图 (Shadow Map)</strong>。阴影贴图的每个像素记录了从光源出发，到达最近物体的距离。</li>
+                </ul>
+                </li>
+                <li><strong>Pass 2 (从主相机视角渲染):</strong>
+                <ul>
+                <li>回到主相机的视角，正常渲染场景。</li>
+                <li>对于场景中的每一个即将被着色的片元（像素），我们将其坐标变换到光源的视角下。</li>
+                <li>用变换后的坐标去查询第一步生成的阴影贴图，得到一个深度值 $D_{map}$（光源到最近遮挡物的距离）。</li>
+                <li>比较该片元自身的深度 $D_{current}$（光源到当前片元的距离）与 $D_{map}$。
+                <ul>
+                <li>如果 $D_{current} > D_{map}$，说明在光源和当前片元之间，有一个更近的物体挡住了光线。因此，该片元处于<strong>阴影中</strong>，只计算环境光。</li>
+                <li>否则，该片元被光源照亮，正常进行光照计算。</li>
+                </ul>
+                </li>
+                </ul>
+                </li>
+                </ol>
+                </li>
+                </ul>
+                <p>阴影贴图是实时渲染的基石技术之一，但它也有其局限性，比如容易产生锯齿（需要PCF等技术平滑）、无法很好地处理半透明阴影等。</p>
+                <h3 id="3-%E5%85%89%E7%BA%BF%E8%BF%BD%E8%B8%AA-ray-tracing"><strong>3. 光线追踪 (Ray Tracing)</strong></h3>
+                <p>光线追踪是目前能够生成最逼真图像的渲染技术之一，其原理非常优雅。</p>
+                <ul>
+                <li><strong>核心思想：</strong> 与物理世界中光从光源发出，最终进入眼睛相反，我们<strong>从眼睛（相机）出发，反向追踪光线的路径</strong>。</li>
+                <li><strong>算法流程（经典递归光线追踪）：</strong>
+                <ol>
+                <li><strong>主光线 (Primary Ray):</strong> 对于屏幕上的每一个像素，从视点（eye）出发，穿过该像素中心，向场景中发射一条<strong>主光线</strong>。</li>
+                <li><strong>求交 (Intersection):</strong> 计算这条光线与场景中所有物体的交点，找到<strong>最近的那个交点</strong>。如果没有交点，则该像素显示背景色。</li>
+                <li><strong>着色 (Shading):</strong> 在该交点处，进行颜色计算。该点的最终颜色由三部分贡献：
+                <ul>
+                <li><strong>a. 局部光照：</strong> 从交点向<strong>每一个光源</strong>发射一条<strong>阴影光线 (Shadow Ray)</strong>。如果这条光线在到达光源前没有碰到任何其他物体，则该光源对交点有直接贡献，计算其漫反射和镜面反射。否则，该点处于该光源的阴影中。</li>
+                <li><strong>b. 反射光：</strong> 如果交点所在的表面是反射性的（如镜子），则根据反射定律计算出<strong>反射光线 (Reflection Ray)</strong> 的方向，并<strong>递归地</strong>调用光线追踪函数，追踪这条新的光线，将其返回的颜色按材质的反射率叠加到当前颜色上。</li>
+                <li><strong>c. 折射光：</strong> 如果表面是透明的（如玻璃），则根据折射定律（斯涅尔定律）计算出<strong>折射光线 (Refraction Ray)</strong> 的方向，并<strong>递归地</strong>调用光线追踪函数，将其返回的颜色按材质的透射率叠加到当前颜色上。</li>
+                </ul>
+                </li>
+                <li><strong>递归终止：</strong> 当光线没有碰到任何物体，或递归达到预设的最大深度时，递归返回。</li>
+                </ol>
+                </li>
+                </ul>
+                <p><strong>优点：</strong></p>
+                <ul>
+                <li><strong>效果逼真：</strong> 能自然地、物理正确地模拟出精确的阴影、镜面反射和折射效果。</li>
+                <li><strong>对象空间精度：</strong> 计算完全在三维对象空间中进行，结果非常精确。</li>
+                </ul>
+                <p><strong>缺点：</strong></p>
+                <ul>
+                <li><strong>计算量巨大：</strong> 每条光线都可能需要与场景中所有物体进行求交测试，且递归会产生大量的次生光线，计算成本极高，传统上难以实时运行。</li>
+                <li><strong>不擅长模拟漫反射间的相互作用</strong> (Color Bleeding)。</li>
+                </ul>
+                <h3 id="4-%E8%BE%90%E5%B0%84%E5%BA%A6-radiosity"><strong>4. 辐射度 (Radiosity)</strong></h3>
+                <p>辐射度算法与光线追踪正好相反，它专注于完美地模拟光线在<strong>漫反射</strong>表面之间的相互作用。</p>
+                <ul>
+                <li><strong>核心思想：</strong> 基于热辐射传导的物理原理，它不追踪单条光线，而是计算场景中<strong>面片 (Patch)</strong> 之间能量的相互传递。它假设所有表面都是<strong>理想漫反射体 (Lambertian)</strong>。</li>
+                <li><strong>算法流程：</strong>
+                <ol>
+                <li><strong>离散化：</strong> 将场景中的所有表面剖分成许多小的面片。</li>
+                <li><strong>计算形状因子 (Form Factors):</strong> 对于任意两个面片 $i$ 和 $j$，计算一个<strong>形状因子</strong> $F_{ij}$，它表示从面片 $i$ 发出的能量中，有多少比例会直接到达面片 $j$。这个计算是纯粹的几何问题，非常耗时。</li>
+                <li><strong>建立方程组：</strong> 为每个面片建立一个能量平衡方程，描述它射出的总能量（Radiosity）等于它自身发出的能量加上从所有其他面片接收并反射的能量。这将形成一个巨大的线性方程组。</li>
+                <li><strong>求解：</strong> 求解这个方程组，得到每个面片最终的、稳定的光照强度（颜色）。</li>
+                </ol>
+                </li>
+                <li><strong>特点：</strong>
+                <ul>
+                <li><strong>视点无关 (View-Independent):</strong> 计算结果是场景中每个面的固有光照，与观察者位置无关。计算一次后，可以从任意角度快速漫游浏览。</li>
+                <li><strong>效果柔和真实：</strong> 能完美模拟漫反射表面间的颜色渗透（Color Bleeding）和极其柔和的软阴影。非常适合渲染室内建筑、艺术馆等场景。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>优点：</strong></p>
+                <ul>
+                <li>能产生物理精确的柔和光照效果。</li>
+                <li>计算结果与视点无关。</li>
+                </ul>
+                <p><strong>缺点：</strong></p>
+                <ul>
+                <li><strong>只能处理漫反射：</strong> 无法模拟镜面反射和高光。</li>
+                <li><strong>预处理计算量大：</strong> 计算形状因子和求解方程组非常耗时。</li>
+                <li><strong>不适用于动态场景。</strong></li>
+                </ul>
+                <h3 id="5-%E4%B8%A4%E5%A4%A7%E6%8A%80%E6%9C%AF%E7%9A%84%E8%9E%8D%E5%90%88%E4%B8%8E%E6%9C%AA%E6%9D%A5"><strong>5. 两大技术的融合与未来</strong></h3>
+                <p>光线追踪和辐射度各有擅长，它们像是全局光照的“一体两面”：</p>
+                <table>
+                <thead>
+                <tr>
+                <th style="text-align:left">特性</th>
+                <th style="text-align:left">光线追踪 (Ray Tracing)</th>
+                <th style="text-align:left">辐射度 (Radiosity)</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                <td style="text-align:left"><strong>擅长</strong></td>
+                <td style="text-align:left">镜面反射、折射、硬阴影</td>
+                <td style="text-align:left">漫反射、颜色渗透、软阴影</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>视点关系</strong></td>
+                <td style="text-align:left">视点相关</td>
+                <td style="text-align:left">视点无关</td>
+                </tr>
+                <tr>
+                <td style="text-align:left"><strong>核心</strong></td>
+                <td style="text-align:left">追踪光线</td>
+                <td style="text-align:left">计算能量平衡</td>
+                </tr>
+                </tbody>
+                </table>
+                <p>为了结合两者的优点，人们发展出了许多<strong>混合渲染技术</strong>，如<strong>双向路径追踪 (Bidirectional Path Tracing)</strong>、<strong>光子映射 (Photon Mapping)</strong> 等，它们同时模拟漫反射和镜面反射，是当今离线渲染（如电影特效）领域的主流。</p>
+                <p>随着NVIDIA RTX等实时光线追踪硬件的出现，曾经遥不可及的光线追踪技术正逐步进入实时游戏领域，通常与传统的光栅化渲染相结合，用于生成高质量的阴影、反射和全局光照效果，标志着实时渲染正向着电影级画质的目标大步迈进。</p>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
