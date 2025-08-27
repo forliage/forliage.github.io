@@ -859,5 +859,19 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-27-cg03.html",
       "abstract": "计算机图形学03:图形学基础2"
+    },
+    {
+      "title": "计算机图形学04:动手实践 - 你的第一个OpenGL程序",
+      "date": "2025-08-27",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-27-cg04.html",
+      "abstract": "计算机图形学04:动手实践 - 你的第一个OpenGL程序"
+    },
+    {
+      "title": "计算机图形学05:二维图形算法-光栅化",
+      "date": "2025-08-27",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-27-cg05.html",
+      "abstract": "计算机图形学05:二维图形算法-光栅化"
     }
   ];
