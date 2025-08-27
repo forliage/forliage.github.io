@@ -782,5 +782,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-27-na08.html",
       "abstract": "数值分析08:高级插值技术与最小二乘逼近"
+    },
+    {
+      "title": "数值分析09:正交多项式与最小二乘逼近",
+      "date": "2025-08-27",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-27-na09.html",
+      "abstract": "数值分析09:正交多项式与最小二乘逼近"
     }
   ];
