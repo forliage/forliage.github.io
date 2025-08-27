@@ -887,5 +887,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-27-cg07.html",
       "abstract": "计算机图形学07:三维视图管线"
+    },
+    {
+      "title": "计算机图形学08:图形硬件",
+      "date": "2025-08-27",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-27-cg08.html",
+      "abstract": "计算机图形学08:图形硬件"
     }
   ];
