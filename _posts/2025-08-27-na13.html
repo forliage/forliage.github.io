@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数值分析13:龙格-库塔法与多步法</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E6%95%B0%E5%80%BC%E5%88%86%E6%9E%9013%E9%BE%99%E6%A0%BC-%E5%BA%93%E5%A1%94%E6%B3%95%E4%B8%8E%E5%A4%9A%E6%AD%A5%E6%B3%95">数值分析13:龙格-库塔法与多步法</h1>
+                <h3 id="%E5%BC%95%E8%A8%80%E8%BF%BD%E6%B1%82%E5%AE%8C%E7%BE%8E%E7%9A%84ode%E6%B1%82%E8%A7%A3%E5%99%A8"><strong>引言：追求“完美”的ODE求解器</strong></h3>
+                <p>在上一讲中，我们开启了求解常微分方程初值问题的大门，并学习了最基础的<strong>欧拉方法</strong>和<strong>高阶泰勒方法</strong>。我们的探索之路留下了一个关键性的挑战。</p>
+                <p><strong>“能否找到一种方法，它兼具所有已知方法的优点，而没有它们的缺点？”</strong></p>
+                <p>让我们回顾一下这些优缺点：</p>
+                <ul>
+                <li><strong>显式欧拉法：</strong> 简单，但精度仅为一阶。</li>
+                <li><strong>高阶泰勒法：</strong> 精度高 ($O(h^n)$)，但需要手动计算并编程实现 $f(t,y)$ 的复杂高阶导数，这在实践中几乎是不可行的。</li>
+                <li><strong>隐式欧拉法：</strong> 具有更好的稳定性（我们将在后续课程深入探讨），但每一步都需要求解一个（可能非线性的）方程，计算成本高。</li>
+                </ul>
+                <p>这个“圣杯”式的追求，引导我们去寻找一种方法，它应该具备：</p>
+                <ol>
+                <li><strong>高阶精度：</strong> 像泰勒方法一样，局部截断误差是 $O(h^p)$ 且 $p \ge 2$。</li>
+                <li><strong>无需导数：</strong> 像欧拉方法一样，算法的实现应该只依赖于函数 $f(t,y)$ 本身的求值。</li>
+                <li><strong>单步、显式：</strong> 易于编程实现和启动。</li>
+                </ol>
+                <p>这个看似不可能的任务，被两位杰出的数学家<strong>龙格 (Runge)</strong> 和<strong>库塔 (Kutta)</strong> 解决了。他们发明的<strong>龙格-库塔方法</strong>，通过在每个时间步内进行多次“内插”式的函数求值，巧妙地用这些值的线性组合来模拟高阶泰勒展开的效果，从而在不计算导数的情况下实现了高阶精度。</p>
+                <p>今天，我们将首先深入学习<strong>龙格-库塔方法</strong>，特别是最经典的四阶方法。然后，我们将探讨另一大类求解ODE的思路——<strong>多步法 (Multistep Methods)</strong>。与只利用上一步信息的单步法不同，多步法会利用<strong>过去多步</strong>的历史信息来预测下一步，这使得它们在达到同等精度时可能需要更少的函数求值。最后，我们将看到如何将显式的多步法（作为<strong>预测</strong>）和隐式的多步法（作为<strong>校正</strong>）结合起来，形成高效稳定的<strong>预测-校正</strong>算法。</p>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E9%BE%99%E6%A0%BC-%E5%BA%93%E5%A1%94-runge-kutta-%E6%96%B9%E6%B3%95"><strong>第一部分：龙格-库塔 (Runge-Kutta) 方法</strong></h3>
+                <h4 id="541-%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3%E7%94%A8%E5%87%BD%E6%95%B0%E6%B1%82%E5%80%BC%E6%A8%A1%E6%8B%9F%E6%B3%B0%E5%8B%92%E5%B1%95%E5%BC%80"><strong>5.4.1 核心思想：用函数求值模拟泰勒展开</strong></h4>
+                <p>&quot;A single-step method with high-order local truncation error without evaluating the derivatives of f.&quot;</p>
+                <p><strong>基本思路：</strong> 欧拉法 $w_{i+1} = w_i + h \cdot f(t_i, w_i)$ 使用的是起始点的斜率 $f(t_i, w_i)$ 来进行一步外推。这个斜率在整个区间 $[t_i, t_{i+1}]$ 上可能并不是一个好的代表。
+                <strong>&quot;We can improve the result by finding a better slope.&quot;</strong></p>
+                <p>龙格-库塔法的核心就是去寻找一个<strong>加权的平均斜率 $\phi(t_i, w_i, h)$</strong>，使得单步格式 $w_{i+1} = w_i + h \cdot \phi$ 在与 $y(t)$ 的泰勒展开式进行比较时，能够匹配到尽可能高的 $h$ 的幂次。</p>
+                <h4 id="542-%E4%BA%8C%E9%98%B6%E9%BE%99%E6%A0%BC-%E5%BA%93%E5%A1%94%E6%96%B9%E6%B3%95-rk2-%E7%9A%84%E6%8E%A8%E5%AF%BC"><strong>5.4.2 二阶龙格-库塔方法 (RK2) 的推导</strong></h4>
+                <p>让我们尝试构造一个二阶方法。我们寻求一个形式如下的平均斜率：
+                $$\phi = \lambda_1 K_1 + \lambda_2 K_2$$
+                其中 $K_1$ 和 $K_2$ 是在区间内不同点计算的斜率。
+                迭代格式为：
+                $$w_{i+1} = w_i + h(\lambda_1 K_1 + \lambda_2 K_2)$$</p>
+                <ul>
+                <li><strong>$K_1$ (起始点斜率):</strong> 最自然的选择是在起始点 $(t_i, w_i)$ 计算斜率。
+                $K_1 = f(t_i, w_i)$</li>
+                <li><strong>$K_2$ (试探点斜率):</strong> 我们向前“试探”一小步，在一个新的点 $(t_i+ph, w_i+qh K_1)$ 计算斜率。为了简化，通常取 $p=q$。
+                $$K_2 = f(t_i+ph, w_i+phK_1)$$</li>
+                </ul>
+                <p>现在我们有了一个包含三个待定参数 $\lambda_1, \lambda_2, p$ 的通用二阶方法族。</p>
+                <p><strong>Step 1-3: 泰勒展开与系数匹配</strong>
+                我们的目标是选择这三个参数，使得 $w_{i+1}$ 的表达式与 $y(t_{i+1})$ 的二阶泰勒展开式尽可能匹配。</p>
+                <ul>
+                <li>
+                <p><strong>真解的二阶泰勒展开:</strong>
+                $$y(t_{i+1}) = y(t_i) + h y'(t_i) + \frac{h^2}{2} y''(t_i) + O(h^3)$$
+                将 $y'=f$ 和 $y'' = f_t + f_y f$ 代入，得到：
+                $$y(t_{i+1}) = y_i + h f(t_i, y_i) + \frac{h^2}{2}(f_t + f_y f)(t_i, y_i) + O(h^3)$$</p>
+                </li>
+                <li>
+                <p><strong>数值解的展开:</strong></p>
+                <ol>
+                <li>对 $K_2 = f(t_i+ph, y_i+phK_1)$ 进行二元泰勒展开：
+                $$K_2 = f(t_i,y_i) + ph \frac{\partial f}{\partial t} + phK_1 \frac{\partial f}{\partial y} + O(h^2)$$
+                代入 $K_1=f(t_i, y_i)$，得到：
+                $$K_2 = f + ph(f_t + f_y f) + O(h^2) = y'(t_i) + ph y''(t_i) + O(h^2)$$</li>
+                <li>将 $K_1, K_2$ 的展开式代入 $w_{i+1} = y_i + h(\lambda_1 K_1 + \lambda_2 K_2)$：
+                $$w_{i+1} = y_i + h(\lambda_1 f + \lambda_2[f + ph(f_t+f_y f)]) + O(h^3)$$
+                $$w_{i+1} = y_i + (\lambda_1+\lambda_2)h f + \lambda_2 p h^2 (f_t+f_y f) + O(h^3)$$</li>
+                </ol>
+                </li>
+                <li>
+                <p><strong>系数匹配:</strong>
+                比较 $y(t_{i+1})$ 和 $w_{i+1}$ 表达式中 $h$ 和 $h^2$ 的系数：</p>
+                <ul>
+                <li>$h$ 的系数: $\lambda_1 + \lambda_2 = 1$</li>
+                <li>$h^2$ 的系数: $\lambda_2 p = 1/2$</li>
+                </ul>
+                </li>
+                </ul>
+                <p>我们得到了 <strong>2 个方程</strong>，但有 <strong>3 个未知数</strong>！
+                &quot;Here are 3 unknowns and 2 equations.&quot;这意味着存在<strong>无穷多组解</strong>，形成一个二阶龙格-库塔方法的家族。</p>
+                <p><strong>RK2 家族的两个著名成员：</strong></p>
+                <ol>
+                <li>
+                <p><strong>中点法 (Midpoint Method):</strong></p>
+                <ul>
+                <li>选择 $\lambda_2 = 1$, 则 $\lambda_1 = 0, p=1/2$。</li>
+                <li>$w_{i+1} = w_i + h \cdot f(t_i+\frac{h}{2}, w_i+\frac{h}{2}K_1)$</li>
+                <li>几何意义：用区间<strong>中点</strong>的斜率来更新整步。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>修正欧拉法 (Modified Euler's Method) 或 Heun 法:</strong></p>
+                <ul>
+                <li>选择 $\lambda_2=1/2$, 则 $\lambda_1=1/2, p=1$。</li>
+                <li>$K_1 = f(t_i, w_i)$</li>
+                <li>$K_2 = f(t_i+h, w_i+hK_1)$</li>
+                <li>$w_{i+1} = w_i + \frac{h}{2}(K_1 + K_2)$</li>
+                <li>几何意义：用<strong>起始点斜率</strong>和<strong>用欧拉法预测的终点斜率</strong>的<strong>算术平均值</strong>来更新整步。</li>
+                </ul>
+                </li>
+                </ol>
+                <h4 id="543-%E7%BB%8F%E5%85%B8%E7%9A%84%E5%9B%9B%E9%98%B6%E9%BE%99%E6%A0%BC-%E5%BA%93%E5%A1%94%E6%96%B9%E6%B3%95-rk4"><strong>5.4.3 经典的四阶龙格-库塔方法 (RK4)</strong></h4>
+                <p>&quot;How to obtain higher-ordered accuracy?&quot;
+                通过引入更多的“级”(stages)，即更多的中间斜率 $K_i$，并匹配更高阶的泰勒展开，我们可以得到更高阶的RK方法。这个过程极其繁琐，被称为“屠夫表理论 (Butcher Tableau)”。</p>
+                <p>最著名、最流行、应用最广泛的是<strong>经典的四阶龙ge-库塔方法 (RK4)</strong>。</p>
+                <p><strong>RK4 格式：</strong>
+                $$w_{i+1} = w_i + \frac{h}{6}(K_1 + 2K_2 + 2K_3 + K_4)$$
+                其中：
+                $K_1 = f(t_i, w_i)$  (起始点斜率)
+                $K_2 = f(t_i + \frac{h}{2}, w_i + \frac{h}{2}K_1)$ (用 $K_1$ 预测的<strong>中点</strong>斜率)
+                $K_3 = f(t_i + \frac{h}{2}, w_i + \frac{h}{2}K_2)$ (用 $K_2$ 预测的<strong>中点</strong>斜率)
+                $K_4 = f(t_i + h, w_i + hK_3)$ (用 $K_3$ 预测的<strong>终点</strong>斜率)</p>
+                <p><strong>分析：</strong></p>
+                <ul>
+                <li><strong>局部截断误差</strong>为 $O(h^4)$，因此全局误差也是 $O(h^4)$。这是一个<strong>四阶</strong>方法，精度非常高。</li>
+                <li>加权平均斜率 $\phi = \frac{1}{6}(K_1+2K_2+2K_3+K_4)$ 的形式与数值积分中的<strong>辛普森法则</strong>惊人地相似！这并非巧合，RK方法可以从求积公式的角度来理解。</li>
+                <li><strong>计算成本：</strong> 每一步需要<strong>4次</strong>函数 $f$ 的求值。这是它的主要计算开销。</li>
+                </ul>
+                <p>RK4在精度、稳定性和实现复杂度之间达到了绝佳的平衡，是科学与工程计算中的“主力军”。</p>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%A4%9A%E6%AD%A5%E6%B3%95-multistep-methods"><strong>第二部分：多步法 (Multistep Methods)</strong></h3>
+                <p><strong>动机：</strong> RK4每步需要4次函数求值来实现四阶精度。有没有可能更“经济”一些？
+                <strong>多步法的核心思想：</strong>
+                单步法是“健忘”的，它只利用 $(t_i, w_i)$ 来计算 $w_{i+1}$。而多步法会利用<strong>过去的一系列点</strong> $(t_i, w_i), (t_{i-1}, w_{i-1}), \dots$ 的信息来计算 $w_{i+1}$。如果这些历史信息可以被高效地复用，我们或许能用<strong>少于4次</strong>的函数求值（理想情况是1次）就达到四阶精度。</p>
+                <h4 id="561-%E5%9F%BA%E4%BA%8E%E7%A7%AF%E5%88%86%E7%9A%84%E6%8E%A8%E5%AF%BC"><strong>5.6.1 基于积分的推导</strong></h4>
+                <p>所有单步和多步法都可以从积分形式 $y(t_{i+1}) = y(t_i) + \int_{t_i}^{t_{i+1}} f(t, y(t)) dt$ 推导出来。
+                <strong>&quot;The key is to approximate the integral.&quot;</strong></p>
+                <p><strong>核心策略：</strong>
+                用一个多项式 $P(t)$ 来<strong>插值</strong>函数 $f(t,y(t))$ 在过去一系列点 $(t_j, f_j)$ 上的值（其中 $f_j = f(t_j, w_j)$），然后对这个插值多项式积分来近似 $\int_{t_i}^{t_{i+1}} f dt$。</p>
+                <h4 id="562-adams-bashforth-ab-%E6%98%BE%E5%BC%8F%E6%96%B9%E6%B3%95"><strong>5.6.2 Adams-Bashforth (AB) 显式方法</strong></h4>
+                <p><strong>思想：</strong>
+                要计算 $w_{i+1}$，我们用一个 $m-1$ 次的多项式来插值<strong>过去 $m$ 个点</strong>的斜率信息：
+                $$(t_i, f_i), (t_{i-1}, f_{i-1}), \dots, (t_{i+1-m}, f_{i+1-m})$$
+                然后将这个多项式从 $t_i$ 积分到 $t_{i+1}$。</p>
+                <p><strong>推导 (AB二步法为例):</strong></p>
+                <ol>
+                <li>用 $(t_i, f_i)$ 和 $(t_{i-1}, f_{i-1})$ 构造一个线性插值多项式 $P_1(t)$。使用牛顿后向差分形式更方便。</li>
+                <li>积分 $\int_{t_i}^{t_{i+1}} P_1(t) dt$。</li>
+                <li>得到迭代格式：
+                $w_{i+1} = w_i + \frac{h}{2}[3f(t_i, w_i) - f(t_{i-1}, w_{i-1})]$
+                这是一个二步方法，局部截断误差是 $O(h^2)$。</li>
+                </ol>
+                <p><strong>通用 Adams-Bashforth m-步法：</strong>
+                $w_{i+1} = w_i + h \sum_{j=0}^{m-1} b_j \nabla^j f_i$ (基于牛顿后向差分公式积分)
+                例如，<strong>四阶 Adams-Bashforth (AB4) 方法：</strong>
+                $$w_{i+1} = w_i + \frac{h}{24}[55f_i - 59f_{i-1} + 37f_{i-2} - 9f_{i-3}]$$</p>
+                <ul>
+                <li><strong>优点：</strong>
+                <ul>
+                <li>这是一个<strong>四阶</strong>方法（LTE为 $O(h^4)$）。</li>
+                <li>它是<strong>显式</strong>的。一旦启动，每一步<strong>只需要1次</strong>新的函数求值 $f_i=f(t_i, w_i)$，因为过去的值 $f_{i-1}, \dots$ 都是已知的！这比RK4的4次求值高效得多。</li>
+                </ul>
+                </li>
+                <li><strong>缺点：</strong>
+                <ul>
+                <li><strong>不是自启动的：</strong> 为了计算 $w_4$，我们需要 $w_0, w_1, w_2, w_3$。而 $w_1, w_2, w_3$ 必须由其他方法（通常是同阶的RK4）来“预热”生成。</li>
+                <li><strong>稳定性较差：</strong> 相比于同阶的RK方法，AB方法的稳定性区间更小。</li>
+                <li><strong>改变步长困难：</strong> 由于公式依赖于等距的历史点，改变步长 $h$ 会变得非常麻烦。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="563-adams-moulton-am-%E9%9A%90%E5%BC%8F%E6%96%B9%E6%B3%95"><strong>5.6.3 Adams-Moulton (AM) 隐式方法</strong></h4>
+                <p><strong>思想：</strong>
+                AB方法只利用了过去的信息，是一种“外插”。如果我们把<strong>未来的、未知的点 $(t_{i+1}, f_{i+1})$</strong> 也包含进来进行插值，就能得到更精确的积分近似，这是一种“内插”。
+                我们用一个 $m-1$ 次多项式来插值点：
+                $$(t_{i+1}, f_{i+1}), (t_i, f_i), \dots, (t_{i+2-m}, f_{i+2-m})$$</p>
+                <p><strong>三阶 Adams-Moulton (AM3) 方法：</strong>
+                $$w_{i+1} = w_i + \frac{h}{24}[9f_{i+1} + 19f_i - 5f_{i-1} + f_{i-2}]$$</p>
+                <ul>
+                <li><strong>优点：</strong>
+                <ul>
+                <li>这是一个<strong>四阶</strong>方法。</li>
+                <li><strong>精度更高：</strong> 在同阶的情况下，AM方法的截断误差常数比AB方法小得多 (例如，四阶AM的误差常数约为AB的 $1/14$）。</li>
+                <li><strong>稳定性更好：</strong> 稳定性区间远大于同阶的AB方法。</li>
+                </ul>
+                </li>
+                <li><strong>缺点：</strong>
+                <ul>
+                <li><strong>隐式：</strong> 未知量 $w_{i+1}$ 出现在 $f_{i+1} = f(t_{i+1}, w_{i+1})$ 中，每一步都需要迭代求解。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="564-%E9%A2%84%E6%B5%8B-%E6%A0%A1%E6%AD%A3-predictor-corrector-%E7%B3%BB%E7%BB%9F"><strong>5.6.4 预测-校正 (Predictor-Corrector) 系统</strong></h4>
+                <p>我们如何结合AB方法的<strong>高效</strong>和AM方法的<strong>高精度与稳定性</strong>，同时又避免求解非线性方程？
+                <strong>Adams 预测-校正系统：</strong>
+                这是一个绝妙的组合，构成了许多现代ODE求解器的核心。</p>
+                <p><strong>以四阶 Adams 系统为例 (PECE 模式):</strong>
+                假设我们已经有了 $w_i, f_i, f_{i-1}, f_{i-2}$。</p>
+                <ol>
+                <li>
+                <p><strong>P (Predict):</strong> 使用<strong>显式</strong>的 Adams-Bashforth (AB4) 方法，计算一个对 $w_{i+1}$ 的初步<strong>预测值</strong> $w_{i+1}^*$。
+                $$w_{i+1}^* = w_i + \frac{h}{24}[55f_i - 59f_{i-1} + 37f_{i-2} - 9f_{i-3}]$$</p>
+                </li>
+                <li>
+                <p><strong>E (Evaluate):</strong> 使用这个预测值，计算一个对未来斜率的近似值 $f_{i+1}^*$。
+                $$f_{i+1}^* = f(t_{i+1}, w_{i+1}^*)$$</p>
+                </li>
+                <li>
+                <p><strong>C (Correct):</strong> 使用<strong>隐式</strong>的 Adams-Moulton (AM3) 方法的公式，但用 $f_{i+1}^*$ 代替右端真正的 $f_{i+1}$，来对预测值进行<strong>校正</strong>，得到最终的 $w_{i+1}$。
+                $$w_{i+1} = w_i + \frac{h}{24}[9f_{i+1}^* + 19f_i - 5f_{i-1} + f_{i-2}]$$</p>
+                </li>
+                <li>
+                <p><strong>E (Evaluate, optional):</strong> 可以计算最终的 $f_{i+1}=f(t_{i+1}, w_{i+1})$ 为下一步做准备。</p>
+                </li>
+                </ol>
+                <p><strong>优点：</strong></p>
+                <ul>
+                <li><strong>高阶精度：</strong> 整个方法的局部截断误差是四阶的，与AM方法在同一水平。</li>
+                <li><strong>计算高效：</strong> 每一步只需要<strong>2次</strong>函数求值（一次在E步，一次在C步之后），比RK4的4次求值更经济。</li>
+                <li><strong>全显式计算：</strong> 巧妙地规避了求解隐式方程的难题。</li>
+                <li><strong>误差估计：</strong> 预测值 $w_{i+1}^*$ 和校正值 $w_{i+1}$ 之间的差异 $|w_{i+1} - w_{i+1}^*|$ 可以用来<strong>实时估计</strong>该步的局部截断误差，这为实现<strong>自适应步长控制</strong>提供了基础。</li>
+                </ul>
+                <h3 id="%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93"><strong>课程总结</strong></h3>
+                <p><strong>本讲核心要点：</strong></p>
+                <ol>
+                <li><strong>龙格-库塔 (RK) 方法</strong>通过在每个步长内进行多次函数求值和加权平均，可以在不计算导数的情况下实现高阶精度。经典的<strong>RK4</strong>是应用最广泛的单步法。</li>
+                <li><strong>多步法</strong>利用历史信息来提高效率。<strong>Adams-Bashforth (AB)</strong> 是显式的，每步函数求值次数少但稳定性较差；<strong>Adams-Moulton (AM)</strong> 是隐式的，精度和稳定性更优但需要求解方程。</li>
+                <li><strong>预测-校正 (PECE)</strong> 是一种黄金组合，它使用AB法做预测，AM法做校正，兼具了高阶精度、高效率和全显式计算的优点，是现代ODE求解器中的主流技术。</li>
+                <li><strong>单步法 vs 多步法：</strong> RK方法是自启动的，易于改变步长，适合求解精度要求高、函数行为复杂的通用问题。多步法在启动和变步长上较为复杂，但在函数行为平滑、可以采用较固定步长的情况下，其函数求值效率更高。</li>
+                </ol>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
