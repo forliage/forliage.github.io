@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数值分析07:牛顿插值法与差商</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E6%95%B0%E5%80%BC%E5%88%86%E6%9E%9007%E7%89%9B%E9%A1%BF%E6%8F%92%E5%80%BC%E6%B3%95%E4%B8%8E%E5%B7%AE%E5%95%86">数值分析07:牛顿插值法与差商</h1>
+                <h3 id="%E5%BC%95%E8%A8%80%E5%AF%BB%E6%B1%82%E6%9B%B4%E9%AB%98%E6%95%88%E7%9A%84%E6%8F%92%E5%80%BC%E6%96%B9%E6%A1%88"><strong>引言：寻求更高效的插值方案</strong></h3>
+                <p>在上一讲中，我们学习了拉格朗日多项式插值。它从理论上完美地解决了“给定 $n+1$ 个点，如何构造一个次数不超过 $n$ 的多项式穿过它们”的问题。拉格朗日的方法通过构造一组巧妙的基函数 $L_{n,i}(x)$，给出了插值多项式 $P_n(x) = \sum\limits_{i=0}^n y_i L_{n,i}(x)$ 一个清晰的、具有存在性和唯一性证明的表达形式。</p>
+                <p>然而，从<strong>计算实践</strong>的角度来看，拉格朗日插值法存在一个显著的<strong>缺陷</strong>：
+                <strong>缺乏可扩展性 (Lack of Recursiveness)。</strong>
+                想象一下，我们已经辛苦地基于 $n+1$ 个数据点 $(x_0, y_0), \dots, (x_n, y_n)$ 构造了 $n$ 次插值多项式 $P_n(x)$。现在，我们获得了一个新的数据点 $(x_{n+1}, y_{n+1})$。如果我们想得到一个能穿过所有 $n+2$ 个点的、新的 $n+1$ 次插值多项式 $P_{n+1}(x)$，我们该怎么做？</p>
+                <p>使用拉格朗日方法，我们几乎必须<strong>推倒重来</strong>。因为新的基函数 $L_{n+1, i}(x)$ 与旧的 $L_{n,i}(x)$ 完全不同，所有的计算都需要重新进行。这在需要逐步增加数据点来观察插值效果变化的场景中，效率极低。</p>
+                <p>这就引出了我们今天的核心问题：<strong>是否存在一种插值多项式的表示形式，使得我们可以在旧的 $n$ 次多项式的基础上，通过添加一个“修正项”来方便地得到新的 $n+1$ 次多项式？</strong></p>
+                <p>答案是肯定的。这就是<strong>牛顿插值法</strong>的精髓。它将插值多项式表示为一种嵌套的、可扩展的形式，而实现这一切的数学工具，就是<strong>差商 (Divided Differences)</strong>。</p>
+                <p>今天，我们将学习：</p>
+                <ol>
+                <li><strong>拉格朗日插值的实践问题：</strong> 通过一个例子直观感受插值与外推的差异，以及高次插值的潜在风险。</li>
+                <li><strong>内维尔方法 (Neville's Method):</strong> 一种优雅的、生成特定点插值的递推算法，为牛顿法的思想做铺垫。</li>
+                <li><strong>差商：</strong> 定义和计算这个核心概念，它类似于离散世界中的“导数”。</li>
+                <li><strong>牛顿插值多项式：</strong> 如何利用差商来构建具有完美扩展性的插值多项式。</li>
+                <li><strong>等距节点的特殊情况：</strong> 介绍牛顿前向/后向差分公式，简化计算。</li>
+                </ol>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E6%8B%89%E6%A0%BC%E6%9C%97%E6%97%A5%E6%8F%92%E5%80%BC%E7%9A%84%E5%AE%9E%E8%B7%B5%E4%B8%8E%E6%80%9D%E8%80%83"><strong>第一部分：拉格朗日插值的实践与思考</strong></h3>
+                <h4 id="11-%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90%E6%8F%92%E5%80%BC-vs-%E5%A4%96%E6%8E%A8"><strong>1.1 案例分析：插值 vs. 外推</strong></h4>
+                <p>我们通过一个例子来具体看下拉格朗日插值的应用。
+                <strong>例：</strong> 已知 $\sin(\pi/6)=0.5$, $\sin(\pi/4) \approx 0.7071$, $\sin(\pi/3) \approx 0.8660$。使用线性和二次拉格朗日插值来近似计算 $\sin(50^\circ)$ 的值。($50^\circ = 5\pi/18$ 弧度)。
+                已知真值 $\sin(50^\circ) \approx 0.7660444$。</p>
+                <p><strong>a) 线性插值 (Linear Interpolation)</strong></p>
+                <ul>
+                <li><strong>Case 1 (外推 Extrapolation):</strong> 使用节点 $x_0 = \pi/6$ (30°) 和 $x_1 = \pi/4$ (45°)。目标点 $x=50^\circ$ 在插值区间之外。
+                $$P_1(x) = y_0 \frac{x-x_1}{x_0-x_1} + y_1 \frac{x-x_0}{x_1-x_0}$$
+                $$P_1(5\pi/18) \approx 0.7761$$
+                <strong>误差:</strong> $|0.7761 - 0.7660| \approx 0.0101$ (相对较大)。</li>
+                <li><strong>Case 2 (内插 Interpolation):</strong> 使用节点 $x_1 = \pi/4$ (45°) 和 $x_2 = \pi/3$ (60°)。目标点 $x=50^\circ$ 在插值区间之内。
+                $$P_1(x) = y_1 \frac{x-x_2}{x_1-x_2} + y_2 \frac{x-x_1}{x_2-x_1}$$
+                $$P_1(5\pi/18) \approx 0.76008$$
+                <strong>误差:</strong> $|0.76008 - 0.7660| \approx 0.0059$ (小得多)。</li>
+                </ul>
+                <p><strong>结论：</strong> &quot;In general, interpolation is better than extrapolation.&quot;外推的误差通常比内插大得多，因为我们对函数在插值区间外的行为一无所知，外推本质上是基于一种“趋势会延续”的盲目假设。</p>
+                <p><strong>b) 二次插值 (Quadratic Interpolation)</strong>
+                使用所有三个节点 $x_0 = \pi/6, x_1 = \pi/4, x_2 = \pi/3$。目标点 $x=50^\circ$ 位于插值区间内。
+                $$P_2(x) = y_0 L_{2,0}(x) + y_1 L_{2,1}(x) + y_2 L_{2,2}(x)$$
+                计算可得 $P_2(5\pi/18) \approx 0.76543$。
+                <strong>误差:</strong> $|0.76543 - 0.7660| \approx 0.00061$。</p>
+                <p><strong>结论：</strong> &quot;Interpolation with higher degree usually gives better results.&quot;在这个例子中，二次插值的误差比线性插值小了一个数量级。</p>
+                <h4 id="12-%E9%AB%98%E6%AC%A1%E6%8F%92%E5%80%BC%E7%9A%84%E9%99%B7%E9%98%B1%E9%BE%99%E6%A0%BC%E7%8E%B0%E8%B1%A1-runges-phenomenon"><strong>1.2 高次插值的陷阱：龙格现象 (Runge's Phenomenon)</strong></h4>
+                <p>&quot;The higher the better? Nooooooo....&quot; 
+                增加插值多项式的次数并不总是能提高精度。对于某些函数，当使用高次多项式在等距节点上进行插值时，可能会在区间的边缘出现剧烈的、非物理的振荡，导致巨大的误差。这就是著名的<strong>龙格现象</strong>。</p>
+                <p><strong>经典例子：</strong> 对函数 $f(x) = \frac{1}{1+25x^2}$ 在区间 $[-1, 1]$ 上使用 $n+1$ 个等距节点进行插值。</p>
+                <p>尽管插值多项式在中间部分拟合得不错，但在靠近-1和1的区域，它剧烈振荡，与原函数偏差极大。而且，随着次数 $n$ 的增加，这种振荡会越来越严重。</p>
+                <p><strong>教训：</strong></p>
+                <ol>
+                <li>盲目使用高次多项式插值是危险的。</li>
+                <li>插值节点的<strong>选择</strong>至关重要。（使用切比雪夫节点可以极大地缓解龙格现象）。</li>
+                <li>对于大量数据点，使用分段低次插值（如样条插值）通常是更好的选择。</li>
+                </ol>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E7%89%9B%E9%A1%BF%E6%8F%92%E5%80%BC%E6%B3%95%E4%B8%8E%E5%B7%AE%E5%95%86"><strong>第二部分：牛顿插值法与差商</strong></h3>
+                <p>&quot;Excellent point! Let's look at Neville's Method...&quot;在直接进入牛顿法之前，内维尔方法为我们展示了插值问题中优雅的递推结构。</p>
+                <h4 id="311-%E5%86%85%E7%BB%B4%E5%B0%94%E6%96%B9%E6%B3%95-nevilles-method"><strong>3.1.1 内维尔方法 (Neville's Method)</strong></h4>
+                <p><strong>目标：</strong> 给定 $n+1$ 个点，高效地计算出插值多项式在<strong>某一个特定点 $x$</strong> 的值 $P_n(x)$，而不需要显式地写出 $P_n(x)$ 的表达式。</p>
+                <p><strong>记号：</strong> $P_{m_1, \dots, m_k}(x)$ 表示使用节点 $(x_{m_1}, y_{m_1}), \dots, (x_{m_k}, y_{m_k})$ 构造的插值多项式在点 $x$ 的值。</p>
+                <p><strong>递推关系：</strong>
+                可以证明，一个更高阶的插值多项式可以由两个低一阶的插值多项式线性组合而成：
+                $$P_{i, i+1, \dots, j}(x) = \frac{(x-x_i)P_{i+1, \dots, j}(x) - (x-x_j)P_{i, \dots, j-1}(x)}{x_j - x_i}$$</p>
+                <p><strong>计算过程：</strong> 我们可以构造一个表格。
+                第0列是已知的函数值 $P_i = y_i$。
+                第1列由第0列计算得到：$P_{i, i+1}$
+                第2列由第1列计算得到：$P_{i, i+1, i+2}$
+                ...
+                最终表格右上角的元素 $P_{0,1,\dots,n}$ 就是我们要求的值。</p>
+                <p><strong>示例：</strong>
+                $x_0 \quad P_0$
+                $x_1 \quad P_1 \quad P_{0,1}$
+                $x_2 \quad P_2 \quad P_{1,2} \quad P_{0,1,2}$
+                $x_3 \quad P_3 \quad P_{2,3} \quad P_{1,2,3} \quad P_{0,1,2,3}$</p>
+                <p>内维尔方法非常适合于“试探性”的插值，即逐步增加节点数量，观察插值结果的变化趋势。但它的主要目的是求值，而不是得到多项式本身。</p>
+                <h4 id="32-%E5%B7%AE%E5%95%86-divided-differences"><strong>3.2 差商 (Divided Differences)</strong></h4>
+                <p>牛顿插值法的核心是<strong>差商</strong>。差商是多项式系数的“天然”表示，并且它与函数导数有着深刻的联系。</p>
+                <p><strong>定义：</strong></p>
+                <ul>
+                <li>
+                <p><strong>零阶差商 (0-th DD):</strong> $f[x_i] = f(x_i) = y_i$</p>
+                </li>
+                <li>
+                <p><strong>一阶差商 (1-st DD):</strong> $f[x_i, x_j] = \frac{f[x_j] - f[x_i]}{x_j - x_i}$</p>
+                <ul>
+                <li>这正是连接 $(x_i, y_i)$ 和 $(x_j, y_j)$ 两点直线的<strong>斜率</strong>。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>二阶差商 (2-nd DD):</strong> $f[x_i, x_j, x_k] = \frac{f[x_j, x_k] - f[x_i, x_j]}{x_k - x_i}$</p>
+                <ul>
+                <li>这可以看作是“斜率的斜率”，类似于二阶导数。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>k阶差商 (k-th DD):</strong>
+                $$f[x_0, x_1, \dots, x_k] = \frac{f[x_1, \dots, x_k] - f[x_0, \dots, x_{k-1}]}{x_k - x_0}$$</p>
+                </li>
+                </ul>
+                <p><strong>重要性质：</strong></p>
+                <ul>
+                <li><strong>对称性：</strong> &quot;The value of $f[x_0, \dots, x_k]$ is independent of the order of the numbers $x_0, \dots, x_k$.&quot; 这个性质非常重要，但从递推定义中不易看出。它保证了我们选择节点的顺序不影响最终结果。</li>
+                <li><strong>与导数的关系：</strong> 如果函数 $f$ 足够光滑，那么存在一点 $\xi$ 在节点区间内，使得：
+                $f[x_0, x_1, \dots, x_k] = \frac{f^{(k)}(\xi)}{k!}$
+                这表明，$k$ 阶差商是 $k$ 阶导数除以 $k!$ 的一个离散模拟。</li>
+                </ul>
+                <p><strong>差商表 (Divided Difference Table):</strong>
+                我们可以像内维尔方法一样，用表格来系统地计算所有需要的差商。
+                $x_0 \quad f[x_0]$
+                $\qquad \qquad f[x_0, x_1]$
+                $x_1 \quad f[x_1] \qquad \qquad f[x_0, x_1, x_2]$
+                $\qquad \qquad f[x_1, x_2] \qquad \qquad \quad \ddots$
+                $x_2 \quad f[x_2] \qquad \qquad f[x_1, x_2, x_3]$
+                $\qquad \qquad f[x_2, x_3]$
+                $x_3 \quad f[x_3]$</p>
+                <h4 id="321-%E7%89%9B%E9%A1%BF%E6%8F%92%E5%80%BC%E5%A4%9A%E9%A1%B9%E5%BC%8F"><strong>3.2.1 牛顿插值多项式</strong></h4>
+                <p>牛顿插值法的思想是构造一个具有“可加性”的多项式。
+                $$P_n(x) = P_{n-1}(x) + (\text{a correction term})$$
+                这个修正项必须满足：</p>
+                <ol>
+                <li>它不改变 $P_n(x)$ 在旧节点 $x_0, \dots, x_{n-1}$ 上的值（即它在这些点上必须为0）。</li>
+                <li>它保证 $P_n(x_n) = y_n$。</li>
+                </ol>
+                <p>满足条件1的最简单形式是 $C \cdot (x-x_0)(x-x_1)\dots(x-x_{n-1})$。
+                由此，我们可以将插值多项式写成如下<strong>牛顿形式 (Newton Form)</strong>：</p>
+                <p>$$N_n(x) = a_0 + a_1(x-x_0) + a_2(x-x_0)(x-x_1) + \dots + a_n(x-x_0)\dots(x-x_{n-1})$$</p>
+                <p><strong>如何确定系数 $a_k$？</strong>
+                通过依次代入插值条件：</p>
+                <ul>
+                <li>$x=x_0: N_n(x_0) = a_0 = y_0 = f[x_0]$</li>
+                <li>$x=x_1: N_n(x_1) = a_0 + a_1(x_1-x_0) = y_1 \implies a_1 = \frac{y_1-y_0}{x_1-x_0} = f[x_0, x_1]$</li>
+                <li>$x=x_2: \dots \implies a_2 = f[x_0, x_1, x_2]$</li>
+                <li>...</li>
+                <li><strong>一般地，系数 $a_k$ 就是 $k$ 阶差商：$a_k = f[x_0, x_1, \dots, x_k]$</strong></li>
+                </ul>
+                <p><strong>牛顿插值多项式公式：</strong>
+                $$N_n(x) = f[x_0] + \sum_{k=1}^n f[x_0, \dots, x_k] \prod_{i=0}^{k-1} (x-x_i)$$</p>
+                <p><strong>计算优势：</strong></p>
+                <ul>
+                <li><strong>可扩展性：</strong> 如果要从 $N_n(x)$ 得到 $N_{n+1}(x)$，我们只需要计算新的一行差商，然后在 $N_n(x)$ 的表达式后面<strong>加上一项</strong> $f[x_0, \dots, x_{n+1}](x-x_0)\dots(x-x_n)$ 即可。之前的计算完全可以复用。</li>
+                <li><strong>高效求值：</strong> 牛顿形式的多项式可以用嵌套乘法（秦九韶算法的变体）来高效求值。
+                $N_n(x) = f[x_0] + (x-x_0)(f[x_0,x_1] + (x-x_1)(f[x_0,x_1,x_2] + \dots))$</li>
+                </ul>
+                <p><strong>误差项：</strong>
+                由于插值多项式是唯一的，$N_n(x) \equiv P_n(x)$，它们有完全相同的误差项：
+                $$f(x) - N_n(x) = f[x_0, \dots, x_n, x] \prod_{i=0}^n (x-x_i)$$</p>
+                <h4 id="322-%E7%AD%89%E8%B7%9D%E8%8A%82%E7%82%B9%E7%89%9B%E9%A1%BF%E5%B7%AE%E5%88%86%E5%85%AC%E5%BC%8F"><strong>3.2.2 等距节点：牛顿差分公式</strong></h4>
+                <p>当插值节点是等距的，$x_i = x_0 + i h$，差商的计算可以大大简化，并用<strong>差分 (Finite Differences)</strong> 来表示。</p>
+                <p><strong>前向差分 (Forward Differences):</strong> $\Delta$
+                $$\Delta f_i = f_{i+1} - f_i$$
+                $$\Delta^k f_i = \Delta(\Delta^{k-1} f_i) = \Delta^{k-1} f_{i+1} - \Delta^{k-1} f_i$$
+                可以证明：$f[x_0, \dots, x_k] = \frac{\Delta^k f_0}{k! h^k}$。
+                令 $x=x_0+sh$，则 $x-x_i = (s-i)h$。代入牛顿公式得到：</p>
+                <p><strong>牛顿前向差分公式 (Newton's Forward-Difference Formula):</strong>
+                $$P_n(x) = P_n(x_0+sh) = \sum_{k=0}^n \binom{s}{k} \Delta^k f_0$$
+                其中 $\binom{s}{k} = \frac{s(s-1)\dots(s-k+1)}{k!}$ 是广义二项式系数。
+                这个公式最适合在数据表格的<strong>开始部分</strong>进行插值。</p>
+                <p><strong>后向差分 (Backward Differences):</strong> $\nabla$
+                $\nabla f_i = f_i - f_{i-1}$
+                类似地，可以得到：
+                <strong>牛顿后向差分公式 (Newton's Backward-Difference Formula):</strong>
+                $$P_n(x) = P_n(x_n+sh) = \sum_{k=0}^n (-1)^k \binom{-s}{k} \nabla^k f_n$$
+                这个公式使用表格末尾的差分值，最适合在数据表格的<strong>结束部分</strong>进行插值。</p>
+                <h3 id="%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93"><strong>课程总结</strong></h3>
+                <p><strong>本讲核心要点：</strong></p>
+                <ol>
+                <li><strong>高次多项式插值需谨慎。</strong> 虽然增加次数在局部可以提高精度，但对于等距节点和某些函数，它可能导致灾难性的<strong>龙格现象</strong>。</li>
+                <li><strong>牛顿插值法</strong>通过<strong>差商</strong>的概念，构建了一种<strong>可扩展</strong>的插值多项式形式，克服了拉格朗日法计算效率低下的问题。</li>
+                <li><strong>差商</strong>可以看作是导数的离散模拟，其值与节点的排列顺序无关。</li>
+                <li>计算差商并构建牛顿多项式，通常通过构造<strong>差商表</strong>来系统地完成。</li>
+                <li>当节点<strong>等距</strong>时，差商可以用更简单的<strong>前向/后向差分</strong>代替，得到牛顿前向/后向差分插值公式，特别适用于处理表格数据。</li>
+                </ol>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

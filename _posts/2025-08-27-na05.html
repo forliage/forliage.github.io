@@ -171,7 +171,7 @@
                 <p><strong>Discussion 14: 分析一个迭代方法</strong>
                 给定矩阵 $A = \begin{pmatrix} 2 &amp; 1 \\ 1 &amp; 2 \end{pmatrix}$, $\mathbf{b} = \begin{pmatrix} 1 \\ 2 \end{pmatrix}$ 和一个迭代格式：
                 $$\mathbf{x}^{(k+1)} = \mathbf{x}^{(k)} + \omega(A\mathbf{x}^{(k)} - \mathbf{b})$$
-                这是一个求解 $A\mathbf{x}=\mathbf{b}$ 的迭代法吗？不，它是求解 $A\mathbf{x}-\mathbf{b}=\mathbf{0}$，但迭代格式写错了。正确的应该是求解 $A\mathbf{x}=\mathbf{b}$ 的残差修正法，如 $\mathbf{x}^{(k+1)} = \mathbf{x}^{(k)} + \omega(\mathbf{b} - A\mathbf{x}^{(k)})$。我们以PDF上的格式为例进行分析。</p>
+                这是一个求解 $A\mathbf{x}=\mathbf{b}$ 的迭代法吗？不，它是求解 $A\mathbf{x}-\mathbf{b}=\mathbf{0}$，但迭代格式写错了。正确的应该是求解 $A\mathbf{x}=\mathbf{b}$ 的残差修正法，如 $\mathbf{x}^{(k+1)} = \mathbf{x}^{(k)} + \omega(\mathbf{b} - A\mathbf{x}^{(k)})$。</p>
                 <p><strong>1. 找出迭代矩阵 $T$:</strong>
                 $$\mathbf{x}^{(k+1)} = (\mathbf{I} + \omega A)\mathbf{x}^{(k)} - \omega \mathbf{b}$$
                 所以，迭代矩阵 $T = \mathbf{I} + \omega A = \begin{pmatrix} 1+2\omega &amp; \omega \\ \omega &amp; 1+2\omega \end{pmatrix}$。</p>
