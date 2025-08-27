@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机图形学01:绪论</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A601%E7%BB%AA%E8%AE%BA">计算机图形学01:绪论</h1>
+                <h3 id="%E5%BC%95%E8%A8%A0%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6%E6%98%AF%E4%BB%80%E4%B9%88"><strong>引言：计算机图形学是什么？</strong></h3>
+                <p>如果我们要为这门学科下一个定义，可以这样描述：</p>
+                <p><strong>计算机图形学（Computer Graphics, CG）是一门研究如何利用计算机来生成、处理和展示视觉内容的科学与技术。它的核心使命，是在由微小发光单元——像素（Pixel）——构成的屏幕上，从无到有地构建一个虚拟世界，并让这个世界为我们提供一种近乎真实的沉浸式体验。</strong></p>
+                <p>这种“真实体验”是全方位的。它首先是<strong>视觉上的真实</strong>，这意味着我们创造的图像要拥有可信的光影、细腻的材质和精确的物理形态。其次，它可以扩展到<strong>听觉甚至触觉的真实</strong>，但这更多地涉及到与其他领域的交叉。本课程的焦点，将集中在如何实现最核心的——<strong>视觉真实感</strong>。</p>
+                <p>我们的终极目标，就是学会如何指挥计算机，将千千万万个独立的像素点巧妙地组织起来，最终汇成一幅幅生动的画面，真正做到“像素之中，别有洞天”。</p>
+                <h3 id="1-%E6%A0%B8%E5%BF%83%E6%8C%91%E6%88%98%E5%9C%A8%E6%9C%89%E9%99%90%E7%9A%84%E7%94%BB%E5%B8%83%E4%B8%8A%E6%8F%8F%E7%BB%98%E6%97%A0%E9%99%90%E7%9A%84%E4%B8%96%E7%95%8C"><strong>1. 核心挑战：在有限的画布上描绘无限的世界</strong></h3>
+                <p>计算机图形学的根基，在于解决一对看似不可调和的矛盾：<strong>现实世界的无限复杂性</strong> 与 <strong>数字屏幕的严格有限性</strong>。</p>
+                <h4 id="11-%E5%83%8F%E7%B4%A0%E7%9A%84%E5%8A%9B%E9%87%8F%E4%B8%8E%E5%B1%80%E9%99%90"><strong>1.1 像素的力量与局限</strong></h4>
+                <p>我们创作的终点是一块屏幕。无论这块屏幕多么先进，其本质都是一个由像素构成的二维网格。<strong>像素</strong>，这个词源于“Picture Element”（图像元素），是构成数字图像的最小、最基本的单位。</p>
+                <p>理解像素至关重要，因为它只有两个极其简单的属性：</p>
+                <ul>
+                <li><strong>位置：</strong> 每个像素在屏幕的网格坐标系中都有一个固定的、不可改变的位置。</li>
+                <li><strong>颜色：</strong> 这是我们唯一能够通过程序去完全掌控的变量。我们可以精确地告诉计算机，在坐标 (x, y) 上的这个像素，应该显示什么颜色。</li>
+                </ul>
+                <p>这就是我们手中唯一的画笔——一个只能在固定位置填充颜色的工具。我们所有的工作，无论背后涉及多么高深的数学和物理，最终都必须收敛到这一个最朴素的操作上：为屏幕上的每一个像素，计算出它应有的颜色值。这既是图形学的基本约束，也是其强大表现力的起点。当我们把一张图片放大到极限，看到那些马赛克般的色块时，我们看到的正是像素的本来面目。</p>
+                <h4 id="12-%E7%8E%B0%E5%AE%9E%E4%B8%96%E7%95%8C%E7%9A%84%E6%97%A0%E7%A9%B7%E7%BB%86%E8%8A%82"><strong>1.2 现实世界的无穷细节</strong></h4>
+                <p>现在，让我们把目光从屏幕转向我们要描绘的对象——我们身处的这个世界。它的复杂性体现在两个主要层面：</p>
+                <ol>
+                <li>
+                <p><strong>静态外观的复杂性：</strong></p>
+                <ul>
+                <li><strong>几何形态：</strong> 物体的形状千变万化，从一个光滑的球面，到一棵树错综复杂的枝干，再到人体精妙的结构，用数学去精确描述它们本身就是巨大的挑战。</li>
+                <li><strong>材质属性：</strong> 物体的表面特性决定了它如何与光相互作用。想想金属的冰冷反光、磨砂玻璃的朦胧透射、一块旧木头的粗糙纹理、丝绸的柔和光泽。每一种材质都对应着一套独特的光学物理规律。</li>
+                <li><strong>光照现象：</strong> 光是视觉世界的灵魂。一束光从光源出发，经过空气的散射，照射到物体表面，一部分被吸收，一部分被反射到其他物体上，再经过多次反弹，最终进入我们的眼睛。这个包含了直接光照、间接光照、阴影、焦散等复杂现象的过程，是实现真实感的关键。一幅照片级真实的渲染图，其魅力正在于对光照的精确模拟。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>动态行为的复杂性：</strong></p>
+                <ul>
+                <li>世界是运动的。物体会根据物理法则移动、旋转、碰撞、破碎。柔软的物体，如布料和水，会产生复杂的形变和流动。</li>
+                <li>物体间的交互构成了动态的世界。一个球的滚动，不仅取决于它自身的属性，还受到地面摩擦力、空气阻力、重力以及可能存在的其他碰撞的影响。创造出一段可信的人物行走动画，需要对人体运动学有深刻的理解。</li>
+                </ul>
+                </li>
+                </ol>
+                <p>那么，图形学是如何在这两者之间架起桥梁的呢？我们如何用设定像素颜色这样简单的指令，去再现一个拥有复杂几何、材质、光照和动态行为的世界？</p>
+                <p>答案在于一个系统性的流程，也就是计算机图形学的三大基本任务。</p>
+                <h3 id="2-%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6%E7%9A%84%E4%B8%89%E5%A4%A7%E5%9F%BA%E6%9C%AC%E4%BB%BB%E5%8A%A1%E5%BB%BA%E6%A8%A1%E6%B8%B2%E6%9F%93%E4%B8%8E%E5%8A%A8%E7%94%BB"><strong>2. 计算机图形学的三大基本任务：建模、渲染与动画</strong></h3>
+                <p>为了应对上述挑战，图形学将创造虚拟世界的过程分解为三个环环相扣的核心步骤。这三者共同构成了从抽象概念到最终画面的完整管线，而**几何学（Geometry）<strong>和</strong>物理学（Physics）**则是驱动这条管线的两大引擎。</p>
+                <h4 id="21-%E5%BB%BA%E6%A8%A1-modeling"><strong>2.1 建模 (Modeling)</strong></h4>
+                <p><strong>建模</strong>，回答的是这样一个问题：<strong>“我们要描绘的物体，它在三维空间中究竟是什么形状？”</strong></p>
+                <p>我们无法把一个真实的苹果直接放进计算机里。我们必须使用数学语言和数据结构，来构建一个苹果的<strong>数字孪生体</strong>。这个过程就是建模。其本质，是用离散的、有限的数字信息去逼近连续的、无限的真实物体。</p>
+                <p>最常见的建模方法是<strong>多边形网格建模（Polygon Mesh Modeling）</strong>。我们可以想象一下，用无数个微小的三角形或四边形面片，像拼接雕塑一样，将物体的表面完整地勾勒出来。这些面片由顶点（Vertices）、边（Edges）和面（Faces）构成。当我们只显示这些边线时，看到的就是一个物体的**线框（Wireframe）**结构，它清晰地揭示了物体的数字骨架。</p>
+                <p>除此以外，还有用于创建平滑工业曲面的NURBS建模，以及在工程领域中定义物体内部信息的实体建模等。建模的最终产物，是一个纯粹的几何描述，是虚拟世界的骨架。它本身没有颜色，没有质感，但为接下来的一切奠定了基础。</p>
+                <h4 id="22-%E6%B8%B2%E6%9F%93-rendering"><strong>2.2 渲染 (Rendering)</strong></h4>
+                <p><strong>渲染</strong>，回答的是这个问题：<strong>“当我们从某个特定的视角，在特定的光照下去观察这个数字世界时，它看起来应该是什么样子？”</strong></p>
+                <p>有了三维模型之后，渲染的任务就是生成一张二维图像。这是一个模拟“摄影”的过程。我们需要在场景中定义一个<strong>虚拟摄像机</strong>（决定了观察位置和方向）、设置若干<strong>光源</strong>（决定了光照环境），并为模型赋予<strong>材质</strong>。随后，渲染器这个复杂的程序会进行海量的计算，最终确定屏幕上每个像素的颜色。</p>
+                <p>渲染的核心环节包括：</p>
+                <ul>
+                <li>
+                <p><strong>三维到二维的投影 (Projection):</strong></p>
+                <ul>
+                <li><strong>平行投影 (Parallel Projection)</strong>：所有投影线相互平行，物体不会“近大远小”，常用于工程制图和某些游戏风格。</li>
+                <li><strong>透视投影 (Perspective Projection)</strong>：所有投影线汇聚于一点（视点），能模拟人眼的视觉效果，产生深度感。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>可见性判断 (Visibility Determination):</strong> 在复杂的场景中，必须判断哪些物体在摄像机视野内，以及哪些部分被其他物体遮挡，被遮挡的部分无需计算和绘制。</p>
+                </li>
+                <li>
+                <p><strong>着色 (Shading):</strong> 这是实现真实感的重中之重。它根据光照模型计算物体表面的光暗和色彩。从最简单的<strong>平面着色</strong>（每个多边形一个颜色，棱角分明），到更平滑的<strong>平滑着色</strong>，再到能够模拟复杂反射、折射和全局光照的<strong>光线追踪（Ray Tracing）</strong>，渲染质量和计算成本会急剧上升。我们看到的那些足以乱真的计算机生成图像，比如一个细节丰富的废弃街道场景，或者一杯盛有红酒和冰块的晶莹剔otou的玻璃杯，都得益于高级的着色算法。</p>
+                </li>
+                <li>
+                <p><strong>纹理映射 (Texture Mapping):</strong> 为了增加模型表面的细节，我们可以将一张二维图片，像贴纸一样“贴”到三维模型的表面上。比如，为一面墙贴上砖块的图案，为一个游戏角色贴上皮肤的细节。</p>
+                </li>
+                </ul>
+                <h4 id="23-%E5%8A%A8%E7%94%BB-animation"><strong>2.3 动画 (Animation)</strong></h4>
+                <p><strong>动画</strong>，则回答了最后一个问题：<strong>“这个世界中的物体，是如何随着时间流逝而变化的？”</strong></p>
+                <p>它负责定义和控制物体的运动、形变以及其他属性随时间的变化。</p>
+                <ul>
+                <li><strong>关键帧动画 (Keyframe Animation):</strong> 动画师只需设定几个关键时刻的姿态，计算机会自动生成平滑的过渡动画。</li>
+                <li><strong>物理模拟 (Physics Simulation):</strong> 引入物理定律（如牛顿力学、流体力学）来驱动动画。这种方法可以自动生成极为真实的布料飘动、液体飞溅、刚体碰撞等效果。</li>
+                <li><strong>程序化动画 (Procedural Animation):</strong> 通过算法来生成复杂的动态效果，例如用分形算法模拟植物的生长。</li>
+                </ul>
+                <p>一个逼真的角色行走动画，其背后是复杂的骨骼绑定系统和对人体运动学的精确模拟，这正是动画技术的魅力所在。</p>
+                <p><strong>总结一下</strong>：<strong>建模</strong>创造了静态的几何世界，<strong>动画</strong>为其注入了时间的维度和动态的行为，而<strong>渲染</strong>则在每一个时间点，将这个三维的动态世界翻译成我们最终在屏幕上看到的二维图像。</p>
+                <h3 id="3-%E5%9B%BE%E5%BD%A2%E5%AD%A6%E5%9C%A8%E8%A7%86%E8%A7%89%E8%AE%A1%E7%AE%97%E9%A2%86%E5%9F%9F%E7%9A%84%E5%9D%90%E6%A0%87"><strong>3. 图形学在视觉计算领域的坐标</strong></h3>
+                <p>计算机图形学并非孤立存在，它是“视觉计算”（Visual Computing）大家族中的重要一员。了解它的“亲戚们”，能帮助我们更好地定位这门学科。</p>
+                <ul>
+                <li><strong>图像处理 (Image Processing):</strong> 它的流程是“图像 → 图像”。比如用软件对一张照片进行亮度调整、降噪或风格化处理。它是在已有的图像上做文章。</li>
+                <li><strong>计算机视觉 (Computer Vision):</strong> 它的流程是“图像 → 理解”。它致力于让计算机像人一样“看懂”图像内容，例如实现人脸识别、场景分割或自动驾驶中的障碍物检测。</li>
+                </ul>
+                <p>最核心的区别在于信息流动的方向：</p>
+                <p><strong>计算机图形学是“从理想到现实”的合成（Synthesis）过程：它从抽象的数据和模型出发，生成具体的图像。</strong>
+                <strong>计算机视觉是“从现实到理解”的分析（Analysis）过程：它从具体的图像出发，提取抽象的数据和信息。</strong></p>
+                <p>它们是同一枚硬币的正反面，共同推动着人机视觉交互的进步。</p>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

@@ -838,5 +838,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-27-na16.html",
       "abstract": "数值分析16:数值优化——从牛顿法到机器学习"
+    },
+    {
+      "title": "计算机图形学01:绪论",
+      "date": "2025-08-27",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-27-cg01.html",
+      "abstract": "计算机图形学01:绪论"
     }
   ];
