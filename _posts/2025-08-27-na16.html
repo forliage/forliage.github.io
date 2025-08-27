@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数值分析16:数值优化——从牛顿法到机器学习</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E6%95%B0%E5%80%BC%E5%88%86%E6%9E%9016%E6%95%B0%E5%80%BC%E4%BC%98%E5%8C%96%E4%BB%8E%E7%89%9B%E9%A1%BF%E6%B3%95%E5%88%B0%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0">数值分析16:数值优化——从牛顿法到机器学习</h1>
+                <h3 id="%E5%BC%95%E8%A8%80"><strong>引言：</strong></h3>
+                <p>在过去的十五讲中，我们一起攀登了数值计算的诸多高峰：从解线性与非线性方程，到逼近函数与计算微积分，再到模拟动态系统的演化。今天，我们将探讨一个可以说是将所有这些知识融会贯通的、在现代科学与工程中无处不在的终极问题——<strong>数值优化 (Numerical Optimization)</strong>。</p>
+                <p><strong>什么是优化？</strong>
+                简单来说，给定一个目标函数 $f(\mathbf{x})$，优化的目标就是找到一个输入 $\mathbf{x}^*$，使得函数值 $f(\mathbf{x}^*)$ 达到<strong>最小</strong>（或最大）。
+                $\min_{\mathbf{x}} f(\mathbf{x})$
+                这个看似简单的问题，是几乎所有现代科学技术领域的核心：</p>
+                <ul>
+                <li><strong>工程设计：</strong> 在满足约束的条件下，找到使桥梁重量最轻、飞机阻力最小的设计参数。</li>
+                <li><strong>金融：</strong> 构建投资组合，使得在给定风险水平下，预期回报率最高。</li>
+                <li><strong>物流：</strong> 规划运输路线，使得总运输成本最低。</li>
+                <li><strong>机器学习：</strong> 调整一个深度神经网络的亿万个参数（权重），使得模型在训练数据上的<strong>损失函数 (Cost/Loss Function)</strong> 最小。</li>
+                </ul>
+                <p>除了极少数的凸优化问题，绝大多数优化问题都无法得到解析解。因此，我们必须依赖<strong>迭代算法</strong>。这些算法就像一个“登山者”，从一个初始点出发，一步步地寻找通往山谷最低点的路径。</p>
+                <p>今天，我们将重点探讨基于<strong>梯度 (Gradient)</strong> 的优化方法：</p>
+                <ol>
+                <li><strong>梯度下降法：</strong> 最直观的“下山”策略，但有时步履蹒跚。</li>
+                <li><strong>牛顿法：</strong> 利用二阶信息（曲率），试图一步“跳”到谷底，速度快但代价高昂且脆弱。</li>
+                <li><strong>拟牛顿法 (BFGS):</strong> 现代优化的“主力军”，它巧妙地<strong>近似</strong>了牛顿法中的二阶信息，兼具了速度、效率与鲁棒性。</li>
+                <li><strong>前沿展望：</strong> 我们将看到，拟牛顿法中的核心思想——<strong>低秩矩阵更新 (Low-rank Update)</strong>，如何在当今最前沿的<strong>大语言模型微调 (LoRA)</strong> 技术中扮演着关键角色，这充分展示了经典数值分析思想的永恒生命力。</li>
+                </ol>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E4%BC%98%E5%8C%96%E5%9F%BA%E7%A1%80%E4%B8%8E%E7%89%9B%E9%A1%BF%E6%B3%95"><strong>第一部分：优化基础与牛顿法</strong></h3>
+                <h4 id="11-%E6%9C%80%E4%BC%98%E6%80%A7%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%9D%A1%E4%BB%B6%E4%B8%8E%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D"><strong>1.1 最优性的基本条件与梯度下降</strong></h4>
+                <p>对于一个光滑的多元函数 $f(\mathbf{x})$，其在某点 $\mathbf{x}^*$ 达到局部最小值的必要条件是该点的<strong>梯度为零</strong>：
+                $$\nabla f(\mathbf{x}^*) = \mathbf{0}$$
+                这是一个<strong>非线性方程组</strong>！因此，优化问题与我们之前学习的求根问题紧密相连。</p>
+                <p><strong>梯度下降法 (Gradient Descent):</strong>
+                这是最简单的优化算法。我们知道，函数在某点 $\mathbf{x}$ 的<strong>负梯度方向 $-\nabla f(\mathbf{x})$</strong> 是函数值下降最快的方向。
+                因此，我们可以构造一个简单的迭代格式：
+                $$\mathbf{x}_{k+1} = \mathbf{x}_k - \alpha_k \nabla f(\mathbf{x}_k)$$
+                其中 $\alpha_k > 0$ 是<strong>步长 (step size)</strong> 或<strong>学习率 (learning rate)</strong>。</p>
+                <ul>
+                <li><strong>优点：</strong> 简单，易于实现，每一步的计算成本仅为一次梯度求值。</li>
+                <li><strong>缺点：</strong>
+                <ul>
+                <li><strong>收敛缓慢：</strong> 如果目标函数等高线是狭长的椭圆形（即病态的），梯度下降会以“之”字形路径缓慢地走向最小值。</li>
+                <li><strong>步长选择困难：</strong> $\alpha_k$ 太小，收敛慢；$\alpha_k$ 太大，可能会在谷底来回振荡甚至发散。</li>
+                </ul>
+                </li>
+                </ul>
+                <h4 id="12-%E7%89%9B%E9%A1%BF%E6%B3%95%E7%94%A8%E4%BA%8E%E4%BC%98%E5%8C%96"><strong>1.2 牛顿法用于优化</strong></h4>
+                <p><strong>核心思想：</strong> 将“寻找 $f(\mathbf{x})$ 的最小值”问题，转化为“寻找其梯度 $\nabla f(\mathbf{x})$ 的根”的问题。</p>
+                <p>我们已经知道如何用牛顿法求解非线性方程组 $\mathbf{g}(\mathbf{x})=\mathbf{0}$，其迭代公式为：
+                $$\mathbf{x}_{k+1} = \mathbf{x}_k - [J_g(\mathbf{x}_k)]^{-1} \mathbf{g}(\mathbf{x}_k)$$
+                其中 $J_g$ 是 $\mathbf{g}$ 的雅可比矩阵。</p>
+                <p>现在，令 $\mathbf{g}(\mathbf{x}) = \nabla f(\mathbf{x})$。那么 $\mathbf{g}$ 的雅可比矩阵是什么？
+                $$(J_{\nabla f})_{ij} = \frac{\partial (\nabla f)_i}{\partial x_j} = \frac{\partial}{\partial x_j} \left( \frac{\partial f}{\partial x_i} \right) = \frac{\partial^2 f}{\partial x_j \partial x_i}$$
+                这正是 $f(\mathbf{x})$ 的<strong>海森矩阵 (Hessian Matrix)</strong> $H(f)$！</p>
+                <p><strong>牛顿法用于优化的迭代公式：</strong>
+                $$\mathbf{x}_{k+1} = \mathbf{x}_k - [H(f)(\mathbf{x}_k)]^{-1} \nabla f(\mathbf{x}_k)$$</p>
+                <p><strong>从二次模型角度理解：</strong>
+                在点 $\mathbf{x}_k$ 附近，我们可以用二阶泰勒展开来构建一个 $f(\mathbf{x})$ 的<strong>二次模型</strong> $m_k(\mathbf{p})$，其中 $\mathbf{p} = \mathbf{x} - \mathbf{x}_k$ 是位移向量：
+                $f(\mathbf{x}_k+\mathbf{p}) \approx m_k(\mathbf{p}) = f(\mathbf{x}_k) + \nabla f(\mathbf{x}_k)^T \mathbf{p} + \frac{1}{2}\mathbf{p}^T H(f)(\mathbf{x}_k) \mathbf{p}$
+                牛顿法的每一步，就是去寻找这个<strong>二次模型的最小值点</strong>。令 $\nabla m_k(\mathbf{p}) = \nabla f(\mathbf{x}_k) + H(f)(\mathbf{x}_k) \mathbf{p} = \mathbf{0}$，解出牛顿步长 $\mathbf{p}_k = -[H(f)(\mathbf{x}_k)]^{-1} \nabla f(\mathbf{x}_k)$。</p>
+                <p><strong>优点：</strong></p>
+                <ul>
+                <li><strong>收敛速度快：</strong> 在最小值点附近，如果海森矩阵是正定的，牛顿法具有<strong>二次收敛</strong>性，速度远快于梯度下降。</li>
+                </ul>
+                <p><strong>缺点 (致命的)：</strong></p>
+                <ol>
+                <li><strong>计算成本高：</strong> 需要计算 $n \times n$ 的海森矩阵，并求解一个 $n \times n$ 的线性方程组（或求逆），每一步的计算量为 $O(n^3)$。对于高维问题（如机器学习），这完全不可行。</li>
+                <li><strong>海森矩阵可能非正定：</strong> 如果当前点不在一个凸区域，海森矩阵可能不是正定的，此时牛顿步长可能指向一个鞍点甚至最大值点，导致算法失败。</li>
+                <li><strong>海森矩阵可能奇异：</strong> &quot;The Hessian matrix might be singular&quot; 。此时牛顿步长无定义。</li>
+                </ol>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E6%8B%9F%E7%89%9B%E9%A1%BF%E6%B3%95--bfgs-%E7%9A%84%E6%8E%A8%E5%AF%BC%E4%B8%8E%E6%80%9D%E6%83%B3"><strong>第二部分：拟牛顿法 —— BFGS 的推导与思想</strong></h3>
+                <p><strong>核心思想：</strong> 我们能否<strong>避免</strong>直接计算和存储海森矩阵 $H_k$，转而用一个更容易处理的矩阵 $B_k$ 来<strong>近似</strong>它？这个近似矩阵 $B_k$ 应该：</p>
+                <ol>
+                <li><strong>保持正定性</strong>，以保证每一步都是下降方向。</li>
+                <li><strong>易于更新</strong>，每一步的更新成本远低于 $O(n^3)$。</li>
+                <li><strong>能够模拟真实海森矩阵的行为</strong>。</li>
+                </ol>
+                <p>这就是<strong>拟牛顿法 (Quasi-Newton Methods)</strong> 的精髓。</p>
+                <h4 id="21-%E5%89%B2%E7%BA%BF%E6%9D%A1%E4%BB%B6-secant-condition"><strong>2.1 割线条件 (Secant Condition)</strong></h4>
+                <p>如何让 $B_{k+1}$ 模拟 $H_{k+1}$ 的行为？
+                回顾一维牛顿法 $x_{k+1} = x_k - f'(x_k)/f''(x_k)$ 和割线法 $x_{k+1} = x_k - f'(x_k) \frac{x_k-x_{k-1}}{f'(x_k)-f'(x_{k-1})}$。割线法用 $\frac{f'(x_k)-f'(x_{k-1})}{x_k-x_{k-1}}$ 来近似二阶导数 $f''(x_k)$。
+                推广到多维，我们希望新的海森近似 $B_{k+1}$ 能够满足：
+                $$B_{k+1}(\mathbf{x}_{k+1} - \mathbf{x}_k) = \nabla f(\mathbf{x}_{k+1}) - \nabla f(\mathbf{x}_k)$$</p>
+                <p>令 $\mathbf{s}_k = \mathbf{x}_{k+1} - \mathbf{x}_k$ (步长向量)，$\mathbf{y}_k = \nabla f_{k+1} - \nabla f_k$ (梯度差向量)。我们要求 $B_{k+1}$ 满足<strong>割线方程 (Secant Equation)</strong>：
+                $$B_{k+1}\mathbf{s}_k = \mathbf{y}_k$$</p>
+                <h4 id="22-bfgs-%E6%9B%B4%E6%96%B0%E5%85%AC%E5%BC%8F%E7%9A%84%E6%8E%A8%E5%AF%BC"><strong>2.2 BFGS 更新公式的推导</strong></h4>
+                <p>我们有很多方法来更新 $B_k$ 得到满足割线条件的 $B_{k+1}$。BFGS 方法来自于一个最优更新问题：寻找一个对称矩阵 $B$，使得它在某种范数下<strong>距离当前的 $B_k$ 最近</strong>，同时满足割线方程 $B\mathbf{s}_k = \mathbf{y}_k$。</p>
+                <p>这是一个带约束的优化问题。可以证明，其解为一个<strong>秩为2 (rank-two)</strong> 的更新公式：
+                $$B_{k+1} = B_k - \frac{B_k \mathbf{s}_k \mathbf{s}_k^T B_k}{\mathbf{s}_k^T B_k \mathbf{s}_k} + \frac{\mathbf{y}_k \mathbf{y}_k^T}{\mathbf{y}_k^T \mathbf{s}_k}$$
+                这就是著名的 <strong>BFGS (Broyden-Fletcher-Goldfarb-Shanno)</strong> 更新公式。</p>
+                <p><strong>曲率条件 (Curvature Condition):</strong>
+                为了保证更新后的 $B_{k+1}$ 保持正定性（从而保证 $B_k$ 也正定），分母 $\mathbf{y}_k^T \mathbf{s}_k$ 必须大于零。
+                $$\mathbf{y}_k^T \mathbf{s}_k > 0$$
+                这个条件被称为<strong>曲率条件</strong>。它直观地表示，在步长方向 $\mathbf{s}_k$ 上，函数的梯度变化（由 $\mathbf{y}_k$ 体现）应该与步长方向一致，表明该方向上函数具有正的曲率（向上凸）。</p>
+                <p><strong>如何保证曲率条件？—— 线搜索 (Line Search)</strong>
+                在实际算法中，我们计算出下降方向 $\mathbf{p}_k = -B_k^{-1}\nabla f_k$ 后，不是直接走一步，而是进行<strong>线搜索</strong>，寻找一个合适的步长 $\alpha_k > 0$ 来更新 $\mathbf{x}_{k+1} = \mathbf{x}_k + \alpha_k \mathbf{p}_k$。这个步长 $\alpha_k$ 必须满足一定的条件，如 <strong>Wolfe 条件</strong>，它能保证：</p>
+                <ol>
+                <li>函数值确实有足够的下降。</li>
+                <li>下降方向的斜率有足够的减小。
+                满足 Wolfe 条件的线搜索，可以<strong>保证</strong>曲率条件成立。</li>
+                </ol>
+                <h4 id="23-bfgs-%E7%AE%97%E6%B3%95%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%9B%B4%E6%96%B0%E9%80%86%E7%9F%A9%E9%98%B5"><strong>2.3 BFGS 算法的实现：更新逆矩阵</strong></h4>
+                <p>在每一步迭代中，我们需要的不是 $B_{k+1}$ 本身，而是它的逆 $H_{k+1} = B_{k+1}^{-1}$，来计算下一步的方向 $\mathbf{p}_{k+1} = -H_{k+1}\nabla f_{k+1}$。
+                直接对 $B_{k+1}$ 求逆的计算量仍然是 $O(n^3)$。幸运的是，我们可以利用 <strong>Sherman-Morrison-Woodbury 公式</strong> 来直接推导出 $H_k$ 的更新公式。</p>
+                <p><strong>Sherman-Morrison-Woodbury 公式:</strong>
+                这是一个关于<strong>矩阵求逆的低秩更新</strong>公式。
+                如果 $A$ 可逆，则 $A+\mathbf{u}\mathbf{v}^T$ 的逆为：
+                $$(A+\mathbf{u}\mathbf{v}^T)^{-1} = A^{-1} - \frac{A^{-1}\mathbf{u}\mathbf{v}^T A^{-1}}{1+\mathbf{v}^T A^{-1}\mathbf{u}}$$</p>
+                <p>对 BFGS 的更新公式 $B_{k+1}$ 应用两次这个公式（因为是秩为2的更新），可以得到 $H_{k+1} = B_{k+1}^{-1}$ 的更新公式：
+                $$H_{k+1} = \left(\mathbf{I} - \rho_k \mathbf{s}_k \mathbf{y}_k^T\right) H_k \left(\mathbf{I} - \rho_k \mathbf{y}_k \mathbf{s}_k^T\right) + \rho_k \mathbf{s}_k \mathbf{s}_k^T$$
+                其中 $\rho_k = 1 / (\mathbf{y}_k^T \mathbf{s}_k)$。</p>
+                <p><strong>BFGS 算法流程:</strong></p>
+                <ol>
+                <li><strong>初始化：</strong> 选择初始点 $\mathbf{x}_0$，初始海森逆近似 $H_0$（通常为单位矩阵 $\mathbf{I}$）。</li>
+                <li><strong>迭代循环 (k=0, 1, 2, ...):</strong>
+                a.  计算梯度 $\nabla f_k = \nabla f(\mathbf{x}_k)$。
+                b.  <strong>计算下降方向：</strong> $\mathbf{p}_k = -H_k \nabla f_k$。（只需矩阵-向量乘法，$O(n^2)$）
+                c.  <strong>线搜索：</strong> 寻找步长 $\alpha_k$ 满足 Wolfe 条件。
+                d.  <strong>更新点：</strong> $\mathbf{x}_{k+1} = \mathbf{x}_k + \alpha_k \mathbf{p}_k$。
+                e.  <strong>更新梯度和向量：</strong> $\mathbf{s}_k = \mathbf{x}_{k+1}-\mathbf{x}_k$, $\mathbf{y}_k = \nabla f_{k+1}-\nabla f_k$。
+                f.  <strong>更新海森逆矩阵：</strong> 使用 BFGS 公式更新 $H_k$ 得到 $H_{k+1}$。（只需向量外积和矩阵-向量乘法，$O(n^2)$）</li>
+                </ol>
+                <p><strong>BFGS 的巨大成功：</strong>
+                BFGS 将每一步的主要计算成本从牛顿法的 $O(n^3)$ <strong>降低到了 $O(n^2)$</strong>，同时通过巧妙的更新保持了矩阵的正定性和对真实海森矩阵的良好近似，因此它具有<strong>超线性收敛</strong>性，速度非常接近二次收敛。这使其成为目前求解无约束非线性优化问题<strong>最有效、最流行</strong>的算法之一。</p>
+                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E5%89%8D%E6%B2%BF%E5%B1%95%E6%9C%9B%E4%BB%8Ebfgs%E5%88%B0%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83"><strong>第三部分：前沿展望——从BFGS到大模型微调</strong></h3>
+                <p><strong>Research topic 21: LoRA 与低秩更新</strong>
+                让我们再次审视 BFGS 更新公式中的核心部分，例如 $\frac{\mathbf{y}_k \mathbf{y}_k^T}{\mathbf{y}_k^T \mathbf{s}_k}$。
+                这是一个<strong>秩为1 (rank-one)</strong> 的矩阵。BFGS 的本质就是用两个秩一矩阵去更新（修正）当前的海森近似。这种<strong>低秩更新 (Low-rank Updating)</strong> 的思想，在现代机器学习中得到了惊人的应用。</p>
+                <p><strong>背景：大语言模型 (LLM) 微调</strong>
+                像 GPT-3 这样的 LLM 拥有数千亿个参数，构成了一个巨大的权重矩阵 $W_0 \in \mathbb{R}^{d \times d}$。对整个模型进行微调（即更新 $W_0$ 的所有参数）成本极高。</p>
+                <p><strong>LoRA (Low-rank Adaptation) 的思想：</strong>
+                微调过程中的权重更新矩阵 $\Delta W$ 也是一个 $d \times d$ 的大矩阵。LoRA 的核心假设是：这个更新矩阵 $\Delta W$ 可能是<strong>低秩</strong>的。
+                因此，我们可以用<strong>两个小的、瘦长的矩阵</strong> $B \in \mathbb{R}^{d \times r}$ 和 $A \in \mathbb{R}^{r \times d}$ (其中秩 $r \ll d$) 的乘积来<strong>近似</strong>它：
+                $W \approx W_0 + BA$
+                在微调时，我们<strong>冻结</strong>巨大的原始权重 $W_0$ 不变，只训练参数量小得多的 $B$ 和 $A$。</p>
+                <ul>
+                <li><strong>参数量：</strong> 从 $d^2$ 减少到 $2dr$。如果 $d=1000, r=8$，参数量减少了超过100倍！</li>
+                </ul>
+                <p><strong>与 BFGS 的联系：</strong>
+                LoRA 背后的数学工具，正是 BFGS 中反复出现的<strong>秩一更新</strong>和 <strong>Sherman-Morrison-Woodbury 公式</strong>。理解了这些经典的数值线性代数思想，我们就能从根本上理解为什么 LoRA 能够如此高效地工作。这完美地展示了数值分析作为一门基础学科，其深刻思想在数十年后依然能为最前沿的科技领域提供强大的理论武器。</p>
+                <h3 id="%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93"><strong>课程总结</strong></h3>
+                <p><strong>本讲核心要点：</strong></p>
+                <ol>
+                <li><strong>数值优化</strong>的核心是将寻找最优值问题转化为求解梯度为零的求根问题。</li>
+                <li><strong>牛顿法</strong>利用二阶曲率信息（海森矩阵），收敛速度快但计算成本高昂且对矩阵性质要求苛刻。</li>
+                <li><strong>拟牛顿法（特别是BFGS）<strong>通过</strong>低秩更新</strong>来<strong>近似</strong>海森矩阵的逆，将每步计算成本从 $O(n^3)$ 降至 $O(n^2)$，同时保持了超线性收敛性，是现代优化算法的基石。</li>
+                <li>经典的数值分析思想，如<strong>低秩更新</strong>，在当今的<strong>人工智能</strong>领域（如LoRA）中依然扮演着核心角色，展现出强大的生命力。</li>
+                </ol>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
