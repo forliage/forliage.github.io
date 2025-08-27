@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数值分析14:多步法的系统构造与高阶微分方程组</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E6%95%B0%E5%80%BC%E5%88%86%E6%9E%9014%E5%A4%9A%E6%AD%A5%E6%B3%95%E7%9A%84%E7%B3%BB%E7%BB%9F%E6%9E%84%E9%80%A0%E4%B8%8E%E9%AB%98%E9%98%B6%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B%E7%BB%84">数值分析14:多步法的系统构造与高阶微分方程组</h1>
+                <h3 id="%E5%BC%95%E8%A8%80%E5%A4%9A%E6%AD%A5%E6%B3%95%E7%9A%84%E5%9F%BA%E5%9B%A0%E4%B8%8E-ode-%E6%B1%82%E8%A7%A3%E7%9A%84%E5%8D%87%E7%BB%B4"><strong>引言：多步法的“基因”与 ODE 求解的“升维”</strong></h3>
+                <p>在上一讲中，我们学习了求解常微分方程（ODE）的两大主流方法族：<strong>单步法</strong>（以龙格-库塔为代表）和<strong>多步法</strong>（以 Adams 方法为代表）。我们了解到，多步法通过利用历史信息，在函数求值效率上可能优于单步法，特别是通过<strong>预测-校正</strong>策略，实现了精度、效率和稳定性的精妙平衡。</p>
+                <p>我们上一讲是从<strong>积分</strong>的角度推导多步法的，即把 $y(t_{i+1}) = y(t_i) + \int_{t_i}^{t_{i+1}} f(t,y)dt$ 中的积分项用插值多项式来近似。今天课程的第一部分，我们将从另一个更基本、更强大的视角来审视多步法：<strong>泰勒展开 (Taylor Expansion)</strong>。</p>
+                <p><strong>&quot;Derive from Taylor expansion&quot;</strong> 这个视角将为我们揭示所有线性多步法的“遗传密码”。我们将看到，任何一个形如 $w_{i+1} = \sum a_j w_{i-j} + h \sum b_j f_{i+1-j}$ 的线性多步法，其系数 ${a_j}$ 和 ${b_j}$ 都可以通过一个系统性的<strong>待定系数法</strong>来确定：将公式中的所有项在中心点 $t_i$ 处进行泰勒展开，然后匹配 $h$ 的各次幂系数，使得方法的<strong>局部截断误差 (Local Truncation Error)</strong> 达到我们想要的阶数。这个过程不仅能让我们重新推导出已知的 Adams 方法，还能创造出全新的方法族，如<strong>米尔恩 (Milne's)</strong> 方法。</p>
+                <p>课程的第二部分，我们将进行一次重要的“升维打击”。到目前为止，我们所有的讨论都局限于<strong>一阶单变量</strong>的 ODE 问题 $\frac{dy}{dt}=f(t,y)$。然而，现实世界中的绝大多数动态系统，要么由<strong>高阶微分方程</strong>描述（例如，牛顿第二定律 $F=ma$ 是一个二阶 ODE），要么由多个相互耦合的一阶 ODE 组成的<strong>方程组</strong>描述（例如，捕食者-被捕食者模型）。</p>
+                <p>我们是否需要为这些更复杂的问题重新发明一套全新的数值方法？答案是：<strong>完全不需要！</strong> 存在一个极其优美的技巧，可以将<strong>任何</strong>高阶 ODE 或 ODE 系统，转化为一个等价的<strong>一阶 ODE 系统</strong>。这意味着，我们之前辛辛苦苦学过的所有方法（欧拉、龙格-库塔、Adams 等）都可以<strong>直接</strong>应用于求解这些看似复杂得多的问题，只需将标量运算替换为向量运算即可。</p>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%A4%9A%E6%AD%A5%E6%B3%95%E7%9A%84%E6%B3%B0%E5%8B%92%E5%B1%95%E5%BC%80%E6%9E%84%E9%80%A0%E6%B3%95"><strong>第一部分：多步法的泰勒展开构造法</strong></h3>
+                <h4 id="56-ii-%E9%80%9A%E7%94%A8%E7%BA%BF%E6%80%A7%E5%A4%9A%E6%AD%A5%E6%B3%95"><strong>5.6 (II) 通用线性多步法</strong></h4>
+                <p>一个通用的 $m$ 步线性多步法 (Linear Multistep Method, LMM) 具有如下形式：
+                $$w_{i+1} = \sum_{j=0}^{m-1} a_j w_{i-j} + h \sum_{j=-1}^{m-1} b_j f_{i-j}$$
+                其中 $f_k = f(t_k, w_k)$。为了方便，我们通常写成：
+                $$w_{i+1} = a_{m-1}w_i + a_{m-2}w_{i-1} + \dots + a_0 w_{i+1-m} + h[b_m f_{i+1} + b_{m-1}f_i + \dots + b_0 f_{i+1-m}]$$</p>
+                <ul>
+                <li>如果 $b_m=0$，公式是<strong>显式 (Explicit)</strong> 的，因为右端不依赖于未知的 $w_{i+1}$。</li>
+                <li>如果 $b_m \neq 0$，公式是<strong>隐式 (Implicit)</strong> 的。</li>
+                </ul>
+                <p><strong>问题：</strong> 如何系统地确定这些系数 $a_j$ 和 $b_j$ 来获得一个具有特定<strong>阶数 (order)</strong> $p$ 的方法？
+                （阶数为 $p$ 意味着局部截断误差 $\tau_{i+1}(h) = O(h^p)$）。</p>
+                <h4 id="56-ii-%E5%BE%85%E5%AE%9A%E7%B3%BB%E6%95%B0%E6%B3%95"><strong>5.6 (II) 待定系数法</strong></h4>
+                <p><strong>核心思想：</strong></p>
+                <ol>
+                <li>写下我们想要的通用公式形式，例如，一个显式的三步四阶方法：
+                $$w_{i+1} = a_2 w_i + a_1 w_{i-1} + a_0 w_{i-2} + h[b_3 f_i + b_2 f_{i-1} + b_1 f_{i-2} + b_0 f_{i-3}]$$</li>
+                <li>定义该方法的局部截断误差 $\tau_{i+1}(h) = \frac{y(t_{i+1}) - (\sum a_j y_{i-j} + h \sum b_j y'_{i-j})}{h}$。</li>
+                <li><strong>&quot;Expand ... in Taylor series about $t_i$.&quot;</strong> 将公式中涉及到的所有 $y(t_{i-j})$ 和 $y'(t_{i-j})$ 项，全部在中心点 $t_i$ 进行泰勒展开。</li>
+                <li>将这些展开式代入 $\tau_{i+1}(h)$ 的表达式中，整理出关于 $h$ 的幂级数。</li>
+                <li><strong>&quot;equate the coefficients of $h^k$.&quot;</strong>为了让方法的阶数为 $p$，我们要求 $\tau_{i+1}(h) = O(h^p)$，这意味着展开式中从 $h^0$ 到 $h^{p-1}$ 的所有项的系数都必须为零。</li>
+                <li>这就构成了一个关于未知系数 $a_j, b_j$ 的<strong>线性方程组</strong>。求解这个方程组，即可得到我们想要的方法。</li>
+                </ol>
+                <p><strong>例：推导一个四阶显式方法 (Example)</strong>
+                目标形式: $w_{i+1} = a_2 w_i + a_1 w_{i-1} + a_0 w_{i-2} + h[b_3 f_i + b_2 f_{i-1} + b_1 f_{i-2} + b_0 f_{i-3}]$
+                我们有 7 个未知数: $a_2, a_1, a_0, b_3, b_2, b_1, b_0$。
+                我们将 $y(t_{i+1}), y_{i-1}, y_{i-2}, y'_{i-1}, y'_{i-2}, y'_{i-3}$ 全部在 $t_i$ 处展开至 $O(h^5)$（为了得到 $O(h^4)$ 的方法，$\tau$ 的分子需要是 $O(h^5)$）。</p>
+                <ul>
+                <li>$y(t_{i+1}) = y_i + hy'_i + \frac{h^2}{2}y''_i + \frac{h^3}{6}y'''_i + \frac{h^4}{24}y^{(4)}_i + O(h^5)$</li>
+                <li>$y_{i-1} = y_i - hy'_i + \frac{h^2}{2}y''_i - \dots$</li>
+                <li>... (以此类推，共6个展开式)</li>
+                </ul>
+                <p>将这些展开式代入 $\tau_{i+1}(h)$ 的分子 $y(t_{i+1}) - (\dots)$，然后按 $y_i, y'_i, y''_i, \dots$ 的各阶导数整理系数。
+                为了让 $\tau_{i+1}(h) = O(h^4)$，我们必须让 $h^0, h^1, h^2, h^3, h^4$ 的系数都为零。</p>
+                <ul>
+                <li>$h^0$ (即 $y_i$ 的系数): $1 - (a_2+a_1+a_0) = 0$</li>
+                <li>$h^1$ (即 $y'_i$ 的系数): $1 - (-a_1-2a_0) - (b_3+b_2+b_1+b_0) = 0$</li>
+                <li>...</li>
+                <li>$h^4$ (即 $y^{(4)}_i$ 的系数): $\frac{1}{24} - (\frac{a_1}{24}+\frac{16a_0}{24}) - (\frac{b_2}{6}+\frac{8b_1}{6}+\frac{27b_0}{6}) = 0$</li>
+                </ul>
+                <p>我们得到了 <strong>5 个方程</strong>，但有 <strong>7 个未知数</strong>。
+                &quot;5 equations and 7 unknowns&quot; 这意味着存在一个具有<strong>两个自由度</strong>的方法族。我们可以通过指定其中两个系数的值，来确定一个具体的方法。</p>
+                <p><strong>派生出不同的方法族：</strong></p>
+                <ul>
+                <li>
+                <p><strong>Adams-Bashforth (显式):</strong></p>
+                <ul>
+                <li>这类方法的核心思想是“纯积分”，它只利用过去的斜率信息，而不直接利用过去的点的位置信息。这对应于设置 $a_1=a_2=\dots=a_{m-2}=0, a_{m-1}=1$。</li>
+                <li>在我们的例子中，如果设 $a_2=1, a_1=0, a_0=0$，我们就可以解出 $b_3, b_2, b_1, b_0$，从而得到四阶 Adams-Bashforth 方法。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>Adams-Moulton (隐式):</strong></p>
+                <ul>
+                <li>类似的，我们设置 $a_1=a_2=\dots=a_{m-2}=0, a_{m-1}=1$，但在 $b$ 系数中包含 $b_m f_{i+1}$ 项。</li>
+                </ul>
+                </li>
+                <li>
+                <p><strong>米尔恩方法 (Milne's Method):</strong></p>
+                <ul>
+                <li>这是另一类重要的方法，它通过让尽可能多的低阶 $a_j$ 系数为零来获得最简单的形式。</li>
+                <li>在我们的例子中，如果设置 $a_2=0, a_1=0$，则无法获得四阶方法。但如果我们的目标形式是 $w_{i+1} = a_1 w_i + a_0 w_{i-1} + h(\dots)$，则可以推导出<strong>辛普森-米尔恩 (Simpson-Milne)</strong> 方法族。</li>
+                <li><strong>显式 Milne's 法 (四阶):</strong>
+                $$w_{i+1} = w_{i-3} + \frac{4h}{3}(2f_i - f_{i-1} + 2f_{i-2})$$</li>
+                <li><strong>隐式 Milne's 法 (辛普森法则, 四阶):</strong>
+                $$w_{i+1} = w_{i-1} + \frac{h}{3}(f_{i+1} + 4f_i + f_{i-1})$$
+                这个公式非常著名，它来源于在 $[t_{i-1}, t_{i+1}]$ 上对 $y'$ 用辛普森法则积分。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>Milne's 方法的缺陷：</strong> 虽然这些方法的局部截断误差常数很小，但它们存在严重的<strong>稳定性问题</strong>（弱稳定性），在长时间积分时可能会产生振荡解，因此在现代求解器中已不常用。</p>
+                <h4 id="56-ii-%E9%A2%84%E6%B5%8B-%E6%A0%A1%E6%AD%A3%E7%9A%84%E8%AF%AF%E5%B7%AE%E4%BC%B0%E8%AE%A1%E4%B8%8E%E6%94%B9%E8%BF%9B"><strong>5.6 (II) 预测-校正的误差估计与改进</strong></h4>
+                <p><strong>Research topic 16:</strong>
+                我们已经知道，四阶 AB-AM 预测-校正系统非常高效。我们能否利用其误差结构来做得更好？</p>
+                <ul>
+                <li><strong>预测步 (AB4):</strong> $y(t_{i+1}) - w_{i+1}^* \approx \frac{251}{720}h^5 y^{(5)}(\xi)$</li>
+                <li><strong>校正步 (AM4):</strong> $y(t_{i+1}) - w_{i+1} \approx -\frac{19}{720}h^5 y^{(5)}(\xi)$</li>
+                </ul>
+                <p>假设 $y^{(5)}(t)$ 在一个步长内变化不大，我们可以得到一个惊人的关系：
+                $$y(t_{i+1}) - w_{i+1} \approx -\frac{19}{251} (y(t_{i+1}) - w_{i+1}^*)$$
+                两边都包含未知的真解 $y(t_{i+1})$。但我们可以用校正值 $w_{i+1}$ 来近似它：
+                $$w_{i+1} - w_{i+1}^* \approx (y(t_{i+1}) - w_{i+1}^*) - (y(t_{i+1}) - w_{i+1}) \approx \frac{251+19}{720}h^5 y^{(5)}(\xi) = \frac{270}{720}h^5 y^{(5)}(\xi)$$</p>
+                <p><strong>局部误差估计：</strong>
+                $$\text{Local Error} = y(t_{i+1}) - w_{i+1} \approx -\frac{19}{270}(w_{i+1} - w_{i+1}^*)$$
+                这个公式允许我们在<strong>每一步之后</strong>，都对该步引入的局部截断误差进行一个<strong>可计算的估计</strong>！这对于<strong>自适应步长控制</strong>至关重要：</p>
+                <ul>
+                <li>如果估计误差大于容差，我们就拒绝这一步，用一个更小的步长 $h$ 重算。</li>
+                <li>如果估计误差远小于容差，我们可以尝试在下一步增大步长 $h$ 以提高效率。</li>
+                </ul>
+                <p><strong>米尔恩误差修正 (Milne's error correction):</strong>
+                更有甚者，既然我们能估计出误差，为什么不直接用它来修正我们的结果呢？
+                <strong>PECEC 模式 (Predict-Evaluate-Correct-Evaluate-Correct):</strong>
+                我们可以再增加一个修正步骤，得到一个更精确的结果 $w_{i+1}^{final}$。这种思想构成了更高级的、变阶变步长的 ODE 求解器的基础。</p>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E9%AB%98%E9%98%B6%E6%96%B9%E7%A8%8B%E4%B8%8E%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B%E7%BB%84"><strong>第二部分：高阶方程与微分方程组</strong></h3>
+                <h4 id="591-%E4%BB%8E%E9%AB%98%E9%98%B6%E5%88%B0%E4%B8%80%E9%98%B6%E7%B3%BB%E7%BB%9F"><strong>5.9.1 从高阶到一阶系统</strong></h4>
+                <p><strong>核心思想：</strong> 通过引入新变量，将一个 $m$ 阶的 ODE 转化为一个包含 $m$ 个方程的<strong>一阶 ODE 系统</strong>。</p>
+                <p><strong>一般 $m$ 阶 ODE:</strong>
+                $$y^{(m)}(t) = f(t, y, y', \dots, y^{(m-1)})$$
+                以及 $m$ 个初始条件: $y(a)=\alpha_1, y'(a)=\alpha_2, \dots, y^{(m-1)}(a)=\alpha_m$。</p>
+                <p><strong>转化步骤：</strong></p>
+                <ol>
+                <li>定义一组新的因变量：
+                $u_1(t) = y(t)$
+                $u_2(t) = y'(t)$
+                $u_3(t) = y''(t)$
+                ...
+                $u_m(t) = y^{(m-1)}(t)$</li>
+                <li>写出这些新变量之间的关系：
+                $u'_1 = (y)' = y' = u_2$
+                $u'_2 = (y')' = y'' = u_3$
+                ...
+                $u'_{m-1} = (y^{(m-2)})' = y^{(m-1)} = u_m$</li>
+                <li>写出最后一个新变量的导数，利用原始的 ODE：
+                $u'_m = (y^{(m-1)})' = y^{(m)} = f(t, y, \dots, y^{(m-1)}) = f(t, u_1, u_2, \dots, u_m)$</li>
+                <li>写出新的初始条件：
+                $u_1(a) = \alpha_1$
+                $u_2(a) = \alpha_2$
+                ...
+                $u_m(a) = \alpha_m$</li>
+                </ol>
+                <p><strong>结果：</strong>
+                我们得到了一个<strong>一阶常微分方程组</strong>：
+                $$\begin{cases}
+                u'_1 &= u_2 \\
+                u'_2 &= u_3 \\
+                &\vdots \\
+                u'_{m-1} &= u_m \\
+                u'_m &= f(t, u_1, \dots, u_m)
+                \end{cases}$$
+                以及初始条件 $\mathbf{u}(a) = \mathbf{\alpha}$。</p>
+                <p>我们可以将它写成优雅的<strong>向量形式</strong>：
+                令 $\mathbf{u}(t) = [u_1(t), \dots, u_m(t)]^T$，则
+                $$\mathbf{u}'(t) = \mathbf{F}(t, \mathbf{u}(t))$$
+                其中 $\mathbf{F}$ 是一个向量函数。这个形式与我们之前研究的一阶单变量 ODE $y'=f(t,y)$ <strong>完全相同</strong>！</p>
+                <h4 id="592-%E6%95%B0%E5%80%BC%E6%96%B9%E6%B3%95%E7%9A%84%E6%8E%A8%E5%B9%BF"><strong>5.9.2 数值方法的推广</strong></h4>
+                <p>这意味着，我们之前学过的所有单步法都可以直接推广来求解这个系统。我们只需将所有标量运算替换为向量运算即可。</p>
+                <p><strong>以修正欧拉法（RK2的一种）为例 (Discussion 34):</strong>
+                求解二阶 IVP: $y'' - 2y' + y = te^t - t, \quad y(0)=0, y'(0)=-0.5$</p>
+                <ol>
+                <li>
+                <p><strong>转化为一阶系统：</strong>
+                令 $u_1 = y, u_2 = y'$。
+                $u'_1 = y' = u_2$
+                $u'_2 = y'' = 2y' - y + te^t - t = 2u_2 - u_1 + te^t - t$
+                初始条件: $u_1(0)=0, u_2(0)=-0.5$。
+                向量形式: $\mathbf{u}' = \begin{pmatrix} u'_1 \\ u'_2 \end{pmatrix} = \begin{pmatrix} u_2 \\ 2u_2 - u_1 + te^t - t \end{pmatrix} = \mathbf{F}(t, \mathbf{u})$。</p>
+                </li>
+                <li>
+                <p><strong>应用修正欧拉法 (向量版):</strong>
+                $\mathbf{w}_0 = [0, -0.5]^T$
+                $\mathbf{K}_1 = \mathbf{F}(t_i, \mathbf{w}_i)$
+                $\mathbf{K}_2 = \mathbf{F}(t_i+h, \mathbf{w}_i+h\mathbf{K}_1)$
+                $\mathbf{w}_{i+1} = \mathbf{w}_i + \frac{h}{2}(\mathbf{K}_1 + \mathbf{K}_2)$</p>
+                <p><strong>计算第一步 (i=0, h=0.1):</strong></p>
+                <ul>
+                <li>$t_0=0, \mathbf{w}_0 = [0, -0.5]^T$</li>
+                <li>$\mathbf{K}_1 = \mathbf{F}(0, [0, -0.5]) = \begin{pmatrix} -0.5 \\ 2(-0.5)-0+0-0 \end{pmatrix} = \begin{pmatrix} -0.5 \\ -1.0 \end{pmatrix}$</li>
+                <li>$\mathbf{K}_2 = \mathbf{F}(0.1, \mathbf{w}_0 + 0.1\mathbf{K}_1) = \mathbf{F}(0.1, [0, -0.5] + [-0.05, -0.1]) = \mathbf{F}(0.1, [-0.05, -0.6])$
+                $= \begin{pmatrix} -0.6 \\ 2(-0.6) - (-0.05) + 0.1e^{0.1} - 0.1 \end{pmatrix} \approx \begin{pmatrix} -0.6 \\ -1.139 \end{pmatrix}$</li>
+                <li>$\mathbf{w}_1 = \mathbf{w}_0 + \frac{0.1}{2}(\mathbf{K}_1 + \mathbf{K}_2) = \begin{pmatrix} 0 \\ -0.5 \end{pmatrix} + 0.05 \begin{pmatrix} -1.1 \\ -2.139 \end{pmatrix} = \begin{pmatrix} -0.055 \\ -0.60695 \end{pmatrix}$</li>
+                </ul>
+                </li>
+                </ol>
+                <p>我们就这样一步步地计算出了 $y(0.1)$ 和 $y'(0.1)$ 的近似值。</p>
+                <p><strong>结论：</strong> 求解高阶方程和方程组的数值方法，在理论和实现上，与求解一阶单变量方程的方法并无本质区别，这极大地统一了ODE数值解法的理论框架。</p>
+                <h3 id="%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93"><strong>课程总结</strong></h3>
+                <p><strong>本讲核心要点：</strong></p>
+                <ol>
+                <li><strong>多步法的系统构造：</strong> 任何线性多步法都可以通过在中心点进行泰勒展开，并令低阶项系数为零的<strong>待定系数法</strong>来系统地推导。这揭示了不同方法族（如 Adams 和 Milne）之间的内在联系。</li>
+                <li><strong>预测-校正的威力：</strong> 通过比较预测值和校正值，我们不仅可以<strong>实时估计局部截断误差</strong>，为自适应步长控制打下基础，还可以进一步修正结果以提高精度。</li>
+                <li><strong>高阶ODE的降阶：</strong> 任何 $m$ 阶 ODE 或 ODE 系统都可以被严格地转化为一个等价的<strong>一阶 ODE 系统</strong>。</li>
+                <li><strong>数值方法的普适性：</strong> 我们为一阶单变量 ODE 发展的数值方法（欧拉、RK、多步法等）可以<strong>直接推广</strong>到求解一阶系统，只需将标量运算替换为向量运算即可。</li>
+                </ol>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

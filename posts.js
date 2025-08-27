@@ -817,5 +817,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-27-na13.html",
       "abstract": "数值分析13:龙格-库塔法与多步法"
+    },
+    {
+      "title": "数值分析14:多步法的系统构造与高阶微分方程组",
+      "date": "2025-08-27",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-27-na14.html",
+      "abstract": "数值分析14:多步法的系统构造与高阶微分方程组"
     }
   ];
