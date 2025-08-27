@@ -845,5 +845,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-27-cg01.html",
       "abstract": "计算机图形学01:绪论"
+    },
+    {
+      "title": "计算机图形学02:图形学基础1",
+      "date": "2025-08-27",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-27-cg02.html",
+      "abstract": "计算机图形学02:图形学基础1"
     }
   ];
