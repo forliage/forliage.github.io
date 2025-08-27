@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>数值分析12:高斯求积与常微分方程初值问题</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E6%95%B0%E5%80%BC%E5%88%86%E6%9E%9012%E9%AB%98%E6%96%AF%E6%B1%82%E7%A7%AF%E4%B8%8E%E5%B8%B8%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B%E5%88%9D%E5%80%BC%E9%97%AE%E9%A2%98">数值分析12:高斯求积与常微分方程初值问题</h1>
+                <h3 id="%E5%BC%95%E8%A8%80%E4%BB%8E%E8%A2%AB%E5%8A%A8%E9%87%87%E6%A0%B7%E5%88%B0%E4%B8%BB%E5%8A%A8%E5%AF%BB%E4%BC%98%E4%BB%8E%E9%9D%99%E6%80%81%E9%97%AE%E9%A2%98%E5%88%B0%E5%8A%A8%E6%80%81%E6%A8%A1%E6%8B%9F"><strong>引言：从被动采样到主动寻优，从静态问题到动态模拟</strong></h3>
+                <p>在过去的几讲中，我们的旅程主要集中在<strong>静态</strong>的数学问题上：求解一个代数方程，拟合一组数据，计算一个定积分。今天，我们的课程将分为两个激动人心的部分，分别代表着数值分析中两种思想的巅峰，并引领我们从静态问题走向动态模拟。</p>
+                <p><strong>第一部分：高斯求积 (Gaussian Quadrature)</strong></p>
+                <p>我们已经学习了<strong>牛顿-柯特斯 (Newton-Cotes)</strong> 系列的数值积分公式，如梯形法则和辛普森法则。它们的核心思想是：<strong>先固定积分节点 (通常是等距的)，然后推导出对应的权重</strong>，使得公式对尽可能高次的多项式精确。这种方法就像是被动地接受给定的采样点，然后尽力做到最好。</p>
+                <p>这就引出了一个深刻的问题：<strong>如果我们被赋予更大的自由度，不仅可以设计权重 (weights)，还可以主动选择积分节点 (nodes) 的位置，我们能否构造出“更强大”的求积公式？</strong></p>
+                <p>答案是肯定的，而且结果令人惊叹。通过巧妙地选择积分节点的位置，我们可以让一个仅使用 $n+1$ 个点的求积公式，其<strong>精度 (Degree of Precision)</strong> 达到惊人的 $2n+1$！这几乎是牛顿-柯特斯公式的两倍。这就是<strong>高斯求积</strong>的魔力。我们将揭示，这些“神奇”的积分节点，正是我们在前面章节学习的<strong>正交多项式</strong>的根。这一部分的学习，将是之前逼近理论和正交多项式知识的完美应用和升华。</p>
+                <p><strong>第二部分：常微分方程初值问题 (Initial-Value Problems for ODEs)</strong></p>
+                <p>课程的第二部分，我们将开启一个全新的、也是数值分析应用最广泛的领域。现实世界充满了<strong>变化</strong>：物体的运动、人口的增长、电路中电流的变化、化学反应的进程……所有这些动态过程，在数学上都由<strong>微分方程</strong>来描述。</p>
+                <p>我们将聚焦于最基本的一类问题——<strong>一阶常微分方程初值问题 (IVP)</strong>：
+                $$\frac{dy}{dt} = f(t,y), \quad y(a)=\alpha$$
+                给定系统在初始时刻 $a$ 的状态 $\alpha$，我们希望预测它在未来时刻 $t>a$ 的状态 $y(t)$。</p>
+                <p>除了极少数情况，绝大多数微分方程无法求出解析解。因此，我们必须依赖<strong>数值方法</strong>。数值方法的核心思想是“<strong>步进 (Stepping)</strong>”：从已知的初始点 $(t_0, y_0)$ 出发，像“摸着石头过河”一样，一步一步地近似计算出序列点 $(t_1, w_1), (t_2, w_2), \dots$，其中 $w_i \approx y(t_i)$。</p>
+                <p>今天，我们将从最基础的<strong>欧拉方法 (Euler's Method)</strong> 入手，深入分析其思想、推导、误差以及稳定性。这将为我们后续学习更高级、更强大的ODE求解器（如龙格-库塔法）奠定坚实的理论基础。我们将探讨：</p>
+                <ul>
+                <li>一个ODE问题要“值得解”，需要满足哪些数学条件（<strong>适定性 Well-posedness</strong>）？</li>
+                <li>数值方法的<strong>局部截断误差</strong>和<strong>全局误差</strong>有何区别与联系？</li>
+                <li>为什么显式方法简单却有稳定性的烦恼，而隐式方法复杂却更稳健？</li>
+                </ul>
+                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E9%AB%98%E6%96%AF%E6%B1%82%E7%A7%AF"><strong>第一部分：高斯求积</strong></h3>
+                <h4 id="471-newton-cotes-%E5%85%AC%E5%BC%8F%E7%9A%84%E5%B1%80%E9%99%90%E4%B8%8E%E6%96%B0%E6%80%9D%E8%B7%AF"><strong>4.7.1 Newton-Cotes 公式的局限与新思路</strong></h4>
+                <p>回顾牛顿-柯特斯公式 $\int_a^b f(x)dx \approx \sum\limits_{k=0}^n A_k f(x_k)$，我们有 $n+1$ 个自由度（即权重 $A_0, \dots, A_n$），因为节点 $x_k$ 是预先固定的。这 $n+1$ 个自由度让我们构造的公式精度最高能达到 $n$（如果 $n$ 是奇数）或 $n+1$（如果 $n$ 是偶数）。</p>
+                <p><strong>高斯求积的核心思想：</strong>
+                如果我们把<strong>节点 $x_0, \dots, x_n$</strong> 和<strong>权重 $A_0, \dots, A_n$</strong> <strong>全部</strong>看作是待定的未知数，那么我们总共有 <strong>$2n+2$ 个自由度</strong>！
+                &quot;Determine $2n+2$ unknowns ... such that the formula is accurate for $f(x)=1, x, x^2, \dots, x^{2n+1}$.&quot;</p>
+                <p>我们的目标是利用这 $2n+2$ 个自由度，构造一个求积公式，使其能精确地对所有次数不超过 $2n+1$ 的多项式积分。即，我们追求的<strong>精度高达 $2n+1$</strong>。</p>
+                <p><strong>一个简单的例子 (Discussion 31):</strong>
+                求 $\int_0^1 \sqrt{x}f(x)dx \approx A_0 f(x_0) + A_1 f(x_1)$ ($n=1$，两个点)。
+                我们有4个未知数：$x_0, x_1, A_0, A_1$。
+                我们要求它对 $f(x)=1, x, x^2, x^3$ 都精确。权函数是 $w(x)=\sqrt{x}$。</p>
+                <ol>
+                <li>$f(x)=1: \int_0^1 \sqrt{x} dx = \frac{2}{3} = A_0 + A_1$</li>
+                <li>$f(x)=x: \int_0^1 \sqrt{x} \cdot x dx = \frac{2}{5} = A_0 x_0 + A_1 x_1$</li>
+                <li>$f(x)=x^2: \int_0^1 \sqrt{x} \cdot x^2 dx = \frac{2}{7} = A_0 x_0^2 + A_1 x_1^2$</li>
+                <li>$f(x)=x^3: \int_0^1 \sqrt{x} \cdot x^3 dx = \frac{2}{9} = A_0 x_0^3 + A_1 x_1^3$</li>
+                </ol>
+                <p>这是一个关于 $x_0, x_1, A_0, A_1$ 的<strong>非线性方程组</strong>！&quot;Nonlinear!&quot; 直接求解这个方程组非常困难。我们需要一个更系统、更具构造性的方法。</p>
+                <h4 id="472-%E9%AB%98%E6%96%AF%E8%8A%82%E7%82%B9%E4%B8%8E%E6%AD%A3%E4%BA%A4%E5%A4%9A%E9%A1%B9%E5%BC%8F%E7%9A%84%E6%B7%B1%E5%88%BB%E8%81%94%E7%B3%BB"><strong>4.7.2 高斯节点与正交多项式的深刻联系</strong></h4>
+                <p><strong>关键定理：</strong>
+                求积公式 $\int_a^b w(x)f(x)dx \approx \sum\limits_{k=0}^n A_k f(x_k)$ 的精度为 $2n+1$ 的<strong>充分必要条件</strong>是：节点 $x_0, \dots, x_n$ 是<strong>关于权函数 $w(x)$ 和区间 $[a,b]$ 的 $(n+1)$ 阶正交多项式 $\phi_{n+1}(x)$ 的根</strong>。</p>
+                <p><strong>证明思路 (简述):</strong>
+                ($\Leftarrow$) <strong>如果节点是正交多项式的根，则精度为 $2n+1$。</strong></p>
+                <ul>
+                <li>设 $P_{2n+1}(x)$ 是任意一个次数 $\le 2n+1$ 的多项式。</li>
+                <li>用 $\phi_{n+1}(x)$ 去除 $P_{2n+1}(x)$，得到商 $q(x)$ 和余数 $r(x)$，它们的次数都 $\le n$。
+                $$P_{2n+1}(x) = \phi_{n+1}(x)q(x) + r(x)$$</li>
+                <li>对 $P_{2n+1}(x)$ 积分：
+                $$\int_a^b w(x) P_{2n+1}(x) dx = \int_a^b w(x)\phi_{n+1}(x)q(x)dx + \int_a^b w(x)r(x)dx$$
+                由于 $\phi_{n+1}$ 与所有次数 $\le n$ 的多项式（包括 $q(x)$）都正交，第一项积分为0！
+                所以，$$\int_a^b w(x) P_{2n+1}(x) dx = \int_a^b w(x)r(x)dx$$</li>
+                <li>将 $P_{2n+1}(x)$ 代入求积公式：
+                $$\sum_{k=0}^n A_k P_{2n+1}(x_k) = \sum A_k (\phi_{n+1}(x_k)q(x_k) + r(x_k))$$
+                因为 $x_k$ 是 $\phi_{n+1}$ 的根，所以 $\phi_{n+1}(x_k)=0$。
+                $$\sum A_k P_{2n+1}(x_k) = \sum A_k r(x_k)$$</li>
+                <li>由于我们的求积公式是通过对次数 $\le n$ 的插值多项式积分构造的（权重 $A_k = \int_a^b w(x) L_k(x)dx$），它对所有次数 $\le n$ 的多项式（包括 $r(x)$）都是<strong>精确</strong>的！
+                所以 $$\int_a^b w(x)r(x)dx = \sum A_k r(x_k)$$</li>
+                <li>结合以上，我们证明了 $\int_a^b w(x) P_{2n+1}(x) dx = \sum A_k P_{2n+1}(x_k)$。证毕。</li>
+                </ul>
+                <p><strong>高斯求积的构造步骤：</strong></p>
+                <ol>
+                <li><strong>确定正交多项式族：</strong> 根据积分区间 $[a,b]$ 和权函数 $w(x)$，确定对应的正交多项式族（如勒让德、切比雪夫等）。</li>
+                <li><strong>寻找高斯节点：</strong> 求解 $n+1$ 阶正交多项式 $\phi_{n+1}(x)=0$ 的根，得到 $x_0, \dots, x_n$。可以证明，这些根都是在 $(a,b)$ 内的实根。</li>
+                <li><strong>计算权重：</strong> 通过公式 $A_k = \int_a^b w(x) L_k(x)dx$ 计算权重。对于经典的正交多项式族，这些权重有简洁的解析表达式。</li>
+                <li><strong>应用公式：</strong> 使用 $\int_a^b w(x)f(x)dx \approx \sum_{k=0}^n A_k f(x_k)$。</li>
+                </ol>
+                <p><strong>经典的高斯求积公式：</strong></p>
+                <ul>
+                <li><strong>Gauss-Legendre Quadrature:</strong>
+                <ul>
+                <li>区间: $[-1,1]$, 权函数: $w(x)=1$。</li>
+                <li>节点: $(n+1)$ 阶勒让德多项式 $P_{n+1}(x)$ 的根。</li>
+                <li>应用：最通用的高精度数值积分方法。</li>
+                </ul>
+                </li>
+                <li><strong>Gauss-Chebyshev Quadrature:</strong>
+                <ul>
+                <li>区间: $[-1,1]$, 权函数: $w(x)=1/\sqrt{1-x^2}$。</li>
+                <li>节点: $x_k = \cos(\frac{2k+1}{2n+2}\pi)$ (非常容易计算!)</li>
+                <li>权重: $A_k = \pi/(n+1)$ (所有权重都相等!)</li>
+                <li>应用：处理端点有 $1/\sqrt{1-x^2}$ 型奇性的积分。</li>
+                </ul>
+                </li>
+                </ul>
+                <p><strong>结论：</strong> 高斯求积通过牺牲节点选择的简便性（不再是等距），换来了无与伦比的精度。对于光滑的被积函数，它通常是最高效的数值积分方法。</p>
+                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%B8%B8%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B%E5%88%9D%E5%80%BC%E9%97%AE%E9%A2%98"><strong>第二部分：常微分方程初值问题</strong></h3>
+                <h4 id="51-%E9%97%AE%E9%A2%98%E7%9A%84%E6%95%B0%E5%AD%A6%E6%A1%86%E6%9E%B6"><strong>5.1 问题的数学框架</strong></h4>
+                <p>我们研究形如 $\frac{dy}{dt} = f(t,y), a \le t \le b, y(a)=\alpha$ 的初值问题。
+                在投入计算资源之前，我们必须确保这个问题是“值得解的”。</p>
+                <p><strong>定义 (适定性 - Well-Posed Problem):</strong>
+                一个初值问题是适定的，如果：</p>
+                <ol>
+                <li><strong>解存在且唯一。</strong></li>
+                <li><strong>解对初始条件是连续依赖的：</strong> 初始条件 $\alpha$ 或函数 $f(t,y)$ 的微小扰动，只会导致解 $y(t)$ 的微小变化。</li>
+                </ol>
+                <p><strong>Lipschitz 条件：</strong>
+                保证解存在且唯一的关键条件是 <strong>Lipschitz 条件</strong>。
+                函数 $f(t,y)$ 在变量 $y$ 上满足 Lipschitz 条件，如果存在一个常数 $L>0$ (Lipschitz 常数)，使得：
+                $$|f(t, y_1) - f(t, y_2)| \le L|y_1 - y_2|$$
+                对于定义域内的任意两点 $(t, y_1)$ 和 $(t, y_2)$。
+                直观上，这个条件限制了函数 $f$ 沿 $y$ 方向的变化率不能是无限的。如果 $\frac{\partial f}{\partial y}$ 存在且有界，那么 $f$ 一定满足Lipschitz条件。</p>
+                <p><strong>存在唯一性与适定性定理：</strong>
+                如果 $f(t,y)$ 在其定义域上连续，并且在变量 $y$ 上满足 Lipschitz 条件，那么该初值问题是<strong>适定的</strong>。</p>
+                <h4 id="52-%E6%AC%A7%E6%8B%89%E6%96%B9%E6%B3%95-eulers-method"><strong>5.2 欧拉方法 (Euler's Method)</strong></h4>
+                <p>这是最简单、最直观的数值方法。
+                <strong>推导1：泰勒展开</strong>
+                将真解 $y(t_{i+1})$ 在 $t_i$ 处进行一阶泰勒展开：
+                $y(t_{i+1}) = y(t_i) + y'(t_i)(t_{i+1}-t_i) + \frac{y''(\xi_i)}{2}(t_{i+1}-t_i)^2$
+                令 $h = t_{i+1}-t_i$，并注意到 $y'(t_i) = f(t_i, y(t_i))$。忽略二阶及以上的项，并用近似值 $w_i \approx y(t_i)$ 代替，我们得到：
+                $$w_{i+1} = w_i + h f(t_i, w_i)$$</p>
+                <p><strong>推导2：前向差分</strong>
+                用前向差分近似导数：$\frac{y(t_{i+1})-y(t_i)}{h} \approx y'(t_i) = f(t_i, y(t_i))$。
+                整理后得到相同的迭代格式。</p>
+                <p><strong>欧拉方法迭代公式：</strong>
+                $w_0 = \alpha$
+                $w_{i+1} = w_i + h f(t_i, w_i), \quad \text{for } i=0, 1, \dots, n-1$.</p>
+                <p>几何上，欧拉方法就是从点 $(t_i, w_i)$ 出发，沿着由 $f(t_i, w_i)$ 给出的“方向场”（即切线斜率），前进一个步长 $h$，到达下一个点 $(t_{i+1}, w_{i+1})$。</p>
+                <h4 id="521-%E8%AF%AF%E5%B7%AE%E5%88%86%E6%9E%90%E5%B1%80%E9%83%A8%E4%B8%8E%E5%85%A8%E5%B1%80"><strong>5.2.1 误差分析：局部与全局</strong></h4>
+                <p><strong>局部截断误差 (Local Truncation Error, LTE):</strong>
+                LTE 是衡量数值方法<strong>一步</strong>之内引入的误差。它假设我们从一个<strong>精确的点</strong> $(t_i, y(t_i))$ 出发，走一步后与真解 $y(t_{i+1})$ 的差距。
+                $$\tau_{i+1}(h) = \frac{y(t_{i+1}) - (y(t_i) + h f(t_i, y(t_i)))}{h} = \frac{h}{2}y''(\xi_i) = O(h)$$
+                欧拉方法是一个<strong>一阶方法</strong>，因为其LTE是 $O(h)$。</p>
+                <p><strong>全局截断误差 (Global Truncation Error):</strong>
+                全局误差是我们在 $t_i$ 点的计算值 $w_i$ 与真解 $y(t_i)$ 之间的总差距 $|y(t_i) - w_i|$。这个误差是之前所有步的局部截断误差<strong>累积</strong>的结果。
+                可以证明，对于一个适定的问题，如果一个方法的局部截断误差是 $O(h^p)$，那么它的全局截断误差就是 $O(h^p)$。
+                因此，欧拉方法的全局误差是 $O(h)$。</p>
+                <p><strong>误差界：</strong>
+                <strong>定理：</strong> 对于一个满足Lipschitz条件的问题，欧拉方法的全局误差满足：
+                $$|y(t_i) - w_i| \le \frac{Mh}{2L} [e^{L(t_i-a)} - 1]$$
+                其中 $M$ 是 $|y''(t)|$ 的上界，$L$ 是 Lipschitz 常数。
+                这个公式虽然不便于实际计算，但它深刻地揭示了：</p>
+                <ul>
+                <li>误差与步长 $h$ 成正比（一阶）。</li>
+                <li>误差随积分时间 $t_i$ 呈指数增长（由 $e^{L(t_i-a)}$ 项决定）。$L$ 越大，误差累积越快。</li>
+                </ul>
+                <h4 id="53-%E9%AB%98%E9%98%B6%E6%B3%B0%E5%8B%92%E6%96%B9%E6%B3%95"><strong>5.3 高阶泰勒方法</strong></h4>
+                <p>为了提高精度，我们可以自然地想到在泰勒展开中保留更多项。
+                一个 <strong>$n$ 阶泰勒方法</strong>的迭代格式为：
+                $$w_{i+1} = w_i + h T^{(n)}(t_i, w_i)$$
+                其中 $T^{(n)}(t_i, w_i) = f(t_i, w_i) + \frac{h}{2}f'(t_i, w_i) + \dots + \frac{h^{n-1}}{n!}f^{(n-1)}(t_i, w_i)$。
+                这里的 $f', f'', \dots$ 是对 $y'(t)=f(t,y(t))$ 这个复合函数关于 $t$ 的全导数，需要用到链式法则，例如：
+                $$f'(t,y) = \frac{\partial f}{\partial t} + \frac{\partial f}{\partial y} \frac{dy}{dt} = \frac{\partial f}{\partial t} + \frac{\partial f}{\partial y} f(t,y)$$</p>
+                <p>$n$ 阶泰勒方法的局部截断误差是 $O(h^n)$，全局误差也是 $O(h^n)$。
+                <strong>优点：</strong> 精度高。
+                <strong>缺点：</strong> 需要计算 $f$ 的高阶偏导数，对于复杂的函数 $f$ 来说，这会变得极其繁琐和容易出错。因此，高阶泰勒方法在实践中很少直接使用。</p>
+                <h4 id="531-%E9%9A%90%E5%BC%8F%E6%96%B9%E6%B3%95%E7%AE%80%E4%BB%8B"><strong>5.3.1 隐式方法简介</strong></h4>
+                <p>欧拉方法被称为<strong>显式 (Explicit)</strong> 方法，因为 $w_{i+1}$ 的计算公式完全由已知的 $t_i, w_i$ 决定。
+                <strong>隐式欧拉法 (Implicit Euler's Method):</strong>
+                如果我们用后向差分来近似导数 $\frac{y(t_i)-y(t_{i-1})}{h} \approx y'(t_i)$，我们会得到：
+                $$w_{i+1} = w_i + h f(t_{i+1}, w_{i+1})$$
+                这是一个<strong>隐式 (Implicit)</strong> 方法，因为未知的 $w_{i+1}$ 同时出现在方程的两边！为了求解 $w_{i+1}$，我们通常需要使用求根算法（如不动点迭代或牛顿法）。</p>
+                <p><strong>为什么需要隐式方法？</strong></p>
+                <ul>
+                <li><strong>更好的稳定性：</strong> 对于某些“刚性 (stiff)”问题，显式方法的步长 $h$ 会受到极大的限制才能保持稳定，而隐式方法可以用大得多的步长进行稳定计算。</li>
+                <li><strong>更高的精度 (有时):</strong> 例如，将显式和隐式欧拉法平均，可以得到<strong>梯形法</strong>，这是一个二阶精度的隐式方法。</li>
+                </ul>
+                <h3 id="%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93"><strong>课程总结</strong></h3>
+                <p><strong>本讲核心要点：</strong></p>
+                <ol>
+                <li><strong>高斯求积</strong>通过同时优化<strong>节点</strong>和<strong>权重</strong>，实现了用 $n+1$ 个点达到 $2n+1$ 的精度，是最高效的数值积分方法之一。其节点是相应正交多项式的根。</li>
+                <li><strong>常微分方程初值问题</strong>是模拟动态系统的基本数学模型。其<strong>适定性</strong>（解的存在、唯一、稳定）由<strong>Lipschitz条件</strong>保证。</li>
+                <li><strong>欧拉方法</strong>是最基础的ODE数值解法，通过泰勒展开或差分近似推导。它是一个<strong>一阶方法</strong>，即局部和全局误差都是 $O(h)$。</li>
+                <li><strong>高阶泰勒方法</strong>可以提高精度，但需要计算 $f$ 的复杂高阶导数，实用性不强。</li>
+                <li>数值方法分为<strong>显式</strong>和<strong>隐式</strong>两类。显式方法计算简单，但稳定性受限；隐式方法计算复杂，但通常具有更好的稳定性。</li>
+                </ol>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
