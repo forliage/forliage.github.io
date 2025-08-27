@@ -733,5 +733,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-27-na01.html",
       "abstract": "数值分析01:有限位数表达、误差传递和收敛性"
+    },
+    {
+      "title": "数值分析02:单变量非线性方程求解",
+      "date": "2025-08-27",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-27-na02.html",
+      "abstract": "数值分析02:单变量非线性方程求解"
     }
   ];
