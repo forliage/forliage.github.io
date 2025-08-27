@@ -915,5 +915,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-27-cg11.html",
       "abstract": "计算机图形学11:光照与着色"
+    },
+    {
+      "title": "计算机图形学12:纹理映射",
+      "date": "2025-08-27",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-27-cg12.html",
+      "abstract": "计算机图形学12:纹理映射"
     }
   ];

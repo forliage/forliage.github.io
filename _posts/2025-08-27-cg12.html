@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>计算机图形学12:纹理映射</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <audio id="bg-music" src="../music.mp3" loop></audio>
+    <button id="music-toggle" class="music-control">♪</button>
+    <header>
+        <h1>forliage的blog</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../posts.html">文章</a></li>
+                <li><a href="../about.html">关于</a></li>
+                <li><a href="../category.html?category=技术文章">技术文章</a></li>
+                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+                <li><a href="../category.html?category=心情日记">心情日记</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <div id="sidebar-container"></div>
+        <main>
+            <article>
+                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A612%E7%BA%B9%E7%90%86%E6%98%A0%E5%B0%84">计算机图形学12:纹理映射</h1>
+                <h3 id="1-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E7%BA%B9%E7%90%86%E6%98%A0%E5%B0%84"><strong>1. 为什么需要纹理映射？</strong></h3>
+                <p>到目前为止，我们渲染的物体表面属性（如颜色）要么是单一的，要么是在顶点之间平滑插值的。这就像是用纯色颜料或渐变色给模型上色，很难表现复杂的细节。</p>
+                <p><strong>纹理 (Texture)</strong>，从广义上讲，是指物体表面属性的任何空间变化。这包括但不限于：</p>
+                <ul>
+                <li><strong>颜色</strong>的变化（如砖墙、木纹）</li>
+                <li><strong>光泽度</strong>的变化（如部分磨损的金属）</li>
+                <li><strong>透明度</strong>的变化（如彩色玻璃窗）</li>
+                <li><strong>法线方向</strong>的变化（模拟凹凸不平的表面）</li>
+                </ul>
+                <p><strong>纹理映射 (Texture Mapping)</strong>，就是将这些预先定义好的表面属性变化（通常是一张二维图片），“贴”到三维模型的表面上。这就像是给一个白色的墙壁模型贴上壁纸，或者给一个光滑的瓶子模型贴上标签。</p>
+                <p><strong>核心优势：以计算换取几何。</strong> 我们用相对廉价的、在渲染时查询一张图片的成本，来替代创建数百万个微小多边形来模拟表面细节的巨大几何成本。</p>
+                <h3 id="2-%E7%BA%B9%E7%90%86%E6%98%A0%E5%B0%84%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%B5%81%E7%A8%8B"><strong>2. 纹理映射的基本流程</strong></h3>
+                <p>纹理映射的本质是一个<strong>映射 (Mapping)</strong> 过程，它在两个空间之间建立了一座桥梁：</p>
+                <ol>
+                <li><strong>纹理空间 (Texture Space):</strong> 一个通常是二维的、标准化的坐标系，用来定义纹理本身。这个空间中的图像我们称为<strong>纹理图 (Texture Map)</strong>，其中的每个数据点称为<strong>纹素 (Texel)</strong>。纹理空间的坐标通常用 <strong>(u, v)</strong> 表示，范围通常是 <code>[0, 1]</code>。</li>
+                <li><strong>对象空间 (Object Space):</strong> 我们三维模型所在的坐标系，坐标为 <strong>(x, y, z)</strong>。</li>
+                </ol>
+                <p><strong>映射过程分为两步：</strong></p>
+                <ol>
+                <li><strong>分配纹理坐标：</strong> 对于模型的每个顶点，我们必须<strong>手动</strong>或通过算法为其指定一组纹理坐标 <strong>(u, v)</strong>。这个过程也称为 <strong>UV展开 (UV Unwrapping)</strong>。它定义了模型表面的哪一个点，对应于纹理图上的哪一个点。</li>
+                <li><strong>渲染时插值：</strong> 在光栅化阶段，多边形内部每个像素的纹理坐标 <strong>(u, v)</strong>，由其所属三角形顶点的UV坐标通过<strong>重心坐标插值</strong>得到。GPU用这个插值后的UV坐标，到纹理图中去<strong>查询 (lookup)</strong> 对应的纹素颜色，并用这个颜色来为像素着色。</li>
+                </ol>
+                <h3 id="3-%E7%BA%B9%E7%90%86%E6%98%A0%E5%B0%84%E7%9A%84%E5%BA%94%E7%94%A8%E4%B8%8D%E4%BB%85%E4%BB%85%E6%98%AF%E8%B4%B4%E5%9B%BE"><strong>3. 纹理映射的应用：不仅仅是贴图</strong></h3>
+                <p>“纹理”不仅仅是颜色图。我们可以用纹理来控制和“伪造”几乎任何表面属性，极大地丰富视觉效果。</p>
+                <ul>
+                <li><strong>颜色映射 (Color Mapping):</strong> 这是最常见的应用，用纹理的颜色来决定物体表面的漫反射颜色 ($k_d$)。</li>
+                <li><strong>凹凸贴图 (Bump Mapping):</strong> 用一张灰度图来<strong>扰动</strong>表面法线。纹理中较亮的部分表示“凸起”，较暗的部分表示“凹陷”。在进行光照计算时，使用这个被扰动过的法线，而不是原始的几何法线。这可以在一个完全平坦的几何表面上，制造出极其逼真的凹凸不平的<strong>假象</strong>。注意，它只改变了光照效果，并没有真正改变模型的几何形状。</li>
+                <li><strong>法线贴图 (Normal Mapping):</strong> 凹凸贴图的升级版。纹理中直接存储了预计算好的、完整的法线向量（XYZ分量编码到RGB通道中）。它比凹凸贴图能表现更复杂的表面细节，是现代游戏中塑造角色和场景细节的核心技术。</li>
+                <li><strong>置换贴图 (Displacement Mapping):</strong> 这是唯一一种<strong>真正改变模型几何</strong>的贴图技术。它使用灰度图的高度信息，在渲染时（通常在顶点着色器或专门的细分阶段）将模型的顶点沿法线方向进行实际的位移。它能产生真实的凹凸轮廓和阴影，但计算成本最高。</li>
+                <li><strong>环境映射 (Environment Mapping):</strong> 用一张纹理来模拟<strong>镜面反射</strong>。纹理图是周围环境的全景图（通常是立方体贴图或球形贴图）。对于模型上的每个点，我们计算出视线在该点的反射方向，然后用这个反射方向向量去查询环境贴图，得到反射的颜色。这可以高效地在光滑物体上伪造出反射周围环境的效果。</li>
+                <li><strong>光照贴图 (Light Mapping):</strong> 将复杂的光照和阴影效果（通常是计算成本高昂的全局光照）<strong>预先烘焙 (bake)</strong> 到一张纹理上。渲染时，只需将这张光照贴图与物体的基础颜色贴图相乘即可。这是一种用空间换取时间的技术，能够在静态场景中实现高质量的全局光照效果。</li>
+                </ul>
+                <h3 id="4-%E7%BA%B9%E7%90%86%E6%98%A0%E5%B0%84%E7%9A%84%E6%8C%91%E6%88%98%E8%B5%B0%E6%A0%B7%E4%B8%8E%E6%BB%A4%E6%B3%A2"><strong>4. 纹理映射的挑战：走样与滤波</strong></h3>
+                <p>纹理映射本质上也是一种<strong>采样</strong>过程，因此同样会遇到<strong>走样 (Aliasing)</strong> 问题。</p>
+                <ul>
+                <li><strong>放大 (Magnification):</strong> 当一个纹素被映射到屏幕上的多个像素时（比如相机离物体很近），会出现<strong>块状马赛克</strong>。</li>
+                <li><strong>缩小 (Minification):</strong> 当多个纹素被挤压到一个像素区域内时（比如相机离物体很远），会导致<strong>闪烁、摩尔纹</strong>等现象。</li>
+                </ul>
+                <p>为了解决这些问题，我们需要<strong>纹理滤波 (Texture Filtering)</strong> 技术。</p>
+                <ul>
+                <li><strong>最近邻滤波 (Nearest-Neighbor Filtering):</strong> 最简单的方法。直接选择离采样点最近的那个纹素的颜色。效果粗糙，会产生明显的马赛克，但速度最快。</li>
+                <li><strong>双线性滤波 (Bilinear Filtering):</strong> 取离采样点最近的<strong>4个</strong>纹素，根据采样点与它们的距离进行加权平均，得到最终颜色。效果平滑，能很好地解决放大时的马赛克问题。</li>
+                <li><strong>Mipmapping (多级渐远纹理):</strong> 解决缩小问题的关键技术。
+                <ol>
+                <li><strong>预处理：</strong> 在加载纹理时，预先生成一系列从原始分辨率开始，每级分辨率减半的低分辨率纹理版本，构成一个<strong>Mipmap链</strong>。</li>
+                <li><strong>渲染时：</strong> GPU根据物体在屏幕上的投影大小，自动选择最接近该大小的Mipmap层级进行采样。</li>
+                <li><strong>三线性滤波 (Trilinear Filtering):</strong> 在两个最接近的Mipmap层级上分别进行双线性滤波，然后再对这两个结果进行线性插值。这能有效消除从一个Mipmap层级跳变到另一个层级时的突变痕迹。</li>
+                </ol>
+                </li>
+                <li><strong>各向异性滤波 (Anisotropic Filtering):</strong> Mipmapping假设像素的投影区域是正方形，但当视线与表面夹角很小时（如观察一条长长的公路），像素的投影区域会是一个狭长的矩形。各向异性滤波通过对不同方向进行不同频率的采样，能够在这种极端视角下依然保持纹理的清晰度，是目前最高质量的滤波技术。</li>
+                </ul>
+                <h3 id="5-%E7%BA%B9%E7%90%86%E5%9D%90%E6%A0%87%E7%9A%84%E5%A4%84%E7%90%86"><strong>5. 纹理坐标的处理</strong></h3>
+                <ul>
+                <li><strong>UV坐标：</strong> 通常用(s, t)或(u, v)表示，范围是[0, 1]。这个标准化坐标系使得一张纹理可以被应用到任意大小的模型上。</li>
+                <li><strong>寻址模式 (Wrapping/Clamping):</strong> 当UV坐标超出了[0, 1]的范围时，该如何处理？
+                <ul>
+                <li><code>GL_REPEAT</code>: <strong>重复/平铺</strong>纹理。</li>
+                <li><code>GL_CLAMP_TO_EDGE</code>: <strong>钳制</strong>到边缘，拉伸边缘的纹素颜色。</li>
+                <li><code>GL_MIRRORED_REPEAT</code>: <strong>镜像重复</strong>。</li>
+                </ul>
+                </li>
+                <li><strong>程序化生成 (Procedural Generation):</strong> 除了使用图片，纹理也可以通过数学函数在运行时动态生成。这种<strong>程序化纹理</strong>可以产生无限的细节，且占用存储空间极小，常用于模拟木纹、石材、云雾等自然现象。</li>
+                </ul>
+            </article>
+        </main>
+    </div>
+    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>
