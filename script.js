@@ -5,6 +5,16 @@ window.onload = function() {
     const musicBtn = document.getElementById('music-toggle');
     const darkModeToggle = document.getElementById('dark-mode-toggle');
 
+    // Function to update highlight.js theme
+    function updateHighlightTheme(isDarkMode) {
+        const themeLink = document.getElementById('highlight-theme-link');
+        if (themeLink) {
+            const lightTheme = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-dawn.min.css';
+            const darkTheme = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-moon.min.css';
+            themeLink.href = isDarkMode ? darkTheme : lightTheme;
+        }
+    }
+
     // Function to apply the saved theme
     function applyTheme() {
         const isDarkMode = localStorage.getItem('darkMode') === 'true';
@@ -15,6 +25,7 @@ window.onload = function() {
             document.body.classList.remove('dark-mode');
             if (darkModeToggle) darkModeToggle.textContent = '🌙'; // Moon icon for dark mode
         }
+        updateHighlightTheme(isDarkMode);
     }
 
     // Toggle dark mode
@@ -23,6 +34,7 @@ window.onload = function() {
             const isDarkMode = document.body.classList.toggle('dark-mode');
             localStorage.setItem('darkMode', isDarkMode);
             darkModeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+            updateHighlightTheme(isDarkMode);
         });
     }
 

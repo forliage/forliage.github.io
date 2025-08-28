@@ -17,21 +17,54 @@ CDN_BASE_URL = 'https://cdn.jsdelivr.net/npm/simple-icons/icons/'
 # --- HTML Templates ---
 DARK_MODE_BUTTON_HTML = '<button id="dark-mode-toggle" class="dark-mode-control">🌙</button>'
 
+HIGHLIGHT_JS_HEAD_HTML = """
+<!-- Highlight.js Themes -->
+<link id="highlight-theme-link" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-dawn.min.css">
+<!-- Highlight.js Copy Plugin CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.css">
+"""
+
+HIGHLIGHT_JS_BODY_HTML = """
+<!-- Highlight.js Core -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<!-- Highlight.js Copy Plugin -->
+<script src="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.js"></script>
+<!-- Initialize Highlight.js and Copy Plugin -->
+<script>
+  hljs.highlightAll();
+  hljs.addPlugin(new CopyButtonPlugin());
+</script>
+"""
+
+GISCUS_HTML = """
+<div class="giscus-container" style="margin-top: 50px;">
+  <script src="https://giscus.app/client.js"
+          data-repo="forliage/forliage.github.io"
+          data-repo-id="R_kgDONjzd4w"
+          data-category="Announcements"
+          data-mapping="pathname"
+          data-strict="0"
+          data-reactions-enabled="1"
+          data-emit-metadata="0"
+          data-input-position="bottom"
+          data-theme="../giscus.css"
+          data-lang="zh-CN"
+          crossorigin="anonymous"
+          async>
+  </script>
+</div>
+"""
+
 def get_svg_icon(icon_name):
     """Fetches an SVG icon from the CDN."""
     try:
         url = f"{CDN_BASE_URL}{icon_name}.svg"
         response = requests.get(url)
         if response.status_code == 200:
-            # The SVG from simple-icons has role and xmlns attributes we can use directly.
-            # We might want to add a class for styling.
             svg_content = response.text
-            # Let's use BeautifulSoup to manipulate the SVG and add a class
             svg_soup = BeautifulSoup(svg_content, 'html.parser')
             svg_tag = svg_soup.find('svg')
             if svg_tag:
-                 # The CSS already handles the fill color via `currentColor`, so we don't need to set it here.
-                 # No specific class needed on the svg tag itself based on current CSS.
                 return str(svg_tag)
         return f"<!-- Icon '{icon_name}' not found -->"
     except Exception as e:
@@ -43,8 +76,6 @@ def create_share_buttons_html():
     buttons_html = '<div class="share-buttons">\n  <p>分享到：</p>\n'
     for platform, details in SOCIAL_PLATFORMS.items():
         icon_svg = get_svg_icon(details['icon'])
-        # Note: The actual sharing URL will be set by JavaScript later.
-        # Using a placeholder '#' for now.
         buttons_html += f'  <a href="#" class="share-btn {platform}" onclick="sharePost(event, \'{platform}\')">\n    {icon_svg}\n    <span>{details["name"]}</span>\n  </a>\n'
     buttons_html += '</div>'
     return buttons_html
@@ -52,25 +83,53 @@ def create_share_buttons_html():
 def process_html_file(filepath, share_buttons_html):
     """Adds features to a single HTML file."""
     print(f"Processing {filepath}...")
+    modified = False
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             soup = BeautifulSoup(f, 'html.parser')
 
-        # --- 1. Add Dark Mode Toggle Button ---
+        head = soup.find('head')
+        body = soup.find('body')
+
+        # --- 1. Add Highlight.js assets ---
+        if head and not head.find('link', id='highlight-theme-link'):
+            head.append(BeautifulSoup(HIGHLIGHT_JS_HEAD_HTML, 'html.parser'))
+            print(f"  - Added Highlight.js CSS to <head>.")
+            modified = True
+
+        if body and not body.find('script', src=lambda s: s and 'highlight.min.js' in s):
+            body.append(BeautifulSoup(HIGHLIGHT_JS_BODY_HTML, 'html.parser'))
+            print(f"  - Added Highlight.js JS to <body>.")
+            modified = True
+
+        # --- 2. Add Giscus Comment Section ---
+        share_buttons_div = soup.find('div', class_='share-buttons')
+        if share_buttons_div and not soup.find('div', class_='giscus-container'):
+            share_buttons_div.insert_after(BeautifulSoup(GISCUS_HTML, 'html.parser'))
+            print(f"  - Added Giscus comment section.")
+            modified = True
+        
+        # --- Legacy: Add Dark Mode Toggle Button (for older posts if needed) ---
         music_toggle = soup.find('button', id='music-toggle')
         if music_toggle and not music_toggle.find_next_sibling('button', id='dark-mode-toggle'):
             music_toggle.insert_after(BeautifulSoup(DARK_MODE_BUTTON_HTML, 'html.parser'))
             print(f"  - Added dark mode button.")
+            modified = True
         
-        # --- 2. Add Social Share Buttons ---
+        # --- Legacy: Add Social Share Buttons (for older posts if needed) ---
         article_tag = soup.find('article')
         if article_tag and not soup.find('div', class_='share-buttons'):
             article_tag.insert_after(BeautifulSoup(share_buttons_html, 'html.parser'))
             print(f"  - Added share buttons.")
+            modified = True
 
         # --- Save the modified HTML ---
-        with open(filepath, 'w', encoding='utf-8') as f:
-            f.write(str(soup))
+        if modified:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(str(soup))
+            print(f"  - Saved changes to {filepath}")
+        else:
+            print(f"  - No changes needed.")
             
     except Exception as e:
         print(f"  - Error processing file: {e}")
