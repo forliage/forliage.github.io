@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>ads15:外部排序 (External Sorting)</title>
     <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../modal.css">
     <script>
       MathJax = {
         tex: {
@@ -17,6 +18,15 @@
     </script>
     <script type="text/javascript" id="MathJax-script" async
       src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FPDBQB4LZD');
     </script>
 </head>
 <body>
@@ -33,6 +43,7 @@
                 <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
                 <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
                 <li><a href="../category.html?category=心情日记">心情日记</a></li>
+                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
             </ul>
         </nav>
     </header>
@@ -574,5 +585,23 @@ int main() {
       });
     </script>
     <script src="../script.js"></script>
+    <!-- The Modal -->
+    <div id="about-me-modal" class="modal">
+      <!-- Modal content -->
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>About Me</h2>
+        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+        <hr>
+        <h3>订阅我的博客</h3>
+        <p>订阅功能正在建设中，敬请期待！</p>
+      </div>
+    </div>
+    <script src="../modal.js"></script>
 </body>
 </html>
