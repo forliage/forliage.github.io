@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机图形学14:人工智能在图形学中的应用</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>计算机图形学14:人工智能在图形学中的应用</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,178 +30,204 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A614%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%9C%A8%E5%9B%BE%E5%BD%A2%E5%AD%A6%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8">计算机图形学14:人工智能在图形学中的应用</h1>
-                <h3 id="1-%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E4%B8%8E%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0"><strong>1. 什么是人工智能与机器学习？</strong></h3>
-                <p>在深入探讨应用之前，我们首先需要建立对AI和机器学习的基本认知。</p>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A614%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%9C%A8%E5%9B%BE%E5%BD%A2%E5%AD%A6%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8">计算机图形学14:人工智能在图形学中的应用</h1>
+<h3 id="1-%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E4%B8%8E%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0"><strong>1. 什么是人工智能与机器学习？</strong></h3>
+<p>在深入探讨应用之前，我们首先需要建立对AI和机器学习的基本认知。</p>
+<ul>
+<li><strong>人工智能 (AI):</strong> 一个广阔的领域，其宏伟目标是创造能够像人类一样思考、学习和行动的智能体。它涵盖了自然语言处理、知识推理、机器感知、模式识别等多个子领域。</li>
+<li><strong>机器学习 (Machine Learning, ML):</strong> 实现人工智能的一种核心方法。它的精髓在于，我们<strong>不再为计算机编写解决问题的具体、明确的规则</strong>，而是让计算机<strong>从大量的数据中自动学习</strong>这些规则。</li>
+</ul>
+<p><strong>传统编程 vs. 机器学习</strong></p>
+<ul>
+<li><strong>传统编程:</strong> <code>输入数据</code> + <code>程序员编写的规则</code> -&gt; <code>输出结果</code></li>
+<li><strong>机器学习:</strong> <code>输入数据</code> + <code>对应的正确结果(标签)</code> -&gt; <code>机器学到的规则(模型)</code></li>
+</ul>
+<p>这种范式的转变是革命性的。它使得我们能够解决那些人类能做到、但却难以用语言精确描述其规则的复杂问题，比如“识别一张图片中的猫”或“判断一段文字的情感倾向”。</p>
+<h4 id="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%88%86%E7%B1%BB"><strong>机器学习的分类</strong></h4>
+<p>机器学习主要分为三类：</p>
+<ol>
+<li><strong>监督学习 (Supervised Learning):</strong> 训练数据同时包含输入（如图片）和期望的输出（如标签“猫”）。
                 <ul>
-                <li><strong>人工智能 (AI):</strong> 一个广阔的领域，其宏伟目标是创造能够像人类一样思考、学习和行动的智能体。它涵盖了自然语言处理、知识推理、机器感知、模式识别等多个子领域。</li>
-                <li><strong>机器学习 (Machine Learning, ML):</strong> 实现人工智能的一种核心方法。它的精髓在于，我们<strong>不再为计算机编写解决问题的具体、明确的规则</strong>，而是让计算机<strong>从大量的数据中自动学习</strong>这些规则。</li>
-                </ul>
-                <p><strong>传统编程 vs. 机器学习</strong></p>
+<li><strong>分类 (Classification):</strong> 输出是离散的类别（猫、狗、车）。</li>
+<li><strong>回归 (Regression):</strong> 输出是连续的数值（房价、股票价格）。</li>
+</ul>
+</li>
+<li><strong>无监督学习 (Unsupervised Learning):</strong> 训练数据只有输入，没有标签。算法需要自己发现数据中的结构和模式。
                 <ul>
-                <li><strong>传统编程:</strong> <code>输入数据</code> + <code>程序员编写的规则</code> -&gt; <code>输出结果</code></li>
-                <li><strong>机器学习:</strong> <code>输入数据</code> + <code>对应的正确结果(标签)</code> -&gt; <code>机器学到的规则(模型)</code></li>
-                </ul>
-                <p>这种范式的转变是革命性的。它使得我们能够解决那些人类能做到、但却难以用语言精确描述其规则的复杂问题，比如“识别一张图片中的猫”或“判断一段文字的情感倾向”。</p>
-                <h4 id="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%88%86%E7%B1%BB"><strong>机器学习的分类</strong></h4>
-                <p>机器学习主要分为三类：</p>
-                <ol>
-                <li><strong>监督学习 (Supervised Learning):</strong> 训练数据同时包含输入（如图片）和期望的输出（如标签“猫”）。
-                <ul>
-                <li><strong>分类 (Classification):</strong> 输出是离散的类别（猫、狗、车）。</li>
-                <li><strong>回归 (Regression):</strong> 输出是连续的数值（房价、股票价格）。</li>
-                </ul>
-                </li>
-                <li><strong>无监督学习 (Unsupervised Learning):</strong> 训练数据只有输入，没有标签。算法需要自己发现数据中的结构和模式。
-                <ul>
-                <li><strong>聚类 (Clustering):</strong> 将相似的数据点分组。</li>
-                <li><strong>降维 (Dimensionality Reduction):</strong> 寻找数据的更紧凑表示。</li>
-                </ul>
-                </li>
-                <li><strong>强化学习 (Reinforcement Learning):</strong> 智能体通过与环境交互，根据获得的奖励或惩罚来学习最优策略。AlphaGo就是强化学习的巅峰之作。</li>
-                </ol>
-                <p>在图形学中，<strong>监督学习</strong>的应用最为广泛。</p>
-                <h3 id="2-%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%9A%84%E6%A0%B8%E5%BF%83%E5%BC%95%E6%93%8E%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-ann"><strong>2. 机器学习的核心引擎：人工神经网络 (ANN)</strong></h3>
-                <p><strong>人工神经网络</strong>是受人脑神经元结构启发而设计的数学模型，是当前深度学习革命的核心驱动力。</p>
-                <ul>
-                <li><strong>基本单元：神经元 (Neuron):</strong> 一个简单的计算单元，它接收多个输入，对它们进行加权求和，然后通过一个<strong>激活函数 (Activation Function)</strong>（如Sigmoid, ReLU）进行非线性变换，最终产生一个输出。</li>
-                <li><strong>网络结构：</strong> 大量神经元组织成<strong>层 (Layer)</strong>。一个典型的网络包含一个<strong>输入层</strong>、一个或多个<strong>隐藏层</strong>和一个<strong>输出层</strong>。数据从输入层流入，经过隐藏层的逐层计算和变换，最终在输出层得到结果。</li>
-                <li><strong>深度学习：</strong> 当神经网络包含非常多的隐藏层时，我们称之为<strong>深度神经网络 (Deep Neural Network, DNN)</strong>，而使用DNN进行学习的过程就是<strong>深度学习</strong>。</li>
-                </ul>
-                <p>深度神经网络强大的<strong>函数拟合能力</strong>是其成功的关键。理论上，一个足够大的神经网络可以逼近任何复杂的连续函数。<strong>训练 (Training)</strong> 的过程，就是通过<strong>反向传播算法 (Backpropagation)</strong> 和<strong>梯度下降 (Gradient Descent)</strong>，不断调整网络中数以百万计的<strong>权重 (Weights)</strong>，使得网络对于给定的输入，其输出能越来越接近真实的标签，从而最小化<strong>损失函数 (Loss Function)</strong>。</p>
-                <h3 id="3-%E5%BA%94%E7%94%A8%E6%A1%88%E4%BE%8B%E4%BB%8E%E5%8D%95%E5%BC%A0%E5%9B%BE%E7%89%87%E9%87%8D%E5%BB%BA%E4%B8%89%E7%BB%B4%E4%BA%BA%E8%84%B8"><strong>3. 应用案例：从单张图片重建三维人脸</strong></h3>
-                <p>这是一个经典的图形学与AI结合的问题。传统方法通常需要复杂的多视图几何或结构光扫描。而基于深度学习的方法，试图训练一个神经网络，直接从<strong>一张二维人脸图片</strong>，回归出其对应的<strong>三维人脸模型参数</strong>。</p>
-                <ul>
-                <li><strong>输入：</strong> 一张RGB人脸图片。</li>
-                <li><strong>输出：</strong> 一组控制<strong>参数化人脸模型 (3DMM)</strong> 的参数。</li>
-                <li><strong>核心网络：</strong> 通常使用<strong>卷积神经网络 (Convolutional Neural Network, CNN)</strong>。CNN通过其<strong>局部连接</strong>和<strong>权值共享</strong>的特性，特别擅长从图像中提取空间特征。</li>
-                <li><strong>训练过程：</strong>
-                <ol>
-                <li>用一个大型的三维人脸扫描数据库作为基础，构建一个参数化的3DMM模型。该模型能用一组参数（如身份参数$\alpha_{id}$，表情参数$\alpha_{exp}$）来表示各种人脸形状。</li>
-                <li>网络（CNN）学习从输入图片中预测出这组参数以及相机的姿态参数。</li>
-                <li>利用这些参数，生成一个三维人脸网格，并将其投影回二维平面。</li>
-                <li>定义<strong>损失函数</strong>，比较投影后的二维关键点与图片中真实的人脸关键点之间的误差，并通过反向传播来优化网络权重。</li>
-                <li>为了提升重建结果的<strong>可识别性</strong>，还可以引入一个预训练的<strong>人脸识别网络</strong>，将重建出的人脸参数输入该网络，计算<strong>识别损失</strong>，并加入到总的损失函数中，从而引导模型生成更具身份特征的人脸。</li>
-                </ol>
-                </li>
-                </ul>
-                <h3 id="4-%E7%A5%9E%E7%BB%8F%E6%B8%B2%E6%9F%93-neural-renderingai%E9%87%8D%E5%A1%91%E6%B8%B2%E6%9F%93%E7%AE%A1%E7%BA%BF"><strong>4. 神经渲染 (Neural Rendering)：AI重塑渲染管线</strong></h3>
-                <p>近年来，AI对图形学最颠覆性的影响体现在<strong>神经渲染</strong>领域。它不再将渲染管线视为一个固定的、基于物理规则的流程，而是将其中的一个或多个模块替换为<strong>可学习的神经网络</strong>。其中最引人注目的两项技术是 <strong>NeRF</strong> 和 <strong>3D高斯溅射 (3DGS)</strong>。</p>
-                <h4 id="41-nerf-%E7%A5%9E%E7%BB%8F%E8%BE%90%E5%B0%84%E5%9C%BA---neural-radiance-fields"><strong>4.1 NeRF (神经辐射场 - Neural Radiance Fields)</strong></h4>
-                <p>NeRF是一种全新的<strong>场景表示</strong>方法。传统方法用三角形网格、体素等离散结构来表示场景，而NeRF用一个<strong>连续的函数</strong>——一个简单的<strong>多层感知机 (MLP)</strong> 神经网络——来表示整个三维场景。</p>
-                <ul>
-                <li>
-                <p><strong>核心思想：</strong>
+<li><strong>聚类 (Clustering):</strong> 将相似的数据点分组。</li>
+<li><strong>降维 (Dimensionality Reduction):</strong> 寻找数据的更紧凑表示。</li>
+</ul>
+</li>
+<li><strong>强化学习 (Reinforcement Learning):</strong> 智能体通过与环境交互，根据获得的奖励或惩罚来学习最优策略。AlphaGo就是强化学习的巅峰之作。</li>
+</ol>
+<p>在图形学中，<strong>监督学习</strong>的应用最为广泛。</p>
+<h3 id="2-%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%9A%84%E6%A0%B8%E5%BF%83%E5%BC%95%E6%93%8E%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-ann"><strong>2. 机器学习的核心引擎：人工神经网络 (ANN)</strong></h3>
+<p><strong>人工神经网络</strong>是受人脑神经元结构启发而设计的数学模型，是当前深度学习革命的核心驱动力。</p>
+<ul>
+<li><strong>基本单元：神经元 (Neuron):</strong> 一个简单的计算单元，它接收多个输入，对它们进行加权求和，然后通过一个<strong>激活函数 (Activation Function)</strong>（如Sigmoid, ReLU）进行非线性变换，最终产生一个输出。</li>
+<li><strong>网络结构：</strong> 大量神经元组织成<strong>层 (Layer)</strong>。一个典型的网络包含一个<strong>输入层</strong>、一个或多个<strong>隐藏层</strong>和一个<strong>输出层</strong>。数据从输入层流入，经过隐藏层的逐层计算和变换，最终在输出层得到结果。</li>
+<li><strong>深度学习：</strong> 当神经网络包含非常多的隐藏层时，我们称之为<strong>深度神经网络 (Deep Neural Network, DNN)</strong>，而使用DNN进行学习的过程就是<strong>深度学习</strong>。</li>
+</ul>
+<p>深度神经网络强大的<strong>函数拟合能力</strong>是其成功的关键。理论上，一个足够大的神经网络可以逼近任何复杂的连续函数。<strong>训练 (Training)</strong> 的过程，就是通过<strong>反向传播算法 (Backpropagation)</strong> 和<strong>梯度下降 (Gradient Descent)</strong>，不断调整网络中数以百万计的<strong>权重 (Weights)</strong>，使得网络对于给定的输入，其输出能越来越接近真实的标签，从而最小化<strong>损失函数 (Loss Function)</strong>。</p>
+<h3 id="3-%E5%BA%94%E7%94%A8%E6%A1%88%E4%BE%8B%E4%BB%8E%E5%8D%95%E5%BC%A0%E5%9B%BE%E7%89%87%E9%87%8D%E5%BB%BA%E4%B8%89%E7%BB%B4%E4%BA%BA%E8%84%B8"><strong>3. 应用案例：从单张图片重建三维人脸</strong></h3>
+<p>这是一个经典的图形学与AI结合的问题。传统方法通常需要复杂的多视图几何或结构光扫描。而基于深度学习的方法，试图训练一个神经网络，直接从<strong>一张二维人脸图片</strong>，回归出其对应的<strong>三维人脸模型参数</strong>。</p>
+<ul>
+<li><strong>输入：</strong> 一张RGB人脸图片。</li>
+<li><strong>输出：</strong> 一组控制<strong>参数化人脸模型 (3DMM)</strong> 的参数。</li>
+<li><strong>核心网络：</strong> 通常使用<strong>卷积神经网络 (Convolutional Neural Network, CNN)</strong>。CNN通过其<strong>局部连接</strong>和<strong>权值共享</strong>的特性，特别擅长从图像中提取空间特征。</li>
+<li><strong>训练过程：</strong>
+<ol>
+<li>用一个大型的三维人脸扫描数据库作为基础，构建一个参数化的3DMM模型。该模型能用一组参数（如身份参数$\alpha_{id}$，表情参数$\alpha_{exp}$）来表示各种人脸形状。</li>
+<li>网络（CNN）学习从输入图片中预测出这组参数以及相机的姿态参数。</li>
+<li>利用这些参数，生成一个三维人脸网格，并将其投影回二维平面。</li>
+<li>定义<strong>损失函数</strong>，比较投影后的二维关键点与图片中真实的人脸关键点之间的误差，并通过反向传播来优化网络权重。</li>
+<li>为了提升重建结果的<strong>可识别性</strong>，还可以引入一个预训练的<strong>人脸识别网络</strong>，将重建出的人脸参数输入该网络，计算<strong>识别损失</strong>，并加入到总的损失函数中，从而引导模型生成更具身份特征的人脸。</li>
+</ol>
+</li>
+</ul>
+<h3 id="4-%E7%A5%9E%E7%BB%8F%E6%B8%B2%E6%9F%93-neural-renderingai%E9%87%8D%E5%A1%91%E6%B8%B2%E6%9F%93%E7%AE%A1%E7%BA%BF"><strong>4. 神经渲染 (Neural Rendering)：AI重塑渲染管线</strong></h3>
+<p>近年来，AI对图形学最颠覆性的影响体现在<strong>神经渲染</strong>领域。它不再将渲染管线视为一个固定的、基于物理规则的流程，而是将其中的一个或多个模块替换为<strong>可学习的神经网络</strong>。其中最引人注目的两项技术是 <strong>NeRF</strong> 和 <strong>3D高斯溅射 (3DGS)</strong>。</p>
+<h4 id="41-nerf-%E7%A5%9E%E7%BB%8F%E8%BE%90%E5%B0%84%E5%9C%BA---neural-radiance-fields"><strong>4.1 NeRF (神经辐射场 - Neural Radiance Fields)</strong></h4>
+<p>NeRF是一种全新的<strong>场景表示</strong>方法。传统方法用三角形网格、体素等离散结构来表示场景，而NeRF用一个<strong>连续的函数</strong>——一个简单的<strong>多层感知机 (MLP)</strong> 神经网络——来表示整个三维场景。</p>
+<ul>
+<li>
+<p><strong>核心思想：</strong>
                 这个神经网络 $F_\theta$ 学习的是一个映射关系：
                 $$F_\theta : (x, y, z, d_x, d_y) \rightarrow (\text{color}, \text{density})$$</p>
-                <ul>
-                <li><strong>输入：</strong> 一个三维空间点坐标 $(x,y,z)$ 和一个观察方向 $(d_x, d_y)$。</li>
-                <li><strong>输出：</strong> 该空间点在该观察方向下的<strong>颜色 (RGB)</strong> 和<strong>体密度 ($\sigma$)</strong>。体密度代表了该点有多大的可能性会阻挡光线。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>渲染过程（体渲染 - Volume Rendering）：</strong></p>
-                <ol>
-                <li>对于屏幕上的一个像素，从相机出发，沿着穿过该像素的视线，在空间中采样一系列点。</li>
-                <li>将这些采样点的坐标和视线方向，<strong>查询</strong>已经训练好的NeRF网络，得到每个点的颜色和密度。</li>
-                <li>使用经典的<strong>体渲染</strong>积分公式，将这些采样点的颜色和密度沿光线进行<strong>积分</strong>，计算出最终穿过所有半透明粒子后到达相机的光线颜色，作为该像素的最终颜色。</li>
-                </ol>
-                </li>
-                <li>
-                <p><strong>训练过程：</strong></p>
-                <ul>
-                <li><strong>输入：</strong> 只需要一个场景的<strong>多张、不同视角的二维图片</strong>以及对应的<strong>相机参数</strong>。</li>
-                <li><strong>损失函数：</strong> 对于每个训练视角，用上述渲染过程生成一张图片，然后将其与真实的训练图片进行<strong>逐像素的颜色对比</strong>，计算损失。通过反向传播，优化神经网络的权重。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>NeRF的革命性在于：</strong></p>
-                <ul>
-                <li>它用一个极小的神经网络（通常只有几MB）隐式地表示了极其复杂的、具有精细几何和光照细节的三维场景。</li>
-                <li>它能从稀疏的输入图像中，合成出任意新视角的、照片般真实感的图像，并能自然地处理半透明物体和复杂的视图依赖效果（如高光）。</li>
-                </ul>
-                <h4 id="42-3d%E9%AB%98%E6%96%AF%E6%BA%85%E5%B0%84-3d-gaussian-splatting-3dgs"><strong>4.2 3D高斯溅射 (3D Gaussian Splatting, 3DGS)</strong></h4>
-                <p>3DGS是2023年SIGGRAPH上提出的技术，它在保持NeRF高质量渲染的同时，实现了<strong>极高的渲染速度</strong>，达到了<strong>实时</strong>级别，引发了新一轮的轰动。</p>
-                <ul>
-                <li>
-                <p><strong>核心思想：</strong> 它不再使用连续的神经辐射场，而是用<strong>大量的三维高斯分布</strong>来显式地表示场景。</p>
-                <ul>
-                <li>每个高斯分布都有其<strong>位置 (position)</strong>、<strong>协方差 (covariance)</strong>（决定其形状和旋转）、<strong>颜色 (color)</strong> 和<strong>不透明度 (opacity)</strong> 等属性。</li>
-                <li>可以把它们想象成一堆彩色的、半透明的、可拉伸变形的椭球云。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>渲染过程：</strong></p>
-                <ol>
-                <li>将所有三维高斯分布<strong>投影</strong>到二维屏幕空间，它们会变成二维高斯分布。</li>
-                <li>这是一个高度可并行的操作，GPU通过专门设计的<strong>光栅化器 (Splatting)</strong>，高效地将这些二维高斯“溅射”到屏幕上。</li>
-                <li>对于每个像素，累加所有覆盖它的二维高斯的颜色（按不透明度加权），得到最终的像素颜色。</li>
-                </ol>
-                </li>
-                <li>
-                <p><strong>训练过程：</strong></p>
-                <ul>
-                <li>与NeRF类似，从多视角图片和相机参数开始。</li>
-                <li>但它优化的不再是神经网络权重，而是<strong>所有三维高斯分布的属性</strong>。</li>
-                <li>训练过程中，算法会自动地<strong>分裂</strong>（将一个大的高斯分裂成多个小的）和<strong>剪枝</strong>（删除不重要的高斯），从而自适应地调整高斯分布来更好地拟合场景几何。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>3DGS的优势：</strong></p>
-                <ul>
-                <li><strong>实时性能：</strong> 由于其显式的表示和高度并行的光栅化流程，3DGS的渲染速度比NeRF快了几个数量级，可以轻松实现高质量的实时漫游。</li>
-                <li><strong>训练快速：</strong> 训练速度也远快于NeRF。</li>
-                </ul>
-                <p><strong>NeRF vs. 3DGS</strong>
+<ul>
+<li><strong>输入：</strong> 一个三维空间点坐标 $(x,y,z)$ 和一个观察方向 $(d_x, d_y)$。</li>
+<li><strong>输出：</strong> 该空间点在该观察方向下的<strong>颜色 (RGB)</strong> 和<strong>体密度 ($\sigma$)</strong>。体密度代表了该点有多大的可能性会阻挡光线。</li>
+</ul>
+</li>
+<li>
+<p><strong>渲染过程（体渲染 - Volume Rendering）：</strong></p>
+<ol>
+<li>对于屏幕上的一个像素，从相机出发，沿着穿过该像素的视线，在空间中采样一系列点。</li>
+<li>将这些采样点的坐标和视线方向，<strong>查询</strong>已经训练好的NeRF网络，得到每个点的颜色和密度。</li>
+<li>使用经典的<strong>体渲染</strong>积分公式，将这些采样点的颜色和密度沿光线进行<strong>积分</strong>，计算出最终穿过所有半透明粒子后到达相机的光线颜色，作为该像素的最终颜色。</li>
+</ol>
+</li>
+<li>
+<p><strong>训练过程：</strong></p>
+<ul>
+<li><strong>输入：</strong> 只需要一个场景的<strong>多张、不同视角的二维图片</strong>以及对应的<strong>相机参数</strong>。</li>
+<li><strong>损失函数：</strong> 对于每个训练视角，用上述渲染过程生成一张图片，然后将其与真实的训练图片进行<strong>逐像素的颜色对比</strong>，计算损失。通过反向传播，优化神经网络的权重。</li>
+</ul>
+</li>
+</ul>
+<p><strong>NeRF的革命性在于：</strong></p>
+<ul>
+<li>它用一个极小的神经网络（通常只有几MB）隐式地表示了极其复杂的、具有精细几何和光照细节的三维场景。</li>
+<li>它能从稀疏的输入图像中，合成出任意新视角的、照片般真实感的图像，并能自然地处理半透明物体和复杂的视图依赖效果（如高光）。</li>
+</ul>
+<h4 id="42-3d%E9%AB%98%E6%96%AF%E6%BA%85%E5%B0%84-3d-gaussian-splatting-3dgs"><strong>4.2 3D高斯溅射 (3D Gaussian Splatting, 3DGS)</strong></h4>
+<p>3DGS是2023年SIGGRAPH上提出的技术，它在保持NeRF高质量渲染的同时，实现了<strong>极高的渲染速度</strong>，达到了<strong>实时</strong>级别，引发了新一轮的轰动。</p>
+<ul>
+<li>
+<p><strong>核心思想：</strong> 它不再使用连续的神经辐射场，而是用<strong>大量的三维高斯分布</strong>来显式地表示场景。</p>
+<ul>
+<li>每个高斯分布都有其<strong>位置 (position)</strong>、<strong>协方差 (covariance)</strong>（决定其形状和旋转）、<strong>颜色 (color)</strong> 和<strong>不透明度 (opacity)</strong> 等属性。</li>
+<li>可以把它们想象成一堆彩色的、半透明的、可拉伸变形的椭球云。</li>
+</ul>
+</li>
+<li>
+<p><strong>渲染过程：</strong></p>
+<ol>
+<li>将所有三维高斯分布<strong>投影</strong>到二维屏幕空间，它们会变成二维高斯分布。</li>
+<li>这是一个高度可并行的操作，GPU通过专门设计的<strong>光栅化器 (Splatting)</strong>，高效地将这些二维高斯“溅射”到屏幕上。</li>
+<li>对于每个像素，累加所有覆盖它的二维高斯的颜色（按不透明度加权），得到最终的像素颜色。</li>
+</ol>
+</li>
+<li>
+<p><strong>训练过程：</strong></p>
+<ul>
+<li>与NeRF类似，从多视角图片和相机参数开始。</li>
+<li>但它优化的不再是神经网络权重，而是<strong>所有三维高斯分布的属性</strong>。</li>
+<li>训练过程中，算法会自动地<strong>分裂</strong>（将一个大的高斯分裂成多个小的）和<strong>剪枝</strong>（删除不重要的高斯），从而自适应地调整高斯分布来更好地拟合场景几何。</li>
+</ul>
+</li>
+</ul>
+<p><strong>3DGS的优势：</strong></p>
+<ul>
+<li><strong>实时性能：</strong> 由于其显式的表示和高度并行的光栅化流程，3DGS的渲染速度比NeRF快了几个数量级，可以轻松实现高质量的实时漫游。</li>
+<li><strong>训练快速：</strong> 训练速度也远快于NeRF。</li>
+</ul>
+<p><strong>NeRF vs. 3DGS</strong>
                 NeRF像是用一个连续函数去<strong>隐式</strong>地描述一个场景，而3DGS则是用大量的、离散的基元（高斯）去<strong>显式</strong>地构建一个场景。3DGS牺牲了一定的模型紧凑性，换来了无与伦比的渲染和训练速度。</p>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

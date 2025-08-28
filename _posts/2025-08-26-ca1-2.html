@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机体系结构1-2:趋势、量化与设计原则</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>计算机体系结构1-2:趋势、量化与设计原则</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,222 +30,222 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%841-2%E8%B6%8B%E5%8A%BF%E9%87%8F%E5%8C%96%E4%B8%8E%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99">计算机体系结构1-2:趋势、量化与设计原则</h1>
-                <h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E9%A9%B1%E5%8A%A8%E6%9E%B6%E6%9E%84%E6%BC%94%E8%BF%9B%E7%9A%84%E6%8A%80%E6%9C%AF%E8%B6%8B%E5%8A%BF"><strong>第五部分：驱动架构演进的技术趋势</strong></h3>
-                <p>架构师并非在真空中进行设计，我们所有的奇思妙想都必须建立在坚实的物理和技术基础之上。技术的演进速度和方向，决定了我们设计空间的边界。</p>
-                <h4 id="51-%E5%8D%8A%E5%AF%BC%E4%BD%93%E6%8A%80%E6%9C%AF%E7%9A%84%E6%BC%94%E8%BF%9B"><strong>5.1 半导体技术的演进</strong></h4>
-                <p>计算机系统由五大关键技术构成：集成电路逻辑、DRAM、闪存、磁盘和网络。它们的发展速度并不均衡，这种不均衡恰恰是架构师面临的最大挑战和机遇。</p>
-                <ol>
-                <li>
-                <p><strong>集成电路逻辑 (Integrated Circuit Logic) - 摩尔定律的遗产</strong></p>
-                <ul>
-                <li><strong>历史</strong>：摩尔定律预测，芯片上集成的晶体管数量大约每18-24个月翻一番。这一定律在长达近50年的时间里，以惊人的准确性推动了整个行业的发展，带来了每年40%-55%的晶体管数量增长。
-                <img src="../images/imagea010.png" alt="figure 10"></li>
-                <li><strong>现状</strong>：大约在2015年后，摩尔定律的指数增长效应开始显著放缓。虽然工艺节点（Feature Size）仍在缩小（如5nm, 3nm），但成本的增加和物理极限的挑战使得单纯依靠晶体管数量翻倍来驱动性能提升的时代已经结束。</li>
-                <li><strong>架构师的启示</strong>：我们不能再指望“下一代工艺会自动带来性能提升”。设计的重点必须从利用“免费”的晶体管，转向<strong>如何更聪明地利用有限的晶体管和功耗预算</strong>。这直接催生了专用加速器（如TPU、NPU）和异构计算的兴起。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>动态随机存取存储器 (DRAM) - 容量的胜利</strong></p>
-                <ul>
-                <li>DRAM的演进主要体现在容量上。其容量大约每2-3年翻一番。</li>
-                <li><strong>设计权衡</strong>：DRAM的设计目标首要在于<strong>高密度和低成本</strong>，这使得其单个存储单元结构简单（一个晶体管+一个电容）。但这种结构的代价是速度相对较慢，并且需要不断刷新以维持数据。DRAM的速度（延迟）改进远远落后于其容量改进。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>闪存 (Semiconductor Flash) - 非易失性存储的革命</strong></p>
-                <ul>
-                <li>作为一种EEPROM，闪存（特别是NAND Flash）以其<strong>非易失性</strong>（断电不丢数据）、<strong>高密度</strong>和<strong>比DRAM低得多的成本</strong>（每比特便宜8-10倍），成为了移动设备和固态硬盘（SSD）的标准存储介质。其容量增长速度与DRAM类似，大约每两年翻一番。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>磁性磁盘 (Magnetic Disk) - 冷数据的基石</strong></p>
-                <ul>
-                <li>在2011年之前，磁盘的存储密度也曾经历过高速增长。但近年来，其增长率已降至每年5%以下。</li>
-                <li><strong>设计权衡</strong>：磁盘的优势在于其<strong>极致的每比特成本</strong>（比闪存便宜8-10倍，比DRAM便宜200-300倍），这使其成为服务器和数据中心存储大量“冷数据”的无可替代的选择。但它的性能，尤其是延迟，是所有存储介质中最差的。</li>
-                </ul>
-                </li>
-                </ol>
-                <h4 id="52-%E6%80%A7%E8%83%BD%E8%B6%8B%E5%8A%BF%E7%9A%84%E6%A0%B8%E5%BF%83%E7%9F%9B%E7%9B%BE%E5%B8%A6%E5%AE%BD-vs-%E5%BB%B6%E8%BF%9F"><strong>5.2 性能趋势的核心矛盾：带宽 vs. 延迟</strong></h4>
-                <p>如果我们审视所有这些技术的发展，会发现一个惊人的共同规律：<strong>带宽的提升速度远远超过延迟的降低速度</strong>。</p>
-                <p><img src="../images/imagea011.png" alt="figure 11"></p>
-                <ul>
-                <li><strong>带宽/吞吐率 (Bandwidth/Throughput)</strong>：单位时间内完成的工作总量。</li>
-                <li><strong>延迟/响应时间 (Latency/Response Time)</strong>：完成单个事件所需的时间。</li>
-                </ul>
-                <p><strong>为什么会这样？</strong>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%841-2%E8%B6%8B%E5%8A%BF%E9%87%8F%E5%8C%96%E4%B8%8E%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99">计算机体系结构1-2:趋势、量化与设计原则</h1>
+<h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E9%A9%B1%E5%8A%A8%E6%9E%B6%E6%9E%84%E6%BC%94%E8%BF%9B%E7%9A%84%E6%8A%80%E6%9C%AF%E8%B6%8B%E5%8A%BF"><strong>第五部分：驱动架构演进的技术趋势</strong></h3>
+<p>架构师并非在真空中进行设计，我们所有的奇思妙想都必须建立在坚实的物理和技术基础之上。技术的演进速度和方向，决定了我们设计空间的边界。</p>
+<h4 id="51-%E5%8D%8A%E5%AF%BC%E4%BD%93%E6%8A%80%E6%9C%AF%E7%9A%84%E6%BC%94%E8%BF%9B"><strong>5.1 半导体技术的演进</strong></h4>
+<p>计算机系统由五大关键技术构成：集成电路逻辑、DRAM、闪存、磁盘和网络。它们的发展速度并不均衡，这种不均衡恰恰是架构师面临的最大挑战和机遇。</p>
+<ol>
+<li>
+<p><strong>集成电路逻辑 (Integrated Circuit Logic) - 摩尔定律的遗产</strong></p>
+<ul>
+<li><strong>历史</strong>：摩尔定律预测，芯片上集成的晶体管数量大约每18-24个月翻一番。这一定律在长达近50年的时间里，以惊人的准确性推动了整个行业的发展，带来了每年40%-55%的晶体管数量增长。
+                <img alt="figure 10" src="../images/imagea010.png"/></li>
+<li><strong>现状</strong>：大约在2015年后，摩尔定律的指数增长效应开始显著放缓。虽然工艺节点（Feature Size）仍在缩小（如5nm, 3nm），但成本的增加和物理极限的挑战使得单纯依靠晶体管数量翻倍来驱动性能提升的时代已经结束。</li>
+<li><strong>架构师的启示</strong>：我们不能再指望“下一代工艺会自动带来性能提升”。设计的重点必须从利用“免费”的晶体管，转向<strong>如何更聪明地利用有限的晶体管和功耗预算</strong>。这直接催生了专用加速器（如TPU、NPU）和异构计算的兴起。</li>
+</ul>
+</li>
+<li>
+<p><strong>动态随机存取存储器 (DRAM) - 容量的胜利</strong></p>
+<ul>
+<li>DRAM的演进主要体现在容量上。其容量大约每2-3年翻一番。</li>
+<li><strong>设计权衡</strong>：DRAM的设计目标首要在于<strong>高密度和低成本</strong>，这使得其单个存储单元结构简单（一个晶体管+一个电容）。但这种结构的代价是速度相对较慢，并且需要不断刷新以维持数据。DRAM的速度（延迟）改进远远落后于其容量改进。</li>
+</ul>
+</li>
+<li>
+<p><strong>闪存 (Semiconductor Flash) - 非易失性存储的革命</strong></p>
+<ul>
+<li>作为一种EEPROM，闪存（特别是NAND Flash）以其<strong>非易失性</strong>（断电不丢数据）、<strong>高密度</strong>和<strong>比DRAM低得多的成本</strong>（每比特便宜8-10倍），成为了移动设备和固态硬盘（SSD）的标准存储介质。其容量增长速度与DRAM类似，大约每两年翻一番。</li>
+</ul>
+</li>
+<li>
+<p><strong>磁性磁盘 (Magnetic Disk) - 冷数据的基石</strong></p>
+<ul>
+<li>在2011年之前，磁盘的存储密度也曾经历过高速增长。但近年来，其增长率已降至每年5%以下。</li>
+<li><strong>设计权衡</strong>：磁盘的优势在于其<strong>极致的每比特成本</strong>（比闪存便宜8-10倍，比DRAM便宜200-300倍），这使其成为服务器和数据中心存储大量“冷数据”的无可替代的选择。但它的性能，尤其是延迟，是所有存储介质中最差的。</li>
+</ul>
+</li>
+</ol>
+<h4 id="52-%E6%80%A7%E8%83%BD%E8%B6%8B%E5%8A%BF%E7%9A%84%E6%A0%B8%E5%BF%83%E7%9F%9B%E7%9B%BE%E5%B8%A6%E5%AE%BD-vs-%E5%BB%B6%E8%BF%9F"><strong>5.2 性能趋势的核心矛盾：带宽 vs. 延迟</strong></h4>
+<p>如果我们审视所有这些技术的发展，会发现一个惊人的共同规律：<strong>带宽的提升速度远远超过延迟的降低速度</strong>。</p>
+<p><img alt="figure 11" src="../images/imagea011.png"/></p>
+<ul>
+<li><strong>带宽/吞吐率 (Bandwidth/Throughput)</strong>：单位时间内完成的工作总量。</li>
+<li><strong>延迟/响应时间 (Latency/Response Time)</strong>：完成单个事件所需的时间。</li>
+</ul>
+<p><strong>为什么会这样？</strong>
                 这是一个深刻的设计哲学问题。<strong>提升带宽通常可以通过并行来实现</strong>：增加内存位宽、使用更多光纤、在芯片上集成更多核心。这本质上是“堆料”，在技术上相对容易。而<strong>降低延迟则需要改进技术的根本物理特性</strong>：加快晶体管开关速度、缩短信号传播距离、减少协议开销。这常常会遇到物理瓶颈，改进极其困难。</p>
-                <ul>
-                <li><strong>对微处理器和网络而言</strong>：性能是首要目标。带宽提升了数万倍，而延迟只改善了不到百倍。</li>
-                <li><strong>对内存和磁盘而言</strong>：容量是首要目标。因此其带宽提升相对温和，延迟改善更是微乎其微。</li>
-                </ul>
-                <p><strong>架构师的挑战与应对</strong>：正是这种巨大的差异（CPU越来越快，内存和磁盘相对越来越慢），催生了我们在上一讲讨论的复杂存储器层次结构（Cache）。<strong>缓存的本质，就是用高带宽、低延迟的SRAM来掩盖高延迟的DRAM和磁盘，从而弥合这种技术发展的不均衡性。</strong></p>
-                <h3 id="%E7%AC%AC%E5%85%AD%E9%83%A8%E5%88%86%E5%8A%9F%E8%80%97%E4%B8%8E%E8%83%BD%E6%BA%90%E7%9A%84%E6%8C%91%E6%88%98"><strong>第六部分：功耗与能源的挑战</strong></h3>
-                <p>如果说技术是引擎，那么功耗就是刹车。21世纪以来，<strong>功耗和能源已经取代性能，成为计算机设计的首要限制因素</strong>。</p>
-                <h4 id="61-%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8A%9F%E8%80%97%E5%A6%82%E6%AD%A4%E9%87%8D%E8%A6%81"><strong>6.1 为什么功耗如此重要？</strong></h4>
-                <ul>
-                <li><strong>对于数据中心</strong>：功耗直接等同于<strong>运营成本</strong>。电费和为服务器散热的费用是巨大开销。</li>
-                <li><strong>对于移动设备</strong>：功耗决定了<strong>电池续航</strong>，这是用户体验的核心。</li>
-                <li><strong>对于所有设备</strong>：功耗最终转化为<strong>热量</strong>。散热系统的成本、体积和噪音都是设计的关键考量。无法散出的热量会导致芯片过热、性能下降甚至永久性损坏。</li>
-                </ul>
-                <h4 id="62-%E5%8A%9F%E8%80%97%E7%9A%84%E6%9D%A5%E6%BA%90%E5%8A%A8%E6%80%81%E4%B8%8E%E9%9D%99%E6%80%81"><strong>6.2 功耗的来源：动态与静态</strong></h4>
-                <p>芯片的功耗主要来自两部分：</p>
-                <ol>
-                <li>
-                <p><strong>动态功耗 (Dynamic Power)</strong>：来自于晶体管的开关动作（0变1或1变0）。这是过去主要的功耗来源。
+<ul>
+<li><strong>对微处理器和网络而言</strong>：性能是首要目标。带宽提升了数万倍，而延迟只改善了不到百倍。</li>
+<li><strong>对内存和磁盘而言</strong>：容量是首要目标。因此其带宽提升相对温和，延迟改善更是微乎其微。</li>
+</ul>
+<p><strong>架构师的挑战与应对</strong>：正是这种巨大的差异（CPU越来越快，内存和磁盘相对越来越慢），催生了我们在上一讲讨论的复杂存储器层次结构（Cache）。<strong>缓存的本质，就是用高带宽、低延迟的SRAM来掩盖高延迟的DRAM和磁盘，从而弥合这种技术发展的不均衡性。</strong></p>
+<h3 id="%E7%AC%AC%E5%85%AD%E9%83%A8%E5%88%86%E5%8A%9F%E8%80%97%E4%B8%8E%E8%83%BD%E6%BA%90%E7%9A%84%E6%8C%91%E6%88%98"><strong>第六部分：功耗与能源的挑战</strong></h3>
+<p>如果说技术是引擎，那么功耗就是刹车。21世纪以来，<strong>功耗和能源已经取代性能，成为计算机设计的首要限制因素</strong>。</p>
+<h4 id="61-%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8A%9F%E8%80%97%E5%A6%82%E6%AD%A4%E9%87%8D%E8%A6%81"><strong>6.1 为什么功耗如此重要？</strong></h4>
+<ul>
+<li><strong>对于数据中心</strong>：功耗直接等同于<strong>运营成本</strong>。电费和为服务器散热的费用是巨大开销。</li>
+<li><strong>对于移动设备</strong>：功耗决定了<strong>电池续航</strong>，这是用户体验的核心。</li>
+<li><strong>对于所有设备</strong>：功耗最终转化为<strong>热量</strong>。散热系统的成本、体积和噪音都是设计的关键考量。无法散出的热量会导致芯片过热、性能下降甚至永久性损坏。</li>
+</ul>
+<h4 id="62-%E5%8A%9F%E8%80%97%E7%9A%84%E6%9D%A5%E6%BA%90%E5%8A%A8%E6%80%81%E4%B8%8E%E9%9D%99%E6%80%81"><strong>6.2 功耗的来源：动态与静态</strong></h4>
+<p>芯片的功耗主要来自两部分：</p>
+<ol>
+<li>
+<p><strong>动态功耗 (Dynamic Power)</strong>：来自于晶体管的开关动作（0变1或1变0）。这是过去主要的功耗来源。
                 $$
                 \text{Power}_{\text{dynamic}} \propto \frac{1}{2} \times \text{Capacitive load} \times \text{Voltage}^2 \times \text{Frequency switched}
                 $$</p>
-                <ul>
-                <li><strong>关键洞察</strong>：动态功耗与<strong>电压的平方</strong>成正比！这是架构师进行功耗优化的最有力杠杆。降低15%的电压，可以带来约28%（$1 - 0.85^2$）的能耗节省。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>静态功耗 (Static Power)</strong>：来自于晶体管的<strong>漏电流</strong>（Leakage）。即使晶体管没有在开关，它也不是完美的绝缘体，总有微小的电流流过。
+<ul>
+<li><strong>关键洞察</strong>：动态功耗与<strong>电压的平方</strong>成正比！这是架构师进行功耗优化的最有力杠杆。降低15%的电压，可以带来约28%（$1 - 0.85^2$）的能耗节省。</li>
+</ul>
+</li>
+<li>
+<p><strong>静态功耗 (Static Power)</strong>：来自于晶体管的<strong>漏电流</strong>（Leakage）。即使晶体管没有在开关，它也不是完美的绝缘体，总有微小的电流流过。
                 $
                 \text{Power}<em>{\text{static}} \propto \text{Current}</em>{\text{static}} \times \text{Voltage}
                 $</p>
+<ul>
+<li><strong>趋势</strong>：随着工艺节点越来越小，晶体管的绝缘层越来越薄，漏电流问题变得日益严重。在现代芯片中，静态功耗已占总功耗的相当大一部分（有时甚至超过50%）。</li>
+</ul>
+</li>
+</ol>
+<h4 id="63-%E5%8A%9F%E8%80%97%E4%BC%98%E5%8C%96%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6"><strong>6.3 功耗优化的设计哲学</strong></h4>
+<p>面对功耗墙，架构师发展出了一系列精妙的节能技术：</p>
+<ol>
+<li><strong>无为而治 (Do Nothing Well)</strong>：一个最简单的哲理是，不工作的部件就不应该耗电。<strong>时钟门控 (Clock Gating)</strong> 技术可以关闭芯片中处于空闲状态模块的时钟信号，从而消除这部分的动态功耗。</li>
+<li><strong>动态电压频率调整 (DVFS - Dynamic Voltage-Frequency Scaling)</strong>：系统根据当前的负载动态调整CPU的工作电压和频率。负载低时，降低电压和频率，可以大幅节省功耗；负载高时，再恢复到高性能状态。
                 <ul>
-                <li><strong>趋势</strong>：随着工艺节点越来越小，晶体管的绝缘层越来越薄，漏电流问题变得日益严重。在现代芯片中，静态功耗已占总功耗的相当大一部分（有时甚至超过50%）。</li>
-                </ul>
-                </li>
-                </ol>
-                <h4 id="63-%E5%8A%9F%E8%80%97%E4%BC%98%E5%8C%96%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6"><strong>6.3 功耗优化的设计哲学</strong></h4>
-                <p>面对功耗墙，架构师发展出了一系列精妙的节能技术：</p>
-                <ol>
-                <li><strong>无为而治 (Do Nothing Well)</strong>：一个最简单的哲理是，不工作的部件就不应该耗电。<strong>时钟门控 (Clock Gating)</strong> 技术可以关闭芯片中处于空闲状态模块的时钟信号，从而消除这部分的动态功耗。</li>
-                <li><strong>动态电压频率调整 (DVFS - Dynamic Voltage-Frequency Scaling)</strong>：系统根据当前的负载动态调整CPU的工作电压和频率。负载低时，降低电压和频率，可以大幅节省功耗；负载高时，再恢复到高性能状态。
-                <ul>
-                <li><strong>一个重要的辨析</strong>：对于一个固定的任务，<strong>单纯降低频率可以降低功率，但不能节省总能量</strong>。因为功率下降的同时，执行时间也相应延长，两者的乘积（能量）不变。DVFS之所以能节省能量，是因为它同时降低了电压。</li>
-                </ul>
-                </li>
-                <li><strong>为典型场景设计 (Design for Typical Case)</strong>：大部分时间里，电脑都不是满负荷运行的。因此，内存和存储设备都设计了多种低功耗模式（睡眠、休眠）。</li>
-                <li><strong>短时超频 (Turbo Mode / Overclocking)</strong>：利用芯片的<strong>热容</strong>。在短时间内，允许芯片以超过其额定TDP（热设计功耗）的更高频率运行，只要其温度还没达到上限。一旦温度过高，再降回正常频率。这可以在不改变散热设计的前提下，有效提升短时任务的响应速度。</li>
-                <li><strong>奔向停机 (Race-to-Halt)</strong>：这是一个反直觉的系统级节能策略。与其用一个低功耗但慢的处理器长时间工作，不如用一个高功耗但快的处理器迅速完成任务，然后让整个系统（包括内存、屏幕等其他耗电大户）进入深度睡眠状态。在很多场景下，后者消耗的总能量更少。</li>
-                </ol>
-                <h3 id="%E7%AC%AC%E4%B8%83%E9%83%A8%E5%88%86%E6%88%90%E6%9C%AC%E7%9A%84%E8%80%83%E9%87%8F"><strong>第七部分：成本的考量</strong></h3>
-                <p>成本是计算机设计中最现实的约束。一个无法以市场可接受的价格制造出来的设计，即使再完美也毫无意义。</p>
-                <h4 id="71-%E6%88%90%E6%9C%AC%E7%9A%84%E5%8A%A8%E6%80%81%E6%80%A7"><strong>7.1 成本的动态性</strong></h4>
-                <ul>
-                <li><strong>学习曲线 (Learning Curve)</strong>：任何制造工艺随着时间推移都会变得更成熟，从而降低成本。</li>
-                <li><strong>产量 (Volume)</strong>：产量每翻一番，单位成本大约会下降10%。这就是为什么高产量的消费级芯片可以做到非常便宜。</li>
-                <li><strong>商品化 (Commoditization)</strong>：当多种产品实现相同功能时（如PC主板），激烈的竞争会进一步压低价格。</li>
-                </ul>
-                <h4 id="72-%E9%9B%86%E6%88%90%E7%94%B5%E8%B7%AF%E7%9A%84%E6%88%90%E6%9C%AC%E6%9E%84%E6%88%90"><strong>7.2 集成电路的成本构成</strong></h4>
-                <p>芯片的制造成本主要由单个裸片（Die）的成本决定。
+<li><strong>一个重要的辨析</strong>：对于一个固定的任务，<strong>单纯降低频率可以降低功率，但不能节省总能量</strong>。因为功率下降的同时，执行时间也相应延长，两者的乘积（能量）不变。DVFS之所以能节省能量，是因为它同时降低了电压。</li>
+</ul>
+</li>
+<li><strong>为典型场景设计 (Design for Typical Case)</strong>：大部分时间里，电脑都不是满负荷运行的。因此，内存和存储设备都设计了多种低功耗模式（睡眠、休眠）。</li>
+<li><strong>短时超频 (Turbo Mode / Overclocking)</strong>：利用芯片的<strong>热容</strong>。在短时间内，允许芯片以超过其额定TDP（热设计功耗）的更高频率运行，只要其温度还没达到上限。一旦温度过高，再降回正常频率。这可以在不改变散热设计的前提下，有效提升短时任务的响应速度。</li>
+<li><strong>奔向停机 (Race-to-Halt)</strong>：这是一个反直觉的系统级节能策略。与其用一个低功耗但慢的处理器长时间工作，不如用一个高功耗但快的处理器迅速完成任务，然后让整个系统（包括内存、屏幕等其他耗电大户）进入深度睡眠状态。在很多场景下，后者消耗的总能量更少。</li>
+</ol>
+<h3 id="%E7%AC%AC%E4%B8%83%E9%83%A8%E5%88%86%E6%88%90%E6%9C%AC%E7%9A%84%E8%80%83%E9%87%8F"><strong>第七部分：成本的考量</strong></h3>
+<p>成本是计算机设计中最现实的约束。一个无法以市场可接受的价格制造出来的设计，即使再完美也毫无意义。</p>
+<h4 id="71-%E6%88%90%E6%9C%AC%E7%9A%84%E5%8A%A8%E6%80%81%E6%80%A7"><strong>7.1 成本的动态性</strong></h4>
+<ul>
+<li><strong>学习曲线 (Learning Curve)</strong>：任何制造工艺随着时间推移都会变得更成熟，从而降低成本。</li>
+<li><strong>产量 (Volume)</strong>：产量每翻一番，单位成本大约会下降10%。这就是为什么高产量的消费级芯片可以做到非常便宜。</li>
+<li><strong>商品化 (Commoditization)</strong>：当多种产品实现相同功能时（如PC主板），激烈的竞争会进一步压低价格。</li>
+</ul>
+<h4 id="72-%E9%9B%86%E6%88%90%E7%94%B5%E8%B7%AF%E7%9A%84%E6%88%90%E6%9C%AC%E6%9E%84%E6%88%90"><strong>7.2 集成电路的成本构成</strong></h4>
+<p>芯片的制造成本主要由单个裸片（Die）的成本决定。
                 $$
                 \text{Cost of die} = \frac{\text{Cost of wafer}}{\text{Dies per wafer} \times \text{Die yield}}
                 $$</p>
-                <ol>
-                <li>
-                <p><strong>每片晶圆的裸片数量 (Dies per wafer)</strong>：
+<ol>
+<li>
+<p><strong>每片晶圆的裸片数量 (Dies per wafer)</strong>：
                 $$
                 \text{Dies per wafer} \approx \frac{\pi \times (\text{Wafer diameter}/2)^2}{\text{Die area}} - \frac{\pi \times \text{Wafer diameter}}{\sqrt{2 \times \text{Die area}}}
                 $$</p>
-                <ul>
-                <li><strong>核心洞察</strong>：裸片数量与裸片面积（Die area）大致成反比。<strong>芯片面积越大，能切割出的数量就越少，成本越高</strong>。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>裸片良率 (Die yield)</strong>：指一张晶圆上能够正常工作的裸片所占的比例。这是成本模型中最关键、也最敏感的因素。
+<ul>
+<li><strong>核心洞察</strong>：裸片数量与裸片面积（Die area）大致成反比。<strong>芯片面积越大，能切割出的数量就越少，成本越高</strong>。</li>
+</ul>
+</li>
+<li>
+<p><strong>裸片良率 (Die yield)</strong>：指一张晶圆上能够正常工作的裸片所占的比例。这是成本模型中最关键、也最敏感的因素。
                 $$
                 \text{Die yield} = \text{Wafer yield} \times (1 + \frac{\text{Defects per unit area} \times \text{Die area}}{\alpha})^{-\alpha}
                 $$</p>
+<ul>
+<li><strong>核心洞察</strong>：良率与裸片面积<strong>高度负相关</strong>。一个大的芯片不仅切割数量少，而且它“撞上”一个制造缺陷的概率也更大，导致其良率更低。这两个因素叠加，使得<strong>大芯片的成本会呈指数级增长</strong>。</li>
+<li><code>α</code> 是与工艺复杂度相关的经验常数，通常在4.0左右。</li>
+</ul>
+</li>
+</ol>
+<p><strong>架构师的应对策略</strong>：</p>
+<ul>
+<li><strong>控制芯片面积</strong>：在设计时，架构师会极力避免不必要的复杂性以减小芯片面积。</li>
+<li><strong>模块化与冗余</strong>：现代大型芯片（如GPU和服务器CPU）通常采用模块化设计。如果一个模块有缺陷，可以屏蔽它，将芯片降级出售（如12核CPU屏蔽2个坏核心后作为10核CPU卖）。内存芯片（DRAM/SRAM）内部会集成备用的行和列，用于替换有缺陷的存储单元，从而大大提高良率。</li>
+</ul>
+<h4 id="73-%E6%88%90%E6%9C%AC-vs-%E4%BB%B7%E6%A0%BC-%E4%B8%8E-%E8%B5%84%E6%9C%AC%E6%94%AF%E5%87%BA-vs-%E8%BF%90%E8%90%A5%E6%94%AF%E5%87%BA"><strong>7.3 成本 vs. 价格 与 资本支出 vs. 运营支出</strong></h4>
+<ul>
+<li><strong>成本 (Cost)</strong> 是制造成本，<strong>价格 (Price)</strong> 是销售价格。<code>价格 = 成本 + 利润</code>。利润中包含了研发、市场、销售等费用。</li>
+<li>对于大型数据中心，我们还需要区分：
                 <ul>
-                <li><strong>核心洞察</strong>：良率与裸片面积<strong>高度负相关</strong>。一个大的芯片不仅切割数量少，而且它“撞上”一个制造缺陷的概率也更大，导致其良率更低。这两个因素叠加，使得<strong>大芯片的成本会呈指数级增长</strong>。</li>
-                <li><code>α</code> 是与工艺复杂度相关的经验常数，通常在4.0左右。</li>
-                </ul>
-                </li>
-                </ol>
-                <p><strong>架构师的应对策略</strong>：</p>
+<li><strong>资本支出 (CAPEX)</strong>：购买服务器、网络设备等硬件的一次性投入。</li>
+<li><strong>运营支出 (OPEX)</strong>：维持数据中心运行的持续性开销，主要是电费和人力成本。</li>
+<li><strong>设计趋势</strong>：现代数据中心设计越来越关注<strong>总体拥有成本 (TCO)</strong>，即CAPEX和OPEX之和。有时，购买更贵但更节能的服务器，从长期来看可能是更经济的选择。</li>
+</ul>
+</li>
+</ul>
+<h3 id="%E7%AC%AC%E5%85%AB%E9%83%A8%E5%88%86%E5%8F%AF%E9%9D%A0%E6%80%A7%E4%B8%8E%E5%8F%AF%E4%BE%9D%E8%B5%96%E6%80%A7"><strong>第八部分：可靠性与可依赖性</strong></h3>
+<p>随着晶体管尺寸缩小到纳米级别，以及系统日益复杂，单个组件发生故障的概率在增加。如何构建一个在面对故障时仍能提供正确服务的系统？这就是<strong>可依赖性 (Dependability)</strong> 设计要解决的问题。</p>
+<h4 id="81-%E6%95%85%E9%9A%9C%E9%94%99%E8%AF%AF%E4%B8%8E%E5%A4%B1%E6%95%88%E7%9A%84%E8%BF%9E%E9%94%81%E5%8F%8D%E5%BA%94"><strong>8.1 故障、错误与失效的连锁反应</strong></h4>
+<p>这三个概念的区分至关重要：</p>
+<ul>
+<li><strong>故障 (Fault)</strong>：系统的物理缺陷或设计上的 bug。例如，一段代码里 <code>60 + 35 = 90</code> 是错误的。这是一个<strong>潜在</strong>的、静态的问题。</li>
+<li><strong>错误 (Error)</strong>：是故障被<strong>激活</strong>后的结果，导致系统内部状态偏离了正确值。例如，程序执行了 <code>add(60, 35)</code>，得到了错误的结果90。</li>
+<li><strong>失效 (Failure)</strong>：是错误<strong>外显</strong>出来，导致系统提供的服务不符合其规约。例如，由于计算结果是90，学生的最终绩点被错误地判定为4.5，而不是正确的4.0。</li>
+</ul>
+<p><strong>关键点</strong>：故障不一定会导致错误（如果错误代码段从未被执行），错误也不一定会导致失效（如果错误的中间结果在后续计算中被纠正或未使用）。可靠性设计的核心，就是<strong>切断这个连锁反应</strong>。</p>
+<h4 id="82-%E9%87%8F%E5%8C%96%E5%8F%AF%E9%9D%A0%E6%80%A7"><strong>8.2 量化可靠性</strong></h4>
+<ul>
+<li><strong>模块可靠性 (Reliability)</strong>：衡量系统能<strong>持续</strong>提供正确服务的能力。
                 <ul>
-                <li><strong>控制芯片面积</strong>：在设计时，架构师会极力避免不必要的复杂性以减小芯片面积。</li>
-                <li><strong>模块化与冗余</strong>：现代大型芯片（如GPU和服务器CPU）通常采用模块化设计。如果一个模块有缺陷，可以屏蔽它，将芯片降级出售（如12核CPU屏蔽2个坏核心后作为10核CPU卖）。内存芯片（DRAM/SRAM）内部会集成备用的行和列，用于替换有缺陷的存储单元，从而大大提高良率。</li>
-                </ul>
-                <h4 id="73-%E6%88%90%E6%9C%AC-vs-%E4%BB%B7%E6%A0%BC-%E4%B8%8E-%E8%B5%84%E6%9C%AC%E6%94%AF%E5%87%BA-vs-%E8%BF%90%E8%90%A5%E6%94%AF%E5%87%BA"><strong>7.3 成本 vs. 价格 与 资本支出 vs. 运营支出</strong></h4>
-                <ul>
-                <li><strong>成本 (Cost)</strong> 是制造成本，<strong>价格 (Price)</strong> 是销售价格。<code>价格 = 成本 + 利润</code>。利润中包含了研发、市场、销售等费用。</li>
-                <li>对于大型数据中心，我们还需要区分：
-                <ul>
-                <li><strong>资本支出 (CAPEX)</strong>：购买服务器、网络设备等硬件的一次性投入。</li>
-                <li><strong>运营支出 (OPEX)</strong>：维持数据中心运行的持续性开销，主要是电费和人力成本。</li>
-                <li><strong>设计趋势</strong>：现代数据中心设计越来越关注<strong>总体拥有成本 (TCO)</strong>，即CAPEX和OPEX之和。有时，购买更贵但更节能的服务器，从长期来看可能是更经济的选择。</li>
-                </ul>
-                </li>
-                </ul>
-                <h3 id="%E7%AC%AC%E5%85%AB%E9%83%A8%E5%88%86%E5%8F%AF%E9%9D%A0%E6%80%A7%E4%B8%8E%E5%8F%AF%E4%BE%9D%E8%B5%96%E6%80%A7"><strong>第八部分：可靠性与可依赖性</strong></h3>
-                <p>随着晶体管尺寸缩小到纳米级别，以及系统日益复杂，单个组件发生故障的概率在增加。如何构建一个在面对故障时仍能提供正确服务的系统？这就是<strong>可依赖性 (Dependability)</strong> 设计要解决的问题。</p>
-                <h4 id="81-%E6%95%85%E9%9A%9C%E9%94%99%E8%AF%AF%E4%B8%8E%E5%A4%B1%E6%95%88%E7%9A%84%E8%BF%9E%E9%94%81%E5%8F%8D%E5%BA%94"><strong>8.1 故障、错误与失效的连锁反应</strong></h4>
-                <p>这三个概念的区分至关重要：</p>
-                <ul>
-                <li><strong>故障 (Fault)</strong>：系统的物理缺陷或设计上的 bug。例如，一段代码里 <code>60 + 35 = 90</code> 是错误的。这是一个<strong>潜在</strong>的、静态的问题。</li>
-                <li><strong>错误 (Error)</strong>：是故障被<strong>激活</strong>后的结果，导致系统内部状态偏离了正确值。例如，程序执行了 <code>add(60, 35)</code>，得到了错误的结果90。</li>
-                <li><strong>失效 (Failure)</strong>：是错误<strong>外显</strong>出来，导致系统提供的服务不符合其规约。例如，由于计算结果是90，学生的最终绩点被错误地判定为4.5，而不是正确的4.0。</li>
-                </ul>
-                <p><strong>关键点</strong>：故障不一定会导致错误（如果错误代码段从未被执行），错误也不一定会导致失效（如果错误的中间结果在后续计算中被纠正或未使用）。可靠性设计的核心，就是<strong>切断这个连锁反应</strong>。</p>
-                <h4 id="82-%E9%87%8F%E5%8C%96%E5%8F%AF%E9%9D%A0%E6%80%A7"><strong>8.2 量化可靠性</strong></h4>
-                <ul>
-                <li><strong>模块可靠性 (Reliability)</strong>：衡量系统能<strong>持续</strong>提供正确服务的能力。
-                <ul>
-                <li><strong>MTTF (Mean Time To Failure)</strong>：平均无故障时间。</li>
-                <li><strong>MTTR (Mean Time To Repair)</strong>：平均修复时间。</li>
-                <li><strong>MTBF (Mean Time Between Failures)</strong>：平均故障间隔时间。 $\text{MTBF} = \text{MTTF} + \text{MTTR}$。</li>
-                </ul>
-                </li>
-                <li><strong>模块可用性 (Availability)</strong>：衡量系统在任意时刻能够正常工作的概率。
+<li><strong>MTTF (Mean Time To Failure)</strong>：平均无故障时间。</li>
+<li><strong>MTTR (Mean Time To Repair)</strong>：平均修复时间。</li>
+<li><strong>MTBF (Mean Time Between Failures)</strong>：平均故障间隔时间。 $\text{MTBF} = \text{MTTF} + \text{MTTR}$。</li>
+</ul>
+</li>
+<li><strong>模块可用性 (Availability)</strong>：衡量系统在任意时刻能够正常工作的概率。
                 $$
                 \text{Module Availability} = \frac{\text{MTTF}}{\text{MTTF} + \text{MTTR}}
                 $$
                 <ul>
-                <li>高可用性系统追求的是多个“9”，例如“5个9”的可用性意味着一年中宕机时间不超过5.26分钟。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="83-%E5%8F%AF%E9%9D%A0%E6%80%A7%E8%AE%BE%E8%AE%A1%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3%E5%86%97%E4%BD%99-redundancy"><strong>8.3 可靠性设计的核心思想：冗余 (Redundancy)</strong></h4>
-                <p>“不要把所有鸡蛋放在一个篮子里”。冗余是构建可靠系统的唯一途径。</p>
+<li>高可用性系统追求的是多个“9”，例如“5个9”的可用性意味着一年中宕机时间不超过5.26分钟。</li>
+</ul>
+</li>
+</ul>
+<h4 id="83-%E5%8F%AF%E9%9D%A0%E6%80%A7%E8%AE%BE%E8%AE%A1%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3%E5%86%97%E4%BD%99-redundancy"><strong>8.3 可靠性设计的核心思想：冗余 (Redundancy)</strong></h4>
+<p>“不要把所有鸡蛋放在一个篮子里”。冗余是构建可靠系统的唯一途径。</p>
+<ul>
+<li><strong>空间冗余</strong>：部署多个相同的组件。一个坏了，另一个可以顶上。</li>
+<li><strong>时间冗余</strong>：重复执行一次操作。如果第一次因为瞬时干扰（如宇宙射线）而出错，第二次很可能就是对的。</li>
+<li><strong>信息冗余</strong>：增加额外的数据位（如ECC、奇偶校验），用于检测和纠正数据错误。</li>
+</ul>
+<h4 id="84-%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%E7%A3%81%E7%9B%98%E9%98%B5%E5%88%97-raid"><strong>8.4 案例研究：磁盘阵列 RAID</strong></h4>
+<p>RAID（廉价磁盘冗余阵列）是冗余设计思想的经典范例。它将多个独立的磁盘组合起来，以提供比单个磁盘更高的性能、更大的容量和更强的可靠性。</p>
+<ul>
+<li><strong>RAID 0 (条带化)</strong>：只为性能，不提供冗余。数据被分散写入多个磁盘，可以并行读写，吞吐率很高。但任何一个磁盘损坏，所有数据都会丢失。</li>
+<li><strong>RAID 1 (镜像)</strong>：最简单的冗余。将数据完整地复制到另一个磁盘。提供100%的数据冗余，但代价是50%的存储空间浪费。</li>
+<li><strong>RAID 3/4 (奇偶校验)</strong>：更聪明的方法。使用一个专门的磁盘存储所有数据盘的奇偶校验信息。如果一个数据盘损坏，可以通过其他数据盘和校验盘的信息，像解方程一样恢复出丢失的数据。RAID 4相比RAID 3以数据块为单位，更适合小文件读写。
                 <ul>
-                <li><strong>空间冗余</strong>：部署多个相同的组件。一个坏了，另一个可以顶上。</li>
-                <li><strong>时间冗余</strong>：重复执行一次操作。如果第一次因为瞬时干扰（如宇宙射线）而出错，第二次很可能就是对的。</li>
-                <li><strong>信息冗余</strong>：增加额外的数据位（如ECC、奇偶校验），用于检测和纠正数据错误。</li>
-                </ul>
-                <h4 id="84-%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%E7%A3%81%E7%9B%98%E9%98%B5%E5%88%97-raid"><strong>8.4 案例研究：磁盘阵列 RAID</strong></h4>
-                <p>RAID（廉价磁盘冗余阵列）是冗余设计思想的经典范例。它将多个独立的磁盘组合起来，以提供比单个磁盘更高的性能、更大的容量和更强的可靠性。</p>
-                <ul>
-                <li><strong>RAID 0 (条带化)</strong>：只为性能，不提供冗余。数据被分散写入多个磁盘，可以并行读写，吞吐率很高。但任何一个磁盘损坏，所有数据都会丢失。</li>
-                <li><strong>RAID 1 (镜像)</strong>：最简单的冗余。将数据完整地复制到另一个磁盘。提供100%的数据冗余，但代价是50%的存储空间浪费。</li>
-                <li><strong>RAID 3/4 (奇偶校验)</strong>：更聪明的方法。使用一个专门的磁盘存储所有数据盘的奇偶校验信息。如果一个数据盘损坏，可以通过其他数据盘和校验盘的信息，像解方程一样恢复出丢失的数据。RAID 4相比RAID 3以数据块为单位，更适合小文件读写。
-                <ul>
-                <li><strong>设计瓶颈</strong>：所有写操作都需要更新同一个校验盘，导致<strong>校验盘成为性能瓶颈</strong>。</li>
-                </ul>
-                </li>
-                <li><strong>RAID 5 (分布式奇偶校验)</strong>：对RAID 4的完美改进。它将校验信息<strong>分散存储</strong>在所有磁盘上，消除了单一校验盘的瓶颈。这是目前应用最广泛的RAID级别之一。</li>
-                <li><strong>RAID 6 (双重校验)</strong>：随着磁盘容量越来越大，在单盘损坏后进行数据重构（Rebuild）需要很长时间，期间如果再坏一块盘，数据就会丢失。RAID 6通过增加第二种独立的校验信息（如里德-所罗门码），可以容忍<strong>任意两块磁盘同时损坏</strong>，提供了更高的可靠性。</li>
-                </ul>
-                <h3 id="%E7%AC%AC%E4%B9%9D%E9%83%A8%E5%88%86%E6%80%A7%E8%83%BD%E7%9A%84%E6%B5%8B%E9%87%8F%E4%B8%8E%E6%8A%A5%E5%91%8A"><strong>第九部分：性能的测量与报告</strong></h3>
-                <p>我们所有的设计和优化，最终都需要一个客观的标尺来衡量。如何科学地测量和比较计算机的性能？</p>
-                <h4 id="91-%E6%80%A7%E8%83%BD%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%AE%9A%E4%B9%89"><strong>9.1 性能的基本定义</strong></h4>
-                <p>对于一个给定的任务：
+<li><strong>设计瓶颈</strong>：所有写操作都需要更新同一个校验盘，导致<strong>校验盘成为性能瓶颈</strong>。</li>
+</ul>
+</li>
+<li><strong>RAID 5 (分布式奇偶校验)</strong>：对RAID 4的完美改进。它将校验信息<strong>分散存储</strong>在所有磁盘上，消除了单一校验盘的瓶颈。这是目前应用最广泛的RAID级别之一。</li>
+<li><strong>RAID 6 (双重校验)</strong>：随着磁盘容量越来越大，在单盘损坏后进行数据重构（Rebuild）需要很长时间，期间如果再坏一块盘，数据就会丢失。RAID 6通过增加第二种独立的校验信息（如里德-所罗门码），可以容忍<strong>任意两块磁盘同时损坏</strong>，提供了更高的可靠性。</li>
+</ul>
+<h3 id="%E7%AC%AC%E4%B9%9D%E9%83%A8%E5%88%86%E6%80%A7%E8%83%BD%E7%9A%84%E6%B5%8B%E9%87%8F%E4%B8%8E%E6%8A%A5%E5%91%8A"><strong>第九部分：性能的测量与报告</strong></h3>
+<p>我们所有的设计和优化，最终都需要一个客观的标尺来衡量。如何科学地测量和比较计算机的性能？</p>
+<h4 id="91-%E6%80%A7%E8%83%BD%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%AE%9A%E4%B9%89"><strong>9.1 性能的基本定义</strong></h4>
+<p>对于一个给定的任务：
                 $$
                 \text{Performance} = \frac{1}{\text{Execution Time}}
                 $$
@@ -253,81 +253,107 @@
                 $$
                 n = \frac{\text{Execution time}_Y}{\text{Execution time}_X} = \frac{\text{Performance}_X}{\text{Performance}_Y}
                 $$</p>
+<ul>
+<li><strong>执行时间 (Execution Time) vs. CPU时间 (CPU Time)</strong>
+<ul>
+<li><strong>执行时间/墙上时钟时间 (Elapsed/Wall-clock Time)</strong>：用户从任务开始到结束所感知的总时间，包括了CPU计算、I/O等待、操作系统开销等。这是衡量用户体验的最终指标。</li>
+<li><strong>CPU时间</strong>：仅指CPU真正在为该任务计算所花费的时间。这是衡量CPU自身性能的指标。</li>
+</ul>
+</li>
+</ul>
+<h4 id="92-%E6%80%A7%E8%83%BD%E8%AF%84%E6%B5%8B%E7%9A%84%E5%9F%BA%E7%9F%B3%E5%9F%BA%E5%87%86%E6%B5%8B%E8%AF%95%E7%A8%8B%E5%BA%8F-benchmarks"><strong>9.2 性能评测的基石：基准测试程序 (Benchmarks)</strong></h4>
+<p>我们不能用单一的指标（如MIPS, MFLOPS）来评价性能，因为这无法反映真实应用的复杂性。唯一科学的方法是运行<strong>真实的应用或者能够代表真实应用负载的程序</strong>。</p>
+<ul>
+<li><strong>SPEC (Standard Performance Evaluation Corporation)</strong>：最权威的CPU性能评测基准套件。
                 <ul>
-                <li><strong>执行时间 (Execution Time) vs. CPU时间 (CPU Time)</strong>
-                <ul>
-                <li><strong>执行时间/墙上时钟时间 (Elapsed/Wall-clock Time)</strong>：用户从任务开始到结束所感知的总时间，包括了CPU计算、I/O等待、操作系统开销等。这是衡量用户体验的最终指标。</li>
-                <li><strong>CPU时间</strong>：仅指CPU真正在为该任务计算所花费的时间。这是衡量CPU自身性能的指标。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="92-%E6%80%A7%E8%83%BD%E8%AF%84%E6%B5%8B%E7%9A%84%E5%9F%BA%E7%9F%B3%E5%9F%BA%E5%87%86%E6%B5%8B%E8%AF%95%E7%A8%8B%E5%BA%8F-benchmarks"><strong>9.2 性能评测的基石：基准测试程序 (Benchmarks)</strong></h4>
-                <p>我们不能用单一的指标（如MIPS, MFLOPS）来评价性能，因为这无法反映真实应用的复杂性。唯一科学的方法是运行<strong>真实的应用或者能够代表真实应用负载的程序</strong>。</p>
-                <ul>
-                <li><strong>SPEC (Standard Performance Evaluation Corporation)</strong>：最权威的CPU性能评测基准套件。
-                <ul>
-                <li><strong>SPECspeed</strong> (如 CINT2017 speed)：衡量单个任务的执行速度，关心的是<strong>响应时间</strong>。</li>
-                <li><strong>SPECrate</strong> (如 CINT2017 rate)：衡量单位时间内能完成多少个任务，关心的是<strong>吞吐率</strong>。</li>
-                </ul>
-                </li>
-                <li><strong>TPC (Transaction Processing Council)</strong>：服务器领域，特别是数据库和在线交易处理的基准测试，如TPC-C, TPC-E。</li>
-                </ul>
-                <h4 id="93-%E6%80%A7%E8%83%BD%E7%9A%84%E6%8A%A5%E5%91%8A%E4%B8%8E%E6%80%BB%E7%BB%93"><strong>9.3 性能的报告与总结</strong></h4>
-                <ul>
-                <li><strong>可复现性 (Reproducibility)</strong>：是性能报告的黄金准则。必须详细列出测试环境的所有细节（硬件配置、操作系统版本、编译器、编译选项等），以便他人能够复现你的结果。</li>
-                <li><strong>如何总结多个程序的性能？</strong>
-                <ul>
-                <li><strong>错误方法</strong>：使用算术平均值。这会不成比例地受到执行时间长的程序的影响。</li>
-                <li><strong>正确方法</strong>：使用<strong>几何平均值 (Geometric Mean)</strong>。
+<li><strong>SPECspeed</strong> (如 CINT2017 speed)：衡量单个任务的执行速度，关心的是<strong>响应时间</strong>。</li>
+<li><strong>SPECrate</strong> (如 CINT2017 rate)：衡量单位时间内能完成多少个任务，关心的是<strong>吞吐率</strong>。</li>
+</ul>
+</li>
+<li><strong>TPC (Transaction Processing Council)</strong>：服务器领域，特别是数据库和在线交易处理的基准测试，如TPC-C, TPC-E。</li>
+</ul>
+<h4 id="93-%E6%80%A7%E8%83%BD%E7%9A%84%E6%8A%A5%E5%91%8A%E4%B8%8E%E6%80%BB%E7%BB%93"><strong>9.3 性能的报告与总结</strong></h4>
+<ul>
+<li><strong>可复现性 (Reproducibility)</strong>：是性能报告的黄金准则。必须详细列出测试环境的所有细节（硬件配置、操作系统版本、编译器、编译选项等），以便他人能够复现你的结果。</li>
+<li><strong>如何总结多个程序的性能？</strong>
+<ul>
+<li><strong>错误方法</strong>：使用算术平均值。这会不成比例地受到执行时间长的程序的影响。</li>
+<li><strong>正确方法</strong>：使用<strong>几何平均值 (Geometric Mean)</strong>。
                 $$
                 \text{Geometric mean} = \sqrt[n]{\prod_{i=1}^{n} \text{sample}_i}
                 $$
                 在使用SPECRatio（将执行时间相对于一台参考机器进行归一化）进行性能比较时，几何平均值具有一个优良特性：最终的性能比率与选择哪台参考机器无关。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="94-%E5%A4%84%E7%90%86%E5%99%A8%E6%80%A7%E8%83%BD%E7%9A%84%E9%93%81%E5%BE%8B"><strong>9.4 处理器性能的“铁律”</strong></h4>
-                <p>最后，我们给出一个分解处理器性能的经典公式，它将硬件技术、组织结构和指令集/编译器联系在一起，是体系结构分析的核心工具。</p>
-                <p>$$
+</ul>
+</li>
+</ul>
+<h4 id="94-%E5%A4%84%E7%90%86%E5%99%A8%E6%80%A7%E8%83%BD%E7%9A%84%E9%93%81%E5%BE%8B"><strong>9.4 处理器性能的“铁律”</strong></h4>
+<p>最后，我们给出一个分解处理器性能的经典公式，它将硬件技术、组织结构和指令集/编译器联系在一起，是体系结构分析的核心工具。</p>
+<p>$$
                 \text{CPU time} = \text{Instruction count} \times \text{CPI} \times \text{Clock cycle time}
                 $$</p>
-                <p>或者写成：
+<p>或者写成：
                 $$
                 \text{CPU time} = \frac{\text{Instruction count} \times \text{CPI}}{\text{Clock rate}}
                 $$</p>
-                <ul>
-                <li><strong>指令数 (Instruction Count, IC)</strong>：由<strong>ISA</strong>和<strong>编译器</strong>决定。</li>
-                <li><strong>每指令周期数 (Cycles Per Instruction, CPI)</strong>：由<strong>ISA</strong>和<strong>微体系结构</strong>（如流水线效率、缓存命中率）决定。</li>
-                <li><strong>时钟周期时间 (Clock cycle time)</strong>：由<strong>硬件实现技术</strong>和<strong>微体系结构</strong>（如最长流水线级延迟）决定。</li>
-                </ul>
-                <p><strong>架构师的日常，就是在优化这三个变量的乘积</strong>。例如，RISC架构可能会增加IC，但它能显著降低CPI和时钟周期时间，从而获得总体性能的提升。</p>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<ul>
+<li><strong>指令数 (Instruction Count, IC)</strong>：由<strong>ISA</strong>和<strong>编译器</strong>决定。</li>
+<li><strong>每指令周期数 (Cycles Per Instruction, CPI)</strong>：由<strong>ISA</strong>和<strong>微体系结构</strong>（如流水线效率、缓存命中率）决定。</li>
+<li><strong>时钟周期时间 (Clock cycle time)</strong>：由<strong>硬件实现技术</strong>和<strong>微体系结构</strong>（如最长流水线级延迟）决定。</li>
+</ul>
+<p><strong>架构师的日常，就是在优化这三个变量的乘积</strong>。例如，RISC架构可能会增加IC，但它能显著降低CPI和时钟周期时间，从而获得总体性能的提升。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>数值分析14:多步法的系统构造与高阶微分方程组</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>数值分析14:多步法的系统构造与高阶微分方程组</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,234 +30,260 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E6%95%B0%E5%80%BC%E5%88%86%E6%9E%9014%E5%A4%9A%E6%AD%A5%E6%B3%95%E7%9A%84%E7%B3%BB%E7%BB%9F%E6%9E%84%E9%80%A0%E4%B8%8E%E9%AB%98%E9%98%B6%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B%E7%BB%84">数值分析14:多步法的系统构造与高阶微分方程组</h1>
-                <h3 id="%E5%BC%95%E8%A8%80%E5%A4%9A%E6%AD%A5%E6%B3%95%E7%9A%84%E5%9F%BA%E5%9B%A0%E4%B8%8E-ode-%E6%B1%82%E8%A7%A3%E7%9A%84%E5%8D%87%E7%BB%B4"><strong>引言：多步法的“基因”与 ODE 求解的“升维”</strong></h3>
-                <p>在上一讲中，我们学习了求解常微分方程（ODE）的两大主流方法族：<strong>单步法</strong>（以龙格-库塔为代表）和<strong>多步法</strong>（以 Adams 方法为代表）。我们了解到，多步法通过利用历史信息，在函数求值效率上可能优于单步法，特别是通过<strong>预测-校正</strong>策略，实现了精度、效率和稳定性的精妙平衡。</p>
-                <p>我们上一讲是从<strong>积分</strong>的角度推导多步法的，即把 $y(t_{i+1}) = y(t_i) + \int_{t_i}^{t_{i+1}} f(t,y)dt$ 中的积分项用插值多项式来近似。今天课程的第一部分，我们将从另一个更基本、更强大的视角来审视多步法：<strong>泰勒展开 (Taylor Expansion)</strong>。</p>
-                <p><strong>&quot;Derive from Taylor expansion&quot;</strong> 这个视角将为我们揭示所有线性多步法的“遗传密码”。我们将看到，任何一个形如 $w_{i+1} = \sum a_j w_{i-j} + h \sum b_j f_{i+1-j}$ 的线性多步法，其系数 ${a_j}$ 和 ${b_j}$ 都可以通过一个系统性的<strong>待定系数法</strong>来确定：将公式中的所有项在中心点 $t_i$ 处进行泰勒展开，然后匹配 $h$ 的各次幂系数，使得方法的<strong>局部截断误差 (Local Truncation Error)</strong> 达到我们想要的阶数。这个过程不仅能让我们重新推导出已知的 Adams 方法，还能创造出全新的方法族，如<strong>米尔恩 (Milne's)</strong> 方法。</p>
-                <p>课程的第二部分，我们将进行一次重要的“升维打击”。到目前为止，我们所有的讨论都局限于<strong>一阶单变量</strong>的 ODE 问题 $\frac{dy}{dt}=f(t,y)$。然而，现实世界中的绝大多数动态系统，要么由<strong>高阶微分方程</strong>描述（例如，牛顿第二定律 $F=ma$ 是一个二阶 ODE），要么由多个相互耦合的一阶 ODE 组成的<strong>方程组</strong>描述（例如，捕食者-被捕食者模型）。</p>
-                <p>我们是否需要为这些更复杂的问题重新发明一套全新的数值方法？答案是：<strong>完全不需要！</strong> 存在一个极其优美的技巧，可以将<strong>任何</strong>高阶 ODE 或 ODE 系统，转化为一个等价的<strong>一阶 ODE 系统</strong>。这意味着，我们之前辛辛苦苦学过的所有方法（欧拉、龙格-库塔、Adams 等）都可以<strong>直接</strong>应用于求解这些看似复杂得多的问题，只需将标量运算替换为向量运算即可。</p>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%A4%9A%E6%AD%A5%E6%B3%95%E7%9A%84%E6%B3%B0%E5%8B%92%E5%B1%95%E5%BC%80%E6%9E%84%E9%80%A0%E6%B3%95"><strong>第一部分：多步法的泰勒展开构造法</strong></h3>
-                <h4 id="56-ii-%E9%80%9A%E7%94%A8%E7%BA%BF%E6%80%A7%E5%A4%9A%E6%AD%A5%E6%B3%95"><strong>5.6 (II) 通用线性多步法</strong></h4>
-                <p>一个通用的 $m$ 步线性多步法 (Linear Multistep Method, LMM) 具有如下形式：
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E6%95%B0%E5%80%BC%E5%88%86%E6%9E%9014%E5%A4%9A%E6%AD%A5%E6%B3%95%E7%9A%84%E7%B3%BB%E7%BB%9F%E6%9E%84%E9%80%A0%E4%B8%8E%E9%AB%98%E9%98%B6%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B%E7%BB%84">数值分析14:多步法的系统构造与高阶微分方程组</h1>
+<h3 id="%E5%BC%95%E8%A8%80%E5%A4%9A%E6%AD%A5%E6%B3%95%E7%9A%84%E5%9F%BA%E5%9B%A0%E4%B8%8E-ode-%E6%B1%82%E8%A7%A3%E7%9A%84%E5%8D%87%E7%BB%B4"><strong>引言：多步法的“基因”与 ODE 求解的“升维”</strong></h3>
+<p>在上一讲中，我们学习了求解常微分方程（ODE）的两大主流方法族：<strong>单步法</strong>（以龙格-库塔为代表）和<strong>多步法</strong>（以 Adams 方法为代表）。我们了解到，多步法通过利用历史信息，在函数求值效率上可能优于单步法，特别是通过<strong>预测-校正</strong>策略，实现了精度、效率和稳定性的精妙平衡。</p>
+<p>我们上一讲是从<strong>积分</strong>的角度推导多步法的，即把 $y(t_{i+1}) = y(t_i) + \int_{t_i}^{t_{i+1}} f(t,y)dt$ 中的积分项用插值多项式来近似。今天课程的第一部分，我们将从另一个更基本、更强大的视角来审视多步法：<strong>泰勒展开 (Taylor Expansion)</strong>。</p>
+<p><strong>"Derive from Taylor expansion"</strong> 这个视角将为我们揭示所有线性多步法的“遗传密码”。我们将看到，任何一个形如 $w_{i+1} = \sum a_j w_{i-j} + h \sum b_j f_{i+1-j}$ 的线性多步法，其系数 ${a_j}$ 和 ${b_j}$ 都可以通过一个系统性的<strong>待定系数法</strong>来确定：将公式中的所有项在中心点 $t_i$ 处进行泰勒展开，然后匹配 $h$ 的各次幂系数，使得方法的<strong>局部截断误差 (Local Truncation Error)</strong> 达到我们想要的阶数。这个过程不仅能让我们重新推导出已知的 Adams 方法，还能创造出全新的方法族，如<strong>米尔恩 (Milne's)</strong> 方法。</p>
+<p>课程的第二部分，我们将进行一次重要的“升维打击”。到目前为止，我们所有的讨论都局限于<strong>一阶单变量</strong>的 ODE 问题 $\frac{dy}{dt}=f(t,y)$。然而，现实世界中的绝大多数动态系统，要么由<strong>高阶微分方程</strong>描述（例如，牛顿第二定律 $F=ma$ 是一个二阶 ODE），要么由多个相互耦合的一阶 ODE 组成的<strong>方程组</strong>描述（例如，捕食者-被捕食者模型）。</p>
+<p>我们是否需要为这些更复杂的问题重新发明一套全新的数值方法？答案是：<strong>完全不需要！</strong> 存在一个极其优美的技巧，可以将<strong>任何</strong>高阶 ODE 或 ODE 系统，转化为一个等价的<strong>一阶 ODE 系统</strong>。这意味着，我们之前辛辛苦苦学过的所有方法（欧拉、龙格-库塔、Adams 等）都可以<strong>直接</strong>应用于求解这些看似复杂得多的问题，只需将标量运算替换为向量运算即可。</p>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%A4%9A%E6%AD%A5%E6%B3%95%E7%9A%84%E6%B3%B0%E5%8B%92%E5%B1%95%E5%BC%80%E6%9E%84%E9%80%A0%E6%B3%95"><strong>第一部分：多步法的泰勒展开构造法</strong></h3>
+<h4 id="56-ii-%E9%80%9A%E7%94%A8%E7%BA%BF%E6%80%A7%E5%A4%9A%E6%AD%A5%E6%B3%95"><strong>5.6 (II) 通用线性多步法</strong></h4>
+<p>一个通用的 $m$ 步线性多步法 (Linear Multistep Method, LMM) 具有如下形式：
                 $$w_{i+1} = \sum_{j=0}^{m-1} a_j w_{i-j} + h \sum_{j=-1}^{m-1} b_j f_{i-j}$$
                 其中 $f_k = f(t_k, w_k)$。为了方便，我们通常写成：
                 $$w_{i+1} = a_{m-1}w_i + a_{m-2}w_{i-1} + \dots + a_0 w_{i+1-m} + h[b_m f_{i+1} + b_{m-1}f_i + \dots + b_0 f_{i+1-m}]$$</p>
-                <ul>
-                <li>如果 $b_m=0$，公式是<strong>显式 (Explicit)</strong> 的，因为右端不依赖于未知的 $w_{i+1}$。</li>
-                <li>如果 $b_m \neq 0$，公式是<strong>隐式 (Implicit)</strong> 的。</li>
-                </ul>
-                <p><strong>问题：</strong> 如何系统地确定这些系数 $a_j$ 和 $b_j$ 来获得一个具有特定<strong>阶数 (order)</strong> $p$ 的方法？
+<ul>
+<li>如果 $b_m=0$，公式是<strong>显式 (Explicit)</strong> 的，因为右端不依赖于未知的 $w_{i+1}$。</li>
+<li>如果 $b_m \neq 0$，公式是<strong>隐式 (Implicit)</strong> 的。</li>
+</ul>
+<p><strong>问题：</strong> 如何系统地确定这些系数 $a_j$ 和 $b_j$ 来获得一个具有特定<strong>阶数 (order)</strong> $p$ 的方法？
                 （阶数为 $p$ 意味着局部截断误差 $\tau_{i+1}(h) = O(h^p)$）。</p>
-                <h4 id="56-ii-%E5%BE%85%E5%AE%9A%E7%B3%BB%E6%95%B0%E6%B3%95"><strong>5.6 (II) 待定系数法</strong></h4>
-                <p><strong>核心思想：</strong></p>
-                <ol>
-                <li>写下我们想要的通用公式形式，例如，一个显式的三步四阶方法：
+<h4 id="56-ii-%E5%BE%85%E5%AE%9A%E7%B3%BB%E6%95%B0%E6%B3%95"><strong>5.6 (II) 待定系数法</strong></h4>
+<p><strong>核心思想：</strong></p>
+<ol>
+<li>写下我们想要的通用公式形式，例如，一个显式的三步四阶方法：
                 $$w_{i+1} = a_2 w_i + a_1 w_{i-1} + a_0 w_{i-2} + h[b_3 f_i + b_2 f_{i-1} + b_1 f_{i-2} + b_0 f_{i-3}]$$</li>
-                <li>定义该方法的局部截断误差 $\tau_{i+1}(h) = \frac{y(t_{i+1}) - (\sum a_j y_{i-j} + h \sum b_j y'_{i-j})}{h}$。</li>
-                <li><strong>&quot;Expand ... in Taylor series about $t_i$.&quot;</strong> 将公式中涉及到的所有 $y(t_{i-j})$ 和 $y'(t_{i-j})$ 项，全部在中心点 $t_i$ 进行泰勒展开。</li>
-                <li>将这些展开式代入 $\tau_{i+1}(h)$ 的表达式中，整理出关于 $h$ 的幂级数。</li>
-                <li><strong>&quot;equate the coefficients of $h^k$.&quot;</strong>为了让方法的阶数为 $p$，我们要求 $\tau_{i+1}(h) = O(h^p)$，这意味着展开式中从 $h^0$ 到 $h^{p-1}$ 的所有项的系数都必须为零。</li>
-                <li>这就构成了一个关于未知系数 $a_j, b_j$ 的<strong>线性方程组</strong>。求解这个方程组，即可得到我们想要的方法。</li>
-                </ol>
-                <p><strong>例：推导一个四阶显式方法 (Example)</strong>
+<li>定义该方法的局部截断误差 $\tau_{i+1}(h) = \frac{y(t_{i+1}) - (\sum a_j y_{i-j} + h \sum b_j y'_{i-j})}{h}$。</li>
+<li><strong>"Expand ... in Taylor series about $t_i$."</strong> 将公式中涉及到的所有 $y(t_{i-j})$ 和 $y'(t_{i-j})$ 项，全部在中心点 $t_i$ 进行泰勒展开。</li>
+<li>将这些展开式代入 $\tau_{i+1}(h)$ 的表达式中，整理出关于 $h$ 的幂级数。</li>
+<li><strong>"equate the coefficients of $h^k$."</strong>为了让方法的阶数为 $p$，我们要求 $\tau_{i+1}(h) = O(h^p)$，这意味着展开式中从 $h^0$ 到 $h^{p-1}$ 的所有项的系数都必须为零。</li>
+<li>这就构成了一个关于未知系数 $a_j, b_j$ 的<strong>线性方程组</strong>。求解这个方程组，即可得到我们想要的方法。</li>
+</ol>
+<p><strong>例：推导一个四阶显式方法 (Example)</strong>
                 目标形式: $w_{i+1} = a_2 w_i + a_1 w_{i-1} + a_0 w_{i-2} + h[b_3 f_i + b_2 f_{i-1} + b_1 f_{i-2} + b_0 f_{i-3}]$
                 我们有 7 个未知数: $a_2, a_1, a_0, b_3, b_2, b_1, b_0$。
                 我们将 $y(t_{i+1}), y_{i-1}, y_{i-2}, y'_{i-1}, y'_{i-2}, y'_{i-3}$ 全部在 $t_i$ 处展开至 $O(h^5)$（为了得到 $O(h^4)$ 的方法，$\tau$ 的分子需要是 $O(h^5)$）。</p>
-                <ul>
-                <li>$y(t_{i+1}) = y_i + hy'_i + \frac{h^2}{2}y''_i + \frac{h^3}{6}y'''_i + \frac{h^4}{24}y^{(4)}_i + O(h^5)$</li>
-                <li>$y_{i-1} = y_i - hy'_i + \frac{h^2}{2}y''_i - \dots$</li>
-                <li>... (以此类推，共6个展开式)</li>
-                </ul>
-                <p>将这些展开式代入 $\tau_{i+1}(h)$ 的分子 $y(t_{i+1}) - (\dots)$，然后按 $y_i, y'_i, y''_i, \dots$ 的各阶导数整理系数。
+<ul>
+<li>$y(t_{i+1}) = y_i + hy'_i + \frac{h^2}{2}y''_i + \frac{h^3}{6}y'''_i + \frac{h^4}{24}y^{(4)}_i + O(h^5)$</li>
+<li>$y_{i-1} = y_i - hy'_i + \frac{h^2}{2}y''_i - \dots$</li>
+<li>... (以此类推，共6个展开式)</li>
+</ul>
+<p>将这些展开式代入 $\tau_{i+1}(h)$ 的分子 $y(t_{i+1}) - (\dots)$，然后按 $y_i, y'_i, y''_i, \dots$ 的各阶导数整理系数。
                 为了让 $\tau_{i+1}(h) = O(h^4)$，我们必须让 $h^0, h^1, h^2, h^3, h^4$ 的系数都为零。</p>
-                <ul>
-                <li>$h^0$ (即 $y_i$ 的系数): $1 - (a_2+a_1+a_0) = 0$</li>
-                <li>$h^1$ (即 $y'_i$ 的系数): $1 - (-a_1-2a_0) - (b_3+b_2+b_1+b_0) = 0$</li>
-                <li>...</li>
-                <li>$h^4$ (即 $y^{(4)}_i$ 的系数): $\frac{1}{24} - (\frac{a_1}{24}+\frac{16a_0}{24}) - (\frac{b_2}{6}+\frac{8b_1}{6}+\frac{27b_0}{6}) = 0$</li>
-                </ul>
-                <p>我们得到了 <strong>5 个方程</strong>，但有 <strong>7 个未知数</strong>。
-                &quot;5 equations and 7 unknowns&quot; 这意味着存在一个具有<strong>两个自由度</strong>的方法族。我们可以通过指定其中两个系数的值，来确定一个具体的方法。</p>
-                <p><strong>派生出不同的方法族：</strong></p>
-                <ul>
-                <li>
-                <p><strong>Adams-Bashforth (显式):</strong></p>
-                <ul>
-                <li>这类方法的核心思想是“纯积分”，它只利用过去的斜率信息，而不直接利用过去的点的位置信息。这对应于设置 $a_1=a_2=\dots=a_{m-2}=0, a_{m-1}=1$。</li>
-                <li>在我们的例子中，如果设 $a_2=1, a_1=0, a_0=0$，我们就可以解出 $b_3, b_2, b_1, b_0$，从而得到四阶 Adams-Bashforth 方法。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>Adams-Moulton (隐式):</strong></p>
-                <ul>
-                <li>类似的，我们设置 $a_1=a_2=\dots=a_{m-2}=0, a_{m-1}=1$，但在 $b$ 系数中包含 $b_m f_{i+1}$ 项。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>米尔恩方法 (Milne's Method):</strong></p>
-                <ul>
-                <li>这是另一类重要的方法，它通过让尽可能多的低阶 $a_j$ 系数为零来获得最简单的形式。</li>
-                <li>在我们的例子中，如果设置 $a_2=0, a_1=0$，则无法获得四阶方法。但如果我们的目标形式是 $w_{i+1} = a_1 w_i + a_0 w_{i-1} + h(\dots)$，则可以推导出<strong>辛普森-米尔恩 (Simpson-Milne)</strong> 方法族。</li>
-                <li><strong>显式 Milne's 法 (四阶):</strong>
+<ul>
+<li>$h^0$ (即 $y_i$ 的系数): $1 - (a_2+a_1+a_0) = 0$</li>
+<li>$h^1$ (即 $y'_i$ 的系数): $1 - (-a_1-2a_0) - (b_3+b_2+b_1+b_0) = 0$</li>
+<li>...</li>
+<li>$h^4$ (即 $y^{(4)}_i$ 的系数): $\frac{1}{24} - (\frac{a_1}{24}+\frac{16a_0}{24}) - (\frac{b_2}{6}+\frac{8b_1}{6}+\frac{27b_0}{6}) = 0$</li>
+</ul>
+<p>我们得到了 <strong>5 个方程</strong>，但有 <strong>7 个未知数</strong>。
+                "5 equations and 7 unknowns" 这意味着存在一个具有<strong>两个自由度</strong>的方法族。我们可以通过指定其中两个系数的值，来确定一个具体的方法。</p>
+<p><strong>派生出不同的方法族：</strong></p>
+<ul>
+<li>
+<p><strong>Adams-Bashforth (显式):</strong></p>
+<ul>
+<li>这类方法的核心思想是“纯积分”，它只利用过去的斜率信息，而不直接利用过去的点的位置信息。这对应于设置 $a_1=a_2=\dots=a_{m-2}=0, a_{m-1}=1$。</li>
+<li>在我们的例子中，如果设 $a_2=1, a_1=0, a_0=0$，我们就可以解出 $b_3, b_2, b_1, b_0$，从而得到四阶 Adams-Bashforth 方法。</li>
+</ul>
+</li>
+<li>
+<p><strong>Adams-Moulton (隐式):</strong></p>
+<ul>
+<li>类似的，我们设置 $a_1=a_2=\dots=a_{m-2}=0, a_{m-1}=1$，但在 $b$ 系数中包含 $b_m f_{i+1}$ 项。</li>
+</ul>
+</li>
+<li>
+<p><strong>米尔恩方法 (Milne's Method):</strong></p>
+<ul>
+<li>这是另一类重要的方法，它通过让尽可能多的低阶 $a_j$ 系数为零来获得最简单的形式。</li>
+<li>在我们的例子中，如果设置 $a_2=0, a_1=0$，则无法获得四阶方法。但如果我们的目标形式是 $w_{i+1} = a_1 w_i + a_0 w_{i-1} + h(\dots)$，则可以推导出<strong>辛普森-米尔恩 (Simpson-Milne)</strong> 方法族。</li>
+<li><strong>显式 Milne's 法 (四阶):</strong>
                 $$w_{i+1} = w_{i-3} + \frac{4h}{3}(2f_i - f_{i-1} + 2f_{i-2})$$</li>
-                <li><strong>隐式 Milne's 法 (辛普森法则, 四阶):</strong>
+<li><strong>隐式 Milne's 法 (辛普森法则, 四阶):</strong>
                 $$w_{i+1} = w_{i-1} + \frac{h}{3}(f_{i+1} + 4f_i + f_{i-1})$$
                 这个公式非常著名，它来源于在 $[t_{i-1}, t_{i+1}]$ 上对 $y'$ 用辛普森法则积分。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>Milne's 方法的缺陷：</strong> 虽然这些方法的局部截断误差常数很小，但它们存在严重的<strong>稳定性问题</strong>（弱稳定性），在长时间积分时可能会产生振荡解，因此在现代求解器中已不常用。</p>
-                <h4 id="56-ii-%E9%A2%84%E6%B5%8B-%E6%A0%A1%E6%AD%A3%E7%9A%84%E8%AF%AF%E5%B7%AE%E4%BC%B0%E8%AE%A1%E4%B8%8E%E6%94%B9%E8%BF%9B"><strong>5.6 (II) 预测-校正的误差估计与改进</strong></h4>
-                <p><strong>Research topic 16:</strong>
+</ul>
+</li>
+</ul>
+<p><strong>Milne's 方法的缺陷：</strong> 虽然这些方法的局部截断误差常数很小，但它们存在严重的<strong>稳定性问题</strong>（弱稳定性），在长时间积分时可能会产生振荡解，因此在现代求解器中已不常用。</p>
+<h4 id="56-ii-%E9%A2%84%E6%B5%8B-%E6%A0%A1%E6%AD%A3%E7%9A%84%E8%AF%AF%E5%B7%AE%E4%BC%B0%E8%AE%A1%E4%B8%8E%E6%94%B9%E8%BF%9B"><strong>5.6 (II) 预测-校正的误差估计与改进</strong></h4>
+<p><strong>Research topic 16:</strong>
                 我们已经知道，四阶 AB-AM 预测-校正系统非常高效。我们能否利用其误差结构来做得更好？</p>
-                <ul>
-                <li><strong>预测步 (AB4):</strong> $y(t_{i+1}) - w_{i+1}^* \approx \frac{251}{720}h^5 y^{(5)}(\xi)$</li>
-                <li><strong>校正步 (AM4):</strong> $y(t_{i+1}) - w_{i+1} \approx -\frac{19}{720}h^5 y^{(5)}(\xi)$</li>
-                </ul>
-                <p>假设 $y^{(5)}(t)$ 在一个步长内变化不大，我们可以得到一个惊人的关系：
+<ul>
+<li><strong>预测步 (AB4):</strong> $y(t_{i+1}) - w_{i+1}^* \approx \frac{251}{720}h^5 y^{(5)}(\xi)$</li>
+<li><strong>校正步 (AM4):</strong> $y(t_{i+1}) - w_{i+1} \approx -\frac{19}{720}h^5 y^{(5)}(\xi)$</li>
+</ul>
+<p>假设 $y^{(5)}(t)$ 在一个步长内变化不大，我们可以得到一个惊人的关系：
                 $$y(t_{i+1}) - w_{i+1} \approx -\frac{19}{251} (y(t_{i+1}) - w_{i+1}^*)$$
                 两边都包含未知的真解 $y(t_{i+1})$。但我们可以用校正值 $w_{i+1}$ 来近似它：
                 $$w_{i+1} - w_{i+1}^* \approx (y(t_{i+1}) - w_{i+1}^*) - (y(t_{i+1}) - w_{i+1}) \approx \frac{251+19}{720}h^5 y^{(5)}(\xi) = \frac{270}{720}h^5 y^{(5)}(\xi)$$</p>
-                <p><strong>局部误差估计：</strong>
+<p><strong>局部误差估计：</strong>
                 $$\text{Local Error} = y(t_{i+1}) - w_{i+1} \approx -\frac{19}{270}(w_{i+1} - w_{i+1}^*)$$
                 这个公式允许我们在<strong>每一步之后</strong>，都对该步引入的局部截断误差进行一个<strong>可计算的估计</strong>！这对于<strong>自适应步长控制</strong>至关重要：</p>
-                <ul>
-                <li>如果估计误差大于容差，我们就拒绝这一步，用一个更小的步长 $h$ 重算。</li>
-                <li>如果估计误差远小于容差，我们可以尝试在下一步增大步长 $h$ 以提高效率。</li>
-                </ul>
-                <p><strong>米尔恩误差修正 (Milne's error correction):</strong>
+<ul>
+<li>如果估计误差大于容差，我们就拒绝这一步，用一个更小的步长 $h$ 重算。</li>
+<li>如果估计误差远小于容差，我们可以尝试在下一步增大步长 $h$ 以提高效率。</li>
+</ul>
+<p><strong>米尔恩误差修正 (Milne's error correction):</strong>
                 更有甚者，既然我们能估计出误差，为什么不直接用它来修正我们的结果呢？
                 <strong>PECEC 模式 (Predict-Evaluate-Correct-Evaluate-Correct):</strong>
                 我们可以再增加一个修正步骤，得到一个更精确的结果 $w_{i+1}^{final}$。这种思想构成了更高级的、变阶变步长的 ODE 求解器的基础。</p>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E9%AB%98%E9%98%B6%E6%96%B9%E7%A8%8B%E4%B8%8E%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B%E7%BB%84"><strong>第二部分：高阶方程与微分方程组</strong></h3>
-                <h4 id="591-%E4%BB%8E%E9%AB%98%E9%98%B6%E5%88%B0%E4%B8%80%E9%98%B6%E7%B3%BB%E7%BB%9F"><strong>5.9.1 从高阶到一阶系统</strong></h4>
-                <p><strong>核心思想：</strong> 通过引入新变量，将一个 $m$ 阶的 ODE 转化为一个包含 $m$ 个方程的<strong>一阶 ODE 系统</strong>。</p>
-                <p><strong>一般 $m$ 阶 ODE:</strong>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E9%AB%98%E9%98%B6%E6%96%B9%E7%A8%8B%E4%B8%8E%E5%BE%AE%E5%88%86%E6%96%B9%E7%A8%8B%E7%BB%84"><strong>第二部分：高阶方程与微分方程组</strong></h3>
+<h4 id="591-%E4%BB%8E%E9%AB%98%E9%98%B6%E5%88%B0%E4%B8%80%E9%98%B6%E7%B3%BB%E7%BB%9F"><strong>5.9.1 从高阶到一阶系统</strong></h4>
+<p><strong>核心思想：</strong> 通过引入新变量，将一个 $m$ 阶的 ODE 转化为一个包含 $m$ 个方程的<strong>一阶 ODE 系统</strong>。</p>
+<p><strong>一般 $m$ 阶 ODE:</strong>
                 $$y^{(m)}(t) = f(t, y, y', \dots, y^{(m-1)})$$
                 以及 $m$ 个初始条件: $y(a)=\alpha_1, y'(a)=\alpha_2, \dots, y^{(m-1)}(a)=\alpha_m$。</p>
-                <p><strong>转化步骤：</strong></p>
-                <ol>
-                <li>定义一组新的因变量：
+<p><strong>转化步骤：</strong></p>
+<ol>
+<li>定义一组新的因变量：
                 $u_1(t) = y(t)$
                 $u_2(t) = y'(t)$
                 $u_3(t) = y''(t)$
                 ...
                 $u_m(t) = y^{(m-1)}(t)$</li>
-                <li>写出这些新变量之间的关系：
+<li>写出这些新变量之间的关系：
                 $u'_1 = (y)' = y' = u_2$
                 $u'_2 = (y')' = y'' = u_3$
                 ...
                 $u'_{m-1} = (y^{(m-2)})' = y^{(m-1)} = u_m$</li>
-                <li>写出最后一个新变量的导数，利用原始的 ODE：
+<li>写出最后一个新变量的导数，利用原始的 ODE：
                 $u'_m = (y^{(m-1)})' = y^{(m)} = f(t, y, \dots, y^{(m-1)}) = f(t, u_1, u_2, \dots, u_m)$</li>
-                <li>写出新的初始条件：
+<li>写出新的初始条件：
                 $u_1(a) = \alpha_1$
                 $u_2(a) = \alpha_2$
                 ...
                 $u_m(a) = \alpha_m$</li>
-                </ol>
-                <p><strong>结果：</strong>
+</ol>
+<p><strong>结果：</strong>
                 我们得到了一个<strong>一阶常微分方程组</strong>：
                 $$\begin{cases}
-                u'_1 &= u_2 \\
-                u'_2 &= u_3 \\
-                &\vdots \\
-                u'_{m-1} &= u_m \\
-                u'_m &= f(t, u_1, \dots, u_m)
+                u'_1 &amp;= u_2 \\
+                u'_2 &amp;= u_3 \\
+                &amp;\vdots \\
+                u'_{m-1} &amp;= u_m \\
+                u'_m &amp;= f(t, u_1, \dots, u_m)
                 \end{cases}$$
                 以及初始条件 $\mathbf{u}(a) = \mathbf{\alpha}$。</p>
-                <p>我们可以将它写成优雅的<strong>向量形式</strong>：
+<p>我们可以将它写成优雅的<strong>向量形式</strong>：
                 令 $\mathbf{u}(t) = [u_1(t), \dots, u_m(t)]^T$，则
                 $$\mathbf{u}'(t) = \mathbf{F}(t, \mathbf{u}(t))$$
                 其中 $\mathbf{F}$ 是一个向量函数。这个形式与我们之前研究的一阶单变量 ODE $y'=f(t,y)$ <strong>完全相同</strong>！</p>
-                <h4 id="592-%E6%95%B0%E5%80%BC%E6%96%B9%E6%B3%95%E7%9A%84%E6%8E%A8%E5%B9%BF"><strong>5.9.2 数值方法的推广</strong></h4>
-                <p>这意味着，我们之前学过的所有单步法都可以直接推广来求解这个系统。我们只需将所有标量运算替换为向量运算即可。</p>
-                <p><strong>以修正欧拉法（RK2的一种）为例 (Discussion 34):</strong>
+<h4 id="592-%E6%95%B0%E5%80%BC%E6%96%B9%E6%B3%95%E7%9A%84%E6%8E%A8%E5%B9%BF"><strong>5.9.2 数值方法的推广</strong></h4>
+<p>这意味着，我们之前学过的所有单步法都可以直接推广来求解这个系统。我们只需将所有标量运算替换为向量运算即可。</p>
+<p><strong>以修正欧拉法（RK2的一种）为例 (Discussion 34):</strong>
                 求解二阶 IVP: $y'' - 2y' + y = te^t - t, \quad y(0)=0, y'(0)=-0.5$</p>
-                <ol>
-                <li>
-                <p><strong>转化为一阶系统：</strong>
+<ol>
+<li>
+<p><strong>转化为一阶系统：</strong>
                 令 $u_1 = y, u_2 = y'$。
                 $u'_1 = y' = u_2$
                 $u'_2 = y'' = 2y' - y + te^t - t = 2u_2 - u_1 + te^t - t$
                 初始条件: $u_1(0)=0, u_2(0)=-0.5$。
                 向量形式: $\mathbf{u}' = \begin{pmatrix} u'_1 \\ u'_2 \end{pmatrix} = \begin{pmatrix} u_2 \\ 2u_2 - u_1 + te^t - t \end{pmatrix} = \mathbf{F}(t, \mathbf{u})$。</p>
-                </li>
-                <li>
-                <p><strong>应用修正欧拉法 (向量版):</strong>
+</li>
+<li>
+<p><strong>应用修正欧拉法 (向量版):</strong>
                 $\mathbf{w}_0 = [0, -0.5]^T$
                 $\mathbf{K}_1 = \mathbf{F}(t_i, \mathbf{w}_i)$
                 $\mathbf{K}_2 = \mathbf{F}(t_i+h, \mathbf{w}_i+h\mathbf{K}_1)$
                 $\mathbf{w}_{i+1} = \mathbf{w}_i + \frac{h}{2}(\mathbf{K}_1 + \mathbf{K}_2)$</p>
-                <p><strong>计算第一步 (i=0, h=0.1):</strong></p>
-                <ul>
-                <li>$t_0=0, \mathbf{w}_0 = [0, -0.5]^T$</li>
-                <li>$\mathbf{K}_1 = \mathbf{F}(0, [0, -0.5]) = \begin{pmatrix} -0.5 \\ 2(-0.5)-0+0-0 \end{pmatrix} = \begin{pmatrix} -0.5 \\ -1.0 \end{pmatrix}$</li>
-                <li>$\mathbf{K}_2 = \mathbf{F}(0.1, \mathbf{w}_0 + 0.1\mathbf{K}_1) = \mathbf{F}(0.1, [0, -0.5] + [-0.05, -0.1]) = \mathbf{F}(0.1, [-0.05, -0.6])$
+<p><strong>计算第一步 (i=0, h=0.1):</strong></p>
+<ul>
+<li>$t_0=0, \mathbf{w}_0 = [0, -0.5]^T$</li>
+<li>$\mathbf{K}_1 = \mathbf{F}(0, [0, -0.5]) = \begin{pmatrix} -0.5 \\ 2(-0.5)-0+0-0 \end{pmatrix} = \begin{pmatrix} -0.5 \\ -1.0 \end{pmatrix}$</li>
+<li>$\mathbf{K}_2 = \mathbf{F}(0.1, \mathbf{w}_0 + 0.1\mathbf{K}_1) = \mathbf{F}(0.1, [0, -0.5] + [-0.05, -0.1]) = \mathbf{F}(0.1, [-0.05, -0.6])$
                 $= \begin{pmatrix} -0.6 \\ 2(-0.6) - (-0.05) + 0.1e^{0.1} - 0.1 \end{pmatrix} \approx \begin{pmatrix} -0.6 \\ -1.139 \end{pmatrix}$</li>
-                <li>$\mathbf{w}_1 = \mathbf{w}_0 + \frac{0.1}{2}(\mathbf{K}_1 + \mathbf{K}_2) = \begin{pmatrix} 0 \\ -0.5 \end{pmatrix} + 0.05 \begin{pmatrix} -1.1 \\ -2.139 \end{pmatrix} = \begin{pmatrix} -0.055 \\ -0.60695 \end{pmatrix}$</li>
-                </ul>
-                </li>
-                </ol>
-                <p>我们就这样一步步地计算出了 $y(0.1)$ 和 $y'(0.1)$ 的近似值。</p>
-                <p><strong>结论：</strong> 求解高阶方程和方程组的数值方法，在理论和实现上，与求解一阶单变量方程的方法并无本质区别，这极大地统一了ODE数值解法的理论框架。</p>
-                <h3 id="%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93"><strong>课程总结</strong></h3>
-                <p><strong>本讲核心要点：</strong></p>
-                <ol>
-                <li><strong>多步法的系统构造：</strong> 任何线性多步法都可以通过在中心点进行泰勒展开，并令低阶项系数为零的<strong>待定系数法</strong>来系统地推导。这揭示了不同方法族（如 Adams 和 Milne）之间的内在联系。</li>
-                <li><strong>预测-校正的威力：</strong> 通过比较预测值和校正值，我们不仅可以<strong>实时估计局部截断误差</strong>，为自适应步长控制打下基础，还可以进一步修正结果以提高精度。</li>
-                <li><strong>高阶ODE的降阶：</strong> 任何 $m$ 阶 ODE 或 ODE 系统都可以被严格地转化为一个等价的<strong>一阶 ODE 系统</strong>。</li>
-                <li><strong>数值方法的普适性：</strong> 我们为一阶单变量 ODE 发展的数值方法（欧拉、RK、多步法等）可以<strong>直接推广</strong>到求解一阶系统，只需将标量运算替换为向量运算即可。</li>
-                </ol>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li>$\mathbf{w}_1 = \mathbf{w}_0 + \frac{0.1}{2}(\mathbf{K}_1 + \mathbf{K}_2) = \begin{pmatrix} 0 \\ -0.5 \end{pmatrix} + 0.05 \begin{pmatrix} -1.1 \\ -2.139 \end{pmatrix} = \begin{pmatrix} -0.055 \\ -0.60695 \end{pmatrix}$</li>
+</ul>
+</li>
+</ol>
+<p>我们就这样一步步地计算出了 $y(0.1)$ 和 $y'(0.1)$ 的近似值。</p>
+<p><strong>结论：</strong> 求解高阶方程和方程组的数值方法，在理论和实现上，与求解一阶单变量方程的方法并无本质区别，这极大地统一了ODE数值解法的理论框架。</p>
+<h3 id="%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93"><strong>课程总结</strong></h3>
+<p><strong>本讲核心要点：</strong></p>
+<ol>
+<li><strong>多步法的系统构造：</strong> 任何线性多步法都可以通过在中心点进行泰勒展开，并令低阶项系数为零的<strong>待定系数法</strong>来系统地推导。这揭示了不同方法族（如 Adams 和 Milne）之间的内在联系。</li>
+<li><strong>预测-校正的威力：</strong> 通过比较预测值和校正值，我们不仅可以<strong>实时估计局部截断误差</strong>，为自适应步长控制打下基础，还可以进一步修正结果以提高精度。</li>
+<li><strong>高阶ODE的降阶：</strong> 任何 $m$ 阶 ODE 或 ODE 系统都可以被严格地转化为一个等价的<strong>一阶 ODE 系统</strong>。</li>
+<li><strong>数值方法的普适性：</strong> 我们为一阶单变量 ODE 发展的数值方法（欧拉、RK、多步法等）可以<strong>直接推广</strong>到求解一阶系统，只需将标量运算替换为向量运算即可。</li>
+</ol>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

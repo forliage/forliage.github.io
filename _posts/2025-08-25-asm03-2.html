@@ -1,13 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>x86汇编03-2:寄存器与端口</title>
-    
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    
-    <script>
+<meta charset="utf-8"/>
+<title>x86汇编03-2:寄存器与端口</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -18,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -32,81 +30,81 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="x86%E6%B1%87%E7%BC%9603-2%E5%AF%84%E5%AD%98%E5%99%A8%E4%B8%8E%E7%AB%AF%E5%8F%A3">x86汇编03-2:寄存器与端口</h1>
-                <h3 id="%E5%BC%95%E8%A8%80%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%AF%84%E5%AD%98%E5%99%A8"><strong>引言：为什么需要寄存器？</strong></h3>
-                <p>从根本上说，计算机体系结构的设计，就是一场与物理定律的持续斗争，其中最核心的矛盾之一就是<strong>速度与容量的权衡</strong>。</p>
-                <div class="mermaid">graph TD
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="x86%E6%B1%87%E7%BC%9603-2%E5%AF%84%E5%AD%98%E5%99%A8%E4%B8%8E%E7%AB%AF%E5%8F%A3">x86汇编03-2:寄存器与端口</h1>
+<h3 id="%E5%BC%95%E8%A8%80%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%AF%84%E5%AD%98%E5%99%A8"><strong>引言：为什么需要寄存器？</strong></h3>
+<p>从根本上说，计算机体系结构的设计，就是一场与物理定律的持续斗争，其中最核心的矛盾之一就是<strong>速度与容量的权衡</strong>。</p>
+<div class="mermaid">graph TD
                     subgraph "存储器层次结构 (Memory Hierarchy)"
                         direction TB
-                        A["<b>CPU 寄存器</b><br>~0.25ns, KB级"]
-                        B["L1 Cache<br>~1ns, 几十KB级"]
-                        C["L2 Cache<br>~3ns, 几MB级"]
-                        D["L3 Cache<br>~12ns, 几十MB级"]
-                        E["主内存 (DRAM)<br>~60ns, GB级"]
-                        F["固态硬盘 (SSD)<br>微秒级(μs), TB级"]
-                        G["机械硬盘 (HDD)<br>毫秒级(ms), TB级"]
+                        A["<b>CPU 寄存器</b><br/>~0.25ns, KB级"]
+                        B["L1 Cache<br/>~1ns, 几十KB级"]
+                        C["L2 Cache<br/>~3ns, 几MB级"]
+                        D["L3 Cache<br/>~12ns, 几十MB级"]
+                        E["主内存 (DRAM)<br/>~60ns, GB级"]
+                        F["固态硬盘 (SSD)<br/>微秒级(μs), TB级"]
+                        G["机械硬盘 (HDD)<br/>毫秒级(ms), TB级"]
                     end
-                    A -- 极快 --> B -- 快 --> C -- 较快 --> D -- 慢 --> E -- 很慢 --> F -- 非常慢 --> G
+                    A -- 极快 --&gt; B -- 快 --&gt; C -- 较快 --&gt; D -- 慢 --&gt; E -- 很慢 --&gt; F -- 非常慢 --&gt; G
 
                     style A fill:#ff9,stroke:#333,stroke-width:2px
                 </div>
-                <p>CPU寄存器与主内存（我们常说的RAM）之间存在着<strong>巨大的速度鸿沟</strong>。CPU执行一条指令可能只需要不到1纳秒，而从内存中读取一个数据则可能需要几十甚至上百纳秒。如果CPU每执行一条指令都要等待内存，那它绝大部分时间都会处于空闲状态，性能将大打折扣。</p>
-                <p><strong>设计的解决方案：</strong> 在CPU芯片内部，集成一小组容量极小但速度与CPU核心同步的存储单元，这就是<strong>寄存器</strong>。</p>
-                <p><strong>工作台的比喻：</strong></p>
-                <ul>
-                <li><strong>内存 (RAM)</strong>：就像一个巨大的<strong>仓库</strong>，存放着成千上万的工具和原材料。</li>
-                <li><strong>寄存器 (Registers)</strong>：就是你面前的<strong>工作台</strong>。你只会把当前任务立刻要用到的几件工具和几块木料（数据）从仓库搬到工作台上。</li>
-                <li><strong>CPU的运算单元 (ALU)</strong>：就是你的双手，它只能直接操作工作台上的东西。</li>
-                </ul>
-                <p>因此，几乎所有的计算都遵循一个模式：<strong>加载（Load）-&gt; 操作（Operate）-&gt; 存储（Store）</strong>。</p>
-                <ol>
-                <li><strong>加载</strong>：从内存（仓库）把数据搬到寄存器（工作台）。</li>
-                <li><strong>操作</strong>：ALU对寄存器里的数据进行运算。</li>
-                <li><strong>存储</strong>：把寄存器里的结果写回内存（仓库）。</li>
-                </ol>
-                <h3 id="1-%E5%AF%84%E5%AD%98%E5%99%A8%E5%AE%B6%E6%97%8Fx86%E6%9E%B6%E6%9E%84%E7%9A%84%E6%BC%94%E8%BF%9B%E5%8F%B2"><strong>1. 寄存器家族：x86架构的演进史</strong></h3>
-                <p>x86的寄存器设计充分体现了其“向后兼容”的核心设计哲学。它们不是一次性设计出来的，而是像树木的年轮一样，随着处理器从16位、32位演进到64位，不断扩展而来。</p>
-                <h4 id="11-%E9%80%9A%E7%94%A8%E5%AF%84%E5%AD%98%E5%99%A8-general-purpose-registers"><strong>1.1. 通用寄存器 (General-Purpose Registers)</strong></h4>
-                <p>这些是程序员最常使用的寄存器，是真正的工作台。</p>
-                <p><strong>1. 数据寄存器 (Data Registers)</strong>
+<p>CPU寄存器与主内存（我们常说的RAM）之间存在着<strong>巨大的速度鸿沟</strong>。CPU执行一条指令可能只需要不到1纳秒，而从内存中读取一个数据则可能需要几十甚至上百纳秒。如果CPU每执行一条指令都要等待内存，那它绝大部分时间都会处于空闲状态，性能将大打折扣。</p>
+<p><strong>设计的解决方案：</strong> 在CPU芯片内部，集成一小组容量极小但速度与CPU核心同步的存储单元，这就是<strong>寄存器</strong>。</p>
+<p><strong>工作台的比喻：</strong></p>
+<ul>
+<li><strong>内存 (RAM)</strong>：就像一个巨大的<strong>仓库</strong>，存放着成千上万的工具和原材料。</li>
+<li><strong>寄存器 (Registers)</strong>：就是你面前的<strong>工作台</strong>。你只会把当前任务立刻要用到的几件工具和几块木料（数据）从仓库搬到工作台上。</li>
+<li><strong>CPU的运算单元 (ALU)</strong>：就是你的双手，它只能直接操作工作台上的东西。</li>
+</ul>
+<p>因此，几乎所有的计算都遵循一个模式：<strong>加载（Load）-&gt; 操作（Operate）-&gt; 存储（Store）</strong>。</p>
+<ol>
+<li><strong>加载</strong>：从内存（仓库）把数据搬到寄存器（工作台）。</li>
+<li><strong>操作</strong>：ALU对寄存器里的数据进行运算。</li>
+<li><strong>存储</strong>：把寄存器里的结果写回内存（仓库）。</li>
+</ol>
+<h3 id="1-%E5%AF%84%E5%AD%98%E5%99%A8%E5%AE%B6%E6%97%8Fx86%E6%9E%B6%E6%9E%84%E7%9A%84%E6%BC%94%E8%BF%9B%E5%8F%B2"><strong>1. 寄存器家族：x86架构的演进史</strong></h3>
+<p>x86的寄存器设计充分体现了其“向后兼容”的核心设计哲学。它们不是一次性设计出来的，而是像树木的年轮一样，随着处理器从16位、32位演进到64位，不断扩展而来。</p>
+<h4 id="11-%E9%80%9A%E7%94%A8%E5%AF%84%E5%AD%98%E5%99%A8-general-purpose-registers"><strong>1.1. 通用寄存器 (General-Purpose Registers)</strong></h4>
+<p>这些是程序员最常使用的寄存器，是真正的工作台。</p>
+<p><strong>1. 数据寄存器 (Data Registers)</strong>
                 它们虽然被称为“通用”，但在历史设计上各自有其“偏好”的用途。了解这些偏好有助于理解某些指令的特殊行为。</p>
-                <ul>
-                <li><strong>RAX/EAX/AX/AH/AL (Accumulator)</strong>: <strong>累加器</strong>。在早期的设计中，它是很多算术和逻辑运算的默认目标操作数。例如，<code>MUL</code> (乘法) 和 <code>DIV</code> (除法) 指令会隐式地使用 <code>AX/DX</code> 或 <code>EAX/EDX</code>。在函数调用中，它通常用于存放<strong>返回值</strong>。</li>
-                <li><strong>RBX/EBX/BX/BH/BL (Base)</strong>: <strong>基址寄存器</strong>。在16位模式下，它常被用作内存寻址时的基址指针 <code>[BX]</code>。</li>
-                <li><strong>RCX/ECX/CX/CH/CL (Counter)</strong>: <strong>计数器</strong>。<code>LOOP</code> 指令以及一些字符串重复操作指令（如 <code>REP MOVSB</code>）会默认使用 <code>CX/ECX/RCX</code> 作为循环计数器。</li>
-                <li><strong>RDX/EDX/DX/DH/DL (Data)</strong>: <strong>数据寄存器</strong>。它常常作为 <code>RAX</code> 的辅助。在乘除法中，它用于存放高位结果或被除数的高位部分。在I/O操作中，<code>DX</code> 用于存放端口地址。</li>
-                </ul>
-                <p><strong>2. 指针和变址寄存器 (Pointer and Index Registers)</strong></p>
-                <p>这些寄存器的主要职责是<strong>保存内存地址</strong>，用于间接寻址，是实现指针和数组的关键。</p>
-                <ul>
-                <li><strong>RSP/ESP/SP (Stack Pointer)</strong>: <strong>堆栈指针</strong>。它永远指向<strong>栈顶</strong>。<code>PUSH</code> 和 <code>POP</code> 指令会自动修改 <code>RSP</code> 的值。它是CPU进行函数调用、中断处理的基石，<strong>绝对不能随意用它来存储通用数据</strong>。</li>
-                <li><strong>RBP/EBP/BP (Base Pointer)</strong>: <strong>基址指针</strong>。它通常用于指向当前函数<strong>栈帧（Stack Frame）的底部</strong>。这使得在函数内部，可以通过一个固定的基址 <code>[RBP+offset]</code> 来访问局部变量和参数，即使 <code>RSP</code> 在不断变化。</li>
-                <li><strong>RSI/ESI/SI (Source Index)</strong>: <strong>源变址寄存器</strong>。在字符串和内存块操作指令中，它通常用作<strong>源地址</strong>指针。</li>
-                <li><strong>RDI/EDI/DI (Destination Index)</strong>: <strong>目的变址寄存器</strong>。在字符串和内存块操作指令中，它通常用作<strong>目的地址</strong>指针。</li>
-                </ul>
-                <p><strong>寄存器演进图示：</strong></p>
-                <pre class="hljs"><code><div> 63                            31              15      7       0
+<ul>
+<li><strong>RAX/EAX/AX/AH/AL (Accumulator)</strong>: <strong>累加器</strong>。在早期的设计中，它是很多算术和逻辑运算的默认目标操作数。例如，<code>MUL</code> (乘法) 和 <code>DIV</code> (除法) 指令会隐式地使用 <code>AX/DX</code> 或 <code>EAX/EDX</code>。在函数调用中，它通常用于存放<strong>返回值</strong>。</li>
+<li><strong>RBX/EBX/BX/BH/BL (Base)</strong>: <strong>基址寄存器</strong>。在16位模式下，它常被用作内存寻址时的基址指针 <code>[BX]</code>。</li>
+<li><strong>RCX/ECX/CX/CH/CL (Counter)</strong>: <strong>计数器</strong>。<code>LOOP</code> 指令以及一些字符串重复操作指令（如 <code>REP MOVSB</code>）会默认使用 <code>CX/ECX/RCX</code> 作为循环计数器。</li>
+<li><strong>RDX/EDX/DX/DH/DL (Data)</strong>: <strong>数据寄存器</strong>。它常常作为 <code>RAX</code> 的辅助。在乘除法中，它用于存放高位结果或被除数的高位部分。在I/O操作中，<code>DX</code> 用于存放端口地址。</li>
+</ul>
+<p><strong>2. 指针和变址寄存器 (Pointer and Index Registers)</strong></p>
+<p>这些寄存器的主要职责是<strong>保存内存地址</strong>，用于间接寻址，是实现指针和数组的关键。</p>
+<ul>
+<li><strong>RSP/ESP/SP (Stack Pointer)</strong>: <strong>堆栈指针</strong>。它永远指向<strong>栈顶</strong>。<code>PUSH</code> 和 <code>POP</code> 指令会自动修改 <code>RSP</code> 的值。它是CPU进行函数调用、中断处理的基石，<strong>绝对不能随意用它来存储通用数据</strong>。</li>
+<li><strong>RBP/EBP/BP (Base Pointer)</strong>: <strong>基址指针</strong>。它通常用于指向当前函数<strong>栈帧（Stack Frame）的底部</strong>。这使得在函数内部，可以通过一个固定的基址 <code>[RBP+offset]</code> 来访问局部变量和参数，即使 <code>RSP</code> 在不断变化。</li>
+<li><strong>RSI/ESI/SI (Source Index)</strong>: <strong>源变址寄存器</strong>。在字符串和内存块操作指令中，它通常用作<strong>源地址</strong>指针。</li>
+<li><strong>RDI/EDI/DI (Destination Index)</strong>: <strong>目的变址寄存器</strong>。在字符串和内存块操作指令中，它通常用作<strong>目的地址</strong>指针。</li>
+</ul>
+<p><strong>寄存器演进图示：</strong></p>
+<pre class="hljs"><code><div> 63                            31              15      7       0
                  +-----------------------------+---------------+-------+-------+
                  |                             |      EAX      |       AX      | RAX (64-bit)
                  +-----------------------------+---------------+-------+-------+
@@ -114,133 +112,133 @@
                                                +---------------+-------+-------+
                                                                AH/AL (8-bit)
                 </div></code></pre>
-                <ul>
-                <li><strong>8086 (16位)</strong>: 拥有 <code>AX, BX, CX, DX, SP, BP, SI, DI</code>。</li>
-                <li><strong>80386 (32位)</strong>: 将它们扩展为32位，前面加上 'E' (Extended)，如 <code>EAX</code>。16位的 <code>AX</code> 成为 <code>EAX</code> 的低16位，保持了完美的向后兼容。</li>
-                <li><strong>x86-64 (64位)</strong>: 再次扩展到64位，前面用 'R' (Register) 表示，如 <code>RAX</code>。并新增了8个通用寄存器 <code>R8</code> 到 <code>R15</code>，极大地缓解了寄存器短缺的问题。</li>
-                </ul>
-                <h4 id="12-%E6%AE%B5%E5%9C%B0%E5%9D%80%E5%AF%84%E5%AD%98%E5%99%A8-segment-registers"><strong>1.2. 段地址寄存器 (Segment Registers)</strong></h4>
-                <p>我们在上一讲已经详细讨论过分段机制。这些16位的寄存器就是用来存放<strong>段地址</strong>的。</p>
-                <ul>
-                <li><strong>CS (Code Segment)</strong>: <strong>代码段寄存器</strong>。CPU总是从 <code>CS:IP</code> (或 <code>CS:EIP/RIP</code>) 所指向的地址取指令执行。<code>CS</code> 的值通常不能由程序员用 <code>MOV</code> 指令直接修改，只能通过特定的跳转、调用或中断指令来改变。这是为了保护代码段不被意外篡改。</li>
-                <li><strong>DS (Data Segment)</strong>: <strong>数据段寄存器</strong>。默认的数据访问段。</li>
-                <li><strong>SS (Stack Segment)</strong>: <strong>堆栈段寄存器</strong>。默认的堆栈操作段，与 <code>SP/BP</code> 配合使用。</li>
-                <li><strong>ES, FS, GS (Extra Segments)</strong>: <strong>附加段寄存器</strong>。提供额外的段供程序员灵活使用。在现代操作系统中，<code>FS</code> 和 <code>GS</code> 有着特殊的用途，例如在Windows中 <code>FS</code> 指向线程信息块(TIB)，在Linux中 <code>GS</code> 指向线程局部存储(TLS)。</li>
-                </ul>
-                <p><strong>设计哲学演变：</strong>
+<ul>
+<li><strong>8086 (16位)</strong>: 拥有 <code>AX, BX, CX, DX, SP, BP, SI, DI</code>。</li>
+<li><strong>80386 (32位)</strong>: 将它们扩展为32位，前面加上 'E' (Extended)，如 <code>EAX</code>。16位的 <code>AX</code> 成为 <code>EAX</code> 的低16位，保持了完美的向后兼容。</li>
+<li><strong>x86-64 (64位)</strong>: 再次扩展到64位，前面用 'R' (Register) 表示，如 <code>RAX</code>。并新增了8个通用寄存器 <code>R8</code> 到 <code>R15</code>，极大地缓解了寄存器短缺的问题。</li>
+</ul>
+<h4 id="12-%E6%AE%B5%E5%9C%B0%E5%9D%80%E5%AF%84%E5%AD%98%E5%99%A8-segment-registers"><strong>1.2. 段地址寄存器 (Segment Registers)</strong></h4>
+<p>我们在上一讲已经详细讨论过分段机制。这些16位的寄存器就是用来存放<strong>段地址</strong>的。</p>
+<ul>
+<li><strong>CS (Code Segment)</strong>: <strong>代码段寄存器</strong>。CPU总是从 <code>CS:IP</code> (或 <code>CS:EIP/RIP</code>) 所指向的地址取指令执行。<code>CS</code> 的值通常不能由程序员用 <code>MOV</code> 指令直接修改，只能通过特定的跳转、调用或中断指令来改变。这是为了保护代码段不被意外篡改。</li>
+<li><strong>DS (Data Segment)</strong>: <strong>数据段寄存器</strong>。默认的数据访问段。</li>
+<li><strong>SS (Stack Segment)</strong>: <strong>堆栈段寄存器</strong>。默认的堆栈操作段，与 <code>SP/BP</code> 配合使用。</li>
+<li><strong>ES, FS, GS (Extra Segments)</strong>: <strong>附加段寄存器</strong>。提供额外的段供程序员灵活使用。在现代操作系统中，<code>FS</code> 和 <code>GS</code> 有着特殊的用途，例如在Windows中 <code>FS</code> 指向线程信息块(TIB)，在Linux中 <code>GS</code> 指向线程局部存储(TLS)。</li>
+</ul>
+<p><strong>设计哲学演变：</strong>
                 在16位实模式下，这些寄存器是内存寻址的核心。但在现代64位操作系统的<strong>平坦内存模型 (Flat Memory Model)</strong> 下，它们的作用被大大削弱。此时，它们不再直接参与地址计算，而是作为“选择子 (Selector)”，指向全局描述符表 (GDT) 中的一个条目，该条目定义了段的基址、限长和权限。对于普通应用程序来说，DS, SS, ES通常都指向同一个覆盖整个地址空间的巨大数据段，使得分段机制几乎“透明”了。</p>
-                <h4 id="13-%E6%A0%87%E5%BF%97%E5%AF%84%E5%AD%98%E5%99%A8-flagseflagsrflagscpu%E7%9A%84%E7%8A%B6%E6%80%81%E6%8A%A5%E5%91%8A"><strong>1.3. 标志寄存器 (FLAGS/EFLAGS/RFLAGS)：CPU的“状态报告”</strong></h4>
-                <p>这是CPU中一个非常特殊的寄存器。它的每一位（或几位）都有独立的含义，像一个开关或指示灯，记录了最近一次算术或逻辑运算的结果状态，或者控制着CPU的某些行为。</p>
-                <p><strong>它分为两类标志：</strong></p>
-                <ol>
-                <li><strong>状态标志 (Status Flags)</strong>: 被动地反映运算结果。</li>
-                <li><strong>控制标志 (Control Flags)</strong>: 由程序员主动设置，用来控制CPU行为。</li>
-                </ol>
-                <p>下面我们详细解读每一个重要的标志位：</p>
+<h4 id="13-%E6%A0%87%E5%BF%97%E5%AF%84%E5%AD%98%E5%99%A8-flagseflagsrflagscpu%E7%9A%84%E7%8A%B6%E6%80%81%E6%8A%A5%E5%91%8A"><strong>1.3. 标志寄存器 (FLAGS/EFLAGS/RFLAGS)：CPU的“状态报告”</strong></h4>
+<p>这是CPU中一个非常特殊的寄存器。它的每一位（或几位）都有独立的含义，像一个开关或指示灯，记录了最近一次算术或逻辑运算的结果状态，或者控制着CPU的某些行为。</p>
+<p><strong>它分为两类标志：</strong></p>
+<ol>
+<li><strong>状态标志 (Status Flags)</strong>: 被动地反映运算结果。</li>
+<li><strong>控制标志 (Control Flags)</strong>: 由程序员主动设置，用来控制CPU行为。</li>
+</ol>
+<p>下面我们详细解读每一个重要的标志位：</p>
+<ul>
+<li>
+<p><strong>CF (Carry Flag) - 进位标志 [状态]</strong></p>
+<ul>
+<li><strong>用途1：无符号数运算溢出</strong>。当一个无符号数加法的结果超出了目标操作数的容量，CF置1。当一个无符号数减法需要向更高位借位时，CF置1。</li>
+<li><code>BYTE num = 255; num++;</code> // 结果是0, 但CF=1</li>
+<li><strong>用途2：移位操作的“比特桶”</strong>。在移位（<code>SHL</code>, <code>SHR</code>）或循环移位（<code>ROL</code>, <code>ROR</code>）指令中，被移出操作数的比特会被放入CF中。</li>
+</ul>
+</li>
+<li>
+<p><strong>ZF (Zero Flag) - 零标志 [状态]</strong></p>
+<ul>
+<li><strong>用途：判断结果是否为零</strong>。如果最近一次算术或逻辑运算的结果为0，ZF置1；否则清0。这是实现 <code>if (x == y)</code> 的基础，<code>CMP x, y</code> 指令本质上是计算 <code>x-y</code>，如果结果为0，则ZF置1。</li>
+</ul>
+</li>
+<li>
+<p><strong>SF (Sign Flag) - 符号标志 [状态]</strong></p>
+<ul>
+<li><strong>用途：判断结果的符号</strong>。它直接复制运算结果的最高有效位 (MSB)。如果结果为负数（在补码表示中，MSB为1），SF置1；否则清0。</li>
+</ul>
+</li>
+<li>
+<p><strong>OF (Overflow Flag) - 溢出标志 [状态]</strong></p>
+<ul>
+<li><strong>用途：有符号数运算溢出</strong>。这是初学者最容易和CF混淆的。OF只关心有符号数。当运算结果超出了有符号数的表示范围时，OF置1。</li>
+<li><strong>判断方法</strong>：
                 <ul>
-                <li>
-                <p><strong>CF (Carry Flag) - 进位标志 [状态]</strong></p>
+<li>两个正数相加，结果却为负数 (SF=1)。</li>
+<li>两个负数相加，结果却为正数 (SF=0)。</li>
+<li>一个正数减去一个负数，结果为负数。</li>
+<li>一个负数减去一个正数，结果为正数。</li>
+</ul>
+</li>
+<li><code>SBYTE num = 127; num++;</code> // 结果是-128, OF=1, SF=1</li>
+<li><code>SBYTE num = -128; num--;</code> // 结果是127, OF=1, SF=0</li>
+</ul>
+</li>
+<li>
+<p><strong>PF (Parity Flag) - 奇偶标志 [状态]</strong></p>
+<ul>
+<li><strong>用途：检查结果中1的个数</strong>。如果运算结果的<strong>最低字节</strong>中，1的个数为偶数，PF置1；否则清0。这是一个比较古老的标志，最初用于数据通信中的错误校验，现在应用较少，但在密码学等特定领域可能用到。</li>
+</ul>
+</li>
+<li>
+<p><strong>AF (Auxiliary Carry Flag) - 辅助进位标志 [状态]</strong></p>
+<ul>
+<li><strong>用途：BCD码运算</strong>。当算术运算在结果的第3位和第4位之间（低半字节和高半字节之间）产生进位或借位时，AF置1。它专门用于支持二进制编码的十进制 (BCD) 运算。</li>
+</ul>
+</li>
+<li>
+<p><strong>DF (Direction Flag) - 方向标志 [控制]</strong></p>
+<ul>
+<li><strong>用途：控制字符串操作方向</strong>。这是由程序员用 <code>CLD</code> (Clear Direction Flag) 或 <code>STD</code> (Set Direction Flag) 指令来设置的。
                 <ul>
-                <li><strong>用途1：无符号数运算溢出</strong>。当一个无符号数加法的结果超出了目标操作数的容量，CF置1。当一个无符号数减法需要向更高位借位时，CF置1。</li>
-                <li><code>BYTE num = 255; num++;</code> // 结果是0, 但CF=1</li>
-                <li><strong>用途2：移位操作的“比特桶”</strong>。在移位（<code>SHL</code>, <code>SHR</code>）或循环移位（<code>ROL</code>, <code>ROR</code>）指令中，被移出操作数的比特会被放入CF中。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>ZF (Zero Flag) - 零标志 [状态]</strong></p>
+<li><code>DF = 0</code> (CLD): 字符串操作（如<code>MOVSB</code>, <code>LODSB</code>）会自动增加变址寄存器 (<code>RSI</code>, <code>RDI</code>) 的值，从低地址向高地址处理。</li>
+<li><code>DF = 1</code> (STD): 字符串操作会自动减少变址寄存器 (<code>RSI</code>, <code>RDI</code>) 的值，从高地址向低地址处理。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>IF (Interrupt Flag) - 中断标志 [控制]</strong></p>
+<ul>
+<li><strong>用途：控制可屏蔽硬件中断</strong>。
                 <ul>
-                <li><strong>用途：判断结果是否为零</strong>。如果最近一次算术或逻辑运算的结果为0，ZF置1；否则清0。这是实现 <code>if (x == y)</code> 的基础，<code>CMP x, y</code> 指令本质上是计算 <code>x-y</code>，如果结果为0，则ZF置1。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>SF (Sign Flag) - 符号标志 [状态]</strong></p>
+<li><code>IF = 1</code> (通过 <code>STI</code> 指令设置): CPU允许响应外部设备发来的可屏蔽中断请求（如键盘输入、鼠标移动）。</li>
+<li><code>IF = 0</code> (通过 <code>CLI</code> 指令设置): CPU会暂时忽略这些中断请求。这在操作系统内核执行一些不可被打断的原子操作时至关重要。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>TF (Trap Flag) - 陷阱标志 [控制]</strong></p>
+<ul>
+<li><strong>用途：单步调试</strong>。当 <code>TF</code> 被置为1时，CPU在执行完<strong>每一条</strong>指令后，都会产生一个内部中断（陷阱）。调试器（Debugger）通过捕获这个中断，就可以获得CPU的控制权，从而实现单步执行、检查寄存器状态等功能。这是所有软件调试器的硬件基础。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-%E7%AB%AF%E5%8F%A3-port%E4%B8%8E%E5%A4%96%E9%83%A8%E8%AE%BE%E5%A4%87%E7%9A%84%E5%AF%B9%E8%AF%9D"><strong>2. 端口 (Port)：与外部设备的对话</strong></h3>
+<p>我们已经知道CPU通过内存地址访问内存。但是，计算机上还有很多其他设备，如键盘、鼠标、硬盘控制器、网卡等。CPU如何与它们通信？</p>
+<p><strong>设计的两种方案：</strong></p>
+<ol>
+<li><strong>内存映射I/O (MMIO)</strong>: 我们在上一讲显存的例子中已经见过。将设备的控制寄存器映射到物理内存地址空间的一部分。CPU像访问普通内存一样访问这些地址，就能与设备通信。</li>
+<li><strong>端口映射I/O (PMIO)</strong>: Intel x86架构还提供了另一种独立的地址空间，称为<strong>I/O地址空间</strong>。这个空间有 $2^{16} = 65536$ 个8位的<strong>端口（Ports）</strong>。</li>
+</ol>
+<p><strong>I/O端口 vs 内存地址</strong></p>
+<ul>
+<li><strong>地址空间</strong>: 内存空间和I/O空间是<strong>完全独立</strong>的。内存地址 <code>0x80</code> 和 I/O端口 <code>0x80</code> 是两个不同的地方。</li>
+<li><strong>访问指令</strong>:
                 <ul>
-                <li><strong>用途：判断结果的符号</strong>。它直接复制运算结果的最高有效位 (MSB)。如果结果为负数（在补码表示中，MSB为1），SF置1；否则清0。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>OF (Overflow Flag) - 溢出标志 [状态]</strong></p>
-                <ul>
-                <li><strong>用途：有符号数运算溢出</strong>。这是初学者最容易和CF混淆的。OF只关心有符号数。当运算结果超出了有符号数的表示范围时，OF置1。</li>
-                <li><strong>判断方法</strong>：
-                <ul>
-                <li>两个正数相加，结果却为负数 (SF=1)。</li>
-                <li>两个负数相加，结果却为正数 (SF=0)。</li>
-                <li>一个正数减去一个负数，结果为负数。</li>
-                <li>一个负数减去一个正数，结果为正数。</li>
-                </ul>
-                </li>
-                <li><code>SBYTE num = 127; num++;</code> // 结果是-128, OF=1, SF=1</li>
-                <li><code>SBYTE num = -128; num--;</code> // 结果是127, OF=1, SF=0</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>PF (Parity Flag) - 奇偶标志 [状态]</strong></p>
-                <ul>
-                <li><strong>用途：检查结果中1的个数</strong>。如果运算结果的<strong>最低字节</strong>中，1的个数为偶数，PF置1；否则清0。这是一个比较古老的标志，最初用于数据通信中的错误校验，现在应用较少，但在密码学等特定领域可能用到。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>AF (Auxiliary Carry Flag) - 辅助进位标志 [状态]</strong></p>
-                <ul>
-                <li><strong>用途：BCD码运算</strong>。当算术运算在结果的第3位和第4位之间（低半字节和高半字节之间）产生进位或借位时，AF置1。它专门用于支持二进制编码的十进制 (BCD) 运算。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>DF (Direction Flag) - 方向标志 [控制]</strong></p>
-                <ul>
-                <li><strong>用途：控制字符串操作方向</strong>。这是由程序员用 <code>CLD</code> (Clear Direction Flag) 或 <code>STD</code> (Set Direction Flag) 指令来设置的。
-                <ul>
-                <li><code>DF = 0</code> (CLD): 字符串操作（如<code>MOVSB</code>, <code>LODSB</code>）会自动增加变址寄存器 (<code>RSI</code>, <code>RDI</code>) 的值，从低地址向高地址处理。</li>
-                <li><code>DF = 1</code> (STD): 字符串操作会自动减少变址寄存器 (<code>RSI</code>, <code>RDI</code>) 的值，从高地址向低地址处理。</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>IF (Interrupt Flag) - 中断标志 [控制]</strong></p>
-                <ul>
-                <li><strong>用途：控制可屏蔽硬件中断</strong>。
-                <ul>
-                <li><code>IF = 1</code> (通过 <code>STI</code> 指令设置): CPU允许响应外部设备发来的可屏蔽中断请求（如键盘输入、鼠标移动）。</li>
-                <li><code>IF = 0</code> (通过 <code>CLI</code> 指令设置): CPU会暂时忽略这些中断请求。这在操作系统内核执行一些不可被打断的原子操作时至关重要。</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>TF (Trap Flag) - 陷阱标志 [控制]</strong></p>
-                <ul>
-                <li><strong>用途：单步调试</strong>。当 <code>TF</code> 被置为1时，CPU在执行完<strong>每一条</strong>指令后，都会产生一个内部中断（陷阱）。调试器（Debugger）通过捕获这个中断，就可以获得CPU的控制权，从而实现单步执行、检查寄存器状态等功能。这是所有软件调试器的硬件基础。</li>
-                </ul>
-                </li>
-                </ul>
-                <h3 id="2-%E7%AB%AF%E5%8F%A3-port%E4%B8%8E%E5%A4%96%E9%83%A8%E8%AE%BE%E5%A4%87%E7%9A%84%E5%AF%B9%E8%AF%9D"><strong>2. 端口 (Port)：与外部设备的对话</strong></h3>
-                <p>我们已经知道CPU通过内存地址访问内存。但是，计算机上还有很多其他设备，如键盘、鼠标、硬盘控制器、网卡等。CPU如何与它们通信？</p>
-                <p><strong>设计的两种方案：</strong></p>
-                <ol>
-                <li><strong>内存映射I/O (MMIO)</strong>: 我们在上一讲显存的例子中已经见过。将设备的控制寄存器映射到物理内存地址空间的一部分。CPU像访问普通内存一样访问这些地址，就能与设备通信。</li>
-                <li><strong>端口映射I/O (PMIO)</strong>: Intel x86架构还提供了另一种独立的地址空间，称为<strong>I/O地址空间</strong>。这个空间有 $2^{16} = 65536$ 个8位的<strong>端口（Ports）</strong>。</li>
-                </ol>
-                <p><strong>I/O端口 vs 内存地址</strong></p>
-                <ul>
-                <li><strong>地址空间</strong>: 内存空间和I/O空间是<strong>完全独立</strong>的。内存地址 <code>0x80</code> 和 I/O端口 <code>0x80</code> 是两个不同的地方。</li>
-                <li><strong>访问指令</strong>:
-                <ul>
-                <li>访问内存使用 <code>MOV</code>, <code>ADD</code> 等通用指令。</li>
-                <li>访问端口必须使用专门的 <code>IN</code> 和 <code>OUT</code> 指令。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong><code>IN</code> 和 <code>OUT</code> 指令</strong></p>
-                <ul>
-                <li><code>IN accumulator, port</code>: 从 <code>port</code> 读取数据到累加器 (<code>AL</code>, <code>AX</code>, or <code>EAX</code>)。</li>
-                <li><code>OUT port, accumulator</code>: 将累加器 (<code>AL</code>, <code>AX</code>, or <code>EAX</code>) 的数据写入到 <code>port</code>。</li>
-                </ul>
-                <p><code>port</code> 可以是一个8位的立即数（0-255），或者是一个16位的地址，该地址必须预先加载到 <code>DX</code> 寄存器中。</p>
-                <p><strong>示例：经典的PC蜂鸣器</strong>
+<li>访问内存使用 <code>MOV</code>, <code>ADD</code> 等通用指令。</li>
+<li>访问端口必须使用专门的 <code>IN</code> 和 <code>OUT</code> 指令。</li>
+</ul>
+</li>
+</ul>
+<p><strong><code>IN</code> 和 <code>OUT</code> 指令</strong></p>
+<ul>
+<li><code>IN accumulator, port</code>: 从 <code>port</code> 读取数据到累加器 (<code>AL</code>, <code>AX</code>, or <code>EAX</code>)。</li>
+<li><code>OUT port, accumulator</code>: 将累加器 (<code>AL</code>, <code>AX</code>, or <code>EAX</code>) 的数据写入到 <code>port</code>。</li>
+</ul>
+<p><code>port</code> 可以是一个8位的立即数（0-255），或者是一个16位的地址，该地址必须预先加载到 <code>DX</code> 寄存器中。</p>
+<p><strong>示例：经典的PC蜂鸣器</strong>
                 要让PC的内部扬声器发出声音，需要通过端口与可编程间隔定时器（PIT）和扬声器控制器交互。</p>
-                <pre class="hljs"><code><div>; 通过端口0x43设置定时器通道2
+<pre class="hljs"><code><div>; 通过端口0x43设置定时器通道2
                 mov al, 10110110b   ; 设置定时器模式
                 out 43h, al
 
@@ -263,35 +261,60 @@
                 and al, 11111100b   ; 清零最低两位
                 out 61h, al
                 </div></code></pre>
-                <p>这个例子完美地展示了通过一系列精确的端口读写操作来控制外部硬件。</p>
-            </article>
-        </main>
-    </div>
-    
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<p>这个例子完美地展示了通过一系列精确的端口读写操作来控制外部硬件。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

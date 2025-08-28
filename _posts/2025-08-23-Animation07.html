@@ -1,13 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机动画07:关节(角色)动画·上</title>
-    
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    
-    <script>
+<meta charset="utf-8"/>
+<title>计算机动画07:关节(角色)动画·上</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -18,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -32,84 +30,84 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8A%A8%E7%94%BB07%E5%85%B3%E8%8A%82%E8%A7%92%E8%89%B2%E5%8A%A8%E7%94%BB%E4%B8%8A">计算机动画07:关节(角色)动画·上</h1>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%85%B3%E8%8A%82%E5%8A%A8%E7%94%BB%E7%9A%84%E9%AD%85%E5%8A%9B%E4%B8%8E%E5%BA%94%E7%94%A8"><strong>第一部分：关节动画的魅力与应用</strong></h3>
-                <p>在计算机动画的世界里，如果我们想让画面不仅仅是冰冷的几何体在移动，而是充满生命力，我们就需要引入<strong>角色</strong>——比如人、动物，甚至是会动的机器人。这些角色能让整个场景瞬间“活”起来。而<strong>关节动画</strong>，正是实现这一切的核心技术，是赋予这些角色生命和活力的基石。</p>
-                <h4 id="11-%E5%BA%94%E7%94%A8%E6%97%A0%E5%A4%84%E4%B8%8D%E5%9C%A8"><strong>1.1 应用无处不在</strong></h4>
-                <p>关节动画技术几乎渗透在我们数字生活的方方面面，它的应用深度和广度可能远超大家的想象。</p>
-                <p><strong>在游戏中，它是角色的灵魂...</strong></p>
-                <p>无论是你在《FIFA》里看到C罗振臂高呼的标志性庆祝动作，还是在《魔兽世界》里兽人战士充满力量的挥砍，又或者是在《英雄联盟》里英雄们释放的华丽技能，以及《NBA 2K》系列中篮球巨星们流畅的过人暴扣——所有这些栩栩如生的人物动作，背后都是由复杂的关节动画系统驱动的。它让虚拟角色能够模拟真实世界中复杂的运动。</p>
-                <p><strong>在动画中，它能赋予万物生命...</strong></p>
-                <p>这项技术的神奇之处在于，它不仅能用于有生命的角色。我们甚至可以为没有生命、软塌塌的物体（比如一个面粉袋）内部构建一套虚拟的“骨骼”。通过控制这套骨骼，我们就能让它像一个有思想、有情绪的角色一样，做出挤压、伸展、跳跃等拟人化的动作。这是动画师赋予物体“性格”的关键技巧。</p>
-                <p><strong>在电影中，它是视觉奇观的缔造者...</strong></p>
-                <p>电影工业是关节动画技术的集大成者。从早期的《恐龙》中栩栩如生的史前巨兽，到皮克斯经典《海底总动员》里悠闲游动的海龟，从史诗级的《金刚》那充满力量与情感的动作，到《加勒比海盗》中拥有章鱼触须、动作诡异的戴维·琼斯，再到《变形金刚》里那些结构无比复杂、变形流畅的机器人——它们每一个动作，每一个姿态，都离不开强大的关节动画技术。</p>
-                <p>特别是随着动作捕捉（Motion Capture）和表演捕捉（Performance Capture）技术的发展，如在《极地特快》（Polar Express）和后来的《阿丽塔：战斗天使》（Alita: Battle Angel）中，我们已经能将真人演员的精细表情和动作数据，实时地映射到虚拟角色的关节骨骼上，从而创造出前所未有的真实感和感染力。</p>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%85%B3%E8%8A%82%E5%8A%A8%E7%94%BB%E7%9A%84%E6%A0%B8%E5%BF%83%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%A6%82%E5%BF%B5"><strong>第二部分：关节动画的核心模型与概念</strong></h3>
-                <p>现在我们已经感受到了关节动画的强大，那么，它是如何从技术上实现的呢？我们需要掌握几个至关重要的核心概念。</p>
-                <h4 id="21-%E6%A8%A1%E5%9E%8B%E4%B8%8E%E9%AA%A8%E9%AA%BC-model-and-skeleton"><strong>2.1 模型与骨骼 (Model and Skeleton)</strong></h4>
-                <p>一个可动的角色通常由两部分组成：</p>
-                <ol>
-                <li><strong>模型（Model/Skin/Mesh）</strong>: 这是我们最终在屏幕上看到的部分，也就是角色的“皮肤”或“外壳”，它通常是一个多边形网格。</li>
-                <li><strong>骨骼（Skeleton/Rig）</strong>: 这是隐藏在模型内部的一套驱动结构，它由一系列的**关节（Joints）<strong>和</strong>连杆（Links，也常被称为骨骼 Bones）**组成。</li>
-                </ol>
-                <p>动画师并不直接去逐一拖拽模型上的每一个顶点，而是通过控制骨骼的运动，来间接地带动整个模型运动。这就好比我们人类，是骨骼带动肌肉和皮肤在运动。</p>
-                <div class="mermaid">graph TD
-                    A[骨骼 Skeleton] -- 驱动 Deforms --> B(模型 Model/Skin);
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8A%A8%E7%94%BB07%E5%85%B3%E8%8A%82%E8%A7%92%E8%89%B2%E5%8A%A8%E7%94%BB%E4%B8%8A">计算机动画07:关节(角色)动画·上</h1>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%85%B3%E8%8A%82%E5%8A%A8%E7%94%BB%E7%9A%84%E9%AD%85%E5%8A%9B%E4%B8%8E%E5%BA%94%E7%94%A8"><strong>第一部分：关节动画的魅力与应用</strong></h3>
+<p>在计算机动画的世界里，如果我们想让画面不仅仅是冰冷的几何体在移动，而是充满生命力，我们就需要引入<strong>角色</strong>——比如人、动物，甚至是会动的机器人。这些角色能让整个场景瞬间“活”起来。而<strong>关节动画</strong>，正是实现这一切的核心技术，是赋予这些角色生命和活力的基石。</p>
+<h4 id="11-%E5%BA%94%E7%94%A8%E6%97%A0%E5%A4%84%E4%B8%8D%E5%9C%A8"><strong>1.1 应用无处不在</strong></h4>
+<p>关节动画技术几乎渗透在我们数字生活的方方面面，它的应用深度和广度可能远超大家的想象。</p>
+<p><strong>在游戏中，它是角色的灵魂...</strong></p>
+<p>无论是你在《FIFA》里看到C罗振臂高呼的标志性庆祝动作，还是在《魔兽世界》里兽人战士充满力量的挥砍，又或者是在《英雄联盟》里英雄们释放的华丽技能，以及《NBA 2K》系列中篮球巨星们流畅的过人暴扣——所有这些栩栩如生的人物动作，背后都是由复杂的关节动画系统驱动的。它让虚拟角色能够模拟真实世界中复杂的运动。</p>
+<p><strong>在动画中，它能赋予万物生命...</strong></p>
+<p>这项技术的神奇之处在于，它不仅能用于有生命的角色。我们甚至可以为没有生命、软塌塌的物体（比如一个面粉袋）内部构建一套虚拟的“骨骼”。通过控制这套骨骼，我们就能让它像一个有思想、有情绪的角色一样，做出挤压、伸展、跳跃等拟人化的动作。这是动画师赋予物体“性格”的关键技巧。</p>
+<p><strong>在电影中，它是视觉奇观的缔造者...</strong></p>
+<p>电影工业是关节动画技术的集大成者。从早期的《恐龙》中栩栩如生的史前巨兽，到皮克斯经典《海底总动员》里悠闲游动的海龟，从史诗级的《金刚》那充满力量与情感的动作，到《加勒比海盗》中拥有章鱼触须、动作诡异的戴维·琼斯，再到《变形金刚》里那些结构无比复杂、变形流畅的机器人——它们每一个动作，每一个姿态，都离不开强大的关节动画技术。</p>
+<p>特别是随着动作捕捉（Motion Capture）和表演捕捉（Performance Capture）技术的发展，如在《极地特快》（Polar Express）和后来的《阿丽塔：战斗天使》（Alita: Battle Angel）中，我们已经能将真人演员的精细表情和动作数据，实时地映射到虚拟角色的关节骨骼上，从而创造出前所未有的真实感和感染力。</p>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%85%B3%E8%8A%82%E5%8A%A8%E7%94%BB%E7%9A%84%E6%A0%B8%E5%BF%83%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%A6%82%E5%BF%B5"><strong>第二部分：关节动画的核心模型与概念</strong></h3>
+<p>现在我们已经感受到了关节动画的强大，那么，它是如何从技术上实现的呢？我们需要掌握几个至关重要的核心概念。</p>
+<h4 id="21-%E6%A8%A1%E5%9E%8B%E4%B8%8E%E9%AA%A8%E9%AA%BC-model-and-skeleton"><strong>2.1 模型与骨骼 (Model and Skeleton)</strong></h4>
+<p>一个可动的角色通常由两部分组成：</p>
+<ol>
+<li><strong>模型（Model/Skin/Mesh）</strong>: 这是我们最终在屏幕上看到的部分，也就是角色的“皮肤”或“外壳”，它通常是一个多边形网格。</li>
+<li><strong>骨骼（Skeleton/Rig）</strong>: 这是隐藏在模型内部的一套驱动结构，它由一系列的**关节（Joints）<strong>和</strong>连杆（Links，也常被称为骨骼 Bones）**组成。</li>
+</ol>
+<p>动画师并不直接去逐一拖拽模型上的每一个顶点，而是通过控制骨骼的运动，来间接地带动整个模型运动。这就好比我们人类，是骨骼带动肌肉和皮肤在运动。</p>
+<div class="mermaid">graph TD
+                    A[骨骼 Skeleton] -- 驱动 Deforms --&gt; B(模型 Model/Skin);
                     subgraph A
                         direction LR
-                        J1(关节 Joint) -- 连接 Connects --> L1(连杆 Link);
-                        L1 -- 连接 Connects --> J2(关节 Joint);
-                        J2 -- 连接 Connects --> L2(连杆 Link);
+                        J1(关节 Joint) -- 连接 Connects --&gt; L1(连杆 Link);
+                        L1 -- 连接 Connects --&gt; J2(关节 Joint);
+                        J2 -- 连接 Connects --&gt; L2(连杆 Link);
                     end
                     style B fill:#f9f,stroke:#333,stroke-width:2px
                 </div>
-                <h4 id="22-%E6%A8%A1%E5%9E%8B%E5%B1%82%E6%AC%A1-vs-%E8%BF%90%E5%8A%A8%E5%B1%82%E6%AC%A1-model-hierarchy-vs-motion-hierarchy"><strong>2.2 模型层次 vs. 运动层次 (Model Hierarchy vs. Motion Hierarchy)</strong></h4>
-                <p>为了有效地组织和控制骨骼，我们引入了<strong>层次结构（Hierarchy）</strong> 的概念。</p>
+<h4 id="22-%E6%A8%A1%E5%9E%8B%E5%B1%82%E6%AC%A1-vs-%E8%BF%90%E5%8A%A8%E5%B1%82%E6%AC%A1-model-hierarchy-vs-motion-hierarchy"><strong>2.2 模型层次 vs. 运动层次 (Model Hierarchy vs. Motion Hierarchy)</strong></h4>
+<p>为了有效地组织和控制骨骼，我们引入了<strong>层次结构（Hierarchy）</strong> 的概念。</p>
+<ul>
+<li><strong>通常用相对运动来描述</strong>：想象一下你的身体。你的小臂相对于大臂运动，大臂相对于肩膀运动，而肩膀又相对于躯干运动。我们不会去计算每个部位在世界中的绝对位置，而是描述这种“子级相对于父级”的运动关系。</li>
+<li><strong>运动层次的构成</strong>：
                 <ul>
-                <li><strong>通常用相对运动来描述</strong>：想象一下你的身体。你的小臂相对于大臂运动，大臂相对于肩膀运动，而肩膀又相对于躯干运动。我们不会去计算每个部位在世界中的绝对位置，而是描述这种“子级相对于父级”的运动关系。</li>
-                <li><strong>运动层次的构成</strong>：
-                <ul>
-                <li><strong>物体层次 + 相对运动 = 运动层次</strong>。</li>
-                <li><strong>连杆（Links）</strong>: 代表身体的各个部分，比如大臂、小臂、手掌。</li>
-                <li><strong>关节（Joints）</strong>: 连接这些连杆，并定义了它们之间如何相对运动。</li>
-                <li><strong>运动通常受限制</strong>: 比如，你的膝盖只能向一个方向弯曲，而你的肩膀则可以进行更自由的旋转。这些限制是关节的固有属性，我们称之为<strong>自由度（Degrees of Freedom, DOF）</strong>。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="23-%E8%BF%90%E5%8A%A8%E5%AD%A6-vs-%E5%8A%A8%E5%8A%9B%E5%AD%A6-kinematics-vs-dynamics"><strong>2.3 运动学 vs. 动力学 (Kinematics vs. Dynamics)</strong></h4>
-                <p>在动画领域，我们经常听到两个词：运动学和动力学。它们的区别至关重要：</p>
-                <ul>
-                <li><strong>运动学 (Kinematics)</strong>: 研究的是<strong>运动的几何性质</strong>，即“如何运动”。它只关心位置、速度、加速度等，而不考虑引起这些运动的力。我们这门课的核心问题就是：“如何通过设置位置随时间的参数来对连杆设置动画？” 这就是运动学问题。</li>
-                <li><strong>动力学 (Dynamics)</strong>: 研究的是<strong>引起运动的力</strong>，即“为何运动”。它会考虑质量、惯性、力、扭矩等物理量，通常用于物理模拟，比如布料飘动、碰撞效果等。</li>
-                </ul>
-                <p><strong>今天，我们的焦点将完全集中在运动学上。</strong></p>
-                <h4 id="24-%E5%85%B3%E8%8A%82%E6%A8%A1%E5%9E%8B-articulated-model"><strong>2.4 关节模型 (Articulated Model)</strong></h4>
-                <p>一个关节角色可以被抽象成一个由连杆和关节组成的<strong>树状结构</strong>。</p>
-                <ul>
-                <li><strong>把关节角色表示为一系列通过关节(joints)相连接的连杆(links)。</strong></li>
-                </ul>
-                <div class="mermaid">graph TD
+<li><strong>物体层次 + 相对运动 = 运动层次</strong>。</li>
+<li><strong>连杆（Links）</strong>: 代表身体的各个部分，比如大臂、小臂、手掌。</li>
+<li><strong>关节（Joints）</strong>: 连接这些连杆，并定义了它们之间如何相对运动。</li>
+<li><strong>运动通常受限制</strong>: 比如，你的膝盖只能向一个方向弯曲，而你的肩膀则可以进行更自由的旋转。这些限制是关节的固有属性，我们称之为<strong>自由度（Degrees of Freedom, DOF）</strong>。</li>
+</ul>
+</li>
+</ul>
+<h4 id="23-%E8%BF%90%E5%8A%A8%E5%AD%A6-vs-%E5%8A%A8%E5%8A%9B%E5%AD%A6-kinematics-vs-dynamics"><strong>2.3 运动学 vs. 动力学 (Kinematics vs. Dynamics)</strong></h4>
+<p>在动画领域，我们经常听到两个词：运动学和动力学。它们的区别至关重要：</p>
+<ul>
+<li><strong>运动学 (Kinematics)</strong>: 研究的是<strong>运动的几何性质</strong>，即“如何运动”。它只关心位置、速度、加速度等，而不考虑引起这些运动的力。我们这门课的核心问题就是：“如何通过设置位置随时间的参数来对连杆设置动画？” 这就是运动学问题。</li>
+<li><strong>动力学 (Dynamics)</strong>: 研究的是<strong>引起运动的力</strong>，即“为何运动”。它会考虑质量、惯性、力、扭矩等物理量，通常用于物理模拟，比如布料飘动、碰撞效果等。</li>
+</ul>
+<p><strong>今天，我们的焦点将完全集中在运动学上。</strong></p>
+<h4 id="24-%E5%85%B3%E8%8A%82%E6%A8%A1%E5%9E%8B-articulated-model"><strong>2.4 关节模型 (Articulated Model)</strong></h4>
+<p>一个关节角色可以被抽象成一个由连杆和关节组成的<strong>树状结构</strong>。</p>
+<ul>
+<li><strong>把关节角色表示为一系列通过关节(joints)相连接的连杆(links)。</strong></li>
+</ul>
+<div class="mermaid">graph TD
                     subgraph 角色
                         A[人体轮廓]
                     end
@@ -125,71 +123,71 @@
                         D --- D2 --- D2_1 --- D2_2
                         D2_1 --- D2_1_1
                     end
-                    A --> B --> C --> D
+                    A --&gt; B --&gt; C --&gt; D
                 </div>
-                <p>在这个树状结构中：</p>
+<p>在这个树状结构中：</p>
+<ul>
+<li><strong>节点（Node）</strong>: 代表物体的某个部件（例如，大臂、头部）。</li>
+<li><strong>边（Edge）</strong>: 代表连接两个部件的关节，以及它们之间的相对变换。</li>
+<li><strong>根节点（Root）</strong>: 通常是角色的核心部分（如骨盆），它的位置和朝向是在世界坐标系中定义的。</li>
+</ul>
+<h4 id="25-%E8%87%AA%E7%94%B1%E5%BA%A6-degrees-of-freedom-dof"><strong>2.5 自由度 (Degrees of Freedom, DOF)</strong></h4>
+<p><strong>自由度</strong>是指完全指定一个物体运动所需的最小独立坐标数目。</p>
+<ul>
+<li>一个在三维空间中自由运动的刚体，拥有 <strong>6个自由度 (6 DOF)</strong>：
                 <ul>
-                <li><strong>节点（Node）</strong>: 代表物体的某个部件（例如，大臂、头部）。</li>
-                <li><strong>边（Edge）</strong>: 代表连接两个部件的关节，以及它们之间的相对变换。</li>
-                <li><strong>根节点（Root）</strong>: 通常是角色的核心部分（如骨盆），它的位置和朝向是在世界坐标系中定义的。</li>
-                </ul>
-                <h4 id="25-%E8%87%AA%E7%94%B1%E5%BA%A6-degrees-of-freedom-dof"><strong>2.5 自由度 (Degrees of Freedom, DOF)</strong></h4>
-                <p><strong>自由度</strong>是指完全指定一个物体运动所需的最小独立坐标数目。</p>
+<li>3个平移自由度 (Translational DOF): 沿 X, Y, Z 轴的移动。</li>
+<li>3个旋转自由度 (Rotational DOF): 绕 X, Y, Z 轴的旋转（通常称为 Pitch, Yaw, Roll）。</li>
+</ul>
+</li>
+</ul>
+<p>对于关节模型：</p>
+<ul>
+<li><strong>单个自由度关节</strong>：只允许在一个方向上运动。
                 <ul>
-                <li>一个在三维空间中自由运动的刚体，拥有 <strong>6个自由度 (6 DOF)</strong>：
+<li><strong>转动关节 (Revolute joint)</strong>: 如肘关节，只允许旋转。</li>
+<li><strong>移动关节 (Prismatic joint)</strong>: 如活塞，只允许平移。</li>
+</ul>
+</li>
+<li><strong>复杂关节</strong>：拥有多个自由度。
                 <ul>
-                <li>3个平移自由度 (Translational DOF): 沿 X, Y, Z 轴的移动。</li>
-                <li>3个旋转自由度 (Rotational DOF): 绕 X, Y, Z 轴的旋转（通常称为 Pitch, Yaw, Roll）。</li>
-                </ul>
-                </li>
-                </ul>
-                <p>对于关节模型：</p>
+<li><strong>2自由度关节</strong>: 如手腕，可以向上下和左右弯曲。</li>
+<li><strong>3自由度关节</strong>:
                 <ul>
-                <li><strong>单个自由度关节</strong>：只允许在一个方向上运动。
+<li><strong>球状关节 (Ball and socket joint)</strong>: 如肩关节，可以在三个轴向上自由旋转。</li>
+<li><strong>万向节 (Gimbal)</strong>: 机械中常见的3自由度旋转接头。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>一个重要的概念是：<strong>一个n个自由度的复杂关节，可以看作是由n个1自由度的关节，通过n-1个长度为0的连杆串联而成。</strong> 这在数学和编程实现上为我们提供了巨大的便利。</p>
+<p><strong>人体模型的自由度</strong></p>
+<p>一个典型的人体模型，其自由度分布大致如下：</p>
+<ul>
+<li><strong>根节点 (Root)</strong>: 位于骨盆，拥有全部6个自由度（3平移+3旋转），决定了角色在世界中的整体位置和朝向。</li>
+<li><strong>其它关节</strong>: 通常只使用旋转关节 (Rotational joints)。
                 <ul>
-                <li><strong>转动关节 (Revolute joint)</strong>: 如肘关节，只允许旋转。</li>
-                <li><strong>移动关节 (Prismatic joint)</strong>: 如活塞，只允许平移。</li>
-                </ul>
-                </li>
-                <li><strong>复杂关节</strong>：拥有多个自由度。
+<li><strong>肩关节 (Shoulder)</strong>: 3 DOF</li>
+<li><strong>腕关节 (Wrist)</strong>: 2 DOF</li>
+<li><strong>膝关节 (Knee)</strong>: 1 DOF</li>
+</ul>
+</li>
+</ul>
+<h4 id="26-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><strong>2.6 数据结构</strong></h4>
+<p>如何用代码来表示这种层次结构呢？我们通常使用一个树状的数据结构。</p>
+<ul>
+<li><strong>层次连杆可用一树状结构来表示</strong>：
                 <ul>
-                <li><strong>2自由度关节</strong>: 如手腕，可以向上下和左右弯曲。</li>
-                <li><strong>3自由度关节</strong>:
-                <ul>
-                <li><strong>球状关节 (Ball and socket joint)</strong>: 如肩关节，可以在三个轴向上自由旋转。</li>
-                <li><strong>万向节 (Gimbal)</strong>: 机械中常见的3自由度旋转接头。</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                </ul>
-                <p>一个重要的概念是：<strong>一个n个自由度的复杂关节，可以看作是由n个1自由度的关节，通过n-1个长度为0的连杆串联而成。</strong> 这在数学和编程实现上为我们提供了巨大的便利。</p>
-                <p><strong>人体模型的自由度</strong></p>
-                <p>一个典型的人体模型，其自由度分布大致如下：</p>
-                <ul>
-                <li><strong>根节点 (Root)</strong>: 位于骨盆，拥有全部6个自由度（3平移+3旋转），决定了角色在世界中的整体位置和朝向。</li>
-                <li><strong>其它关节</strong>: 通常只使用旋转关节 (Rotational joints)。
-                <ul>
-                <li><strong>肩关节 (Shoulder)</strong>: 3 DOF</li>
-                <li><strong>腕关节 (Wrist)</strong>: 2 DOF</li>
-                <li><strong>膝关节 (Knee)</strong>: 1 DOF</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="26-%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><strong>2.6 数据结构</strong></h4>
-                <p>如何用代码来表示这种层次结构呢？我们通常使用一个树状的数据结构。</p>
-                <ul>
-                <li><strong>层次连杆可用一树状结构来表示</strong>：
-                <ul>
-                <li><strong>根节点 (Root Node)</strong>: 对应于物体的根部，其变换（位置和朝向）是在<strong>世界坐标系</strong>中给出的。</li>
-                <li><strong>其它节点 (Child Nodes)</strong>: 其变换是<strong>相对于父节点</strong>来表示的。</li>
-                <li><strong>叶节点 (Leaf Nodes)</strong>: 树的末端节点，如指尖、脚尖。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>代码实现思路</strong></p>
-                <p>我们可以定义一个<code>Joint</code>或<code>Node</code>的结构体/类：</p>
-                <pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;vector&gt;</span></span>
+<li><strong>根节点 (Root Node)</strong>: 对应于物体的根部，其变换（位置和朝向）是在<strong>世界坐标系</strong>中给出的。</li>
+<li><strong>其它节点 (Child Nodes)</strong>: 其变换是<strong>相对于父节点</strong>来表示的。</li>
+<li><strong>叶节点 (Leaf Nodes)</strong>: 树的末端节点，如指尖、脚尖。</li>
+</ul>
+</li>
+</ul>
+<p><strong>代码实现思路</strong></p>
+<p>我们可以定义一个<code>Joint</code>或<code>Node</code>的结构体/类：</p>
+<pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;vector&gt;</span></span>
                 <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;string&gt;</span></span>
                 <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">"glm/glm.hpp"</span> <span class="hljs-comment">// 使用GLM库处理向量和矩阵</span></span>
 
@@ -220,55 +218,55 @@
                     <span class="hljs-comment">// 更新变换矩阵的方法...</span>
                 };
                 </div></code></pre>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E6%AD%A3%E5%90%91%E8%BF%90%E5%8A%A8%E5%AD%A6-forward-kinematics-fk"><strong>第三部分：正向运动学 (Forward Kinematics, FK)</strong></h3>
-                <p>现在，我们进入今天第一个核心技术点：<strong>正向运动学</strong>。</p>
-                <p><strong>定义</strong>: <strong>动画师通过直接指定每一个关节的运动参数（通常是旋转角度），系统据此计算出各个连杆以及末端执行器（End Effector，如手或脚）在世界空间中的最终位置和姿态。</strong></p>
-                <p>这是一种“从根到叶”的计算过程。你设定了因（关节角度），然后去求解果（最终位置）。</p>
-                <h4 id="31-%E5%B1%82%E6%AC%A1%E5%8F%98%E6%8D%A2%E7%9A%84%E6%95%B0%E5%AD%A6%E5%8E%9F%E7%90%86"><strong>3.1 层次变换的数学原理</strong></h4>
-                <p>FK的核心就是矩阵的级联（concatenation）。一个子节点的世界坐标，是其父节点的世界坐标变换与其自身的局部坐标变换累积相乘的结果。</p>
-                <p>假设我们有一个顶点<code>V</code>，它定义在某个连杆 <code>Link_k</code> 的局部坐标系中。为了得到它在世界坐标系中的位置 <code>V'</code>，我们需要将从根节点到 <code>Link_k</code> 的所有变换矩阵依次左乘。</p>
-                <p>$$V' = M_{world} \cdot V = (M_0 \cdot M_1 \cdot ... \cdot M_k) \cdot V$$</p>
-                <p>其中，<code>M_i</code> 是第 <code>i</code> 个节点相对于其父节点的局部变换矩阵。它通常由一个平移矩阵 <code>T_i</code> 和一个旋转矩阵 <code>R_i(θ_i)</code> 组成。</p>
-                <p>$$M_i = T_i \cdot R_i(\theta_i)$$</p>
-                <p><strong>让我们通过一个例子来理解这个过程：</strong></p>
-                <p>考虑一个两节的手臂 <code>Link_0 -&gt; Link_1 -&gt; Link_1,1</code>。</p>
-                <ul>
-                <li>
-                <p><code>V₀</code>: <code>Link₀</code> 上的一个顶点。</p>
-                </li>
-                <li>
-                <p><code>V₁</code>: <code>Link₁</code> 上的一个顶点。</p>
-                </li>
-                <li>
-                <p><code>V₁,₁</code>: <code>Link₁,₁</code> 上的一个顶点。</p>
-                </li>
-                <li>
-                <p><code>T₀</code>: <code>Link₀</code>（根）在世界坐标系中的变换。</p>
-                </li>
-                <li>
-                <p><code>T₁</code>: <code>Link₁</code> 相对于 <code>Link₀</code> 的平移变换（即<code>Link₀</code>的长度）。</p>
-                </li>
-                <li>
-                <p><code>R₁(θ₁)</code>: <code>Link₁</code> 绕其关节的旋转。</p>
-                </li>
-                <li>
-                <p><code>T₁,₁</code>: <code>Link₁,₁</code> 相对于 <code>Link₁</code> 的平移变换。</p>
-                </li>
-                <li>
-                <p><code>R₁,₁(θ₁,₁)</code>: <code>Link₁,₁</code> 绕其关节的旋转。</p>
-                </li>
-                </ul>
-                <p>那么，这些顶点在世界坐标系中的位置为：</p>
-                <ul>
-                <li>$V_0' = T_0 \cdot V_0$</li>
-                <li>$V_1' = T_0 \cdot (T_1 \cdot R_1(\theta_1) \cdot V_1) = (T_0 T_1 R_1(\theta_1)) \cdot V_1$</li>
-                <li>$V_{1,1}' = T_0 \cdot T_1 R_1(\theta_1) \cdot (T_{1,1} R_{1,1}(\theta_{1,1}) \cdot V_{1,1}) = (T_0 T_1 R_1(\theta_1) T_{1,1} R_{1,1}(\theta_{1,1})) \cdot V_{1,1}$</li>
-                </ul>
-                <p><strong>注意矩阵的顺序！</strong> 变换是从父级到子级依次应用的。</p>
-                <h4 id="32-fk%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%A0%91%E7%9A%84%E9%81%8D%E5%8E%86"><strong>3.2 FK的实现：树的遍历</strong></h4>
-                <p>计算整棵骨骼树的FK过程，本质上就是对树进行一次<strong>深度优先遍历 (Depth-First Search, DFS)</strong>。</p>
-                <p><strong>算法伪代码:</strong></p>
-                <pre class="hljs"><code><div>// 使用一个矩阵栈来保存父节点的累积变换
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E6%AD%A3%E5%90%91%E8%BF%90%E5%8A%A8%E5%AD%A6-forward-kinematics-fk"><strong>第三部分：正向运动学 (Forward Kinematics, FK)</strong></h3>
+<p>现在，我们进入今天第一个核心技术点：<strong>正向运动学</strong>。</p>
+<p><strong>定义</strong>: <strong>动画师通过直接指定每一个关节的运动参数（通常是旋转角度），系统据此计算出各个连杆以及末端执行器（End Effector，如手或脚）在世界空间中的最终位置和姿态。</strong></p>
+<p>这是一种“从根到叶”的计算过程。你设定了因（关节角度），然后去求解果（最终位置）。</p>
+<h4 id="31-%E5%B1%82%E6%AC%A1%E5%8F%98%E6%8D%A2%E7%9A%84%E6%95%B0%E5%AD%A6%E5%8E%9F%E7%90%86"><strong>3.1 层次变换的数学原理</strong></h4>
+<p>FK的核心就是矩阵的级联（concatenation）。一个子节点的世界坐标，是其父节点的世界坐标变换与其自身的局部坐标变换累积相乘的结果。</p>
+<p>假设我们有一个顶点<code>V</code>，它定义在某个连杆 <code>Link_k</code> 的局部坐标系中。为了得到它在世界坐标系中的位置 <code>V'</code>，我们需要将从根节点到 <code>Link_k</code> 的所有变换矩阵依次左乘。</p>
+<p>$$V' = M_{world} \cdot V = (M_0 \cdot M_1 \cdot ... \cdot M_k) \cdot V$$</p>
+<p>其中，<code>M_i</code> 是第 <code>i</code> 个节点相对于其父节点的局部变换矩阵。它通常由一个平移矩阵 <code>T_i</code> 和一个旋转矩阵 <code>R_i(θ_i)</code> 组成。</p>
+<p>$$M_i = T_i \cdot R_i(\theta_i)$$</p>
+<p><strong>让我们通过一个例子来理解这个过程：</strong></p>
+<p>考虑一个两节的手臂 <code>Link_0 -&gt; Link_1 -&gt; Link_1,1</code>。</p>
+<ul>
+<li>
+<p><code>V₀</code>: <code>Link₀</code> 上的一个顶点。</p>
+</li>
+<li>
+<p><code>V₁</code>: <code>Link₁</code> 上的一个顶点。</p>
+</li>
+<li>
+<p><code>V₁,₁</code>: <code>Link₁,₁</code> 上的一个顶点。</p>
+</li>
+<li>
+<p><code>T₀</code>: <code>Link₀</code>（根）在世界坐标系中的变换。</p>
+</li>
+<li>
+<p><code>T₁</code>: <code>Link₁</code> 相对于 <code>Link₀</code> 的平移变换（即<code>Link₀</code>的长度）。</p>
+</li>
+<li>
+<p><code>R₁(θ₁)</code>: <code>Link₁</code> 绕其关节的旋转。</p>
+</li>
+<li>
+<p><code>T₁,₁</code>: <code>Link₁,₁</code> 相对于 <code>Link₁</code> 的平移变换。</p>
+</li>
+<li>
+<p><code>R₁,₁(θ₁,₁)</code>: <code>Link₁,₁</code> 绕其关节的旋转。</p>
+</li>
+</ul>
+<p>那么，这些顶点在世界坐标系中的位置为：</p>
+<ul>
+<li>$V_0' = T_0 \cdot V_0$</li>
+<li>$V_1' = T_0 \cdot (T_1 \cdot R_1(\theta_1) \cdot V_1) = (T_0 T_1 R_1(\theta_1)) \cdot V_1$</li>
+<li>$V_{1,1}' = T_0 \cdot T_1 R_1(\theta_1) \cdot (T_{1,1} R_{1,1}(\theta_{1,1}) \cdot V_{1,1}) = (T_0 T_1 R_1(\theta_1) T_{1,1} R_{1,1}(\theta_{1,1})) \cdot V_{1,1}$</li>
+</ul>
+<p><strong>注意矩阵的顺序！</strong> 变换是从父级到子级依次应用的。</p>
+<h4 id="32-fk%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%A0%91%E7%9A%84%E9%81%8D%E5%8E%86"><strong>3.2 FK的实现：树的遍历</strong></h4>
+<p>计算整棵骨骼树的FK过程，本质上就是对树进行一次<strong>深度优先遍历 (Depth-First Search, DFS)</strong>。</p>
+<p><strong>算法伪代码:</strong></p>
+<pre class="hljs"><code><div>// 使用一个矩阵栈来保存父节点的累积变换
                 MatrixStack matrix_stack;
                 matrix_stack.push(IdentityMatrix); // 初始为单位矩阵
 
@@ -288,52 +286,52 @@
                 // 从根节点开始调用
                 TraverseAndCalculateFK(root_joint, IdentityMatrix);
                 </div></code></pre>
-                <h4 id="33-fk%E4%BE%8B%E5%AD%90%E4%B8%80%E4%B8%AA%E4%B8%89%E8%BF%9E%E6%9D%86%E5%B9%B3%E9%9D%A2%E8%87%82"><strong>3.3 FK例子：一个三连杆平面臂</strong></h4>
-                <p>让我们来计算一个具体的例子。假设一个平面上的三连杆机械臂，Base在原点。</p>
+<h4 id="33-fk%E4%BE%8B%E5%AD%90%E4%B8%80%E4%B8%AA%E4%B8%89%E8%BF%9E%E6%9D%86%E5%B9%B3%E9%9D%A2%E8%87%82"><strong>3.3 FK例子：一个三连杆平面臂</strong></h4>
+<p>让我们来计算一个具体的例子。假设一个平面上的三连杆机械臂，Base在原点。</p>
+<ul>
+<li>连杆长度: $l_1, l_2, l_3$</li>
+<li>关节角度: $\theta_1, \theta_2, \theta_3$ (相对于水平轴或上一连杆)</li>
+</ul>
+<p>末端影响器 (End Effector) 的坐标 $(x, y)$ 是什么？</p>
+<p>我们可以通过累加每个连杆在$X$和$Y$轴上的投影来得到：</p>
+<ul>
+<li><strong>连杆1的末端坐标</strong>: $(l_1 \cos(\theta_1), l_1 \sin(\theta_1))$</li>
+<li><strong>连杆2的相对朝向</strong>: $\theta_1 + \theta_2'$ (这里假设 $\theta_2$ 是相对角度，为了简单起见，我们定义所有角度都相对于一个固定的轴，比如水平轴，如上图所示)。
                 <ul>
-                <li>连杆长度: $l_1, l_2, l_3$</li>
-                <li>关节角度: $\theta_1, \theta_2, \theta_3$ (相对于水平轴或上一连杆)</li>
-                </ul>
-                <p>末端影响器 (End Effector) 的坐标 $(x, y)$ 是什么？</p>
-                <p>我们可以通过累加每个连杆在$X$和$Y$轴上的投影来得到：</p>
-                <ul>
-                <li><strong>连杆1的末端坐标</strong>: $(l_1 \cos(\theta_1), l_1 \sin(\theta_1))$</li>
-                <li><strong>连杆2的相对朝向</strong>: $\theta_1 + \theta_2'$ (这里假设 $\theta_2$ 是相对角度，为了简单起见，我们定义所有角度都相对于一个固定的轴，比如水平轴，如上图所示)。
-                <ul>
-                <li>根据图示，$\theta_2$ 是与一个向下延伸的虚线的夹角。如果水平线为0度，连杆1的角度是$\theta_1$，那么连杆2与水平线的夹角是 $\theta_1 - (180 - \theta_2')$，这很复杂。</li>
-                <li><strong>让我们重新定义角度</strong>，让问题更清晰：设 $\theta_1, \theta_2, \theta_3$ 均为连杆与<strong>水平正方向</strong>的夹角。</li>
-                <li>那么末端坐标 $(x, y)$ 就是所有连杆在x和y方向上的分量之和：
+<li>根据图示，$\theta_2$ 是与一个向下延伸的虚线的夹角。如果水平线为0度，连杆1的角度是$\theta_1$，那么连杆2与水平线的夹角是 $\theta_1 - (180 - \theta_2')$，这很复杂。</li>
+<li><strong>让我们重新定义角度</strong>，让问题更清晰：设 $\theta_1, \theta_2, \theta_3$ 均为连杆与<strong>水平正方向</strong>的夹角。</li>
+<li>那么末端坐标 $(x, y)$ 就是所有连杆在x和y方向上的分量之和：
                 $$x = l_1 \cos(\theta_1) + l_2 \cos(\theta_2) + l_3 \cos(\theta_3)$$
                 $$y = l_1 \sin(\theta_1) + l_2 \sin(\theta_2) + l_3 \sin(\theta_3)$$</li>
-                <li><strong>如果角度是相对的</strong> (即 $\theta_i$ 是 <code>link_i</code> 相对于 <code>link_{i-1}</code> 的角度)，则：
+<li><strong>如果角度是相对的</strong> (即 $\theta_i$ 是 <code>link_i</code> 相对于 <code>link_{i-1}</code> 的角度)，则：
                 <ul>
-                <li><code>link_1</code> 的世界角度是 $\theta_1$</li>
-                <li><code>link_2</code> 的世界角度是 $\theta_1 + \theta_2$</li>
-                <li><code>link_3</code> 的世界角度是 $\theta_1 + \theta_2 + \theta_3$</li>
-                <li>最终坐标为：
+<li><code>link_1</code> 的世界角度是 $\theta_1$</li>
+<li><code>link_2</code> 的世界角度是 $\theta_1 + \theta_2$</li>
+<li><code>link_3</code> 的世界角度是 $\theta_1 + \theta_2 + \theta_3$</li>
+<li>最终坐标为：
                 $$x = l_1 \cos(\theta_1) + l_2 \cos(\theta_1 + \theta_2) + l_3 \cos(\theta_1 + \theta_2 + \theta_3)$$
                 $$y = l_1 \sin(\theta_1) + l_2 \sin(\theta_1 + \theta_2) + l_3 \cos(\theta_1 + \theta_2 + \theta_3)$$</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                </ul>
-                <p>这就是正向运动学——<strong>给定关节参数，求解末端位置</strong>。</p>
-                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E9%80%86%E5%90%91%E8%BF%90%E5%8A%A8%E5%AD%A6-inverse-kinematics-ik"><strong>第四部分：逆向运动学 (Inverse Kinematics, IK)</strong></h3>
-                <p>现在，我们来看问题的另一面，这也是关节动画中更强大但也更具挑战性的部分：<strong>逆向运动学</strong>。</p>
-                <p><strong>定义</strong>: <strong>动画师指定末端执行器（End Effector）的目标位置和/或姿态，系统反向求解出为了达到该目标，关节链中所有关节需要设置的角度。</strong></p>
-                <p>这是一种“从叶到根”的思考方式。你设定了果（目标位置），然后去反向求解因（关节角度）。这非常符合我们的直觉：当你想拿起桌上的杯子时，你不会去想“我的肩膀要转30度，肘部要弯70度...”，你只会想着“让我的手移动到杯子的位置”，你的大脑会自动为你完成IK的计算。</p>
-                <h4 id="41-ik%E7%9A%84%E6%8C%91%E6%88%98"><strong>4.1 IK的挑战</strong></h4>
-                <p>IK问题远比FK复杂，因为它面临着几个固有的难题：</p>
-                <ol>
-                <li>
-                <p><strong>解的存在性</strong>:</p>
-                <ul>
-                <li><strong>无解</strong>: 如果目标点超出了机械臂的可达范围，那么IK问题无解。</li>
-                <li><strong>唯一解</strong>: 这种情况非常罕见，通常只在关节数量和约束条件恰好匹配时出现。</li>
-                <li><strong>多解/无穷多解</strong>: 这是最常见的情况。对于一个简单的2D两连杆手臂，到达一个点通常就有两种姿态（“肘朝上”和“肘朝下”）。对于拥有更多关节的人体手臂（肩、肘、腕），可以到达同一个目标点的姿态有无穷多种。我们称之为<strong>冗余 (Redundancy)</strong>。</li>
-                </ul>
-                <div class="mermaid">graph TD
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>这就是正向运动学——<strong>给定关节参数，求解末端位置</strong>。</p>
+<h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E9%80%86%E5%90%91%E8%BF%90%E5%8A%A8%E5%AD%A6-inverse-kinematics-ik"><strong>第四部分：逆向运动学 (Inverse Kinematics, IK)</strong></h3>
+<p>现在，我们来看问题的另一面，这也是关节动画中更强大但也更具挑战性的部分：<strong>逆向运动学</strong>。</p>
+<p><strong>定义</strong>: <strong>动画师指定末端执行器（End Effector）的目标位置和/或姿态，系统反向求解出为了达到该目标，关节链中所有关节需要设置的角度。</strong></p>
+<p>这是一种“从叶到根”的思考方式。你设定了果（目标位置），然后去反向求解因（关节角度）。这非常符合我们的直觉：当你想拿起桌上的杯子时，你不会去想“我的肩膀要转30度，肘部要弯70度...”，你只会想着“让我的手移动到杯子的位置”，你的大脑会自动为你完成IK的计算。</p>
+<h4 id="41-ik%E7%9A%84%E6%8C%91%E6%88%98"><strong>4.1 IK的挑战</strong></h4>
+<p>IK问题远比FK复杂，因为它面临着几个固有的难题：</p>
+<ol>
+<li>
+<p><strong>解的存在性</strong>:</p>
+<ul>
+<li><strong>无解</strong>: 如果目标点超出了机械臂的可达范围，那么IK问题无解。</li>
+<li><strong>唯一解</strong>: 这种情况非常罕见，通常只在关节数量和约束条件恰好匹配时出现。</li>
+<li><strong>多解/无穷多解</strong>: 这是最常见的情况。对于一个简单的2D两连杆手臂，到达一个点通常就有两种姿态（“肘朝上”和“肘朝下”）。对于拥有更多关节的人体手臂（肩、肘、腕），可以到达同一个目标点的姿态有无穷多种。我们称之为<strong>冗余 (Redundancy)</strong>。</li>
+</ul>
+<div class="mermaid">graph TD
                     subgraph "多解情况 (Multiple Solutions)"
                         direction LR
                         Base((Base))
@@ -341,124 +339,149 @@
                         ElbowUp(Elbow Up)
                         ElbowDown(Elbow Down)
                         
-                        Base -- L1 --> ElbowUp -- L2 --> Target
-                        Base -- L1 --> ElbowDown -- L2 --> Target
+                        Base -- L1 --&gt; ElbowUp -- L2 --&gt; Target
+                        Base -- L1 --&gt; ElbowDown -- L2 --&gt; Target
                     end
 
                     subgraph "无解情况 (No Solution)"
                         direction LR
-                        Base2((Base)) -- L1 --> Elbow2((Elbow)) -- L2 --> EndEffector(End)
+                        Base2((Base)) -- L1 --&gt; Elbow2((Elbow)) -- L2 --&gt; EndEffector(End)
                         Target2{Target is out of reach}
                     end
 
                     style Target fill:#f00,stroke:#333,stroke-width:2px
                     style Target2 fill:#f00,stroke:#333,stroke-width:2px
                 </div>
-                </li>
-                <li>
-                <p><strong>奇异性 (Singularities)</strong>: 在某些特定的关节构型下，关节链会失去一个或多个自由度，导致无法向某些方向移动。最常见的例子就是手臂完全伸直时，你无法让手在伸直的方向上再“向前”移动。在这些点上，IK的数学解会变得不稳定或无定义。</p>
-                </li>
-                <li>
-                <p><strong>求解的复杂性</strong>: FK的方程是直接的三角函数，而IK要求解的是一组高度<strong>非线性</strong>的三角函数方程组，这通常没有简单的代数解。</p>
-                </li>
-                </ol>
-                <h4 id="42-%E6%B1%82%E8%A7%A3ik%E7%9A%84%E6%96%B9%E6%B3%95%E8%A7%A3%E6%9E%90%E6%B3%95"><strong>4.2 求解IK的方法：解析法</strong></h4>
-                <p>对于非常简单的关节链（比如2D两连杆手臂），我们可以通过几何或代数方法找到<strong>解析解（Analytical Solution）</strong>。</p>
-                <p><strong>例子：2D两连杆手臂的解析解</strong></p>
-                <p>让我们来推导这个经典问题的解。</p>
-                <ul>
-                <li>已知：连杆长度 $L_1, L_2$，目标点坐标 $(X, Y)$。</li>
-                <li>求解：关节角度 $\theta_1, \theta_2$。</li>
-                </ul>
-                <p><strong>推导步骤:</strong></p>
-                <ol>
-                <li>
-                <p><strong>建立几何关系</strong>
+</li>
+<li>
+<p><strong>奇异性 (Singularities)</strong>: 在某些特定的关节构型下，关节链会失去一个或多个自由度，导致无法向某些方向移动。最常见的例子就是手臂完全伸直时，你无法让手在伸直的方向上再“向前”移动。在这些点上，IK的数学解会变得不稳定或无定义。</p>
+</li>
+<li>
+<p><strong>求解的复杂性</strong>: FK的方程是直接的三角函数，而IK要求解的是一组高度<strong>非线性</strong>的三角函数方程组，这通常没有简单的代数解。</p>
+</li>
+</ol>
+<h4 id="42-%E6%B1%82%E8%A7%A3ik%E7%9A%84%E6%96%B9%E6%B3%95%E8%A7%A3%E6%9E%90%E6%B3%95"><strong>4.2 求解IK的方法：解析法</strong></h4>
+<p>对于非常简单的关节链（比如2D两连杆手臂），我们可以通过几何或代数方法找到<strong>解析解（Analytical Solution）</strong>。</p>
+<p><strong>例子：2D两连杆手臂的解析解</strong></p>
+<p>让我们来推导这个经典问题的解。</p>
+<ul>
+<li>已知：连杆长度 $L_1, L_2$，目标点坐标 $(X, Y)$。</li>
+<li>求解：关节角度 $\theta_1, \theta_2$。</li>
+</ul>
+<p><strong>推导步骤:</strong></p>
+<ol>
+<li>
+<p><strong>建立几何关系</strong>
                 我们有一个由原点(0,0)、肘关节、目标点(X,Y)构成的三角形。三条边的长度分别是 $L_1, L_2$ 和 $D = \sqrt{X^2 + Y^2}$。</p>
-                <div class="mermaid">graph LR
-                Base("Base (0,0)") -- L1 --> Elbow((Elbow));
-                Elbow -- L2 --> Goal("Goal (X,Y)");
-                Base -. "D = sqrt(X²+Y²)" .-> Goal;
+<div class="mermaid">graph LR
+                Base("Base (0,0)") -- L1 --&gt; Elbow((Elbow));
+                Elbow -- L2 --&gt; Goal("Goal (X,Y)");
+                Base -. "D = sqrt(X²+Y²)" .-&gt; Goal;
                 </div>
-                </li>
-                <li>
-                <p><strong>使用余弦定理求解 $\theta_2$</strong>
+</li>
+<li>
+<p><strong>使用余弦定理求解 $\theta_2$</strong>
                 在 $\triangle ABC$ 中，根据余弦定理：
                 $$D^2 = L_1^2 + L_2^2 - 2L_1L_2 \cos(\alpha)$$
                 其中 $\alpha$ 是肘关节处的内角。</p>
-                <p>$$\cos(\alpha) = \frac{L_1^2 + L_2^2 - D^2}{2L_1L_2} = \frac{L_1^2 + L_2^2 - (X^2 + Y^2)}{2L_1L_2}$$</p>
-                <p>从图中可以看出，我们定义的关节角 $\theta_2$ 与内角 $\alpha$ 的关系是 $\alpha = 180^\circ - \theta_2$ (假设 $\theta_2$ 为正代表向外弯曲)。
+<p>$$\cos(\alpha) = \frac{L_1^2 + L_2^2 - D^2}{2L_1L_2} = \frac{L_1^2 + L_2^2 - (X^2 + Y^2)}{2L_1L_2}$$</p>
+<p>从图中可以看出，我们定义的关节角 $\theta_2$ 与内角 $\alpha$ 的关系是 $\alpha = 180^\circ - \theta_2$ (假设 $\theta_2$ 为正代表向外弯曲)。
                 因为 $\cos(180^\circ - \theta_2) = -\cos(\theta_2)$，所以：
                 $$-\cos(\theta_2) = \frac{L_1^2 + L_2^2 - X^2 - Y^2}{2L_1L_2}$$</p>
-                <p>$$\cos(\theta_2) = \frac{X^2 + Y^2 - L_1^2 - L_2^2}{2L_1L_2}$$</p>
-                <p>因此，$\theta_2$ 的解是：
+<p>$$\cos(\theta_2) = \frac{X^2 + Y^2 - L_1^2 - L_2^2}{2L_1L_2}$$</p>
+<p>因此，$\theta_2$ 的解是：
                 $$\theta_2 = \pm \arccos\left(\frac{X^2 + Y^2 - L_1^2 - L_2^2}{2L_1L_2}\right)$$</p>
-                <p>这里的 <code>+</code> 和 <code>-</code> 分别对应“肘朝下”和“肘朝上”的两种情况。</p>
-                </li>
-                <li>
-                <p><strong>求解 $\theta_1$</strong>
+<p>这里的 <code>+</code> 和 <code>-</code> 分别对应“肘朝下”和“肘朝上”的两种情况。</p>
+</li>
+<li>
+<p><strong>求解 $\theta_1$</strong>
                 现在我们知道了 $\theta_2$，如何求 $\theta_1$？
                 $\theta_1$ 可以看作是两个角度的和或差：$\theta_1 = \beta \pm \gamma$</p>
-                <ul>
-                <li>$\beta$ 是从Base到Goal点的连线与X轴的夹角。
+<ul>
+<li>$\beta$ 是从Base到Goal点的连线与X轴的夹角。
                 $\beta = \text{atan2}(Y, X)$ (使用 <code>atan2</code> 函数可以正确处理所有象限)。</li>
-                <li>$\gamma$ 是 $\triangle ABC$ 在Base处的内角。</li>
-                </ul>
-                <p>再次使用余弦定理求 $\gamma$：
+<li>$\gamma$ 是 $\triangle ABC$ 在Base处的内角。</li>
+</ul>
+<p>再次使用余弦定理求 $\gamma$：
                 $$L_2^2 = L_1^2 + D^2 - 2L_1D \cos(\gamma)$$
                 $$\cos(\gamma) = \frac{L_1^2 + D^2 - L_2^2}{2L_1D} = \frac{L_1^2 + X^2 + Y^2 - L_2^2}{2L_1\sqrt{X^2+Y^2}}$$
                 $$\gamma = \arccos\left(\frac{L_1^2 + X^2 + Y^2 - L_2^2}{2L_1\sqrt{X^2+Y^2}}\right)$$</p>
-                <p>最终，$\theta_1$ 的解是：
+<p>最终，$\theta_1$ 的解是：
                 $$\theta_1 = \text{atan2}(Y, X) \mp \gamma$$</p>
-                <p>注意这里的 <code>∓</code> 与 $\theta_2$ 的 <code>±</code> 是对应的。如果 $\theta_2$ 取正值（肘朝下），则 $\theta_1$ 要减去 $\gamma$；如果 $\theta_2$ 取负值（肘朝上），则 $\theta_1$ 要加上 $\gamma$。</p>
-                </li>
-                </ol>
-                <p><strong>解析法的局限</strong>:
+<p>注意这里的 <code>∓</code> 与 $\theta_2$ 的 <code>±</code> 是对应的。如果 $\theta_2$ 取正值（肘朝下），则 $\theta_1$ 要减去 $\gamma$；如果 $\theta_2$ 取负值（肘朝上），则 $\theta_1$ 要加上 $\gamma$。</p>
+</li>
+</ol>
+<p><strong>解析法的局限</strong>:
                 这种方法虽然精确，但只适用于非常简单的结构。对于超过3个关节的链，或者在三维空间中，代数方程会变得异常复杂甚至无解。因此，在实际应用中，我们更多地依赖<strong>数值法</strong>。</p>
-                <h4 id="43-%E6%B1%82%E8%A7%A3ik%E7%9A%84%E6%96%B9%E6%B3%95%E6%95%B0%E5%80%BC%E6%B3%95-%E7%AE%80%E4%BB%8B"><strong>4.3 求解IK的方法：数值法 (简介)</strong></h4>
-                <p>当解析法失效时，我们采用迭代的数值方法来<strong>逼近</strong>解。这些方法的基本思想是：</p>
-                <ol>
-                <li>从当前的关节姿态开始。</li>
-                <li>计算末端执行器当前位置与目标位置的差距（误差）。</li>
-                <li>根据这个误差，微调所有关节的角度，使得末端执行器向目标靠近一小步。</li>
-                <li>重复步骤2和3，直到误差小于一个可接受的阈值，或者达到最大迭代次数。</li>
-                </ol>
-                <p>常见的数值求解IK的方法包括：</p>
-                <ul>
-                <li><strong>逆向雅可比方法 (Inverse-Jacobian method)</strong>: 这是最经典和流行的方法之一，它通过一个叫做“雅可比矩阵”的工具来建立关节速度和末端执行器速度之间的线性关系。</li>
-                <li><strong>循环坐标下降法 (Cyclic Coordinate Descent, CCD)</strong>: 一种更简单直观的方法，它从末端关节开始，依次旋转每个关节，使其指向目标。</li>
-                <li><strong>FABRIK (Forward And Backward Reaching Inverse Kinematics)</strong>: 一种基于几何的迭代方法，通过前后拉伸关节链来逼近目标。</li>
-                <li><strong>基于优化的方法 (Optimization-based method)</strong>: 将IK问题看作是一个优化问题，目标是最小化末端执行器与目标之间的距离，同时可能考虑其它约束（如关节限制、保持平衡等）。</li>
-                </ul>
-                <p>我们将在下一讲中，详细深入地探讨这些强大的数值方法，特别是逆向雅可比方法。</p>
-            </article>
-        </main>
-    </div>
-    
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<h4 id="43-%E6%B1%82%E8%A7%A3ik%E7%9A%84%E6%96%B9%E6%B3%95%E6%95%B0%E5%80%BC%E6%B3%95-%E7%AE%80%E4%BB%8B"><strong>4.3 求解IK的方法：数值法 (简介)</strong></h4>
+<p>当解析法失效时，我们采用迭代的数值方法来<strong>逼近</strong>解。这些方法的基本思想是：</p>
+<ol>
+<li>从当前的关节姿态开始。</li>
+<li>计算末端执行器当前位置与目标位置的差距（误差）。</li>
+<li>根据这个误差，微调所有关节的角度，使得末端执行器向目标靠近一小步。</li>
+<li>重复步骤2和3，直到误差小于一个可接受的阈值，或者达到最大迭代次数。</li>
+</ol>
+<p>常见的数值求解IK的方法包括：</p>
+<ul>
+<li><strong>逆向雅可比方法 (Inverse-Jacobian method)</strong>: 这是最经典和流行的方法之一，它通过一个叫做“雅可比矩阵”的工具来建立关节速度和末端执行器速度之间的线性关系。</li>
+<li><strong>循环坐标下降法 (Cyclic Coordinate Descent, CCD)</strong>: 一种更简单直观的方法，它从末端关节开始，依次旋转每个关节，使其指向目标。</li>
+<li><strong>FABRIK (Forward And Backward Reaching Inverse Kinematics)</strong>: 一种基于几何的迭代方法，通过前后拉伸关节链来逼近目标。</li>
+<li><strong>基于优化的方法 (Optimization-based method)</strong>: 将IK问题看作是一个优化问题，目标是最小化末端执行器与目标之间的距离，同时可能考虑其它约束（如关节限制、保持平衡等）。</li>
+</ul>
+<p>我们将在下一讲中，详细深入地探讨这些强大的数值方法，特别是逆向雅可比方法。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

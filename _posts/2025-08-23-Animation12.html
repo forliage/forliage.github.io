@@ -1,13 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机动画12:隐函数曲面造型和动画技术</title>
-    
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    
-    <script>
+<meta charset="utf-8"/>
+<title>计算机动画12:隐函数曲面造型和动画技术</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -18,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -32,75 +30,75 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8A%A8%E7%94%BB12%E9%9A%90%E5%87%BD%E6%95%B0%E6%9B%B2%E9%9D%A2%E9%80%A0%E5%9E%8B%E5%92%8C%E5%8A%A8%E7%94%BB%E6%8A%80%E6%9C%AF">计算机动画12:隐函数曲面造型和动画技术</h1>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E4%B8%89%E7%BB%B4%E4%B8%96%E7%95%8C%E7%9A%84%E5%87%A0%E4%BD%95%E8%A1%A8%E7%A4%BA%E6%B3%95"><strong>第一部分：三维世界的几何表示法</strong></h3>
-                <p>在进入隐函数的世界之前，我们首先需要了解在计算机图形学中，我们有哪些主流的工具来描述一个三维物体的形状。把这些工具想象成艺术家的不同媒介：有的人用积木，有的人用画笔，有的人用黏土。</p>
-                <div class="mermaid">graph TD
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8A%A8%E7%94%BB12%E9%9A%90%E5%87%BD%E6%95%B0%E6%9B%B2%E9%9D%A2%E9%80%A0%E5%9E%8B%E5%92%8C%E5%8A%A8%E7%94%BB%E6%8A%80%E6%9C%AF">计算机动画12:隐函数曲面造型和动画技术</h1>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E4%B8%89%E7%BB%B4%E4%B8%96%E7%95%8C%E7%9A%84%E5%87%A0%E4%BD%95%E8%A1%A8%E7%A4%BA%E6%B3%95"><strong>第一部分：三维世界的几何表示法</strong></h3>
+<p>在进入隐函数的世界之前，我们首先需要了解在计算机图形学中，我们有哪些主流的工具来描述一个三维物体的形状。把这些工具想象成艺术家的不同媒介：有的人用积木，有的人用画笔，有的人用黏土。</p>
+<div class="mermaid">graph TD
                     subgraph "自由曲面的表示方法"
-                        A["<b>参数曲面 (Parametric Surface)</b><br>如：NURBS, Bezier<br><i>像在可拉伸的画布上绘画</i>"]
-                        B["<b>多边形网格 (Polygon Mesh)</b><br>如：STL, OBJ<br><i>像用三角形积木搭建模型</i>"]
-                        C["<b>细分曲面 (Subdivision Surface)</b><br>如：Catmull-Clark<br><i>对积木模型进行打磨抛光</i>"]
-                        D["<b>隐式曲面 (Implicit Surface)</b><br>如：Metaballs, SDF<br><i>像用磁场或力场定义形状</i>"]
+                        A["<b>参数曲面 (Parametric Surface)</b><br/>如：NURBS, Bezier<br/><i>像在可拉伸的画布上绘画</i>"]
+                        B["<b>多边形网格 (Polygon Mesh)</b><br/>如：STL, OBJ<br/><i>像用三角形积木搭建模型</i>"]
+                        C["<b>细分曲面 (Subdivision Surface)</b><br/>如：Catmull-Clark<br/><i>对积木模型进行打磨抛光</i>"]
+                        D["<b>隐式曲面 (Implicit Surface)</b><br/>如：Metaballs, SDF<br/><i>像用磁场或力场定义形状</i>"]
                     end
 
-                    A -- B-Rep (边界表示) --> B
+                    A -- B-Rep (边界表示) --&gt; B
                 </div>
-                <ul>
-                <li>
-                <p><strong>参数曲面 (Parametric Surface)</strong>：如Bezier曲面、NURBS曲面。它们通过一个二维参数 $(u, v)$ 映射到三维空间中的点 $(x, y, z)$ 来定义曲面。你可以把它想象成在一块有弹性的橡胶布上（UV空间）画画，然后把这块布拉伸、扭曲成三维形状。这种方法非常适合构建光滑、精确的工业设计表面，比如汽车车身。</p>
-                </li>
-                <li>
-                <p><strong>多边形网格 (Polygon Mesh)</strong>：这是最普遍、最直接的表示方法。它将物体的表面近似为由许多微小的、平坦的多边形（通常是三角形或四边形）拼接而成。我们玩的绝大多数3D游戏中的模型，都是多边形网格。</p>
-                </li>
-                <li>
-                <p><strong>细分曲面 (Subdivision Surface)</strong>：它结合了前两者的优点。它从一个粗糙的多边形控制网格出发，通过一套递归的细分规则，不断地增加顶点并平滑其位置，最终生成一个光滑的曲面。Pixar动画电影中的角色模型大量使用了这项技术。</p>
-                </li>
-                </ul>
-                <p>以上三种，无论是参数曲面还是多边形网格，都属于<strong>边界表示 (Boundary Representation, B-Rep)</strong>。它们直接描述了物体的“皮肤”，但对于物体“内部”的信息则知之甚少。它们在处理某些情况时会遇到困难：</p>
-                <ul>
-                <li><strong>拓扑变化困难</strong>：想象一下，要模拟两滴水融合在一起。对于多边形网格来说，你需要极其复杂的算法来检测碰撞、删除重叠的三角面、然后重新“缝合”网格，这个过程非常繁琐且容易出错。</li>
-                <li><strong>体模型表示不直观</strong>：像克莱因瓶这样没有严格内外之分的曲面，用边界表示法来处理会很奇怪。</li>
-                </ul>
-                <p>而我们今天的主角——<strong>隐式曲面 (Implicit Surface)</strong>，则提供了一种全新的思路。</p>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E9%9A%90%E5%BC%8F%E6%9B%B2%E9%9D%A2%E7%94%A8%E5%9C%BA%E6%9D%A5%E5%AE%9A%E4%B9%89%E5%BD%A2%E7%8A%B6"><strong>第二部分：隐式曲面——用场来定义形状</strong></h3>
-                <p>隐式曲面不直接描述“皮”，而是定义了一个遍布整个三维空间的<strong>标量场 (Scalar Field)</strong>。</p>
-                <h4 id="21-%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3%E7%AD%89%E5%80%BC%E9%9D%A2-isosurface"><strong>2.1 核心思想：等值面 (Isosurface)</strong></h4>
-                <p>想象一下地理课上的等高线地图。地图上的每一条等高线，连接了所有海拔相同的点。例如，海拔800米等高线上的所有点，其<code>海拔(经度, 纬度) = 800</code>。</p>
-                <p>现在，我们将这个思想扩展到三维空间。我们定义一个函数 $f(x, y, z)$，它为空间中任意一个点赋予一个标量值。这个函数就构建了一个标量场。<strong>隐式曲面就是这个场中所有函数值等于某个特定阈值（常数）$T$ 的点的集合。</strong></p>
-                <p>在数学上，这个曲面 $S$ 被定义为：
+<ul>
+<li>
+<p><strong>参数曲面 (Parametric Surface)</strong>：如Bezier曲面、NURBS曲面。它们通过一个二维参数 $(u, v)$ 映射到三维空间中的点 $(x, y, z)$ 来定义曲面。你可以把它想象成在一块有弹性的橡胶布上（UV空间）画画，然后把这块布拉伸、扭曲成三维形状。这种方法非常适合构建光滑、精确的工业设计表面，比如汽车车身。</p>
+</li>
+<li>
+<p><strong>多边形网格 (Polygon Mesh)</strong>：这是最普遍、最直接的表示方法。它将物体的表面近似为由许多微小的、平坦的多边形（通常是三角形或四边形）拼接而成。我们玩的绝大多数3D游戏中的模型，都是多边形网格。</p>
+</li>
+<li>
+<p><strong>细分曲面 (Subdivision Surface)</strong>：它结合了前两者的优点。它从一个粗糙的多边形控制网格出发，通过一套递归的细分规则，不断地增加顶点并平滑其位置，最终生成一个光滑的曲面。Pixar动画电影中的角色模型大量使用了这项技术。</p>
+</li>
+</ul>
+<p>以上三种，无论是参数曲面还是多边形网格，都属于<strong>边界表示 (Boundary Representation, B-Rep)</strong>。它们直接描述了物体的“皮肤”，但对于物体“内部”的信息则知之甚少。它们在处理某些情况时会遇到困难：</p>
+<ul>
+<li><strong>拓扑变化困难</strong>：想象一下，要模拟两滴水融合在一起。对于多边形网格来说，你需要极其复杂的算法来检测碰撞、删除重叠的三角面、然后重新“缝合”网格，这个过程非常繁琐且容易出错。</li>
+<li><strong>体模型表示不直观</strong>：像克莱因瓶这样没有严格内外之分的曲面，用边界表示法来处理会很奇怪。</li>
+</ul>
+<p>而我们今天的主角——<strong>隐式曲面 (Implicit Surface)</strong>，则提供了一种全新的思路。</p>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E9%9A%90%E5%BC%8F%E6%9B%B2%E9%9D%A2%E7%94%A8%E5%9C%BA%E6%9D%A5%E5%AE%9A%E4%B9%89%E5%BD%A2%E7%8A%B6"><strong>第二部分：隐式曲面——用场来定义形状</strong></h3>
+<p>隐式曲面不直接描述“皮”，而是定义了一个遍布整个三维空间的<strong>标量场 (Scalar Field)</strong>。</p>
+<h4 id="21-%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3%E7%AD%89%E5%80%BC%E9%9D%A2-isosurface"><strong>2.1 核心思想：等值面 (Isosurface)</strong></h4>
+<p>想象一下地理课上的等高线地图。地图上的每一条等高线，连接了所有海拔相同的点。例如，海拔800米等高线上的所有点，其<code>海拔(经度, 纬度) = 800</code>。</p>
+<p>现在，我们将这个思想扩展到三维空间。我们定义一个函数 $f(x, y, z)$，它为空间中任意一个点赋予一个标量值。这个函数就构建了一个标量场。<strong>隐式曲面就是这个场中所有函数值等于某个特定阈值（常数）$T$ 的点的集合。</strong></p>
+<p>在数学上，这个曲面 $S$ 被定义为：
                 $$S = { (x, y, z) \in \mathbb{R}^3 \mid f(x, y, z) = T }$$
                 这个曲面 $S$ 就被称为函数 $f$ 的<strong>等值面 (Isosurface)</strong> 或<strong>水平集 (Level Set)</strong>。通常为了方便，我们会将阈值 $T$ 移到函数一侧，并令其为0，即：
                 $$g(x, y, z) = f(x, y, z) - T = 0$$</p>
-                <h4 id="22-%E5%86%85%E5%A4%96%E4%B9%8B%E5%88%86%E7%A9%BA%E9%97%B4%E7%9A%84%E5%88%92%E5%88%86"><strong>2.2 内外之分：空间的划分</strong></h4>
-                <p>隐式曲面的一个巨大优势是，它不仅定义了曲面本身，还自然地将整个空间划分为三个区域：</p>
-                <ul>
-                <li><strong>曲面上 (On)</strong>：满足 $f(x, y, z) = 0$ 的点。</li>
-                <li><strong>内部 (Inside)</strong>：满足 $f(x, y, z) &gt; 0$ 的点。</li>
-                <li><strong>外部 (Outside)</strong>：满足 $f(x, y, z) &lt; 0$ 的点。</li>
-                </ul>
-                <p>当然，你也可以反过来定义，让 $f&lt;0$ 为内部。关键在于保持定义的一致性。这个特性使得<strong>点的内外判断 (Inside/Outside Test)</strong> 变得极其简单高效：只需计算该点的函数值并检查其符号即可。这在碰撞检测等应用中非常有用。</p>
-                <pre class="hljs"><code><div><span class="hljs-comment">// C++ 伪代码</span>
+<h4 id="22-%E5%86%85%E5%A4%96%E4%B9%8B%E5%88%86%E7%A9%BA%E9%97%B4%E7%9A%84%E5%88%92%E5%88%86"><strong>2.2 内外之分：空间的划分</strong></h4>
+<p>隐式曲面的一个巨大优势是，它不仅定义了曲面本身，还自然地将整个空间划分为三个区域：</p>
+<ul>
+<li><strong>曲面上 (On)</strong>：满足 $f(x, y, z) = 0$ 的点。</li>
+<li><strong>内部 (Inside)</strong>：满足 $f(x, y, z) &gt; 0$ 的点。</li>
+<li><strong>外部 (Outside)</strong>：满足 $f(x, y, z) &lt; 0$ 的点。</li>
+</ul>
+<p>当然，你也可以反过来定义，让 $f&lt;0$ 为内部。关键在于保持定义的一致性。这个特性使得<strong>点的内外判断 (Inside/Outside Test)</strong> 变得极其简单高效：只需计算该点的函数值并检查其符号即可。这在碰撞检测等应用中非常有用。</p>
+<pre class="hljs"><code><div><span class="hljs-comment">// C++ 伪代码</span>
                 <span class="hljs-keyword">enum</span> PointLocation { INSIDE, OUTSIDE, ON_SURFACE };
 
                 <span class="hljs-function">PointLocation <span class="hljs-title">check_location</span><span class="hljs-params">(<span class="hljs-keyword">const</span> glm::vec3&amp; point)</span> </span>{
@@ -114,147 +112,147 @@
                     }
                 }
                 </div></code></pre>
-                <h4 id="23-%E6%9B%B2%E9%9D%A2%E6%B3%95%E5%90%91%E6%A2%AF%E5%BA%A6%E7%9A%84%E5%A8%81%E5%8A%9B"><strong>2.3 曲面法向：梯度的威力</strong></h4>
-                <p>在图形学中，曲面的法向量至关重要，它决定了光照和着色的效果。对于隐式曲面，法向量的计算异常优雅：<strong>曲面上任意一点的法向量，就是该点处函数的梯度方向。</strong></p>
-                <p><strong>数学证明</strong>：
+<h4 id="23-%E6%9B%B2%E9%9D%A2%E6%B3%95%E5%90%91%E6%A2%AF%E5%BA%A6%E7%9A%84%E5%A8%81%E5%8A%9B"><strong>2.3 曲面法向：梯度的威力</strong></h4>
+<p>在图形学中，曲面的法向量至关重要，它决定了光照和着色的效果。对于隐式曲面，法向量的计算异常优雅：<strong>曲面上任意一点的法向量，就是该点处函数的梯度方向。</strong></p>
+<p><strong>数学证明</strong>：
                 梯度 $\nabla f$ 定义为：
                 $$\nabla f(x, y, z) = \left( \frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}, \frac{\partial f}{\partial z} \right)$$
                 梯度向量指向函数值增长最快的方向。为什么它垂直于等值面呢？</p>
-                <ol>
-                <li>考虑曲面 $f(x, y, z) = C$ 上的任意一点 $\mathbf{p}_0 = (x_0, y_0, z_0)$。</li>
-                <li>再考虑曲面上的一条经过 $\mathbf{p}_0$ 的任意平滑曲线，其参数方程为 $\mathbf{p}(t) = (x(t), y(t), z(t))$，且 $\mathbf{p}(0) = \mathbf{p}_0$。</li>
-                <li>因为曲线上的所有点都在等值面上，所以对于任意的 $t$，都有 $f(\mathbf{p}(t)) = C$。</li>
-                <li>我们将这个方程对 $t$ 求导。根据多元复合函数求导的链式法则，我们得到：
+<ol>
+<li>考虑曲面 $f(x, y, z) = C$ 上的任意一点 $\mathbf{p}_0 = (x_0, y_0, z_0)$。</li>
+<li>再考虑曲面上的一条经过 $\mathbf{p}_0$ 的任意平滑曲线，其参数方程为 $\mathbf{p}(t) = (x(t), y(t), z(t))$，且 $\mathbf{p}(0) = \mathbf{p}_0$。</li>
+<li>因为曲线上的所有点都在等值面上，所以对于任意的 $t$，都有 $f(\mathbf{p}(t)) = C$。</li>
+<li>我们将这个方程对 $t$ 求导。根据多元复合函数求导的链式法则，我们得到：
                 $\frac{d}{dt} f(\mathbf{p}(t)) = \frac{\partial f}{\partial x} \frac{dx}{dt} + \frac{\partial f}{\partial y} \frac{dy}{dt} + \frac{\partial f}{\partial z} \frac{dz}{dt} = \frac{dC}{dt} = 0$</li>
-                <li>这个表达式可以写成两个向量的点积形式：
+<li>这个表达式可以写成两个向量的点积形式：
                 $$\left( \frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}, \frac{\partial f}{\partial z} \right) \cdot \left( \frac{dx}{dt}, \frac{dy}{dt}, \frac{dz}{dt} \right) = 0$$</li>
-                <li>即 $\nabla f(\mathbf{p}(t)) \cdot \mathbf{p}'(t) = 0$。</li>
-                <li>$\mathbf{p}'(t)$ 正是曲线在 $\mathbf{p}(t)$ 点的切向量。这个等式意味着，函数在曲面上一点的<strong>梯度向量</strong>，与经过该点的<strong>任意一条曲面切向量</strong>都垂直。</li>
-                <li>因此，梯度向量 $\nabla f$ 必然是该点处曲面的<strong>法向量</strong>。</li>
-                </ol>
-                <p>这个性质非常强大。我们无需复杂的几何计算，只需对函数求偏导，就能得到法向量。</p>
-                <ul>
-                <li>如果 $f&gt;0$ 表示内部，那么梯度 $\nabla f$ 指向内部（函数值增大的方向）。</li>
-                <li>如果 $f&lt;0$ 表示内部，那么梯度 $\nabla f$ 指向外部。</li>
-                </ul>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E9%9A%90%E5%BC%8F%E6%9B%B2%E9%9D%A2%E7%9A%84%E8%B6%85%E8%83%BD%E5%8A%9B"><strong>第三部分：隐式曲面的“超能力”</strong></h3>
-                <p>基于以上核心思想，隐式曲面展现出了一些传统几何表示法难以匹敌的强大能力。</p>
-                <h4 id="31-%E8%B6%85%E8%83%BD%E5%8A%9B%E4%B8%80%E8%BD%BB%E6%9D%BE%E7%9A%84%E6%9E%84%E9%80%A0%E6%80%A7%E5%AE%9E%E4%BD%93%E5%87%A0%E4%BD%95-csg"><strong>3.1 超能力一：轻松的构造性实体几何 (CSG)</strong></h4>
-                <p>CSG 是一种通过对基本几何体进行布尔运算（并、交、差）来构建复杂模型的技术。对于多边形网格，实现CSG非常复杂。但对于隐式曲面，它出奇地简单！</p>
-                <p>假设我们有两个隐式曲面，分别由函数 $f(x,y,z)$ 和 $g(x,y,z)$ 定义，并且我们约定 $f&lt;0$ 和 $g&lt;0$ 表示物体内部。</p>
-                <ul>
-                <li>
-                <p><strong>并集 (Union, $A \cup B$)</strong>: 一个点在并集中，当且仅当它在 A <strong>或</strong> B 中。这等价于 $f &lt; 0$ <strong>或</strong> $g &lt; 0$。这个逻辑可以用 <code>min</code> 函数完美实现：
+<li>即 $\nabla f(\mathbf{p}(t)) \cdot \mathbf{p}'(t) = 0$。</li>
+<li>$\mathbf{p}'(t)$ 正是曲线在 $\mathbf{p}(t)$ 点的切向量。这个等式意味着，函数在曲面上一点的<strong>梯度向量</strong>，与经过该点的<strong>任意一条曲面切向量</strong>都垂直。</li>
+<li>因此，梯度向量 $\nabla f$ 必然是该点处曲面的<strong>法向量</strong>。</li>
+</ol>
+<p>这个性质非常强大。我们无需复杂的几何计算，只需对函数求偏导，就能得到法向量。</p>
+<ul>
+<li>如果 $f&gt;0$ 表示内部，那么梯度 $\nabla f$ 指向内部（函数值增大的方向）。</li>
+<li>如果 $f&lt;0$ 表示内部，那么梯度 $\nabla f$ 指向外部。</li>
+</ul>
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E9%9A%90%E5%BC%8F%E6%9B%B2%E9%9D%A2%E7%9A%84%E8%B6%85%E8%83%BD%E5%8A%9B"><strong>第三部分：隐式曲面的“超能力”</strong></h3>
+<p>基于以上核心思想，隐式曲面展现出了一些传统几何表示法难以匹敌的强大能力。</p>
+<h4 id="31-%E8%B6%85%E8%83%BD%E5%8A%9B%E4%B8%80%E8%BD%BB%E6%9D%BE%E7%9A%84%E6%9E%84%E9%80%A0%E6%80%A7%E5%AE%9E%E4%BD%93%E5%87%A0%E4%BD%95-csg"><strong>3.1 超能力一：轻松的构造性实体几何 (CSG)</strong></h4>
+<p>CSG 是一种通过对基本几何体进行布尔运算（并、交、差）来构建复杂模型的技术。对于多边形网格，实现CSG非常复杂。但对于隐式曲面，它出奇地简单！</p>
+<p>假设我们有两个隐式曲面，分别由函数 $f(x,y,z)$ 和 $g(x,y,z)$ 定义，并且我们约定 $f&lt;0$ 和 $g&lt;0$ 表示物体内部。</p>
+<ul>
+<li>
+<p><strong>并集 (Union, $A \cup B$)</strong>: 一个点在并集中，当且仅当它在 A <strong>或</strong> B 中。这等价于 $f &lt; 0$ <strong>或</strong> $g &lt; 0$。这个逻辑可以用 <code>min</code> 函数完美实现：
                 $$f_{\text{union}}(x,y,z) = \min(f(x,y,z), g(x,y,z))$$
                 因为只有当 $f$ 和 $g$ 中至少一个为负时，它们的最小值才为负。</p>
-                </li>
-                <li>
-                <p><strong>交集 (Intersection, $A \cap B$)</strong>: 一个点在交集中，当且仅当它同时在 A <strong>和</strong> B 中。这等价于 $f &lt; 0$ <strong>且</strong> $g &lt; 0$。这个逻辑可以用 <code>max</code> 函数实现：
+</li>
+<li>
+<p><strong>交集 (Intersection, $A \cap B$)</strong>: 一个点在交集中，当且仅当它同时在 A <strong>和</strong> B 中。这等价于 $f &lt; 0$ <strong>且</strong> $g &lt; 0$。这个逻辑可以用 <code>max</code> 函数实现：
                 $$f_{\text{intersection}}(x,y,z) = \max(f(x,y,z), g(x,y,z))$$
                 因为只有当 $f$ 和 $g$ 同时为负时，它们的最大值才为负。</p>
-                </li>
-                <li>
-                <p><strong>差集 (Subtraction, $A - B$)</strong>: 一个点在差集中，当且仅当它在 A 中，但不在 B 中。这等价于 $f &lt; 0$ <strong>且</strong> $g \ge 0$。这可以通过交集和补集实现：$A \cap (\text{not } B)$。
+</li>
+<li>
+<p><strong>差集 (Subtraction, $A - B$)</strong>: 一个点在差集中，当且仅当它在 A 中，但不在 B 中。这等价于 $f &lt; 0$ <strong>且</strong> $g \ge 0$。这可以通过交集和补集实现：$A \cap (\text{not } B)$。
                 一个物体的补集（反转内外）可以通过对函数取反得到。所以，B 的外部由 $-g &lt; 0$ 定义。因此，差集就是 A 与 B 的补集的交集：
                 $$f_{\text{subtraction}}(x,y,z) = \max(f(x,y,z), -g(x,y,z))$$</p>
-                </li>
-                </ul>
-                <p>这种用简单的 <code>min/max</code> 操作就能实现复杂几何运算的能力，是隐式曲面的一大魅力。</p>
-                <h4 id="32-%E8%B6%85%E8%83%BD%E5%8A%9B%E4%BA%8C%E8%87%AA%E7%84%B6%E7%9A%84%E6%8B%93%E6%89%91%E5%8F%98%E5%8C%96%E4%B8%8E%E8%9E%8D%E5%90%88"><strong>3.2 超能力二：自然的拓扑变化与融合</strong></h4>
-                <p>还记得T-1000吗？它最酷的能力就是融合。这正是隐式曲面最擅长的领域。这个技术被称为<strong>元球 (Metaball)</strong> 或 <strong>Blobby Model</strong>。</p>
-                <p><strong>元球造型 (Metaball Modeling)</strong> 的思想始于上世纪80年代。其核心是：</p>
-                <ol>
-                <li>空间中放置若干个基本形状（元球），每个元球都定义了一个以其中心为最高点、向外平滑衰减的标量场。</li>
-                <li>在空间中任意一点的总场强，是所有元球在该点场强的<strong>总和</strong>。</li>
-                <li>最终的曲面就是总场强等于某个阈值的等值面。</li>
-                </ol>
-                <p>当两个元球相互靠近时，它们的场会叠加。在它们之间区域的总场强会升高，当这个场强超过阈值时，两个独立的表面就会自然地、平滑地<strong>融合 (Blend)</strong> 在一起，形成一个连通的表面。这个过程不需要任何复杂的网格操作，拓扑变化是自动发生的。</p>
-                <h4 id="33-%E8%B6%85%E8%83%BD%E5%8A%9B%E4%B8%89%E9%AB%98%E6%95%88%E7%9A%84%E6%B1%82%E4%BA%A4%E8%AE%A1%E7%AE%97"><strong>3.3 超能力三：高效的求交计算</strong></h4>
-                <p>在光线追踪渲染中，我们需要计算光线与物体的交点。对于隐式曲面，这个过程也很直接。
+</li>
+</ul>
+<p>这种用简单的 <code>min/max</code> 操作就能实现复杂几何运算的能力，是隐式曲面的一大魅力。</p>
+<h4 id="32-%E8%B6%85%E8%83%BD%E5%8A%9B%E4%BA%8C%E8%87%AA%E7%84%B6%E7%9A%84%E6%8B%93%E6%89%91%E5%8F%98%E5%8C%96%E4%B8%8E%E8%9E%8D%E5%90%88"><strong>3.2 超能力二：自然的拓扑变化与融合</strong></h4>
+<p>还记得T-1000吗？它最酷的能力就是融合。这正是隐式曲面最擅长的领域。这个技术被称为<strong>元球 (Metaball)</strong> 或 <strong>Blobby Model</strong>。</p>
+<p><strong>元球造型 (Metaball Modeling)</strong> 的思想始于上世纪80年代。其核心是：</p>
+<ol>
+<li>空间中放置若干个基本形状（元球），每个元球都定义了一个以其中心为最高点、向外平滑衰减的标量场。</li>
+<li>在空间中任意一点的总场强，是所有元球在该点场强的<strong>总和</strong>。</li>
+<li>最终的曲面就是总场强等于某个阈值的等值面。</li>
+</ol>
+<p>当两个元球相互靠近时，它们的场会叠加。在它们之间区域的总场强会升高，当这个场强超过阈值时，两个独立的表面就会自然地、平滑地<strong>融合 (Blend)</strong> 在一起，形成一个连通的表面。这个过程不需要任何复杂的网格操作，拓扑变化是自动发生的。</p>
+<h4 id="33-%E8%B6%85%E8%83%BD%E5%8A%9B%E4%B8%89%E9%AB%98%E6%95%88%E7%9A%84%E6%B1%82%E4%BA%A4%E8%AE%A1%E7%AE%97"><strong>3.3 超能力三：高效的求交计算</strong></h4>
+<p>在光线追踪渲染中，我们需要计算光线与物体的交点。对于隐式曲面，这个过程也很直接。
                 一条光线的参数方程可以表示为：
                 $$\mathbf{P}(t) = \mathbf{O} + t \cdot \mathbf{D}$$
                 其中 $\mathbf{O}$ 是光线起点，$\mathbf{D}$ 是方向向量，$t$ 是距离。</p>
-                <p>要找到交点，我们只需将光线方程代入隐式曲面方程 $f(\mathbf{P}) = 0$，即：
+<p>要找到交点，我们只需将光线方程代入隐式曲面方程 $f(\mathbf{P}) = 0$，即：
                 $$f(\mathbf{O} + t \cdot \mathbf{D}) = 0$$
                 这会得到一个只含未知数 $t$ 的方程。我们只需解出最小的正实数根 $t$，就能找到第一个交点。</p>
-                <p><strong>示例：光线与椭球求交</strong>
+<p><strong>示例：光线与椭球求交</strong>
                 椭球的隐式方程为：
                 $$(\frac{x}{r_x})^2 + (\frac{y}{r_y})^2 + (\frac{z}{r_z})^2 - 1 = 0$$
                 代入光线方程 $\mathbf{P}(t) = (O_x+tD_x, O_y+tD_y, O_z+tD_z)$：
                 $$(\frac{O_x+tD_x}{r_x})^2 + (\frac{O_y+tD_y}{r_y})^2 + (\frac{O_z+tD_z}{r_z})^2 - 1 = 0$$
                 这是一个关于 $t$ 的一元二次方程 $At^2 + Bt + C = 0$，可以用求根公式轻松解出。对于更高次的代数曲面（如心形曲面），虽然解析解可能不存在，但我们仍然可以使用牛顿法等数值方法来求解。</p>
-                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E6%9E%84%E5%BB%BA%E9%9A%90%E5%BC%8F%E6%9B%B2%E9%9D%A2%E7%9A%84%E6%96%B9%E6%B3%95"><strong>第四部分：构建隐式曲面的方法</strong></h3>
-                <p>我们已经知道了隐式曲面是什么以及它的优点，那么，我们具体如何定义那个神奇的函数 $f(x, y, z)$ 呢？这里有几种主流的方法。</p>
-                <h4 id="41-%E4%BB%A3%E6%95%B0%E6%9B%B2%E9%9D%A2-algebraic-surfaces"><strong>4.1 代数曲面 (Algebraic Surfaces)</strong></h4>
-                <p>这是最直接的方法，即用一个多项式方程来定义曲面。
+<h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E6%9E%84%E5%BB%BA%E9%9A%90%E5%BC%8F%E6%9B%B2%E9%9D%A2%E7%9A%84%E6%96%B9%E6%B3%95"><strong>第四部分：构建隐式曲面的方法</strong></h3>
+<p>我们已经知道了隐式曲面是什么以及它的优点，那么，我们具体如何定义那个神奇的函数 $f(x, y, z)$ 呢？这里有几种主流的方法。</p>
+<h4 id="41-%E4%BB%A3%E6%95%B0%E6%9B%B2%E9%9D%A2-algebraic-surfaces"><strong>4.1 代数曲面 (Algebraic Surfaces)</strong></h4>
+<p>这是最直接的方法，即用一个多项式方程来定义曲面。
                 <strong>二次代数曲面 (Quadrics)</strong> 是最常见的，其通用方程为：
                 $$f(x,y,z) = Ax^2 + Ey^2 + Hz^2 + 2Bxy + 2Cxz + 2Fyz + 2Dx + 2Gy + 2Iz + J = 0$$
                 通过选择不同的系数，这个方程可以表示球、椭球、圆柱、圆锥、双曲面、抛物面等所有二次曲面。</p>
-                <p>我们还可以使用<strong>高次代数曲面</strong>来创建更复杂的形状，比如心形、四叶结等。这些形状虽然优美，但通过调整方程系数来直观地控制形状非常困难。</p>
-                <h4 id="42-%E8%B7%9D%E7%A6%BB%E6%9B%B2%E9%9D%A2-distance-surfaces-%E4%B8%8E%E8%B7%9D%E7%A6%BB%E5%9C%BA-distance-field"><strong>4.2 距离曲面 (Distance Surfaces) 与距离场 (Distance Field)</strong></h4>
-                <p>这是一种非常强大和直观的方法。函数 $f(x, y, z)$ 的值被定义为点 $(x, y, z)$ 到某个几何对象（如点、线、曲线、甚至一个复杂模型）的<strong>最短距离</strong>。
+<p>我们还可以使用<strong>高次代数曲面</strong>来创建更复杂的形状，比如心形、四叶结等。这些形状虽然优美，但通过调整方程系数来直观地控制形状非常困难。</p>
+<h4 id="42-%E8%B7%9D%E7%A6%BB%E6%9B%B2%E9%9D%A2-distance-surfaces-%E4%B8%8E%E8%B7%9D%E7%A6%BB%E5%9C%BA-distance-field"><strong>4.2 距离曲面 (Distance Surfaces) 与距离场 (Distance Field)</strong></h4>
+<p>这是一种非常强大和直观的方法。函数 $f(x, y, z)$ 的值被定义为点 $(x, y, z)$ 到某个几何对象（如点、线、曲线、甚至一个复杂模型）的<strong>最短距离</strong>。
                 $$f(\mathbf{x}, \text{Object}) = d(\mathbf{x}, \text{Object}) - r = \min_{\mathbf{y} \in \text{Object}} ||\mathbf{x} - \mathbf{y}|| - r$$
                 当 $r=0$ 时，等值面就是物体本身。当 $r&gt;0$ 时，就是物体向外膨胀 $r$ 距离后的表面。</p>
-                <ul>
-                <li><strong>球</strong>: $f(\mathbf{x}) = d(\mathbf{x}, \text{point}) - r = ||\mathbf{x} - \mathbf{c}|| - r = 0$</li>
-                <li><strong>圆柱</strong>: $f(\mathbf{x}) = d(\mathbf{x}, \text{line}) - r = 0$</li>
-                <li><strong>圆环</strong>: $f(\mathbf{x}) = d(\mathbf{x}, \text{circle}) - r = 0$</li>
-                </ul>
-                <p>当这个距离函数被定义为<strong>有向距离函数 (Signed Distance Function, SDF)</strong> 时，即在物体内部为负，外部为正，我们就得到了一个<strong>距离场 (Distance Field)</strong>。这是一个极其有用的数据结构，广泛应用于实时渲染、碰撞检测和三维重建（如Kinect Fusion, Poisson Reconstruction）中。</p>
-                <h4 id="43-%E5%8D%B7%E7%A7%AF%E6%9B%B2%E9%9D%A2-convolution-surfaces"><strong>4.3 卷积曲面 (Convolution Surfaces)</strong></h4>
-                <p>距离曲面在处理由线段构成的骨架时，会在连接处产生不平滑的“鼓包”(bulge)。卷积曲面正是为了解决这个问题而提出的。
+<ul>
+<li><strong>球</strong>: $f(\mathbf{x}) = d(\mathbf{x}, \text{point}) - r = ||\mathbf{x} - \mathbf{c}|| - r = 0$</li>
+<li><strong>圆柱</strong>: $f(\mathbf{x}) = d(\mathbf{x}, \text{line}) - r = 0$</li>
+<li><strong>圆环</strong>: $f(\mathbf{x}) = d(\mathbf{x}, \text{circle}) - r = 0$</li>
+</ul>
+<p>当这个距离函数被定义为<strong>有向距离函数 (Signed Distance Function, SDF)</strong> 时，即在物体内部为负，外部为正，我们就得到了一个<strong>距离场 (Distance Field)</strong>。这是一个极其有用的数据结构，广泛应用于实时渲染、碰撞检测和三维重建（如Kinect Fusion, Poisson Reconstruction）中。</p>
+<h4 id="43-%E5%8D%B7%E7%A7%AF%E6%9B%B2%E9%9D%A2-convolution-surfaces"><strong>4.3 卷积曲面 (Convolution Surfaces)</strong></h4>
+<p>距离曲面在处理由线段构成的骨架时，会在连接处产生不平滑的“鼓包”(bulge)。卷积曲面正是为了解决这个问题而提出的。
                 其核心思想是通过<strong>卷积</strong>运算来生成标量场。
                 $$f(\mathbf{P}) = (g * h)(\mathbf{P}) = \int_V g(\mathbf{Q}) h(\mathbf{P} - \mathbf{Q}) dV$$</p>
-                <ul>
-                <li>$g(\mathbf{Q})$: <strong>几何函数</strong>，定义了物体的“骨架”(skeleton)。在骨架上 $g=1$，其他地方 $g=0$。</li>
-                <li>$h(\mathbf{r})$: <strong>核函数 (Kernel Function)</strong>，通常是一个径向对称的、平滑衰减的函数，如高斯函数 $h(r) = e^{-a^2 r^2}$。它扮演着一个低通滤波器的角色。</li>
-                </ul>
-                <p>直观地理解，卷积过程就是将核函数沿着骨架进行“涂抹”或“模糊化”。骨架上的每一点都向外辐射一个场，空间中任意一点的场强是所有这些辐射的累加。这保证了即使在骨架的尖锐连接处，生成的场也是平滑的。</p>
-                <h4 id="44-%E5%85%83%E7%90%83blobby%E6%A8%A1%E5%9E%8B-%E7%A6%BB%E6%95%A3%E5%8C%96%E7%9A%84%E5%8D%B7%E7%A7%AF"><strong>4.4 元球/Blobby模型 (离散化的卷积)</strong></h4>
-                <p>元球可以看作是卷积曲面的一种离散化和简化。它将积分变为了求和。
+<ul>
+<li>$g(\mathbf{Q})$: <strong>几何函数</strong>，定义了物体的“骨架”(skeleton)。在骨架上 $g=1$，其他地方 $g=0$。</li>
+<li>$h(\mathbf{r})$: <strong>核函数 (Kernel Function)</strong>，通常是一个径向对称的、平滑衰减的函数，如高斯函数 $h(r) = e^{-a^2 r^2}$。它扮演着一个低通滤波器的角色。</li>
+</ul>
+<p>直观地理解，卷积过程就是将核函数沿着骨架进行“涂抹”或“模糊化”。骨架上的每一点都向外辐射一个场，空间中任意一点的场强是所有这些辐射的累加。这保证了即使在骨架的尖锐连接处，生成的场也是平滑的。</p>
+<h4 id="44-%E5%85%83%E7%90%83blobby%E6%A8%A1%E5%9E%8B-%E7%A6%BB%E6%95%A3%E5%8C%96%E7%9A%84%E5%8D%B7%E7%A7%AF"><strong>4.4 元球/Blobby模型 (离散化的卷积)</strong></h4>
+<p>元球可以看作是卷积曲面的一种离散化和简化。它将积分变为了求和。
                 一个元球系统定义的标量场为：
                 $$f(x, y, z) = \sum_{i=1}^{n} f_i(r_i)$$
                 其中，$f_i$ 是第 $i$ 个元球的<strong>势函数 (Potential Function)</strong>，$r_i$ 是空间点到第 $i$ 个元球中心的距离。</p>
-                <p>研究者们提出了多种势函数，各有优劣：</p>
-                <ul>
-                <li><strong>Blinn的幂函数</strong>: $f_i(r) = b_i e^{-a_i r^2}$ (高斯函数)，场的影响范围是无限的。</li>
-                <li><strong>Nishimura的分段二次多项式</strong>:
-                $$f_i(r) = \begin{cases} b_i \left( 1 - 3(\frac{r}{R_i})^2 \right) & 0 \le r \le R_i/3 \\ b_i \frac{3}{2} \left( 1 - \frac{r}{R_i} \right)^2 & R_i/3 \le r \le R_i \\ 0 & r \ge R_i \end{cases}$$
+<p>研究者们提出了多种势函数，各有优劣：</p>
+<ul>
+<li><strong>Blinn的幂函数</strong>: $f_i(r) = b_i e^{-a_i r^2}$ (高斯函数)，场的影响范围是无限的。</li>
+<li><strong>Nishimura的分段二次多项式</strong>:
+                $$f_i(r) = \begin{cases} b_i \left( 1 - 3(\frac{r}{R_i})^2 \right) &amp; 0 \le r \le R_i/3 \\ b_i \frac{3}{2} \left( 1 - \frac{r}{R_i} \right)^2 &amp; R_i/3 \le r \le R_i \\ 0 &amp; r \ge R_i \end{cases}$$
                 这个函数在半径 $R_i$ 之外值为0，具有局部影响性，计算效率更高。</li>
-                <li><strong>Wyvill的六次多项式</strong>: 提供了更好的融合形状控制。</li>
-                </ul>
-                <p>最终的曲面由方程 $\sum f_i(r_i) = T$ 定义。</p>
-                <h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E7%9C%8B%E8%A7%81%E9%9A%90%E5%BC%8F%E6%9B%B2%E9%9D%A2%E5%A4%9A%E8%BE%B9%E5%BD%A2%E5%8C%96"><strong>第五部分：看见隐式曲面——多边形化</strong></h3>
-                <p>我们有了强大的隐式函数，但还有一个问题：现代的GPU是为渲染三角形而生的。我们如何将一个由数学方程定义的隐式曲面，转换成GPU可以处理的多边形网格呢？这个过程称为<strong>多边形化 (Polygonization)</strong>。</p>
-                <p>最著名、最经典的算法，就是1987年由Lorensen和Cline提出的<strong>移动立方体 (Marching Cubes)</strong> 算法。这篇论文是计算机图形学史上被引用次数最多的论文之一，至今引用已超过16000次。</p>
-                <p><strong>移动立方体算法</strong></p>
-                <p>该算法分为两步：</p>
-                <ol>
-                <li><strong>空间分割</strong>：将我们关心的三维空间区域划分成一个规整的、由许多小立方体（体素，Voxel）组成的网格。</li>
-                <li><strong>单元处理</strong>：独立地处理每一个小立方体，找出隐式曲面是如何穿过这个立方体的，并用一或多个三角形来近似这部分曲面。</li>
-                </ol>
-                <p><strong>核心步骤详解</strong>：</p>
-                <ol>
-                <li>
-                <p><strong>顶点分类</strong>：对于一个立方体，它有8个顶点。我们计算这8个顶点处的隐式函数值 $f(x,y,z)$，并根据值的符号（正或负）将顶点分类为“在物体内部”或“在物体外部”。</p>
-                </li>
-                <li>
-                <p><strong>建立索引</strong>：我们将8个顶点的分类结果看作一个8位的二进制数（例如，内部为1，外部为0）。这个数的值域为0-255，可以作为索引。</p>
-                </li>
-                <li>
-                <p><strong>查询查找表 (Lookup Table)</strong>：总共有 $2^8 = 256$ 种可能的顶点分类组合。但考虑到对称性和互补性，这些组合可以被简化为<strong>15种基本模式</strong>。算法预先构建一个查找表，存储了这256个索引对应的三角剖分方案。根据上一步计算的索引，我们可以直接查表得到，在这个立方体内，应该生成哪些三角形，以及这些三角形的顶点分别位于立方体的哪些边上。</p>
-                </li>
-                <li>
-                <p><strong>计算顶点位置</strong>：我们已经知道曲面穿过了哪些边，但具体穿在边上的哪个位置呢？这可以通过<strong>线性插值</strong>来计算。假设一条边连接了顶点 $\mathbf{x}_1$ 和 $\mathbf{x}_2$，它们对应的函数值分别为 $v_1$ 和 $v_2$（假设符号相反）。曲面穿过该边的点（函数值为0）的位置 $\mathbf{x}$ 为：
+<li><strong>Wyvill的六次多项式</strong>: 提供了更好的融合形状控制。</li>
+</ul>
+<p>最终的曲面由方程 $\sum f_i(r_i) = T$ 定义。</p>
+<h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E7%9C%8B%E8%A7%81%E9%9A%90%E5%BC%8F%E6%9B%B2%E9%9D%A2%E5%A4%9A%E8%BE%B9%E5%BD%A2%E5%8C%96"><strong>第五部分：看见隐式曲面——多边形化</strong></h3>
+<p>我们有了强大的隐式函数，但还有一个问题：现代的GPU是为渲染三角形而生的。我们如何将一个由数学方程定义的隐式曲面，转换成GPU可以处理的多边形网格呢？这个过程称为<strong>多边形化 (Polygonization)</strong>。</p>
+<p>最著名、最经典的算法，就是1987年由Lorensen和Cline提出的<strong>移动立方体 (Marching Cubes)</strong> 算法。这篇论文是计算机图形学史上被引用次数最多的论文之一，至今引用已超过16000次。</p>
+<p><strong>移动立方体算法</strong></p>
+<p>该算法分为两步：</p>
+<ol>
+<li><strong>空间分割</strong>：将我们关心的三维空间区域划分成一个规整的、由许多小立方体（体素，Voxel）组成的网格。</li>
+<li><strong>单元处理</strong>：独立地处理每一个小立方体，找出隐式曲面是如何穿过这个立方体的，并用一或多个三角形来近似这部分曲面。</li>
+</ol>
+<p><strong>核心步骤详解</strong>：</p>
+<ol>
+<li>
+<p><strong>顶点分类</strong>：对于一个立方体，它有8个顶点。我们计算这8个顶点处的隐式函数值 $f(x,y,z)$，并根据值的符号（正或负）将顶点分类为“在物体内部”或“在物体外部”。</p>
+</li>
+<li>
+<p><strong>建立索引</strong>：我们将8个顶点的分类结果看作一个8位的二进制数（例如，内部为1，外部为0）。这个数的值域为0-255，可以作为索引。</p>
+</li>
+<li>
+<p><strong>查询查找表 (Lookup Table)</strong>：总共有 $2^8 = 256$ 种可能的顶点分类组合。但考虑到对称性和互补性，这些组合可以被简化为<strong>15种基本模式</strong>。算法预先构建一个查找表，存储了这256个索引对应的三角剖分方案。根据上一步计算的索引，我们可以直接查表得到，在这个立方体内，应该生成哪些三角形，以及这些三角形的顶点分别位于立方体的哪些边上。</p>
+</li>
+<li>
+<p><strong>计算顶点位置</strong>：我们已经知道曲面穿过了哪些边，但具体穿在边上的哪个位置呢？这可以通过<strong>线性插值</strong>来计算。假设一条边连接了顶点 $\mathbf{x}_1$ 和 $\mathbf{x}_2$，它们对应的函数值分别为 $v_1$ 和 $v_2$（假设符号相反）。曲面穿过该边的点（函数值为0）的位置 $\mathbf{x}$ 为：
                 $$\mathbf{x} = \frac{|v_2|}{ |v_1| + |v_2| } \mathbf{x}_1 + \frac{|v_1|}{ |v_1| + |v_2| } \mathbf{x}_2$$
                 这是一个简单的加权平均。</p>
-                </li>
-                <li>
-                <p><strong>组合三角形</strong>：将所有立方体生成的三角形组合起来，就得到了整个隐式曲面的多边形网格近似。</p>
-                </li>
-                </ol>
-                <p><strong>伪代码</strong>：</p>
-                <pre class="hljs"><code><div><span class="hljs-comment">// Marching Cubes 伪代码</span>
+</li>
+<li>
+<p><strong>组合三角形</strong>：将所有立方体生成的三角形组合起来，就得到了整个隐式曲面的多边形网格近似。</p>
+</li>
+</ol>
+<p><strong>伪代码</strong>：</p>
+<pre class="hljs"><code><div><span class="hljs-comment">// Marching Cubes 伪代码</span>
                 <span class="hljs-function">PolygonMesh <span class="hljs-title">MarchingCubes</span><span class="hljs-params">(ScalarField field, <span class="hljs-keyword">float</span> iso_level)</span> </span>{
                     PolygonMesh mesh;
                     <span class="hljs-keyword">for</span> (each cube in field.grid) {
@@ -299,92 +297,117 @@
                     <span class="hljs-keyword">return</span> mesh;
                 }
                 </div></code></pre>
-                <p>算法的精度直接受网格大小的影响。网格越精细，生成的模型就越平滑，但计算量和模型面数也会急剧增加。</p>
-                <h3 id="%E7%AC%AC%E5%85%AD%E9%83%A8%E5%88%86%E9%AB%98%E7%BA%A7%E8%AF%BE%E9%A2%98%E8%87%AA%E5%8A%A8%E6%8B%9F%E5%90%88%E5%85%83%E7%90%83%E6%A8%A1%E5%9E%8B"><strong>第六部分：高级课题——自动拟合元球模型</strong></h3>
-                <p>手动放置成百上千个元球来构建一个复杂模型（如人体）是极其乏味的工作。因此，一个重要的研究方向是：<strong>给定一个已有的几何模型（如多边形网格），如何自动地生成一组元球来逼近它？</strong></p>
-                <p>1991年，Muraki 率先提出了一个基于能量最小化的优雅解决方案。</p>
-                <p><strong>核心思想</strong>：
+<p>算法的精度直接受网格大小的影响。网格越精细，生成的模型就越平滑，但计算量和模型面数也会急剧增加。</p>
+<h3 id="%E7%AC%AC%E5%85%AD%E9%83%A8%E5%88%86%E9%AB%98%E7%BA%A7%E8%AF%BE%E9%A2%98%E8%87%AA%E5%8A%A8%E6%8B%9F%E5%90%88%E5%85%83%E7%90%83%E6%A8%A1%E5%9E%8B"><strong>第六部分：高级课题——自动拟合元球模型</strong></h3>
+<p>手动放置成百上千个元球来构建一个复杂模型（如人体）是极其乏味的工作。因此，一个重要的研究方向是：<strong>给定一个已有的几何模型（如多边形网格），如何自动地生成一组元球来逼近它？</strong></p>
+<p>1991年，Muraki 率先提出了一个基于能量最小化的优雅解决方案。</p>
+<p><strong>核心思想</strong>：
                 将拟合问题转化为一个<strong>最优化问题</strong>。我们定义一个<strong>能量函数 (Energy Function)</strong> $E$，它衡量了当前元球模型与目标模型之间的“差距”。我们的目标就是调整元球的参数，使得这个能量函数 $E$ 达到最小值。</p>
-                <p>每个元球有5个参数：中心位置 $(x_i, y_i, z_i)$，以及势函数中的两个系数（如Blinn函数中的 $a_i, b_i$）。
+<p>每个元球有5个参数：中心位置 $(x_i, y_i, z_i)$，以及势函数中的两个系数（如Blinn函数中的 $a_i, b_i$）。
                 $$P_i = (x_i, y_i, z_i, a_i, b_i)$$</p>
-                <p><strong>能量函数的构成</strong>：
+<p><strong>能量函数的构成</strong>：
                 为了得到好的拟合效果，能量函数通常由三部分组成：</p>
-                <ol>
-                <li>
-                <p><strong>位置能量函数 (Value Energy)</strong>：
+<ol>
+<li>
+<p><strong>位置能量函数 (Value Energy)</strong>：
                 首先，我们在目标模型表面上采样 $M$ 个点 $\Omega = { \mathbf{p}_j }_{j=1}^M$。这一项要求我们生成的元球曲面（等值面）尽可能地穿过这些采样点。即，在采样点 $\mathbf{p}_j$ 处，元球系统的函数值 $f(\mathbf{p}_j)$ 应该尽可能地接近阈值 $T$。
                 $$E_{\text{value}} = \sum_{j=1}^{M} (f(\mathbf{p}_j) - T)^2$$</p>
-                </li>
-                <li>
-                <p><strong>法向能量函数 (Normal Energy)</strong>：
+</li>
+<li>
+<p><strong>法向能量函数 (Normal Energy)</strong>：
                 仅仅位置对齐是不够的，我们还希望元球曲面在采样点处的法线方向与目标模型的法线方向一致。设 $\mathbf{n}_j$ 是目标模型在 $\mathbf{p}_j$ 处的单位法向量，$\mathbf{N}(\mathbf{p}_j)$ 是元球模型在 $\mathbf{p}_j$ 处的法向量（即梯度 $\nabla f(\mathbf{p}_j)$）。我们希望这两个向量的夹角尽可能小，也就是它们的点积尽可能接近1。
                 $$E_{\text{normal}} = \sum_{j=1}^{M} \left| \mathbf{n}_j - \frac{\mathbf{N}(\mathbf{p}_j)}{|\mathbf{N}(\mathbf{p}_j)|} \right|^2$$</p>
-                </li>
-                <li>
-                <p><strong>收缩能量函数 (Shrink Energy)</strong>：
+</li>
+<li>
+<p><strong>收缩能量函数 (Shrink Energy)</strong>：
                 前两项只在采样点上定义了约束。这可能导致元球为了拟合数据而变得异常“臃肿”或使用奇怪的负权重。收缩能量是一个<strong>正则化项</strong>，它的目的是惩罚那些体积过大的元球，鼓励系统使用更紧凑、更简单的元球组合来解决问题。对于Blinn的势函数，其在整个空间的积分（可以看作元球的“能量”或“体积”）与 $\frac{|b_i|}{a_i^{3/2}}$ 成正比。因此可以定义：
                 $$E_{\text{shrink}} = \sum_{i=1}^{n} \left( a_i^{3/2} |b_i| \right)^2$$</p>
-                </li>
-                </ol>
-                <p><strong>复合能量函数</strong>：
+</li>
+</ol>
+<p><strong>复合能量函数</strong>：
                 最终的总能量是这三项的加权和：
                 $$E = \frac{1}{M} (E_{\text{value}} + \alpha E_{\text{normal}}) + \beta E_{\text{shrink}}$$
                 其中 $\alpha$ 和 $\beta$ 是权重系数，用于平衡不同约束的重要性。</p>
-                <p><strong>求解过程 (迭代分割)</strong>：
+<p><strong>求解过程 (迭代分割)</strong>：
                 直接求解包含 $5n$ 个未知参数的非线性最小化问题非常困难。Muraki提出了一种迭代分割的策略：</p>
-                <ol>
-                <li><strong>初始化</strong>：从一个元球开始，将其中心置于所有采样点的重心，通过数值优化（如牛顿法）求解其5个参数，使得总能量 $E$ 最小。将这个元球放入一个“元球列表”。</li>
-                <li><strong>迭代</strong>：<code>while (能量 E 仍然过大)</code>
+<ol>
+<li><strong>初始化</strong>：从一个元球开始，将其中心置于所有采样点的重心，通过数值优化（如牛顿法）求解其5个参数，使得总能量 $E$ 最小。将这个元球放入一个“元球列表”。</li>
+<li><strong>迭代</strong>：<code>while (能量 E 仍然过大)</code>
                 a. <strong>选择</strong>：从元球列表中，根据某种策略（例如，选择分裂后能最大程度降低总能量的那个元球）选出一个元球 $P_i$ 进行分裂。
                 b. <strong>分裂</strong>：将 $P_i$ 从列表中移除，并分裂成两个新的元球 $P'_i$ 和 $P''_i$。一个简单的初始分裂策略是：$P'_i = P''_i = (x_i, y_i, z_i, a_i, b_i/2)$。
                 c. <strong>优化</strong>：将这两个新的元球加入列表。固定列表中其他元球的参数，只优化 $P'_i$ 和 $P''_i$ 的总共10个参数，使得总能量 $E$ 再次达到极小值。</li>
-                <li><strong>结束</strong>：重复此过程，直到能量足够小或元球数量达到上限。</li>
-                </ol>
-                <h3 id="%E7%AC%AC%E4%B8%83%E9%83%A8%E5%88%86%E6%80%BB%E7%BB%93%E4%B8%8E%E5%B1%95%E6%9C%9B"><strong>第七部分：总结与展望</strong></h3>
-                <p>我们深入探索了隐函数曲面的世界。让我们回顾一下它的优缺点。</p>
-                <p><strong>优点</strong>：</p>
-                <ul>
-                <li><strong>易于内外测试</strong>：对碰撞检测等非常友好。</li>
-                <li><strong>CSG操作简单</strong>：用 <code>min/max</code> 即可构建复杂模型。</li>
-                <li><strong>拓扑变化自然</strong>：完美支持融合、分裂等动画效果。</li>
-                <li>生成的曲面<strong>永远光滑</strong>。</li>
-                <li><strong>数据量小</strong>：用几百个元球就能表示复杂的有机形态，远少于高精度多边形网格所需的顶点数。</li>
-                </ul>
-                <p><strong>缺点</strong>：</p>
-                <ul>
-                <li><strong>间接控制</strong>：艺术家无法像编辑多边形网格那样直接拖拽顶点来精确控制曲面，控制不够直观。</li>
-                <li><strong>难以表示尖锐特征</strong>：由于其内在的平滑性，很难表示模型的棱角、折痕等尖锐细节。（虽然有方法可以缓解，例如使用各向异性的元球，如椭球型元球）。</li>
-                <li><strong>绘制慢</strong>：直接对隐函数进行光线追踪渲染很慢。虽然可以用Marching Cubes转换为多边形，但这会引入近似误差且生成大量三角面。</li>
-                </ul>
-                <p>尽管存在这些缺点，隐函数曲面因其在特定领域的独特优势，至今仍在图形学中占据着不可替代的地位，尤其是在<strong>流体模拟、有机体建模、医学成像和特效动画</strong>中。</p>
-            </article>
-        </main>
-    </div>
-    
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li><strong>结束</strong>：重复此过程，直到能量足够小或元球数量达到上限。</li>
+</ol>
+<h3 id="%E7%AC%AC%E4%B8%83%E9%83%A8%E5%88%86%E6%80%BB%E7%BB%93%E4%B8%8E%E5%B1%95%E6%9C%9B"><strong>第七部分：总结与展望</strong></h3>
+<p>我们深入探索了隐函数曲面的世界。让我们回顾一下它的优缺点。</p>
+<p><strong>优点</strong>：</p>
+<ul>
+<li><strong>易于内外测试</strong>：对碰撞检测等非常友好。</li>
+<li><strong>CSG操作简单</strong>：用 <code>min/max</code> 即可构建复杂模型。</li>
+<li><strong>拓扑变化自然</strong>：完美支持融合、分裂等动画效果。</li>
+<li>生成的曲面<strong>永远光滑</strong>。</li>
+<li><strong>数据量小</strong>：用几百个元球就能表示复杂的有机形态，远少于高精度多边形网格所需的顶点数。</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li><strong>间接控制</strong>：艺术家无法像编辑多边形网格那样直接拖拽顶点来精确控制曲面，控制不够直观。</li>
+<li><strong>难以表示尖锐特征</strong>：由于其内在的平滑性，很难表示模型的棱角、折痕等尖锐细节。（虽然有方法可以缓解，例如使用各向异性的元球，如椭球型元球）。</li>
+<li><strong>绘制慢</strong>：直接对隐函数进行光线追踪渲染很慢。虽然可以用Marching Cubes转换为多边形，但这会引入近似误差且生成大量三角面。</li>
+</ul>
+<p>尽管存在这些缺点，隐函数曲面因其在特定领域的独特优势，至今仍在图形学中占据着不可替代的地位，尤其是在<strong>流体模拟、有机体建模、医学成像和特效动画</strong>中。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

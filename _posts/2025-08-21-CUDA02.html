@@ -1,13 +1,14 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>CUDA02: Compilation with NVCC</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<meta charset="utf-8"/>
+<title>CUDA02: Compilation with NVCC</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -16,113 +17,139 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="cuda02-compilation-with-nvcc">CUDA02: Compilation with NVCC</h1>
-                <p>（所有内容均基于NVIDIA官方CUDA Document。本次内容包含原文档Chapter6.1）</p>
-                <p>内核可以使用CUDA指令集架构（称为PTX）编写，该架构在PTX参考手册中有所描述。
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="cuda02-compilation-with-nvcc">CUDA02: Compilation with NVCC</h1>
+<p>（所有内容均基于NVIDIA官方CUDA Document。本次内容包含原文档Chapter6.1）</p>
+<p>内核可以使用CUDA指令集架构（称为PTX）编写，该架构在PTX参考手册中有所描述。
                 然而，通常使用高级编程语言（如C++）会更有效。在两种情况下，内核都必须通过nvcc编译为二进制代码，以便在设备上执行。</p>
-                <p>nvcc 是一个编译器驱动程序，用于简化 C++ 或 PTX 代码的编译过程：它提供简单且熟悉的命令行选项，并通过调用实现不同编译阶段的工具集合来执行这些选项。本节概述了 nvcc 的工作流程和命令行选项。完整的描述可在 nvcc 用户手册中找到。</p>
-                <h2 id="icompilation-workflow">I.Compilation Workflow</h2>
-                <h3 id="11offline-compilation">1.1.Offline Compilation</h3>
-                <p>使用 nvcc 编译的源文件可以包含主机代码（即在主机上执行的代码）
+<p>nvcc 是一个编译器驱动程序，用于简化 C++ 或 PTX 代码的编译过程：它提供简单且熟悉的命令行选项，并通过调用实现不同编译阶段的工具集合来执行这些选项。本节概述了 nvcc 的工作流程和命令行选项。完整的描述可在 nvcc 用户手册中找到。</p>
+<h2 id="icompilation-workflow">I.Compilation Workflow</h2>
+<h3 id="11offline-compilation">1.1.Offline Compilation</h3>
+<p>使用 nvcc 编译的源文件可以包含主机代码（即在主机上执行的代码）
                 和设备代码（即在设备上执行的代码）。nvcc 的基本工作流程包括将设备代码与主机代码分离，然后：</p>
-                <ul>
-                <li>将设备代码编译为汇编形式（PTX代码）和/或二进制形式（cubin对象），</li>
-                <li>并通过替换内核中引入的 <code>&lt;&lt;&lt;...&gt;&gt;&gt;</code> 语法（在 ExecutionConfiguration 中有更详细的描述）为必要的 CUDA 运行时函数调用，来修改主机代码，以从 PTX 代码和/或 cubin 对象中加载并启动每个编译好的内核。</li>
-                </ul>
-                <p>修改后的宿主代码可以以C++代码的形式输出，该代码需通过其他工具进行编译，或直接以目标代码形式输出，即在最后的编译阶段让nvcc调用宿主编译器进行编译。</p>
-                <ul>
-                <li>要么链接到编译后的宿主代码（这是最常见的情况）</li>
-                <li>如果存在修改后的主机代码，则使用该代码，并通过CUDA驱动程序API（参见驱动程序API）加载并执行PTX代码或cubin对象。</li>
-                </ul>
-                <h3 id="12just-in-time-compilation">1.2.Just-in-Time Compilation</h3>
-                <p>任何在运行时由应用程序加载的PTX代码都会由设备驱动程序进一步编译为二进制代码。这被称为即时编译。即时编译会增加应用程序的加载时间，但使应用程序能够从每个新设备驱动程序带来的编译器改进中受益。这也是应用程序在编译时不存在的设备上运行的唯一方式，如应用程序兼容性部分所述。</p>
-                <p>当设备驱动程序为某个应用程序即时编译部分PTX代码时，它会自动将生成的二进制代码的副本缓存起来，以避免在后续应用程序调用时重复编译。该缓存（称为计算缓存）在设备驱动程序升级时会自动失效，以便应用程序能够受益于设备驱动程序中内置的新即时编译器的改进。</p>
-                <p>环境变量可用于控制即时编译，具体内容请参阅CUDA环境变量。</p>
-                <p>作为使用nvcc编译CUDA C++设备代码的替代方案，NVRTC可用于在运行时将CUDA C++设备代码编译为PTX。NVRTC是CUDA C++的运行时编译库。</p>
-                <h2 id="iibinary-compatibility">II.Binary Compatibility</h2>
-                <p>二进制代码具有架构依赖性。通过编译器选项-code生成cubin对象，该选项指定目标架构：例如，使用-code=sm_80编译将生成适用于计算能力为8.0的设备的二进制代码。二进制兼容性在相邻次要版本之间得到保证，但不适用于相邻次要版本之间或跨主要版本的情况。换句话说，为计算能力X.y生成的cubin对象仅能在计算能力为X.z的设备上执行。</p>
-                <p>注意：二进制兼容性仅支持桌面版本。不支持Tegra。此外，桌面与Tegra之间的二进制兼容性也不支持。</p>
-                <h2 id="iiiptx-compatibility">III.PTX Compatibility</h2>
-                <p>某些PTX指令仅在计算能力更高的设备上受支持。例如，包含 warp shuffle 的代码必须使用 -arch=compute_50（或更高）进行编译。</p>
-                <p>针对特定计算能力的 PTX 代码始终可以编译为计算能力更高或相同的二进制代码。需要注意的是，从较早版本的 PTX 编译而来的二进制文件可能无法利用某些硬件功能。例如，针对计算能力7.0（Volta）的二进制文件，如果使用针对计算能力6.0（Pascal）生成的PTX代码编译，将无法使用张量核指令，因为这些指令在Pascal架构上不可用。因此，最终的二进制文件性能可能不如使用最新版本PTX生成的二进制.</p>
-                <p>PTX 代码编译为针对特定架构的特性时，仅能在与目标架构完全相同的物理架构上运行，而不能在其他架构上运行。针对特定架构的 PTX 代码不具备向前兼容性和向后兼容性。</p>
-                <p>使用 sm_90a 或 compute_90a 编译的示例代码仅能在计算能力为 9.0 的设备上运行，且不具备向后兼容性和向前兼容性。</p>
-                <p>PTX 代码编译为针对特定家族功能时，仅能在与目标物理架构完全相同的物理架构上运行，以及同一家族中的其他架构。家族特定的PTX代码与同一家族中的其他设备向前兼容，但不向后兼容。例如，使用sm_100f或compute_100f编译的示例代码仅可在计算能力为10.0和10.3的设备上运行。表25显示了家族特定目标与计算能力的兼容性。</p>
-                <h2 id="ivapplication-compatibility">IV.Application Compatibility</h2>
-                <p>要在具有特定计算能力的设备上执行代码，应用程序必须加载与该计算能力兼容的二进制或PTX代码，如《二进制兼容性与PTX兼容性》中所述。特别是，为了能够在具有更高计算能力的未来架构上执行代码（目前尚无法为此生成二进制代码），应用程序必须加载PTX代码，该代码将计算能力（目前尚无法为其生成二进制代码）的设备上执行代码，应用程序必须加载PTX代码，该代码将为这些设备进行即时编译（参见即时编译）。</p>
-                <p>嵌入到CUDAC++应用程序中的PTX和二进制代码由-arch和-code编译器选项或-gencode编译器选项控制，具体细节请参阅nvcc用户手册。例如：</p>
-                <div class="code-container">
-                <pre><code>nvcc x.cu
+<ul>
+<li>将设备代码编译为汇编形式（PTX代码）和/或二进制形式（cubin对象），</li>
+<li>并通过替换内核中引入的 <code>&lt;&lt;&lt;...&gt;&gt;&gt;</code> 语法（在 ExecutionConfiguration 中有更详细的描述）为必要的 CUDA 运行时函数调用，来修改主机代码，以从 PTX 代码和/或 cubin 对象中加载并启动每个编译好的内核。</li>
+</ul>
+<p>修改后的宿主代码可以以C++代码的形式输出，该代码需通过其他工具进行编译，或直接以目标代码形式输出，即在最后的编译阶段让nvcc调用宿主编译器进行编译。</p>
+<ul>
+<li>要么链接到编译后的宿主代码（这是最常见的情况）</li>
+<li>如果存在修改后的主机代码，则使用该代码，并通过CUDA驱动程序API（参见驱动程序API）加载并执行PTX代码或cubin对象。</li>
+</ul>
+<h3 id="12just-in-time-compilation">1.2.Just-in-Time Compilation</h3>
+<p>任何在运行时由应用程序加载的PTX代码都会由设备驱动程序进一步编译为二进制代码。这被称为即时编译。即时编译会增加应用程序的加载时间，但使应用程序能够从每个新设备驱动程序带来的编译器改进中受益。这也是应用程序在编译时不存在的设备上运行的唯一方式，如应用程序兼容性部分所述。</p>
+<p>当设备驱动程序为某个应用程序即时编译部分PTX代码时，它会自动将生成的二进制代码的副本缓存起来，以避免在后续应用程序调用时重复编译。该缓存（称为计算缓存）在设备驱动程序升级时会自动失效，以便应用程序能够受益于设备驱动程序中内置的新即时编译器的改进。</p>
+<p>环境变量可用于控制即时编译，具体内容请参阅CUDA环境变量。</p>
+<p>作为使用nvcc编译CUDA C++设备代码的替代方案，NVRTC可用于在运行时将CUDA C++设备代码编译为PTX。NVRTC是CUDA C++的运行时编译库。</p>
+<h2 id="iibinary-compatibility">II.Binary Compatibility</h2>
+<p>二进制代码具有架构依赖性。通过编译器选项-code生成cubin对象，该选项指定目标架构：例如，使用-code=sm_80编译将生成适用于计算能力为8.0的设备的二进制代码。二进制兼容性在相邻次要版本之间得到保证，但不适用于相邻次要版本之间或跨主要版本的情况。换句话说，为计算能力X.y生成的cubin对象仅能在计算能力为X.z的设备上执行。</p>
+<p>注意：二进制兼容性仅支持桌面版本。不支持Tegra。此外，桌面与Tegra之间的二进制兼容性也不支持。</p>
+<h2 id="iiiptx-compatibility">III.PTX Compatibility</h2>
+<p>某些PTX指令仅在计算能力更高的设备上受支持。例如，包含 warp shuffle 的代码必须使用 -arch=compute_50（或更高）进行编译。</p>
+<p>针对特定计算能力的 PTX 代码始终可以编译为计算能力更高或相同的二进制代码。需要注意的是，从较早版本的 PTX 编译而来的二进制文件可能无法利用某些硬件功能。例如，针对计算能力7.0（Volta）的二进制文件，如果使用针对计算能力6.0（Pascal）生成的PTX代码编译，将无法使用张量核指令，因为这些指令在Pascal架构上不可用。因此，最终的二进制文件性能可能不如使用最新版本PTX生成的二进制.</p>
+<p>PTX 代码编译为针对特定架构的特性时，仅能在与目标架构完全相同的物理架构上运行，而不能在其他架构上运行。针对特定架构的 PTX 代码不具备向前兼容性和向后兼容性。</p>
+<p>使用 sm_90a 或 compute_90a 编译的示例代码仅能在计算能力为 9.0 的设备上运行，且不具备向后兼容性和向前兼容性。</p>
+<p>PTX 代码编译为针对特定家族功能时，仅能在与目标物理架构完全相同的物理架构上运行，以及同一家族中的其他架构。家族特定的PTX代码与同一家族中的其他设备向前兼容，但不向后兼容。例如，使用sm_100f或compute_100f编译的示例代码仅可在计算能力为10.0和10.3的设备上运行。表25显示了家族特定目标与计算能力的兼容性。</p>
+<h2 id="ivapplication-compatibility">IV.Application Compatibility</h2>
+<p>要在具有特定计算能力的设备上执行代码，应用程序必须加载与该计算能力兼容的二进制或PTX代码，如《二进制兼容性与PTX兼容性》中所述。特别是，为了能够在具有更高计算能力的未来架构上执行代码（目前尚无法为此生成二进制代码），应用程序必须加载PTX代码，该代码将计算能力（目前尚无法为其生成二进制代码）的设备上执行代码，应用程序必须加载PTX代码，该代码将为这些设备进行即时编译（参见即时编译）。</p>
+<p>嵌入到CUDAC++应用程序中的PTX和二进制代码由-arch和-code编译器选项或-gencode编译器选项控制，具体细节请参阅nvcc用户手册。例如：</p>
+<div class="code-container">
+<pre><code>nvcc x.cu
         -gencode arch=compute_50,code=sm_50
         -gencode arch=compute_60,code=sm_60
         -gencode arch=compute_70,code="compute_70,sm_70"
 </code></pre>
-                </div>
-                <p>嵌入与计算能力 5.0 和 6.0（第一代和第二代代码选项）兼容的二进制代码，以及与计算能力 7.0（第三代代码选项）兼容的 PTX 和二进制代码。</p>
-                <p>主机代码在运行时自动选择最合适的代码进行加载和执行，以上示例中将为：</p>
-                <ul>
-                <li>5.0 binary code for devices with compute capability 5.0 and 5.2,</li>
-                <li>6.0 binary code for devices with compute capability 6.0 and 6.1,</li>
-                <li>7.0 binary code for devices with compute capability 7.0 and 7.5,</li>
-                <li>PTX code which is compiled to binary code at runtime for devices with compute capability later than 7.5</li>
-                </ul>
-                <p>x.cu 可以包含一个优化后的代码路径，该路径使用了 warp 缩减操作，例如，这些操作仅在计算能力为 8.0 及以上的设备上支持。<code>__CUDA_ARCH__</code> 宏可用于根据计算能力区分不同的代码路径。它仅在设备代码中定义。例如，当使用 -arch=compute_80 进行编译时，<code>__CUDA_ARCH__</code> 等于 800。</p>
-                <p>如果 x.cu 文件是针对特定架构的特性进行编译，使用了 sm_100f 或 compute_100f，那么该代码只能在特定架构的设备上运行，即计算能力为 10.0 和 10.3 的设备。对于特定架构的代码目标，会定义一个额外的宏 <code>__CUDA_ARCH_FAMILY_SPECIFIC__</code>。在此示例中，<code>__CUDA_ARCH_FAMILY_SPECIFIC__</code> 等于 1000。</p>
-                <p>如果 x.cu 针对架构特定功能使用 sm_100a 或 compute_100a 进行编译，则代码只能
+</div>
+<p>嵌入与计算能力 5.0 和 6.0（第一代和第二代代码选项）兼容的二进制代码，以及与计算能力 7.0（第三代代码选项）兼容的 PTX 和二进制代码。</p>
+<p>主机代码在运行时自动选择最合适的代码进行加载和执行，以上示例中将为：</p>
+<ul>
+<li>5.0 binary code for devices with compute capability 5.0 and 5.2,</li>
+<li>6.0 binary code for devices with compute capability 6.0 and 6.1,</li>
+<li>7.0 binary code for devices with compute capability 7.0 and 7.5,</li>
+<li>PTX code which is compiled to binary code at runtime for devices with compute capability later than 7.5</li>
+</ul>
+<p>x.cu 可以包含一个优化后的代码路径，该路径使用了 warp 缩减操作，例如，这些操作仅在计算能力为 8.0 及以上的设备上支持。<code>__CUDA_ARCH__</code> 宏可用于根据计算能力区分不同的代码路径。它仅在设备代码中定义。例如，当使用 -arch=compute_80 进行编译时，<code>__CUDA_ARCH__</code> 等于 800。</p>
+<p>如果 x.cu 文件是针对特定架构的特性进行编译，使用了 sm_100f 或 compute_100f，那么该代码只能在特定架构的设备上运行，即计算能力为 10.0 和 10.3 的设备。对于特定架构的代码目标，会定义一个额外的宏 <code>__CUDA_ARCH_FAMILY_SPECIFIC__</code>。在此示例中，<code>__CUDA_ARCH_FAMILY_SPECIFIC__</code> 等于 1000。</p>
+<p>如果 x.cu 针对架构特定功能使用 sm_100a 或 compute_100a 进行编译，则代码只能
                 在计算能力为 10.0 的设备上运行。对于架构特定的代码目标，会额外定义一个宏<code>__CUDA_ARCH_SPECIFIC__</code>。在此示例中，<code>__CUDA_ARCH_SPECIFIC__</code> 等于 1000。由于架构特定功能是家族特定功能的超集，因此家族特定宏<code>__CUDA_ARCH_FAMILY_SPECIFIC__</code> 也被定义且等于 1000.</p>
-                <p>使用驱动程序 API 的应用程序必须将代码编译到单独的文件中，并在运行时显式加载并执行
+<p>使用驱动程序 API 的应用程序必须将代码编译到单独的文件中，并在运行时显式加载并执行
                 最合适的文件。</p>
-                <p>Volta 架构引入了独立线程调度，这改变了线程在 GPU 上调度的方式。对于依赖于先前架构中 SIMT 调度特定行为的代码，独立线程调度可能会改变参与线程的集合，导致错误的结果。在实施独立线程调度中详细描述的纠正措施时，为帮助迁移，Volta开发者可通过编译器选项组-arch=compute_60-code=sm_70选择启用Pascal的线程调度。</p>
-                <p>nvcc 用户手册列出了各种用于 -arch、-code 和 -gencode 编译器选项的简写形式。例如，-arch=sm_70 是 -arch=compute_70 -code=compute_70 的简写，sm_70（与 -gencode arch=compute_70,code=\“compute_70,sm_70\” 相同）</p>
-                <h2 id="vc-compatibility">V.C++ Compatibility</h2>
-                <p>编译器的前端部分根据C++语法规则处理CUDA源文件。主机代码支持完整的C++语言。然而，对于设备代码，仅支持C++语言的一部分，具体内容如C++语言支持部分所述。</p>
-                <h2 id="vi-64-bit-compatibility">VI. 64-Bit Compatibility</h2>
-                <p>64位版本的nvcc以64位模式编译设备代码（即指针为64位）。设备代码以64位模式编译的设备代码仅与以64位模式编译的主机代码兼容。</p>
-            </article>
-        </main>
-    </div>
-    <footer>
-        <p>© 2025 我的博客</p>
-    </footer>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<p>Volta 架构引入了独立线程调度，这改变了线程在 GPU 上调度的方式。对于依赖于先前架构中 SIMT 调度特定行为的代码，独立线程调度可能会改变参与线程的集合，导致错误的结果。在实施独立线程调度中详细描述的纠正措施时，为帮助迁移，Volta开发者可通过编译器选项组-arch=compute_60-code=sm_70选择启用Pascal的线程调度。</p>
+<p>nvcc 用户手册列出了各种用于 -arch、-code 和 -gencode 编译器选项的简写形式。例如，-arch=sm_70 是 -arch=compute_70 -code=compute_70 的简写，sm_70（与 -gencode arch=compute_70,code=\“compute_70,sm_70\” 相同）</p>
+<h2 id="vc-compatibility">V.C++ Compatibility</h2>
+<p>编译器的前端部分根据C++语法规则处理CUDA源文件。主机代码支持完整的C++语言。然而，对于设备代码，仅支持C++语言的一部分，具体内容如C++语言支持部分所述。</p>
+<h2 id="vi-64-bit-compatibility">VI. 64-Bit Compatibility</h2>
+<p>64位版本的nvcc以64位模式编译设备代码（即指针为64位）。设备代码以64位模式编译的设备代码仅与以64位模式编译的主机代码兼容。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<footer>
+<p>© 2025 我的博客</p>
+</footer>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

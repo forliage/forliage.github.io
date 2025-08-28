@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>数值分析05:线性系统迭代法及其收敛性理论</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>数值分析05:线性系统迭代法及其收敛性理论</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,227 +30,253 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E6%95%B0%E5%80%BC%E5%88%86%E6%9E%9005%E7%BA%BF%E6%80%A7%E7%B3%BB%E7%BB%9F%E8%BF%AD%E4%BB%A3%E6%B3%95%E5%8F%8A%E5%85%B6%E6%94%B6%E6%95%9B%E6%80%A7%E7%90%86%E8%AE%BA">数值分析05:线性系统迭代法及其收敛性理论</h1>
-                <h3 id="%E5%BC%95%E8%A8%80%E4%B8%BA%E4%BD%95%E8%BF%AD%E4%BB%A3%E5%A6%82%E4%BD%95%E8%BF%AD%E4%BB%A3"><strong>引言：为何迭代？如何迭代？</strong></h3>
-                <p>在上一讲中，我们已经初步接触了用迭代法求解线性系统的思想。今天，我们将正式、系统地深入这个主题。</p>
-                <p>让我们再次回到那个核心问题：我们已经有了稳定可靠的、经过主元法改进的高斯消元法这样的<strong>直接法</strong>，为什么还需要发展<strong>迭代法</strong>？</p>
-                <p>答案主要在于<strong>处理超大规模稀疏系统</strong>时的巨大优势。想象一下，在天气预报、飞机设计或材料科学中，我们需要求解的线性方程组的维度 $n$ 可能高达数百万。</p>
-                <ul>
-                <li><strong>直接法 ($O(n^3)$):</strong> 即使是现代超级计算机，一个百万维度的稠密系统的 $10^{18}$ 次浮点运算也是一个巨大的挑战。</li>
-                <li><strong>存储：</strong> 存储一个百万乘百万的稠密矩阵需要 $10^{12}$ 个浮点数，约等于8000GB的内存，这通常是不现实的。</li>
-                <li><strong>稀疏性破坏：</strong> 更关键的是，这些系统通常是<strong>稀疏</strong>的，例如，每行只有5-10个非零元素。直接法中的行变换会引入大量非零元（称为<strong>Fill-in</strong>），彻底破坏这种宝贵的稀疏结构，导致内存需求激增。</li>
-                </ul>
-                <p><strong>迭代法</strong>正是为了克服这些困难而生。它有两大吸引力：</p>
-                <ol>
-                <li><strong>内存友好：</strong> 迭代过程通常只涉及矩阵和向量的乘法 ($A\mathbf{x}^{(k)}$)，可以完美地利用矩阵的稀疏性，存储需求仅为 $O(\text{nnz})$（非零元数量），远小于 $O(n^2)$。</li>
-                <li><strong>可控精度：</strong> 我们可以根据实际需求设定容差，迭代到满足精度要求即可停止，无需进行完整的 $O(n^3)$ 运算。对于某些问题，一个中等精度的解可能就足够了。</li>
-                </ol>
-                <p>上一讲我们已经建立了迭代法的基本框架：将 $A\mathbf{x}=\mathbf{b}$ 转化为等价的不动点形式 $\mathbf{x} = T\mathbf{x}+\mathbf{c}$，然后进行迭代 $\mathbf{x}^{(k+1)}=T\mathbf{x}^{(k)}+\mathbf{c}$。</p>
-                <p>今天，我们将详细探讨以下几个问题：</p>
-                <ol>
-                <li><strong>经典迭代法：</strong> Jacobi和Gauss-Seidel方法的具体实现和对比。</li>
-                <li><strong>收敛性理论：</strong> 迭代法到底在什么条件下才收敛？这是本讲的理论核心。</li>
-                <li><strong>加速收敛：</strong> 如何改进Gauss-Seidel方法，得到收敛更快的SOR方法？</li>
-                <li><strong>实践分析：</strong> 如何通过分析迭代矩阵的特征值来判断收敛性并找到最优参数？</li>
-                </ol>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E7%BB%8F%E5%85%B8%E8%BF%AD%E4%BB%A3%E6%A0%BC%E5%BC%8F"><strong>第一部分：经典迭代格式</strong></h3>
-                <p>我们再次使用矩阵分裂的思想 $A=D-L-U$ 来构造迭代格式。</p>
-                <h4 id="731-jacobi-%E8%BF%AD%E4%BB%A3%E6%B3%95"><strong>7.3.1 Jacobi 迭代法</strong></h4>
-                <p><strong>推导：</strong>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E6%95%B0%E5%80%BC%E5%88%86%E6%9E%9005%E7%BA%BF%E6%80%A7%E7%B3%BB%E7%BB%9F%E8%BF%AD%E4%BB%A3%E6%B3%95%E5%8F%8A%E5%85%B6%E6%94%B6%E6%95%9B%E6%80%A7%E7%90%86%E8%AE%BA">数值分析05:线性系统迭代法及其收敛性理论</h1>
+<h3 id="%E5%BC%95%E8%A8%80%E4%B8%BA%E4%BD%95%E8%BF%AD%E4%BB%A3%E5%A6%82%E4%BD%95%E8%BF%AD%E4%BB%A3"><strong>引言：为何迭代？如何迭代？</strong></h3>
+<p>在上一讲中，我们已经初步接触了用迭代法求解线性系统的思想。今天，我们将正式、系统地深入这个主题。</p>
+<p>让我们再次回到那个核心问题：我们已经有了稳定可靠的、经过主元法改进的高斯消元法这样的<strong>直接法</strong>，为什么还需要发展<strong>迭代法</strong>？</p>
+<p>答案主要在于<strong>处理超大规模稀疏系统</strong>时的巨大优势。想象一下，在天气预报、飞机设计或材料科学中，我们需要求解的线性方程组的维度 $n$ 可能高达数百万。</p>
+<ul>
+<li><strong>直接法 ($O(n^3)$):</strong> 即使是现代超级计算机，一个百万维度的稠密系统的 $10^{18}$ 次浮点运算也是一个巨大的挑战。</li>
+<li><strong>存储：</strong> 存储一个百万乘百万的稠密矩阵需要 $10^{12}$ 个浮点数，约等于8000GB的内存，这通常是不现实的。</li>
+<li><strong>稀疏性破坏：</strong> 更关键的是，这些系统通常是<strong>稀疏</strong>的，例如，每行只有5-10个非零元素。直接法中的行变换会引入大量非零元（称为<strong>Fill-in</strong>），彻底破坏这种宝贵的稀疏结构，导致内存需求激增。</li>
+</ul>
+<p><strong>迭代法</strong>正是为了克服这些困难而生。它有两大吸引力：</p>
+<ol>
+<li><strong>内存友好：</strong> 迭代过程通常只涉及矩阵和向量的乘法 ($A\mathbf{x}^{(k)}$)，可以完美地利用矩阵的稀疏性，存储需求仅为 $O(\text{nnz})$（非零元数量），远小于 $O(n^2)$。</li>
+<li><strong>可控精度：</strong> 我们可以根据实际需求设定容差，迭代到满足精度要求即可停止，无需进行完整的 $O(n^3)$ 运算。对于某些问题，一个中等精度的解可能就足够了。</li>
+</ol>
+<p>上一讲我们已经建立了迭代法的基本框架：将 $A\mathbf{x}=\mathbf{b}$ 转化为等价的不动点形式 $\mathbf{x} = T\mathbf{x}+\mathbf{c}$，然后进行迭代 $\mathbf{x}^{(k+1)}=T\mathbf{x}^{(k)}+\mathbf{c}$。</p>
+<p>今天，我们将详细探讨以下几个问题：</p>
+<ol>
+<li><strong>经典迭代法：</strong> Jacobi和Gauss-Seidel方法的具体实现和对比。</li>
+<li><strong>收敛性理论：</strong> 迭代法到底在什么条件下才收敛？这是本讲的理论核心。</li>
+<li><strong>加速收敛：</strong> 如何改进Gauss-Seidel方法，得到收敛更快的SOR方法？</li>
+<li><strong>实践分析：</strong> 如何通过分析迭代矩阵的特征值来判断收敛性并找到最优参数？</li>
+</ol>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E7%BB%8F%E5%85%B8%E8%BF%AD%E4%BB%A3%E6%A0%BC%E5%BC%8F"><strong>第一部分：经典迭代格式</strong></h3>
+<p>我们再次使用矩阵分裂的思想 $A=D-L-U$ 来构造迭代格式。</p>
+<h4 id="731-jacobi-%E8%BF%AD%E4%BB%A3%E6%B3%95"><strong>7.3.1 Jacobi 迭代法</strong></h4>
+<p><strong>推导：</strong>
                 $$A\mathbf{x} = \mathbf{b} \implies (D-L-U)\mathbf{x} = \mathbf{b} \implies D\mathbf{x} = (L+U)\mathbf{x} + \mathbf{b}$$
                 假设所有对角元 $a_{ii} \neq 0$，则 $D$ 可逆：
                 $$\mathbf{x} = D^{-1}(L+U)\mathbf{x} + D^{-1}\mathbf{b}$$</p>
-                <p><strong>Jacobi 迭代格式：</strong>
+<p><strong>Jacobi 迭代格式：</strong>
                 $$\mathbf{x}^{(k+1)} = \underbrace{D^{-1}(L+U)}_{T_J} \mathbf{x}^{(k)} + \underbrace{D^{-1}\mathbf{b}}_{\mathbf{c}_J}$$</p>
-                <p><strong>分量形式 (Component-wise Form):</strong>
+<p><strong>分量形式 (Component-wise Form):</strong>
                 $$x_i^{(k+1)} = \frac{1}{a_{ii}} \left( b_i - \sum_{j=1, j \neq i}^{n} a_{ij}x_j^{(k)} \right), \quad \text{for } i=1, \dots, n$$</p>
-                <p><strong>实现要点：</strong></p>
-                <ul>
-                <li><strong>两个向量存储：</strong> 从分量形式可以看出，为了计算新的向量 $\mathbf{x}^{(k+1)}$ 的每一个分量，我们都需要<strong>完整的旧向量 $\mathbf{x}^{(k)}$</strong>。因此，在实现时，我们需要两个数组，一个用于存储<code>x_old</code> ($\mathbf{x}^{(k)}$)，一个用于存储<code>x_new</code> ($\mathbf{x}^{(k+1)}$)。在一轮迭代完全结束后，再将<code>x_new</code>复制给<code>x_old</code>。</li>
-                <li><strong>并行性：</strong> 各个分量 $x_i^{(k+1)}$ 的计算是<strong>相互独立</strong>的，可以完美地分配给不同的处理器并行计算，这在高性能计算中是一个巨大优势。</li>
-                </ul>
-                <h4 id="732-gauss-seidel-%E8%BF%AD%E4%BB%A3%E6%B3%95"><strong>7.3.2 Gauss-Seidel 迭代法</strong></h4>
-                <p><strong>思想：</strong> &quot;A bit wasteful, isn't it?&quot;Jacobi方法在计算 $x_i^{(k+1)}$ 时，没有利用已经算出的、更新的 $x_1^{(k+1)}, \dots, x_{i-1}^{(k+1)}$。Gauss-Seidel方法修正了这一点。</p>
-                <p><strong>推导：</strong>
+<p><strong>实现要点：</strong></p>
+<ul>
+<li><strong>两个向量存储：</strong> 从分量形式可以看出，为了计算新的向量 $\mathbf{x}^{(k+1)}$ 的每一个分量，我们都需要<strong>完整的旧向量 $\mathbf{x}^{(k)}$</strong>。因此，在实现时，我们需要两个数组，一个用于存储<code>x_old</code> ($\mathbf{x}^{(k)}$)，一个用于存储<code>x_new</code> ($\mathbf{x}^{(k+1)}$)。在一轮迭代完全结束后，再将<code>x_new</code>复制给<code>x_old</code>。</li>
+<li><strong>并行性：</strong> 各个分量 $x_i^{(k+1)}$ 的计算是<strong>相互独立</strong>的，可以完美地分配给不同的处理器并行计算，这在高性能计算中是一个巨大优势。</li>
+</ul>
+<h4 id="732-gauss-seidel-%E8%BF%AD%E4%BB%A3%E6%B3%95"><strong>7.3.2 Gauss-Seidel 迭代法</strong></h4>
+<p><strong>思想：</strong> "A bit wasteful, isn't it?"Jacobi方法在计算 $x_i^{(k+1)}$ 时，没有利用已经算出的、更新的 $x_1^{(k+1)}, \dots, x_{i-1}^{(k+1)}$。Gauss-Seidel方法修正了这一点。</p>
+<p><strong>推导：</strong>
                 $$(D-L-U)\mathbf{x} = \mathbf{b} \implies (D-L)\mathbf{x} = U\mathbf{x} + \mathbf{b}$$
                 我们将所有包含“新”分量的项移到左边，“旧”分量的项留在右边。</p>
-                <p><strong>Gauss-Seidel 迭代格式：</strong>
+<p><strong>Gauss-Seidel 迭代格式：</strong>
                 $$\mathbf{x}^{(k+1)} = \underbrace{(D-L)^{-1}U}_{T_{GS}} \mathbf{x}^{(k)} + \underbrace{(D-L)^{-1}\mathbf{b}}_{\mathbf{c}_{GS}}$$</p>
-                <p><strong>分量形式 (Component-wise Form):</strong>
+<p><strong>分量形式 (Component-wise Form):</strong>
                 $$x_i^{(k+1)} = \frac{1}{a_{ii}} \left( b_i - \sum_{j=1}^{i-1} a_{ij}x_j^{(k+1)} - \sum_{j=i+1}^{n} a_{ij}x_j^{(k)} \right), \quad \text{for } i=1, \dots, n$$</p>
-                <p><strong>实现要点：</strong></p>
-                <ul>
-                <li><strong>一个向量存储：</strong> 从分量形式可以看出，我们可以用<strong>一个数组</strong>原地更新。在计算 $x_i^{(k+1)}$ 时，数组中前 $i-1$ 个元素已经是本次迭代更新过的值，后 $n-i$ 个元素还是上一次迭代的值。这节省了一半的内存。</li>
-                <li><strong>串行性：</strong> $x_i^{(k+1)}$ 的计算依赖于 $x_{i-1}^{(k+1)}$，因此必须按顺序 $i=1, 2, \dots, n$ 进行，不适合直接并行化。</li>
-                </ul>
-                <p><strong>收敛性对比：</strong></p>
-                <ul>
-                <li>直观上，Gauss-Seidel使用了最新信息，人们期望它收敛更快。在很多情况下（例如对于严格对角占优或对称正定矩阵），确实如此。</li>
-                <li>然而，“Neither of the methods are always convergent. And more, there are cases in which Jacobi method fails while Gauss-Seidel is convergent, and vice-versa.” 存在Jacobi收敛而Gauss-Seidel发散的例子，反之亦然。它们的收敛性取决于迭代矩阵的谱半径，而 $\rho(T_J)$ 和 $\rho(T_{GS})$ 之间没有绝对的大小关系。</li>
-                </ul>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E6%94%B6%E6%95%9B%E6%80%A7%E7%90%86%E8%AE%BA"><strong>第二部分：收敛性理论</strong></h3>
-                <p>这是理解所有迭代法行为的核心。</p>
-                <h4 id="721-%E8%B0%B1%E5%8D%8A%E5%BE%84%E4%B8%8E%E7%9F%A9%E9%98%B5%E6%94%B6%E6%95%9B"><strong>7.2.1 谱半径与矩阵收敛</strong></h4>
-                <p>我们已经知道，迭代法 $\mathbf{x}^{(k+1)} = T\mathbf{x}^{(k)} + \mathbf{c}$ 收敛的充要条件是 $\lim_{k\to\infty} T^k = O$ (零矩阵)。满足这个条件的矩阵被称为<strong>收敛矩阵 (Convergent Matrix)</strong>。</p>
-                <p><strong>定义 (谱半径 - Spectral Radius):</strong>
+<p><strong>实现要点：</strong></p>
+<ul>
+<li><strong>一个向量存储：</strong> 从分量形式可以看出，我们可以用<strong>一个数组</strong>原地更新。在计算 $x_i^{(k+1)}$ 时，数组中前 $i-1$ 个元素已经是本次迭代更新过的值，后 $n-i$ 个元素还是上一次迭代的值。这节省了一半的内存。</li>
+<li><strong>串行性：</strong> $x_i^{(k+1)}$ 的计算依赖于 $x_{i-1}^{(k+1)}$，因此必须按顺序 $i=1, 2, \dots, n$ 进行，不适合直接并行化。</li>
+</ul>
+<p><strong>收敛性对比：</strong></p>
+<ul>
+<li>直观上，Gauss-Seidel使用了最新信息，人们期望它收敛更快。在很多情况下（例如对于严格对角占优或对称正定矩阵），确实如此。</li>
+<li>然而，“Neither of the methods are always convergent. And more, there are cases in which Jacobi method fails while Gauss-Seidel is convergent, and vice-versa.” 存在Jacobi收敛而Gauss-Seidel发散的例子，反之亦然。它们的收敛性取决于迭代矩阵的谱半径，而 $\rho(T_J)$ 和 $\rho(T_{GS})$ 之间没有绝对的大小关系。</li>
+</ul>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E6%94%B6%E6%95%9B%E6%80%A7%E7%90%86%E8%AE%BA"><strong>第二部分：收敛性理论</strong></h3>
+<p>这是理解所有迭代法行为的核心。</p>
+<h4 id="721-%E8%B0%B1%E5%8D%8A%E5%BE%84%E4%B8%8E%E7%9F%A9%E9%98%B5%E6%94%B6%E6%95%9B"><strong>7.2.1 谱半径与矩阵收敛</strong></h4>
+<p>我们已经知道，迭代法 $\mathbf{x}^{(k+1)} = T\mathbf{x}^{(k)} + \mathbf{c}$ 收敛的充要条件是 $\lim_{k\to\infty} T^k = O$ (零矩阵)。满足这个条件的矩阵被称为<strong>收敛矩阵 (Convergent Matrix)</strong>。</p>
+<p><strong>定义 (谱半径 - Spectral Radius):</strong>
                 一个矩阵 $A$ 的谱半径 $\rho(A)$ 是其所有特征值绝对值的最大值。
                 $$\rho(A) = \max {|\lambda| : \lambda \text{ is an eigenvalue of } A}$$</p>
-                <p><strong>定理 (收敛矩阵的等价条件):</strong>
+<p><strong>定理 (收敛矩阵的等价条件):</strong>
                 对于一个 $n \times n$ 矩阵 $A$，以下陈述是等价的：</p>
-                <ol>
-                <li>$A$ 是一个收敛矩阵 (即 $\lim_{k\to\infty} A^k = O$)。</li>
-                <li>对于<strong>某个</strong>自然矩阵范数，$\lim_{k\to\infty} |A^k| = 0$。</li>
-                <li>对于<strong>所有</strong>自然矩阵范数，$\lim_{k\to\infty} |A^k| = 0$。</li>
-                <li>$A$ 的谱半径<strong>严格小于1</strong>，即 $\rho(A) < 1$。</li>
-                <li>对于任意向量 $\mathbf{x}$，都有 $\lim_{k\to\infty} A^k \mathbf{x} = \mathbf{0}$。</li>
-                </ol>
-                <p>这个定理是线性迭代法理论的基石。它告诉我们，判断一个迭代法是否收敛，最终归结为计算其迭代矩阵的谱半径。</p>
-                <p><strong>谱半径与范数的关系：</strong>
-                <strong>定理：</strong> 对于任意自然矩阵范数 $|\cdot|$ 和任意矩阵 $A$，都有 $\rho(A) \le |A|$。</p>
-                <ul>
-                <li><strong>证明思路：</strong> 设 $\lambda$ 是 $A$ 的一个特征值，$\mathbf{v}$ 是对应的特征向量。则 $A\mathbf{v} = \lambda\mathbf{v}$。
+<ol>
+<li>$A$ 是一个收敛矩阵 (即 $\lim_{k\to\infty} A^k = O$)。</li>
+<li>对于<strong>某个</strong>自然矩阵范数，$\lim_{k\to\infty} |A^k| = 0$。</li>
+<li>对于<strong>所有</strong>自然矩阵范数，$\lim_{k\to\infty} |A^k| = 0$。</li>
+<li>$A$ 的谱半径<strong>严格小于1</strong>，即 $\rho(A) &lt; 1$。</li>
+<li>对于任意向量 $\mathbf{x}$，都有 $\lim_{k\to\infty} A^k \mathbf{x} = \mathbf{0}$。</li>
+</ol>
+<p>这个定理是线性迭代法理论的基石。它告诉我们，判断一个迭代法是否收敛，最终归结为计算其迭代矩阵的谱半径。</p>
+<p><strong>谱半径与范数的关系：</strong>
+<strong>定理：</strong> 对于任意自然矩阵范数 $|\cdot|$ 和任意矩阵 $A$，都有 $\rho(A) \le |A|$。</p>
+<ul>
+<li><strong>证明思路：</strong> 设 $\lambda$ 是 $A$ 的一个特征值，$\mathbf{v}$ 是对应的特征向量。则 $A\mathbf{v} = \lambda\mathbf{v}$。
                 $|\lambda||\mathbf{v}| = |\lambda\mathbf{v}| = |A\mathbf{v}| \le |A||\mathbf{v}|$。
                 由于 $\mathbf{v}$ 非零，两边消去 $|\mathbf{v}|$ 得到 $|\lambda| \le |A|$。这对所有特征值都成立，所以 $\rho(A) = \max|\lambda| \le |A|$。</li>
-                </ul>
-                <h4 id="722-%E6%94%B6%E6%95%9B%E6%80%A7%E5%AE%9A%E7%90%86"><strong>7.2.2 收敛性定理</strong></h4>
-                <p>结合以上理论，我们可以给出迭代法收敛性的最终定理。</p>
-                <p><strong>定理 (线性迭代法收敛性):</strong>
-                对于任意初始向量 $\mathbf{x}^{(0)} \in \mathbb{R}^n$，由 $\mathbf{x}^{(k+1)} = T\mathbf{x}^{(k)} + \mathbf{c}$ 生成的序列收敛到方程 $\mathbf{x}=T\mathbf{x}+\mathbf{c}$ 的唯一解的<strong>充分必要条件</strong>是 $\rho(T) < 1$。</p>
-                <p><strong>证明思路 (简述):</strong></p>
-                <ul>
-                <li>($\Leftarrow$) <strong>如果 $\rho(T)<1$，则收敛：</strong>
-                误差关系为 $\mathbf{e}^{(k)} = T^k \mathbf{e}^{(0)}$。因为 $\rho(T)<1$，所以 $T$ 是收敛矩阵，$\lim_{k\to\infty} T^k = O$。因此 $\lim_{k\to\infty} \mathbf{e}^{(k)} = \mathbf{0}$。</li>
-                <li>($\Rightarrow$) <strong>如果对任意初值都收敛，则 $\rho(T)<1$：</strong>
+</ul>
+<h4 id="722-%E6%94%B6%E6%95%9B%E6%80%A7%E5%AE%9A%E7%90%86"><strong>7.2.2 收敛性定理</strong></h4>
+<p>结合以上理论，我们可以给出迭代法收敛性的最终定理。</p>
+<p><strong>定理 (线性迭代法收敛性):</strong>
+                对于任意初始向量 $\mathbf{x}^{(0)} \in \mathbb{R}^n$，由 $\mathbf{x}^{(k+1)} = T\mathbf{x}^{(k)} + \mathbf{c}$ 生成的序列收敛到方程 $\mathbf{x}=T\mathbf{x}+\mathbf{c}$ 的唯一解的<strong>充分必要条件</strong>是 $\rho(T) &lt; 1$。</p>
+<p><strong>证明思路 (简述):</strong></p>
+<ul>
+<li>($\Leftarrow$) <strong>如果 $\rho(T)&lt;1$，则收敛：</strong>
+                误差关系为 $\mathbf{e}^{(k)} = T^k \mathbf{e}^{(0)}$。因为 $\rho(T)&lt;1$，所以 $T$ 是收敛矩阵，$\lim_{k\to\infty} T^k = O$。因此 $\lim_{k\to\infty} \mathbf{e}^{(k)} = \mathbf{0}$。</li>
+<li>($\Rightarrow$) <strong>如果对任意初值都收敛，则 $\rho(T)&lt;1$：</strong>
                 (反证法) 假设 $\rho(T) \ge 1$。那么存在一个特征值 $\lambda$ 使得 $|\lambda| \ge 1$。设其对应的特征向量为 $\mathbf{v}$。如果我们选择初始误差 $\mathbf{e}^{(0)} = \mathbf{v}$，那么 $\mathbf{e}^{(k)} = T^k \mathbf{v} = \lambda^k \mathbf{v}$。
                 $|\mathbf{e}^{(k)}| = |\lambda|^k |\mathbf{v}|$。由于 $|\lambda| \ge 1$，这个误差范数不会趋于0，所以序列不收敛。这与“对任意初值都收敛”的前提矛盾。</li>
-                </ul>
-                <p><strong>实用的充分条件：</strong>
+</ul>
+<p><strong>实用的充分条件：</strong>
                 计算谱半径通常很困难。一个更容易验证的<strong>充分条件</strong>是：
-                <strong>如果存在某个自然矩阵范数使得 $|T| < 1$，则迭代法保证收敛。</strong>
+                <strong>如果存在某个自然矩阵范数使得 $|T| &lt; 1$，则迭代法保证收敛。</strong>
                 例如，对于Jacobi法，我们可以计算 $|T_J|_\infty = |D^{-1}(L+U)|_\infty$。如果这个值小于1，Jacobi就收敛。</p>
-                <p><strong>定理 (对角占优保证收敛):</strong>
+<p><strong>定理 (对角占优保证收敛):</strong>
                 如果矩阵 $A$ 是<strong>严格对角占优</strong>的，那么 Jacobi 和 Gauss-Seidel 方法都收敛。</p>
-                <ul>
-                <li><strong>证明思路 (以Jacobi为例):</strong>
-                对于严格对角占优矩阵，可以证明其Jacobi迭代矩阵 $T_J$ 的无穷范数满足 $|T_J|_\infty = \max_i \sum_{j \neq i} \frac{|a_{ij}|}{|a_{ii}|} < 1$。根据范数收敛准则，Jacobi法收敛。Gauss-Seidel的证明更复杂一些，但结论相同。</li>
-                </ul>
-                <h4 id="733-sor-%E6%96%B9%E6%B3%95%E5%8A%A0%E9%80%9F-gauss-seidel"><strong>7.3.3 SOR 方法：加速 Gauss-Seidel</strong></h4>
-                <p><strong>思想：</strong> 从另一个角度看待Gauss-Seidel。
+<ul>
+<li><strong>证明思路 (以Jacobi为例):</strong>
+                对于严格对角占优矩阵，可以证明其Jacobi迭代矩阵 $T_J$ 的无穷范数满足 $|T_J|_\infty = \max_i \sum_{j \neq i} \frac{|a_{ij}|}{|a_{ii}|} &lt; 1$。根据范数收敛准则，Jacobi法收敛。Gauss-Seidel的证明更复杂一些，但结论相同。</li>
+</ul>
+<h4 id="733-sor-%E6%96%B9%E6%B3%95%E5%8A%A0%E9%80%9F-gauss-seidel"><strong>7.3.3 SOR 方法：加速 Gauss-Seidel</strong></h4>
+<p><strong>思想：</strong> 从另一个角度看待Gauss-Seidel。
                 Gauss-Seidel的第 $i$ 步实际上是先计算一个Jacobi式的中间值 $\tilde{x}_i^{(k+1)}$，然后立即用它更新 $x_i^{(k)}$。我们可以看作是 $x_i^{(k)}$ 加上一个修正量。
                 令 $r_i^{(k)} = b_i - \sum_{j=1}^n a_{ij}x_j^{(k)}$ 是第 $k$ 步的残差向量的第 $i$ 个分量。
                 Gauss-Seidel的更新可以写成：$x_i^{(k+1)} = x_i^{(k)} + \frac{r_i^{(k)}}{a_{ii}}$ （这里 $r_i$ 内部混合了新旧分量）。</p>
-                <p><strong>松弛法 (Relaxation):</strong>
+<p><strong>松弛法 (Relaxation):</strong>
                 我们不必完全“相信”Gauss-Seidel给出的修正步长。我们可以引入一个<strong>松弛因子 (Relaxation Factor)</strong> $\omega$，来控制我们朝修正方向“走多远”。</p>
-                <p><strong>逐次超松弛法 (Successive Over-Relaxation, SOR) 迭代格式:</strong>
+<p><strong>逐次超松弛法 (Successive Over-Relaxation, SOR) 迭代格式:</strong>
                 $$x_i^{(k+1)} = (1-\omega)x_i^{(k)} + \omega \left[ \frac{1}{a_{ii}} \left( b_i - \sum_{j=1}^{i-1} a_{ij}x_j^{(k+1)} - \sum_{j=i+1}^{n} a_{ij}x_j^{(k)} \right) \right]$$</p>
-                <ul>
-                <li>当 $\omega=1$ 时，SOR <strong>退化为 Gauss-Seidel</strong>。</li>
-                <li>当 $0 < \omega < 1$ 时，称为<strong>欠松弛 (Under-Relaxation)</strong>，用于稳定某些发散的迭代。</li>
-                <li>当 $\omega > 1$ 时，称为<strong>超松弛 (Over-Relaxation)</strong>，用于加速收敛。我们通常关心这种情况。</li>
-                </ul>
-                <p><strong>SOR 迭代矩阵:</strong>
+<ul>
+<li>当 $\omega=1$ 时，SOR <strong>退化为 Gauss-Seidel</strong>。</li>
+<li>当 $0 &lt; \omega &lt; 1$ 时，称为<strong>欠松弛 (Under-Relaxation)</strong>，用于稳定某些发散的迭代。</li>
+<li>当 $\omega &gt; 1$ 时，称为<strong>超松弛 (Over-Relaxation)</strong>，用于加速收敛。我们通常关心这种情况。</li>
+</ul>
+<p><strong>SOR 迭代矩阵:</strong>
                 $$T_\omega = (D-\omega L)^{-1}((1-\omega)D + \omega U)$$</p>
-                <p><strong>SOR 收敛性定理:</strong></p>
-                <ul>
-                <li><strong>Kahan 定理：</strong> $\rho(T_\omega) \ge |\omega-1|$。这意味着SOR要收敛，<strong>$\omega$ 必须在 $(0, 2)$ 区间内</strong>。这是一个必要条件。</li>
-                <li><strong>Ostrowski-Reich 定理：</strong> 如果 $A$ 是<strong>对称正定</strong>的，那么只要 $0 < \omega < 2$，SOR就保证收敛。</li>
-                </ul>
-                <p>对于特定类型的矩阵（如对称正定三对角矩阵），甚至可以计算出使 $\rho(T_\omega)$ 最小的<strong>最优松弛因子 $\omega_{opt}$</strong>：
+<p><strong>SOR 收敛性定理:</strong></p>
+<ul>
+<li><strong>Kahan 定理：</strong> $\rho(T_\omega) \ge |\omega-1|$。这意味着SOR要收敛，<strong>$\omega$ 必须在 $(0, 2)$ 区间内</strong>。这是一个必要条件。</li>
+<li><strong>Ostrowski-Reich 定理：</strong> 如果 $A$ 是<strong>对称正定</strong>的，那么只要 $0 &lt; \omega &lt; 2$，SOR就保证收敛。</li>
+</ul>
+<p>对于特定类型的矩阵（如对称正定三对角矩阵），甚至可以计算出使 $\rho(T_\omega)$ 最小的<strong>最优松弛因子 $\omega_{opt}$</strong>：
                 $$\omega_{opt} = \frac{2}{1+\sqrt{1 - [\rho(T_J)]^2}}$$</p>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E6%94%B6%E6%95%9B%E6%80%A7%E5%88%86%E6%9E%90%E5%AE%9E%E8%B7%B5"><strong>第三部分：收敛性分析实践</strong></h3>
-                <p><strong>Discussion 14: 分析一个迭代方法</strong>
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E6%94%B6%E6%95%9B%E6%80%A7%E5%88%86%E6%9E%90%E5%AE%9E%E8%B7%B5"><strong>第三部分：收敛性分析实践</strong></h3>
+<p><strong>Discussion 14: 分析一个迭代方法</strong>
                 给定矩阵 $A = \begin{pmatrix} 2 &amp; 1 \\ 1 &amp; 2 \end{pmatrix}$, $\mathbf{b} = \begin{pmatrix} 1 \\ 2 \end{pmatrix}$ 和一个迭代格式：
                 $$\mathbf{x}^{(k+1)} = \mathbf{x}^{(k)} + \omega(A\mathbf{x}^{(k)} - \mathbf{b})$$
                 这是一个求解 $A\mathbf{x}=\mathbf{b}$ 的迭代法吗？不，它是求解 $A\mathbf{x}-\mathbf{b}=\mathbf{0}$，但迭代格式写错了。正确的应该是求解 $A\mathbf{x}=\mathbf{b}$ 的残差修正法，如 $\mathbf{x}^{(k+1)} = \mathbf{x}^{(k)} + \omega(\mathbf{b} - A\mathbf{x}^{(k)})$。</p>
-                <p><strong>1. 找出迭代矩阵 $T$:</strong>
+<p><strong>1. 找出迭代矩阵 $T$:</strong>
                 $$\mathbf{x}^{(k+1)} = (\mathbf{I} + \omega A)\mathbf{x}^{(k)} - \omega \mathbf{b}$$
                 所以，迭代矩阵 $T = \mathbf{I} + \omega A = \begin{pmatrix} 1+2\omega &amp; \omega \\ \omega &amp; 1+2\omega \end{pmatrix}$。</p>
-                <p><strong>2. 计算 $T$ 的特征值来得到谱半径:</strong>
+<p><strong>2. 计算 $T$ 的特征值来得到谱半径:</strong>
                 特征方程为 $\det(T-\lambda\mathbf{I}) = 0$。
                 $$(1+2\omega - \lambda)^2 - \omega^2 = 0$$
                 $$1+2\omega - \lambda = \pm \omega$$
                 $$\lambda = 1+2\omega \mp \omega$$
                 所以特征值为 $\lambda_1 = 1+\omega$ 和 $\lambda_2 = 1+3\omega$。</p>
-                <p><strong>3. 分析收敛条件:</strong>
-                要使迭代收敛，谱半径 $\rho(T) = \max\{|1+\omega|, |1+3\omega|\} < 1$。
+<p><strong>3. 分析收敛条件:</strong>
+                要使迭代收敛，谱半径 $\rho(T) = \max\{|1+\omega|, |1+3\omega|\} &lt; 1$。
                 这需要同时满足两个不等式：
-                (1) $-1 < 1+\omega < 1 \implies -2 < \omega < 0$
-                (2) $-1 < 1+3\omega < 1 \implies -2 < 3\omega < 0 \implies -2/3 < \omega < 0$
-                两个条件的交集是 <strong>$-2/3 < \omega < 0$</strong>。</p>
-                <p><strong>4. 寻找最优 $\omega$:</strong>
+                (1) $-1 &lt; 1+\omega &lt; 1 \implies -2 &lt; \omega &lt; 0$
+                (2) $-1 &lt; 1+3\omega &lt; 1 \implies -2 &lt; 3\omega &lt; 0 \implies -2/3 &lt; \omega &lt; 0$
+                两个条件的交集是 <strong>$-2/3 &lt; \omega &lt; 0$</strong>。</p>
+<p><strong>4. 寻找最优 $\omega$:</strong>
                 我们需要找到 $\omega$ 使得 $\rho(T)$ 最小。我们需要最小化函数 $f(\omega) = \max\{|1+\omega|, |1+3\omega|\}$。
                 画出两个函数 $|1+\omega|$ (V型，顶点在-1) 和 $|1+3\omega|$ (更窄的V型，顶点在-1/3) 的图像。</p>
-                <p>最大值函数的最小值出现在两条线的交点处，即：
+<p>最大值函数的最小值出现在两条线的交点处，即：
                 $$|1+\omega| = |1+3\omega|$$
-                在收敛区间 $(-2/3, 0)$ 内，$1+\omega > 0$，$1+3\omega$ 可能为正也可能为负。
+                在收敛区间 $(-2/3, 0)$ 内，$1+\omega &gt; 0$，$1+3\omega$ 可能为正也可能为负。
                 若 $1+3\omega \ge 0$ (即 $\omega \ge -1/3$)，则 $1+\omega = 1+3\omega \implies \omega=0$，不在区间内。
-                若 $1+3\omega < 0$ (即 $\omega < -1/3$)，则 $1+\omega = -(1+3\omega) = -1-3\omega \implies 4\omega = -2 \implies \omega = -1/2$。
+                若 $1+3\omega &lt; 0$ (即 $\omega &lt; -1/3$)，则 $1+\omega = -(1+3\omega) = -1-3\omega \implies 4\omega = -2 \implies \omega = -1/2$。
                 这个值在收敛区间内。
                 当 $\omega = -1/2$ 时，$\rho(T) = |1-1/2| = |1-3/2| = 0.5$。这就是最小的谱半径。</p>
-                <p>因此，最优松弛因子是 $\omega_{opt} = -1/2$。</p>
-                <h3 id="%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93"><strong>课程总结</strong></h3>
-                <p><strong>本讲核心要点：</strong></p>
-                <ol>
-                <li><strong>Jacobi</strong> 和 <strong>Gauss-Seidel</strong> 是将矩阵 $A$ 分裂为 $D-L-U$ 得到的两种基础迭代法，前者易于并行，后者通常收敛更快且节省内存。</li>
-                <li>迭代法收敛的<strong>充要条件是迭代矩阵的谱半径 $\rho(T)<1$</strong>。这是一个深刻的理论结果，将线性代数的特征值理论与迭代过程的收敛性联系起来。</li>
-                <li><strong>范数小于1</strong> ($ |T| < 1 $) 是一个更容易计算的<strong>充分条件</strong>，而<strong>严格对角占优</strong>是保证Jacobi和GS收敛的一个更易判断的矩阵性质。</li>
-                <li><strong>SOR方法</strong>通过引入松弛因子 $\omega$ 来加速Gauss-Seidel，收敛的必要条件是 $0 < \omega < 2$。选择最优的 $\omega$ 可以显著提升收敛速度。</li>
-                </ol>
-                <p><strong>Lab 04 ：Jacobi 与 Gauss-Seidel 对比</strong>
-                <strong>任务：</strong> 编写程序，用Jacobi和Gauss-Seidel方法求解给定的线性系统，并对比它们的表现。
+<p>因此，最优松弛因子是 $\omega_{opt} = -1/2$。</p>
+<h3 id="%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93"><strong>课程总结</strong></h3>
+<p><strong>本讲核心要点：</strong></p>
+<ol>
+<li><strong>Jacobi</strong> 和 <strong>Gauss-Seidel</strong> 是将矩阵 $A$ 分裂为 $D-L-U$ 得到的两种基础迭代法，前者易于并行，后者通常收敛更快且节省内存。</li>
+<li>迭代法收敛的<strong>充要条件是迭代矩阵的谱半径 $\rho(T)&lt;1$</strong>。这是一个深刻的理论结果，将线性代数的特征值理论与迭代过程的收敛性联系起来。</li>
+<li><strong>范数小于1</strong> ($ |T| &lt; 1 $) 是一个更容易计算的<strong>充分条件</strong>，而<strong>严格对角占优</strong>是保证Jacobi和GS收敛的一个更易判断的矩阵性质。</li>
+<li><strong>SOR方法</strong>通过引入松弛因子 $\omega$ 来加速Gauss-Seidel，收敛的必要条件是 $0 &lt; \omega &lt; 2$。选择最优的 $\omega$ 可以显著提升收敛速度。</li>
+</ol>
+<p><strong>Lab 04 ：Jacobi 与 Gauss-Seidel 对比</strong>
+<strong>任务：</strong> 编写程序，用Jacobi和Gauss-Seidel方法求解给定的线性系统，并对比它们的表现。
                 <strong>关键提示 (Note):</strong></p>
-                <ul>
-                <li>实验要求实现一种<strong>预处理</strong>策略来增强对角占优性：对于每一行 $i$，从该行向下扫描第 $i$ 列，找到绝对值最大的元素，通过<strong>行交换</strong>将其放到对角线位置。如果找不到非零元，则向上扫描，找到非零元后将其所在行<strong>加到</strong>第 $i$ 行。这种操作旨在尽可能地满足收敛条件，是数值实践中提高算法鲁棒性的常用技巧。</li>
-                <li>你需要分别实现两种算法，对同一个问题进行求解，并可能需要记录迭代次数或运行时间来对比效率。</li>
-                </ul>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<ul>
+<li>实验要求实现一种<strong>预处理</strong>策略来增强对角占优性：对于每一行 $i$，从该行向下扫描第 $i$ 列，找到绝对值最大的元素，通过<strong>行交换</strong>将其放到对角线位置。如果找不到非零元，则向上扫描，找到非零元后将其所在行<strong>加到</strong>第 $i$ 行。这种操作旨在尽可能地满足收敛条件，是数值实践中提高算法鲁棒性的常用技巧。</li>
+<li>你需要分别实现两种算法，对同一个问题进行求解，并可能需要记录迭代次数或运行时间来对比效率。</li>
+</ul>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

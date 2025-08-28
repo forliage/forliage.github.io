@@ -1,10 +1,11 @@
 <!DOCTYPE html>
+
 <html>
 <head>
 <title>并行退火算法(PSA)</title>
-<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
-<link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
+<meta content="text/html;charset=utf-8" http-equiv="Content-type"/>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
 <script>
   MathJax = {
     tex: {
@@ -16,12 +17,11 @@
     }
   };
 </script>
-<script type="text/javascript" id="MathJax-script" async
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
 </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,27 +30,27 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
 <h1 id="%E5%B9%B6%E8%A1%8C%E9%80%80%E7%81%AB%E7%AE%97%E6%B3%95psa">并行退火算法(PSA)</h1>
 <h2 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%BC%95%E8%A8%80---%E4%BB%8E%E7%89%A9%E7%90%86%E9%80%80%E7%81%AB%E5%88%B0%E6%A8%A1%E6%8B%9F%E9%80%80%E7%81%ABsa">第一部分：引言 - 从物理退火到模拟退火(SA)</h2>
 <p>众所周知，组合优化问题(Combinatorial Optimization)是计算机科学中的一大难题，例如TSP、VLSI Layout等。这类问题的解空间通常随着问题规模呈指数级增长，使得暴力枚举变得不切实际。</p>
@@ -68,8 +68,8 @@
 </li>
 </ul>
 <p><strong>SA的核心思想</strong>：</p>
-<p>算法不仅仅接收比当前解更好的新解($\Delta E=E(S')-E(S)<0$)，还能以一定的概率接受一个更差的解($\Delta E>0$)。这个接受概率由Metropolis准则给出：
-$$P(\text{accept } S')=\begin{cases}1,\quad\text{  if } \Delta E<0\ e^{-\frac{\Delta E}{T}},\text{if }\Delta E\geq 0\ \end{cases}$$
+<p>算法不仅仅接收比当前解更好的新解($\Delta E=E(S')-E(S)&lt;0$)，还能以一定的概率接受一个更差的解($\Delta E&gt;0$)。这个接受概率由Metropolis准则给出：
+$$P(\text{accept } S')=\begin{cases}1,\quad\text{  if } \Delta E&lt;0\ e^{-\frac{\Delta E}{T}},\text{if }\Delta E\geq 0\ \end{cases}$$
 这个概率性的"向坏处走"的举动，是SA算法的灵魂。</p>
 <ul>
 <li><strong>高温时</strong>(<code>T</code>很大)：$e^{-\frac{\Delta E}{T}}$趋近于1.算法几乎会接受任何新解，表现出强烈的随机探索行为，使其有能力"翻越"高山，避免陷入局部最优。</li>
@@ -80,18 +80,18 @@ $$P(\text{accept } S')=\begin{cases}1,\quad\text{  if } \Delta E<0\ e^{-\frac{\D
    - 初始解 S_current = generate_initial_solution()
    - 初始温度 T = T_initial
    - 终止温度 T_final
-   - 冷却率 alpha (0 < alpha < 1)
+   - 冷却率 alpha (0 &lt; alpha &lt; 1)
    - S_best = S_current
-2. while T > T_final:
+2. while T &gt; T_final:
 3.    for i = 1 to L: // 在每个温度下迭代L次
 4.       S_new = generate_neighbor(S_current)
 5.       delta_E = E(S_new) - E(S_current)
-6.       if delta_E < 0:
+6.       if delta_E &lt; 0:
 7.          S_current = S_new
-8.          if E(S_current) < E(S_best):
+8.          if E(S_current) &lt; E(S_best):
 9.             S_best = S_current
 10.      else:
-11.         if random(0, 1) < exp(-delta_E / T):
+11.         if random(0, 1) &lt; exp(-delta_E / T):
 12.            S_current = S_new
 13.   T = T * alpha // 降温
 14. return S_best
@@ -113,7 +113,7 @@ $$\pi_i (T)=\frac{1}{Z(T)} e^{-\frac{E(i)}{T}}$$
 <p><strong>证明(基于细致平衡条件):</strong></p>
 <p>一个马尔可夫链存在稳态分布$\pi$的充分条件是Detailed Balance Condition成立：
 $$\pi_i P_{ij} = \pi_j P_{ji}\quad \forall i,j \in \Omega$$
-我们来验证。假设$E(j)>E(i)$，则$\Delta E=E(j)-E(i)>0$。
+我们来验证。假设$E(j)&gt;E(i)$，则$\Delta E=E(j)-E(i)&gt;0$。
 $$A_{ij}(T) = e^{-\frac{E(j)-E(i)}{T}}\text{ and } A_{ji}(T)=1$$
 代入细致平衡条件：
 $$\text{LHS}=\pi_i P_{ij} = \left(\frac{1}{Z(T)}e^{-\frac{E(i)}{T}}\right)\cdot G_{ij}\cdot e^{-\frac{E(i)-E(j)}{T}}=\frac{G_{ij}}{Z(T)}e^{-\frac{E(j)}{T}}$$
@@ -125,7 +125,7 @@ $$\text{RHS}=\pi_j P_{ji} = \left(\frac{1}{Z(T)}e^{-\frac{E(j)}{T}}\right)\cdot 
 <p>SA算法的温度是变化的，因此它是一个非齐次马尔可夫链（Inhomogeneous Markov Chain）。其收敛性证明要复杂得多，但核心思想是：</p>
 <p><strong>定理</strong>:如果满足以下两个条件，SA算法将以概率1收敛到全局最优解：</p>
 <ol>
-<li><strong>遍历性</strong>（Ergodicity）：对于任意温度$T > 0$，其对应的马尔可夫链都是不可约的。这意味着从任意解$i$出发，经过有限步，都有可能到达任意其他解$j$。这要求我们的邻域函数设计得当，能够连通整个解空间。</li>
+<li><strong>遍历性</strong>（Ergodicity）：对于任意温度$T &gt; 0$，其对应的马尔可夫链都是不可约的。这意味着从任意解$i$出发，经过有限步，都有可能到达任意其他解$j$。这要求我们的邻域函数设计得当，能够连通整个解空间。</li>
 <li><strong>足够慢的冷却</strong>（Sufficiently Slow Cooling）：温度$T(k)$（$k$是迭代次数）必须下降得足够慢，以保证在每个温度下，系统都有足够的时间趋近其稳态分布。Geman和Geman在1984年证明，如果冷却进度表满足：
 $$T(k) \ge \frac{C}{\log(k+k_0)}$$
 其中$C$是一个足够大的常数（至少是解空间“能垒”的最大高度），算法就能保证收敛到全局最优。</li>
@@ -328,7 +328,7 @@ void simulated_annealing_worker(
     double T_final = 1e-8;
     double alpha = 0.999;
 
-    while (T > T_final) {
+    while (T &gt; T_final) {
         for (int i = 0; i &lt; 100; ++i) { // 每个温度迭代100次
             // 生成新邻居 (2-opt)
             std::vector&lt;int&gt; new_path = current_path;
@@ -339,10 +339,10 @@ void simulated_annealing_worker(
             double new_energy = total_distance(new_path, cities);
             double delta_E = new_energy - current_energy;
 
-            if (delta_E < 0 || dist(rng) < std::exp(-delta_E / T)) {
+            if (delta_E &lt; 0 || dist(rng) &lt; std::exp(-delta_E / T)) {
                 current_path = new_path;
                 current_energy = new_energy;
-                if (current_energy < local_min_energy) {
+                if (current_energy &lt; local_min_energy) {
                     local_best_path = current_path;
                     local_min_energy = current_energy;
                 }
@@ -353,10 +353,10 @@ void simulated_annealing_worker(
 
     // 更新全局最优解（需要加锁）
     std::lock_guard&lt;std::mutex&gt; lock(mtx);
-    if (local_min_energy < min_distance) {
+    if (local_min_energy &lt; min_distance) {
         min_distance = local_min_energy;
         best_path = local_best_path;
-        std::cout << "Thread " << thread_id << " found new best distance: " << min_distance << std::endl;
+        std::cout &lt;&lt; "Thread " &lt;&lt; thread_id &lt;&lt; " found new best distance: " &lt;&lt; min_distance &lt;&lt; std::endl;
     }
 }
 
@@ -366,19 +366,19 @@ int main() {
     std::vector&lt;City&gt; cities(num_cities);
     std::mt19937 city_rng(123); // 固定种子以复现
     std::uniform_real_distribution&lt;double&gt; coord_dist(0.0, 100.0);
-    for (int i = 0; i < num_cities; ++i) {
+    for (int i = 0; i &lt; num_cities; ++i) {
         cities[i] = {coord_dist(city_rng), coord_dist(city_rng)};
     }
 
     const int num_threads = std::thread::hardware_concurrency(); // 获取CPU核心数
-    std::cout << "Using " << num_threads << " threads." << std::endl;
+    std::cout &lt;&lt; "Using " &lt;&lt; num_threads &lt;&lt; " threads." &lt;&lt; std::endl;
 
     std::vector&lt;int&gt; global_best_path;
     double global_min_distance = std::numeric_limits&lt;double&gt;::max();
     std::mutex mtx;
 
     std::vector&lt;std::thread&gt; threads;
-    for (int i = 0; i < num_threads; ++i) {
+    for (int i = 0; i &lt; num_threads; ++i) {
         threads.emplace_back(simulated_annealing_worker, i, std::ref(cities), 
                              std::ref(global_best_path), std::ref(global_min_distance), std::ref(mtx));
     }
@@ -387,12 +387,12 @@ int main() {
         t.join();
     }
 
-    std::cout << "\nFinal best distance: " << global_min_distance << std::endl;
-    std::cout << "Path: ";
+    std::cout &lt;&lt; "\nFinal best distance: " &lt;&lt; global_min_distance &lt;&lt; std::endl;
+    std::cout &lt;&lt; "Path: ";
     for (int city_idx : global_best_path) {
-        std::cout << city_idx << " -> ";
+        std::cout &lt;&lt; city_idx &lt;&lt; " -&gt; ";
     }
-    std::cout << global_best_path[0] << std::endl;
+    std::cout &lt;&lt; global_best_path[0] &lt;&lt; std::endl;
 
     return 0;
 }
@@ -432,7 +432,7 @@ __device__ float distance_gpu(const City&amp; a, const City&amp; b) {
 // GPU设备函数：计算路径总长度
 __device__ float total_distance_gpu(int* path, City* cities) {
     float dist = 0.0f;
-    for (int i = 0; i < NUM_CITIES - 1; ++i) {
+    for (int i = 0; i &lt; NUM_CITIES - 1; ++i) {
         dist += distance_gpu(cities[path[i]], cities[path[i + 1]]);
     }
     dist += distance_gpu(cities[path[NUM_CITIES - 1]], cities[path[0]]);
@@ -443,16 +443,16 @@ __device__ float total_distance_gpu(int* path, City* cities) {
 __global__ void parallel_sa_kernel(City* d_cities, int* d_best_paths, float* d_min_distances, curandState* states) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if (tid >= NUM_WALKERS) return;
+    if (tid &gt;= NUM_WALKERS) return;
 
     // 1. 初始化每个线程的随机数生成器
     curandState local_state = states[tid];
 
     // 2. 初始化路径 (存储在每个线程的局部内存中)
     int current_path[NUM_CITIES];
-    for (int i = 0; i < NUM_CITIES; ++i) current_path[i] = i;
+    for (int i = 0; i &lt; NUM_CITIES; ++i) current_path[i] = i;
     // Fisher-Yates shuffle
-    for (int i = NUM_CITIES - 1; i > 0; --i) {
+    for (int i = NUM_CITIES - 1; i &gt; 0; --i) {
         int j = curand_uniform(&amp;local_state) * (i + 1);
         int temp = current_path[i];
         current_path[i] = current_path[j];
@@ -462,113 +462,30 @@ __global__ void parallel_sa_kernel(City* d_cities, int* d_best_paths, float* d_m
     float current_energy = total_distance_gpu(current_path, d_cities);
     
     int local_best_path[NUM_CITIES];
-    for(int i=0; i<NUM_CITIES; ++i) local_best_path[i] = current_path[i];
-    float local_min_energy = current_energy;
-
-    float T = 10000.0f;
-    float T_final = 1e-5f;
-    float alpha = 0.995f;
-
-    // 3. SA主循环
-    while (T > T_final) {
-        for (int i = 0; i < 50; ++i) {
+    for(int i=0; i<num_cities; (t="" ++i)="" 3.="" alpha="0.995f;" float="" local_best_path[i]="current_path[i];" local_min_energy="current_energy;" sa主循环="" t="10000.0f;" t_final="1e-5f;" while=""> T_final) {
+        for (int i = 0; i &lt; 50; ++i) {
             // 生成邻居 (2-opt)
             int a = 1 + (int)(curand_uniform(&amp;local_state) * (NUM_CITIES - 2));
             int b = 1 + (int)(curand_uniform(&amp;local_state) * (NUM_CITIES - 2));
             if (a == b) continue;
-            if (a > b) { int temp = a; a = b; b = temp; }
+            if (a &gt; b) { int temp = a; a = b; b = temp; }
             
             // Reverse the sub-path in a temporary array
             int new_path[NUM_CITIES];
-            for(int k=0; k<NUM_CITIES; ++k) new_path[k] = current_path[k];
-
-            int l=a, r=b;
-            while(l < r){
-                int temp = new_path[l];
-                new_path[l] = new_path[r];
-                new_path[r] = temp;
-                l++; r--;
-            }
-
-            float new_energy = total_distance_gpu(new_path, d_cities);
-            float delta_E = new_energy - current_energy;
-
-            if (delta_E < 0 || curand_uniform(&amp;local_state) < expf(-delta_E / T)) {
-                for(int k=0; k<NUM_CITIES; ++k) current_path[k] = new_path[k];
-                current_energy = new_energy;
-                if (current_energy < local_min_energy) {
-                    local_min_energy = current_energy;
-                    for(int k=0; k<NUM_CITIES; ++k) local_best_path[k] = current_path[k];
-                }
-            }
-        }
-        T *= alpha;
-    }
-
-    // 4. 将结果写回全局内存
-    d_min_distances[tid] = local_min_energy;
-    for (int i = 0; i < NUM_CITIES; ++i) {
-        d_best_paths[tid * NUM_CITIES + i] = local_best_path[i];
-    }
-    
-    // 5. 保存随机状态
-    states[tid] = local_state;
-}
-
-
-int main() {
-    // --- Host (CPU) Code ---
-    // 1. 创建TSP问题
-    std::vector&lt;City&gt; h_cities(NUM_CITIES);
-    srand(123);
-    for (int i = 0; i < NUM_CITIES; ++i) {
-        h_cities[i] = {(float)(rand() % 1000), (float)(rand() % 1000)};
-    }
-
-    // 2. 分配GPU内存
-    City* d_cities;
-    int* d_best_paths;
-    float* d_min_distances;
-    curandState* d_states;
-
-    cudaMalloc((void**)&amp;d_cities, NUM_CITIES * sizeof(City));
-    cudaMalloc((void**)&amp;d_best_paths, NUM_WALKERS * NUM_CITIES * sizeof(int));
-    cudaMalloc((void**)&amp;d_min_distances, NUM_WALKERS * sizeof(float));
-    cudaMalloc((void**)&amp;d_states, NUM_WALKERS * sizeof(curandState));
-
-    // 3. 拷贝数据到GPU
-    cudaMemcpy(d_cities, h_cities.data(), NUM_CITIES * sizeof(City), cudaMemcpyHostToDevice);
-
-    // 4. 初始化cuRAND状态
-    // 使用一个kernel来并行初始化，比在CPU上做然后拷贝快得多
-    cudaError_t err = cudaGetLastError();
-
-    dim3 blocks_rand( (NUM_WALKERS+255)/256 );
-    dim3 threads_rand( 256 );
-
-    // 内联的初始化kernel
-    auto init_rand_kernel = [](curandState* states, int num_walkers, unsigned long long seed){
-        int tid = blockIdx.x * blockDim.x + threadIdx.x;
-        if (tid < num_walkers) {
-            curand_init(seed, tid, 0, &amp;states[tid]);
-        }
-    };
-    // C++ Lambda anomymous kernel launch
-    void (*ptr_init_rand_kernel)(curandState*, int, unsigned long long) = init_rand_kernel;
-    ptr_init_rand_kernel<<<blocks_rand, threads_rand>>>(d_states, NUM_WALKERS, time(0));
+            for(int k=0; k<num_cities; %="" &amp;states[tid]);="" (*ptr_init_rand_kernel)(curandstate*,="" (cpu)="" (current_energy="" (delta_e="" (float)(rand()="" (int="" (num_walkers+255)="" (tid="" );="" *="" +="" ++i)="" ++k)="" -="" ---="" 0="" 0,="" 1.="" 1000),="" 1000)};="" 2.="" 256="" 3.="" 4.="" 5.="" <="" anomymous="" auto="" blockdim.x="" blocks_rand(="" c++="" city*="" code="" cudaerror_t="" cudamalloc((void**)&amp;d_best_paths,="" cudamalloc((void**)&amp;d_cities,="" cudamalloc((void**)&amp;d_min_distances,="" cudamalloc((void**)&amp;d_states,="" cudamemcpy(d_cities,="" cudamemcpyhosttodevice);="" curand_init(seed,="" curand_uniform(&amp;local_state)="" curandstate*="" current_energy="new_energy;" current_energy;="" current_path[k]="new_path[k];" d_best_paths;="" d_best_paths[tid="" d_cities);="" d_cities;="" d_min_distances;="" d_min_distances[tid]="local_min_energy;" d_states;="" delta_e="new_energy" dim3="" err="cudaGetLastError();" expf(-delta_e="" float="" float*="" for="" for(int="" h_cities(num_cities);="" h_cities.data(),="" h_cities[i]="{(float)(rand()" host="" i="" i]="local_best_path[i];" if="" init_rand_kernel="[](curandState*" int="" int*="" int,="" k="0;" k<num_cities;="" kernel="" l="a," l++;="" lambda="" launch="" local_best_path[k]="current_path[k];" local_min_energy="current_energy;" local_min_energy)="" long="" long)="init_rand_kernel;" main()="" new_energy="total_distance_gpu(new_path," new_path[k]="current_path[k];" new_path[l]="new_path[r];" new_path[r]="temp;" num_cities="" num_cities;="" num_walkers="" num_walkers)="" num_walkers,="" ptr_init_rand_kernel<<<blocks_rand,="" r="b;" r){="" r--;="" seed){="" sizeof(city));="" sizeof(city),="" sizeof(curandstate));="" sizeof(float));="" sizeof(int));="" srand(123);="" states,="" states[tid]="local_state;" std::vector&lt;city&gt;="" t="" t))="" temp="new_path[l];" threadidx.x;="" threads_rand="" threads_rand(="" tid="blockIdx.x" tid,="" unsigned="" void="" while(l="" {="" ||="" }="" };="" 使用一个kernel来并行初始化，比在cpu上做然后拷贝快得多="" 保存随机状态="" 内联的初始化kernel="" 分配gpu内存="" 创建tsp问题="" 初始化curand状态="" 将结果写回全局内存="" 拷贝数据到gpu="">&gt;&gt;(d_states, NUM_WALKERS, time(0));
     
     
     // 5. 启动SA Kernel
     int threadsPerBlock = 256;
     int blocksPerGrid = (NUM_WALKERS + threadsPerBlock - 1) / threadsPerBlock;
     
-    std::cout << "Launching " << NUM_WALKERS << " walkers on GPU..." << std::endl;
-    parallel_sa_kernel<<<blocksPerGrid, threadsPerBlock>>>(d_cities, d_best_paths, d_min_distances, d_states);
+    std::cout &lt;&lt; "Launching " &lt;&lt; NUM_WALKERS &lt;&lt; " walkers on GPU..." &lt;&lt; std::endl;
+    parallel_sa_kernel&lt;&lt;<blockspergrid, threadsperblock="">&gt;&gt;(d_cities, d_best_paths, d_min_distances, d_states);
     cudaDeviceSynchronize(); // 等待kernel执行完毕
     
     err = cudaGetLastError();
     if (err != cudaSuccess) {
-        std::cerr << "CUDA error after kernel launch: " << cudaGetErrorString(err) << std::endl;
+        std::cerr &lt;&lt; "CUDA error after kernel launch: " &lt;&lt; cudaGetErrorString(err) &lt;&lt; std::endl;
         return 1;
     }
 
@@ -582,19 +499,19 @@ int main() {
     // 7. 在CPU上寻找全局最优解
     float global_min_dist = h_min_distances[0];
     int best_walker_idx = 0;
-    for (int i = 1; i < NUM_WALKERS; ++i) {
-        if (h_min_distances[i] < global_min_dist) {
+    for (int i = 1; i &lt; NUM_WALKERS; ++i) {
+        if (h_min_distances[i] &lt; global_min_dist) {
             global_min_dist = h_min_distances[i];
             best_walker_idx = i;
         }
     }
 
-    std::cout << "\nFinal best distance (from GPU): " << global_min_dist << std::endl;
-    std::cout << "Path: ";
-    for (int i = 0; i < NUM_CITIES; ++i) {
-        std::cout << h_best_paths[best_walker_idx * NUM_CITIES + i] << " -> ";
+    std::cout &lt;&lt; "\nFinal best distance (from GPU): " &lt;&lt; global_min_dist &lt;&lt; std::endl;
+    std::cout &lt;&lt; "Path: ";
+    for (int i = 0; i &lt; NUM_CITIES; ++i) {
+        std::cout &lt;&lt; h_best_paths[best_walker_idx * NUM_CITIES + i] &lt;&lt; " -&gt; ";
     }
-    std::cout << h_best_paths[best_walker_idx * NUM_CITIES] << std::endl;
+    std::cout &lt;&lt; h_best_paths[best_walker_idx * NUM_CITIES] &lt;&lt; std::endl;
 
     // 8. 释放GPU内存
     cudaFree(d_cities);
@@ -604,34 +521,60 @@ int main() {
 
     return 0;
 }
-</div></code></pre>
+</blockspergrid,></num_cities;></num_cities;></div></code></pre>
 <p>这个CUDA实现利用了GPU的大规模并行性，在瞬间完成了成千上万次独立的退火过程，极大地增加了找到高质量解的概率，并且花费的时间远少于在CPU上串行执行同样次数的退火。</p>
 <h2 id="%E6%80%BB%E7%BB%93%E4%B8%8E%E5%B1%95%E6%9C%9B">总结与展望</h2>
 <p>未来，随着计算能力的进一步提升，以及与AI、量子计算等前沿领域的深度融合，并行退火及其衍生算法必将在解决人类面临的更宏大、更复杂的优化问题中，扮演愈发重要的角色。</p>
-            </article>
-        </main>
-    </div>
-    <footer>
-        <p>© 2025 我的博客</p>
-    </footer>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<footer>
+<p>© 2025 我的博客</p>
+</footer>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

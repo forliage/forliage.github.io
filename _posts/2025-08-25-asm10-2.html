@@ -1,13 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>x86汇编10-2:保护模式进阶</title>
-    
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    
-    <script>
+<meta charset="utf-8"/>
+<title>x86汇编10-2:保护模式进阶</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -18,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -32,117 +30,117 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="x86%E6%B1%87%E7%BC%9610-2%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E8%BF%9B%E9%98%B6">x86汇编10-2:保护模式进阶</h1>
-                <h3 id="%E5%BC%95%E8%A8%80"><strong>引言</strong></h3>
-                <p>想象一下两个国家，一个是平民区（Ring 3），一个是戒备森严的中央政务区（Ring 0）。平民不能随意闯入政务区，否则会被卫兵（CPU硬件异常）立即逮捕。但是，平民需要办事，比如办理护照（文件IO）。</p>
-                <p>解决方案是什么？在两个区域的边界上设立一个**“大使馆”或“政务服务大厅”**。这个大厅本身有明确的地址，平民被允许进入。进入后，你不能乱跑，只能到指定的窗口，提交你的申请，由内部的工作人员（高权限代码）为你办理，办完后将结果交给你，然后你离开。</p>
-                <p>在x86保护模式中，这个“服务大厅”就是<strong>门描述符（Gate Descriptor）</strong>。</p>
-                <h3 id="1-%E8%B0%83%E7%94%A8%E9%97%A8-call-gate"><strong>1 调用门 (Call Gate)</strong></h3>
-                <p>调用门是为**应用程序主动请求操作系统服务（即系统调用）**而设计的。</p>
-                <h4 id="11-%E4%BB%80%E4%B9%88%E6%98%AF%E8%B0%83%E7%94%A8%E9%97%A8"><strong>1.1 什么是调用门？</strong></h4>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="x86%E6%B1%87%E7%BC%9610-2%E4%BF%9D%E6%8A%A4%E6%A8%A1%E5%BC%8F%E8%BF%9B%E9%98%B6">x86汇编10-2:保护模式进阶</h1>
+<h3 id="%E5%BC%95%E8%A8%80"><strong>引言</strong></h3>
+<p>想象一下两个国家，一个是平民区（Ring 3），一个是戒备森严的中央政务区（Ring 0）。平民不能随意闯入政务区，否则会被卫兵（CPU硬件异常）立即逮捕。但是，平民需要办事，比如办理护照（文件IO）。</p>
+<p>解决方案是什么？在两个区域的边界上设立一个**“大使馆”或“政务服务大厅”**。这个大厅本身有明确的地址，平民被允许进入。进入后，你不能乱跑，只能到指定的窗口，提交你的申请，由内部的工作人员（高权限代码）为你办理，办完后将结果交给你，然后你离开。</p>
+<p>在x86保护模式中，这个“服务大厅”就是<strong>门描述符（Gate Descriptor）</strong>。</p>
+<h3 id="1-%E8%B0%83%E7%94%A8%E9%97%A8-call-gate"><strong>1 调用门 (Call Gate)</strong></h3>
+<p>调用门是为**应用程序主动请求操作系统服务（即系统调用）**而设计的。</p>
+<h4 id="11-%E4%BB%80%E4%B9%88%E6%98%AF%E8%B0%83%E7%94%A8%E9%97%A8"><strong>1.1 什么是调用门？</strong></h4>
+<ul>
+<li>
+<p><strong>定义</strong>: 调用门是一个<strong>系统段描述符</strong>（S=0，Type=12），它不指向一段内存，而是定义了一个受控的<strong>远过程调用（Far Call）</strong>。它本质上是一个安全的“传送门”，其描述符中包含了传送的目标地址和规则。</p>
+</li>
+<li>
+<p><strong>位置</strong>: 调用门描述符可以存放在GDT或LDT中。</p>
+</li>
+<li>
+<p><strong>结构 (8字节)</strong>:</p>
+<ul>
+<li><strong>目标代码段选择子 (Destination Selector)</strong>: 目标过程（通常是Ring 0）的代码段选择子。</li>
+<li><strong>目标偏移 (Destination Offset)</strong>: 目标过程在代码段内的32位入口地址。</li>
+<li><strong>DPL (Descriptor Privilege Level)</strong>: <strong>门本身的权限</strong>。这至关重要，它规定了<strong>谁有资格使用这个门</strong>。通常设置为3，表示Ring 3的应用程序可以使用。</li>
+<li><strong>参数数量 (Parameter Count)</strong>: 指定在发生特权级切换时，需要从调用者（低权限）的堆栈上复制多少个参数（以<code>DWORD</code>为单位）到被调用者（高权限）的堆栈上。</li>
+<li><strong>P (Present) 位</strong>: 该门是否有效。</li>
+</ul>
+</li>
+<li>
+<p><strong>设计哲学</strong>: 调用门的设计体现了<strong>最小权限原则</strong>和<strong>接口封装</strong>。</p>
+<ol>
+<li><strong>受控入口</strong>: 应用程序不能跳转到内核的任意位置，只能跳转到调用门指定的<strong>唯一入口点</strong>。这防止了恶意代码绕过安全检查，直接执行内核的危险代码。</li>
+<li><strong>权限隔离</strong>: 应用程序只是“使用”门（<code>CALL</code>一个门选择子），它对门背后的Ring 0代码一无所知，也无法修改。</li>
+</ol>
+</li>
+</ul>
+<h4 id="12-%E8%B0%83%E7%94%A8%E9%97%A8%E7%9B%B8%E5%85%B3%E7%9A%84call%E5%92%8Cretf%E6%8C%87%E4%BB%A4"><strong>1.2 调用门相关的<code>CALL</code>和<code>RETF</code>指令</strong></h4>
+<p>当一个<code>CALL FAR</code>指令的操作数指向一个调用门选择子时，CPU会执行一套极其复杂的、由硬件固化的操作流程。</p>
+<p><strong><code>CALL FAR gate_selector:offset</code> (offset会被忽略) 的硬件执行流程:</strong></p>
+<ol>
+<li><strong>权限检查</strong>:
                 <ul>
-                <li>
-                <p><strong>定义</strong>: 调用门是一个<strong>系统段描述符</strong>（S=0，Type=12），它不指向一段内存，而是定义了一个受控的<strong>远过程调用（Far Call）</strong>。它本质上是一个安全的“传送门”，其描述符中包含了传送的目标地址和规则。</p>
-                </li>
-                <li>
-                <p><strong>位置</strong>: 调用门描述符可以存放在GDT或LDT中。</p>
-                </li>
-                <li>
-                <p><strong>结构 (8字节)</strong>:</p>
+<li><strong>检查1 (访问门)</strong>: <code>CPL &lt;= Gate DPL</code> 并且 <code>RPL &lt;= Gate DPL</code>。确保当前代码和请求者有权使用这个门。</li>
+<li><strong>检查2 (目标代码段)</strong>: 调用门指向的目标代码段描述符的<code>DPL</code>必须<strong>小于等于</strong><code>CPL</code>。即，只允许通过调用门<strong>转移到同级或更高权限</strong>的代码段。</li>
+</ul>
+</li>
+<li><strong>如果发生特权级提升 (例如，从Ring 3 -&gt; Ring 0):</strong>
+<ul>
+<li><strong>堆栈切换 (Stack Switch)</strong>: 这是最关键的安全机制。CPU不能继续使用Ring 3的堆栈，因为它不安全、不可靠且可能空间不足。CPU会：
+                <ol>
+<li>查找当前任务的<strong>任务状态段 (TSS)</strong>（由<code>TR</code>寄存器指向）。</li>
+<li>从TSS中取出为目标特权级（Ring 0）预先准备好的堆栈指针：<code>SS0</code>和<code>ESP0</code>。</li>
+<li>加载<code>SS0</code>和<code>ESP0</code>到<code>SS</code>和<code>ESP</code>寄存器，切换到内核的安全堆栈。</li>
+</ol>
+</li>
+<li><strong>参数复制</strong>:
+                <ol>
+<li>CPU将旧的<code>SS</code>和<code>ESP</code>（Ring 3的堆栈指针）压入<strong>新的内核堆栈</strong>。</li>
+<li>根据调用门描述符中的<strong>参数数量</strong>，将指定数量的参数从旧堆栈复制到新堆栈。</li>
+</ol>
+</li>
+<li><strong>压入返回地址</strong>:
+                <ol>
+<li>将旧的<code>CS</code>和<code>EIP</code>（Ring 3的返回地址）压入新堆栈。</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><strong>加载并跳转</strong>:
                 <ul>
-                <li><strong>目标代码段选择子 (Destination Selector)</strong>: 目标过程（通常是Ring 0）的代码段选择子。</li>
-                <li><strong>目标偏移 (Destination Offset)</strong>: 目标过程在代码段内的32位入口地址。</li>
-                <li><strong>DPL (Descriptor Privilege Level)</strong>: <strong>门本身的权限</strong>。这至关重要，它规定了<strong>谁有资格使用这个门</strong>。通常设置为3，表示Ring 3的应用程序可以使用。</li>
-                <li><strong>参数数量 (Parameter Count)</strong>: 指定在发生特权级切换时，需要从调用者（低权限）的堆栈上复制多少个参数（以<code>DWORD</code>为单位）到被调用者（高权限）的堆栈上。</li>
-                <li><strong>P (Present) 位</strong>: 该门是否有效。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>设计哲学</strong>: 调用门的设计体现了<strong>最小权限原则</strong>和<strong>接口封装</strong>。</p>
-                <ol>
-                <li><strong>受控入口</strong>: 应用程序不能跳转到内核的任意位置，只能跳转到调用门指定的<strong>唯一入口点</strong>。这防止了恶意代码绕过安全检查，直接执行内核的危险代码。</li>
-                <li><strong>权限隔离</strong>: 应用程序只是“使用”门（<code>CALL</code>一个门选择子），它对门背后的Ring 0代码一无所知，也无法修改。</li>
-                </ol>
-                </li>
-                </ul>
-                <h4 id="12-%E8%B0%83%E7%94%A8%E9%97%A8%E7%9B%B8%E5%85%B3%E7%9A%84call%E5%92%8Cretf%E6%8C%87%E4%BB%A4"><strong>1.2 调用门相关的<code>CALL</code>和<code>RETF</code>指令</strong></h4>
-                <p>当一个<code>CALL FAR</code>指令的操作数指向一个调用门选择子时，CPU会执行一套极其复杂的、由硬件固化的操作流程。</p>
-                <p><strong><code>CALL FAR gate_selector:offset</code> (offset会被忽略) 的硬件执行流程:</strong></p>
-                <ol>
-                <li><strong>权限检查</strong>:
-                <ul>
-                <li><strong>检查1 (访问门)</strong>: <code>CPL &lt;= Gate DPL</code> 并且 <code>RPL &lt;= Gate DPL</code>。确保当前代码和请求者有权使用这个门。</li>
-                <li><strong>检查2 (目标代码段)</strong>: 调用门指向的目标代码段描述符的<code>DPL</code>必须<strong>小于等于</strong><code>CPL</code>。即，只允许通过调用门<strong>转移到同级或更高权限</strong>的代码段。</li>
-                </ul>
-                </li>
-                <li><strong>如果发生特权级提升 (例如，从Ring 3 -&gt; Ring 0):</strong>
-                <ul>
-                <li><strong>堆栈切换 (Stack Switch)</strong>: 这是最关键的安全机制。CPU不能继续使用Ring 3的堆栈，因为它不安全、不可靠且可能空间不足。CPU会：
-                <ol>
-                <li>查找当前任务的<strong>任务状态段 (TSS)</strong>（由<code>TR</code>寄存器指向）。</li>
-                <li>从TSS中取出为目标特权级（Ring 0）预先准备好的堆栈指针：<code>SS0</code>和<code>ESP0</code>。</li>
-                <li>加载<code>SS0</code>和<code>ESP0</code>到<code>SS</code>和<code>ESP</code>寄存器，切换到内核的安全堆栈。</li>
-                </ol>
-                </li>
-                <li><strong>参数复制</strong>:
-                <ol>
-                <li>CPU将旧的<code>SS</code>和<code>ESP</code>（Ring 3的堆栈指针）压入<strong>新的内核堆栈</strong>。</li>
-                <li>根据调用门描述符中的<strong>参数数量</strong>，将指定数量的参数从旧堆栈复制到新堆栈。</li>
-                </ol>
-                </li>
-                <li><strong>压入返回地址</strong>:
-                <ol>
-                <li>将旧的<code>CS</code>和<code>EIP</code>（Ring 3的返回地址）压入新堆栈。</li>
-                </ol>
-                </li>
-                </ul>
-                </li>
-                <li><strong>加载并跳转</strong>:
-                <ul>
-                <li>将调用门中指定的<strong>目标代码段选择子</strong>和<strong>目标偏移</strong>加载到<code>CS</code>和<code>EIP</code>寄存器。</li>
-                <li><code>CS</code>中的<code>CPL</code>此时更新为目标代码段的DPL（即0）。</li>
-                <li>CPU开始从Ring 0的新地址执行。</li>
-                </ul>
-                </li>
-                </ol>
-                <p><strong><code>RETF</code> (Far Return) 的硬件执行流程:</strong>
+<li>将调用门中指定的<strong>目标代码段选择子</strong>和<strong>目标偏移</strong>加载到<code>CS</code>和<code>EIP</code>寄存器。</li>
+<li><code>CS</code>中的<code>CPL</code>此时更新为目标代码段的DPL（即0）。</li>
+<li>CPU开始从Ring 0的新地址执行。</li>
+</ul>
+</li>
+</ol>
+<p><strong><code>RETF</code> (Far Return) 的硬件执行流程:</strong>
                 当Ring 0的代码执行<code>RETF</code>时，CPU会检查栈上的返回地址<code>CS</code>选择子，发现其<code>RPL</code>为3，就知道这是一次跨级返回。</p>
-                <ol>
-                <li>CPU执行权限检查。</li>
-                <li>从当前（内核）堆栈上弹出<code>EIP</code>, <code>CS</code>, <code>ESP</code>, <code>SS</code>，恢复到Ring 3的状态。</li>
-                <li>堆栈切换回用户空间。</li>
-                <li>（可选）如果<code>RETF</code>带有操作数（如<code>RETF 8</code>），会在<strong>返回后</strong>调整用户堆栈指针，用于清理参数。</li>
-                </ol>
-                <h4 id="13-%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E6%AE%B5-tss-%E4%B8%8E%E4%BB%BB%E5%8A%A1%E5%88%87%E6%8D%A2"><strong>1.3 任务状态段 (TSS) 与任务切换</strong></h4>
-                <ul>
-                <li><strong>TSS (Task State Segment)</strong>: 是内存中一个特殊的数据结构，用于保存一个任务（进程或线程）的完整上下文（所有寄存器的值、LDT选择子、I/O权限位图等）。</li>
-                <li><strong>在门调用中的核心作用</strong>: TSS在现代操作系统中很少用于硬件任务切换（因为效率不高），但它有一个<strong>不可替代</strong>的作用：为每个任务提供<strong>特权级0、1、2的堆栈指针（<code>SS0/ESP0</code>, <code>SS1/ESP1</code>, <code>SS2/ESP2</code>）</strong>。</li>
-                <li><strong>设计哲学</strong>: 操作系统在创建每个进程时，都会为其创建一个TSS，并在TSS中填好该进程的内核堆栈地址。当该进程通过调用门或中断进入内核时，CPU硬件能自动、安全地找到正确的内核堆栈，实现了<strong>进程间的内核堆栈隔离</strong>。</li>
-                </ul>
-                <h4 id="14-%E8%B0%83%E7%94%A8%E9%97%A8%E5%AE%9E%E4%BE%8B"><strong>1.4 调用门实例</strong></h4>
-                <p>一个Ring 3程序通过调用门调用Ring 0的代码，在屏幕上打印一条消息。</p>
-                <pre class="hljs"><code><div>; --- GDT 定义 ---
+<ol>
+<li>CPU执行权限检查。</li>
+<li>从当前（内核）堆栈上弹出<code>EIP</code>, <code>CS</code>, <code>ESP</code>, <code>SS</code>，恢复到Ring 3的状态。</li>
+<li>堆栈切换回用户空间。</li>
+<li>（可选）如果<code>RETF</code>带有操作数（如<code>RETF 8</code>），会在<strong>返回后</strong>调整用户堆栈指针，用于清理参数。</li>
+</ol>
+<h4 id="13-%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E6%AE%B5-tss-%E4%B8%8E%E4%BB%BB%E5%8A%A1%E5%88%87%E6%8D%A2"><strong>1.3 任务状态段 (TSS) 与任务切换</strong></h4>
+<ul>
+<li><strong>TSS (Task State Segment)</strong>: 是内存中一个特殊的数据结构，用于保存一个任务（进程或线程）的完整上下文（所有寄存器的值、LDT选择子、I/O权限位图等）。</li>
+<li><strong>在门调用中的核心作用</strong>: TSS在现代操作系统中很少用于硬件任务切换（因为效率不高），但它有一个<strong>不可替代</strong>的作用：为每个任务提供<strong>特权级0、1、2的堆栈指针（<code>SS0/ESP0</code>, <code>SS1/ESP1</code>, <code>SS2/ESP2</code>）</strong>。</li>
+<li><strong>设计哲学</strong>: 操作系统在创建每个进程时，都会为其创建一个TSS，并在TSS中填好该进程的内核堆栈地址。当该进程通过调用门或中断进入内核时，CPU硬件能自动、安全地找到正确的内核堆栈，实现了<strong>进程间的内核堆栈隔离</strong>。</li>
+</ul>
+<h4 id="14-%E8%B0%83%E7%94%A8%E9%97%A8%E5%AE%9E%E4%BE%8B"><strong>1.4 调用门实例</strong></h4>
+<p>一个Ring 3程序通过调用门调用Ring 0的代码，在屏幕上打印一条消息。</p>
+<pre class="hljs"><code><div>; --- GDT 定义 ---
                 ; ... (NULL, Ring0 Code/Data, Ring3 Code/Data 描述符) ...
                 GDT_CALL_GATE_SELECTOR EQU $ - GDT_BASE
                 gdt_call_gate:
@@ -161,62 +159,62 @@
                     ; ... 在屏幕打印 "Hello from Ring 0!" 的代码 ...
                     RETF
                 </div></code></pre>
-                <h3 id="2-%E4%B8%AD%E6%96%AD%E9%97%A8%E4%B8%8E%E9%99%B7%E9%98%B1%E9%97%A8%E6%84%8F%E5%A4%96%E4%BA%8B%E4%BB%B6%E7%9A%84%E7%B4%A7%E6%80%A5%E9%80%9A%E9%81%93"><strong>2 中断门与陷阱门——意外事件的“紧急通道”</strong></h3>
-                <p>硬件中断和CPU异常是不可预知的事件。当中断发生时，如果CPU正运行在Ring 3，而中断处理程序在Ring 0，同样需要一个安全的跨级机制。这个机制就是<strong>中断门</strong>和<strong>陷阱门</strong>。</p>
-                <h4 id="21-%E4%BB%80%E4%B9%88%E6%98%AF%E4%B8%AD%E6%96%AD%E9%97%A8%E9%99%B7%E9%98%B1%E9%97%A8"><strong>2.1 什么是中断门/陷阱门？</strong></h4>
+<h3 id="2-%E4%B8%AD%E6%96%AD%E9%97%A8%E4%B8%8E%E9%99%B7%E9%98%B1%E9%97%A8%E6%84%8F%E5%A4%96%E4%BA%8B%E4%BB%B6%E7%9A%84%E7%B4%A7%E6%80%A5%E9%80%9A%E9%81%93"><strong>2 中断门与陷阱门——意外事件的“紧急通道”</strong></h3>
+<p>硬件中断和CPU异常是不可预知的事件。当中断发生时，如果CPU正运行在Ring 3，而中断处理程序在Ring 0，同样需要一个安全的跨级机制。这个机制就是<strong>中断门</strong>和<strong>陷阱门</strong>。</p>
+<h4 id="21-%E4%BB%80%E4%B9%88%E6%98%AF%E4%B8%AD%E6%96%AD%E9%97%A8%E9%99%B7%E9%98%B1%E9%97%A8"><strong>2.1 什么是中断门/陷阱门？</strong></h4>
+<ul>
+<li><strong>定义</strong>: 它们也是系统段描述符，结构与调用门非常相似，但用于处理中断和异常。</li>
+<li><strong>位置</strong>: 必须存放在<strong>中断描述符表 (IDT - Interrupt Descriptor Table)</strong> 中。CPU通过<code>IDTR</code>寄存器找到IDT。</li>
+<li><strong>区别 (中断类别)</strong>:
                 <ul>
-                <li><strong>定义</strong>: 它们也是系统段描述符，结构与调用门非常相似，但用于处理中断和异常。</li>
-                <li><strong>位置</strong>: 必须存放在<strong>中断描述符表 (IDT - Interrupt Descriptor Table)</strong> 中。CPU通过<code>IDTR</code>寄存器找到IDT。</li>
-                <li><strong>区别 (中断类别)</strong>:
+<li><strong>中断门 (Interrupt Gate)</strong>: 当通过此门进入处理程序时，CPU硬件<strong>自动清除<code>IF</code>标志位</strong>，即<strong>关中断</strong>。</li>
+<li><strong>陷阱门 (Trap Gate)</strong>: 进入处理程序时，<strong>不改变<code>IF</code>标志位</strong>。</li>
+</ul>
+</li>
+<li><strong>设计哲学</strong>:
                 <ul>
-                <li><strong>中断门 (Interrupt Gate)</strong>: 当通过此门进入处理程序时，CPU硬件<strong>自动清除<code>IF</code>标志位</strong>，即<strong>关中断</strong>。</li>
-                <li><strong>陷阱门 (Trap Gate)</strong>: 进入处理程序时，<strong>不改变<code>IF</code>标志位</strong>。</li>
-                </ul>
-                </li>
-                <li><strong>设计哲学</strong>:
+<li><strong>硬件中断</strong>（如时钟、键盘）应该使用<strong>中断门</strong>。这可以防止在处理一个中断时，被同类型的另一个中断打断，造成堆栈溢出等问题（中断嵌套需要非常小心地手动管理）。</li>
+<li><strong>异常</strong>（如缺页、除零）和<strong>软件中断</strong>(<code>INT n</code>)通常使用<strong>陷阱门</strong>。因为在处理一个异常时，允许响应更紧急的硬件中断是合理的。</li>
+</ul>
+</li>
+</ul>
+<h4 id="22-%E4%B8%AD%E6%96%AD%E7%9B%B8%E5%85%B3%E7%9A%84int%E5%92%8Ciretd%E6%8C%87%E4%BB%A4"><strong>2.2 中断相关的<code>INT</code>和<code>IRETD</code>指令</strong></h4>
+<p><strong>中断/异常发生时的硬件执行流程:</strong></p>
+<ol>
+<li>CPU获取中断向量号<code>N</code>。</li>
+<li>CPU用<code>N</code>作为索引，在IDT中查找第<code>N</code>个门描述符。</li>
+<li><strong>权限检查</strong>:
                 <ul>
-                <li><strong>硬件中断</strong>（如时钟、键盘）应该使用<strong>中断门</strong>。这可以防止在处理一个中断时，被同类型的另一个中断打断，造成堆栈溢出等问题（中断嵌套需要非常小心地手动管理）。</li>
-                <li><strong>异常</strong>（如缺页、除零）和<strong>软件中断</strong>(<code>INT n</code>)通常使用<strong>陷阱门</strong>。因为在处理一个异常时，允许响应更紧急的硬件中断是合理的。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="22-%E4%B8%AD%E6%96%AD%E7%9B%B8%E5%85%B3%E7%9A%84int%E5%92%8Ciretd%E6%8C%87%E4%BB%A4"><strong>2.2 中断相关的<code>INT</code>和<code>IRETD</code>指令</strong></h4>
-                <p><strong>中断/异常发生时的硬件执行流程:</strong></p>
-                <ol>
-                <li>CPU获取中断向量号<code>N</code>。</li>
-                <li>CPU用<code>N</code>作为索引，在IDT中查找第<code>N</code>个门描述符。</li>
-                <li><strong>权限检查</strong>:
+<li>对于软件中断<code>INT n</code>，检查 <code>CPL &lt;= Gate DPL</code>。允许应用程序触发中断。</li>
+<li>对于硬件中断和异常，通常不检查CPL。</li>
+</ul>
+</li>
+<li><strong>如果发生特权级提升 (Ring 3 -&gt; Ring 0):</strong>
+<ul>
+<li><strong>堆栈切换</strong>: 与调用门完全相同，使用TSS中的<code>SS0/ESP0</code>切换到内核堆栈。</li>
+<li><strong>压栈</strong>: CPU依次将旧的<code>SS</code>, <code>ESP</code>, <code>EFLAGS</code>, <code>CS</code>, <code>EIP</code>压入<strong>新的内核堆栈</strong>。</li>
+<li><strong>（可选）压入错误码</strong>: 某些异常（如缺页、通用保护）会由硬件额外压入一个错误码。</li>
+</ul>
+</li>
+<li><strong>加载并跳转</strong>:
                 <ul>
-                <li>对于软件中断<code>INT n</code>，检查 <code>CPL &lt;= Gate DPL</code>。允许应用程序触发中断。</li>
-                <li>对于硬件中断和异常，通常不检查CPL。</li>
-                </ul>
-                </li>
-                <li><strong>如果发生特权级提升 (Ring 3 -&gt; Ring 0):</strong>
-                <ul>
-                <li><strong>堆栈切换</strong>: 与调用门完全相同，使用TSS中的<code>SS0/ESP0</code>切换到内核堆栈。</li>
-                <li><strong>压栈</strong>: CPU依次将旧的<code>SS</code>, <code>ESP</code>, <code>EFLAGS</code>, <code>CS</code>, <code>EIP</code>压入<strong>新的内核堆栈</strong>。</li>
-                <li><strong>（可选）压入错误码</strong>: 某些异常（如缺页、通用保护）会由硬件额外压入一个错误码。</li>
-                </ul>
-                </li>
-                <li><strong>加载并跳转</strong>:
-                <ul>
-                <li>从门描述符中加载目标<code>CS</code>和<code>EIP</code>。</li>
-                <li>如果使用的是中断门，清除<code>IF</code>标志位。</li>
-                <li><code>CPL</code>更新为0，开始执行中断处理程序。</li>
-                </ul>
-                </li>
-                </ol>
-                <p><strong><code>IRETD</code> (Interrupt Return, 32-bit) 的硬件执行流程:</strong>
+<li>从门描述符中加载目标<code>CS</code>和<code>EIP</code>。</li>
+<li>如果使用的是中断门，清除<code>IF</code>标志位。</li>
+<li><code>CPL</code>更新为0，开始执行中断处理程序。</li>
+</ul>
+</li>
+</ol>
+<p><strong><code>IRETD</code> (Interrupt Return, 32-bit) 的硬件执行流程:</strong>
                 这是从中断/异常处理程序返回的<strong>唯一</strong>指令。</p>
-                <ol>
-                <li>CPU执行权限检查。</li>
-                <li><code>IRETD</code>会从当前堆栈上依次弹出<code>EIP</code>, <code>CS</code>, <code>EFLAGS</code>。</li>
-                <li>因为恢复的<code>CS</code>指向了Ring 3，CPU知道发生了特权级切换，于是会继续弹出<code>ESP</code>和<code>SS</code>，恢复用户堆栈。</li>
-                <li>执行恢复到Ring 3。<code>EFLAGS</code>的恢复是关键，它<strong>自动恢复了中断前的<code>IF</code>标志位状态</strong>。</li>
-                </ol>
-                <h4 id="23-%E4%B8%AD%E6%96%AD%E9%97%A8%E5%AE%9E%E4%BE%8B"><strong>2.3 中断门实例</strong></h4>
-                <p>一个Ring 3程序通过<code>INT 80h</code>触发一个系统调用。</p>
-                <pre class="hljs"><code><div>; --- IDT 定义 ---
+<ol>
+<li>CPU执行权限检查。</li>
+<li><code>IRETD</code>会从当前堆栈上依次弹出<code>EIP</code>, <code>CS</code>, <code>EFLAGS</code>。</li>
+<li>因为恢复的<code>CS</code>指向了Ring 3，CPU知道发生了特权级切换，于是会继续弹出<code>ESP</code>和<code>SS</code>，恢复用户堆栈。</li>
+<li>执行恢复到Ring 3。<code>EFLAGS</code>的恢复是关键，它<strong>自动恢复了中断前的<code>IF</code>标志位状态</strong>。</li>
+</ol>
+<h4 id="23-%E4%B8%AD%E6%96%AD%E9%97%A8%E5%AE%9E%E4%BE%8B"><strong>2.3 中断门实例</strong></h4>
+<p>一个Ring 3程序通过<code>INT 80h</code>触发一个系统调用。</p>
+<pre class="hljs"><code><div>; --- IDT 定义 ---
                 ; 假设IDT位于某处，IDTR已设置
                 IDT_ENTRY_80H:
                     DW isr_offset_low      ; 目标偏移
@@ -235,34 +233,59 @@
                     ; ... 处理系统调用 ...
                     IRETD                   ; 从中断返回
                 </div></code></pre>
-            </article>
-        </main>
-    </div>
-    
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

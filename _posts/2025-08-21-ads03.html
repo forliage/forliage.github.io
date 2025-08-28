@@ -1,13 +1,14 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>ads03:倒排文件索引（Inverted File Index）</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<meta charset="utf-8"/>
+<title>ads03:倒排文件索引（Inverted File Index）</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -16,173 +17,173 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="ads03%E5%80%92%E6%8E%92%E6%96%87%E4%BB%B6%E7%B4%A2%E5%BC%95inverted-file-index">ads03:倒排文件索引（Inverted File Index）</h1>
-                <h3 id="part-1-%E9%97%AE%E9%A2%98%E7%9A%84%E6%8F%90%E5%87%BA--%E4%BF%A1%E6%81%AF%E7%9A%84%E6%B1%AA%E6%B4%8B%E4%B8%AD%E5%A6%82%E4%BD%95%E8%88%AA%E8%A1%8C">Part 1: 问题的提出 —— 信息的汪洋中如何航行？</h3>
-                <p>我们每天都在使用搜索引擎。想象一下，当你在搜索框里输入“Computer Science”时，搜索引擎如何在不到一秒的时间内，从数千亿的网页中，精确地找出包含这个词组的页面，并呈现给你？</p>
-                <p>这就是我们今天课程要解决的核心问题：<strong>如何快速地找到在哪些文档中包含了我们想要查询的关键词？</strong></p>
-                <p>面对这个问题，我们最直观的想法是什么？</p>
-                <h4 id="%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-1-%E6%9A%B4%E5%8A%9B%E6%89%AB%E6%8F%8F%E6%B3%95-scan-each-page">解决方案 1: 暴力扫描法 (Scan each page)</h4>
-                <p>最简单粗暴的方法就是：把所有网页（文档）都看作一个长长的字符串，然后一篇一篇地去扫描，看看里面有没有“Computer Science”这个子串。</p>
-                <p>这个方法可行吗？理论上可行。但现实呢？Google索引了超过10亿的网页。假设每篇网页平均100KB，扫描一篇需要1毫秒，那么扫描完所有网页需要：</p>
-                <p>1,000,000,000 (网页) * 0.001 (秒/网页) = 1,000,000 秒 ≈ 11.5 天</p>
-                <p>当你得到结果时，可能已经是很久的事情了。所以，这个方案在现实世界中是完全不可接受的。我们需要更聪明的办法。</p>
-                <h4 id="%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-2-%E8%AF%8D%E9%A1%B9-%E6%96%87%E6%A1%A3%E5%85%B3%E8%81%94%E7%9F%A9%E9%98%B5-term-document-incidence-matrix">解决方案 2: 词项-文档关联矩阵 (Term-Document Incidence Matrix)</h4>
-                <p>既然逐篇扫描太慢，我们能不能预先处理好所有文档，建立一张“速查表”呢？一个自然的想法就是<strong>词项-文档关联矩阵</strong>。</p>
-                <p>我们把所有文档中出现过的词提取出来，作为矩阵的行；把所有文档的编号作为矩阵的列。如果一个词在某篇文档中出现，就在对应的单元格记为<code>1</code>，否则记为<code>0</code>。</p>
-                <p><strong>【示例】</strong>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="ads03%E5%80%92%E6%8E%92%E6%96%87%E4%BB%B6%E7%B4%A2%E5%BC%95inverted-file-index">ads03:倒排文件索引（Inverted File Index）</h1>
+<h3 id="part-1-%E9%97%AE%E9%A2%98%E7%9A%84%E6%8F%90%E5%87%BA--%E4%BF%A1%E6%81%AF%E7%9A%84%E6%B1%AA%E6%B4%8B%E4%B8%AD%E5%A6%82%E4%BD%95%E8%88%AA%E8%A1%8C">Part 1: 问题的提出 —— 信息的汪洋中如何航行？</h3>
+<p>我们每天都在使用搜索引擎。想象一下，当你在搜索框里输入“Computer Science”时，搜索引擎如何在不到一秒的时间内，从数千亿的网页中，精确地找出包含这个词组的页面，并呈现给你？</p>
+<p>这就是我们今天课程要解决的核心问题：<strong>如何快速地找到在哪些文档中包含了我们想要查询的关键词？</strong></p>
+<p>面对这个问题，我们最直观的想法是什么？</p>
+<h4 id="%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-1-%E6%9A%B4%E5%8A%9B%E6%89%AB%E6%8F%8F%E6%B3%95-scan-each-page">解决方案 1: 暴力扫描法 (Scan each page)</h4>
+<p>最简单粗暴的方法就是：把所有网页（文档）都看作一个长长的字符串，然后一篇一篇地去扫描，看看里面有没有“Computer Science”这个子串。</p>
+<p>这个方法可行吗？理论上可行。但现实呢？Google索引了超过10亿的网页。假设每篇网页平均100KB，扫描一篇需要1毫秒，那么扫描完所有网页需要：</p>
+<p>1,000,000,000 (网页) * 0.001 (秒/网页) = 1,000,000 秒 ≈ 11.5 天</p>
+<p>当你得到结果时，可能已经是很久的事情了。所以，这个方案在现实世界中是完全不可接受的。我们需要更聪明的办法。</p>
+<h4 id="%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-2-%E8%AF%8D%E9%A1%B9-%E6%96%87%E6%A1%A3%E5%85%B3%E8%81%94%E7%9F%A9%E9%98%B5-term-document-incidence-matrix">解决方案 2: 词项-文档关联矩阵 (Term-Document Incidence Matrix)</h4>
+<p>既然逐篇扫描太慢，我们能不能预先处理好所有文档，建立一张“速查表”呢？一个自然的想法就是<strong>词项-文档关联矩阵</strong>。</p>
+<p>我们把所有文档中出现过的词提取出来，作为矩阵的行；把所有文档的编号作为矩阵的列。如果一个词在某篇文档中出现，就在对应的单元格记为<code>1</code>，否则记为<code>0</code>。</p>
+<p><strong>【示例】</strong>
                 假设我们有以下4个文档（Document sets）：</p>
-                <ul>
-                <li><strong>Doc 1:</strong> Gold silver truck</li>
-                <li><strong>Doc 2:</strong> Shipment of gold damaged in a fire</li>
-                <li><strong>Doc 3:</strong> Delivery of silver arrived in a silver truck</li>
-                <li><strong>Doc 4:</strong> Shipment of gold arrived in a truck</li>
-                </ul>
-                <p>我们可以构建出如下的矩阵：</p>
-                <table>
-                <thead>
-                <tr>
-                <th style="text-align:left">Term</th>
-                <th style="text-align:center">Doc 1</th>
-                <th style="text-align:center">Doc 2</th>
-                <th style="text-align:center">Doc 3</th>
-                <th style="text-align:center">Doc 4</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                <td style="text-align:left">a</td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">1</td>
-                </tr>
-                <tr>
-                <td style="text-align:left">arrived</td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">1</td>
-                </tr>
-                <tr>
-                <td style="text-align:left">damaged</td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:center">0</td>
-                </tr>
-                <tr>
-                <td style="text-align:left">delivery</td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">0</td>
-                </tr>
-                <tr>
-                <td style="text-align:left">fire</td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:center">0</td>
-                </tr>
-                <tr>
-                <td style="text-align:left">gold</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:center">1</td>
-                </tr>
-                <tr>
-                <td style="text-align:left">of</td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">1</td>
-                </tr>
-                <tr>
-                <td style="text-align:left">in</td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">1</td>
-                </tr>
-                <tr>
-                <td style="text-align:left">shipment</td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:center">1</td>
-                </tr>
-                <tr>
-                <td style="text-align:left">silver</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">0</td>
-                </tr>
-                <tr>
-                <td style="text-align:left">truck</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">1</td>
-                </tr>
-                </tbody>
-                </table>
-                <p>现在，如果我们想查询包含 <code>silver</code> <strong>并且</strong> <code>truck</code> 的文档，该怎么做？</p>
-                <ol>
-                <li>找到 <code>silver</code> 对应的行向量： <code>[1, 0, 1, 0]</code></li>
-                <li>找到 <code>truck</code> 对应的行向量： <code>[1, 0, 1, 1]</code></li>
-                <li>对这两个向量进行**按位与(AND)**操作：
+<ul>
+<li><strong>Doc 1:</strong> Gold silver truck</li>
+<li><strong>Doc 2:</strong> Shipment of gold damaged in a fire</li>
+<li><strong>Doc 3:</strong> Delivery of silver arrived in a silver truck</li>
+<li><strong>Doc 4:</strong> Shipment of gold arrived in a truck</li>
+</ul>
+<p>我们可以构建出如下的矩阵：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Term</th>
+<th style="text-align:center">Doc 1</th>
+<th style="text-align:center">Doc 2</th>
+<th style="text-align:center">Doc 3</th>
+<th style="text-align:center">Doc 4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">a</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td style="text-align:left">arrived</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td style="text-align:left">damaged</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">0</td>
+</tr>
+<tr>
+<td style="text-align:left">delivery</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0</td>
+</tr>
+<tr>
+<td style="text-align:left">fire</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">0</td>
+</tr>
+<tr>
+<td style="text-align:left">gold</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td style="text-align:left">of</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td style="text-align:left">in</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td style="text-align:left">shipment</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+</tr>
+<tr>
+<td style="text-align:left">silver</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0</td>
+</tr>
+<tr>
+<td style="text-align:left">truck</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+</tr>
+</tbody>
+</table>
+<p>现在，如果我们想查询包含 <code>silver</code> <strong>并且</strong> <code>truck</code> 的文档，该怎么做？</p>
+<ol>
+<li>找到 <code>silver</code> 对应的行向量： <code>[1, 0, 1, 0]</code></li>
+<li>找到 <code>truck</code> 对应的行向量： <code>[1, 0, 1, 1]</code></li>
+<li>对这两个向量进行**按位与(AND)**操作：
                 <code>[1, 0, 1, 0] &amp; [1, 0, 1, 1] = [1, 0, 1, 0]</code></li>
-                </ol>
-                <p>结果向量中为<code>1</code>的位置，就是同时包含这两个词的文档，即 Doc 1 和 Doc 3。这个方法在逻辑上非常清晰，查询也很快。</p>
-                <p><strong>但它的致命缺陷是什么？</strong></p>
-                <ol>
-                <li><strong>极度稀疏 (Sparsity)</strong>：想象一下，英语词汇量可能有几十万，而网页数量是千亿级别。这个矩阵的绝大多数单元格都会是 <code>0</code>。这造成了巨大的存储空间浪费。</li>
-                <li><strong>难以扩展 (Scalability)</strong>：每增加一个新词或一篇新文档，就需要给这个巨大的矩阵增加一行或一列。维护成本极高。</li>
-                </ol>
-                <p><strong>数学分析：</strong>
+</ol>
+<p>结果向量中为<code>1</code>的位置，就是同时包含这两个词的文档，即 Doc 1 和 Doc 3。这个方法在逻辑上非常清晰，查询也很快。</p>
+<p><strong>但它的致命缺陷是什么？</strong></p>
+<ol>
+<li><strong>极度稀疏 (Sparsity)</strong>：想象一下，英语词汇量可能有几十万，而网页数量是千亿级别。这个矩阵的绝大多数单元格都会是 <code>0</code>。这造成了巨大的存储空间浪费。</li>
+<li><strong>难以扩展 (Scalability)</strong>：每增加一个新词或一篇新文档，就需要给这个巨大的矩阵增加一行或一列。维护成本极高。</li>
+</ol>
+<p><strong>数学分析：</strong>
                 该矩阵的空间复杂度为 <strong>O(|V| × |D|)</strong>，其中 |V| 是词典中词项的总数，|D| 是文档的总数。对于Web规模的数据，|V| 在百万级，|D| 在千亿级，这个矩阵的大小是天文数字，任何现代计算机都无法存储。</p>
-                <p>所以，词项-文档矩阵虽然在思路上进了一步，但依然不实用。我们需要一种只存储“有效信息”（也就是那些 <code>1</code> 的位置）的数据结构。</p>
-                <hr>
-                <h3 id="part-2-%E6%A0%B8%E5%BF%83%E5%88%A9%E5%99%A8--%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95-inverted-file-index">Part 2: 核心利器 —— 倒排索引 (Inverted File Index)</h3>
-                <h4 id="%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-3-%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95">解决方案 3: 倒排索引</h4>
-                <p>倒排索引正是为了解决矩阵稀疏性问题而生的。它的核心思想非常简单：<strong>我们不记录词在哪个文档中“没有出现”，只记录它“在哪里出现了”</strong>。</p>
-                <p><strong>【定义】</strong></p>
-                <ul>
-                <li><strong>索引 (Index)</strong>: 是一种用于快速定位文本中给定词项的机制。</li>
-                <li><strong>倒排文件/倒排索引 (Inverted File)</strong>: 它包含了一个从<strong>词项(Term)<strong>到其出现位置的</strong>指针列表</strong>的映射。这个“位置”通常是指向文档的ID。</li>
-                </ul>
-                <p>之所以称为“倒排”，是因为它颠倒了“文档 -&gt; 词项”的自然关系，变成了“<strong>词项 -&gt; 文档</strong>”。</p>
-                <p>一个倒排索引主要由两部分组成：</p>
-                <ol>
-                <li><strong>词典 (Dictionary/Vocabulary)</strong>: 包含了系统中所有的词项。</li>
-                <li><strong>倒排列表 (Postings List)</strong>: 对于词典中的每个词项，都有一个与之对应的列表，记录了包含该词项的所有文档的ID。</li>
-                </ol>
-                <p><strong>【示例】</strong>
+<p>所以，词项-文档矩阵虽然在思路上进了一步，但依然不实用。我们需要一种只存储“有效信息”（也就是那些 <code>1</code> 的位置）的数据结构。</p>
+<hr/>
+<h3 id="part-2-%E6%A0%B8%E5%BF%83%E5%88%A9%E5%99%A8--%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95-inverted-file-index">Part 2: 核心利器 —— 倒排索引 (Inverted File Index)</h3>
+<h4 id="%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88-3-%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95">解决方案 3: 倒排索引</h4>
+<p>倒排索引正是为了解决矩阵稀疏性问题而生的。它的核心思想非常简单：<strong>我们不记录词在哪个文档中“没有出现”，只记录它“在哪里出现了”</strong>。</p>
+<p><strong>【定义】</strong></p>
+<ul>
+<li><strong>索引 (Index)</strong>: 是一种用于快速定位文本中给定词项的机制。</li>
+<li><strong>倒排文件/倒排索引 (Inverted File)</strong>: 它包含了一个从<strong>词项(Term)<strong>到其出现位置的</strong>指针列表</strong>的映射。这个“位置”通常是指向文档的ID。</li>
+</ul>
+<p>之所以称为“倒排”，是因为它颠倒了“文档 -&gt; 词项”的自然关系，变成了“<strong>词项 -&gt; 文档</strong>”。</p>
+<p>一个倒排索引主要由两部分组成：</p>
+<ol>
+<li><strong>词典 (Dictionary/Vocabulary)</strong>: 包含了系统中所有的词项。</li>
+<li><strong>倒排列表 (Postings List)</strong>: 对于词典中的每个词项，都有一个与之对应的列表，记录了包含该词项的所有文档的ID。</li>
+</ol>
+<p><strong>【示例】</strong>
                 还是用上面的4个文档作为例子，我们可以构建出这样的倒排索引：</p>
-                <div class="mermaid">
+<div class="mermaid">
                 graph TD
                     subgraph "词典 (Dictionary)"
                         direction LR
@@ -206,96 +207,96 @@
                         P7["[1, 3, 4]"]
                     end
 
-                    A --> P1
-                    B --> P2
-                    C --> P3
-                    D --> P4
-                    E --> P5
-                    F --> P6
-                    G --> P7
+                    A --&gt; P1
+                    B --&gt; P2
+                    C --&gt; P3
+                    D --&gt; P4
+                    E --&gt; P5
+                    F --&gt; P6
+                    G --&gt; P7
                 </div>
-                <p>这个结构清晰地展示了：词<code>gold</code>出现在文档1, 2, 4中；词<code>silver</code>出现在文档1, 3中。</p>
-                <p>现在，再来处理查询 <code>silver &amp; truck</code>：</p>
-                <ol>
-                <li>从词典中找到 <code>silver</code>，获取其倒排列表: <code>[1, 3]</code></li>
-                <li>从词典中找到 <code>truck</code>，获取其倒排列表: <code>[1, 3, 4]</code></li>
-                <li><strong>求两个列表的交集</strong>: <code>intersect([1, 3], [1, 3, 4]) = [1, 3]</code></li>
-                </ol>
-                <p>我们得到了结果 Doc 1 和 Doc 3，与矩阵法一致，但存储效率天差地别！我们只存储了有用的信息。</p>
-                <h4 id="%E6%89%A9%E5%B1%95%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E4%B8%8D%E4%BB%85%E4%BB%85%E6%98%AF%E5%87%BA%E7%8E%B0">扩展倒排索引：不仅仅是出现</h4>
-                <p>一个基础的倒排索引只能回答“是否出现”的问题，但现代搜索引擎需要更多信息，比如：</p>
-                <ul>
-                <li>这个词在一个文档里出现了多少次？（<strong>词频 Frequency</strong>）</li>
-                <li>它具体出现在文档的哪个位置？（<strong>位置信息 Position</strong>）</li>
-                <li>如何根据相关性对结果排序？</li>
-                <li>如何高亮显示搜索结果中的关键词？</li>
-                </ul>
-                <p>为了支持这些功能，我们需要一个更完备的倒排索引结构。</p>
-                <table>
-                <thead>
-                <tr>
-                <th style="text-align:left">No.</th>
-                <th style="text-align:left">Term</th>
-                <th style="text-align:left">Times; Doc ID, Word Position(s)</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                <td style="text-align:left">...</td>
-                <td style="text-align:left">...</td>
-                <td style="text-align:left">...</td>
-                </tr>
-                <tr>
-                <td style="text-align:left">5</td>
-                <td style="text-align:left">fire</td>
-                <td style="text-align:left">&lt;1; (2;7)&gt;</td>
-                </tr>
-                <tr>
-                <td style="text-align:left">6</td>
-                <td style="text-align:left">gold</td>
-                <td style="text-align:left">&lt; 3; (1;1), (2;3), (4;3)&gt;</td>
-                </tr>
-                <tr>
-                <td style="text-align:left">...</td>
-                <td style="text-align:left">...</td>
-                <td style="text-align:left">...</td>
-                </tr>
-                <tr>
-                <td style="text-align:left">10</td>
-                <td style="text-align:left">silver</td>
-                <td style="text-align:left">&lt;2; (1;2), (3;3)&gt;</td>
-                </tr>
-                <tr>
-                <td style="text-align:left">11</td>
-                <td style="text-align:left">truck</td>
-                <td style="text-align:left">&lt; 3; (1;3), (3;8), (4;7)&gt;</td>
-                </tr>
-                </tbody>
-                </table>
-                <p>这里的 <code>&lt;3; (1;1), (2;3), (4;3)&gt;</code> 表示：词 <code>gold</code></p>
-                <ul>
-                <li>总共出现了 <strong>3</strong> 次 (Times/Frequency)</li>
-                <li>出现在文档 <strong>1</strong> 的第 <strong>1</strong> 个位置。</li>
-                <li>出现在文档 <strong>2</strong> 的第 <strong>3</strong> 个位置。</li>
-                <li>出现在文档 <strong>4</strong> 的第 <strong>3</strong> 个位置。</li>
-                </ul>
-                <p>现在我们可以回答之前提出的两个问题了：</p>
-                <ol>
-                <li>
-                <p><strong>如何高亮显示关键词？</strong>
+<p>这个结构清晰地展示了：词<code>gold</code>出现在文档1, 2, 4中；词<code>silver</code>出现在文档1, 3中。</p>
+<p>现在，再来处理查询 <code>silver &amp; truck</code>：</p>
+<ol>
+<li>从词典中找到 <code>silver</code>，获取其倒排列表: <code>[1, 3]</code></li>
+<li>从词典中找到 <code>truck</code>，获取其倒排列表: <code>[1, 3, 4]</code></li>
+<li><strong>求两个列表的交集</strong>: <code>intersect([1, 3], [1, 3, 4]) = [1, 3]</code></li>
+</ol>
+<p>我们得到了结果 Doc 1 和 Doc 3，与矩阵法一致，但存储效率天差地别！我们只存储了有用的信息。</p>
+<h4 id="%E6%89%A9%E5%B1%95%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E4%B8%8D%E4%BB%85%E4%BB%85%E6%98%AF%E5%87%BA%E7%8E%B0">扩展倒排索引：不仅仅是出现</h4>
+<p>一个基础的倒排索引只能回答“是否出现”的问题，但现代搜索引擎需要更多信息，比如：</p>
+<ul>
+<li>这个词在一个文档里出现了多少次？（<strong>词频 Frequency</strong>）</li>
+<li>它具体出现在文档的哪个位置？（<strong>位置信息 Position</strong>）</li>
+<li>如何根据相关性对结果排序？</li>
+<li>如何高亮显示搜索结果中的关键词？</li>
+</ul>
+<p>为了支持这些功能，我们需要一个更完备的倒排索引结构。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">No.</th>
+<th style="text-align:left">Term</th>
+<th style="text-align:left">Times; Doc ID, Word Position(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">...</td>
+<td style="text-align:left">...</td>
+<td style="text-align:left">...</td>
+</tr>
+<tr>
+<td style="text-align:left">5</td>
+<td style="text-align:left">fire</td>
+<td style="text-align:left">&lt;1; (2;7)&gt;</td>
+</tr>
+<tr>
+<td style="text-align:left">6</td>
+<td style="text-align:left">gold</td>
+<td style="text-align:left">&lt; 3; (1;1), (2;3), (4;3)&gt;</td>
+</tr>
+<tr>
+<td style="text-align:left">...</td>
+<td style="text-align:left">...</td>
+<td style="text-align:left">...</td>
+</tr>
+<tr>
+<td style="text-align:left">10</td>
+<td style="text-align:left">silver</td>
+<td style="text-align:left">&lt;2; (1;2), (3;3)&gt;</td>
+</tr>
+<tr>
+<td style="text-align:left">11</td>
+<td style="text-align:left">truck</td>
+<td style="text-align:left">&lt; 3; (1;3), (3;8), (4;7)&gt;</td>
+</tr>
+</tbody>
+</table>
+<p>这里的 <code>&lt;3; (1;1), (2;3), (4;3)&gt;</code> 表示：词 <code>gold</code></p>
+<ul>
+<li>总共出现了 <strong>3</strong> 次 (Times/Frequency)</li>
+<li>出现在文档 <strong>1</strong> 的第 <strong>1</strong> 个位置。</li>
+<li>出现在文档 <strong>2</strong> 的第 <strong>3</strong> 个位置。</li>
+<li>出现在文档 <strong>4</strong> 的第 <strong>3</strong> 个位置。</li>
+</ul>
+<p>现在我们可以回答之前提出的两个问题了：</p>
+<ol>
+<li>
+<p><strong>如何高亮显示关键词？</strong>
                 有了位置信息，当我们要展示文档3给用户时，我们知道 <code>silver</code> 出现在第3个词的位置，<code>truck</code> 出现在第8个词的位置。我们可以在渲染页面时，轻松地给这些位置的词加上高亮标签（如HTML的<code>&lt;strong&gt;</code>）。</p>
-                </li>
-                <li>
-                <p><strong>为什么我们要保留&quot;times&quot; (词频)？</strong>
+</li>
+<li>
+<p><strong>为什么我们要保留"times" (词频)？</strong>
                 词频是<strong>相关性排序 (Relevance Ranking)</strong> 的基石。直觉上，一篇文档中出现“搜索引擎”10次，比只出现1次的文档，更可能与“搜索引擎”这个主题相关。词频是计算著名的 <strong>TF-IDF</strong> 等排序算法的核心要素之一。我们稍后会详细讲解。</p>
-                </li>
-                </ol>
-                <hr>
-                <h3 id="part-3-%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E7%9A%84%E6%9E%84%E5%BB%BA-index-generation">Part 3: 倒排索引的构建 (Index Generation)</h3>
-                <p>了解了倒排索引的结构，我们来看看如何从原始文档集合构建它。这个过程通常是一个流水线作业。</p>
-                <h4 id="%E6%9E%84%E5%BB%BA%E6%B5%81%E7%A8%8B%E4%BC%AA%E4%BB%A3%E7%A0%81">构建流程伪代码</h4>
-                <div class="code-container">
-                <pre><code>// 初始化一个空的倒排索引
+</li>
+</ol>
+<hr/>
+<h3 id="part-3-%E5%80%92%E6%8E%92%E7%B4%A2%E5%BC%95%E7%9A%84%E6%9E%84%E5%BB%BA-index-generation">Part 3: 倒排索引的构建 (Index Generation)</h3>
+<p>了解了倒排索引的结构，我们来看看如何从原始文档集合构建它。这个过程通常是一个流水线作业。</p>
+<h4 id="%E6%9E%84%E5%BB%BA%E6%B5%81%E7%A8%8B%E4%BC%AA%E4%BB%A3%E7%A0%81">构建流程伪代码</h4>
+<div class="code-container">
+<pre><code>// 初始化一个空的倒排索引
 InvertedIndex index = new InvertedIndex();
 
 while (还有未处理的文档 D) {
@@ -327,61 +328,61 @@ while (还有未处理的文档 D) {
 // 将构建好的索引写入磁盘
 write_index_to_disk(index);
 </code></pre>
-                </div>
-                <p>这个流程中，<code>tokenize(D.content)</code> 并不是简单的按空格切分，它包含了一系列重要的预处理步骤。</p>
-                <h4 id="%E6%96%87%E6%9C%AC%E9%A2%84%E5%A4%84%E7%90%86">文本预处理</h4>
-                <p><strong>1. 词干提取 (Word Stemming) 与 词形还原 (Lemmatization)</strong>
+</div>
+<p>这个流程中，<code>tokenize(D.content)</code> 并不是简单的按空格切分，它包含了一系列重要的预处理步骤。</p>
+<h4 id="%E6%96%87%E6%9C%AC%E9%A2%84%E5%A4%84%E7%90%86">文本预处理</h4>
+<p><strong>1. 词干提取 (Word Stemming) 与 词形还原 (Lemmatization)</strong>
                 在搜索时，用户输入 <code>running</code>，他可能也想看到包含 <code>run</code> 或 <code>ran</code> 的结果。为了实现这一点，我们需要将这些词的不同形态统一为它们的原型或词干。</p>
-                <ul>
-                <li><strong>词干提取 (Stemming)</strong>: 一种比较粗暴的、基于规则的方法，直接砍掉词的后缀。例如，<code>processing</code>, <code>processes</code>, <code>processed</code> 可能都会被处理成 <code>process</code>。</li>
-                <li><strong>词形还原 (Lemmatization)</strong>: 一种更精细的、基于词典和形态学分析的方法，将词还原为它的基本形态（lemma）。例如，<code>said</code> 会被还原为 <code>say</code>，<code>better</code> 会被还原为 <code>good</code>。</li>
-                </ul>
-                <div class="code-container">
-                <pre><code>     says
+<ul>
+<li><strong>词干提取 (Stemming)</strong>: 一种比较粗暴的、基于规则的方法，直接砍掉词的后缀。例如，<code>processing</code>, <code>processes</code>, <code>processed</code> 可能都会被处理成 <code>process</code>。</li>
+<li><strong>词形还原 (Lemmatization)</strong>: 一种更精细的、基于词典和形态学分析的方法，将词还原为它的基本形态（lemma）。例如，<code>said</code> 会被还原为 <code>say</code>，<code>better</code> 会被还原为 <code>good</code>。</li>
+</ul>
+<div class="code-container">
+<pre><code>     says
      said     ──&gt;  process  ──&gt;   say
      saying
 </code></pre>
-                </div>
-                <p><strong>2. 停用词 (Stop Words) 移除</strong>
+</div>
+<p><strong>2. 停用词 (Stop Words) 移除</strong>
                 像 <code>a</code>, <code>the</code>, <code>in</code>, <code>of</code>, <code>it</code> 这样的词，在几乎所有文档中都大量出现。它们对表达文档的核心主题意义不大，但会占用大量的索引空间，并在查询处理时增加不必要的计算。这些词被称为“停用词”，我们通常在索引前将它们剔除。</p>
-                <h4 id="%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%9A%84%E9%80%89%E6%8B%A9">数据结构的选择</h4>
-                <p>构建索引时，我们需要一个高效的数据结构来存储<strong>词典</strong>，以便快速查找、插入。</p>
-                <p><strong>【讨论】</strong> 在访问词典时，使用<strong>哈希表 (Hashing)</strong> 和<strong>搜索树 (Search Trees)</strong> 各有什么优缺点？</p>
-                <p><strong>1. 哈希表 (e.g., C++ <code>std::unordered_map</code>)</strong></p>
+<h4 id="%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%9A%84%E9%80%89%E6%8B%A9">数据结构的选择</h4>
+<p>构建索引时，我们需要一个高效的数据结构来存储<strong>词典</strong>，以便快速查找、插入。</p>
+<p><strong>【讨论】</strong> 在访问词典时，使用<strong>哈希表 (Hashing)</strong> 和<strong>搜索树 (Search Trees)</strong> 各有什么优缺点？</p>
+<p><strong>1. 哈希表 (e.g., C++ <code>std::unordered_map</code>)</strong></p>
+<ul>
+<li><strong>优点</strong>:
                 <ul>
-                <li><strong>优点</strong>:
+<li><strong>速度极快</strong>：平均查找、插入和删除的时间复杂度为 <strong>O(1)</strong>。</li>
+</ul>
+</li>
+<li><strong>缺点</strong>:
                 <ul>
-                <li><strong>速度极快</strong>：平均查找、插入和删除的时间复杂度为 <strong>O(1)</strong>。</li>
-                </ul>
-                </li>
-                <li><strong>缺点</strong>:
+<li><strong>无序性</strong>：哈希表不保留词项的顺序。这使得它无法支持<strong>范围查询</strong>或<strong>前缀查询</strong>（例如，查找所有以 <code>comp*</code> 开头的词）。</li>
+<li><strong>空间开销</strong>：为了维持低冲突率，哈希表通常需要预留比实际元素更多的空间（较低的装载因子）。</li>
+<li><strong>哈希冲突</strong>：虽然有好的哈希函数可以缓解，但冲突处理总会带来一些性能开销。</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. 搜索树 (e.g., B-Tree, B+Tree, C++ <code>std::map</code>)</strong></p>
+<ul>
+<li><strong>优点</strong>:
                 <ul>
-                <li><strong>无序性</strong>：哈希表不保留词项的顺序。这使得它无法支持<strong>范围查询</strong>或<strong>前缀查询</strong>（例如，查找所有以 <code>comp*</code> 开头的词）。</li>
-                <li><strong>空间开销</strong>：为了维持低冲突率，哈希表通常需要预留比实际元素更多的空间（较低的装载因子）。</li>
-                <li><strong>哈希冲突</strong>：虽然有好的哈希函数可以缓解，但冲突处理总会带来一些性能开销。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>2. 搜索树 (e.g., B-Tree, B+Tree, C++ <code>std::map</code>)</strong></p>
+<li><strong>有序性</strong>：树结构（特别是B树）本身就是有序的，可以高效地支持范围查询和前缀查询。这对于实现搜索建议（autocomplete）等功能至关重要。</li>
+<li><strong>性能稳定</strong>：最坏情况下的时间复杂度为 <strong>O(log N)</strong>，没有哈希表的极端情况。</li>
+</ul>
+</li>
+<li><strong>缺点</strong>:
                 <ul>
-                <li><strong>优点</strong>:
-                <ul>
-                <li><strong>有序性</strong>：树结构（特别是B树）本身就是有序的，可以高效地支持范围查询和前缀查询。这对于实现搜索建议（autocomplete）等功能至关重要。</li>
-                <li><strong>性能稳定</strong>：最坏情况下的时间复杂度为 <strong>O(log N)</strong>，没有哈希表的极端情况。</li>
-                </ul>
-                </li>
-                <li><strong>缺点</strong>:
-                <ul>
-                <li><strong>速度稍慢</strong>：O(log N) 普遍慢于 O(1)。</li>
-                <li><strong>实现复杂</strong>：相比哈希表，平衡树的实现和维护更复杂。</li>
-                <li><strong>空间开销</strong>：每个节点需要存储指向子节点的指针，有额外的空间开销。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>结论</strong>：在实际的搜索引擎中，常常是两者结合使用。例如，使用**Trie树（字典树）**或其变种来存储词典，它在支持前缀查询方面表现出色，同时空间效率也高。而对于一些内部查找，哈希表因其速度优势仍被广泛应用。</p>
-                <p><strong>C++代码示例 (数据结构定义)</strong></p>
-                <div class="code-container">
-                <pre><code class="language-cpp">#include &lt;iostream&gt;
+<li><strong>速度稍慢</strong>：O(log N) 普遍慢于 O(1)。</li>
+<li><strong>实现复杂</strong>：相比哈希表，平衡树的实现和维护更复杂。</li>
+<li><strong>空间开销</strong>：每个节点需要存储指向子节点的指针，有额外的空间开销。</li>
+</ul>
+</li>
+</ul>
+<p><strong>结论</strong>：在实际的搜索引擎中，常常是两者结合使用。例如，使用**Trie树（字典树）**或其变种来存储词典，它在支持前缀查询方面表现出色，同时空间效率也高。而对于一些内部查找，哈希表因其速度优势仍被广泛应用。</p>
+<p><strong>C++代码示例 (数据结构定义)</strong></p>
+<div class="code-container">
+<pre><code class="language-cpp">#include &lt;iostream&gt;
 #include &lt;vector&gt;
 #include &lt;string&gt;
 #include &lt;map&gt;
@@ -404,68 +405,68 @@ using TreeBasedInvertedIndex = std::map&lt;std::string, PostingList&gt;;
 // 基于哈希表的倒排索引
 using HashBasedInvertedIndex = std::unordered_map&lt;std::string, PostingList&gt;;
 </code></pre>
-                </div>
-                <hr>
-                <h3 id="part-4-%E5%BA%94%E5%AF%B9%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE--%E6%89%A9%E5%B1%95%E6%80%A7%E8%AE%BE%E8%AE%A1">Part 4: 应对海量数据 —— 扩展性设计</h3>
-                <h4 id="1-%E5%86%85%E5%AD%98%E4%B8%8D%E8%B6%B3%E9%97%AE%E9%A2%98%E5%8D%95%E6%9C%BA%E5%A4%A7%E8%A7%84%E6%A8%A1%E7%B4%A2%E5%BC%95%E6%9E%84%E5%BB%BA-spimi">1. 内存不足问题：单机大规模索引构建 (SPIMI)</h4>
-                <p>当文档集合非常大，以至于无法在内存中一次性构建整个倒排索引时，我们怎么办？</p>
-                <p>这里介绍一种广泛使用的算法：<strong>单遍在内存索引 (Single-Pass In-Memory Indexing, SPIMI)</strong>。</p>
-                <p><strong>核心思想</strong>：分而治之，然后合并。</p>
-                <ol>
-                <li><strong>分块处理</strong>：从磁盘读取文档，在内存中构建一个“临时”倒排索引，直到内存快要用完。</li>
-                <li><strong>块内排序</strong>：对这个内存中的临时索引，按<strong>词项</strong>进行字母序排序。</li>
-                <li><strong>写入磁盘</strong>：将这个排好序的临时索引块完整地写入磁盘。</li>
-                <li><strong>重复</strong>：清空内存，继续处理下一批文档，生成下一个排好序的索引块。</li>
-                <li><strong>多路归并</strong>：当所有文档都处理完毕后，磁盘上会有一堆按词项排序的索引块。最后，执行一个<strong>多路归并排序 (multi-way merge)</strong>，将这些块合并成一个最终的、巨大的、有序的倒排索引。</li>
-                </ol>
-                <p>这个过程巧妙地利用了外部排序的思想，使得我们可以在有限的内存下，处理几乎无限大的文档集合。</p>
-                <h4 id="2-web%E7%BA%A7%E7%B4%A2%E5%BC%95%E5%88%86%E5%B8%83%E5%BC%8F%E7%B4%A2%E5%BC%95-distributed-indexing">2. Web级索引：分布式索引 (Distributed Indexing)</h4>
-                <p>当数据量达到千亿网页级别时，单台机器无论如何也无法存储和处理。这时必须采用分布式集群。有两种主流的分布式索引策略：</p>
-                <p><strong>策略一: 按词项分区 (Term-partitioned Index)</strong>
+</div>
+<hr/>
+<h3 id="part-4-%E5%BA%94%E5%AF%B9%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE--%E6%89%A9%E5%B1%95%E6%80%A7%E8%AE%BE%E8%AE%A1">Part 4: 应对海量数据 —— 扩展性设计</h3>
+<h4 id="1-%E5%86%85%E5%AD%98%E4%B8%8D%E8%B6%B3%E9%97%AE%E9%A2%98%E5%8D%95%E6%9C%BA%E5%A4%A7%E8%A7%84%E6%A8%A1%E7%B4%A2%E5%BC%95%E6%9E%84%E5%BB%BA-spimi">1. 内存不足问题：单机大规模索引构建 (SPIMI)</h4>
+<p>当文档集合非常大，以至于无法在内存中一次性构建整个倒排索引时，我们怎么办？</p>
+<p>这里介绍一种广泛使用的算法：<strong>单遍在内存索引 (Single-Pass In-Memory Indexing, SPIMI)</strong>。</p>
+<p><strong>核心思想</strong>：分而治之，然后合并。</p>
+<ol>
+<li><strong>分块处理</strong>：从磁盘读取文档，在内存中构建一个“临时”倒排索引，直到内存快要用完。</li>
+<li><strong>块内排序</strong>：对这个内存中的临时索引，按<strong>词项</strong>进行字母序排序。</li>
+<li><strong>写入磁盘</strong>：将这个排好序的临时索引块完整地写入磁盘。</li>
+<li><strong>重复</strong>：清空内存，继续处理下一批文档，生成下一个排好序的索引块。</li>
+<li><strong>多路归并</strong>：当所有文档都处理完毕后，磁盘上会有一堆按词项排序的索引块。最后，执行一个<strong>多路归并排序 (multi-way merge)</strong>，将这些块合并成一个最终的、巨大的、有序的倒排索引。</li>
+</ol>
+<p>这个过程巧妙地利用了外部排序的思想，使得我们可以在有限的内存下，处理几乎无限大的文档集合。</p>
+<h4 id="2-web%E7%BA%A7%E7%B4%A2%E5%BC%95%E5%88%86%E5%B8%83%E5%BC%8F%E7%B4%A2%E5%BC%95-distributed-indexing">2. Web级索引：分布式索引 (Distributed Indexing)</h4>
+<p>当数据量达到千亿网页级别时，单台机器无论如何也无法存储和处理。这时必须采用分布式集群。有两种主流的分布式索引策略：</p>
+<p><strong>策略一: 按词项分区 (Term-partitioned Index)</strong>
                 将词典切分，分配到不同的机器上。</p>
-                <ul>
-                <li>
-                <p>机器 A 负责 <code>a</code> - <code>c</code> 开头的词</p>
-                </li>
-                <li>
-                <p>机器 B 负责 <code>d</code> - <code>f</code> 开头的词</p>
-                </li>
-                <li>
-                <p>...</p>
-                </li>
-                <li>
-                <p>机器 Z 负责 <code>x</code> - <code>z</code> 开头的词</p>
-                </li>
-                <li>
-                <p><strong>查询处理</strong>：一个查询，如 &quot;distributed indexing&quot;，需要被分发到 &quot;d&quot; 所在的机器和 &quot;i&quot; 所在的机器，分别获取倒排列表，然后由一个聚合节点合并结果。</p>
-                </li>
-                <li>
-                <p><strong>优缺点</strong>：并发性好，但跨节点的查询会增加网络开销和延迟。</p>
-                </li>
-                </ul>
-                <p><strong>策略二: 按文档分区 (Document-partitioned Index)</strong>
+<ul>
+<li>
+<p>机器 A 负责 <code>a</code> - <code>c</code> 开头的词</p>
+</li>
+<li>
+<p>机器 B 负责 <code>d</code> - <code>f</code> 开头的词</p>
+</li>
+<li>
+<p>...</p>
+</li>
+<li>
+<p>机器 Z 负责 <code>x</code> - <code>z</code> 开头的词</p>
+</li>
+<li>
+<p><strong>查询处理</strong>：一个查询，如 "distributed indexing"，需要被分发到 "d" 所在的机器和 "i" 所在的机器，分别获取倒排列表，然后由一个聚合节点合并结果。</p>
+</li>
+<li>
+<p><strong>优缺点</strong>：并发性好，但跨节点的查询会增加网络开销和延迟。</p>
+</li>
+</ul>
+<p><strong>策略二: 按文档分区 (Document-partitioned Index)</strong>
                 将文档集合切分，每台机器负责一个子集，并为这个子集建立一个<strong>完整</strong>的倒排索引。</p>
-                <ul>
-                <li>
-                <p>机器 A 负责文档 1 ~ 1000万</p>
-                </li>
-                <li>
-                <p>机器 B 负责文档 1001万 ~ 2000万</p>
-                </li>
-                <li>
-                <p>...</p>
-                </li>
-                <li>
-                <p><strong>查询处理</strong>：一个查询需要被广播到<strong>所有</strong>的机器上。每台机器在自己的索引上进行查询，返回局部结果。最后由一个聚合节点合并所有局部结果。</p>
-                </li>
-                <li>
-                <p><strong>优缺点</strong>：扩展性极好，增加新文档只需增加新机器。查询时并行度高。这是当今大型搜索引擎（如Google）采用的主流方案，通常被称为<strong>分片 (Sharding)</strong>。</p>
-                </li>
-                </ul>
-                <h4 id="3-%E5%8A%A8%E6%80%81%E7%B4%A2%E5%BC%95-dynamic-indexing">3. 动态索引 (Dynamic Indexing)</h4>
-                <p>互联网是动态变化的，新的网页不断产生，旧的网页可能被删除或修改。我们不可能每天都重新构建整个索引。</p>
-                <p>解决方案是采用 <strong>主-辅索引 (Main-Auxiliary Index)</strong> 结构。</p>
-                <div class="mermaid">
+<ul>
+<li>
+<p>机器 A 负责文档 1 ~ 1000万</p>
+</li>
+<li>
+<p>机器 B 负责文档 1001万 ~ 2000万</p>
+</li>
+<li>
+<p>...</p>
+</li>
+<li>
+<p><strong>查询处理</strong>：一个查询需要被广播到<strong>所有</strong>的机器上。每台机器在自己的索引上进行查询，返回局部结果。最后由一个聚合节点合并所有局部结果。</p>
+</li>
+<li>
+<p><strong>优缺点</strong>：扩展性极好，增加新文档只需增加新机器。查询时并行度高。这是当今大型搜索引擎（如Google）采用的主流方案，通常被称为<strong>分片 (Sharding)</strong>。</p>
+</li>
+</ul>
+<h4 id="3-%E5%8A%A8%E6%80%81%E7%B4%A2%E5%BC%95-dynamic-indexing">3. 动态索引 (Dynamic Indexing)</h4>
+<p>互联网是动态变化的，新的网页不断产生，旧的网页可能被删除或修改。我们不可能每天都重新构建整个索引。</p>
+<p>解决方案是采用 <strong>主-辅索引 (Main-Auxiliary Index)</strong> 结构。</p>
+<div class="mermaid">
                 graph TD
                     subgraph Legend
                         direction LR
@@ -476,89 +477,89 @@ using HashBasedInvertedIndex = std::unordered_map&lt;std::string, PostingList&gt
                         Merge(Periodic Merge)
                     end
                     
-                    NewDocs --> AuxIndex
-                    MainIndex -- Query --> SearchResults
-                    AuxIndex -- Query --> SearchResults
-                    AuxIndex -- Merge --> MainIndex
+                    NewDocs --&gt; AuxIndex
+                    MainIndex -- Query --&gt; SearchResults
+                    AuxIndex -- Query --&gt; SearchResults
+                    AuxIndex -- Merge --&gt; MainIndex
                 </div>
-                <ul>
-                <li><strong>主索引 (Main Index)</strong>: 一个巨大的、静态的、存储在磁盘上的索引，它不直接接受修改。</li>
-                <li><strong>辅助索引 (Auxiliary Index)</strong>: 一个较小的、动态的、通常存储在内存中的索引。所有新来的文档都先被加入到这个索引中。</li>
-                <li><strong>删除列表 (Deletion List)</strong>: 当一个文档被删除时，我们不立即从主索引中移除它（因为磁盘操作很慢），而是将其ID记录在一个“删除列表”中。</li>
-                </ul>
-                <p><strong>查询流程</strong>:</p>
-                <ol>
-                <li>用户发起查询。</li>
-                <li>系统同时查询<strong>主索引</strong>和<strong>辅助索引</strong>。</li>
-                <li>合并两边的结果。</li>
-                <li>使用<strong>删除列表</strong>过滤掉已删除的文档。</li>
-                <li>返回最终结果给用户。</li>
-                </ol>
-                <p><strong>【回答问题】</strong></p>
-                <ul>
-                <li>
-                <p><strong>何时重建索引 (Re-index)?</strong>
+<ul>
+<li><strong>主索引 (Main Index)</strong>: 一个巨大的、静态的、存储在磁盘上的索引，它不直接接受修改。</li>
+<li><strong>辅助索引 (Auxiliary Index)</strong>: 一个较小的、动态的、通常存储在内存中的索引。所有新来的文档都先被加入到这个索引中。</li>
+<li><strong>删除列表 (Deletion List)</strong>: 当一个文档被删除时，我们不立即从主索引中移除它（因为磁盘操作很慢），而是将其ID记录在一个“删除列表”中。</li>
+</ul>
+<p><strong>查询流程</strong>:</p>
+<ol>
+<li>用户发起查询。</li>
+<li>系统同时查询<strong>主索引</strong>和<strong>辅助索引</strong>。</li>
+<li>合并两边的结果。</li>
+<li>使用<strong>删除列表</strong>过滤掉已删除的文档。</li>
+<li>返回最终结果给用户。</li>
+</ol>
+<p><strong>【回答问题】</strong></p>
+<ul>
+<li>
+<p><strong>何时重建索引 (Re-index)?</strong>
                 当辅助索引变得太大，或者删除列表过长时，查询性能会下降。此时，系统会触发一个<strong>合并 (Merge)</strong> 操作：将辅助索引中的内容合并到主索引中，并真正地移除被标记为删除的文档，生成一个新的、干净的主索引。这个过程在后台进行，不影响线上服务。</p>
-                </li>
-                <li>
-                <p><strong>如何删除文档?</strong>
+</li>
+<li>
+<p><strong>如何删除文档?</strong>
                 采用<strong>逻辑删除</strong>。即，只将其ID加入删除列表，而不是物理删除。物理删除留到下一次合并时进行。</p>
-                </li>
-                </ul>
-                <hr>
-                <h3 id="part-5-%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E4%B8%8E%E8%AF%84%E4%BC%B0">Part 5: 性能优化与评估</h3>
-                <h4 id="1-%E7%B4%A2%E5%BC%95%E5%8E%8B%E7%BC%A9-compression">1. 索引压缩 (Compression)</h4>
-                <p>倒排索引，特别是倒排列表，会占用巨大的存储空间。压缩是必不可少的。</p>
-                <ul>
-                <li>
-                <p><strong>词典压缩</strong>: 对于排好序的词典，相邻的词项通常有共同的前缀。可以使用<strong>前缀编码 (Front Coding)</strong> 等技术来压缩。
+</li>
+</ul>
+<hr/>
+<h3 id="part-5-%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E4%B8%8E%E8%AF%84%E4%BC%B0">Part 5: 性能优化与评估</h3>
+<h4 id="1-%E7%B4%A2%E5%BC%95%E5%8E%8B%E7%BC%A9-compression">1. 索引压缩 (Compression)</h4>
+<p>倒排索引，特别是倒排列表，会占用巨大的存储空间。压缩是必不可少的。</p>
+<ul>
+<li>
+<p><strong>词典压缩</strong>: 对于排好序的词典，相邻的词项通常有共同的前缀。可以使用<strong>前缀编码 (Front Coding)</strong> 等技术来压缩。
                 <code>arrived, damaged, deliver, fire, ...</code> -&gt; <code>arrivedamagedeliverfire...</code> + 指针</p>
-                </li>
-                <li>
-                <p><strong>倒排列表压缩</strong>: 这是压缩的重点。
+</li>
+<li>
+<p><strong>倒排列表压缩</strong>: 这是压缩的重点。
                 一个词的倒排列表（文档ID列表）是<strong>单调递增</strong>的。
                 <code>computer</code> -&gt; <code>[2, 15, 47, ..., 58879, 58890, ...]</code></p>
-                <p>我们可以不存储原始ID，而是存储ID之间的<strong>差值 (Gap / Delta)</strong>。
+<p>我们可以不存储原始ID，而是存储ID之间的<strong>差值 (Gap / Delta)</strong>。
                 <code>computer</code> -&gt; <code>[2, 13, 32, ..., (gap), 11, ...]</code></p>
-                <p>这些差值通常是小数字，而小数字可以用更少的比特位来表示。<strong>可变字节编码 (Variable Byte Encoding)</strong> 或 <strong>Gamma/Delta 编码</strong>等技术就是专门用来高效存储这些小整数的。这可以极大地减少索引的磁盘占用，同时由于读取的数据量变小，也能提升I/O速度。</p>
-                </li>
-                </ul>
-                <h4 id="2-%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86%E4%BC%98%E5%8C%96%E9%98%88%E5%80%BC%E6%B3%95-thresholding">2. 查询处理优化：阈值法 (Thresholding)</h4>
-                <p>对于一个热门查询，可能有上百万个匹配的文档。用户只关心前10个或前20个最相关的结果。我们没有必要为所有一百万个文档都计算精确的相关性得分。</p>
-                <ul>
-                <li><strong>文档阈值</strong>: 只计算排名前 <code>k</code> 个文档的得分。例如，基于一些静态质量分（如PageRank）先筛选出高质量的文档，只在这些文档中进行详细匹配。</li>
-                <li><strong>词项阈值</strong>: 对于一个长查询（比如10个词），我们可以先用最稀有（IDF值最高）的2-3个词进行查询，找到一个候选文档集合，然后再用剩下的词在这个小得多的集合里进行打分和过滤。</li>
-                </ul>
-                <h4 id="3-%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E7%9A%84%E8%AF%84%E4%BC%B0%E6%8C%87%E6%A0%87">3. 搜索引擎的评估指标</h4>
-                <p>一个搜索引擎的好坏，可以从多个维度来衡量：</p>
-                <ul>
-                <li><strong>效率 (Efficiency)</strong>
-                <ul>
-                <li><strong>索引速度</strong>: 每小时能处理多少文档？</li>
-                <li><strong>查询速度 (Latency)</strong>: 返回查询结果需要多长时间？</li>
-                </ul>
-                </li>
-                <li><strong>表达能力 (Expressiveness)</strong>
-                <ul>
-                <li>查询语言是否强大？能否支持复杂的布尔逻辑、短语查询、模糊查询？</li>
-                </ul>
-                </li>
-                <li><strong>用户满意度 (User Happiness)</strong>: 这是最终极、也最难衡量的指标。</li>
-                </ul>
-                <p>为了量化用户满意度，信息检索领域引入了两个核心的学术指标：<strong>精确率 (Precision)</strong> 和 <strong>召回率 (Recall)</strong>。</p>
-                <p>要进行评测，我们需要：</p>
-                <ol>
-                <li>一个标准的<strong>文档集合</strong>。</li>
-                <li>一个标准的<strong>查询集合</strong>。</li>
-                <li>对于每个查询，由专家<strong>人工标注</strong>出文档集中哪些是相关的，哪些是不相关的。</li>
-                </ol>
-                <p>然后，我们可以定义：</p>
-                <ul>
-                <li><strong>RR (Retrieved Relevant)</strong>: 检索到的，并且是相关的文档。</li>
-                <li><strong>IR (Retrieved Irrelevant)</strong>: 检索到的，但是不相关的文档（误报）。</li>
-                <li><strong>RN (Retrieved Not)</strong>: 未检索到，但是相关的文档（漏报）。</li>
-                </ul>
-                <div class="mermaid">
+<p>这些差值通常是小数字，而小数字可以用更少的比特位来表示。<strong>可变字节编码 (Variable Byte Encoding)</strong> 或 <strong>Gamma/Delta 编码</strong>等技术就是专门用来高效存储这些小整数的。这可以极大地减少索引的磁盘占用，同时由于读取的数据量变小，也能提升I/O速度。</p>
+</li>
+</ul>
+<h4 id="2-%E6%9F%A5%E8%AF%A2%E5%A4%84%E7%90%86%E4%BC%98%E5%8C%96%E9%98%88%E5%80%BC%E6%B3%95-thresholding">2. 查询处理优化：阈值法 (Thresholding)</h4>
+<p>对于一个热门查询，可能有上百万个匹配的文档。用户只关心前10个或前20个最相关的结果。我们没有必要为所有一百万个文档都计算精确的相关性得分。</p>
+<ul>
+<li><strong>文档阈值</strong>: 只计算排名前 <code>k</code> 个文档的得分。例如，基于一些静态质量分（如PageRank）先筛选出高质量的文档，只在这些文档中进行详细匹配。</li>
+<li><strong>词项阈值</strong>: 对于一个长查询（比如10个词），我们可以先用最稀有（IDF值最高）的2-3个词进行查询，找到一个候选文档集合，然后再用剩下的词在这个小得多的集合里进行打分和过滤。</li>
+</ul>
+<h4 id="3-%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E7%9A%84%E8%AF%84%E4%BC%B0%E6%8C%87%E6%A0%87">3. 搜索引擎的评估指标</h4>
+<p>一个搜索引擎的好坏，可以从多个维度来衡量：</p>
+<ul>
+<li><strong>效率 (Efficiency)</strong>
+<ul>
+<li><strong>索引速度</strong>: 每小时能处理多少文档？</li>
+<li><strong>查询速度 (Latency)</strong>: 返回查询结果需要多长时间？</li>
+</ul>
+</li>
+<li><strong>表达能力 (Expressiveness)</strong>
+<ul>
+<li>查询语言是否强大？能否支持复杂的布尔逻辑、短语查询、模糊查询？</li>
+</ul>
+</li>
+<li><strong>用户满意度 (User Happiness)</strong>: 这是最终极、也最难衡量的指标。</li>
+</ul>
+<p>为了量化用户满意度，信息检索领域引入了两个核心的学术指标：<strong>精确率 (Precision)</strong> 和 <strong>召回率 (Recall)</strong>。</p>
+<p>要进行评测，我们需要：</p>
+<ol>
+<li>一个标准的<strong>文档集合</strong>。</li>
+<li>一个标准的<strong>查询集合</strong>。</li>
+<li>对于每个查询，由专家<strong>人工标注</strong>出文档集中哪些是相关的，哪些是不相关的。</li>
+</ol>
+<p>然后，我们可以定义：</p>
+<ul>
+<li><strong>RR (Retrieved Relevant)</strong>: 检索到的，并且是相关的文档。</li>
+<li><strong>IR (Retrieved Irrelevant)</strong>: 检索到的，但是不相关的文档（误报）。</li>
+<li><strong>RN (Retrieved Not)</strong>: 未检索到，但是相关的文档（漏报）。</li>
+</ul>
+<div class="mermaid">
                 graph TD
                     subgraph "整个文档集合"
                         subgraph "相关文档 (Relevant Docs)"
@@ -577,75 +578,75 @@ using HashBasedInvertedIndex = std::unordered_map&lt;std::string, PostingList&gt
                         end
                     end
                 </div>
-                <ul>
-                <li>
-                <p><strong>精确率 (Precision)</strong>: 在你返回的结果中，有多少是用户真正想要的？
+<ul>
+<li>
+<p><strong>精确率 (Precision)</strong>: 在你返回的结果中，有多少是用户真正想要的？
                 <strong>P = RR / (RR + IR)</strong>
-                <em>追求高精确率，意味着“宁缺毋滥”。</em></p>
-                </li>
-                <li>
-                <p><strong>召回率 (Recall)</strong>: 在所有用户想要的结果中，你返回了多少？
+<em>追求高精确率，意味着“宁缺毋滥”。</em></p>
+</li>
+<li>
+<p><strong>召回率 (Recall)</strong>: 在所有用户想要的结果中，你返回了多少？
                 <strong>R = RR / (RR + RN)</strong>
-                <em>追求高召回率，意味着“宁滥勿缺”。</em></p>
-                </li>
-                </ul>
-                <p><strong>精确率与召回率的权衡 (Precision-Recall Tradeoff)</strong>
+<em>追求高召回率，意味着“宁滥勿缺”。</em></p>
+</li>
+</ul>
+<p><strong>精确率与召回率的权衡 (Precision-Recall Tradeoff)</strong>
                 这两者通常是相互矛盾的。</p>
-                <ul>
-                <li>为了提高召回率，搜索引擎可能会放宽标准，返回更多可能相关的结果，但这也会引入更多不相关的“垃圾”，导致精确率下降。</li>
-                <li>为了提高精确率，搜索引擎会采用非常严格的标准，只返回非常有把握的结果，但这可能会漏掉一些同样相关但不那么匹配的结果，导致召回率下降。</li>
-                </ul>
-                <p>理想的搜索引擎是在右上角（精确率和召回率都为1），但现实中我们只能在这条曲线上寻找一个平衡点。</p>
-                <hr>
-                <h3 id="part-6-%E6%8F%90%E5%8D%87%E7%9B%B8%E5%85%B3%E6%80%A7--%E4%B8%8D%E6%AD%A2%E6%98%AF%E5%8C%B9%E9%85%8D">Part 6: 提升相关性 —— 不止是匹配</h3>
-                <p><strong>【讨论】</strong> 如何提升搜索结果的相关性？
+<ul>
+<li>为了提高召回率，搜索引擎可能会放宽标准，返回更多可能相关的结果，但这也会引入更多不相关的“垃圾”，导致精确率下降。</li>
+<li>为了提高精确率，搜索引擎会采用非常严格的标准，只返回非常有把握的结果，但这可能会漏掉一些同样相关但不那么匹配的结果，导致召回率下降。</li>
+</ul>
+<p>理想的搜索引擎是在右上角（精确率和召回率都为1），但现实中我们只能在这条曲线上寻找一个平衡点。</p>
+<hr/>
+<h3 id="part-6-%E6%8F%90%E5%8D%87%E7%9B%B8%E5%85%B3%E6%80%A7--%E4%B8%8D%E6%AD%A2%E6%98%AF%E5%8C%B9%E9%85%8D">Part 6: 提升相关性 —— 不止是匹配</h3>
+<p><strong>【讨论】</strong> 如何提升搜索结果的相关性？
                 仅仅找到包含查询词的文档是远远不够的。我们需要对结果进行排序，把最可能满足用户需求的排在最前面。</p>
-                <ol>
-                <li>
-                <p><strong>基于内容的排序算法：TF-IDF</strong>
+<ol>
+<li>
+<p><strong>基于内容的排序算法：TF-IDF</strong>
                 我们之前提到了词频 (TF)。一个词在文档中出现次数越多，越可能相关。但我们还需要考虑一个词的“区分度”。</p>
-                <ul>
-                <li><strong>TF (Term Frequency)</strong>: 词 t 在文档 d 中出现的频率。</li>
-                <li><strong>IDF (Inverse Document Frequency)</strong>: 逆文档频率。一个词在越多的文档中出现，它的区分度就越低（如“的”、“是”），IDF值就越小。反之，一个词越稀有，IDF值越大。
+<ul>
+<li><strong>TF (Term Frequency)</strong>: 词 t 在文档 d 中出现的频率。</li>
+<li><strong>IDF (Inverse Document Frequency)</strong>: 逆文档频率。一个词在越多的文档中出现，它的区分度就越低（如“的”、“是”），IDF值就越小。反之，一个词越稀有，IDF值越大。
                 <strong>IDF(t) = log(总文档数 / 包含词 t 的文档数)</strong></li>
-                <li><strong>TF-IDF Score</strong>: <code>Score(t, d) = TF(t, d) * IDF(t)</code>
+<li><strong>TF-IDF Score</strong>: <code>Score(t, d) = TF(t, d) * IDF(t)</code>
                 一个文档的总得分，可以是查询中所有词的TF-IDF得分之和。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>基于链接分析的算法：PageRank</strong>
+</ul>
+</li>
+<li>
+<p><strong>基于链接分析的算法：PageRank</strong>
                 Google的成名绝技。它的核心思想是：一个网页的重要性，取决于指向它的其他网页的数量和质量。一个被很多“重要”网页链接的网页，自己也很可能是一个重要的网页。PageRank是一种独立于查询的、对网页的静态质量评分。</p>
-                </li>
-                <li>
-                <p><strong>向量空间模型 (Vector Space Model)</strong>
+</li>
+<li>
+<p><strong>向量空间模型 (Vector Space Model)</strong>
                 将文档和查询都表示为高维空间中的一个向量，向量的每一维对应一个词，值可以是TF-IDF。然后通过计算查询向量和文档向量之间的<strong>余弦相似度 (Cosine Similarity)</strong> 来判断它们的相关性。夹角越小，相似度越高。</p>
-                </li>
-                <li>
-                <p><strong>现代搜索引擎的综合策略</strong>
+</li>
+<li>
+<p><strong>现代搜索引擎的综合策略</strong>
                 现代搜索引擎的排序模型极其复杂，是一个综合了上百种特征（features）的机器学习模型。这些特征包括：</p>
-                <ul>
-                <li>内容相关性（TF-IDF, BM25等）</li>
-                <li>网页质量（PageRank, TrustRank等）</li>
-                <li>用户行为数据（点击率、停留时间等）</li>
-                <li>查询的上下文和个性化信息（用户历史、地理位置等）</li>
-                </ul>
-                </li>
-                </ol>
-                <hr>
-                <h3 id="part-7-%E5%AE%9E%E8%B7%B5%E9%A1%B9%E7%9B%AE%E4%B8%8E%E6%80%BB%E7%BB%93">Part 7: 实践项目与总结</h3>
-                <h4 id="%E8%BF%B7%E4%BD%A0%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%AE%9E%E7%8E%B0%E4%BC%AA%E4%BB%A3%E7%A0%81">迷你搜索引擎实现伪代码</h4>
-                <p>现在，让我们把今天学到的知识串起来，构思一个迷你搜索引擎的完整实现流程。</p>
-                <p><strong>数据结构定义</strong></p>
-                <div class="code-container">
-                <pre><code class="language-cpp">// 在前面已定义
+<ul>
+<li>内容相关性（TF-IDF, BM25等）</li>
+<li>网页质量（PageRank, TrustRank等）</li>
+<li>用户行为数据（点击率、停留时间等）</li>
+<li>查询的上下文和个性化信息（用户历史、地理位置等）</li>
+</ul>
+</li>
+</ol>
+<hr/>
+<h3 id="part-7-%E5%AE%9E%E8%B7%B5%E9%A1%B9%E7%9B%AE%E4%B8%8E%E6%80%BB%E7%BB%93">Part 7: 实践项目与总结</h3>
+<h4 id="%E8%BF%B7%E4%BD%A0%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%AE%9E%E7%8E%B0%E4%BC%AA%E4%BB%A3%E7%A0%81">迷你搜索引擎实现伪代码</h4>
+<p>现在，让我们把今天学到的知识串起来，构思一个迷你搜索引擎的完整实现流程。</p>
+<p><strong>数据结构定义</strong></p>
+<div class="code-container">
+<pre><code class="language-cpp">// 在前面已定义
 struct Posting { ... };
 using PostingList = std::vector&lt;Posting&gt;;
 using InvertedIndex = std::map&lt;std::string, PostingList&gt;;
 </code></pre>
-                </div>
-                <p><strong>1. 索引构建模块 <code>buildIndex</code></strong></p>
-                <div class="code-container">
-                <pre><code>function buildIndex(document_collection):
+</div>
+<p><strong>1. 索引构建模块 <code>buildIndex</code></strong></p>
+<div class="code-container">
+<pre><code>function buildIndex(document_collection):
     index = new InvertedIndex()
     stop_words = load_stop_words()
     doc_id = 0
@@ -685,10 +686,10 @@ using InvertedIndex = std::map&lt;std::string, PostingList&gt;;
             
     return index
 </code></pre>
-                </div>
-                <p><strong>2. 查询处理模块 <code>performQuery</code></strong></p>
-                <div class="code-container">
-                <pre><code>function intersect_postings(list1, list2):
+</div>
+<p><strong>2. 查询处理模块 <code>performQuery</code></strong></p>
+<div class="code-container">
+<pre><code>function intersect_postings(list1, list2):
     // 高效的列表求交集算法（使用双指针）
     result = new PostingList()
     p1 = 0, p2 = 0
@@ -728,34 +729,60 @@ function performQuery(query_string, index):
     // 5. 返回结果
     return scored_results
 </code></pre>
-                </div>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+</div>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

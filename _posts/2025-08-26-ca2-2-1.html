@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机体系结构2-2-1:层次结构的基础与缓存设计</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>计算机体系结构2-2-1:层次结构的基础与缓存设计</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,251 +30,277 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%842-2-1%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84%E7%9A%84%E5%9F%BA%E7%A1%80%E4%B8%8E%E7%BC%93%E5%AD%98%E8%AE%BE%E8%AE%A1">计算机体系结构2-2-1:层次结构的基础与缓存设计</h1>
-                <p><strong>导言：为什么我们需要“层次”？</strong></p>
-                <p>我们先来思考一个根本性的设计问题：理想中的存储器应该是什么样的？很简单，它应该<strong>无限大、无限快，并且断电后数据永不丢失</strong>。然而，现实世界不存在这样的“神仙”器件。物理定律和经济规律告诉我们：</p>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%842-2-1%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84%E7%9A%84%E5%9F%BA%E7%A1%80%E4%B8%8E%E7%BC%93%E5%AD%98%E8%AE%BE%E8%AE%A1">计算机体系结构2-2-1:层次结构的基础与缓存设计</h1>
+<p><strong>导言：为什么我们需要“层次”？</strong></p>
+<p>我们先来思考一个根本性的设计问题：理想中的存储器应该是什么样的？很简单，它应该<strong>无限大、无限快，并且断电后数据永不丢失</strong>。然而，现实世界不存在这样的“神仙”器件。物理定律和经济规律告诉我们：</p>
+<ul>
+<li><strong>速度越快</strong>的存储技术（如SRAM），单位比特的<strong>成本越高</strong>，集成<strong>密度越低</strong>。</li>
+<li><strong>成本越低</strong>、<strong>密度越高</strong>的技术（如DRAM、磁盘），<strong>速度越慢</strong>。</li>
+</ul>
+<p>面对这个无法调和的矛盾，计算机先驱们没有选择“非黑即白”，而是天才地提出了一种“妥协”的艺术——构建一个<strong>层次化</strong>的结构。</p>
+<p><img alt="figure 20" src="../images/imagea020.png"/></p>
+<p>这个金字塔结构的<strong>设计哲学</strong>是：</p>
+<ol>
+<li><strong>顶层</strong>放置最快、最小、最贵的存储器（寄存器、缓存），供CPU直接、高频地访问。</li>
+<li><strong>底层</strong>放置最慢、最大、最便宜的存储器（主存、磁盘），用于存放海量的程序和数据。</li>
+<li>通过在相邻层次间<strong>自动地、透明地</strong>复制数据，来营造一种**“整个存储空间既快又大”的假象**。</li>
+</ol>
+<p>这个“假象”之所以能够成功，完全依赖于我们在第一讲中提到的<strong>局部性原理 (Principle of Locality)</strong>。正是因为程序访问数据在时间和空间上都高度聚集，我们才可以用小的高速缓存来服务绝大部分的内存请求。</p>
+<p>这张层次结构图，不仅是性能的阶梯，也是整个计算机系统不同组件的分工图：</p>
+<ul>
+<li><strong>寄存器 &lt;-&gt; 缓存</strong>：由<strong>编译器</strong>和<strong>硬件</strong>共同管理。</li>
+<li><strong>缓存 &lt;-&gt; 主存</strong>：由<strong>硬件</strong>（缓存控制器）自动管理。</li>
+<li><strong>主存 &lt;-&gt; 磁盘</strong>：由<strong>操作系统</strong>（通过虚拟内存机制）管理。</li>
+</ul>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E7%BC%93%E5%AD%98%E7%9A%84%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6%E5%9B%9B%E4%B8%AA%E5%9F%BA%E6%9C%AC%E9%97%AE%E9%A2%98"><strong>第一部分：缓存的核心机制——四个基本问题</strong></h3>
+<p>无论一个缓存系统多么复杂，其设计都必须回答四个最基本的问题。这四个问题构成了所有缓存设计的基础。</p>
+<h4 id="%E9%97%AE%E9%A2%98%E4%B8%80%E5%BD%93%E4%B8%80%E4%B8%AA%E6%95%B0%E6%8D%AE%E5%9D%97block%E4%BB%8E%E5%86%85%E5%AD%98%E5%8A%A0%E8%BD%BD%E8%BF%9B%E7%BC%93%E5%AD%98%E6%97%B6%E5%8F%AF%E4%BB%A5%E6%94%BE%E5%9C%A8%E5%93%AA%E9%87%8C-block-placement"><strong>问题一：当一个数据块（Block）从内存加载进缓存时，可以放在哪里？ (Block Placement)</strong></h4>
+<p>这决定了缓存的<strong>组织方式</strong>和<strong>相联度 (Associativity)</strong>。</p>
+<ol>
+<li>
+<p><strong>直接映射 (Direct Mapped)</strong></p>
+<ul>
+<li><strong>设计思想</strong>：最简单的策略。每个内存块只能被放置到缓存中的<strong>一个唯一</strong>的位置。</li>
+<li><strong>实现方式</strong>：位置由内存地址的低位（索引位 Index）决定。<code>Cache Index = (Memory Address / Block Size) % Number of Blocks in Cache</code>。
+                <img alt="figure 22" src="../images/imagea022.png"/></li>
+<li><strong>优点</strong>：硬件实现极其简单、快速、廉价。查找时，只需根据地址索引到唯一的位置，比较一个Tag即可。</li>
+<li><strong>缺点</strong>：非常容易发生<strong>冲突缺失 (Conflict Miss)</strong>。如果程序交替访问两个映射到同一个缓存索引的内存块（例如 <code>A[0]</code> 和 <code>A[1024]</code>），它们会不断地将对方从缓存中“踢”出去，即使缓存中还有大量空闲空间。</li>
+</ul>
+</li>
+<li>
+<p><strong>全相联 (Fully Associative)</strong></p>
+<ul>
+<li><strong>设计思想</strong>：最灵活的策略。一个内存块可以被放置到缓存中的<strong>任何</strong>位置。
+                <img alt="figure 23" src="../images/imagea023.png"/></li>
+<li><strong>实现方式</strong>：查找时，需要将内存地址的Tag与缓存中<strong>所有</strong>的Tag<strong>并行</strong>比较。</li>
+<li><strong>优点</strong>：完全消除了冲突缺失，缓存空间利用率最高。</li>
+<li><strong>缺点</strong>：硬件实现极其复杂、昂贵、缓慢且耗电。需要大量的并行比较器。因此，只适用于非常小的缓存，如TLB（我们稍后会讲到）。</li>
+</ul>
+</li>
+<li>
+<p><strong>组相联 (Set Associative)</strong></p>
+<ul>
+<li><strong>设计思想</strong>：在直接映射和全相联之间的完美妥协。将缓存分为多个“组”(Set)，每个内存块可以被放置到<strong>一个唯一组</strong>中的<strong>任何</strong>位置。一个N路组相联缓存，意味着每个组内有N个“路”(Way)可以存放数据块。</li>
+<li><strong>实现方式</strong>：
                 <ul>
-                <li><strong>速度越快</strong>的存储技术（如SRAM），单位比特的<strong>成本越高</strong>，集成<strong>密度越低</strong>。</li>
-                <li><strong>成本越低</strong>、<strong>密度越高</strong>的技术（如DRAM、磁盘），<strong>速度越慢</strong>。</li>
-                </ul>
-                <p>面对这个无法调和的矛盾，计算机先驱们没有选择“非黑即白”，而是天才地提出了一种“妥协”的艺术——构建一个<strong>层次化</strong>的结构。</p>
-                <p><img src="../images/imagea020.png" alt="figure 20"></p>
-                <p>这个金字塔结构的<strong>设计哲学</strong>是：</p>
+<li><code>Cache Set Index = (Memory Address / Block Size) % Number of Sets in Cache</code>。</li>
+<li>查找时，首先根据地址索引到唯一的组，然后将地址的Tag与该组内<strong>所有N个路</strong>的Tag<strong>并行</strong>比较。
+                <img alt="figure 24" src="../images/imagea024.png"/></li>
+</ul>
+</li>
+<li><strong>优点</strong>：在显著降低冲突缺失的同时，硬件复杂度远低于全相联（只需N个并行比较器）。这是现代CPU缓存最主流的设计。</li>
+<li><strong>特例</strong>：直接映射是“1路组相联”，全相联是“m路组相联”（m为缓存总块数）。</li>
+</ul>
+</li>
+</ol>
+<h4 id="%E9%97%AE%E9%A2%98%E4%BA%8C%E5%A6%82%E4%BD%95%E6%89%BE%E5%88%B0%E4%B8%80%E4%B8%AA%E5%AD%98%E6%94%BE%E5%9C%A8%E7%BC%93%E5%AD%98%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E5%9D%97-block-identification"><strong>问题二：如何找到一个存放在缓存中的数据块？ (Block Identification)</strong></h4>
+<ul>
+<li><strong>地址的分解</strong>：当CPU发出一个内存地址时，缓存控制器会将其分解为三部分：
+                <ul>
+<li><strong>块内偏移 (Block Offset)</strong>：地址的最低位，用于在找到的缓存块中定位具体的字节。<code>Offset bits = log2(Block Size)</code>。</li>
+<li><strong>索引 (Index)</strong>：地址的中间位，用于定位缓存中的具体“组”。<code>Index bits = log2(Number of Sets)</code>。</li>
+<li><strong>标签 (Tag)</strong>：地址的最高位，用于与该组内所有路的Tag进行比较，以确认是否命中以及命中在哪一路。<code>Tag bits = Address bits - Index bits - Offset bits</code>。</li>
+</ul>
+</li>
+<li><strong>查找过程</strong>：
                 <ol>
-                <li><strong>顶层</strong>放置最快、最小、最贵的存储器（寄存器、缓存），供CPU直接、高频地访问。</li>
-                <li><strong>底层</strong>放置最慢、最大、最便宜的存储器（主存、磁盘），用于存放海量的程序和数据。</li>
-                <li>通过在相邻层次间<strong>自动地、透明地</strong>复制数据，来营造一种**“整个存储空间既快又大”的假象**。</li>
-                </ol>
-                <p>这个“假象”之所以能够成功，完全依赖于我们在第一讲中提到的<strong>局部性原理 (Principle of Locality)</strong>。正是因为程序访问数据在时间和空间上都高度聚集，我们才可以用小的高速缓存来服务绝大部分的内存请求。</p>
-                <p>这张层次结构图，不仅是性能的阶梯，也是整个计算机系统不同组件的分工图：</p>
-                <ul>
-                <li><strong>寄存器 &lt;-&gt; 缓存</strong>：由<strong>编译器</strong>和<strong>硬件</strong>共同管理。</li>
-                <li><strong>缓存 &lt;-&gt; 主存</strong>：由<strong>硬件</strong>（缓存控制器）自动管理。</li>
-                <li><strong>主存 &lt;-&gt; 磁盘</strong>：由<strong>操作系统</strong>（通过虚拟内存机制）管理。</li>
-                </ul>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E7%BC%93%E5%AD%98%E7%9A%84%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6%E5%9B%9B%E4%B8%AA%E5%9F%BA%E6%9C%AC%E9%97%AE%E9%A2%98"><strong>第一部分：缓存的核心机制——四个基本问题</strong></h3>
-                <p>无论一个缓存系统多么复杂，其设计都必须回答四个最基本的问题。这四个问题构成了所有缓存设计的基础。</p>
-                <h4 id="%E9%97%AE%E9%A2%98%E4%B8%80%E5%BD%93%E4%B8%80%E4%B8%AA%E6%95%B0%E6%8D%AE%E5%9D%97block%E4%BB%8E%E5%86%85%E5%AD%98%E5%8A%A0%E8%BD%BD%E8%BF%9B%E7%BC%93%E5%AD%98%E6%97%B6%E5%8F%AF%E4%BB%A5%E6%94%BE%E5%9C%A8%E5%93%AA%E9%87%8C-block-placement"><strong>问题一：当一个数据块（Block）从内存加载进缓存时，可以放在哪里？ (Block Placement)</strong></h4>
-                <p>这决定了缓存的<strong>组织方式</strong>和<strong>相联度 (Associativity)</strong>。</p>
+<li>用<code>Index</code>位找到对应的组。</li>
+<li>并行读取该组所有路的<code>Valid</code>位和<code>Tag</code>。</li>
+<li>将地址中的<code>Tag</code>与该组中所有<code>Valid</code>为1的<code>Tag</code>进行比较。</li>
+<li>如果有任何一个匹配，则<strong>缓存命中 (Cache Hit)</strong>。多路选择器根据匹配的路，选择对应的数据块，并结合<code>Offset</code>位将数据返回给CPU。</li>
+<li>如果没有任何一个匹配，则<strong>缓存缺失 (Cache Miss)</strong>。</li>
+</ol>
+</li>
+</ul>
+<h4 id="%E9%97%AE%E9%A2%98%E4%B8%89%E5%BD%93%E5%8F%91%E7%94%9F%E7%BC%93%E5%AD%98%E7%BC%BA%E5%A4%B1%E6%97%B6%E5%A6%82%E6%9E%9C%E7%BB%84%E5%B7%B2%E6%BB%A1%E9%9C%80%E8%A6%81%E6%9B%BF%E6%8D%A2%E5%93%AA%E4%B8%AA%E5%9D%97-block-replacement"><strong>问题三：当发生缓存缺失时，如果组已满，需要替换哪个块？ (Block Replacement)</strong></h4>
+<ul>
+<li><strong>设计挑战</strong>：对于组相联和全相联缓存，当一个新块需要载入但其对应的组已满时，必须选择一个“牺牲者”(victim)将其替换出去。</li>
+<li><strong>常用策略</strong>：
                 <ol>
-                <li>
-                <p><strong>直接映射 (Direct Mapped)</strong></p>
+<li><strong>随机 (Random)</strong>：随机选择一个块进行替换。实现简单，但性能不稳定。</li>
+<li><strong>最近最少使用 (Least Recently Used, LRU)</strong>：替换掉最长时间未被访问过的块。这个策略基于时间局部性原理，通常性能最好。但真正的LRU实现起来非常复杂，需要为每个组维护一个访问顺序的硬件状态。</li>
+<li><strong>伪LRU (Pseudo-LRU)</strong>：许多硬件采用LRU的简化或近似算法，以在性能和硬件成本之间取得平衡。</li>
+</ol>
+</li>
+</ul>
+<h4 id="%E9%97%AE%E9%A2%98%E5%9B%9B%E5%86%99%E6%93%8D%E4%BD%9Cwrite%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%86"><strong>问题四：写操作（Write）如何处理？</strong></h4>
+<ul>
+<li>
+<p><strong>设计挑战</strong>：写操作比读操作更复杂，因为它需要最终修改内存中的数据。</p>
+</li>
+<li>
+<p><strong>策略一：写命中 (Write Hit) 时怎么办？</strong></p>
+<ol>
+<li><strong>写穿 (Write-Through)</strong>：数据<strong>同时</strong>写入缓存和下一级存储（如主存）。
                 <ul>
-                <li><strong>设计思想</strong>：最简单的策略。每个内存块只能被放置到缓存中的<strong>一个唯一</strong>的位置。</li>
-                <li><strong>实现方式</strong>：位置由内存地址的低位（索引位 Index）决定。<code>Cache Index = (Memory Address / Block Size) % Number of Blocks in Cache</code>。
-                <img src="../images/imagea022.png" alt="figure 22"></li>
-                <li><strong>优点</strong>：硬件实现极其简单、快速、廉价。查找时，只需根据地址索引到唯一的位置，比较一个Tag即可。</li>
-                <li><strong>缺点</strong>：非常容易发生<strong>冲突缺失 (Conflict Miss)</strong>。如果程序交替访问两个映射到同一个缓存索引的内存块（例如 <code>A[0]</code> 和 <code>A[1024]</code>），它们会不断地将对方从缓存中“踢”出去，即使缓存中还有大量空闲空间。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>全相联 (Fully Associative)</strong></p>
+<li><strong>优点</strong>：实现简单，缓存和主存始终保持一致。</li>
+<li><strong>缺点</strong>：每次写操作都要访问慢速的主存，严重拖慢了写性能，并占用了大量内存带宽。通常会配合<strong>写缓冲 (Write Buffer)</strong> 使用，以隐藏部分延迟。</li>
+</ul>
+</li>
+<li><strong>写回 (Write-Back)</strong>：数据<strong>只</strong>写入缓存。同时，用一个“<strong>脏位 (Dirty Bit)</strong>”来标记这个缓存块已经被修改过。
                 <ul>
-                <li><strong>设计思想</strong>：最灵活的策略。一个内存块可以被放置到缓存中的<strong>任何</strong>位置。
-                <img src="../images/imagea023.png" alt="figure 23"></li>
-                <li><strong>实现方式</strong>：查找时，需要将内存地址的Tag与缓存中<strong>所有</strong>的Tag<strong>并行</strong>比较。</li>
-                <li><strong>优点</strong>：完全消除了冲突缺失，缓存空间利用率最高。</li>
-                <li><strong>缺点</strong>：硬件实现极其复杂、昂贵、缓慢且耗电。需要大量的并行比较器。因此，只适用于非常小的缓存，如TLB（我们稍后会讲到）。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>组相联 (Set Associative)</strong></p>
+<li><strong>优点</strong>：写操作的速度和缓存命中一样快，多次写入同一个块也只在缓存中进行，极大地节省了内存带宽。</li>
+<li><strong>缺点</strong>：实现复杂。当一个“脏”的缓存块被替换时，必须先将其写回主存。此外，在多核系统中会带来复杂的缓存一致性问题。</li>
+</ul>
+</li>
+</ol>
+</li>
+<li>
+<p><strong>策略二：写缺失 (Write Miss) 时怎么办？</strong></p>
+<ol>
+<li><strong>写分配 (Write Allocate)</strong>：先将该块从内存读入缓存，然后像写命中一样处理。这个策略通常与<strong>写回</strong>缓存配合使用，因为它利用了写的空间局部性。</li>
+<li><strong>非写分配 (No-Write Allocate / Write-Around)</strong>：不将块读入缓存，而是直接将数据写入下一级存储。这个策略通常与<strong>写穿</strong>缓存配合使用。</li>
+</ol>
+</li>
+</ul>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E4%B8%BB%E5%AD%98%E6%8A%80%E6%9C%AFdram"><strong>第二部分：主存技术——DRAM</strong></h3>
+<p>缓存之所以如此重要，是因为它背后的主存——DRAM——有着与CPU截然不同的设计目标和工作原理。</p>
+<h4 id="21-sram-vs-dram%E4%B8%80%E5%9C%BA%E5%85%B3%E4%BA%8E%E5%AF%86%E5%BA%A6%E4%B8%8E%E9%80%9F%E5%BA%A6%E7%9A%84%E6%A0%B9%E6%9C%AC%E5%8F%96%E8%88%8D"><strong>2.1 SRAM vs. DRAM：一场关于密度与速度的根本取舍</strong></h4>
+<ul>
+<li>
+<p><strong>SRAM (静态随机存取存储器)</strong>：</p>
+<ul>
+<li><strong>原理</strong>：使用一个由6个晶体管组成的锁存器来存储1个比特。只要通电，数据就一直保持。</li>
+<li><strong>特性</strong>：速度极快，无需刷新。<strong>访问时间 (Access Time)</strong> 和 <strong>周期时间 (Cycle Time)</strong> 非常接近。</li>
+<li><strong>应用</strong>：因其高速度和高成本，主要用于构建CPU的<strong>缓存</strong>。</li>
+</ul>
+</li>
+<li>
+<p><strong>DRAM (动态随机存取存储器)</strong>：</p>
+<ul>
+<li><strong>原理</strong>：使用一个晶体管和一个微型电容来存储1个比特。数据通过电容的充电状态（有电/没电）来表示。</li>
+<li><strong>特性</strong>：
                 <ul>
-                <li><strong>设计思想</strong>：在直接映射和全相联之间的完美妥协。将缓存分为多个“组”(Set)，每个内存块可以被放置到<strong>一个唯一组</strong>中的<strong>任何</strong>位置。一个N路组相联缓存，意味着每个组内有N个“路”(Way)可以存放数据块。</li>
-                <li><strong>实现方式</strong>：
+<li><strong>高密度，低成本</strong>：结构简单，可以在同样面积下集成比SRAM多得多的存储单元。</li>
+<li><strong>破坏性读取</strong>：读取一个单元会破坏其电荷，因此每次读取后必须立即<strong>重写</strong>。</li>
+<li><strong>需要刷新</strong>：电容会缓慢漏电，所以必须<strong>周期性地刷新</strong>所有存储单元，以防止数据丢失。</li>
+<li><strong>周期时间 &gt; 访问时间</strong>：由于预充电和重写等操作，连续两次访问DRAM的最小间隔（周期时间）要比单次访问的延迟（访问时间）长得多。</li>
+</ul>
+</li>
+<li><strong>应用</strong>：因其高密度和低成本，是计算机<strong>主存</strong>的不二之选。</li>
+</ul>
+</li>
+</ul>
+<h4 id="22-dram%E7%9A%84%E7%BB%84%E7%BB%87%E4%B8%8E%E8%AE%BF%E9%97%AE"><strong>2.2 DRAM的组织与访问</strong></h4>
+<p><img alt="figure 21" src="../images/imagea021.png"/></p>
+<p>DRAM芯片内部被组织成一个二维矩阵，并分为多个独立的<strong>Bank</strong>。一次访问过程如下：</p>
+<ol>
+<li><strong>行激活 (Row Access Strobe, RAS)</strong>：内存控制器发送行地址和<code>Activate</code>命令。整个被选中的<strong>行</strong>（通常是几KB）被读出，加载到一个称为<strong>行缓冲 (Row Buffer)</strong> 的内部SRAM中。这是一个相对较慢的过程。</li>
+<li><strong>列访问 (Column Access Strobe, CAS)</strong>：内存控制器发送列地址。从已经打开的行缓冲中，通过一个多路选择器快速选出所需的列数据。这是一个非常快的操作。</li>
+<li><strong>预充电 (Precharge)</strong>：访问完一个行后，需要发送<code>Precharge</code>命令关闭当前行，为下一次行激活做准备。</li>
+</ol>
+<p><strong>设计启示与优化</strong>：</p>
+<ul>
+<li><strong>行缓冲命中 (Row Buffer Hit)</strong>：如果连续的内存访问命中<strong>同一个打开的行</strong>，就可以省略耗时的RAS和Precharge步骤，只需连续发送CAS命令即可，延迟极低。这极大地利用了<strong>空间局部性</strong>。现代内存控制器的核心任务之一，就是通过指令调度，尽可能地将对同一行的访问聚集在一起。</li>
+<li><strong>多Bank交错</strong>：不同的Bank可以独立进行RAS/CAS/Precharge操作。当一个Bank在进行耗时的行激活时，另一个Bank可以同时服务列访问请求。通过将内存地址映射到不同的Bank，可以实现并行访问，提高整体带宽。</li>
+</ul>
+<h4 id="23-dram%E7%9A%84%E6%BC%94%E8%BF%9Bsdram-ddr%E5%8F%8A%E5%85%B6%E5%90%8E%E4%BB%A3"><strong>2.3 DRAM的演进：SDRAM, DDR及其后代</strong></h4>
+<ul>
+<li><strong>SDRAM (同步DRAM)</strong>：引入了与系统总线同步的时钟信号，使得内存控制器可以更精确地控制数据传输，实现了高速的<strong>突发传输 (Burst Transfer)</strong>。</li>
+<li><strong>DDR (Double Data Rate)</strong>：在SDRAM的基础上，利用时钟信号的<strong>上升沿和下降沿</strong>都进行数据传输，使得数据传输率直接翻倍，而无需提高时钟频率。后续的DDR2, DDR3, DDR4, DDR5通过预取更多数据、提高I/O时钟频率等技术，不断提升带宽。</li>
+</ul>
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E9%9D%9E%E6%98%93%E5%A4%B1%E6%80%A7%E5%AD%98%E5%82%A8%E9%97%AA%E5%AD%98"><strong>第三部分：非易失性存储——闪存</strong></h3>
+<h4 id="31-%E9%97%AA%E5%AD%98-flash-memory"><strong>3.1 闪存 (Flash Memory)</strong></h4>
+<p>闪存作为一种EEPROM，填补了DRAM和磁盘之间的巨大鸿沟。</p>
+<ul>
+<li><strong>特性</strong>：
                 <ul>
-                <li><code>Cache Set Index = (Memory Address / Block Size) % Number of Sets in Cache</code>。</li>
-                <li>查找时，首先根据地址索引到唯一的组，然后将地址的Tag与该组内<strong>所有N个路</strong>的Tag<strong>并行</strong>比较。
-                <img src="../images/imagea024.png" alt="figure 24"></li>
-                </ul>
-                </li>
-                <li><strong>优点</strong>：在显著降低冲突缺失的同时，硬件复杂度远低于全相联（只需N个并行比较器）。这是现代CPU缓存最主流的设计。</li>
-                <li><strong>特例</strong>：直接映射是“1路组相联”，全相联是“m路组相联”（m为缓存总块数）。</li>
-                </ul>
-                </li>
-                </ol>
-                <h4 id="%E9%97%AE%E9%A2%98%E4%BA%8C%E5%A6%82%E4%BD%95%E6%89%BE%E5%88%B0%E4%B8%80%E4%B8%AA%E5%AD%98%E6%94%BE%E5%9C%A8%E7%BC%93%E5%AD%98%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E5%9D%97-block-identification"><strong>问题二：如何找到一个存放在缓存中的数据块？ (Block Identification)</strong></h4>
+<li><strong>非易失性</strong>：断电后数据不丢失。</li>
+<li><strong>高密度</strong>：接近DRAM。</li>
+<li><strong>性能</strong>：读性能远快于磁盘，但慢于DRAM；写性能则相对较慢。</li>
+<li><strong>有限的写寿命</strong>：每个块只能被擦写有限次数（从几千次到几十万次不等）。</li>
+<li><strong>先擦后写</strong>：写入前必须先将整个块（Block）擦除。</li>
+</ul>
+</li>
+<li><strong>设计挑战与解决方案</strong>：
                 <ul>
-                <li><strong>地址的分解</strong>：当CPU发出一个内存地址时，缓存控制器会将其分解为三部分：
-                <ul>
-                <li><strong>块内偏移 (Block Offset)</strong>：地址的最低位，用于在找到的缓存块中定位具体的字节。<code>Offset bits = log2(Block Size)</code>。</li>
-                <li><strong>索引 (Index)</strong>：地址的中间位，用于定位缓存中的具体“组”。<code>Index bits = log2(Number of Sets)</code>。</li>
-                <li><strong>标签 (Tag)</strong>：地址的最高位，用于与该组内所有路的Tag进行比较，以确认是否命中以及命中在哪一路。<code>Tag bits = Address bits - Index bits - Offset bits</code>。</li>
-                </ul>
-                </li>
-                <li><strong>查找过程</strong>：
-                <ol>
-                <li>用<code>Index</code>位找到对应的组。</li>
-                <li>并行读取该组所有路的<code>Valid</code>位和<code>Tag</code>。</li>
-                <li>将地址中的<code>Tag</code>与该组中所有<code>Valid</code>为1的<code>Tag</code>进行比较。</li>
-                <li>如果有任何一个匹配，则<strong>缓存命中 (Cache Hit)</strong>。多路选择器根据匹配的路，选择对应的数据块，并结合<code>Offset</code>位将数据返回给CPU。</li>
-                <li>如果没有任何一个匹配，则<strong>缓存缺失 (Cache Miss)</strong>。</li>
-                </ol>
-                </li>
-                </ul>
-                <h4 id="%E9%97%AE%E9%A2%98%E4%B8%89%E5%BD%93%E5%8F%91%E7%94%9F%E7%BC%93%E5%AD%98%E7%BC%BA%E5%A4%B1%E6%97%B6%E5%A6%82%E6%9E%9C%E7%BB%84%E5%B7%B2%E6%BB%A1%E9%9C%80%E8%A6%81%E6%9B%BF%E6%8D%A2%E5%93%AA%E4%B8%AA%E5%9D%97-block-replacement"><strong>问题三：当发生缓存缺失时，如果组已满，需要替换哪个块？ (Block Replacement)</strong></h4>
-                <ul>
-                <li><strong>设计挑战</strong>：对于组相联和全相联缓存，当一个新块需要载入但其对应的组已满时，必须选择一个“牺牲者”(victim)将其替换出去。</li>
-                <li><strong>常用策略</strong>：
-                <ol>
-                <li><strong>随机 (Random)</strong>：随机选择一个块进行替换。实现简单，但性能不稳定。</li>
-                <li><strong>最近最少使用 (Least Recently Used, LRU)</strong>：替换掉最长时间未被访问过的块。这个策略基于时间局部性原理，通常性能最好。但真正的LRU实现起来非常复杂，需要为每个组维护一个访问顺序的硬件状态。</li>
-                <li><strong>伪LRU (Pseudo-LRU)</strong>：许多硬件采用LRU的简化或近似算法，以在性能和硬件成本之间取得平衡。</li>
-                </ol>
-                </li>
-                </ul>
-                <h4 id="%E9%97%AE%E9%A2%98%E5%9B%9B%E5%86%99%E6%93%8D%E4%BD%9Cwrite%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%86"><strong>问题四：写操作（Write）如何处理？</strong></h4>
-                <ul>
-                <li>
-                <p><strong>设计挑战</strong>：写操作比读操作更复杂，因为它需要最终修改内存中的数据。</p>
-                </li>
-                <li>
-                <p><strong>策略一：写命中 (Write Hit) 时怎么办？</strong></p>
-                <ol>
-                <li><strong>写穿 (Write-Through)</strong>：数据<strong>同时</strong>写入缓存和下一级存储（如主存）。
-                <ul>
-                <li><strong>优点</strong>：实现简单，缓存和主存始终保持一致。</li>
-                <li><strong>缺点</strong>：每次写操作都要访问慢速的主存，严重拖慢了写性能，并占用了大量内存带宽。通常会配合<strong>写缓冲 (Write Buffer)</strong> 使用，以隐藏部分延迟。</li>
-                </ul>
-                </li>
-                <li><strong>写回 (Write-Back)</strong>：数据<strong>只</strong>写入缓存。同时，用一个“<strong>脏位 (Dirty Bit)</strong>”来标记这个缓存块已经被修改过。
-                <ul>
-                <li><strong>优点</strong>：写操作的速度和缓存命中一样快，多次写入同一个块也只在缓存中进行，极大地节省了内存带宽。</li>
-                <li><strong>缺点</strong>：实现复杂。当一个“脏”的缓存块被替换时，必须先将其写回主存。此外，在多核系统中会带来复杂的缓存一致性问题。</li>
-                </ul>
-                </li>
-                </ol>
-                </li>
-                <li>
-                <p><strong>策略二：写缺失 (Write Miss) 时怎么办？</strong></p>
-                <ol>
-                <li><strong>写分配 (Write Allocate)</strong>：先将该块从内存读入缓存，然后像写命中一样处理。这个策略通常与<strong>写回</strong>缓存配合使用，因为它利用了写的空间局部性。</li>
-                <li><strong>非写分配 (No-Write Allocate / Write-Around)</strong>：不将块读入缓存，而是直接将数据写入下一级存储。这个策略通常与<strong>写穿</strong>缓存配合使用。</li>
-                </ol>
-                </li>
-                </ul>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E4%B8%BB%E5%AD%98%E6%8A%80%E6%9C%AFdram"><strong>第二部分：主存技术——DRAM</strong></h3>
-                <p>缓存之所以如此重要，是因为它背后的主存——DRAM——有着与CPU截然不同的设计目标和工作原理。</p>
-                <h4 id="21-sram-vs-dram%E4%B8%80%E5%9C%BA%E5%85%B3%E4%BA%8E%E5%AF%86%E5%BA%A6%E4%B8%8E%E9%80%9F%E5%BA%A6%E7%9A%84%E6%A0%B9%E6%9C%AC%E5%8F%96%E8%88%8D"><strong>2.1 SRAM vs. DRAM：一场关于密度与速度的根本取舍</strong></h4>
-                <ul>
-                <li>
-                <p><strong>SRAM (静态随机存取存储器)</strong>：</p>
-                <ul>
-                <li><strong>原理</strong>：使用一个由6个晶体管组成的锁存器来存储1个比特。只要通电，数据就一直保持。</li>
-                <li><strong>特性</strong>：速度极快，无需刷新。<strong>访问时间 (Access Time)</strong> 和 <strong>周期时间 (Cycle Time)</strong> 非常接近。</li>
-                <li><strong>应用</strong>：因其高速度和高成本，主要用于构建CPU的<strong>缓存</strong>。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>DRAM (动态随机存取存储器)</strong>：</p>
-                <ul>
-                <li><strong>原理</strong>：使用一个晶体管和一个微型电容来存储1个比特。数据通过电容的充电状态（有电/没电）来表示。</li>
-                <li><strong>特性</strong>：
-                <ul>
-                <li><strong>高密度，低成本</strong>：结构简单，可以在同样面积下集成比SRAM多得多的存储单元。</li>
-                <li><strong>破坏性读取</strong>：读取一个单元会破坏其电荷，因此每次读取后必须立即<strong>重写</strong>。</li>
-                <li><strong>需要刷新</strong>：电容会缓慢漏电，所以必须<strong>周期性地刷新</strong>所有存储单元，以防止数据丢失。</li>
-                <li><strong>周期时间 &gt; 访问时间</strong>：由于预充电和重写等操作，连续两次访问DRAM的最小间隔（周期时间）要比单次访问的延迟（访问时间）长得多。</li>
-                </ul>
-                </li>
-                <li><strong>应用</strong>：因其高密度和低成本，是计算机<strong>主存</strong>的不二之选。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="22-dram%E7%9A%84%E7%BB%84%E7%BB%87%E4%B8%8E%E8%AE%BF%E9%97%AE"><strong>2.2 DRAM的组织与访问</strong></h4>
-                <p><img src="../images/imagea021.png" alt="figure 21"></p>
-                <p>DRAM芯片内部被组织成一个二维矩阵，并分为多个独立的<strong>Bank</strong>。一次访问过程如下：</p>
-                <ol>
-                <li><strong>行激活 (Row Access Strobe, RAS)</strong>：内存控制器发送行地址和<code>Activate</code>命令。整个被选中的<strong>行</strong>（通常是几KB）被读出，加载到一个称为<strong>行缓冲 (Row Buffer)</strong> 的内部SRAM中。这是一个相对较慢的过程。</li>
-                <li><strong>列访问 (Column Access Strobe, CAS)</strong>：内存控制器发送列地址。从已经打开的行缓冲中，通过一个多路选择器快速选出所需的列数据。这是一个非常快的操作。</li>
-                <li><strong>预充电 (Precharge)</strong>：访问完一个行后，需要发送<code>Precharge</code>命令关闭当前行，为下一次行激活做准备。</li>
-                </ol>
-                <p><strong>设计启示与优化</strong>：</p>
-                <ul>
-                <li><strong>行缓冲命中 (Row Buffer Hit)</strong>：如果连续的内存访问命中<strong>同一个打开的行</strong>，就可以省略耗时的RAS和Precharge步骤，只需连续发送CAS命令即可，延迟极低。这极大地利用了<strong>空间局部性</strong>。现代内存控制器的核心任务之一，就是通过指令调度，尽可能地将对同一行的访问聚集在一起。</li>
-                <li><strong>多Bank交错</strong>：不同的Bank可以独立进行RAS/CAS/Precharge操作。当一个Bank在进行耗时的行激活时，另一个Bank可以同时服务列访问请求。通过将内存地址映射到不同的Bank，可以实现并行访问，提高整体带宽。</li>
-                </ul>
-                <h4 id="23-dram%E7%9A%84%E6%BC%94%E8%BF%9Bsdram-ddr%E5%8F%8A%E5%85%B6%E5%90%8E%E4%BB%A3"><strong>2.3 DRAM的演进：SDRAM, DDR及其后代</strong></h4>
-                <ul>
-                <li><strong>SDRAM (同步DRAM)</strong>：引入了与系统总线同步的时钟信号，使得内存控制器可以更精确地控制数据传输，实现了高速的<strong>突发传输 (Burst Transfer)</strong>。</li>
-                <li><strong>DDR (Double Data Rate)</strong>：在SDRAM的基础上，利用时钟信号的<strong>上升沿和下降沿</strong>都进行数据传输，使得数据传输率直接翻倍，而无需提高时钟频率。后续的DDR2, DDR3, DDR4, DDR5通过预取更多数据、提高I/O时钟频率等技术，不断提升带宽。</li>
-                </ul>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E9%9D%9E%E6%98%93%E5%A4%B1%E6%80%A7%E5%AD%98%E5%82%A8%E9%97%AA%E5%AD%98"><strong>第三部分：非易失性存储——闪存</strong></h3>
-                <h4 id="31-%E9%97%AA%E5%AD%98-flash-memory"><strong>3.1 闪存 (Flash Memory)</strong></h4>
-                <p>闪存作为一种EEPROM，填补了DRAM和磁盘之间的巨大鸿沟。</p>
-                <ul>
-                <li><strong>特性</strong>：
-                <ul>
-                <li><strong>非易失性</strong>：断电后数据不丢失。</li>
-                <li><strong>高密度</strong>：接近DRAM。</li>
-                <li><strong>性能</strong>：读性能远快于磁盘，但慢于DRAM；写性能则相对较慢。</li>
-                <li><strong>有限的写寿命</strong>：每个块只能被擦写有限次数（从几千次到几十万次不等）。</li>
-                <li><strong>先擦后写</strong>：写入前必须先将整个块（Block）擦除。</li>
-                </ul>
-                </li>
-                <li><strong>设计挑战与解决方案</strong>：
-                <ul>
-                <li>为了解决写寿命问题，SSD控制器中包含了一个复杂的<strong>闪存翻译层 (Flash Translation Layer, FTL)</strong>，其核心技术是<strong>磨损均衡 (Wear Leveling)</strong>，通过动态映射逻辑块到物理块，确保所有块被均匀地写入，从而延长整体寿命。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="32-%E6%96%B0%E5%85%B4%E5%AD%98%E5%82%A8%E6%8A%80%E6%9C%AF"><strong>3.2 新兴存储技术</strong></h4>
-                <p>相变存储器（Phase-Change Memory, PCM）等新技术正在涌现，它们试图结合DRAM的性能、Flash的非易失性和SRAM的字节可寻址性，未来可能再次重塑存储器层次结构的形态。</p>
-                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%8F%AF%E9%9D%A0%E6%80%A7"><strong>第四部分：存储系统的可靠性</strong></h3>
-                <p>存储器中的数据会因为高能粒子（如宇宙射线）的撞击而发生翻转（<strong>软错误</strong>），或者因为物理缺陷而永久损坏（<strong>硬错误</strong>）。</p>
-                <ul>
-                <li><strong>奇偶校验 (Parity)</strong>：最简单的检错码。为每8位数据增加1个校验位，使其总共有奇数（或偶数）个1。可以<strong>检测</strong>出任意单个比特的错误，但无法<strong>纠正</strong>。</li>
-                <li><strong>纠错码 (Error Correcting Code, ECC)</strong>：更强大的编码。例如，为64位数据增加8个校验位，可以实现**“检双纠单” (SECDED)**，即检测出任意两个比特的错误，并纠正任意单个比特的错误。这是服务器和关键任务系统内存的标配。</li>
-                <li><strong>Chipkill</strong>：借鉴RAID的思想，将一个ECC码字分散到多个DRAM芯片上。这样，即使<strong>一整个DRAM芯片完全失效</strong>，系统仍然可以从其他芯片的数据和校验信息中恢复出丢失的数据，提供了极高的可靠性。</li>
-                </ul>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li>为了解决写寿命问题，SSD控制器中包含了一个复杂的<strong>闪存翻译层 (Flash Translation Layer, FTL)</strong>，其核心技术是<strong>磨损均衡 (Wear Leveling)</strong>，通过动态映射逻辑块到物理块，确保所有块被均匀地写入，从而延长整体寿命。</li>
+</ul>
+</li>
+</ul>
+<h4 id="32-%E6%96%B0%E5%85%B4%E5%AD%98%E5%82%A8%E6%8A%80%E6%9C%AF"><strong>3.2 新兴存储技术</strong></h4>
+<p>相变存储器（Phase-Change Memory, PCM）等新技术正在涌现，它们试图结合DRAM的性能、Flash的非易失性和SRAM的字节可寻址性，未来可能再次重塑存储器层次结构的形态。</p>
+<h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%8F%AF%E9%9D%A0%E6%80%A7"><strong>第四部分：存储系统的可靠性</strong></h3>
+<p>存储器中的数据会因为高能粒子（如宇宙射线）的撞击而发生翻转（<strong>软错误</strong>），或者因为物理缺陷而永久损坏（<strong>硬错误</strong>）。</p>
+<ul>
+<li><strong>奇偶校验 (Parity)</strong>：最简单的检错码。为每8位数据增加1个校验位，使其总共有奇数（或偶数）个1。可以<strong>检测</strong>出任意单个比特的错误，但无法<strong>纠正</strong>。</li>
+<li><strong>纠错码 (Error Correcting Code, ECC)</strong>：更强大的编码。例如，为64位数据增加8个校验位，可以实现**“检双纠单” (SECDED)**，即检测出任意两个比特的错误，并纠正任意单个比特的错误。这是服务器和关键任务系统内存的标配。</li>
+<li><strong>Chipkill</strong>：借鉴RAID的思想，将一个ECC码字分散到多个DRAM芯片上。这样，即使<strong>一整个DRAM芯片完全失效</strong>，系统仍然可以从其他芯片的数据和校验信息中恢复出丢失的数据，提供了极高的可靠性。</li>
+</ul>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

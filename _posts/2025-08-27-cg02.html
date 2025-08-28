@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机图形学02:图形学基础1</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>计算机图形学02:图形学基础1</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,251 +30,277 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A602%E5%9B%BE%E5%BD%A2%E5%AD%A6%E5%9F%BA%E7%A1%801">计算机图形学02:图形学基础1</h1>
-                <h3 id="1-%E5%9F%BA%E6%9C%AC%E5%85%83%E7%B4%A0%E7%82%B9-point-%E4%B8%8E%E5%90%91%E9%87%8F-vector"><strong>1. 基本元素：点 (Point) 与向量 (Vector)</strong></h3>
-                <p>在日常语言中，“点”和“向量”似乎可以混用，但在图形学中，它们是两个截然不同但又紧密相关的概念。精确地区分它们，是避免未来产生混淆的第一步。</p>
-                <ul>
-                <li>
-                <p><strong>点 (Point):</strong></p>
-                <ul>
-                <li><strong>定义：</strong> 点表示空间中的一个<strong>位置 (Location)</strong>。</li>
-                <li><strong>属性：</strong> 它没有大小，没有方向，只有“在哪里”这一个属性。例如，“我的家在城市的(x, y)坐标处”。</li>
-                <li><strong>表示：</strong> 通常用大写字母表示，如 $P$, $Q$。在坐标系中，我们用坐标元组来表示它，例如 $P = (x, y, z)$。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>向量 (Vector):</strong></p>
-                <ul>
-                <li><strong>定义：</strong> 向量表示一个<strong>位移 (Displacement)</strong>，即一个方向和一段长度。</li>
-                <li><strong>属性：</strong> 它同时拥有<strong>大小 (Magnitude/Length)</strong> 和 <strong>方向 (Direction)</strong>。向量是与位置无关的。例如，“向正北方向走5公里”，这个指令可以在任何地方执行，它描述的都是同一个向量。</li>
-                <li><strong>表示：</strong> 通常用小写粗体字母或带箭头的字母表示，如 $\mathbf{v}$ 或 $\vec{v}$。在坐标系中，它也用一个元组表示，例如 $\mathbf{v} = (v_x, v_y, v_z)$，这代表了在各个轴向上的分量。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="%E7%82%B9%E4%B8%8E%E5%90%91%E9%87%8F%E7%9A%84%E5%85%B3%E7%B3%BB"><strong>点与向量的关系</strong></h4>
-                <p>它们之间的关系可以通过简单的运算来揭示，这些运算具有明确的几何意义：</p>
-                <ul>
-                <li><strong>点 - 点 = 向量：</strong> 两个点相减，得到的是从一个点指向另一个点的位移向量。例如，有两个点 $P_1$ 和 $P_2$，则向量 $\mathbf{v} = P_2 - P_1$ 表示从 $P_1$ 移动到 $P_2$ 所需的位移。</li>
-                <li><strong>点 + 向量 = 点：</strong> 一个点加上一个向量，得到的是该点按照这个向量进行位移后到达的新位置。例如，$P_2 = P_1 + \mathbf{v}$。</li>
-                </ul>
-                <p><strong>请注意：</strong></p>
-                <ul>
-                <li><strong>点 + 点</strong> 的运算在几何上是没有意义的（两个位置相加是什么？）。</li>
-                <li><strong>向量 + 向量</strong> 是合法的，我们马上会讲到。</li>
-                </ul>
-                <h3 id="2-%E5%8F%82%E8%80%83%E6%A1%86%E6%9E%B6%E5%9D%90%E6%A0%87%E7%B3%BB-coordinate-systems"><strong>2. 参考框架：坐标系 (Coordinate Systems)</strong></h3>
-                <p>为了能用数字来精确地描述点和向量，我们必须建立一个<strong>坐标系</strong>。它为我们的虚拟空间提供了一个统一的参考标准。一个坐标系通常由两部分组成：</p>
-                <ul>
-                <li><strong>原点 (Origin):</strong> 一个作为参考基准的特殊点，通常表示为 $O$。</li>
-                <li><strong>基向量 (Basis Vectors):</strong> 一组相互垂直的单位向量（方向确定，长度为1），用于定义空间的主方向。</li>
-                </ul>
-                <h4 id="%E4%BA%8C%E7%BB%B4%E5%9D%90%E6%A0%87%E7%B3%BB"><strong>二维坐标系</strong></h4>
-                <ul>
-                <li><strong>笛卡尔坐标系 (Cartesian Coordinates):</strong> 这是我们最熟悉的系统，由原点 $O$ 和两个相互垂直的基向量 $\mathbf{i}$ (x轴方向) 和 $\mathbf{j}$ (y轴方向) 定义。空间中任意一点 $P$ 的位置可以表示为 $(x, y)$，这意味着 $P = O + x\mathbf{i} + y\mathbf{j}$。</li>
-                <li><strong>极坐标系 (Polar Coordinates):</strong> 同一个点也可以用另一种方式描述：它到原点的距离 $r$ 和它与参考方向（通常是x轴正方向）的夹角 $\theta$。表示为 $(r, \theta)$。这在描述旋转或圆形运动时特别方便。</li>
-                </ul>
-                <h4 id="%E4%B8%89%E7%BB%B4%E5%9D%90%E6%A0%87%E7%B3%BB"><strong>三维坐标系</strong></h4>
-                <p>在3D图形学中，我们生活在一个三维空间中。一个三维笛卡尔坐标系由原点和三个相互垂直的基向量（定义了x, y, z轴）构成。</p>
-                <p>一个至关重要的概念是坐标系的<strong>手性 (Handedness)</strong>：</p>
-                <ul>
-                <li><strong>右手坐标系 (Right-handed System):</strong> 这是科学、工程和大多数现代图形API（如OpenGL）中使用的标准。规则是：伸出右手，让你的四指从X轴正方向弯向Y轴正方向，此时你的大拇指指向的就是Z轴的正方向。</li>
-                <li><strong>左手坐标系 (Left-handed System):</strong> 在一些早期的图形系统或特定的游戏引擎（如Direct3D, Unity）中被使用。规则是：伸出左手，四指从X轴弯向Y轴，大拇指指向Z轴正方向。</li>
-                </ul>
-                <p>混用不同手性的坐标系是导致图形渲染结果上下颠倒或内外反转的常见原因。在本项目或工作中，首先要做的就是确定你所使用的坐标系。<strong>在本课程中，我们将默认使用右手坐标系。</strong></p>
-                <h3 id="3-%E6%A0%B8%E5%BF%83%E5%B7%A5%E5%85%B7%E5%90%91%E9%87%8F%E4%BB%A3%E6%95%B0-vector-algebra"><strong>3. 核心工具：向量代数 (Vector Algebra)</strong></h3>
-                <p>现在我们来学习如何对向量进行运算。这些运算是图形学算法的基石。</p>
-                <h4 id="%E5%9F%BA%E6%9C%AC%E8%BF%90%E7%AE%97"><strong>基本运算</strong></h4>
-                <ul>
-                <li><strong>标量乘法 (Scalar Multiplication):</strong>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A602%E5%9B%BE%E5%BD%A2%E5%AD%A6%E5%9F%BA%E7%A1%801">计算机图形学02:图形学基础1</h1>
+<h3 id="1-%E5%9F%BA%E6%9C%AC%E5%85%83%E7%B4%A0%E7%82%B9-point-%E4%B8%8E%E5%90%91%E9%87%8F-vector"><strong>1. 基本元素：点 (Point) 与向量 (Vector)</strong></h3>
+<p>在日常语言中，“点”和“向量”似乎可以混用，但在图形学中，它们是两个截然不同但又紧密相关的概念。精确地区分它们，是避免未来产生混淆的第一步。</p>
+<ul>
+<li>
+<p><strong>点 (Point):</strong></p>
+<ul>
+<li><strong>定义：</strong> 点表示空间中的一个<strong>位置 (Location)</strong>。</li>
+<li><strong>属性：</strong> 它没有大小，没有方向，只有“在哪里”这一个属性。例如，“我的家在城市的(x, y)坐标处”。</li>
+<li><strong>表示：</strong> 通常用大写字母表示，如 $P$, $Q$。在坐标系中，我们用坐标元组来表示它，例如 $P = (x, y, z)$。</li>
+</ul>
+</li>
+<li>
+<p><strong>向量 (Vector):</strong></p>
+<ul>
+<li><strong>定义：</strong> 向量表示一个<strong>位移 (Displacement)</strong>，即一个方向和一段长度。</li>
+<li><strong>属性：</strong> 它同时拥有<strong>大小 (Magnitude/Length)</strong> 和 <strong>方向 (Direction)</strong>。向量是与位置无关的。例如，“向正北方向走5公里”，这个指令可以在任何地方执行，它描述的都是同一个向量。</li>
+<li><strong>表示：</strong> 通常用小写粗体字母或带箭头的字母表示，如 $\mathbf{v}$ 或 $\vec{v}$。在坐标系中，它也用一个元组表示，例如 $\mathbf{v} = (v_x, v_y, v_z)$，这代表了在各个轴向上的分量。</li>
+</ul>
+</li>
+</ul>
+<h4 id="%E7%82%B9%E4%B8%8E%E5%90%91%E9%87%8F%E7%9A%84%E5%85%B3%E7%B3%BB"><strong>点与向量的关系</strong></h4>
+<p>它们之间的关系可以通过简单的运算来揭示，这些运算具有明确的几何意义：</p>
+<ul>
+<li><strong>点 - 点 = 向量：</strong> 两个点相减，得到的是从一个点指向另一个点的位移向量。例如，有两个点 $P_1$ 和 $P_2$，则向量 $\mathbf{v} = P_2 - P_1$ 表示从 $P_1$ 移动到 $P_2$ 所需的位移。</li>
+<li><strong>点 + 向量 = 点：</strong> 一个点加上一个向量，得到的是该点按照这个向量进行位移后到达的新位置。例如，$P_2 = P_1 + \mathbf{v}$。</li>
+</ul>
+<p><strong>请注意：</strong></p>
+<ul>
+<li><strong>点 + 点</strong> 的运算在几何上是没有意义的（两个位置相加是什么？）。</li>
+<li><strong>向量 + 向量</strong> 是合法的，我们马上会讲到。</li>
+</ul>
+<h3 id="2-%E5%8F%82%E8%80%83%E6%A1%86%E6%9E%B6%E5%9D%90%E6%A0%87%E7%B3%BB-coordinate-systems"><strong>2. 参考框架：坐标系 (Coordinate Systems)</strong></h3>
+<p>为了能用数字来精确地描述点和向量，我们必须建立一个<strong>坐标系</strong>。它为我们的虚拟空间提供了一个统一的参考标准。一个坐标系通常由两部分组成：</p>
+<ul>
+<li><strong>原点 (Origin):</strong> 一个作为参考基准的特殊点，通常表示为 $O$。</li>
+<li><strong>基向量 (Basis Vectors):</strong> 一组相互垂直的单位向量（方向确定，长度为1），用于定义空间的主方向。</li>
+</ul>
+<h4 id="%E4%BA%8C%E7%BB%B4%E5%9D%90%E6%A0%87%E7%B3%BB"><strong>二维坐标系</strong></h4>
+<ul>
+<li><strong>笛卡尔坐标系 (Cartesian Coordinates):</strong> 这是我们最熟悉的系统，由原点 $O$ 和两个相互垂直的基向量 $\mathbf{i}$ (x轴方向) 和 $\mathbf{j}$ (y轴方向) 定义。空间中任意一点 $P$ 的位置可以表示为 $(x, y)$，这意味着 $P = O + x\mathbf{i} + y\mathbf{j}$。</li>
+<li><strong>极坐标系 (Polar Coordinates):</strong> 同一个点也可以用另一种方式描述：它到原点的距离 $r$ 和它与参考方向（通常是x轴正方向）的夹角 $\theta$。表示为 $(r, \theta)$。这在描述旋转或圆形运动时特别方便。</li>
+</ul>
+<h4 id="%E4%B8%89%E7%BB%B4%E5%9D%90%E6%A0%87%E7%B3%BB"><strong>三维坐标系</strong></h4>
+<p>在3D图形学中，我们生活在一个三维空间中。一个三维笛卡尔坐标系由原点和三个相互垂直的基向量（定义了x, y, z轴）构成。</p>
+<p>一个至关重要的概念是坐标系的<strong>手性 (Handedness)</strong>：</p>
+<ul>
+<li><strong>右手坐标系 (Right-handed System):</strong> 这是科学、工程和大多数现代图形API（如OpenGL）中使用的标准。规则是：伸出右手，让你的四指从X轴正方向弯向Y轴正方向，此时你的大拇指指向的就是Z轴的正方向。</li>
+<li><strong>左手坐标系 (Left-handed System):</strong> 在一些早期的图形系统或特定的游戏引擎（如Direct3D, Unity）中被使用。规则是：伸出左手，四指从X轴弯向Y轴，大拇指指向Z轴正方向。</li>
+</ul>
+<p>混用不同手性的坐标系是导致图形渲染结果上下颠倒或内外反转的常见原因。在本项目或工作中，首先要做的就是确定你所使用的坐标系。<strong>在本课程中，我们将默认使用右手坐标系。</strong></p>
+<h3 id="3-%E6%A0%B8%E5%BF%83%E5%B7%A5%E5%85%B7%E5%90%91%E9%87%8F%E4%BB%A3%E6%95%B0-vector-algebra"><strong>3. 核心工具：向量代数 (Vector Algebra)</strong></h3>
+<p>现在我们来学习如何对向量进行运算。这些运算是图形学算法的基石。</p>
+<h4 id="%E5%9F%BA%E6%9C%AC%E8%BF%90%E7%AE%97"><strong>基本运算</strong></h4>
+<ul>
+<li><strong>标量乘法 (Scalar Multiplication):</strong>
                 一个向量 $\mathbf{v}$ 乘以一个标量（即一个普通数字）$k$，结果是一个新的向量 $k\mathbf{v}$。
                 <ul>
-                <li><strong>几何意义：</strong> 向量的长度被缩放了 $k$ 倍。如果 $k > 0$，方向不变；如果 $k < 0$，方向变为相反。</li>
-                <li><strong>代数表示：</strong> $k\mathbf{v} = k(v_x, v_y, v_z) = (kv_x, kv_y, kv_z)$。</li>
-                </ul>
-                </li>
-                <li><strong>向量加法与减法 (Vector Addition/Subtraction):</strong>
-                <ul>
-                <li><strong>几何意义：</strong> 遵循“平行四边形法则”或“头尾相接法则”。$\mathbf{a} + \mathbf{b}$ 的结果是从 $\mathbf{a}$ 的起点指向 $\mathbf{b}$ 的终点的向量。$\mathbf{a} - \mathbf{b}$ 等价于 $\mathbf{a} + (-\mathbf{b})$。</li>
-                <li><strong>代数表示：</strong> $\mathbf{a} \pm \mathbf{b} = (a_x \pm b_x, a_y \pm b_y, a_z \pm b_z)$。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="%E5%90%91%E9%87%8F%E7%9A%84%E6%A8%A1-magnitude--norm"><strong>向量的模 (Magnitude / Norm)</strong></h4>
-                <p>向量的模就是它的长度，通常用 $|\mathbf{v}|$ 表示。</p>
-                <ul>
-                <li><strong>计算：</strong> 根据勾股定理，$|\mathbf{v}| = \sqrt{v_x^2 + v_y^2 + v_z^2}$。</li>
-                </ul>
-                <h4 id="%E5%8D%95%E4%BD%8D%E5%90%91%E9%87%8F%E4%B8%8E%E5%BD%92%E4%B8%80%E5%8C%96-unit-vector--normalization"><strong>单位向量与归一化 (Unit Vector & Normalization)</strong></h4>
-                <ul>
-                <li><strong>单位向量：</strong> 长度为1的向量，也称为<strong>法向量</strong>（尽管法向量通常特指垂直于表面的单位向量）。它只表示纯粹的方向。通常用“帽子”符号表示，如 $\hat{\mathbf{v}}$。</li>
-                <li><strong>归一化：</strong> 将任意非零向量转换为单位向量的过程。</li>
-                <li><strong>计算：</strong> $\hat{\mathbf{v}} = \frac{\mathbf{v}}{|\mathbf{v}|}$。即将向量的每个分量都除以它的模。</li>
-                </ul>
-                <h4 id="%E7%82%B9%E7%A7%AF-dot-product"><strong>点积 (Dot Product)</strong></h4>
-                <p>点积是向量代数中极其重要的运算，它输入两个向量，输出一个<strong>标量</strong>。</p>
-                <ul>
-                <li><strong>代数定义：</strong> $\mathbf{u} \cdot \mathbf{v} = u_x v_x + u_y v_y + u_z v_z$</li>
-                <li><strong>几何定义：</strong> $\mathbf{u} \cdot \mathbf{v} = |\mathbf{u}| |\mathbf{v}| \cos(\theta)$，其中 $\theta$ 是两个向量之间的夹角。</li>
-                </ul>
-                <p>点积的几何意义是它最有用的地方。它可以告诉我们两个向量方向的相似程度：</p>
-                <ul>
-                <li><strong>应用1：计算夹角：</strong> $\cos(\theta) = \frac{\mathbf{u} \cdot \mathbf{v}}{|\mathbf{u}| |\mathbf{v}|}$。如果向量已归一化，则 $\cos(\theta) = \hat{\mathbf{u}} \cdot \hat{\mathbf{v}}$。</li>
-                <li><strong>应用2：投影 (Projection):</strong> 向量 $\mathbf{u}$ 在向量 $\mathbf{v}$ 方向上的投影长度为 $|\mathbf{u}| \cos(\theta)$，即 $\frac{\mathbf{u} \cdot \mathbf{v}}{|\mathbf{v}|}$。这在光照计算中至关重要，它决定了表面接收到的光照强度。</li>
-                <li><strong>应用3：判断方向关系：</strong>
-                <ul>
-                <li>$\mathbf{u} \cdot \mathbf{v} > 0 \implies \theta < 90^\circ$ (同向)</li>
-                <li>$\mathbf{u} \cdot \mathbf{v} = 0 \implies \theta = 90^\circ$ (正交/垂直)</li>
-                <li>$\mathbf{u} \cdot \mathbf{v} < 0 \implies \theta > 90^\circ$ (反向)</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>注意：</strong> 向量的模可以由点积导出：$|\mathbf{v}| = \sqrt{\mathbf{v} \cdot \mathbf{v}}$。</p>
-                <h4 id="%E5%8F%89%E7%A7%AF-cross-product"><strong>叉积 (Cross Product)</strong></h4>
-                <p>叉积是三维空间中特有的运算，它输入两个向量，输出一个<strong>向量</strong>。</p>
-                <ul>
-                <li><strong>几何定义：</strong> 结果向量 $\mathbf{w} = \mathbf{u} \times \mathbf{v}$ 具有以下特性：
+<li><strong>几何意义：</strong> 向量的长度被缩放了 $k$ 倍。如果 $k &gt; 0$，方向不变；如果 $k &lt; 0$，方向变为相反。</li>
+<li><strong>代数表示：</strong> $k\mathbf{v} = k(v_x, v_y, v_z) = (kv_x, kv_y, kv_z)$。</li>
+</ul>
+</li>
+<li><strong>向量加法与减法 (Vector Addition/Subtraction):</strong>
+<ul>
+<li><strong>几何意义：</strong> 遵循“平行四边形法则”或“头尾相接法则”。$\mathbf{a} + \mathbf{b}$ 的结果是从 $\mathbf{a}$ 的起点指向 $\mathbf{b}$ 的终点的向量。$\mathbf{a} - \mathbf{b}$ 等价于 $\mathbf{a} + (-\mathbf{b})$。</li>
+<li><strong>代数表示：</strong> $\mathbf{a} \pm \mathbf{b} = (a_x \pm b_x, a_y \pm b_y, a_z \pm b_z)$。</li>
+</ul>
+</li>
+</ul>
+<h4 id="%E5%90%91%E9%87%8F%E7%9A%84%E6%A8%A1-magnitude--norm"><strong>向量的模 (Magnitude / Norm)</strong></h4>
+<p>向量的模就是它的长度，通常用 $|\mathbf{v}|$ 表示。</p>
+<ul>
+<li><strong>计算：</strong> 根据勾股定理，$|\mathbf{v}| = \sqrt{v_x^2 + v_y^2 + v_z^2}$。</li>
+</ul>
+<h4 id="%E5%8D%95%E4%BD%8D%E5%90%91%E9%87%8F%E4%B8%8E%E5%BD%92%E4%B8%80%E5%8C%96-unit-vector--normalization"><strong>单位向量与归一化 (Unit Vector &amp; Normalization)</strong></h4>
+<ul>
+<li><strong>单位向量：</strong> 长度为1的向量，也称为<strong>法向量</strong>（尽管法向量通常特指垂直于表面的单位向量）。它只表示纯粹的方向。通常用“帽子”符号表示，如 $\hat{\mathbf{v}}$。</li>
+<li><strong>归一化：</strong> 将任意非零向量转换为单位向量的过程。</li>
+<li><strong>计算：</strong> $\hat{\mathbf{v}} = \frac{\mathbf{v}}{|\mathbf{v}|}$。即将向量的每个分量都除以它的模。</li>
+</ul>
+<h4 id="%E7%82%B9%E7%A7%AF-dot-product"><strong>点积 (Dot Product)</strong></h4>
+<p>点积是向量代数中极其重要的运算，它输入两个向量，输出一个<strong>标量</strong>。</p>
+<ul>
+<li><strong>代数定义：</strong> $\mathbf{u} \cdot \mathbf{v} = u_x v_x + u_y v_y + u_z v_z$</li>
+<li><strong>几何定义：</strong> $\mathbf{u} \cdot \mathbf{v} = |\mathbf{u}| |\mathbf{v}| \cos(\theta)$，其中 $\theta$ 是两个向量之间的夹角。</li>
+</ul>
+<p>点积的几何意义是它最有用的地方。它可以告诉我们两个向量方向的相似程度：</p>
+<ul>
+<li><strong>应用1：计算夹角：</strong> $\cos(\theta) = \frac{\mathbf{u} \cdot \mathbf{v}}{|\mathbf{u}| |\mathbf{v}|}$。如果向量已归一化，则 $\cos(\theta) = \hat{\mathbf{u}} \cdot \hat{\mathbf{v}}$。</li>
+<li><strong>应用2：投影 (Projection):</strong> 向量 $\mathbf{u}$ 在向量 $\mathbf{v}$ 方向上的投影长度为 $|\mathbf{u}| \cos(\theta)$，即 $\frac{\mathbf{u} \cdot \mathbf{v}}{|\mathbf{v}|}$。这在光照计算中至关重要，它决定了表面接收到的光照强度。</li>
+<li><strong>应用3：判断方向关系：</strong>
+<ul>
+<li>$\mathbf{u} \cdot \mathbf{v} &gt; 0 \implies \theta &lt; 90^\circ$ (同向)</li>
+<li>$\mathbf{u} \cdot \mathbf{v} = 0 \implies \theta = 90^\circ$ (正交/垂直)</li>
+<li>$\mathbf{u} \cdot \mathbf{v} &lt; 0 \implies \theta &gt; 90^\circ$ (反向)</li>
+</ul>
+</li>
+</ul>
+<p><strong>注意：</strong> 向量的模可以由点积导出：$|\mathbf{v}| = \sqrt{\mathbf{v} \cdot \mathbf{v}}$。</p>
+<h4 id="%E5%8F%89%E7%A7%AF-cross-product"><strong>叉积 (Cross Product)</strong></h4>
+<p>叉积是三维空间中特有的运算，它输入两个向量，输出一个<strong>向量</strong>。</p>
+<ul>
+<li><strong>几何定义：</strong> 结果向量 $\mathbf{w} = \mathbf{u} \times \mathbf{v}$ 具有以下特性：
                 <ol>
-                <li><strong>方向：</strong> $\mathbf{w}$ 同时垂直于 $\mathbf{u}$ 和 $\mathbf{v}$。其具体方向由<strong>右手定则</strong>确定（四指从 $\mathbf{u}$ 转向 $\mathbf{v}$，大拇指方向为 $\mathbf{w}$ 方向）。</li>
-                <li><strong>大小：</strong> $|\mathbf{w}| = |\mathbf{u}| |\mathbf{v}| \sin(\theta)$。这个值等于由 $\mathbf{u}$ 和 $\mathbf{v}$ 构成的平行四边形的面积。</li>
-                </ol>
-                </li>
-                <li><strong>代数定义：</strong>
+<li><strong>方向：</strong> $\mathbf{w}$ 同时垂直于 $\mathbf{u}$ 和 $\mathbf{v}$。其具体方向由<strong>右手定则</strong>确定（四指从 $\mathbf{u}$ 转向 $\mathbf{v}$，大拇指方向为 $\mathbf{w}$ 方向）。</li>
+<li><strong>大小：</strong> $|\mathbf{w}| = |\mathbf{u}| |\mathbf{v}| \sin(\theta)$。这个值等于由 $\mathbf{u}$ 和 $\mathbf{v}$ 构成的平行四边形的面积。</li>
+</ol>
+</li>
+<li><strong>代数定义：</strong>
                 $$\mathbf{u} \times \mathbf{v} = (u_y v_z - u_z v_y, u_z v_x - u_x v_z, u_x v_y - u_y v_x)$$</li>
-                <li><strong>重要性质：</strong> 叉积不满足交换律，而是反交换律：$\mathbf{u} \times \mathbf{v} = -(\mathbf{v} \times \mathbf{u})$。</li>
-                </ul>
-                <p><strong>应用：</strong></p>
-                <ul>
-                <li><strong>计算法线：</strong> 在3D建模中，一个三角形面片的法线方向（决定了哪面是正面）可以通过其两条边的叉积来计算。这是光照计算和可见性判断的基础。</li>
-                <li><strong>构建坐标系：</strong> 给定两个不平行的向量，可以通过叉积和点积构建一个完整的三维正交坐标系。</li>
-                </ul>
-                <h3 id="4-%E5%87%A0%E4%BD%95%E8%A1%A8%E8%BE%BE%E6%8F%8F%E8%BF%B0%E5%9F%BA%E6%9C%AC%E5%BD%A2%E7%8A%B6"><strong>4. 几何表达：描述基本形状</strong></h3>
-                <p>有了点和向量，我们就可以开始用数学语言来描述几何形状了。</p>
-                <h4 id="%E7%9B%B4%E7%BA%BF%E5%B0%84%E7%BA%BF%E5%92%8C%E7%BA%BF%E6%AE%B5%E7%9A%84%E5%8F%82%E6%95%B0%E6%96%B9%E7%A8%8B"><strong>直线、射线和线段的参数方程</strong></h4>
-                <p>在图形学中，描述一条直线最常用的是<strong>参数方程</strong>形式：
+<li><strong>重要性质：</strong> 叉积不满足交换律，而是反交换律：$\mathbf{u} \times \mathbf{v} = -(\mathbf{v} \times \mathbf{u})$。</li>
+</ul>
+<p><strong>应用：</strong></p>
+<ul>
+<li><strong>计算法线：</strong> 在3D建模中，一个三角形面片的法线方向（决定了哪面是正面）可以通过其两条边的叉积来计算。这是光照计算和可见性判断的基础。</li>
+<li><strong>构建坐标系：</strong> 给定两个不平行的向量，可以通过叉积和点积构建一个完整的三维正交坐标系。</li>
+</ul>
+<h3 id="4-%E5%87%A0%E4%BD%95%E8%A1%A8%E8%BE%BE%E6%8F%8F%E8%BF%B0%E5%9F%BA%E6%9C%AC%E5%BD%A2%E7%8A%B6"><strong>4. 几何表达：描述基本形状</strong></h3>
+<p>有了点和向量，我们就可以开始用数学语言来描述几何形状了。</p>
+<h4 id="%E7%9B%B4%E7%BA%BF%E5%B0%84%E7%BA%BF%E5%92%8C%E7%BA%BF%E6%AE%B5%E7%9A%84%E5%8F%82%E6%95%B0%E6%96%B9%E7%A8%8B"><strong>直线、射线和线段的参数方程</strong></h4>
+<p>在图形学中，描述一条直线最常用的是<strong>参数方程</strong>形式：
                 $$P(t) = P_0 + t\mathbf{d}$$</p>
-                <ul>
-                <li>$P_0$: 直线上任意一个已知点（可以看作是直线的起点）。</li>
-                <li>$\mathbf{d}$: 一个与直线平行的方向向量。</li>
-                <li>$t$: 一个标量参数。当 $t$ 取遍所有实数时，$P(t)$ 就描绘出了整条直线。</li>
-                </ul>
-                <p>通过限制参数 $t$ 的取值范围，我们可以得到其他几何体：</p>
-                <ul>
-                <li><strong>射线 (Ray):</strong> $t \ge 0$。表示从 $P_0$ 点出发，沿着 $\mathbf{d}$ 方向无限延伸。光线追踪算法就是基于射线的计算。</li>
-                <li><strong>线段 (Segment):</strong> $0 \le t \le 1$。表示连接 $P_0$ 和 $P_0+\mathbf{d}$ 两点之间的有限线段。</li>
-                </ul>
-                <p>如果已知线段的两个端点 $P_1$ 和 $P_2$，其参数方程也可以写成：
+<ul>
+<li>$P_0$: 直线上任意一个已知点（可以看作是直线的起点）。</li>
+<li>$\mathbf{d}$: 一个与直线平行的方向向量。</li>
+<li>$t$: 一个标量参数。当 $t$ 取遍所有实数时，$P(t)$ 就描绘出了整条直线。</li>
+</ul>
+<p>通过限制参数 $t$ 的取值范围，我们可以得到其他几何体：</p>
+<ul>
+<li><strong>射线 (Ray):</strong> $t \ge 0$。表示从 $P_0$ 点出发，沿着 $\mathbf{d}$ 方向无限延伸。光线追踪算法就是基于射线的计算。</li>
+<li><strong>线段 (Segment):</strong> $0 \le t \le 1$。表示连接 $P_0$ 和 $P_0+\mathbf{d}$ 两点之间的有限线段。</li>
+</ul>
+<p>如果已知线段的两个端点 $P_1$ 和 $P_2$，其参数方程也可以写成：
                 $P(t) = P_1 + t(P_2 - P_1)$ for $0 \le t \le 1$
                 展开后得到 $P(t) = (1-t)P_1 + tP_2$。这种形式非常重要，它引出了<strong>仿射组合</strong>的概念。</p>
-                <h4 id="%E4%BB%BF%E5%B0%84%E7%BB%84%E5%90%88%E4%B8%8E%E9%87%8D%E5%BF%83%E5%9D%90%E6%A0%87"><strong>仿射组合与重心坐标</strong></h4>
+<h4 id="%E4%BB%BF%E5%B0%84%E7%BB%84%E5%90%88%E4%B8%8E%E9%87%8D%E5%BF%83%E5%9D%90%E6%A0%87"><strong>仿射组合与重心坐标</strong></h4>
+<ul>
+<li><strong>仿射组合 (Affine Combination):</strong> 一系列点 $P_i$ 的仿射组合定义为 $P = \sum_{i} a_i P_i$，其中权重系数 $a_i$ 的和为1 ($\sum a_i = 1$)。
                 <ul>
-                <li><strong>仿射组合 (Affine Combination):</strong> 一系列点 $P_i$ 的仿射组合定义为 $P = \sum_{i} a_i P_i$，其中权重系数 $a_i$ 的和为1 ($\sum a_i = 1$)。
+<li>两个点的仿射组合 $(1-t)P_1 + tP_2$ 定义了穿过 $P_1$ 和 $P_2$ 的整条直线。</li>
+</ul>
+</li>
+<li><strong>凸组合 (Convex Combination):</strong> 如果在仿射组合的基础上，还要求所有权重 $a_i \ge 0$，那么这就是一个凸组合。
                 <ul>
-                <li>两个点的仿射组合 $(1-t)P_1 + tP_2$ 定义了穿过 $P_1$ 和 $P_2$ 的整条直线。</li>
-                </ul>
-                </li>
-                <li><strong>凸组合 (Convex Combination):</strong> 如果在仿射组合的基础上，还要求所有权重 $a_i \ge 0$，那么这就是一个凸组合。
-                <ul>
-                <li>两个点的凸组合定义了连接 $P_1$ 和 $P_2$ 的线段。</li>
-                </ul>
-                </li>
-                <li><strong>重心坐标 (Barycentric Coordinates):</strong> 这是一个极其重要的概念，是仿射组合在三角形上的应用。平面上的任意点 $P$ 都可以表示为三角形三个顶点 $P_1, P_2, P_3$ 的仿射组合：
+<li>两个点的凸组合定义了连接 $P_1$ 和 $P_2$ 的线段。</li>
+</ul>
+</li>
+<li><strong>重心坐标 (Barycentric Coordinates):</strong> 这是一个极其重要的概念，是仿射组合在三角形上的应用。平面上的任意点 $P$ 都可以表示为三角形三个顶点 $P_1, P_2, P_3$ 的仿射组合：
                 $P = \alpha P_1 + \beta P_2 + \gamma P_3$，其中 $\alpha + \beta + \gamma = 1$。
                 <ul>
-                <li>如果点 $P$ 在三角形内部（或边界上），那么这三个系数 $\alpha, \beta, \gamma$ 都是非负的（$0 \le \alpha, \beta, \gamma \le 1$）。</li>
-                <li><strong>应用：</strong> 重心坐标是实现<strong>插值</strong>的关键。例如，在渲染时，我们知道三角形三个顶点的颜色，就可以利用重心坐标来计算三角形内部任意一点像素的平滑过渡颜色。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="%E5%A4%9A%E8%BE%B9%E5%BD%A2-polygons"><strong>多边形 (Polygons)</strong></h4>
+<li>如果点 $P$ 在三角形内部（或边界上），那么这三个系数 $\alpha, \beta, \gamma$ 都是非负的（$0 \le \alpha, \beta, \gamma \le 1$）。</li>
+<li><strong>应用：</strong> 重心坐标是实现<strong>插值</strong>的关键。例如，在渲染时，我们知道三角形三个顶点的颜色，就可以利用重心坐标来计算三角形内部任意一点像素的平滑过渡颜色。</li>
+</ul>
+</li>
+</ul>
+<h4 id="%E5%A4%9A%E8%BE%B9%E5%BD%A2-polygons"><strong>多边形 (Polygons)</strong></h4>
+<ul>
+<li><strong>定义：</strong> 由一系列有序顶点连接而成的封闭图形。</li>
+<li><strong>凸多边形 (Convex Polygon):</strong> 多边形内部任意两点之间的连线，完全包含在多边形内部。</li>
+<li><strong>凹多边形 (Concave Polygon):</strong> 存在某两个内部点，其连线会穿出多边形。
                 <ul>
-                <li><strong>定义：</strong> 由一系列有序顶点连接而成的封闭图形。</li>
-                <li><strong>凸多边形 (Convex Polygon):</strong> 多边形内部任意两点之间的连线，完全包含在多边形内部。</li>
-                <li><strong>凹多边形 (Concave Polygon):</strong> 存在某两个内部点，其连线会穿出多边形。
-                <ul>
-                <li>在图形学中，我们通常更喜欢处理凸多边形，尤其是三角形，因为它们的性质简单，易于计算。复杂的凹多边形往往会被<strong>三角化</strong>（分割成多个三角形）来处理。</li>
-                </ul>
-                </li>
-                </ul>
-                <h3 id="5-%E5%8F%98%E6%8D%A2%E5%B7%A5%E5%85%B7%E7%9F%A9%E9%98%B5-matrix"><strong>5. 变换工具：矩阵 (Matrix)</strong></h3>
-                <p>到目前为止，我们已经学会了如何描述静态的物体。但要让世界动起来，我们需要对物体进行<strong>变换 (Transformation)</strong>，如平移、旋转、缩放。而执行这些变换最强大、最统一的工具，就是<strong>矩阵</strong>。</p>
-                <ul>
-                <li>
-                <p><strong>定义：</strong> 矩阵是一个m行n列的数字矩形阵列。</p>
-                </li>
-                <li>
-                <p><strong>基本类型：</strong></p>
-                <ul>
-                <li><strong>方阵 (Square Matrix):</strong> 行数和列数相等。</li>
-                <li><strong>单位矩阵 (Identity Matrix):</strong> $I$，一个主对角线元素为1，其余元素为0的方阵。它在矩阵乘法中的作用类似于数字1，任何矩阵乘以单位矩阵都等于其自身。</li>
-                <li><strong>转置矩阵 (Transpose Matrix):</strong> $A^T$，将原矩阵 $A$ 的行和列互换得到。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>矩阵运算：</strong></p>
-                <ul>
-                <li><strong>标量乘法、加法：</strong> 对矩阵的每个元素进行相应运算。</li>
-                <li><strong>矩阵乘法：</strong> 这是核心运算。两个矩阵 $A(m \times n)$ 和 $B(n \times p)$ 相乘得到矩阵 $C(m \times p)$。$C$ 中第 $i$ 行第 $j$ 列的元素 $C_{ij}$ 由 $A$ 的第 $i$ 行和 $B$ 的第 $j$ 列对应元素相乘后求和得到。
+<li>在图形学中，我们通常更喜欢处理凸多边形，尤其是三角形，因为它们的性质简单，易于计算。复杂的凹多边形往往会被<strong>三角化</strong>（分割成多个三角形）来处理。</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-%E5%8F%98%E6%8D%A2%E5%B7%A5%E5%85%B7%E7%9F%A9%E9%98%B5-matrix"><strong>5. 变换工具：矩阵 (Matrix)</strong></h3>
+<p>到目前为止，我们已经学会了如何描述静态的物体。但要让世界动起来，我们需要对物体进行<strong>变换 (Transformation)</strong>，如平移、旋转、缩放。而执行这些变换最强大、最统一的工具，就是<strong>矩阵</strong>。</p>
+<ul>
+<li>
+<p><strong>定义：</strong> 矩阵是一个m行n列的数字矩形阵列。</p>
+</li>
+<li>
+<p><strong>基本类型：</strong></p>
+<ul>
+<li><strong>方阵 (Square Matrix):</strong> 行数和列数相等。</li>
+<li><strong>单位矩阵 (Identity Matrix):</strong> $I$，一个主对角线元素为1，其余元素为0的方阵。它在矩阵乘法中的作用类似于数字1，任何矩阵乘以单位矩阵都等于其自身。</li>
+<li><strong>转置矩阵 (Transpose Matrix):</strong> $A^T$，将原矩阵 $A$ 的行和列互换得到。</li>
+</ul>
+</li>
+<li>
+<p><strong>矩阵运算：</strong></p>
+<ul>
+<li><strong>标量乘法、加法：</strong> 对矩阵的每个元素进行相应运算。</li>
+<li><strong>矩阵乘法：</strong> 这是核心运算。两个矩阵 $A(m \times n)$ 和 $B(n \times p)$ 相乘得到矩阵 $C(m \times p)$。$C$ 中第 $i$ 行第 $j$ 列的元素 $C_{ij}$ 由 $A$ 的第 $i$ 行和 $B$ 的第 $j$ 列对应元素相乘后求和得到。
                 $$C_{ij} = \sum_{k=1}^{n} A_{ik} B_{kj}$$
                 <strong>关键特性：矩阵乘法不满足交换律！</strong> 即在大多数情况下 $AB \neq BA$。</li>
-                <li><strong>向量-矩阵乘法：</strong> 将向量视为一个 $n \times 1$（列向量）或 $1 \times n$（行向量）的矩阵，然后按矩阵乘法规则进行计算。这是将变换应用于点或向量的标准方法。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>逆矩阵 (Inverse Matrix):</strong></p>
-                <ul>
-                <li>对于一个方阵 $A$，如果存在另一个方阵 $A^{-1}$，使得 $A A^{-1} = A^{-1} A = I$，则称 $A^{-1}$ 是 $A$ 的逆矩阵。</li>
-                <li><strong>意义：</strong> 逆矩阵可以“撤销”或“反转”原矩阵所代表的变换。例如，如果矩阵 $A$ 代表向前移动5米，那么 $A^{-1}$ 就代表向后移动5米。</li>
-                </ul>
-                </li>
-                </ul>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li><strong>向量-矩阵乘法：</strong> 将向量视为一个 $n \times 1$（列向量）或 $1 \times n$（行向量）的矩阵，然后按矩阵乘法规则进行计算。这是将变换应用于点或向量的标准方法。</li>
+</ul>
+</li>
+<li>
+<p><strong>逆矩阵 (Inverse Matrix):</strong></p>
+<ul>
+<li>对于一个方阵 $A$，如果存在另一个方阵 $A^{-1}$，使得 $A A^{-1} = A^{-1} A = I$，则称 $A^{-1}$ 是 $A$ 的逆矩阵。</li>
+<li><strong>意义：</strong> 逆矩阵可以“撤销”或“反转”原矩阵所代表的变换。例如，如果矩阵 $A$ 代表向前移动5米，那么 $A^{-1}$ 就代表向后移动5米。</li>
+</ul>
+</li>
+</ul>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

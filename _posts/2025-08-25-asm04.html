@@ -1,13 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>x86汇编04:汇编器</title>
-    
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    
-    <script>
+<meta charset="utf-8"/>
+<title>x86汇编04:汇编器</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -18,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -32,99 +30,99 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="x86%E6%B1%87%E7%BC%9604%E6%B1%87%E7%BC%96%E5%99%A8">x86汇编04:汇编器</h1>
-                <h3 id="%E5%BC%95%E8%A8%80%E8%93%9D%E5%9B%BE%E7%9A%84%E8%AF%AD%E8%A8%80"><strong>引言：蓝图的语言</strong></h3>
-                <p>想象一下，你写的 <code>.asm</code> 文件并不是直接给CPU看的，CPU只认识0和1组成的机器码。你的源文件是写给<strong>汇编器</strong>（如MASM, NASM）看的。汇编器是一个程序，它的工作就是阅读你的源文件，并根据你写的“指令”，最终生成一个包含机器码的可执行文件（<code>.exe</code> 或 <code>.o</code>）。</p>
-                <p>因此，源程序的格式和语法，本质上就是我们与汇编器之间的一份<strong>编程契约</strong>。我们必须遵循这套契约，汇编器才能正确理解我们的意图。</p>
-                <h3 id="1-%E6%9E%84%E6%88%90%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%E6%BA%90%E7%A8%8B%E5%BA%8F%E7%9A%84%E4%B8%89%E7%B1%BB%E8%AF%AD%E5%8F%A5"><strong>1 构成汇编语言源程序的三类语句</strong></h3>
-                <p>打开任何一份汇编源文件，你会发现里面的语句可以被清晰地分为三类。理解这个分类，是理解整个汇编程序结构的基础。</p>
-                <ol>
-                <li>
-                <p><strong>指令 (Instructions)</strong></p>
-                <ul>
-                <li><strong>定义</strong>：这才是真正会被翻译成机器码、让CPU在运行时执行的语句。它们是程序的“动作”，是“血肉”。</li>
-                <li><strong>例子</strong>：<code>MOV AX, 0</code>, <code>ADD BX, CX</code>, <code>JMP my_label</code></li>
-                <li><strong>设计视角</strong>：指令是CPU体系结构（ISA）的一部分，是硬件能力的直接体现。我们选择哪条指令，就是选择让CPU执行哪个原子操作。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>伪指令 (Pseudo-instructions / Directives)</strong></p>
-                <ul>
-                <li><strong>定义</strong>：这些语句<strong>不会</strong>被翻译成机器码。它们是写给<strong>汇编器</strong>的命令，用于在<strong>汇编期间</strong>指导汇编器如何组织程序、定义数据、分配空间等。它们是程序的“骨架”和“元数据”。</li>
-                <li><strong>例子</strong>：<code>SEGMENT</code>, <code>ENDS</code>, <code>DB</code>, <code>DW</code>, <code>EQU</code>, <code>ASSUME</code>, <code>END</code></li>
-                <li><strong>设计视角</strong>：伪指令是<strong>汇编器</strong>这个软件工具提供的功能。不同的汇编器可能提供不同的伪指令。它们的存在，是为了将一维的、混乱的机器码，组织成有结构、有意义的程序。没有伪指令，我们就只能写出一个巨大的、无法维护的二进制数据块。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>宏指令 (Macros)</strong></p>
-                <ul>
-                <li><strong>定义</strong>：这是由程序员自己定义的、可以重复使用的代码模板。汇编器在处理到宏调用时，会将其<strong>展开</strong>为预先定义好的一系列指令或伪指令。它是一种文本替换机制，是汇编语言中的一种重要抽象手段。</li>
-                <li><strong>例子</strong>：我们可以定义一个 <code>print</code> 宏，来简化调用操作系统打印字符串的过程。</li>
-                <li><strong>设计视角</strong>：宏是为了解决代码复用和提高可读性。它是软件工程思想在底层语言中的体现，允许我们创造自己的“高级”指令，尽管其本质只是简单的代码展开。</li>
-                </ul>
-                </li>
-                </ol>
-                <h3 id="2-%E6%B1%87%E7%BC%96%E8%AF%AD%E5%8F%A5%E7%9A%84%E8%AF%AD%E6%B3%95%E6%88%90%E5%88%86"><strong>2 汇编语句的语法成分</strong></h3>
-                <p>我们先来看一个典型的汇编语句，它包含了所有可能的组成部分：
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="x86%E6%B1%87%E7%BC%9604%E6%B1%87%E7%BC%96%E5%99%A8">x86汇编04:汇编器</h1>
+<h3 id="%E5%BC%95%E8%A8%80%E8%93%9D%E5%9B%BE%E7%9A%84%E8%AF%AD%E8%A8%80"><strong>引言：蓝图的语言</strong></h3>
+<p>想象一下，你写的 <code>.asm</code> 文件并不是直接给CPU看的，CPU只认识0和1组成的机器码。你的源文件是写给<strong>汇编器</strong>（如MASM, NASM）看的。汇编器是一个程序，它的工作就是阅读你的源文件，并根据你写的“指令”，最终生成一个包含机器码的可执行文件（<code>.exe</code> 或 <code>.o</code>）。</p>
+<p>因此，源程序的格式和语法，本质上就是我们与汇编器之间的一份<strong>编程契约</strong>。我们必须遵循这套契约，汇编器才能正确理解我们的意图。</p>
+<h3 id="1-%E6%9E%84%E6%88%90%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%E6%BA%90%E7%A8%8B%E5%BA%8F%E7%9A%84%E4%B8%89%E7%B1%BB%E8%AF%AD%E5%8F%A5"><strong>1 构成汇编语言源程序的三类语句</strong></h3>
+<p>打开任何一份汇编源文件，你会发现里面的语句可以被清晰地分为三类。理解这个分类，是理解整个汇编程序结构的基础。</p>
+<ol>
+<li>
+<p><strong>指令 (Instructions)</strong></p>
+<ul>
+<li><strong>定义</strong>：这才是真正会被翻译成机器码、让CPU在运行时执行的语句。它们是程序的“动作”，是“血肉”。</li>
+<li><strong>例子</strong>：<code>MOV AX, 0</code>, <code>ADD BX, CX</code>, <code>JMP my_label</code></li>
+<li><strong>设计视角</strong>：指令是CPU体系结构（ISA）的一部分，是硬件能力的直接体现。我们选择哪条指令，就是选择让CPU执行哪个原子操作。</li>
+</ul>
+</li>
+<li>
+<p><strong>伪指令 (Pseudo-instructions / Directives)</strong></p>
+<ul>
+<li><strong>定义</strong>：这些语句<strong>不会</strong>被翻译成机器码。它们是写给<strong>汇编器</strong>的命令，用于在<strong>汇编期间</strong>指导汇编器如何组织程序、定义数据、分配空间等。它们是程序的“骨架”和“元数据”。</li>
+<li><strong>例子</strong>：<code>SEGMENT</code>, <code>ENDS</code>, <code>DB</code>, <code>DW</code>, <code>EQU</code>, <code>ASSUME</code>, <code>END</code></li>
+<li><strong>设计视角</strong>：伪指令是<strong>汇编器</strong>这个软件工具提供的功能。不同的汇编器可能提供不同的伪指令。它们的存在，是为了将一维的、混乱的机器码，组织成有结构、有意义的程序。没有伪指令，我们就只能写出一个巨大的、无法维护的二进制数据块。</li>
+</ul>
+</li>
+<li>
+<p><strong>宏指令 (Macros)</strong></p>
+<ul>
+<li><strong>定义</strong>：这是由程序员自己定义的、可以重复使用的代码模板。汇编器在处理到宏调用时，会将其<strong>展开</strong>为预先定义好的一系列指令或伪指令。它是一种文本替换机制，是汇编语言中的一种重要抽象手段。</li>
+<li><strong>例子</strong>：我们可以定义一个 <code>print</code> 宏，来简化调用操作系统打印字符串的过程。</li>
+<li><strong>设计视角</strong>：宏是为了解决代码复用和提高可读性。它是软件工程思想在底层语言中的体现，允许我们创造自己的“高级”指令，尽管其本质只是简单的代码展开。</li>
+</ul>
+</li>
+</ol>
+<h3 id="2-%E6%B1%87%E7%BC%96%E8%AF%AD%E5%8F%A5%E7%9A%84%E8%AF%AD%E6%B3%95%E6%88%90%E5%88%86"><strong>2 汇编语句的语法成分</strong></h3>
+<p>我们先来看一个典型的汇编语句，它包含了所有可能的组成部分：
                 <code>[名称/标号] 操作码助记符 [操作数, ...] [;注释]</code></p>
-                <ul>
-                <li><strong><code>my_loop: MOV CX, 10 ; Initialize loop counter</code></strong>
-                <ul>
-                <li><strong>名称/标号 (Name/Label)</strong>: <code>my_loop:</code>。它是一个符号，代表了这条指令在内存中的地址。是实现跳转和循环的基础。</li>
-                <li><strong>操作码助记符 (Mnemonic)</strong>: <code>MOV</code>。这是指令或伪指令的核心，告诉汇编器要做什么。</li>
-                <li><strong>操作数 (Operands)</strong>: <code>CX, 10</code>。这是操作的对象。可以是寄存器、内存地址、立即数等。</li>
-                <li><strong>注释 (Comment)</strong>: <code>; Initialize loop counter</code>。以分号开始，会被汇编器完全忽略。<strong>注释是写给未来的你和其他程序员看的，是程序中最重要的部分之一。</strong></li>
-                </ul>
-                </li>
-                </ul>
-                <h3 id="3-%E6%AE%B5%E7%9A%84%E5%AE%9A%E4%B9%89%E5%81%87%E8%AE%BE%E4%B8%8E%E5%BC%95%E7%94%A8%E6%9E%84%E5%BB%BA%E7%A8%8B%E5%BA%8F%E7%9A%84%E9%80%BB%E8%BE%91%E7%A9%BA%E9%97%B4"><strong>3 段的定义、假设与引用：构建程序的逻辑空间</strong></h3>
-                <p>我们在第三讲中已经知道，x86实模式的内存是分段的。那么在源程序中，我们如何告诉汇编器，哪些代码和数据应该放在哪个段里呢？答案就是使用 <code>SEGMENT</code> 和 <code>ENDS</code> 伪指令。</p>
-                <h4 id="31-%E6%AE%B5%E7%9A%84%E5%AE%9A%E4%B9%89"><strong>3.1. 段的定义</strong></h4>
-                <ul>
-                <li>
-                <p><strong>一般格式 (Full Format)</strong> :</p>
-                <pre class="hljs"><code><div>segment_name SEGMENT [align_type] [combine_type] ['class_name']
+<ul>
+<li><strong><code>my_loop: MOV CX, 10 ; Initialize loop counter</code></strong>
+<ul>
+<li><strong>名称/标号 (Name/Label)</strong>: <code>my_loop:</code>。它是一个符号，代表了这条指令在内存中的地址。是实现跳转和循环的基础。</li>
+<li><strong>操作码助记符 (Mnemonic)</strong>: <code>MOV</code>。这是指令或伪指令的核心，告诉汇编器要做什么。</li>
+<li><strong>操作数 (Operands)</strong>: <code>CX, 10</code>。这是操作的对象。可以是寄存器、内存地址、立即数等。</li>
+<li><strong>注释 (Comment)</strong>: <code>; Initialize loop counter</code>。以分号开始，会被汇编器完全忽略。<strong>注释是写给未来的你和其他程序员看的，是程序中最重要的部分之一。</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="3-%E6%AE%B5%E7%9A%84%E5%AE%9A%E4%B9%89%E5%81%87%E8%AE%BE%E4%B8%8E%E5%BC%95%E7%94%A8%E6%9E%84%E5%BB%BA%E7%A8%8B%E5%BA%8F%E7%9A%84%E9%80%BB%E8%BE%91%E7%A9%BA%E9%97%B4"><strong>3 段的定义、假设与引用：构建程序的逻辑空间</strong></h3>
+<p>我们在第三讲中已经知道，x86实模式的内存是分段的。那么在源程序中，我们如何告诉汇编器，哪些代码和数据应该放在哪个段里呢？答案就是使用 <code>SEGMENT</code> 和 <code>ENDS</code> 伪指令。</p>
+<h4 id="31-%E6%AE%B5%E7%9A%84%E5%AE%9A%E4%B9%89"><strong>3.1. 段的定义</strong></h4>
+<ul>
+<li>
+<p><strong>一般格式 (Full Format)</strong> :</p>
+<pre class="hljs"><code><div>segment_name SEGMENT [align_type] [combine_type] ['class_name']
                     ...
                     ; 汇编代码和数据
                     ...
                 segment_name ENDS
                 </div></code></pre>
+<ul>
+<li><code>segment_name</code>：你给这个段起的名字，如 <code>CSEG</code>, <code>DSEG</code>。</li>
+<li><code>align_type</code> (对齐类型): 告诉汇编器该段的起始地址必须是某个值的倍数。如 <code>PARA</code> (16字节对齐), <code>PAGE</code> (256字节对齐)。
                 <ul>
-                <li><code>segment_name</code>：你给这个段起的名字，如 <code>CSEG</code>, <code>DSEG</code>。</li>
-                <li><code>align_type</code> (对齐类型): 告诉汇编器该段的起始地址必须是某个值的倍数。如 <code>PARA</code> (16字节对齐), <code>PAGE</code> (256字节对齐)。
-                <ul>
-                <li><strong>设计考量</strong>：正确的内存对齐可以提升性能。因为CPU在访问未对齐的数据时，可能需要进行两次内存读取操作。</li>
-                </ul>
-                </li>
-                <li><code>combine_type</code> (组合类型): 当链接器（Linker）将多个目标文件（<code>.obj</code>）合并时，此选项决定如何处理同名的段。如 <code>PUBLIC</code> (拼接), <code>STACK</code> (创建堆栈段)。</li>
-                <li><code>'class_name'</code> (类别名): 告诉链接器将所有同类别的段放在内存中相邻的位置。如 <code>'CODE'</code>, <code>'DATA'</code>。这有助于形成最终可执行文件的内存布局。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>简化格式 (Simplified Format)</strong>:
+<li><strong>设计考量</strong>：正确的内存对齐可以提升性能。因为CPU在访问未对齐的数据时，可能需要进行两次内存读取操作。</li>
+</ul>
+</li>
+<li><code>combine_type</code> (组合类型): 当链接器（Linker）将多个目标文件（<code>.obj</code>）合并时，此选项决定如何处理同名的段。如 <code>PUBLIC</code> (拼接), <code>STACK</code> (创建堆栈段)。</li>
+<li><code>'class_name'</code> (类别名): 告诉链接器将所有同类别的段放在内存中相邻的位置。如 <code>'CODE'</code>, <code>'DATA'</code>。这有助于形成最终可执行文件的内存布局。</li>
+</ul>
+</li>
+<li>
+<p><strong>简化格式 (Simplified Format)</strong>:
                 为了简化编程，现代汇编器（如MASM）提供了更高级的伪指令。</p>
-                <pre class="hljs"><code><div>.MODEL SMALL      ; 定义内存模型
+<pre class="hljs"><code><div>.MODEL SMALL      ; 定义内存模型
                 .STACK 100h       ; 定义堆栈段大小
                 .DATA             ; 开始数据段
                     myVar DB 'Hello'
@@ -132,26 +130,26 @@
                 start:
                     ...
                 </div></code></pre>
-                <ul>
-                <li><strong>设计视角</strong>：这是一种更高层次的抽象。程序员不再需要关心对齐、组合等细节，而是直接声明“这是代码”或“这是数据”，由汇编器根据 <code>.MODEL</code> 的设定自动处理。这是从“造轮子”到“用轮子”的进步。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="32-%E6%AE%B5%E7%9A%84%E5%81%87%E8%AE%BE-assume"><strong>3.2. 段的假设 (<code>ASSUME</code>)</strong></h4>
-                <p><code>SEGMENT</code> 伪指令仅仅是定义了一块“领土”，但CPU的段寄存器（CS, DS, SS, ES）并不知道这些领土的存在。<code>ASSUME</code> 伪指令就是用来建立这种联系的。</p>
-                <ul>
-                <li><strong>语法</strong>: <code>ASSUME segment_register:segment_name, ...</code></li>
-                <li><strong>例子</strong>: <code>ASSUME CS:CODE_SEG, DS:DATA_SEG</code></li>
-                </ul>
-                <p><strong>这可能是汇编初学者最容易误解的伪指令！</strong>
-                <code>ASSUME</code> <strong>不产生任何机器码</strong>。它没有加载任何段寄存器。它只是一个<strong>郑重承诺</strong>，是程序员对汇编器说：“<strong>请你相信我，在程序运行时，CS寄存器一定会指向 <code>CODE_SEG</code> 段，DS寄存器一定会指向 <code>DATA_SEG</code> 段。</strong>”</p>
-                <ul>
-                <li><strong>为什么需要这个承诺？</strong>
+<ul>
+<li><strong>设计视角</strong>：这是一种更高层次的抽象。程序员不再需要关心对齐、组合等细节，而是直接声明“这是代码”或“这是数据”，由汇编器根据 <code>.MODEL</code> 的设定自动处理。这是从“造轮子”到“用轮子”的进步。</li>
+</ul>
+</li>
+</ul>
+<h4 id="32-%E6%AE%B5%E7%9A%84%E5%81%87%E8%AE%BE-assume"><strong>3.2. 段的假设 (<code>ASSUME</code>)</strong></h4>
+<p><code>SEGMENT</code> 伪指令仅仅是定义了一块“领土”，但CPU的段寄存器（CS, DS, SS, ES）并不知道这些领土的存在。<code>ASSUME</code> 伪指令就是用来建立这种联系的。</p>
+<ul>
+<li><strong>语法</strong>: <code>ASSUME segment_register:segment_name, ...</code></li>
+<li><strong>例子</strong>: <code>ASSUME CS:CODE_SEG, DS:DATA_SEG</code></li>
+</ul>
+<p><strong>这可能是汇编初学者最容易误解的伪指令！</strong>
+<code>ASSUME</code> <strong>不产生任何机器码</strong>。它没有加载任何段寄存器。它只是一个<strong>郑重承诺</strong>，是程序员对汇编器说：“<strong>请你相信我，在程序运行时，CS寄存器一定会指向 <code>CODE_SEG</code> 段，DS寄存器一定会指向 <code>DATA_SEG</code> 段。</strong>”</p>
+<ul>
+<li><strong>为什么需要这个承诺？</strong>
                 当你写 <code>MOV AX, myVar</code> 时，<code>myVar</code> 只是一个偏移地址。汇编器需要知道 <code>myVar</code> 属于哪个段，才能进行语法检查，并确保可以正确寻址。有了 <code>ASSUME DS:DATA_SEG</code> 的承诺，汇编器就会认为 <code>myVar</code> 是通过 <code>DS</code> 寻址的，于是它愉快地通过了编译。</li>
-                </ul>
-                <h4 id="33-%E6%AE%B5%E7%9A%84%E5%BC%95%E7%94%A8"><strong>3.3. 段的引用</strong></h4>
-                <p><code>ASSUME</code> 只是一个承诺，我们必须在代码中<strong>兑现</strong>这个承诺。这需要真正的指令来完成。</p>
-                <pre class="hljs"><code><div>.DATA
+</ul>
+<h4 id="33-%E6%AE%B5%E7%9A%84%E5%BC%95%E7%94%A8"><strong>3.3. 段的引用</strong></h4>
+<p><code>ASSUME</code> 只是一个承诺，我们必须在代码中<strong>兑现</strong>这个承诺。这需要真正的指令来完成。</p>
+<pre class="hljs"><code><div>.DATA
                     DATA_SEG SEGMENT
                         ...
                     DATA_SEG ENDS
@@ -170,133 +168,133 @@
                         ...
                     CODE_SEG ENDS
                 </div></code></pre>
-                <h3 id="4-%E7%A8%8B%E5%BA%8F%E7%9A%84%E7%BB%93%E6%9D%9F"><strong>4 程序的结束</strong></h3>
-                <p>程序的结束有两个层面的含义：</p>
-                <ol>
-                <li>
-                <p><strong>源程序的结束 (Assembler's perspective)</strong></p>
-                <ul>
-                <li>使用 <code>END</code> 伪指令。它告诉汇编器：“源文件到此结束，后面的内容都不要看了。”</li>
-                <li>更重要的是，<code>END</code> 后面可以跟一个标号，这个标号指定了程序的<strong>入口点（Entry Point）</strong>。</li>
-                <li><code>END start</code> 告诉链接器，当操作系统加载这个程序后，应该把 <code>CS:IP</code> 设置到 <code>start</code> 标号所在的位置开始执行。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>程序的终止 (OS's perspective)</strong></p>
-                <ul>
-                <li>当程序运行结束，需要<strong>返回操作系统</strong>时，必须执行特定的代码。</li>
-                <li>在DOS环境下，最标准的方式是调用 <code>INT 21h</code> 的 <code>4Ch</code> 号功能。</li>
-                </ul>
-                <pre class="hljs"><code><div>MOV AX, 4C00h   ; AH=4Ch (功能号), AL=00h (返回码)
+<h3 id="4-%E7%A8%8B%E5%BA%8F%E7%9A%84%E7%BB%93%E6%9D%9F"><strong>4 程序的结束</strong></h3>
+<p>程序的结束有两个层面的含义：</p>
+<ol>
+<li>
+<p><strong>源程序的结束 (Assembler's perspective)</strong></p>
+<ul>
+<li>使用 <code>END</code> 伪指令。它告诉汇编器：“源文件到此结束，后面的内容都不要看了。”</li>
+<li>更重要的是，<code>END</code> 后面可以跟一个标号，这个标号指定了程序的<strong>入口点（Entry Point）</strong>。</li>
+<li><code>END start</code> 告诉链接器，当操作系统加载这个程序后，应该把 <code>CS:IP</code> 设置到 <code>start</code> 标号所在的位置开始执行。</li>
+</ul>
+</li>
+<li>
+<p><strong>程序的终止 (OS's perspective)</strong></p>
+<ul>
+<li>当程序运行结束，需要<strong>返回操作系统</strong>时，必须执行特定的代码。</li>
+<li>在DOS环境下，最标准的方式是调用 <code>INT 21h</code> 的 <code>4Ch</code> 号功能。</li>
+</ul>
+<pre class="hljs"><code><div>MOV AX, 4C00h   ; AH=4Ch (功能号), AL=00h (返回码)
                 INT 21h         ; 调用DOS中断，终止程序
                 </div></code></pre>
-                <ul>
-                <li><strong>设计视角</strong>：这是程序与操作系统之间的一种交互。程序不能擅自“消失”，它需要通过一个规范的接口（系统调用）来通知操作系统：“我的任务完成了，请回收我占用的资源。”</li>
-                </ul>
-                </li>
-                </ol>
-                <h3 id="5-%E6%B7%B1%E5%85%A5%E6%B1%87%E7%BC%96%E8%AF%AD%E6%B3%95%E6%88%90%E5%88%86"><strong>5 深入汇编语法成分</strong></h3>
-                <p>我们现在来详细拆解构成操作数的各种元素。</p>
-                <h4 id="51-%E5%B8%B8%E6%95%B0%E4%B8%8E%E5%B8%B8%E6%95%B0%E8%A1%A8%E8%BE%BE%E5%BC%8F"><strong>5.1. 常数与常数表达式</strong></h4>
-                <ul>
-                <li>
-                <p><strong>常数 (Constants)</strong>: 写在代码里的固定值。汇编器支持多种进制：</p>
-                <ul>
-                <li><code>123</code> 或 <code>123d</code> (十进制)</li>
-                <li><code>0FFh</code> 或 <code>0FFH</code> (十六进制，必须以数字开头)</li>
-                <li><code>1011b</code> 或 <code>1011B</code> (二进制)</li>
-                <li><code>'A'</code> 或 <code>"Hello"</code> (字符或字符串)</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>常数表达式 (Constant Expressions)</strong>:
+<ul>
+<li><strong>设计视角</strong>：这是程序与操作系统之间的一种交互。程序不能擅自“消失”，它需要通过一个规范的接口（系统调用）来通知操作系统：“我的任务完成了，请回收我占用的资源。”</li>
+</ul>
+</li>
+</ol>
+<h3 id="5-%E6%B7%B1%E5%85%A5%E6%B1%87%E7%BC%96%E8%AF%AD%E6%B3%95%E6%88%90%E5%88%86"><strong>5 深入汇编语法成分</strong></h3>
+<p>我们现在来详细拆解构成操作数的各种元素。</p>
+<h4 id="51-%E5%B8%B8%E6%95%B0%E4%B8%8E%E5%B8%B8%E6%95%B0%E8%A1%A8%E8%BE%BE%E5%BC%8F"><strong>5.1. 常数与常数表达式</strong></h4>
+<ul>
+<li>
+<p><strong>常数 (Constants)</strong>: 写在代码里的固定值。汇编器支持多种进制：</p>
+<ul>
+<li><code>123</code> 或 <code>123d</code> (十进制)</li>
+<li><code>0FFh</code> 或 <code>0FFH</code> (十六进制，必须以数字开头)</li>
+<li><code>1011b</code> 或 <code>1011B</code> (二进制)</li>
+<li><code>'A'</code> 或 <code>"Hello"</code> (字符或字符串)</li>
+</ul>
+</li>
+<li>
+<p><strong>常数表达式 (Constant Expressions)</strong>:
                 由常数和运算符（<code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>）组成的表达式。重点是：这些表达式在<strong>汇编期间</strong>由汇编器计算出结果，最终只有一个常数值被写入机器码。</p>
-                <ul>
-                <li><code>MOV AX, 10 * 20</code> 会被汇编成 <code>MOV AX, 200</code>。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>符号常数 (Symbolic Constants)</strong>:
+<ul>
+<li><code>MOV AX, 10 * 20</code> 会被汇编成 <code>MOV AX, 200</code>。</li>
+</ul>
+</li>
+<li>
+<p><strong>符号常数 (Symbolic Constants)</strong>:
                 使用 <code>EQU</code> (Equate) 伪指令给一个常数或表达式起一个有意义的名字。</p>
-                <ul>
-                <li><code>BUFFER_SIZE EQU 1024</code></li>
-                <li><code>MOV CX, BUFFER_SIZE</code></li>
-                <li><strong>设计价值</strong>：
+<ul>
+<li><code>BUFFER_SIZE EQU 1024</code></li>
+<li><code>MOV CX, BUFFER_SIZE</code></li>
+<li><strong>设计价值</strong>：
                 <ol>
-                <li><strong>可读性</strong>：<code>BUFFER_SIZE</code> 比 <code>1024</code> 更容易理解。</li>
-                <li><strong>可维护性</strong>：如果需要修改缓冲区大小，只需改动 <code>EQU</code> 定义处，所有使用该符号的地方都会自动更新。这是最基本的软件工程实践。</li>
-                </ol>
-                </li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="52-%E5%8F%98%E9%87%8F%E4%B8%8E%E6%A0%87%E5%8F%B7%E7%9A%84%E5%AE%9A%E4%B9%89%E5%8F%8A%E5%BC%95%E7%94%A8"><strong>5.2. 变量与标号的定义及引用</strong></h4>
-                <ul>
-                <li>
-                <p><strong>变量名与标号名 (Names)</strong>: 遵循一定的命名规则（如字母、数字、下划线等组成，不能是保留字）。</p>
-                </li>
-                <li>
-                <p><strong>变量的定义 (Variable Definition)</strong>:
+<li><strong>可读性</strong>：<code>BUFFER_SIZE</code> 比 <code>1024</code> 更容易理解。</li>
+<li><strong>可维护性</strong>：如果需要修改缓冲区大小，只需改动 <code>EQU</code> 定义处，所有使用该符号的地方都会自动更新。这是最基本的软件工程实践。</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="52-%E5%8F%98%E9%87%8F%E4%B8%8E%E6%A0%87%E5%8F%B7%E7%9A%84%E5%AE%9A%E4%B9%89%E5%8F%8A%E5%BC%95%E7%94%A8"><strong>5.2. 变量与标号的定义及引用</strong></h4>
+<ul>
+<li>
+<p><strong>变量名与标号名 (Names)</strong>: 遵循一定的命名规则（如字母、数字、下划线等组成，不能是保留字）。</p>
+</li>
+<li>
+<p><strong>变量的定义 (Variable Definition)</strong>:
                 使用数据定义伪指令在数据段<strong>分配内存空间</strong>，并可选择性地进行初始化。</p>
-                <ul>
-                <li><code>DB</code> (Define Byte): 定义字节 (8位)</li>
-                <li><code>DW</code> (Define Word): 定义字 (16位)</li>
-                <li><code>DD</code> (Define Doubleword): 定义双字 (32位)</li>
-                <li><code>DQ</code> (Define Quadword): 定义四字 (64位)</li>
-                <li><strong>例子</strong>:<pre class="hljs"><code><div>myByte   DB 10, 20, 30  ; 定义三个字节，并初始化
+<ul>
+<li><code>DB</code> (Define Byte): 定义字节 (8位)</li>
+<li><code>DW</code> (Define Word): 定义字 (16位)</li>
+<li><code>DD</code> (Define Doubleword): 定义双字 (32位)</li>
+<li><code>DQ</code> (Define Quadword): 定义四字 (64位)</li>
+<li><strong>例子</strong>:<pre class="hljs"><code><div>myByte   DB 10, 20, 30  ; 定义三个字节，并初始化
                 myWord   DW 1234h       ; 定义一个字
                 myString DB 'Hello', 0   ; 定义一个C风格字符串 (以0结尾)
                 myBuffer DB 100 DUP(?)   ; 定义100个字节，内容未初始化
                 </div></code></pre>
-                </li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>标号的定义 (Label Definition)</strong>:
+</li>
+</ul>
+</li>
+<li>
+<p><strong>标号的定义 (Label Definition)</strong>:
                 在<strong>代码段</strong>中，一个名称后跟一个冒号 <code>:</code>。</p>
-                <ul>
-                <li><code>my_loop: NOP</code></li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>变量与标号的引用 (Referencing)</strong>:</p>
-                <ul>
-                <li><strong>引用变量</strong>: <code>MOV AL, myByte</code> -&gt; 意思是，把 <code>myByte</code> 这个<strong>地址</strong>上的<strong>内容</strong>取出来，放到 <code>AL</code>。</li>
-                <li><strong>引用变量的地址</strong>: <code>MOV BX, OFFSET myByte</code> -&gt; 意思是，把 <code>myByte</code> 这个变量自身的<strong>偏移地址</strong>放到 <code>BX</code>。</li>
-                <li><strong>引用标号</strong>: <code>JMP my_loop</code> -&gt; 意思是，跳转到 <code>my_loop</code> 这个<strong>标号</strong>所代表的<strong>地址</strong>去执行。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>位置计数器 <code>$</code></strong>:
+<ul>
+<li><code>my_loop: NOP</code></li>
+</ul>
+</li>
+<li>
+<p><strong>变量与标号的引用 (Referencing)</strong>:</p>
+<ul>
+<li><strong>引用变量</strong>: <code>MOV AL, myByte</code> -&gt; 意思是，把 <code>myByte</code> 这个<strong>地址</strong>上的<strong>内容</strong>取出来，放到 <code>AL</code>。</li>
+<li><strong>引用变量的地址</strong>: <code>MOV BX, OFFSET myByte</code> -&gt; 意思是，把 <code>myByte</code> 这个变量自身的<strong>偏移地址</strong>放到 <code>BX</code>。</li>
+<li><strong>引用标号</strong>: <code>JMP my_loop</code> -&gt; 意思是，跳转到 <code>my_loop</code> 这个<strong>标号</strong>所代表的<strong>地址</strong>去执行。</li>
+</ul>
+</li>
+<li>
+<p><strong>位置计数器 <code>$</code></strong>:
                 <code>$</code> 是一个特殊的符号，由汇编器提供，它代表<strong>当前指令或数据的地址</strong>。它最经典的应用是计算数据长度：</p>
-                <pre class="hljs"><code><div>msg DB 'An error has occurred.'
+<pre class="hljs"><code><div>msg DB 'An error has occurred.'
                 msg_len EQU $ - msg
                 </div></code></pre>
-                <ul>
-                <li><code>msg</code> 是字符串的起始地址。</li>
-                <li>在 <code>EQU</code> 这一行，<code>$</code> 是紧跟在字符串后面的那个地址。</li>
-                <li>所以 <code>$</code> - <code>msg</code> 正好就是字符串的字节长度。这让汇编器为我们自动计算长度，避免了手动去数，减少了错误。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="53-%E7%BB%93%E6%9E%84%E7%B1%BB%E5%9E%8B%E4%B8%8E%E7%BB%93%E6%9E%84%E5%8F%98%E9%87%8F-structures"><strong>5.3. 结构类型与结构变量 (Structures)</strong></h4>
-                <p>汇编语言甚至提供了类似高级语言 <code>struct</code> 的功能，允许我们定义复杂的数据类型。这是一种强大的数据抽象。</p>
-                <ul>
-                <li>
-                <p><strong>结构类型的定义 (<code>STRUCT</code>)</strong>:
+<ul>
+<li><code>msg</code> 是字符串的起始地址。</li>
+<li>在 <code>EQU</code> 这一行，<code>$</code> 是紧跟在字符串后面的那个地址。</li>
+<li>所以 <code>$</code> - <code>msg</code> 正好就是字符串的字节长度。这让汇编器为我们自动计算长度，避免了手动去数，减少了错误。</li>
+</ul>
+</li>
+</ul>
+<h4 id="53-%E7%BB%93%E6%9E%84%E7%B1%BB%E5%9E%8B%E4%B8%8E%E7%BB%93%E6%9E%84%E5%8F%98%E9%87%8F-structures"><strong>5.3. 结构类型与结构变量 (Structures)</strong></h4>
+<p>汇编语言甚至提供了类似高级语言 <code>struct</code> 的功能，允许我们定义复杂的数据类型。这是一种强大的数据抽象。</p>
+<ul>
+<li>
+<p><strong>结构类型的定义 (<code>STRUCT</code>)</strong>:
                 使用 <code>STRUCT</code> 和 <code>ENDS</code> 来定义一个数据模板。</p>
-                <pre class="hljs"><code><div>STUDENT STRUCT
+<pre class="hljs"><code><div>STUDENT STRUCT
                     id      DW ?   ; 2 bytes for student ID
                     score   DB ?   ; 1 byte for score
                     grade   DB ?   ; 1 byte for grade
                 STUDENT ENDS
                 </div></code></pre>
-                <p>这<strong>不分配任何内存</strong>，只是定义了一个名为 <code>STUDENT</code> 的“蓝图”。</p>
-                </li>
-                <li>
-                <p><strong>结构变量的定义与引用</strong>:
+<p>这<strong>不分配任何内存</strong>，只是定义了一个名为 <code>STUDENT</code> 的“蓝图”。</p>
+</li>
+<li>
+<p><strong>结构变量的定义与引用</strong>:
                 像使用 <code>DB</code>, <code>DW</code> 一样，使用结构名来定义一个变量。</p>
-                <pre class="hljs"><code><div>.DATA
+<pre class="hljs"><code><div>.DATA
                     student1 STUDENT &lt;1001, 95, 'A'&gt;  ; 定义一个学生变量并初始化
                     student2 STUDENT &lt;&gt;              ; 定义另一个，使用默认值
 
@@ -307,39 +305,64 @@
                     MOV BX, OFFSET student1
                     MOV AL, [BX].grade        ; 通过基址寄存器访问字段
                 </div></code></pre>
-                <ul>
-                <li><strong>设计视角</strong>：汇编器在处理 <code>student1.score</code> 时，会自动计算出 <code>score</code> 字段相对于 <code>student1</code> 起始地址的偏移量（在这个例子里是2），然后生成访问 <code>[student1+2]</code> 的机器码。这极大地增强了代码的可读性和结构性，让我们能以更接近人类思维的方式来组织复杂数据。</li>
-                </ul>
-                </li>
-                </ul>
-            </article>
-        </main>
-    </div>
-    
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<ul>
+<li><strong>设计视角</strong>：汇编器在处理 <code>student1.score</code> 时，会自动计算出 <code>score</code> 字段相对于 <code>student1</code> 起始地址的偏移量（在这个例子里是2），然后生成访问 <code>[student1+2]</code> 的机器码。这极大地增强了代码的可读性和结构性，让我们能以更接近人类思维的方式来组织复杂数据。</li>
+</ul>
+</li>
+</ul>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

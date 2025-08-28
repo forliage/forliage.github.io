@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>数据库系统04:实体-关系模型(E-R Model)</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>数据库系统04:实体-关系模型(E-R Model)</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,255 +30,281 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F04%E5%AE%9E%E4%BD%93-%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8Be-r-model">数据库系统04:实体-关系模型(E-R Model)</h1>
-                <h3 id="%E5%BC%95%E8%A8%80"><strong>引言：</strong></h3>
-                <p>想象一下，客户找到你，要你开发一个大学教务系统。他们的需求是这样的：“我们需要管理学生、课程和教授，学生可以选课，教授可以教课，每个系都有自己的课程和学生...”</p>
-                <p>如果你听到这里，立刻打开终端开始<code>CREATE TABLE student...</code>，那么一场灾难几乎是注定的。为什么？</p>
-                <ul>
-                <li>“一个学生能选多少门课？一门课最多有多少学生？”</li>
-                <li>“一个教授能教几门课？一门课可以由多个教授合上吗？”</li>
-                <li>“学生和课程的联系，跟教授和课程的联系，是一回事吗？”</li>
-                </ul>
-                <p>直接进入表设计，就像一个建筑师不画设计图纸就直接让施工队开工。你会陷入无休止的细节、歧义和返工中。</p>
-                <p><strong>E-R模型的设计哲学：</strong></p>
-                <p><strong>它是一种高层次的、独立于具体数据库实现的概念数据模型。其核心目的是：</strong></p>
-                <ol>
-                <li><strong>沟通工具：</strong> E-R图直观、易懂，可以作为与客户、产品经理、非技术人员沟通的“共同语言”，确保所有人对业务需求的理解是一致的。</li>
-                <li><strong>分析工具：</strong> 强迫设计师系统性地思考现实世界中的“事物”（实体）、“事物之间的联系”（关系）以及它们的“特性”（属性）。</li>
-                <li><strong>设计蓝图：</strong> E-R模型一旦确定，就可以作为一份精确的说明书，指导后续的逻辑设计（关系模式）和物理设计。</li>
-                </ol>
-                <p>E-R模型由陈品山（Peter Chen）在1976年提出，它的伟大之处在于，它提供了一套简单而强大的符号，让我们能够把现实世界的“故事”画成一张清晰的地图。</p>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86e-r%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%9E%84%E4%BB%B6"><strong>第一部分：E-R模型的基本构件</strong></h3>
-                <h4 id="11-%E5%AE%9E%E4%BD%93-entity-%E4%B8%8E%E5%AE%9E%E4%BD%93%E9%9B%86-entity-set"><strong>1.1 实体 (Entity) 与实体集 (Entity Set)</strong></h4>
-                <ul>
-                <li><strong>实体 (Entity):</strong> 现实世界中一个<strong>可区分</strong>的对象。它可以是物理存在的（一个学生、一本书），也可以是概念上的（一门课程、一次银行交易）。</li>
-                <li><strong>实体集 (Entity Set):</strong> 具有<strong>相同类型</strong>和<strong>相同属性</strong>的实体的集合。在E-R图中用<strong>矩形</strong>表示。例如：<code>学生(Student)</code>、<code>课程(Course)</code>。</li>
-                </ul>
-                <h4 id="12-%E5%B1%9E%E6%80%A7-attribute%E5%AE%9E%E4%BD%93%E7%9A%84%E7%89%B9%E5%BE%81"><strong>1.2 属性 (Attribute)：实体的特征</strong></h4>
-                <p>实体是通过属性来描述的。在E-R图中用<strong>椭圆形</strong>表示，并通过线连接到其所属的实体集。</p>
-                <p><strong>属性的分类与设计哲学：</strong></p>
-                <ul>
-                <li>
-                <p><strong>简单属性 vs. 复合属性 (Simple vs. Composite)</strong></p>
-                <ul>
-                <li><strong>简单属性 (Simple):</strong> 不可再分的原子值，如<code>age</code>。</li>
-                <li><strong>复合属性 (Composite):</strong> 可分解为多个更小的部分，如<code>name</code>可以分解为<code>first_name</code>, <code>last_name</code>。</li>
-                <li><strong>设计哲学：</strong> 建模时保留复合属性，可以更清晰地表达业务概念（“姓名”是一个整体）。但在最终转换为关系表时，复合属性的<strong>叶子节点</strong>（<code>first_name</code>, <code>last_name</code>）通常会成为表的列，因为关系模型的第一范式要求列的原子性。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>单值属性 vs. 多值属性 (Single-valued vs. Multi-valued)</strong></p>
-                <ul>
-                <li><strong>单值属性 (Single-valued):</strong> 对任何实体，该属性只有一个值，如<code>student_id</code>。</li>
-                <li><strong>多值属性 (Multi-valued):</strong> 一个实体可以有多个该属性的值，如<code>phone_numbers</code>。在E-R图中用<strong>双线椭圆</strong>表示。</li>
-                <li><strong>设计哲学：</strong> E-R模型允许我们直接表达“一个学生有多个电话”这个概念。但在关系模型中，表的一个单元格不能存放多个值。因此，在转换时，多值属性通常需要被<strong>分离成一个独立的新表</strong>。这是E-R模型灵活性与关系模型严格性之间的一个重要转换点。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>派生属性 vs. 基属性 (Derived vs. Stored)</strong></p>
-                <ul>
-                <li><strong>基属性 (Stored):</strong> 需要物理存储的属性，如<code>date_of_birth</code>。</li>
-                <li><strong>派生属性 (Derived):</strong> 其值可以从其他属性计算得出，如<code>age</code>可以由<code>date_of_birth</code>和当前日期计算。在E-R图中用<strong>虚线椭圆</strong>表示。</li>
-                <li><strong>设计哲学：</strong> 识别派生属性是为了<strong>减少数据冗余</strong>和<strong>避免不一致性</strong>。如果存储了<code>age</code>，那么每年都需要去更新所有人的年龄，很容易出错。在设计层面标识出<code>age</code>是派生的，意味着在最终的表中，我们通常只存储<code>date_of_birth</code>，而<code>age</code>则在查询时动态计算。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="13-%E5%85%B3%E7%B3%BB-relationship-%E4%B8%8E%E5%85%B3%E7%B3%BB%E9%9B%86-relationship-set"><strong>1.3 关系 (Relationship) 与关系集 (Relationship Set)</strong></h4>
-                <ul>
-                <li>
-                <p><strong>关系 (Relationship):</strong> 两个或多个实体之间的<strong>关联</strong>。</p>
-                </li>
-                <li>
-                <p><strong>关系集 (Relationship Set):</strong> <strong>同类型</strong>关系的集合。在E-R图中用<strong>菱形</strong>表示。例如，<code>advisor</code>是一个连接<code>学生</code>和<code>教授</code>的关系集。</p>
-                </li>
-                <li>
-                <p><strong>关系的度 (Degree):</strong> 参与一个关系集的实体集的数量。</p>
-                <ul>
-                <li><strong>二元 (Binary):</strong> 最常见，连接两个实体集（如：学生 <code>选修</code> 课程）。</li>
-                <li><strong>三元 (Ternary):</strong> 连接三个实体集。<strong>何时需要三元关系？</strong> 当一个关联本身必须同时涉及三个实体才能完整表达其含义时。例如，一个<code>项目(Project)</code>需要<code>员工(Employee)</code>使用某种<code>技能(Skill)</code>。这个“使用”关系是三元的。如果拆成三个二元关系（员工-项目，员工-技能，项目-技能），就丢失了“在哪个项目上使用哪种技能”的精确信息。</li>
-                <li><strong>设计哲学：</strong> 尽量使用二元关系。只有当业务逻辑无法被多个二元关系无损地表达时，才考虑使用多元关系。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>关系集的属性：</strong> 关系本身也可以有属性，用来描述这个关联的特征。例如，在<code>学生</code>和<code>课程</code>的<code>选修(takes)</code>关系中，<code>grade</code>（成绩）就是一个描述“选修”这个行为的属性。</p>
-                </li>
-                </ul>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%AE%9A%E4%B9%89%E8%A7%84%E5%88%99--%E7%BA%A6%E6%9D%9F"><strong>第二部分：定义规则 —— 约束</strong></h3>
-                <p>E-R模型不仅描述结构，更重要的是描述规则。</p>
-                <h4 id="21-%E6%98%A0%E5%B0%84%E5%9F%BA%E6%95%B0-mapping-cardinality%E6%95%B0%E9%87%8F%E7%9A%84%E7%BA%A6%E6%9D%9F"><strong>2.1 映射基数 (Mapping Cardinality)：数量的约束</strong></h4>
-                <p>映射基数定义了一个实体通过一个关系集能与多少个其他实体关联。对于二元关系，主要有四种：</p>
-                <ul>
-                <li><strong>一对一 (One-to-One):</strong> 一个<code>国家(Country)</code>只有一个<code>首都(Capital)</code>，一个<code>首都</code>也只属于一个<code>国家</code>。E-R图中用 <code>1 &lt;--&gt; 1</code> 表示。</li>
-                <li><strong>一对多 (One-to-Many):</strong> 一个<code>部门(Department)</code>可以有多个<code>员工(Employee)</code>，但一个<code>员工</code>只属于一个<code>部门</code>。E-R图中用 <code>1 &lt;--&gt; N</code> (或 <code>1 &lt;--&gt; M</code>) 表示。</li>
-                <li><strong>多对一 (Many-to-One):</strong> <code>员工</code>与<code>部门</code>关系的另一视角。</li>
-                <li><strong>多对多 (Many-to-Many):</strong> 一个<code>学生(Student)</code>可以选修多门<code>课程(Course)</code>，一门<code>课程</code>也可以被多个<code>学生</code>选修。E-R图中用 <code>N &lt;--&gt; M</code> 表示。</li>
-                </ul>
-                <p><strong>设计哲学：</strong> 基数约束是数据库设计的<strong>核心</strong>。它直接决定了后续转换成关系表时，外键该放在哪里，或者是否需要创建额外的关联表。</p>
-                <ul>
-                <li><strong>1:1</strong> -&gt; 外键可以放在任意一边，或者合并成一张表。</li>
-                <li><strong>1:N</strong> -&gt; 外键必须放在“多”的那一端，指向“一”的那一端的主键。</li>
-                <li><strong>M:N</strong> -&gt; 必须创建一个新的关联表（或称连接表、桥接表），该表的主键通常是两边实体主键的组合。</li>
-                </ul>
-                <h4 id="22-%E5%8F%82%E4%B8%8E%E7%BA%A6%E6%9D%9F-participation-constraints%E5%AD%98%E5%9C%A8%E6%80%A7%E7%9A%84%E7%BA%A6%E6%9D%9F"><strong>2.2 参与约束 (Participation Constraints)：存在性的约束</strong></h4>
-                <ul>
-                <li><strong>全部参与 (Total Participation):</strong> 实体集中的<strong>每一个</strong>实体都必须参与到该关系中。例如，每一门<code>课程(Course)</code>都必须属于一个<code>系(Department)</code>。在E-R图中，用一条<strong>双线</strong>连接实体集和关系集。</li>
-                <li><strong>部分参与 (Partial Participation):</strong> 实体集中的实体可以不参与该关系。例如，不是每一个<code>教授(Professor)</code>都必须是<code>系主任(manages)</code>。这是默认情况，用<strong>单线</strong>表示。</li>
-                </ul>
-                <p><strong>设计哲学：</strong> 参与约束最终会影响关系表中外键列的<code>NOT NULL</code>约束。</p>
-                <ul>
-                <li>如果<code>Course</code>在与<code>Department</code>的关系中是<strong>全部参与</strong>，那么在转换成的<code>Course</code>表中，<code>dept_id</code>这个外键列必须是**<code>NOT NULL</code>**的。</li>
-                </ul>
-                <h4 id="23-%E9%94%AE-keys%E5%94%AF%E4%B8%80%E6%80%A7%E7%9A%84%E4%BF%9D%E8%AF%81"><strong>2.3 键 (Keys)：唯一性的保证</strong></h4>
-                <ul>
-                <li><strong>超键 (Super Key):</strong> 能唯一标识实体集中一个实体的一个或多个属性的集合。</li>
-                <li><strong>候选键 (Candidate Key):</strong> 最小的超键。</li>
-                <li><strong>主键 (Primary Key):</strong> 被设计者选定的、用于唯一标识实体的候选键。在E-R图中，主键的属性名下有<strong>下划线</strong>。</li>
-                </ul>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E5%A4%84%E7%90%86%E5%A4%8D%E6%9D%82%E6%80%A7--%E9%AB%98%E7%BA%A7e-r%E6%A6%82%E5%BF%B5"><strong>第三部分：处理复杂性 —— 高级E-R概念</strong></h3>
-                <h4 id="31-%E5%BC%B1%E5%AE%9E%E4%BD%93%E9%9B%86-weak-entity-set"><strong>3.1 弱实体集 (Weak Entity Set)</strong></h4>
-                <p><strong>思考一个问题：</strong> 对于一栋教学楼，它的房间号是“101”, “102”... 对于另一栋楼，也有“101”, “102”。那么“101”这个房间号能唯一标识一个房间吗？不能。它必须依赖于它所在的“教学楼”才能被唯一标识。</p>
-                <ul>
-                <li><strong>弱实体集：</strong> 一个自身没有足够属性形成主键的实体集。它的存在<strong>依赖于</strong>另一个<strong>强实体集</strong>。例如：<code>房间(Room)</code>。</li>
-                <li><strong>强实体集 (或标识实体集):</strong> 为弱实体集提供标识的实体集。例如：<code>教学楼(Building)</code>。</li>
-                <li><strong>标识关系 (Identifying Relationship):</strong> 连接强弱实体集的关系。</li>
-                <li><strong>分辨符 (Discriminator / Partial Key):</strong> 弱实体集中，能够区分<strong>在同一个强实体下</strong>的不同弱实体的属性。例如：<code>room_number</code>。在E-R图中用<strong>虚下划线</strong>表示。</li>
-                </ul>
-                <p><strong>E-R图表示：</strong></p>
-                <ul>
-                <li>弱实体集用<strong>双线矩形</strong>。</li>
-                <li>标识关系用<strong>双线菱形</strong>。</li>
-                </ul>
-                <p><strong>弱实体集的主键 = 强实体集的主键 + 弱实体集的分辨符。</strong>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F04%E5%AE%9E%E4%BD%93-%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8Be-r-model">数据库系统04:实体-关系模型(E-R Model)</h1>
+<h3 id="%E5%BC%95%E8%A8%80"><strong>引言：</strong></h3>
+<p>想象一下，客户找到你，要你开发一个大学教务系统。他们的需求是这样的：“我们需要管理学生、课程和教授，学生可以选课，教授可以教课，每个系都有自己的课程和学生...”</p>
+<p>如果你听到这里，立刻打开终端开始<code>CREATE TABLE student...</code>，那么一场灾难几乎是注定的。为什么？</p>
+<ul>
+<li>“一个学生能选多少门课？一门课最多有多少学生？”</li>
+<li>“一个教授能教几门课？一门课可以由多个教授合上吗？”</li>
+<li>“学生和课程的联系，跟教授和课程的联系，是一回事吗？”</li>
+</ul>
+<p>直接进入表设计，就像一个建筑师不画设计图纸就直接让施工队开工。你会陷入无休止的细节、歧义和返工中。</p>
+<p><strong>E-R模型的设计哲学：</strong></p>
+<p><strong>它是一种高层次的、独立于具体数据库实现的概念数据模型。其核心目的是：</strong></p>
+<ol>
+<li><strong>沟通工具：</strong> E-R图直观、易懂，可以作为与客户、产品经理、非技术人员沟通的“共同语言”，确保所有人对业务需求的理解是一致的。</li>
+<li><strong>分析工具：</strong> 强迫设计师系统性地思考现实世界中的“事物”（实体）、“事物之间的联系”（关系）以及它们的“特性”（属性）。</li>
+<li><strong>设计蓝图：</strong> E-R模型一旦确定，就可以作为一份精确的说明书，指导后续的逻辑设计（关系模式）和物理设计。</li>
+</ol>
+<p>E-R模型由陈品山（Peter Chen）在1976年提出，它的伟大之处在于，它提供了一套简单而强大的符号，让我们能够把现实世界的“故事”画成一张清晰的地图。</p>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86e-r%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%9E%84%E4%BB%B6"><strong>第一部分：E-R模型的基本构件</strong></h3>
+<h4 id="11-%E5%AE%9E%E4%BD%93-entity-%E4%B8%8E%E5%AE%9E%E4%BD%93%E9%9B%86-entity-set"><strong>1.1 实体 (Entity) 与实体集 (Entity Set)</strong></h4>
+<ul>
+<li><strong>实体 (Entity):</strong> 现实世界中一个<strong>可区分</strong>的对象。它可以是物理存在的（一个学生、一本书），也可以是概念上的（一门课程、一次银行交易）。</li>
+<li><strong>实体集 (Entity Set):</strong> 具有<strong>相同类型</strong>和<strong>相同属性</strong>的实体的集合。在E-R图中用<strong>矩形</strong>表示。例如：<code>学生(Student)</code>、<code>课程(Course)</code>。</li>
+</ul>
+<h4 id="12-%E5%B1%9E%E6%80%A7-attribute%E5%AE%9E%E4%BD%93%E7%9A%84%E7%89%B9%E5%BE%81"><strong>1.2 属性 (Attribute)：实体的特征</strong></h4>
+<p>实体是通过属性来描述的。在E-R图中用<strong>椭圆形</strong>表示，并通过线连接到其所属的实体集。</p>
+<p><strong>属性的分类与设计哲学：</strong></p>
+<ul>
+<li>
+<p><strong>简单属性 vs. 复合属性 (Simple vs. Composite)</strong></p>
+<ul>
+<li><strong>简单属性 (Simple):</strong> 不可再分的原子值，如<code>age</code>。</li>
+<li><strong>复合属性 (Composite):</strong> 可分解为多个更小的部分，如<code>name</code>可以分解为<code>first_name</code>, <code>last_name</code>。</li>
+<li><strong>设计哲学：</strong> 建模时保留复合属性，可以更清晰地表达业务概念（“姓名”是一个整体）。但在最终转换为关系表时，复合属性的<strong>叶子节点</strong>（<code>first_name</code>, <code>last_name</code>）通常会成为表的列，因为关系模型的第一范式要求列的原子性。</li>
+</ul>
+</li>
+<li>
+<p><strong>单值属性 vs. 多值属性 (Single-valued vs. Multi-valued)</strong></p>
+<ul>
+<li><strong>单值属性 (Single-valued):</strong> 对任何实体，该属性只有一个值，如<code>student_id</code>。</li>
+<li><strong>多值属性 (Multi-valued):</strong> 一个实体可以有多个该属性的值，如<code>phone_numbers</code>。在E-R图中用<strong>双线椭圆</strong>表示。</li>
+<li><strong>设计哲学：</strong> E-R模型允许我们直接表达“一个学生有多个电话”这个概念。但在关系模型中，表的一个单元格不能存放多个值。因此，在转换时，多值属性通常需要被<strong>分离成一个独立的新表</strong>。这是E-R模型灵活性与关系模型严格性之间的一个重要转换点。</li>
+</ul>
+</li>
+<li>
+<p><strong>派生属性 vs. 基属性 (Derived vs. Stored)</strong></p>
+<ul>
+<li><strong>基属性 (Stored):</strong> 需要物理存储的属性，如<code>date_of_birth</code>。</li>
+<li><strong>派生属性 (Derived):</strong> 其值可以从其他属性计算得出，如<code>age</code>可以由<code>date_of_birth</code>和当前日期计算。在E-R图中用<strong>虚线椭圆</strong>表示。</li>
+<li><strong>设计哲学：</strong> 识别派生属性是为了<strong>减少数据冗余</strong>和<strong>避免不一致性</strong>。如果存储了<code>age</code>，那么每年都需要去更新所有人的年龄，很容易出错。在设计层面标识出<code>age</code>是派生的，意味着在最终的表中，我们通常只存储<code>date_of_birth</code>，而<code>age</code>则在查询时动态计算。</li>
+</ul>
+</li>
+</ul>
+<h4 id="13-%E5%85%B3%E7%B3%BB-relationship-%E4%B8%8E%E5%85%B3%E7%B3%BB%E9%9B%86-relationship-set"><strong>1.3 关系 (Relationship) 与关系集 (Relationship Set)</strong></h4>
+<ul>
+<li>
+<p><strong>关系 (Relationship):</strong> 两个或多个实体之间的<strong>关联</strong>。</p>
+</li>
+<li>
+<p><strong>关系集 (Relationship Set):</strong> <strong>同类型</strong>关系的集合。在E-R图中用<strong>菱形</strong>表示。例如，<code>advisor</code>是一个连接<code>学生</code>和<code>教授</code>的关系集。</p>
+</li>
+<li>
+<p><strong>关系的度 (Degree):</strong> 参与一个关系集的实体集的数量。</p>
+<ul>
+<li><strong>二元 (Binary):</strong> 最常见，连接两个实体集（如：学生 <code>选修</code> 课程）。</li>
+<li><strong>三元 (Ternary):</strong> 连接三个实体集。<strong>何时需要三元关系？</strong> 当一个关联本身必须同时涉及三个实体才能完整表达其含义时。例如，一个<code>项目(Project)</code>需要<code>员工(Employee)</code>使用某种<code>技能(Skill)</code>。这个“使用”关系是三元的。如果拆成三个二元关系（员工-项目，员工-技能，项目-技能），就丢失了“在哪个项目上使用哪种技能”的精确信息。</li>
+<li><strong>设计哲学：</strong> 尽量使用二元关系。只有当业务逻辑无法被多个二元关系无损地表达时，才考虑使用多元关系。</li>
+</ul>
+</li>
+<li>
+<p><strong>关系集的属性：</strong> 关系本身也可以有属性，用来描述这个关联的特征。例如，在<code>学生</code>和<code>课程</code>的<code>选修(takes)</code>关系中，<code>grade</code>（成绩）就是一个描述“选修”这个行为的属性。</p>
+</li>
+</ul>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%AE%9A%E4%B9%89%E8%A7%84%E5%88%99--%E7%BA%A6%E6%9D%9F"><strong>第二部分：定义规则 —— 约束</strong></h3>
+<p>E-R模型不仅描述结构，更重要的是描述规则。</p>
+<h4 id="21-%E6%98%A0%E5%B0%84%E5%9F%BA%E6%95%B0-mapping-cardinality%E6%95%B0%E9%87%8F%E7%9A%84%E7%BA%A6%E6%9D%9F"><strong>2.1 映射基数 (Mapping Cardinality)：数量的约束</strong></h4>
+<p>映射基数定义了一个实体通过一个关系集能与多少个其他实体关联。对于二元关系，主要有四种：</p>
+<ul>
+<li><strong>一对一 (One-to-One):</strong> 一个<code>国家(Country)</code>只有一个<code>首都(Capital)</code>，一个<code>首都</code>也只属于一个<code>国家</code>。E-R图中用 <code>1 &lt;--&gt; 1</code> 表示。</li>
+<li><strong>一对多 (One-to-Many):</strong> 一个<code>部门(Department)</code>可以有多个<code>员工(Employee)</code>，但一个<code>员工</code>只属于一个<code>部门</code>。E-R图中用 <code>1 &lt;--&gt; N</code> (或 <code>1 &lt;--&gt; M</code>) 表示。</li>
+<li><strong>多对一 (Many-to-One):</strong> <code>员工</code>与<code>部门</code>关系的另一视角。</li>
+<li><strong>多对多 (Many-to-Many):</strong> 一个<code>学生(Student)</code>可以选修多门<code>课程(Course)</code>，一门<code>课程</code>也可以被多个<code>学生</code>选修。E-R图中用 <code>N &lt;--&gt; M</code> 表示。</li>
+</ul>
+<p><strong>设计哲学：</strong> 基数约束是数据库设计的<strong>核心</strong>。它直接决定了后续转换成关系表时，外键该放在哪里，或者是否需要创建额外的关联表。</p>
+<ul>
+<li><strong>1:1</strong> -&gt; 外键可以放在任意一边，或者合并成一张表。</li>
+<li><strong>1:N</strong> -&gt; 外键必须放在“多”的那一端，指向“一”的那一端的主键。</li>
+<li><strong>M:N</strong> -&gt; 必须创建一个新的关联表（或称连接表、桥接表），该表的主键通常是两边实体主键的组合。</li>
+</ul>
+<h4 id="22-%E5%8F%82%E4%B8%8E%E7%BA%A6%E6%9D%9F-participation-constraints%E5%AD%98%E5%9C%A8%E6%80%A7%E7%9A%84%E7%BA%A6%E6%9D%9F"><strong>2.2 参与约束 (Participation Constraints)：存在性的约束</strong></h4>
+<ul>
+<li><strong>全部参与 (Total Participation):</strong> 实体集中的<strong>每一个</strong>实体都必须参与到该关系中。例如，每一门<code>课程(Course)</code>都必须属于一个<code>系(Department)</code>。在E-R图中，用一条<strong>双线</strong>连接实体集和关系集。</li>
+<li><strong>部分参与 (Partial Participation):</strong> 实体集中的实体可以不参与该关系。例如，不是每一个<code>教授(Professor)</code>都必须是<code>系主任(manages)</code>。这是默认情况，用<strong>单线</strong>表示。</li>
+</ul>
+<p><strong>设计哲学：</strong> 参与约束最终会影响关系表中外键列的<code>NOT NULL</code>约束。</p>
+<ul>
+<li>如果<code>Course</code>在与<code>Department</code>的关系中是<strong>全部参与</strong>，那么在转换成的<code>Course</code>表中，<code>dept_id</code>这个外键列必须是**<code>NOT NULL</code>**的。</li>
+</ul>
+<h4 id="23-%E9%94%AE-keys%E5%94%AF%E4%B8%80%E6%80%A7%E7%9A%84%E4%BF%9D%E8%AF%81"><strong>2.3 键 (Keys)：唯一性的保证</strong></h4>
+<ul>
+<li><strong>超键 (Super Key):</strong> 能唯一标识实体集中一个实体的一个或多个属性的集合。</li>
+<li><strong>候选键 (Candidate Key):</strong> 最小的超键。</li>
+<li><strong>主键 (Primary Key):</strong> 被设计者选定的、用于唯一标识实体的候选键。在E-R图中，主键的属性名下有<strong>下划线</strong>。</li>
+</ul>
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E5%A4%84%E7%90%86%E5%A4%8D%E6%9D%82%E6%80%A7--%E9%AB%98%E7%BA%A7e-r%E6%A6%82%E5%BF%B5"><strong>第三部分：处理复杂性 —— 高级E-R概念</strong></h3>
+<h4 id="31-%E5%BC%B1%E5%AE%9E%E4%BD%93%E9%9B%86-weak-entity-set"><strong>3.1 弱实体集 (Weak Entity Set)</strong></h4>
+<p><strong>思考一个问题：</strong> 对于一栋教学楼，它的房间号是“101”, “102”... 对于另一栋楼，也有“101”, “102”。那么“101”这个房间号能唯一标识一个房间吗？不能。它必须依赖于它所在的“教学楼”才能被唯一标识。</p>
+<ul>
+<li><strong>弱实体集：</strong> 一个自身没有足够属性形成主键的实体集。它的存在<strong>依赖于</strong>另一个<strong>强实体集</strong>。例如：<code>房间(Room)</code>。</li>
+<li><strong>强实体集 (或标识实体集):</strong> 为弱实体集提供标识的实体集。例如：<code>教学楼(Building)</code>。</li>
+<li><strong>标识关系 (Identifying Relationship):</strong> 连接强弱实体集的关系。</li>
+<li><strong>分辨符 (Discriminator / Partial Key):</strong> 弱实体集中，能够区分<strong>在同一个强实体下</strong>的不同弱实体的属性。例如：<code>room_number</code>。在E-R图中用<strong>虚下划线</strong>表示。</li>
+</ul>
+<p><strong>E-R图表示：</strong></p>
+<ul>
+<li>弱实体集用<strong>双线矩形</strong>。</li>
+<li>标识关系用<strong>双线菱形</strong>。</li>
+</ul>
+<p><strong>弱实体集的主键 = 强实体集的主键 + 弱实体集的分辨符。</strong>
                 例如，一个<code>Room</code>实体的主键是 <code>{building_id, room_number}</code>。</p>
-                <p><strong>设计哲学：</strong> 弱实体集模型精确地捕捉了现实世界中的“拥有”或“从属”关系，这种关系中，子实体的身份是与父实体绑定的。</p>
-                <h4 id="32-%E6%89%A9%E5%B1%95e-r-eer-%E7%89%B9%E6%80%A7%E7%BB%A7%E6%89%BF%E4%B8%8E%E6%8A%BD%E8%B1%81"><strong>3.2 扩展E-R (EER) 特性：继承与抽象</strong></h4>
+<p><strong>设计哲学：</strong> 弱实体集模型精确地捕捉了现实世界中的“拥有”或“从属”关系，这种关系中，子实体的身份是与父实体绑定的。</p>
+<h4 id="32-%E6%89%A9%E5%B1%95e-r-eer-%E7%89%B9%E6%80%A7%E7%BB%A7%E6%89%BF%E4%B8%8E%E6%8A%BD%E8%B1%81"><strong>3.2 扩展E-R (EER) 特性：继承与抽象</strong></h4>
+<ul>
+<li>
+<p><strong>特化 (Specialization)：自顶向下</strong></p>
+<ul>
+<li><strong>概念：</strong> 将一个通用的实体集（超类）根据某些特征区分为更具体的子实体集（子类）。例如，将<code>人(Person)</code>特化为<code>学生(Student)</code>和<code>教员(Instructor)</code>。</li>
+<li><code>Student</code>和<code>Instructor</code>会<strong>继承</strong><code>Person</code>的所有属性（如<code>name</code>, <code>address</code>），并拥有自己<strong>特有</strong>的属性（如<code>Student</code>有<code>tot_cred</code>，<code>Instructor</code>有<code>salary</code>）。</li>
+<li>在E-R图中用一个<strong>空心三角箭头</strong>指向超类，并用<code>ISA</code>（is a）表示。</li>
+</ul>
+</li>
+<li>
+<p><strong>泛化 (Generalization)：自底向上</strong></p>
+<ul>
+<li><strong>概念：</strong> 将多个具有共同属性的实体集（子类）抽象出一个更通用的实体集（超类）。例如，从<code>轿车(Car)</code>和<code>卡车(Truck)</code>中泛化出<code>车辆(Vehicle)</code>。</li>
+<li>特化和泛化是同一概念的两种不同视角，在E-R图中表示法相同。</li>
+</ul>
+</li>
+</ul>
+<p><strong>设计约束：</strong></p>
+<ul>
+<li><strong>不相交 (Disjoint) vs. 重叠 (Overlapping):</strong>
+<ul>
+<li><code>Disjoint</code>: 一个超类实体最多只能是一个子类的成员（如一个人不能既是<code>Student</code>又是<code>Instructor</code>）。</li>
+<li><code>Overlapping</code>: 允许同时是多个子类的成员。</li>
+</ul>
+</li>
+<li><strong>全部 (Total) vs. 部分 (Partial):</strong>
+<ul>
+<li><code>Total</code>: 每个超类实体<strong>必须</strong>是某个子类的成员（如每个<code>Person</code>都必须是<code>Student</code>或<code>Instructor</code>）。</li>
+<li><code>Partial</code>: 允许超类实体不属于任何一个子类。</li>
+</ul>
+</li>
+</ul>
+<p><strong>设计哲学：</strong> 继承（ISA关系）是面向对象思想在数据建模中的应用。它能极好地处理“is a kind of”关系，减少了模型冗余，提高了模型的表达力和可扩展性。</p>
+<ul>
+<li><strong>聚集 (Aggregation)：将关系视为实体</strong>
+<ul>
+<li><strong>问题：</strong> 如何表达“关系”与“实体”之间的关系？例如，一个<code>员工(Employee)</code>被指派去<strong>监督</strong>一个<code>项目(Project)</code>的某个<code>工作(Job)</code>。这里的“监督(sponsorship)”关系，其对象不是<code>Project</code>也不是<code>Job</code>，而是“在某个项目上的某个工作”这个<strong>关联本身</strong>。</li>
+<li><strong>解决方案：</strong> 聚集允许我们将一个关系集（如<code>proj_job</code>）及其参与的实体集（<code>Project</code>, <code>Job</code>）<strong>打包</strong>成一个抽象的、更高层次的“聚合实体”，然后让其他实体（如<code>Employee</code>）与这个聚合体建立关系。</li>
+<li>在E-R图中，用一个<strong>虚线框</strong>将要聚集的部分框起来。</li>
+</ul>
+</li>
+</ul>
+<p><strong>设计哲学：</strong> 聚集提供了一种处理复杂关联的<strong>抽象机制</strong>，它提升了模型的层次，使得我们可以把一个复杂的子系统看作一个单一的单元来对待。</p>
+<h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E4%BB%8Ee-r%E5%9B%BE%E5%88%B0%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%BC%8F--%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%BD%AC%E6%8D%A2%E7%AE%97%E6%B3%95"><strong>第四部分：从E-R图到关系模式 —— 系统的转换算法</strong></h3>
+<p>这是将设计蓝图变为具体施工指令的关键一步。以下是一套可以机械执行的规则：</p>
+<ol>
+<li><strong>强实体集：</strong> 为每个强实体集创建一个同名表。表的列是该实体集的所有<strong>简单属性</strong>（复合属性则取其叶子节点）。主键就是实体集的主键。</li>
+<li><strong>弱实体集：</strong> 为每个弱实体集创建一个表。
                 <ul>
-                <li>
-                <p><strong>特化 (Specialization)：自顶向下</strong></p>
+<li>列 = 弱实体集的所有属性 + <strong>标识强实体集的主键</strong>（作为外键）。</li>
+<li>表的主键 = <strong>强实体集的主键 + 弱实体集的分辨符</strong>。</li>
+</ul>
+</li>
+<li><strong>关系集：</strong>
+<ul>
+<li><strong>多对多 (M:N):</strong> 创建一个新表。
                 <ul>
-                <li><strong>概念：</strong> 将一个通用的实体集（超类）根据某些特征区分为更具体的子实体集（子类）。例如，将<code>人(Person)</code>特化为<code>学生(Student)</code>和<code>教员(Instructor)</code>。</li>
-                <li><code>Student</code>和<code>Instructor</code>会<strong>继承</strong><code>Person</code>的所有属性（如<code>name</code>, <code>address</code>），并拥有自己<strong>特有</strong>的属性（如<code>Student</code>有<code>tot_cred</code>，<code>Instructor</code>有<code>salary</code>）。</li>
-                <li>在E-R图中用一个<strong>空心三角箭头</strong>指向超类，并用<code>ISA</code>（is a）表示。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>泛化 (Generalization)：自底向上</strong></p>
+<li>列 = 参与关系的所有实体集的主键（作为外键） + 关系集自身的属性。</li>
+<li>主键 = 参与关系的所有实体集的主键的<strong>组合</strong>。</li>
+</ul>
+</li>
+<li><strong>一对多 (1:N) / 一对一 (1:1):</strong> <strong>不创建新表</strong>。在“多”端（或任意一端）的实体表里，添加“一”端实体的主键作为<strong>外键</strong>。关系集的属性也一并添加到该表中。</li>
+</ul>
+</li>
+<li><strong>多值属性：</strong> 为每个多值属性创建一个新表。
                 <ul>
-                <li><strong>概念：</strong> 将多个具有共同属性的实体集（子类）抽象出一个更通用的实体集（超类）。例如，从<code>轿车(Car)</code>和<code>卡车(Truck)</code>中泛化出<code>车辆(Vehicle)</code>。</li>
-                <li>特化和泛化是同一概念的两种不同视角，在E-R图中表示法相同。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>设计约束：</strong></p>
+<li>列 = 拥有该属性的实体集的主键（作为外键） + 多值属性本身。</li>
+<li>主键 = 两列的组合。</li>
+</ul>
+</li>
+<li><strong>继承 (ISA关系):</strong> 有多种策略，各有优劣。
                 <ul>
-                <li><strong>不相交 (Disjoint) vs. 重叠 (Overlapping):</strong>
-                <ul>
-                <li><code>Disjoint</code>: 一个超类实体最多只能是一个子类的成员（如一个人不能既是<code>Student</code>又是<code>Instructor</code>）。</li>
-                <li><code>Overlapping</code>: 允许同时是多个子类的成员。</li>
-                </ul>
-                </li>
-                <li><strong>全部 (Total) vs. 部分 (Partial):</strong>
-                <ul>
-                <li><code>Total</code>: 每个超类实体<strong>必须</strong>是某个子类的成员（如每个<code>Person</code>都必须是<code>Student</code>或<code>Instructor</code>）。</li>
-                <li><code>Partial</code>: 允许超类实体不属于任何一个子类。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>设计哲学：</strong> 继承（ISA关系）是面向对象思想在数据建模中的应用。它能极好地处理“is a kind of”关系，减少了模型冗余，提高了模型的表达力和可扩展性。</p>
-                <ul>
-                <li><strong>聚集 (Aggregation)：将关系视为实体</strong>
-                <ul>
-                <li><strong>问题：</strong> 如何表达“关系”与“实体”之间的关系？例如，一个<code>员工(Employee)</code>被指派去<strong>监督</strong>一个<code>项目(Project)</code>的某个<code>工作(Job)</code>。这里的“监督(sponsorship)”关系，其对象不是<code>Project</code>也不是<code>Job</code>，而是“在某个项目上的某个工作”这个<strong>关联本身</strong>。</li>
-                <li><strong>解决方案：</strong> 聚集允许我们将一个关系集（如<code>proj_job</code>）及其参与的实体集（<code>Project</code>, <code>Job</code>）<strong>打包</strong>成一个抽象的、更高层次的“聚合实体”，然后让其他实体（如<code>Employee</code>）与这个聚合体建立关系。</li>
-                <li>在E-R图中，用一个<strong>虚线框</strong>将要聚集的部分框起来。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>设计哲学：</strong> 聚集提供了一种处理复杂关联的<strong>抽象机制</strong>，它提升了模型的层次，使得我们可以把一个复杂的子系统看作一个单一的单元来对待。</p>
-                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E4%BB%8Ee-r%E5%9B%BE%E5%88%B0%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%BC%8F--%E7%B3%BB%E7%BB%9F%E7%9A%84%E8%BD%AC%E6%8D%A2%E7%AE%97%E6%B3%95"><strong>第四部分：从E-R图到关系模式 —— 系统的转换算法</strong></h3>
-                <p>这是将设计蓝图变为具体施工指令的关键一步。以下是一套可以机械执行的规则：</p>
-                <ol>
-                <li><strong>强实体集：</strong> 为每个强实体集创建一个同名表。表的列是该实体集的所有<strong>简单属性</strong>（复合属性则取其叶子节点）。主键就是实体集的主键。</li>
-                <li><strong>弱实体集：</strong> 为每个弱实体集创建一个表。
-                <ul>
-                <li>列 = 弱实体集的所有属性 + <strong>标识强实体集的主键</strong>（作为外键）。</li>
-                <li>表的主键 = <strong>强实体集的主键 + 弱实体集的分辨符</strong>。</li>
-                </ul>
-                </li>
-                <li><strong>关系集：</strong>
-                <ul>
-                <li><strong>多对多 (M:N):</strong> 创建一个新表。
-                <ul>
-                <li>列 = 参与关系的所有实体集的主键（作为外键） + 关系集自身的属性。</li>
-                <li>主键 = 参与关系的所有实体集的主键的<strong>组合</strong>。</li>
-                </ul>
-                </li>
-                <li><strong>一对多 (1:N) / 一对一 (1:1):</strong> <strong>不创建新表</strong>。在“多”端（或任意一端）的实体表里，添加“一”端实体的主键作为<strong>外键</strong>。关系集的属性也一并添加到该表中。</li>
-                </ul>
-                </li>
-                <li><strong>多值属性：</strong> 为每个多值属性创建一个新表。
-                <ul>
-                <li>列 = 拥有该属性的实体集的主键（作为外键） + 多值属性本身。</li>
-                <li>主键 = 两列的组合。</li>
-                </ul>
-                </li>
-                <li><strong>继承 (ISA关系):</strong> 有多种策略，各有优劣。
-                <ul>
-                <li><strong>策略一（每个实体一个表）：</strong> 为超类和每个子类都创建一个表。子类的表只包含其特有属性和超类的主键（作为主键和外键）。获取一个子类的完整信息需要<strong>连接查询</strong>。</li>
-                <li><strong>策略二（所有子类一个表）：</strong> 只为每个子类创建一个表。每个子类的表包含<strong>继承的属性</strong>和<strong>自身的属性</strong>。超类不创建表（或用视图模拟）。访问单个子类很快，但如果要查询所有<code>Person</code>，则需要<code>UNION</code>多个表。</li>
-                <li><strong>策略三（所有实体一个表）：</strong> 只创建一个大表，包含超类和所有子类的<strong>全部属性</strong>，外加一个<code>type</code>字段来区分实体类型。对于不适用的属性，其值为<code>NULL</code>。<strong>优点：</strong> 无需连接。<strong>缺点：</strong> 大量<code>NULL</code>值，空间浪费，违反范式。</li>
-                </ul>
-                </li>
-                </ol>
-                <p><strong>设计决策：</strong> 继承的转换策略没有绝对的好坏，需要根据查询模式（是经常查父类还是子类？）、数据重叠度等因素来权衡选择。</p>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li><strong>策略一（每个实体一个表）：</strong> 为超类和每个子类都创建一个表。子类的表只包含其特有属性和超类的主键（作为主键和外键）。获取一个子类的完整信息需要<strong>连接查询</strong>。</li>
+<li><strong>策略二（所有子类一个表）：</strong> 只为每个子类创建一个表。每个子类的表包含<strong>继承的属性</strong>和<strong>自身的属性</strong>。超类不创建表（或用视图模拟）。访问单个子类很快，但如果要查询所有<code>Person</code>，则需要<code>UNION</code>多个表。</li>
+<li><strong>策略三（所有实体一个表）：</strong> 只创建一个大表，包含超类和所有子类的<strong>全部属性</strong>，外加一个<code>type</code>字段来区分实体类型。对于不适用的属性，其值为<code>NULL</code>。<strong>优点：</strong> 无需连接。<strong>缺点：</strong> 大量<code>NULL</code>值，空间浪费，违反范式。</li>
+</ul>
+</li>
+</ol>
+<p><strong>设计决策：</strong> 继承的转换策略没有绝对的好坏，需要根据查询模式（是经常查父类还是子类？）、数据重叠度等因素来权衡选择。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

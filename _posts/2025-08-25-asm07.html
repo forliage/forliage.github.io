@@ -1,13 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>x86汇编07:函数</title>
-    
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    
-    <script>
+<meta charset="utf-8"/>
+<title>x86汇编07:函数</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -18,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -32,67 +30,67 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="x86%E6%B1%87%E7%BC%9607%E5%87%BD%E6%95%B0">x86汇编07:函数</h1>
-                <h3 id="1-%E5%87%BD%E6%95%B0%E7%9A%84%E5%AE%9A%E4%B9%89-defining-a-function"><strong>1 函数的定义 (Defining a Function)</strong></h3>
-                <p>在汇编中，“定义”一个函数，本质上只是在代码段中标示出一段代码的起点和终点。汇编器提供了两种方式来做到这一点。</p>
-                <h4 id="11-%E7%94%A8%E6%A0%87%E5%8F%B7%E5%AE%9A%E4%B9%89%E5%87%BD%E6%95%B0"><strong>1.1 用标号定义函数</strong></h4>
-                <p>这是最简单、最纯粹的方式。一个函数就是一个以唯一标号开始，以<code>RET</code>指令结束的代码块。</p>
-                <pre class="hljs"><code><div>my_function:            ; 函数入口点 (标号)
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="x86%E6%B1%87%E7%BC%9607%E5%87%BD%E6%95%B0">x86汇编07:函数</h1>
+<h3 id="1-%E5%87%BD%E6%95%B0%E7%9A%84%E5%AE%9A%E4%B9%89-defining-a-function"><strong>1 函数的定义 (Defining a Function)</strong></h3>
+<p>在汇编中，“定义”一个函数，本质上只是在代码段中标示出一段代码的起点和终点。汇编器提供了两种方式来做到这一点。</p>
+<h4 id="11-%E7%94%A8%E6%A0%87%E5%8F%B7%E5%AE%9A%E4%B9%89%E5%87%BD%E6%95%B0"><strong>1.1 用标号定义函数</strong></h4>
+<p>这是最简单、最纯粹的方式。一个函数就是一个以唯一标号开始，以<code>RET</code>指令结束的代码块。</p>
+<pre class="hljs"><code><div>my_function:            ; 函数入口点 (标号)
                     ; --- 函数体 ---
                     ...
                     RET                 ; 函数出口点 (返回指令)
                 </div></code></pre>
-                <ul>
-                <li><strong>设计视角</strong>: 这种方式简单直接，但缺乏结构性。汇编器除了知道<code>my_function</code>是一个地址外，对它作为“函数”的身份一无所知。</li>
-                </ul>
-                <h4 id="12-%E7%94%A8proc%E4%BC%AA%E6%8C%87%E4%BB%A4%E5%AE%9A%E4%B9%89%E5%87%BD%E6%95%B0"><strong>1.2 用<code>proc</code>伪指令定义函数</strong></h4>
-                <p>为了增强代码的可读性和结构性，汇编器（如MASM）提供了<code>PROC</code>和<code>ENDP</code>伪指令来显式地定义一个过程（Procedure）。</p>
-                <pre class="hljs"><code><div>my_function PROC [NEAR|FAR] ; 定义过程开始
+<ul>
+<li><strong>设计视角</strong>: 这种方式简单直接，但缺乏结构性。汇编器除了知道<code>my_function</code>是一个地址外，对它作为“函数”的身份一无所知。</li>
+</ul>
+<h4 id="12-%E7%94%A8proc%E4%BC%AA%E6%8C%87%E4%BB%A4%E5%AE%9A%E4%B9%89%E5%87%BD%E6%95%B0"><strong>1.2 用<code>proc</code>伪指令定义函数</strong></h4>
+<p>为了增强代码的可读性和结构性，汇编器（如MASM）提供了<code>PROC</code>和<code>ENDP</code>伪指令来显式地定义一个过程（Procedure）。</p>
+<pre class="hljs"><code><div>my_function PROC [NEAR|FAR] ; 定义过程开始
                     ; --- 函数体 ---
                     ...
                     RET
                 my_function ENDP            ; 定义过程结束
                 </div></code></pre>
-                <ul>
-                <li><strong><code>NEAR</code>或<code>FAR</code></strong>: 指定了这个函数是被段内调用（<code>CALL NEAR</code>）还是段间调用（<code>CALL FAR</code>）。这有助于汇编器生成正确的<code>CALL</code>和<code>RET</code>指令（<code>RET</code> vs <code>RETF</code>）。</li>
-                <li><strong>设计视角</strong>: <code>PROC</code>/<code>ENDP</code>对汇编器有更丰富的语义。它帮助汇编器进行类型检查，并清晰地界定了函数的范围。对于阅读代码的人来说，这种形式也远比裸标号要清晰。这体现了编程工具从“能用”到“好用”的演进。</li>
-                </ul>
-                <h3 id="2-%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%82%E6%95%B0%E4%BC%A0%E9%80%92-parameter-passing"><strong>2 函数的参数传递 (Parameter Passing)</strong></h3>
-                <p>如何将数据从调用者（Caller）传递给被调用者（Callee）？这是函数设计中最核心的问题。主要有三种方法，各有优劣。</p>
-                <h4 id="21-%E7%94%A8%E5%AF%84%E5%AD%98%E5%99%A8%E4%BC%A0%E9%80%92%E5%8F%82%E6%95%B0"><strong>2.1 用寄存器传递参数</strong></h4>
-                <ul>
-                <li><strong>方法</strong>: 调用者在执行<code>CALL</code>指令前，将参数放入约定的通用寄存器中。被调用者直接从这些寄存器中读取参数。</li>
-                <li><strong>优点</strong>: <strong>速度极快</strong>。寄存器是CPU中最快的存储单元，避免了内存访问的开销。</li>
-                <li><strong>缺点</strong>:
+<ul>
+<li><strong><code>NEAR</code>或<code>FAR</code></strong>: 指定了这个函数是被段内调用（<code>CALL NEAR</code>）还是段间调用（<code>CALL FAR</code>）。这有助于汇编器生成正确的<code>CALL</code>和<code>RET</code>指令（<code>RET</code> vs <code>RETF</code>）。</li>
+<li><strong>设计视角</strong>: <code>PROC</code>/<code>ENDP</code>对汇编器有更丰富的语义。它帮助汇编器进行类型检查，并清晰地界定了函数的范围。对于阅读代码的人来说，这种形式也远比裸标号要清晰。这体现了编程工具从“能用”到“好用”的演进。</li>
+</ul>
+<h3 id="2-%E5%87%BD%E6%95%B0%E7%9A%84%E5%8F%82%E6%95%B0%E4%BC%A0%E9%80%92-parameter-passing"><strong>2 函数的参数传递 (Parameter Passing)</strong></h3>
+<p>如何将数据从调用者（Caller）传递给被调用者（Callee）？这是函数设计中最核心的问题。主要有三种方法，各有优劣。</p>
+<h4 id="21-%E7%94%A8%E5%AF%84%E5%AD%98%E5%99%A8%E4%BC%A0%E9%80%92%E5%8F%82%E6%95%B0"><strong>2.1 用寄存器传递参数</strong></h4>
+<ul>
+<li><strong>方法</strong>: 调用者在执行<code>CALL</code>指令前，将参数放入约定的通用寄存器中。被调用者直接从这些寄存器中读取参数。</li>
+<li><strong>优点</strong>: <strong>速度极快</strong>。寄存器是CPU中最快的存储单元，避免了内存访问的开销。</li>
+<li><strong>缺点</strong>:
                 <ol>
-                <li><strong>数量有限</strong>: 通用寄存器的数量非常少，无法传递大量参数。</li>
-                <li><strong>破坏性</strong>: 参数会覆盖寄存器原有的值。如果调用者后续还需要使用这些寄存器，必须提前<code>PUSH</code>保存，调用结束后<code>POP</code>恢复。</li>
-                <li><strong>缺乏规范</strong>: 如果没有统一约定，程序员A可能用<code>AX</code>传参，程序员B可能用<code>DX</code>，导致代码无法互操作。</li>
-                </ol>
-                </li>
-                <li><strong>系统层面</strong>: 这种方式非常适合那些被频繁调用、性能要求极高、参数很少的内部辅助函数。现代的 <strong><code>fastcall</code></strong> 调用约定就是一种标准化的寄存器传参规范，它约定前几个参数通过<code>ECX</code>, <code>EDX</code>等传递，以提升性能。</li>
-                <li><strong>例子</strong>: 一个计算<code>ax = bx + cx</code>的函数<pre class="hljs"><code><div>; --- 调用者 ---
+<li><strong>数量有限</strong>: 通用寄存器的数量非常少，无法传递大量参数。</li>
+<li><strong>破坏性</strong>: 参数会覆盖寄存器原有的值。如果调用者后续还需要使用这些寄存器，必须提前<code>PUSH</code>保存，调用结束后<code>POP</code>恢复。</li>
+<li><strong>缺乏规范</strong>: 如果没有统一约定，程序员A可能用<code>AX</code>传参，程序员B可能用<code>DX</code>，导致代码无法互操作。</li>
+</ol>
+</li>
+<li><strong>系统层面</strong>: 这种方式非常适合那些被频繁调用、性能要求极高、参数很少的内部辅助函数。现代的 <strong><code>fastcall</code></strong> 调用约定就是一种标准化的寄存器传参规范，它约定前几个参数通过<code>ECX</code>, <code>EDX</code>等传递，以提升性能。</li>
+<li><strong>例子</strong>: 一个计算<code>ax = bx + cx</code>的函数<pre class="hljs"><code><div>; --- 调用者 ---
                 MOV BX, 10
                 MOV CX, 20
                 CALL add_func
@@ -105,51 +103,51 @@
                 RET
                 add_func ENDP
                 </div></code></pre>
-                </li>
-                </ul>
-                <h4 id="22-%E7%94%A8%E5%8F%98%E9%87%8F%E4%BC%A0%E9%80%92%E5%8F%82%E6%95%B0"><strong>2.2 用变量传递参数</strong></h4>
-                <ul>
-                <li><strong>方法</strong>: 调用者将参数存放在约定的全局变量或内存地址中。被调用者从这些地址读取参数。</li>
-                <li><strong>优点</strong>:
+</li>
+</ul>
+<h4 id="22-%E7%94%A8%E5%8F%98%E9%87%8F%E4%BC%A0%E9%80%92%E5%8F%82%E6%95%B0"><strong>2.2 用变量传递参数</strong></h4>
+<ul>
+<li><strong>方法</strong>: 调用者将参数存放在约定的全局变量或内存地址中。被调用者从这些地址读取参数。</li>
+<li><strong>优点</strong>:
                 <ol>
-                <li><strong>参数数量和大小不受限</strong>。</li>
-                <li><strong>非破坏性</strong>: 不会占用宝贵的寄存器。</li>
-                </ol>
-                </li>
-                <li><strong>缺点</strong>:
+<li><strong>参数数量和大小不受限</strong>。</li>
+<li><strong>非破坏性</strong>: 不会占用宝贵的寄存器。</li>
+</ol>
+</li>
+<li><strong>缺点</strong>:
                 <ol>
-                <li><strong>速度慢</strong>: 每次参数传递都涉及内存读写，开销较大。</li>
-                <li><strong>非可重入 (Not Re-entrant)</strong>: 如果这个函数可能被中断，而中断服务程序又调用了同一个函数，那么后一次调用会覆盖前一次调用的参数，导致程序崩溃。因此，<strong>这种方法在多线程或中断驱动的环境下是极其危险的</strong>。</li>
-                </ol>
-                </li>
-                <li><strong>系统层面</strong>: 适用于参数是大型数据结构（如一个大数组或结构体）的情况，此时通常传递的是这个数据结构的<strong>地址</strong>。</li>
-                </ul>
-                <h4 id="23-%E7%94%A8%E5%A0%86%E6%A0%88%E4%BC%A0%E9%80%92%E5%8F%82%E6%95%B0-the-standard-way"><strong>2.3 用堆栈传递参数 (The Standard Way)</strong></h4>
-                <p>这是最通用、最强大、也是C语言等高级语言默认采用的方式。</p>
-                <ul>
-                <li><strong>方法</strong>: 调用者在<code>CALL</code>指令前，将参数<strong>压入堆栈</strong>。被调用者通过访问堆栈来获取参数。</li>
-                <li><strong>优点</strong>:
+<li><strong>速度慢</strong>: 每次参数传递都涉及内存读写，开销较大。</li>
+<li><strong>非可重入 (Not Re-entrant)</strong>: 如果这个函数可能被中断，而中断服务程序又调用了同一个函数，那么后一次调用会覆盖前一次调用的参数，导致程序崩溃。因此，<strong>这种方法在多线程或中断驱动的环境下是极其危险的</strong>。</li>
+</ol>
+</li>
+<li><strong>系统层面</strong>: 适用于参数是大型数据结构（如一个大数组或结构体）的情况，此时通常传递的是这个数据结构的<strong>地址</strong>。</li>
+</ul>
+<h4 id="23-%E7%94%A8%E5%A0%86%E6%A0%88%E4%BC%A0%E9%80%92%E5%8F%82%E6%95%B0-the-standard-way"><strong>2.3 用堆栈传递参数 (The Standard Way)</strong></h4>
+<p>这是最通用、最强大、也是C语言等高级语言默认采用的方式。</p>
+<ul>
+<li><strong>方法</strong>: 调用者在<code>CALL</code>指令前，将参数<strong>压入堆栈</strong>。被调用者通过访问堆栈来获取参数。</li>
+<li><strong>优点</strong>:
                 <ol>
-                <li><strong>参数数量和大小几乎不受限</strong>（仅受限于堆栈大小）。</li>
-                <li><strong>支持可重入和递归</strong>: 每次函数调用都在堆栈上创建自己独立的“工作区”，互不干扰。</li>
-                </ol>
-                </li>
-                <li><strong>缺点</strong>: 比寄存器传参慢，因为涉及内存操作。</li>
-                </ul>
-                <p><strong>动态变量与栈帧 (Stack Frame)</strong>
+<li><strong>参数数量和大小几乎不受限</strong>（仅受限于堆栈大小）。</li>
+<li><strong>支持可重入和递归</strong>: 每次函数调用都在堆栈上创建自己独立的“工作区”，互不干扰。</li>
+</ol>
+</li>
+<li><strong>缺点</strong>: 比寄存器传参慢，因为涉及内存操作。</li>
+</ul>
+<p><strong>动态变量与栈帧 (Stack Frame)</strong>
                 为了在堆栈上高效、可靠地访问参数和局部变量，几乎所有函数都会在开头建立一个称为<strong>栈帧 (Stack Frame)</strong> 的结构。</p>
-                <ul>
-                <li><strong>建立栈帧 (Prologue):</strong><pre class="hljs"><code><div>PUSH EBP            ; 1. 保存调用者的栈帧基址
+<ul>
+<li><strong>建立栈帧 (Prologue):</strong><pre class="hljs"><code><div>PUSH EBP            ; 1. 保存调用者的栈帧基址
                 MOV  EBP, ESP       ; 2. 将当前栈顶设为新的栈帧基址
                 SUB  ESP, local_size; 3. 为局部变量(动态变量)分配空间
                 </div></code></pre>
-                </li>
-                <li><strong>销毁栈帧 (Epilogue):</strong><pre class="hljs"><code><div>MOV  ESP, EBP       ; 1. 释放局部变量空间
+</li>
+<li><strong>销毁栈帧 (Epilogue):</strong><pre class="hljs"><code><div>MOV  ESP, EBP       ; 1. 释放局部变量空间
                 POP  EBP            ; 2. 恢复调用者的栈帧基址
                 RET
                 </div></code></pre>
-                </li>
-                <li><strong>栈帧结构图:</strong>
+</li>
+<li><strong>栈帧结构图:</strong>
                 当函数执行到<code>SUB ESP</code>之后，堆栈的布局如下：<pre class="hljs"><code><div>    高地址  +-----------------+
                             |    参数 n       |
                             +-----------------+  &lt;-- [EBP + 4 + 4*n]
@@ -169,22 +167,22 @@
                     ESP -&gt;  +-----------------+  &lt;-- 栈顶
                     低地址
                 </div></code></pre>
-                </li>
-                <li><strong>设计与CPU架构</strong>: <code>EBP</code>寄存器的作用是提供一个在函数执行期间<strong>稳定不变的基准点</strong>。<code>ESP</code>作为栈顶指针，在<code>PUSH</code>/<code>POP</code>操作中会不断变化，如果直接用<code>[ESP + offset]</code>来访问参数，<code>offset</code>的值会非常难以计算。而有了<code>EBP</code>，无论<code>ESP</code>如何变化，<code>[EBP + 8]</code>永远指向第一个参数，<code>[EBP - 4]</code>永远指向第一个局部变量。这极大地简化了编译器的代码生成和程序员的手动编码。</li>
-                </ul>
-                <h4 id="%E8%B0%83%E7%94%A8%E7%BA%A6%E5%AE%9A-calling-conventions"><strong>调用约定 (Calling Conventions)</strong></h4>
-                <p>谁负责将参数<code>PUSH</code>入栈？谁负责在函数返回后清理堆栈？这些问题由<strong>调用约定</strong>来规范。</p>
-                <h5 id="231-cdecl"><strong>2.3.1 <code>__cdecl</code></strong></h5>
-                <ul>
-                <li><strong>C语言默认约定</strong>。</li>
-                <li><strong>规则</strong>:
+</li>
+<li><strong>设计与CPU架构</strong>: <code>EBP</code>寄存器的作用是提供一个在函数执行期间<strong>稳定不变的基准点</strong>。<code>ESP</code>作为栈顶指针，在<code>PUSH</code>/<code>POP</code>操作中会不断变化，如果直接用<code>[ESP + offset]</code>来访问参数，<code>offset</code>的值会非常难以计算。而有了<code>EBP</code>，无论<code>ESP</code>如何变化，<code>[EBP + 8]</code>永远指向第一个参数，<code>[EBP - 4]</code>永远指向第一个局部变量。这极大地简化了编译器的代码生成和程序员的手动编码。</li>
+</ul>
+<h4 id="%E8%B0%83%E7%94%A8%E7%BA%A6%E5%AE%9A-calling-conventions"><strong>调用约定 (Calling Conventions)</strong></h4>
+<p>谁负责将参数<code>PUSH</code>入栈？谁负责在函数返回后清理堆栈？这些问题由<strong>调用约定</strong>来规范。</p>
+<h5 id="231-cdecl"><strong>2.3.1 <code>__cdecl</code></strong></h5>
+<ul>
+<li><strong>C语言默认约定</strong>。</li>
+<li><strong>规则</strong>:
                 <ol>
-                <li>参数<strong>从右到左</strong>依次压栈。</li>
-                <li><strong>调用者 (Caller)</strong> 负责清理堆栈。</li>
-                </ol>
-                </li>
-                <li><strong>优点</strong>: 支持<strong>可变参数函数</strong>（如<code>printf</code>）。因为调用者知道自己压入了多少个参数，所以它可以正确地清理堆栈。被调用者（如<code>printf</code>）则从左到右读取参数，直到遇到格式化字符串的结尾。</li>
-                <li><strong>例子</strong>: <code>my_func(1, 2, 3)</code><pre class="hljs"><code><div>; --- 调用者 ---
+<li>参数<strong>从右到左</strong>依次压栈。</li>
+<li><strong>调用者 (Caller)</strong> 负责清理堆栈。</li>
+</ol>
+</li>
+<li><strong>优点</strong>: 支持<strong>可变参数函数</strong>（如<code>printf</code>）。因为调用者知道自己压入了多少个参数，所以它可以正确地清理堆栈。被调用者（如<code>printf</code>）则从左到右读取参数，直到遇到格式化字符串的结尾。</li>
+<li><strong>例子</strong>: <code>my_func(1, 2, 3)</code><pre class="hljs"><code><div>; --- 调用者 ---
                 PUSH 3
                 PUSH 2
                 PUSH 1
@@ -195,31 +193,31 @@
                 ...
                 RET           ; 直接返回
                 </div></code></pre>
-                </li>
-                </ul>
-                <h5 id="232-pascal"><strong>2.3.2 <code>__pascal</code></strong></h5>
-                <ul>
-                <li><strong>Pascal语言约定</strong>。</li>
-                <li><strong>规则</strong>:
+</li>
+</ul>
+<h5 id="232-pascal"><strong>2.3.2 <code>__pascal</code></strong></h5>
+<ul>
+<li><strong>Pascal语言约定</strong>。</li>
+<li><strong>规则</strong>:
                 <ol>
-                <li>参数<strong>从左到右</strong>依次压栈。</li>
-                <li><strong>被调用者 (Callee)</strong> 负责清理堆Stacks。</li>
-                </ol>
-                </li>
-                <li><strong>缺点</strong>: 不支持可变参数。因为被调用者在编译时必须知道参数的总大小，才能生成正确的<code>RET n</code>指令。</li>
-                <li><strong>优点</strong>: 生成的代码比<code>cdecl</code>稍微紧凑一些，因为多条<code>CALL</code>指令可以共用一次堆栈清理，而不是每条<code>CALL</code>后都跟一条<code>ADD ESP, n</code>。</li>
-                </ul>
-                <h5 id="233-stdcall"><strong>2.3.3 <code>__stdcall</code></strong></h5>
-                <ul>
-                <li><strong>Win32 API 标准约定</strong>。</li>
-                <li><strong>规则</strong>:
+<li>参数<strong>从左到右</strong>依次压栈。</li>
+<li><strong>被调用者 (Callee)</strong> 负责清理堆Stacks。</li>
+</ol>
+</li>
+<li><strong>缺点</strong>: 不支持可变参数。因为被调用者在编译时必须知道参数的总大小，才能生成正确的<code>RET n</code>指令。</li>
+<li><strong>优点</strong>: 生成的代码比<code>cdecl</code>稍微紧凑一些，因为多条<code>CALL</code>指令可以共用一次堆栈清理，而不是每条<code>CALL</code>后都跟一条<code>ADD ESP, n</code>。</li>
+</ul>
+<h5 id="233-stdcall"><strong>2.3.3 <code>__stdcall</code></strong></h5>
+<ul>
+<li><strong>Win32 API 标准约定</strong>。</li>
+<li><strong>规则</strong>:
                 <ol>
-                <li>参数<strong>从右到左</strong>依次压栈（同<code>cdecl</code>）。</li>
-                <li><strong>被调用者 (Callee)</strong> 负责清理堆栈（同<code>pascal</code>）。</li>
-                </ol>
-                </li>
-                <li><strong>设计哲学</strong>: 这是<code>cdecl</code>和<code>pascal</code>的折衷。它比<code>cdecl</code>代码尺寸小，同时“从右到左”的压栈顺序在某些架构上被认为更自然。这是Windows平台上最常见的调用约定。</li>
-                <li><strong>例子</strong>: <code>my_func(1, 2, 3)</code><pre class="hljs"><code><div>; --- 调用者 ---
+<li>参数<strong>从右到左</strong>依次压栈（同<code>cdecl</code>）。</li>
+<li><strong>被调用者 (Callee)</strong> 负责清理堆栈（同<code>pascal</code>）。</li>
+</ol>
+</li>
+<li><strong>设计哲学</strong>: 这是<code>cdecl</code>和<code>pascal</code>的折衷。它比<code>cdecl</code>代码尺寸小，同时“从右到左”的压栈顺序在某些架构上被认为更自然。这是Windows平台上最常见的调用约定。</li>
+<li><strong>例子</strong>: <code>my_func(1, 2, 3)</code><pre class="hljs"><code><div>; --- 调用者 ---
                 PUSH 3
                 PUSH 2
                 PUSH 1
@@ -230,28 +228,28 @@
                 ...
                 RET 12        ; 被调用者清理12字节堆栈
                 </div></code></pre>
-                </li>
-                </ul>
-                <h3 id="3-%E9%80%92%E5%BD%92-recursion"><strong>3递归 (Recursion)</strong></h3>
-                <p>递归函数就是一个会直接或间接调用自身的函数。在高级语言中，这是一个强大的抽象工具。那么，它在底层是如何实现的呢？</p>
-                <p><strong>递归的CPU架构层面合理性</strong>:
+</li>
+</ul>
+<h3 id="3-%E9%80%92%E5%BD%92-recursion"><strong>3递归 (Recursion)</strong></h3>
+<p>递归函数就是一个会直接或间接调用自身的函数。在高级语言中，这是一个强大的抽象工具。那么，它在底层是如何实现的呢？</p>
+<p><strong>递归的CPU架构层面合理性</strong>:
                 递归之所以能够在x86架构上（以及几乎所有现代架构上）完美实现，完全得益于<strong>基于堆栈的函数调用机制</strong>。</p>
-                <ol>
-                <li><strong>独立的上下文</strong>: 每一次递归调用，都会在堆栈上创建一个<strong>全新的、独立的栈帧</strong>。</li>
-                <li><strong>状态隔离</strong>: 这个新的栈帧包含了它自己的<strong>返回地址、旧EBP、局部变量和参数</strong>。它与上一次调用的栈帧在内存上是完全隔离的。</li>
-                <li><strong>LIFO行为</strong>: <code>CALL</code>和<code>RET</code>指令天生就是后进先出（LIFO）的。最后一次调用最先返回，正好符合递归“层层深入，再层层返回”的模式。</li>
-                </ol>
-                <p>可以说，<strong>CPU的堆栈架构就是为实现递归而生的</strong>。没有堆栈，递归几乎无法实现。</p>
-                <ul>
-                <li><strong>例子</strong>: 计算阶乘 <code>factorial(n)</code><pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">factorial</span><span class="hljs-params">(<span class="hljs-keyword">int</span> n)</span> </span>{
+<ol>
+<li><strong>独立的上下文</strong>: 每一次递归调用，都会在堆栈上创建一个<strong>全新的、独立的栈帧</strong>。</li>
+<li><strong>状态隔离</strong>: 这个新的栈帧包含了它自己的<strong>返回地址、旧EBP、局部变量和参数</strong>。它与上一次调用的栈帧在内存上是完全隔离的。</li>
+<li><strong>LIFO行为</strong>: <code>CALL</code>和<code>RET</code>指令天生就是后进先出（LIFO）的。最后一次调用最先返回，正好符合递归“层层深入，再层层返回”的模式。</li>
+</ol>
+<p>可以说，<strong>CPU的堆栈架构就是为实现递归而生的</strong>。没有堆栈，递归几乎无法实现。</p>
+<ul>
+<li><strong>例子</strong>: 计算阶乘 <code>factorial(n)</code><pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">factorial</span><span class="hljs-params">(<span class="hljs-keyword">int</span> n)</span> </span>{
                     <span class="hljs-keyword">if</span> (n &lt;= <span class="hljs-number">1</span>)
                         <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
                     <span class="hljs-keyword">else</span>
                         <span class="hljs-keyword">return</span> n * factorial(n - <span class="hljs-number">1</span>);
                 }
                 </div></code></pre>
-                </li>
-                <li><strong>汇编实现 (<code>cdecl</code>):</strong><pre class="hljs"><code><div>factorial PROC
+</li>
+<li><strong>汇编实现 (<code>cdecl</code>):</strong><pre class="hljs"><code><div>factorial PROC
                     ; --- 栈帧建立 ---
                     PUSH EBP
                     MOV EBP, ESP
@@ -286,43 +284,68 @@
                 </div></code></pre>
                 当调用<code>factorial(3)</code>时，堆栈会像这样增长和收缩，每一层都有自己独立的<code>n</code>值和返回地址，互不干扰：
                 <ol>
-                <li><code>CALL factorial(3)</code> -&gt; 创建<code>n=3</code>的栈帧。</li>
-                <li><code>CALL factorial(2)</code> -&gt; 创建<code>n=2</code>的栈帧。</li>
-                <li><code>CALL factorial(1)</code> -&gt; 创建<code>n=1</code>的栈帧。</li>
-                <li><code>factorial(1)</code>返回1。</li>
-                <li><code>factorial(2)</code>的栈帧恢复，计算 <code>2 * 1</code>，返回2。</li>
-                <li><code>factorial(3)</code>的栈帧恢复，计算 <code>3 * 2</code>，返回6。</li>
-                </ol>
-                </li>
-                </ul>
-            </article>
-        </main>
-    </div>
-    
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li><code>CALL factorial(3)</code> -&gt; 创建<code>n=3</code>的栈帧。</li>
+<li><code>CALL factorial(2)</code> -&gt; 创建<code>n=2</code>的栈帧。</li>
+<li><code>CALL factorial(1)</code> -&gt; 创建<code>n=1</code>的栈帧。</li>
+<li><code>factorial(1)</code>返回1。</li>
+<li><code>factorial(2)</code>的栈帧恢复，计算 <code>2 * 1</code>，返回2。</li>
+<li><code>factorial(3)</code>的栈帧恢复，计算 <code>3 * 2</code>，返回6。</li>
+</ol>
+</li>
+</ul>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

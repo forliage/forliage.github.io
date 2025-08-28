@@ -1,13 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>图像信息处理2:图像灰度变换与直方图处理</title>
-    
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    
-    <script>
+<meta charset="utf-8"/>
+<title>图像信息处理2:图像灰度变换与直方图处理</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -18,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -32,59 +30,59 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E5%9B%BE%E5%83%8F%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%862%E5%9B%BE%E5%83%8F%E7%81%B0%E5%BA%A6%E5%8F%98%E6%8D%A2%E4%B8%8E%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%A4%84%E7%90%86">图像信息处理2:图像灰度变换与直方图处理</h1>
-                <h3 id="1-%E5%9B%BE%E5%83%8F%E7%9A%84%E5%8F%AF%E8%A7%81%E6%80%A7%E4%B8%8E%E6%84%9F%E7%9F%A5-visibility-of-image-and-perception"><strong>1. 图像的可见性与感知 (Visibility of Image and Perception)</strong></h3>
-                <p>我们处理图像的最终目的是为了呈现给人类观察或由机器分析。因此，了解人眼的视觉特性和显示设备的工作原理，是进行有效图像增强的基础。</p>
-                <h4 id="11-%E9%9F%A6%E4%BC%AF-%E8%B4%B9%E5%B8%8C%E7%BA%B3%E5%AE%9A%E5%BE%8B-weber-fechner-law"><strong>1.1 韦伯-费希纳定律 (Weber-Fechner Law)</strong></h4>
-                <ul>
-                <li>
-                <p><strong>韦伯定律 (Weber's Law):</strong> 描述了人类对刺激变化的感知能力。对于亮度感知而言，它指出，人眼能感知到的最小亮度变化量（Just Noticeable Difference, JND），即$\Delta I$，与当前背景亮度$I$近似成正比。
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E5%9B%BE%E5%83%8F%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%862%E5%9B%BE%E5%83%8F%E7%81%B0%E5%BA%A6%E5%8F%98%E6%8D%A2%E4%B8%8E%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%A4%84%E7%90%86">图像信息处理2:图像灰度变换与直方图处理</h1>
+<h3 id="1-%E5%9B%BE%E5%83%8F%E7%9A%84%E5%8F%AF%E8%A7%81%E6%80%A7%E4%B8%8E%E6%84%9F%E7%9F%A5-visibility-of-image-and-perception"><strong>1. 图像的可见性与感知 (Visibility of Image and Perception)</strong></h3>
+<p>我们处理图像的最终目的是为了呈现给人类观察或由机器分析。因此，了解人眼的视觉特性和显示设备的工作原理，是进行有效图像增强的基础。</p>
+<h4 id="11-%E9%9F%A6%E4%BC%AF-%E8%B4%B9%E5%B8%8C%E7%BA%B3%E5%AE%9A%E5%BE%8B-weber-fechner-law"><strong>1.1 韦伯-费希纳定律 (Weber-Fechner Law)</strong></h4>
+<ul>
+<li>
+<p><strong>韦伯定律 (Weber's Law):</strong> 描述了人类对刺激变化的感知能力。对于亮度感知而言，它指出，人眼能感知到的最小亮度变化量（Just Noticeable Difference, JND），即$\Delta I$，与当前背景亮度$I$近似成正比。
                 $$
                 \frac{\Delta I}{I} = K_{Weber}
                 $$
                 其中 $K_{Weber}$ 是一个常数（韦伯分数），对于中等亮度的视觉场景，其值约在0.01到0.02之间。这意味着，在明亮的环境中，需要更大的亮度绝对变化才能被察觉；而在昏暗环境中，微小的亮度变化就很容易被感知。</p>
-                </li>
-                <li>
-                <p><strong>费希纳定律 (Fechner's Law):</strong> 是韦伯定律的延伸，指出主观感知强度（如感觉到的亮度 $P$）与物理刺激强度（真实亮度 $I$）的对数成正比。
+</li>
+<li>
+<p><strong>费希纳定律 (Fechner's Law):</strong> 是韦伯定律的延伸，指出主观感知强度（如感觉到的亮度 $P$）与物理刺激强度（真实亮度 $I$）的对数成正比。
                 $$
                 P = k \log(I)
                 $$
                 这解释了为什么我们通常使用对数变换来增强图像的暗部细节——因为人眼对暗部的亮度变化更敏感。</p>
-                </li>
-                <li>
-                <p><strong>显示器的灰度级：</strong> 对于一个8位灰度图像（256级），如果我们假设相邻两个灰度级之间的亮度差异恰好是人眼可见的阈值 $\Delta I$，那么从最低亮度 $I_{min}$ 到最高亮度 $I_{max}$ 的关系可以推导如下：
+</li>
+<li>
+<p><strong>显示器的灰度级：</strong> 对于一个8位灰度图像（256级），如果我们假设相邻两个灰度级之间的亮度差异恰好是人眼可见的阈值 $\Delta I$，那么从最低亮度 $I_{min}$ 到最高亮度 $I_{max}$ 的关系可以推导如下：
                 令 $I_k$ 为第 $k$ 级的亮度，则 $I_k - I_{k-1} = K_{Weber} \cdot I_{k-1}$，即 $I_k = (1+K_{Weber})I_{k-1}$。这是一个等比数列。
                 $$
                 \frac{I_{max}}{I_{min}} = \frac{I_{255}}{I_0} = (1+K_{Weber})^{255}
                 $$
                 当 $K_{Weber}=0.01$ 时，$\frac{I_{max}}{I_{min}} \approx 12.7$。当 $K_{Weber}=0.02$ 时，$\frac{I_{max}}{I_{min}} \approx 156.9$。这揭示了要平滑地覆盖人眼的感知范围，显示设备需要有足够大的动态范围（对比度）。例如，传统的CRT显示器对比度可达100:1，而纸质打印品则只有约10:1。</p>
-                </li>
-                </ul>
-                <h4 id="12-gamma-%E6%A0%A1%E6%AD%A3-gamma-correction"><strong>1.2 Gamma 校正 (Gamma Correction)</strong></h4>
-                <ul>
-                <li><strong>物理原理：</strong> 早期的阴极射线管（CRT）显示器有一个物理特性：输入的电压 $V$ 与屏幕上产生的亮度 $I$ 之间不是线性关系，而是一个幂函数关系，即 $I \propto V^\gamma$。这个指数 $\gamma$（Gamma）的值通常在 2.0 到 2.5 之间。</li>
-                <li><strong>目的：</strong> 为了在屏幕上正确地再现原始场景的亮度，我们需要对输入的图像信号进行“预补偿”。这个过程就是Gamma校正。我们希望最终的屏幕亮度与原始图像的亮度 $I_{in}$ 成线性关系，即 $I_{out} \propto I_{in}$。
+</li>
+</ul>
+<h4 id="12-gamma-%E6%A0%A1%E6%AD%A3-gamma-correction"><strong>1.2 Gamma 校正 (Gamma Correction)</strong></h4>
+<ul>
+<li><strong>物理原理：</strong> 早期的阴极射线管（CRT）显示器有一个物理特性：输入的电压 $V$ 与屏幕上产生的亮度 $I$ 之间不是线性关系，而是一个幂函数关系，即 $I \propto V^\gamma$。这个指数 $\gamma$（Gamma）的值通常在 2.0 到 2.5 之间。</li>
+<li><strong>目的：</strong> 为了在屏幕上正确地再现原始场景的亮度，我们需要对输入的图像信号进行“预补偿”。这个过程就是Gamma校正。我们希望最终的屏幕亮度与原始图像的亮度 $I_{in}$ 成线性关系，即 $I_{out} \propto I_{in}$。
                 因为 $I_{out} \propto V^\gamma$，所以我们需要让 $V \propto I_{in}^{1/\gamma}$。这样一来：
                 $$
                 I_{out} \propto (I_{in}^{1/\gamma})^\gamma = I_{in}
@@ -93,45 +91,45 @@
                 $$
                 I_{out} = c \cdot I_{in}^{1/\gamma}
                 $$</li>
-                <li><strong>应用于图像增强：</strong> 虽然Gamma校正的初衷是设备补偿，但它也成为了一种强大的非线性图像增强工具。通过调整 $\gamma$ 值，我们可以改变图像的整体亮度和对比度。
+<li><strong>应用于图像增强：</strong> 虽然Gamma校正的初衷是设备补偿，但它也成为了一种强大的非线性图像增强工具。通过调整 $\gamma$ 值，我们可以改变图像的整体亮度和对比度。
                 <ul>
-                <li>当 $\gamma &gt; 1$ 时（对应于 $1/\gamma &lt; 1$），会提升暗部区域的亮度，压缩亮部区域，图像整体变亮。</li>
-                <li>当 $\gamma &lt; 1$ 时（对应于 $1/\gamma &gt; 1$），会压缩暗部区域，拉伸亮部区域，图像整体变暗。</li>
-                </ul>
-                </li>
-                </ul>
-                <h3 id="2-%E5%9B%BE%E5%83%8F%E7%9B%B4%E6%96%B9%E5%9B%BE-image-histogram"><strong>2. 图像直方图 (Image Histogram)</strong></h3>
-                <p>直方图是图像最重要的统计特征之一，它描述了图像中各个灰度级像素的分布情况。</p>
-                <h4 id="21-%E5%AE%9A%E4%B9%89%E4%B8%8E%E8%AE%A1%E7%AE%97"><strong>2.1 定义与计算</strong></h4>
-                <ul>
-                <li><strong>灰度直方图 (Grayscale Histogram):</strong> 对于一幅灰度级范围为 $[0, L-1]$（通常是$[0, 255]$）的图像，其直方图是一个离散函数 $h(r_k) = n_k$，其中 $r_k$ 是第 $k$ 个灰度级，$n_k$ 是图像中具有该灰度级的像素数量。</li>
-                <li><strong>归一化直方图 (Normalized Histogram):</strong> 为了便于比较不同尺寸的图像，我们通常将直方图归一化，得到每个灰度级出现的<strong>概率</strong>。如果图像总像素数为 $N$，则归一化直方图为：
+<li>当 $\gamma &gt; 1$ 时（对应于 $1/\gamma &lt; 1$），会提升暗部区域的亮度，压缩亮部区域，图像整体变亮。</li>
+<li>当 $\gamma &lt; 1$ 时（对应于 $1/\gamma &gt; 1$），会压缩暗部区域，拉伸亮部区域，图像整体变暗。</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-%E5%9B%BE%E5%83%8F%E7%9B%B4%E6%96%B9%E5%9B%BE-image-histogram"><strong>2. 图像直方图 (Image Histogram)</strong></h3>
+<p>直方图是图像最重要的统计特征之一，它描述了图像中各个灰度级像素的分布情况。</p>
+<h4 id="21-%E5%AE%9A%E4%B9%89%E4%B8%8E%E8%AE%A1%E7%AE%97"><strong>2.1 定义与计算</strong></h4>
+<ul>
+<li><strong>灰度直方图 (Grayscale Histogram):</strong> 对于一幅灰度级范围为 $[0, L-1]$（通常是$[0, 255]$）的图像，其直方图是一个离散函数 $h(r_k) = n_k$，其中 $r_k$ 是第 $k$ 个灰度级，$n_k$ 是图像中具有该灰度级的像素数量。</li>
+<li><strong>归一化直方图 (Normalized Histogram):</strong> 为了便于比较不同尺寸的图像，我们通常将直方图归一化，得到每个灰度级出现的<strong>概率</strong>。如果图像总像素数为 $N$，则归一化直方图为：
                 $$
                 P(r_k) = \frac{n_k}{N}, \quad \text{其中 } \sum_{k=0}^{L-1} P(r_k) = 1
                 $$</li>
-                <li><strong>累积直方图 (Cumulative Histogram / CDF):</strong> 累积分布函数（CDF）也非常重要，它表示小于等于某个灰度级的像素所占的比例。
+<li><strong>累积直方图 (Cumulative Histogram / CDF):</strong> 累积分布函数（CDF）也非常重要，它表示小于等于某个灰度级的像素所占的比例。
                 $$
                 CDF(r_k) = \sum_{i=0}^{k} P(r_i)
                 $$</li>
-                </ul>
-                <h4 id="22-%E7%9B%B4%E6%96%B9%E5%9B%BE%E7%9A%84%E6%80%A7%E8%B4%A8%E4%B8%8E%E5%B1%80%E9%99%BE%E6%80%A7"><strong>2.2 直方图的性质与局限性</strong></h4>
-                <ul>
-                <li><strong>性质：</strong>
-                <ul>
-                <li><strong>基础性：</strong> 直方图是许多空间域处理技术（如阈值分割、图像增强）的基础。</li>
-                <li><strong>统计性：</strong> 它只反映了图像的灰度分布，例如图像是偏亮、偏暗，还是对比度高/低。</li>
-                <li><strong>唯一性：</strong> 一幅确定的图像有唯一的直方图。</li>
-                </ul>
-                </li>
-                <li><strong>局限性：</strong>
-                <ul>
-                <li><strong>空间信息丢失：</strong> 直方图不包含任何像素的空间位置信息。两幅内容完全不同但灰度分布相同的图像，可以拥有完全相同的直方图。</li>
-                <li><strong>非唯一对应：</strong> 不同的图像可能拥有相同的直方图。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="23-c-%E5%AE%9E%E7%8E%B0-%E4%BD%BF%E7%94%A8opencv"><strong>2.3 C++ 实现 (使用OpenCV)</strong></h4>
-                <pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;opencv2/opencv.hpp&gt;</span></span>
+</ul>
+<h4 id="22-%E7%9B%B4%E6%96%B9%E5%9B%BE%E7%9A%84%E6%80%A7%E8%B4%A8%E4%B8%8E%E5%B1%80%E9%99%BE%E6%80%A7"><strong>2.2 直方图的性质与局限性</strong></h4>
+<ul>
+<li><strong>性质：</strong>
+<ul>
+<li><strong>基础性：</strong> 直方图是许多空间域处理技术（如阈值分割、图像增强）的基础。</li>
+<li><strong>统计性：</strong> 它只反映了图像的灰度分布，例如图像是偏亮、偏暗，还是对比度高/低。</li>
+<li><strong>唯一性：</strong> 一幅确定的图像有唯一的直方图。</li>
+</ul>
+</li>
+<li><strong>局限性：</strong>
+<ul>
+<li><strong>空间信息丢失：</strong> 直方图不包含任何像素的空间位置信息。两幅内容完全不同但灰度分布相同的图像，可以拥有完全相同的直方图。</li>
+<li><strong>非唯一对应：</strong> 不同的图像可能拥有相同的直方图。</li>
+</ul>
+</li>
+</ul>
+<h4 id="23-c-%E5%AE%9E%E7%8E%B0-%E4%BD%BF%E7%94%A8opencv"><strong>2.3 C++ 实现 (使用OpenCV)</strong></h4>
+<pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;opencv2/opencv.hpp&gt;</span></span>
                 <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iostream&gt;</span></span>
                 <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;vector&gt;</span></span>
 
@@ -177,58 +175,58 @@
                     <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
                 }
                 </div></code></pre>
-                <h3 id="3-%E5%9F%BA%E4%BA%8E%E7%82%B9%E6%93%8D%E4%BD%9C%E7%9A%84%E7%81%B0%E5%BA%A6%E5%8F%98%E6%8D%A2-grayscale-transformation-via-point-operations"><strong>3. 基于点操作的灰度变换 (Grayscale Transformation via Point Operations)</strong></h3>
-                <p>灰度变换是最简单的图像增强方法，它对图像中的每个像素独立进行操作，其变换函数形式为 $s = T(r)$，其中 $r$ 是输入像素值，$s$ 是输出像素值。</p>
-                <h4 id="31-%E7%BA%BF%E6%80%A7%E5%8F%98%E6%8D%A2-linear-transform"><strong>3.1 线性变换 (Linear Transform)</strong></h4>
-                <ul>
-                <li>
-                <p><strong>亮度和对比度调整：</strong> 最基本的线性变换是 $s = \alpha \cdot r + \beta$。</p>
-                <ul>
-                <li>$\alpha$：控制<strong>对比度</strong>。$\alpha &gt; 1$ 增加对比度， $0 &lt; \alpha &lt; 1$ 降低对比度。</li>
-                <li>$\beta$：控制<strong>亮度</strong>。$\beta &gt; 0$ 增加亮度，$\beta &lt; 0$ 降低亮度。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>对比度拉伸 (Contrast Stretching):</strong> 这是一种分段线性变换，旨在将图像中一个特定的灰度范围 $[a, b]$ 拉伸到更宽的范围 $[c, d]$，从而增强该区域的对比度。
+<h3 id="3-%E5%9F%BA%E4%BA%8E%E7%82%B9%E6%93%8D%E4%BD%9C%E7%9A%84%E7%81%B0%E5%BA%A6%E5%8F%98%E6%8D%A2-grayscale-transformation-via-point-operations"><strong>3. 基于点操作的灰度变换 (Grayscale Transformation via Point Operations)</strong></h3>
+<p>灰度变换是最简单的图像增强方法，它对图像中的每个像素独立进行操作，其变换函数形式为 $s = T(r)$，其中 $r$ 是输入像素值，$s$ 是输出像素值。</p>
+<h4 id="31-%E7%BA%BF%E6%80%A7%E5%8F%98%E6%8D%A2-linear-transform"><strong>3.1 线性变换 (Linear Transform)</strong></h4>
+<ul>
+<li>
+<p><strong>亮度和对比度调整：</strong> 最基本的线性变换是 $s = \alpha \cdot r + \beta$。</p>
+<ul>
+<li>$\alpha$：控制<strong>对比度</strong>。$\alpha &gt; 1$ 增加对比度， $0 &lt; \alpha &lt; 1$ 降低对比度。</li>
+<li>$\beta$：控制<strong>亮度</strong>。$\beta &gt; 0$ 增加亮度，$\beta &lt; 0$ 降低亮度。</li>
+</ul>
+</li>
+<li>
+<p><strong>对比度拉伸 (Contrast Stretching):</strong> 这是一种分段线性变换，旨在将图像中一个特定的灰度范围 $[a, b]$ 拉伸到更宽的范围 $[c, d]$，从而增强该区域的对比度。
                 $$
-                g(x, y) = \begin{cases} \frac{c}{a} f(x, y) & 0 \le f(x, y) &lt; a \\ \frac{d-c}{b-a}(f(x, y) - a) + c & a \le f(x, y) \le b \\ \frac{L-1-d}{L-1-b}(f(x, y) - b) + d & b &lt; f(x, y) \le L-1 \end{cases}
+                g(x, y) = \begin{cases} \frac{c}{a} f(x, y) &amp; 0 \le f(x, y) &lt; a \\ \frac{d-c}{b-a}(f(x, y) - a) + c &amp; a \le f(x, y) \le b \\ \frac{L-1-d}{L-1-b}(f(x, y) - b) + d &amp; b &lt; f(x, y) \le L-1 \end{cases}
                 $$
                 其中 $f(x,y)$ 是输入像素值，$g(x,y)$ 是输出像素值。</p>
-                </li>
-                </ul>
-                <h4 id="32-%E9%9D%9E%E7%BA%BF%E6%80%A7%E5%8F%98%E6%8D%A2-non-linear-transform"><strong>3.2 非线性变换 (Non-linear Transform)</strong></h4>
-                <ul>
-                <li>
-                <p><strong>对数变换 (Logarithmic Transform):</strong>
+</li>
+</ul>
+<h4 id="32-%E9%9D%9E%E7%BA%BF%E6%80%A7%E5%8F%98%E6%8D%A2-non-linear-transform"><strong>3.2 非线性变换 (Non-linear Transform)</strong></h4>
+<ul>
+<li>
+<p><strong>对数变换 (Logarithmic Transform):</strong>
                 $$
                 s = c \cdot \log(1+r)
                 $$
                 其中 $c = (L-1)/\log(1+I_{max})$ 是一个缩放常数，用于将输出值映射到 $[0, L-1]$ 范围。</p>
-                <ul>
-                <li><strong>效果：</strong> 极大地拉伸了低灰度值区域，同时压缩了高灰度值区域。</li>
-                <li><strong>应用：</strong> 非常适合于增强<strong>暗部细节</strong>，例如处理傅里叶频谱图。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>指数/Gamma变换 (Exponential/Gamma Transform):</strong>
+<ul>
+<li><strong>效果：</strong> 极大地拉伸了低灰度值区域，同时压缩了高灰度值区域。</li>
+<li><strong>应用：</strong> 非常适合于增强<strong>暗部细节</strong>，例如处理傅里叶频谱图。</li>
+</ul>
+</li>
+<li>
+<p><strong>指数/Gamma变换 (Exponential/Gamma Transform):</strong>
                 $$
                 s = c \cdot r^\gamma
                 $$</p>
-                <ul>
-                <li><strong>效果：</strong> 如1.2节所述，$\gamma &gt; 1$ 会拉伸亮部、压缩暗部；$\gamma &lt; 1$ 会拉伸暗部、压缩亮部。对数变换可以看作是Gamma变换的一种极限形式。</li>
-                <li><strong>应用：</strong> 灵活调整图像的整体色调和对比度。</li>
-                </ul>
-                </li>
-                </ul>
-                <h3 id="4-%E5%9F%BA%E4%BA%8E%E7%9B%B4%E6%96%B9%E5%9B%BE%E7%9A%84%E5%9B%BE%E5%83%8F%E5%A2%9E%E5%BC%BA"><strong>4. 基于直方图的图像增强</strong></h3>
-                <p>直方图不仅能描述图像，还能直接用于改造图像，其中最经典的方法就是直方图均衡化。</p>
-                <h4 id="41-%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%9D%87%E8%A1%A1%E5%8C%96-histogram-equalization"><strong>4.1 直方图均衡化 (Histogram Equalization)</strong></h4>
-                <ul>
-                <li>
-                <p><strong>核心思想：</strong> 通过一个变换函数 $s=T(r)$，将原始图像的直方图重新分布，使其尽可能地<strong>均匀（uniform）</strong>。一个直方图均匀的图像，其灰度级得到了充分利用，通常具有较高的对比度。</p>
-                </li>
-                <li>
-                <p><strong>理论推导 (连续情况):</strong>
+<ul>
+<li><strong>效果：</strong> 如1.2节所述，$\gamma &gt; 1$ 会拉伸亮部、压缩暗部；$\gamma &lt; 1$ 会拉伸暗部、压缩亮部。对数变换可以看作是Gamma变换的一种极限形式。</li>
+<li><strong>应用：</strong> 灵活调整图像的整体色调和对比度。</li>
+</ul>
+</li>
+</ul>
+<h3 id="4-%E5%9F%BA%E4%BA%8E%E7%9B%B4%E6%96%B9%E5%9B%BE%E7%9A%84%E5%9B%BE%E5%83%8F%E5%A2%9E%E5%BC%BA"><strong>4. 基于直方图的图像增强</strong></h3>
+<p>直方图不仅能描述图像，还能直接用于改造图像，其中最经典的方法就是直方图均衡化。</p>
+<h4 id="41-%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%9D%87%E8%A1%A1%E5%8C%96-histogram-equalization"><strong>4.1 直方图均衡化 (Histogram Equalization)</strong></h4>
+<ul>
+<li>
+<p><strong>核心思想：</strong> 通过一个变换函数 $s=T(r)$，将原始图像的直方图重新分布，使其尽可能地<strong>均匀（uniform）</strong>。一个直方图均匀的图像，其灰度级得到了充分利用，通常具有较高的对比度。</p>
+</li>
+<li>
+<p><strong>理论推导 (连续情况):</strong>
                 假设输入图像的灰度级 $r$ 是一个连续随机变量，其概率密度函数（PDF）为 $p_r(r)$。我们寻找一个变换 $s=T(r)$，使得输出灰度级 $s$ 的PDF $p_s(s)$ 是一个均匀分布。根据概率论，我们有：
                 $$
                 p_s(s) = p_r(r) \left| \frac{dr}{ds} \right|
@@ -239,9 +237,9 @@
                 s = T(r) = \int_{0}^{r} p_r(w) dw
                 $$
                 这个积分形式正是输入灰度级 $r$ 的<strong>累积分布函数 (CDF)</strong>。</p>
-                </li>
-                <li>
-                <p><strong>离散实现:</strong>
+</li>
+<li>
+<p><strong>离散实现:</strong>
                 对于离散的灰度级，我们将积分替换为求和。变换公式为：
                 $$
                 s_k = T(r_k) = \sum_{j=0}^{k} P(r_j) = \frac{1}{N} \sum_{j=0}^{k} n_j
@@ -250,14 +248,14 @@
                 $$
                 \text{output_pixel_value} = \text{round}((L-1) \cdot s_k)
                 $$</p>
-                </li>
-                <li>
-                <p><strong>为什么实际结果不是完全平坦的？</strong>
+</li>
+<li>
+<p><strong>为什么实际结果不是完全平坦的？</strong>
                 因为像素灰度值是离散的整数。在变换过程中，多个不同的输入灰度级 $r_k$ 可能会被映射到<strong>同一个</strong>输出灰度级 $s_k'$。这导致某些输出灰度级的像素数会增加，而另一些则可能为0，使得最终的直方图呈锯齿状，而非理想的平坦直线。</p>
-                </li>
-                <li>
-                <p><strong>C++ 实现 (手动与OpenCV):</strong></p>
-                <pre class="hljs"><code><div><span class="hljs-comment">// 手动实现</span>
+</li>
+<li>
+<p><strong>C++ 实现 (手动与OpenCV):</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment">// 手动实现</span>
                 <span class="hljs-function">cv::Mat <span class="hljs-title">equalizeHistManual</span><span class="hljs-params">(<span class="hljs-keyword">const</span> cv::Mat&amp; src)</span> </span>{
                     <span class="hljs-comment">// 1. 计算直方图</span>
                     <span class="hljs-keyword">int</span> hist[<span class="hljs-number">256</span>] = {<span class="hljs-number">0</span>};
@@ -305,80 +303,105 @@
                     <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
                 }
                 </div></code></pre>
-                </li>
-                </ul>
-                <h4 id="42-%E7%9B%B4%E6%96%B9%E5%9B%BE%E8%A7%84%E5%AE%9A%E5%8C%96-histogram-specificationmatching"><strong>4.2 直方图规定化 (Histogram Specification/Matching)</strong></h4>
-                <ul>
-                <li>
-                <p><strong>思想：</strong> 不追求直方图的均匀分布，而是将其变换为<strong>某个指定的形状</strong>。这个目标形状可以来自另一幅参考图像，也可以是某个解析定义的分布（如高斯分布）。</p>
-                </li>
-                <li>
-                <p><strong>原理与算法:</strong>
+</li>
+</ul>
+<h4 id="42-%E7%9B%B4%E6%96%B9%E5%9B%BE%E8%A7%84%E5%AE%9A%E5%8C%96-histogram-specificationmatching"><strong>4.2 直方图规定化 (Histogram Specification/Matching)</strong></h4>
+<ul>
+<li>
+<p><strong>思想：</strong> 不追求直方图的均匀分布，而是将其变换为<strong>某个指定的形状</strong>。这个目标形状可以来自另一幅参考图像，也可以是某个解析定义的分布（如高斯分布）。</p>
+</li>
+<li>
+<p><strong>原理与算法:</strong>
                 假设我们想将输入图像（PDF $p_r(r)$）变换为具有目标直方图（PDF $p_z(z)$）的图像。</p>
-                <ol>
-                <li><strong>步骤1:</strong> 对原始图像进行直方图均衡化，得到变换 $s = T(r) = \int_0^r p_r(w)dw$。</li>
-                <li><strong>步骤2:</strong> 对目标直方图 $p_z(z)$ 也进行（理论上的）均衡化，得到变换 $v = G(z) = \int_0^z p_z(w)dw$。</li>
-                <li><strong>步骤3:</strong> 我们的目标是找到一个映射 $z = M(r)$。由于均衡化后的图像都具有均匀分布，我们可以令 $s=v$，即 $T(r) = G(z)$。</li>
-                <li><strong>步骤4:</strong> 从上式求解 $z$，得到最终的映射关系：$z = G^{-1}(s) = G^{-1}(T(r))$。</li>
-                </ol>
-                </li>
-                <li>
-                <p><strong>离散实现步骤:</strong></p>
-                <ol>
-                <li>计算原始图像的CDF，$T(r_k)$。</li>
-                <li>计算目标直方图的CDF，$G(z_j)$。</li>
-                <li>对于原始图像的每个灰度级 $r_k$，计算出其均衡化后的值 $s_k = T(r_k)$。</li>
-                <li>在目标CDF $G(z_j)$ 中，查找与 $s_k$ 最接近的项 $G(z_j)$，并将该 $z_j$ 作为 $r_k$ 的新映射值。</li>
-                <li>根据这个映射关系，生成新图像。</li>
-                </ol>
-                </li>
-                </ul>
-                <h3 id="5-%E5%89%8D%E6%B2%BF%E6%8B%93%E5%B1%95-advanced-topics--frontiers"><strong>5. 前沿拓展 (Advanced Topics &amp; Frontiers)</strong></h3>
-                <h4 id="51-%E8%87%AA%E9%80%82%E5%BA%94%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%9D%87%E8%A1%A1%E5%8C%96-adaptive-histogram-equalization-ahe"><strong>5.1 自适应直方图均衡化 (Adaptive Histogram Equalization, AHE)</strong></h4>
-                <p>全局直方图均衡化有一个致命弱点：它对整幅图像使用同一个变换。如果图像中同时包含大面积的亮区域和暗区域，全局均衡化可能会过度增强噪声，并丢失局部细节。</p>
-                <ul>
-                <li><strong>AHE思想：</strong> 将图像划分为多个不重叠的小块（Tiles），对每个小块<strong>独立</strong>进行直方图均衡化。</li>
-                <li><strong>问题：</strong> 会产生明显的块状效应（Blocking Artifacts）。</li>
-                </ul>
-                <h4 id="52-%E5%AF%B9%E6%AF%94%E5%BA%A6%E5%8F%97%E9%99%90%E7%9A%84%E8%87%AA%E9%80%82%E5%BA%94%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%9D%87%E8%A1%A1%E5%8C%96-clahe"><strong>5.2 对比度受限的自适应直方图均衡化 (CLAHE)</strong></h4>
-                <p>CLAHE 是对AHE的重大改进，也是目前应用最广泛的局部增强算法之一。</p>
-                <ul>
-                <li><strong>核心改进：</strong>
-                <ol>
-                <li><strong>对比度限制 (Contrast Limiting):</strong> 在计算每个小块的直方图时，设置一个“裁剪阈值”。超过该阈值的像素数将被裁剪，并均匀地重新分配到所有灰度级上。这可以有效抑制噪声的过度放大。</li>
-                <li><strong>双线性插值 (Bilinear Interpolation):</strong> 为了消除块状效应，一个像素最终的灰度值由其所在位置周围四个小块的变换函数进行双线性插值得到。</li>
-                </ol>
-                </li>
-                </ul>
-                <p>CLAHE在医学图像处理、遥感图像增强等领域有极其重要的应用。OpenCV也提供了<code>cv::createCLAHE()</code>函数方便地实现这一算法。</p>
-            </article>
-        </main>
-    </div>
-    
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<ol>
+<li><strong>步骤1:</strong> 对原始图像进行直方图均衡化，得到变换 $s = T(r) = \int_0^r p_r(w)dw$。</li>
+<li><strong>步骤2:</strong> 对目标直方图 $p_z(z)$ 也进行（理论上的）均衡化，得到变换 $v = G(z) = \int_0^z p_z(w)dw$。</li>
+<li><strong>步骤3:</strong> 我们的目标是找到一个映射 $z = M(r)$。由于均衡化后的图像都具有均匀分布，我们可以令 $s=v$，即 $T(r) = G(z)$。</li>
+<li><strong>步骤4:</strong> 从上式求解 $z$，得到最终的映射关系：$z = G^{-1}(s) = G^{-1}(T(r))$。</li>
+</ol>
+</li>
+<li>
+<p><strong>离散实现步骤:</strong></p>
+<ol>
+<li>计算原始图像的CDF，$T(r_k)$。</li>
+<li>计算目标直方图的CDF，$G(z_j)$。</li>
+<li>对于原始图像的每个灰度级 $r_k$，计算出其均衡化后的值 $s_k = T(r_k)$。</li>
+<li>在目标CDF $G(z_j)$ 中，查找与 $s_k$ 最接近的项 $G(z_j)$，并将该 $z_j$ 作为 $r_k$ 的新映射值。</li>
+<li>根据这个映射关系，生成新图像。</li>
+</ol>
+</li>
+</ul>
+<h3 id="5-%E5%89%8D%E6%B2%BF%E6%8B%93%E5%B1%95-advanced-topics--frontiers"><strong>5. 前沿拓展 (Advanced Topics &amp; Frontiers)</strong></h3>
+<h4 id="51-%E8%87%AA%E9%80%82%E5%BA%94%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%9D%87%E8%A1%A1%E5%8C%96-adaptive-histogram-equalization-ahe"><strong>5.1 自适应直方图均衡化 (Adaptive Histogram Equalization, AHE)</strong></h4>
+<p>全局直方图均衡化有一个致命弱点：它对整幅图像使用同一个变换。如果图像中同时包含大面积的亮区域和暗区域，全局均衡化可能会过度增强噪声，并丢失局部细节。</p>
+<ul>
+<li><strong>AHE思想：</strong> 将图像划分为多个不重叠的小块（Tiles），对每个小块<strong>独立</strong>进行直方图均衡化。</li>
+<li><strong>问题：</strong> 会产生明显的块状效应（Blocking Artifacts）。</li>
+</ul>
+<h4 id="52-%E5%AF%B9%E6%AF%94%E5%BA%A6%E5%8F%97%E9%99%90%E7%9A%84%E8%87%AA%E9%80%82%E5%BA%94%E7%9B%B4%E6%96%B9%E5%9B%BE%E5%9D%87%E8%A1%A1%E5%8C%96-clahe"><strong>5.2 对比度受限的自适应直方图均衡化 (CLAHE)</strong></h4>
+<p>CLAHE 是对AHE的重大改进，也是目前应用最广泛的局部增强算法之一。</p>
+<ul>
+<li><strong>核心改进：</strong>
+<ol>
+<li><strong>对比度限制 (Contrast Limiting):</strong> 在计算每个小块的直方图时，设置一个“裁剪阈值”。超过该阈值的像素数将被裁剪，并均匀地重新分配到所有灰度级上。这可以有效抑制噪声的过度放大。</li>
+<li><strong>双线性插值 (Bilinear Interpolation):</strong> 为了消除块状效应，一个像素最终的灰度值由其所在位置周围四个小块的变换函数进行双线性插值得到。</li>
+</ol>
+</li>
+</ul>
+<p>CLAHE在医学图像处理、遥感图像增强等领域有极其重要的应用。OpenCV也提供了<code>cv::createCLAHE()</code>函数方便地实现这一算法。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

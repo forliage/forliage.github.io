@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机图形学10:视觉真实感1</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>计算机图形学10:视觉真实感1</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,40 +30,40 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A610%E8%A7%86%E8%A7%89%E7%9C%9F%E5%AE%9E%E6%84%9F1">计算机图形学10:视觉真实感1</h1>
-                <h3 id="1-%E9%97%AE%E9%A2%98%E7%9A%84%E6%A0%B8%E5%BF%83%E6%B7%B1%E5%BA%A6"><strong>1. 问题的核心：深度</strong></h3>
-                <p>在三维空间中，当两个物体在屏幕上投影到同一个位置时，哪个物体应该被显示出来？答案很简单：<strong>距离相机更近的那个。</strong></p>
-                <p>这个“距离相机有多远”的度量，在图形学中我们称之为<strong>深度 (Depth)</strong>。因此，可见面判别的本质，就是一个在投影过程中对深度信息进行比较和排序的问题。</p>
-                <p>听起来简单，但实现起来却极具挑战。想象一个包含数百万个三角形的复杂场景。朴素的暴力解决方法——让场景中的每个三角形都和其他所有三角形进行比较，来判断遮挡关系——其计算复杂度会达到 $O(n^2)$，这在实时渲染中是完全不可接受的。因此，计算机图形学家们发明了各种巧妙的算法来高效地解决这个问题。</p>
-                <h3 id="2-%E4%B8%A4%E5%A4%A7%E9%98%B5%E8%90%A5%E5%AF%B9%E8%B1%A1%E7%A9%BA%E9%97%B4%E7%AE%97%E6%B3%95-vs-%E5%9B%BE%E5%83%8F%E7%A9%BA%E9%97%B4%E7%AE%97%E6%B3%95"><strong>2. 两大阵营：对象空间算法 vs. 图像空间算法</strong></h3>
-                <p>解决隐藏面消除问题的算法，可以被划分为两大基本流派：</p>
-                <h4 id="21-%E5%AF%B9%E8%B1%A1%E7%A9%BA%E9%97%B4%E7%AE%97%E6%B3%95-object-space-algorithms"><strong>2.1 对象空间算法 (Object-Space Algorithms)</strong></h4>
-                <ul>
-                <li><strong>核心思想：</strong> 在三维世界坐标系中，直接对场景中的几何对象（如多边形）进行精确的比较和计算。算法的输入和输出都是几何体。</li>
-                <li><strong>工作流程：</strong>
-                <div class="code-container">
-                    <pre class="hljs"><code><div>for (场景中的每个对象A) {
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A610%E8%A7%86%E8%A7%89%E7%9C%9F%E5%AE%9E%E6%84%9F1">计算机图形学10:视觉真实感1</h1>
+<h3 id="1-%E9%97%AE%E9%A2%98%E7%9A%84%E6%A0%B8%E5%BF%83%E6%B7%B1%E5%BA%A6"><strong>1. 问题的核心：深度</strong></h3>
+<p>在三维空间中，当两个物体在屏幕上投影到同一个位置时，哪个物体应该被显示出来？答案很简单：<strong>距离相机更近的那个。</strong></p>
+<p>这个“距离相机有多远”的度量，在图形学中我们称之为<strong>深度 (Depth)</strong>。因此，可见面判别的本质，就是一个在投影过程中对深度信息进行比较和排序的问题。</p>
+<p>听起来简单，但实现起来却极具挑战。想象一个包含数百万个三角形的复杂场景。朴素的暴力解决方法——让场景中的每个三角形都和其他所有三角形进行比较，来判断遮挡关系——其计算复杂度会达到 $O(n^2)$，这在实时渲染中是完全不可接受的。因此，计算机图形学家们发明了各种巧妙的算法来高效地解决这个问题。</p>
+<h3 id="2-%E4%B8%A4%E5%A4%A7%E9%98%B5%E8%90%A5%E5%AF%B9%E8%B1%A1%E7%A9%BA%E9%97%B4%E7%AE%97%E6%B3%95-vs-%E5%9B%BE%E5%83%8F%E7%A9%BA%E9%97%B4%E7%AE%97%E6%B3%95"><strong>2. 两大阵营：对象空间算法 vs. 图像空间算法</strong></h3>
+<p>解决隐藏面消除问题的算法，可以被划分为两大基本流派：</p>
+<h4 id="21-%E5%AF%B9%E8%B1%A1%E7%A9%BA%E9%97%B4%E7%AE%97%E6%B3%95-object-space-algorithms"><strong>2.1 对象空间算法 (Object-Space Algorithms)</strong></h4>
+<ul>
+<li><strong>核心思想：</strong> 在三维世界坐标系中，直接对场景中的几何对象（如多边形）进行精确的比较和计算。算法的输入和输出都是几何体。</li>
+<li><strong>工作流程：</strong>
+<div class="code-container">
+<pre class="hljs"><code><div>for (场景中的每个对象A) {
     for (场景中的每个其他对象B) {
         比较A和B的遮挡关系;
     }
@@ -71,174 +71,200 @@
     将A的可见部分发送给渲染器;
 }
 </div></code></pre>
-                </div>
-                </li>
-                <li><strong>优点：</strong> <strong>精度高</strong>。计算是在连续的三维空间中进行的，不受屏幕分辨率的限制。</li>
-                <li><strong>缺点：</strong> <strong>计算量巨大</strong>。当物体数量增加时，计算成本急剧上升。</li>
-                <li><strong>代表：</strong> 早期用于矢量绘图的隐藏线消除算法（如Roberts算法）。</li>
-                </ul>
-                <h4 id="22-%E5%9B%BE%E5%83%8F%E7%A9%BA%E9%97%B4%E7%AE%97%E6%B3%95-image-space-algorithms"><strong>2.2 图像空间算法 (Image-Space Algorithms)</strong></h4>
-                <ul>
-                <li><strong>核心思想：</strong> 不在三维空间中纠缠，而是直接在最终的二维屏幕空间（像素空间）中解决问题。算法的精度与屏幕分辨率相关。</li>
-                <li><strong>工作流程：</strong>
-                <div class="code-container">
-                    <pre class="hljs"><code><div>for (屏幕上的每个像素) {
+</div>
+</li>
+<li><strong>优点：</strong> <strong>精度高</strong>。计算是在连续的三维空间中进行的，不受屏幕分辨率的限制。</li>
+<li><strong>缺点：</strong> <strong>计算量巨大</strong>。当物体数量增加时，计算成本急剧上升。</li>
+<li><strong>代表：</strong> 早期用于矢量绘图的隐藏线消除算法（如Roberts算法）。</li>
+</ul>
+<h4 id="22-%E5%9B%BE%E5%83%8F%E7%A9%BA%E9%97%B4%E7%AE%97%E6%B3%95-image-space-algorithms"><strong>2.2 图像空间算法 (Image-Space Algorithms)</strong></h4>
+<ul>
+<li><strong>核心思想：</strong> 不在三维空间中纠缠，而是直接在最终的二维屏幕空间（像素空间）中解决问题。算法的精度与屏幕分辨率相关。</li>
+<li><strong>工作流程：</strong>
+<div class="code-container">
+<pre class="hljs"><code><div>for (屏幕上的每个像素) {
     找出所有投影到该像素的物体;
     在这些物体中，找到距离相机最近的那个;
     用最近物体的颜色来填充该像素;
 }
 </div></code></pre>
-                </div>
-                </li>
-                <li><strong>优点：</strong> <strong>高效且简单</strong>。算法复杂度通常与场景中的物体数量呈线性关系（$O(n)$），与屏幕像素数量成正比，非常适合并行处理。</li>
-                <li><strong>缺点：</strong> <strong>精度受限</strong>。其精度上限就是像素的大小，可能会产生走样。</li>
-                <li><strong>代表：</strong> <strong>Z-Buffer算法</strong>，这是现代图形硬件的基石。</li>
-                </ul>
-                <p>由于其无与伦比的效率和硬件友好性，<strong>图像空间算法是当今实时图形领域的主流。</strong></p>
-                <h3 id="3-%E4%BC%98%E5%8C%96%E7%AC%AC%E4%B8%80%E6%AD%A5%E8%83%8C%E9%9D%A2%E5%89%94%E9%99%A4-back-face-culling"><strong>3. 优化第一步：背面剔除 (Back-face Culling)</strong></h3>
-                <p>在处理具体的遮挡算法之前，我们可以先用一个非常简单高效的技巧，提前剔除掉场景中<strong>绝对不可能</strong>可见的多边形。这个技巧就是<strong>背面剔除</strong>。</p>
+</div>
+</li>
+<li><strong>优点：</strong> <strong>高效且简单</strong>。算法复杂度通常与场景中的物体数量呈线性关系（$O(n)$），与屏幕像素数量成正比，非常适合并行处理。</li>
+<li><strong>缺点：</strong> <strong>精度受限</strong>。其精度上限就是像素的大小，可能会产生走样。</li>
+<li><strong>代表：</strong> <strong>Z-Buffer算法</strong>，这是现代图形硬件的基石。</li>
+</ul>
+<p>由于其无与伦比的效率和硬件友好性，<strong>图像空间算法是当今实时图形领域的主流。</strong></p>
+<h3 id="3-%E4%BC%98%E5%8C%96%E7%AC%AC%E4%B8%80%E6%AD%A5%E8%83%8C%E9%9D%A2%E5%89%94%E9%99%A4-back-face-culling"><strong>3. 优化第一步：背面剔除 (Back-face Culling)</strong></h3>
+<p>在处理具体的遮挡算法之前，我们可以先用一个非常简单高效的技巧，提前剔除掉场景中<strong>绝对不可能</strong>可见的多边形。这个技巧就是<strong>背面剔除</strong>。</p>
+<ul>
+<li><strong>原理：</strong> 对于一个封闭的、不透明的实体对象（比如一个立方体），我们永远只能看到朝向我们的那一半表面。那些“背”对着我们的面，必然会被物体自身所遮挡。</li>
+<li><strong>实现：</strong>
+<ol>
+<li>计算多边形面的<strong>法向量 $\mathbf{N}$</strong>（一个垂直于该平面的向量，通常规定指向物体的“外侧”）。</li>
+<li>计算从相机位置指向该面的<strong>视线向量 $\mathbf{V}$</strong>。</li>
+<li>计算 $\mathbf{N}$ 和 $\mathbf{V}$ 的<strong>点积</strong>。
                 <ul>
-                <li><strong>原理：</strong> 对于一个封闭的、不透明的实体对象（比如一个立方体），我们永远只能看到朝向我们的那一半表面。那些“背”对着我们的面，必然会被物体自身所遮挡。</li>
-                <li><strong>实现：</strong>
-                <ol>
-                <li>计算多边形面的<strong>法向量 $\mathbf{N}$</strong>（一个垂直于该平面的向量，通常规定指向物体的“外侧”）。</li>
-                <li>计算从相机位置指向该面的<strong>视线向量 $\mathbf{V}$</strong>。</li>
-                <li>计算 $\mathbf{N}$ 和 $\mathbf{V}$ 的<strong>点积</strong>。
+<li>如果 $\mathbf{N} \cdot \mathbf{V} &gt; 0$，说明法向量和视线向量的夹角小于90度，该面是<strong>正面 (Front-face)</strong>，可能可见。</li>
+<li>如果 $\mathbf{N} \cdot \mathbf{V} &lt; 0$，说明法向量和视线向量的夹角大于90度，该面是<strong>背面 (Back-face)</strong>，<strong>绝对不可见</strong>，可以直接丢弃，无需进行后续任何处理。</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<p><strong>效果：</strong> 对于一个封闭的凸多面体，背面剔除可以瞬间将需要处理的多边形数量减少约一半！这是渲染管线中一个极其重要的性能优化步骤。</p>
+<p><strong>局限：</strong> 背面剔除无法解决物体之间的相互遮挡问题。</p>
+<h3 id="4-%E8%A1%8C%E4%B8%9A%E6%A0%87%E5%87%86z-buffer-%E6%B7%B1%E5%BA%A6%E7%BC%93%E5%86%B2-%E7%AE%97%E6%B3%95"><strong>4. 行业标准：Z-Buffer (深度缓冲) 算法</strong></h3>
+<p>Z-Buffer算法是迄今为止最成功、应用最广泛的隐藏面消除算法，现代所有GPU都内置了它的硬件实现。</p>
+<ul>
+<li><strong>类别：</strong> 图像空间算法。</li>
+<li><strong>核心思想：</strong> “简单粗暴”但极其有效。除了存储像素颜色的<strong>颜色缓存 (Color Buffer)</strong> 外，额外使用一块与屏幕大小完全相同的内存，称为<strong>深度缓存 (Depth Buffer 或 Z-Buffer)</strong>。
                 <ul>
-                <li>如果 $\mathbf{N} \cdot \mathbf{V} > 0$，说明法向量和视线向量的夹角小于90度，该面是<strong>正面 (Front-face)</strong>，可能可见。</li>
-                <li>如果 $\mathbf{N} \cdot \mathbf{V} < 0$，说明法向量和视线向量的夹角大于90度，该面是<strong>背面 (Back-face)</strong>，<strong>绝对不可见</strong>，可以直接丢弃，无需进行后续任何处理。</li>
-                </ul>
-                </li>
-                </ol>
-                </li>
-                </ul>
-                <p><strong>效果：</strong> 对于一个封闭的凸多面体，背面剔除可以瞬间将需要处理的多边形数量减少约一半！这是渲染管线中一个极其重要的性能优化步骤。</p>
-                <p><strong>局限：</strong> 背面剔除无法解决物体之间的相互遮挡问题。</p>
-                <h3 id="4-%E8%A1%8C%E4%B8%9A%E6%A0%87%E5%87%86z-buffer-%E6%B7%B1%E5%BA%A6%E7%BC%93%E5%86%B2-%E7%AE%97%E6%B3%95"><strong>4. 行业标准：Z-Buffer (深度缓冲) 算法</strong></h3>
-                <p>Z-Buffer算法是迄今为止最成功、应用最广泛的隐藏面消除算法，现代所有GPU都内置了它的硬件实现。</p>
+<li><strong>深度缓存</strong> 的每个单元，只存储一个值：<strong>当前已经绘制到该像素位置的物体的深度值（Z值）</strong>。</li>
+</ul>
+</li>
+<li><strong>算法流程：</strong>
+<ol>
+<li><strong>初始化：</strong> 在绘制一帧开始时，将颜色缓存填充为背景色，将深度缓存的每一个值都初始化为一个<strong>无穷大</strong>（或表示最远距离的值）。</li>
+<li><strong>光栅化：</strong> 逐个光栅化场景中的所有多边形（<strong>绘制顺序完全不重要</strong>）。</li>
+<li><strong>深度测试：</strong> 对于多边形光栅化后产生的每一个片元（可以理解为像素候选者），假设其屏幕坐标为 $(x,y)$，颜色为 $C_{new}$，深度为 $Z_{new}$。
                 <ul>
-                <li><strong>类别：</strong> 图像空间算法。</li>
-                <li><strong>核心思想：</strong> “简单粗暴”但极其有效。除了存储像素颜色的<strong>颜色缓存 (Color Buffer)</strong> 外，额外使用一块与屏幕大小完全相同的内存，称为<strong>深度缓存 (Depth Buffer 或 Z-Buffer)</strong>。
+<li>读取深度缓存中对应位置的值 $Z_{old} = \text{DepthBuffer}[x][y]$。</li>
+<li><strong>比较深度：</strong> 如果 $Z_{new}$ <strong>小于</strong> $Z_{old}$（即新片元更靠近相机）：
                 <ul>
-                <li><strong>深度缓存</strong> 的每个单元，只存储一个值：<strong>当前已经绘制到该像素位置的物体的深度值（Z值）</strong>。</li>
-                </ul>
-                </li>
-                <li><strong>算法流程：</strong>
-                <ol>
-                <li><strong>初始化：</strong> 在绘制一帧开始时，将颜色缓存填充为背景色，将深度缓存的每一个值都初始化为一个<strong>无穷大</strong>（或表示最远距离的值）。</li>
-                <li><strong>光栅化：</strong> 逐个光栅化场景中的所有多边形（<strong>绘制顺序完全不重要</strong>）。</li>
-                <li><strong>深度测试：</strong> 对于多边形光栅化后产生的每一个片元（可以理解为像素候选者），假设其屏幕坐标为 $(x,y)$，颜色为 $C_{new}$，深度为 $Z_{new}$。
+<li><strong>更新颜色缓存：</strong> $\text{ColorBuffer}[x][y] = C_{new}$</li>
+<li><strong>更新深度缓存：</strong> $\text{DepthBuffer}[x][y] = Z_{new}$</li>
+</ul>
+</li>
+<li>否则，如果 $Z_{new} \ge Z_{old}$，说明有更近的物体已经占据了这个像素，<strong>丢弃</strong>这个新片元，什么也不做。</li>
+</ul>
+</li>
+<li><strong>完成：</strong> 当所有多边形都处理完毕后，颜色缓存中自然就存储了最终的、正确消隐的图像。</li>
+</ol>
+</li>
+</ul>
+<p><strong>优点：</strong></p>
+<ul>
+<li><strong>简单、通用：</strong> 易于硬件实现，可以处理任意复杂的、甚至相互穿插的多边形场景。</li>
+<li><strong>顺序无关：</strong> 无需对物体进行排序，大大简化了流程。</li>
+<li><strong>高度并行：</strong> 每个像素的深度测试都是独立进行的，完美契合GPU的大规模并行架构。</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li><strong>内存消耗：</strong> 需要额外的深度缓存（通常每个像素24位或32位）。</li>
+<li><strong>精度问题：</strong> 深度值的精度是有限的，当两个物体距离非常近时，可能出现“Z-fighting”（深度冲突）现象，导致表面出现闪烁的条纹。</li>
+<li><strong>透明度处理困难：</strong> 标准的Z-Buffer无法正确处理半透明物体，需要额外的特殊处理。</li>
+</ul>
+<h3 id="5-%E7%94%BB%E5%AE%B6%E7%AE%97%E6%B3%95-painters-algorithm%E8%BF%9C%E6%99%AF%E5%85%88%E7%94%BB"><strong>5. 画家算法 (Painter's Algorithm)：远景先画</strong></h3>
+<p>这是另一种经典的隐藏面消除算法，其思想非常符合直觉。</p>
+<ul>
+<li><strong>类别：</strong> 混合了对象空间和图像空间的思想。</li>
+<li><strong>核心思想：</strong> 模仿油画家的作画方式——先画远处的背景，再画中景，最后画近景的物体。后画的物体会自然地覆盖先画的物体。</li>
+<li><strong>算法流程：</strong>
+<ol>
+<li><strong>深度排序 (Depth Sort):</strong> 在对象空间中，根据多边形距离相机的远近（通常用最远点的Z值），对场景中<strong>所有多边形</strong>进行从远到近的排序。</li>
+<li><strong>绘制：</strong> 在图像空间中，按照排好的顺序（从远到近），依次将每个多边形光栅化并绘制到帧缓存中。</li>
+</ol>
+</li>
+</ul>
+<p><strong>优点：</strong></p>
+<ul>
+<li><strong>思路简单：</strong> 易于理解。</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li><strong>排序困难且昂贵：</strong> 深度排序是整个算法的核心和瓶颈。</li>
+<li><strong>无法处理循环遮挡：</strong> 如果三个多边形相互循环遮挡（A挡B，B挡C，C挡A），简单的深度排序会失效。</li>
+<li><strong>无法处理相互穿插：</strong> 如果两个多边形相互穿插，谁先谁后根本无法确定。</li>
+</ul>
+<p>为了解决这些排序歧义，画家算法需要进行大量复杂的几何测试和多边形分割，这使得它在通用场景下变得非常缓慢和不可靠。</p>
+<h3 id="6-bsp%E6%A0%91-binary-space-partitioning-tree"><strong>6. BSP树 (Binary Space Partitioning Tree)</strong></h3>
+<p>对于<strong>静态场景</strong>（即场景中的物体不会移动，只有观察者移动），画家算法可以通过一个巧妙的数据结构——<strong>BSP树</strong>——得到极大的优化。</p>
+<ul>
+<li><strong>核心思想：</strong> 在预处理阶段，用场景中的多边形所在的平面，递归地将整个三维空间分割成二叉树结构。
                 <ul>
-                <li>读取深度缓存中对应位置的值 $Z_{old} = \text{DepthBuffer}[x][y]$。</li>
-                <li><strong>比较深度：</strong> 如果 $Z_{new}$ <strong>小于</strong> $Z_{old}$（即新片元更靠近相机）：
-                <ul>
-                <li><strong>更新颜色缓存：</strong> $\text{ColorBuffer}[x][y] = C_{new}$</li>
-                <li><strong>更新深度缓存：</strong> $\text{DepthBuffer}[x][y] = Z_{new}$</li>
-                </ul>
-                </li>
-                <li>否则，如果 $Z_{new} \ge Z_{old}$，说明有更近的物体已经占据了这个像素，<strong>丢弃</strong>这个新片元，什么也不做。</li>
-                </ul>
-                </li>
-                <li><strong>完成：</strong> 当所有多边形都处理完毕后，颜色缓存中自然就存储了最终的、正确消隐的图像。</li>
-                </ol>
-                </li>
-                </ul>
-                <p><strong>优点：</strong></p>
-                <ul>
-                <li><strong>简单、通用：</strong> 易于硬件实现，可以处理任意复杂的、甚至相互穿插的多边形场景。</li>
-                <li><strong>顺序无关：</strong> 无需对物体进行排序，大大简化了流程。</li>
-                <li><strong>高度并行：</strong> 每个像素的深度测试都是独立进行的，完美契合GPU的大规模并行架构。</li>
-                </ul>
-                <p><strong>缺点：</strong></p>
-                <ul>
-                <li><strong>内存消耗：</strong> 需要额外的深度缓存（通常每个像素24位或32位）。</li>
-                <li><strong>精度问题：</strong> 深度值的精度是有限的，当两个物体距离非常近时，可能出现“Z-fighting”（深度冲突）现象，导致表面出现闪烁的条纹。</li>
-                <li><strong>透明度处理困难：</strong> 标准的Z-Buffer无法正确处理半透明物体，需要额外的特殊处理。</li>
-                </ul>
-                <h3 id="5-%E7%94%BB%E5%AE%B6%E7%AE%97%E6%B3%95-painters-algorithm%E8%BF%9C%E6%99%AF%E5%85%88%E7%94%BB"><strong>5. 画家算法 (Painter's Algorithm)：远景先画</strong></h3>
-                <p>这是另一种经典的隐藏面消除算法，其思想非常符合直觉。</p>
-                <ul>
-                <li><strong>类别：</strong> 混合了对象空间和图像空间的思想。</li>
-                <li><strong>核心思想：</strong> 模仿油画家的作画方式——先画远处的背景，再画中景，最后画近景的物体。后画的物体会自然地覆盖先画的物体。</li>
-                <li><strong>算法流程：</strong>
-                <ol>
-                <li><strong>深度排序 (Depth Sort):</strong> 在对象空间中，根据多边形距离相机的远近（通常用最远点的Z值），对场景中<strong>所有多边形</strong>进行从远到近的排序。</li>
-                <li><strong>绘制：</strong> 在图像空间中，按照排好的顺序（从远到近），依次将每个多边形光栅化并绘制到帧缓存中。</li>
-                </ol>
-                </li>
-                </ul>
-                <p><strong>优点：</strong></p>
-                <ul>
-                <li><strong>思路简单：</strong> 易于理解。</li>
-                </ul>
-                <p><strong>缺点：</strong></p>
-                <ul>
-                <li><strong>排序困难且昂贵：</strong> 深度排序是整个算法的核心和瓶颈。</li>
-                <li><strong>无法处理循环遮挡：</strong> 如果三个多边形相互循环遮挡（A挡B，B挡C，C挡A），简单的深度排序会失效。</li>
-                <li><strong>无法处理相互穿插：</strong> 如果两个多边形相互穿插，谁先谁后根本无法确定。</li>
-                </ul>
-                <p>为了解决这些排序歧义，画家算法需要进行大量复杂的几何测试和多边形分割，这使得它在通用场景下变得非常缓慢和不可靠。</p>
-                <h3 id="6-bsp%E6%A0%91-binary-space-partitioning-tree"><strong>6. BSP树 (Binary Space Partitioning Tree)</strong></h3>
-                <p>对于<strong>静态场景</strong>（即场景中的物体不会移动，只有观察者移动），画家算法可以通过一个巧妙的数据结构——<strong>BSP树</strong>——得到极大的优化。</p>
-                <ul>
-                <li><strong>核心思想：</strong> 在预处理阶段，用场景中的多边形所在的平面，递归地将整个三维空间分割成二叉树结构。
-                <ul>
-                <li>每个树节点代表一个多边形（分割平面）。</li>
-                <li>节点的左子树包含了所有在该平面“后面”的多边形。</li>
-                <li>节点的右子树包含了所有在该平面“前面”的多边形。</li>
-                </ul>
-                </li>
-                <li><strong>渲染流程：</strong>
-                <ol>
-                <li><strong>判断视点位置：</strong> 从树的根节点开始，判断当前视点位于该节点平面的“前面”还是“后面”。</li>
-                <li><strong>递归遍历：</strong>
-                <ul>
-                <li>如果视点在<strong>前面</strong>，则先递归遍历<strong>后面</strong>的子树，然后绘制当前节点的多边形，最后递归遍历<strong>前面</strong>的子树。</li>
-                <li>如果视点在<strong>后面</strong>，则先递归遍历<strong>前面</strong>的子树，然后绘制当前节点的多边形，最后递归遍历<strong>后面</strong>的子树。</li>
-                </ul>
-                </li>
-                <li><strong>结果：</strong> 无论视点在何处，这种中序遍历的变体，总能保证输出一个<strong>从远到近</strong>的、完美无误的绘制序列。</li>
-                </ol>
-                </li>
-                </ul>
-                <p><strong>优点：</strong></p>
-                <ul>
-                <li><strong>一次构建，多次使用：</strong> 对于静态场景，BSP树只需构建一次。</li>
-                <li><strong>任意视点正确：</strong> 渲染时的遍历算法可以为任意视点提供正确的绘制顺序。</li>
-                </ul>
-                <p><strong>缺点：</strong></p>
-                <ul>
-                <li><strong>构建复杂：</strong> BSP树的构建过程计算量大，且可能需要分割多边形，增加场景的几何复杂度。</li>
-                <li><strong>不适用于动态场景：</strong> 一旦场景中的物体移动，整个树就需要重建。</li>
-                </ul>
-                <p>BSP树曾在90年代的3D游戏（如《DOOM》、《Quake》）中大放异彩，因为当时的游戏场景主要是静态的室内环境。</p>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li>每个树节点代表一个多边形（分割平面）。</li>
+<li>节点的左子树包含了所有在该平面“后面”的多边形。</li>
+<li>节点的右子树包含了所有在该平面“前面”的多边形。</li>
+</ul>
+</li>
+<li><strong>渲染流程：</strong>
+<ol>
+<li><strong>判断视点位置：</strong> 从树的根节点开始，判断当前视点位于该节点平面的“前面”还是“后面”。</li>
+<li><strong>递归遍历：</strong>
+<ul>
+<li>如果视点在<strong>前面</strong>，则先递归遍历<strong>后面</strong>的子树，然后绘制当前节点的多边形，最后递归遍历<strong>前面</strong>的子树。</li>
+<li>如果视点在<strong>后面</strong>，则先递归遍历<strong>前面</strong>的子树，然后绘制当前节点的多边形，最后递归遍历<strong>后面</strong>的子树。</li>
+</ul>
+</li>
+<li><strong>结果：</strong> 无论视点在何处，这种中序遍历的变体，总能保证输出一个<strong>从远到近</strong>的、完美无误的绘制序列。</li>
+</ol>
+</li>
+</ul>
+<p><strong>优点：</strong></p>
+<ul>
+<li><strong>一次构建，多次使用：</strong> 对于静态场景，BSP树只需构建一次。</li>
+<li><strong>任意视点正确：</strong> 渲染时的遍历算法可以为任意视点提供正确的绘制顺序。</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li><strong>构建复杂：</strong> BSP树的构建过程计算量大，且可能需要分割多边形，增加场景的几何复杂度。</li>
+<li><strong>不适用于动态场景：</strong> 一旦场景中的物体移动，整个树就需要重建。</li>
+</ul>
+<p>BSP树曾在90年代的3D游戏（如《DOOM》、《Quake》）中大放异彩，因为当时的游戏场景主要是静态的室内环境。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

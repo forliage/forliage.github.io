@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机体系结构5:线程级并行(Thread-Level Parallelism, TLP)</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>计算机体系结构5:线程级并行(Thread-Level Parallelism, TLP)</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,297 +30,323 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%845%E7%BA%BF%E7%A8%8B%E7%BA%A7%E5%B9%B6%E8%A1%8Cthread-level-parallelism-tlp">计算机体系结构5:线程级并行(Thread-Level Parallelism, TLP)</h1>
-                <h3 id="1-%E4%BB%8E-ilp-%E5%88%B0-tlp%E5%B9%B6%E8%A1%8C%E7%BB%B4%E5%BA%A6%E7%9A%84%E8%B7%83%E5%8D%87">1 从 ILP 到 TLP：并行维度的跃升</h3>
-                <ul>
-                <li><strong>指令级并行 (ILP)</strong>：在一个线程（Thread）内部，并行执行不同的指令。</li>
-                <li><strong>线程级并行 (TLP)</strong>：同时执行多个独立的线程。</li>
-                </ul>
-                <p><strong>设计的哲学转变</strong>：
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%845%E7%BA%BF%E7%A8%8B%E7%BA%A7%E5%B9%B6%E8%A1%8Cthread-level-parallelism-tlp">计算机体系结构5:线程级并行(Thread-Level Parallelism, TLP)</h1>
+<h3 id="1-%E4%BB%8E-ilp-%E5%88%B0-tlp%E5%B9%B6%E8%A1%8C%E7%BB%B4%E5%BA%A6%E7%9A%84%E8%B7%83%E5%8D%87">1 从 ILP 到 TLP：并行维度的跃升</h3>
+<ul>
+<li><strong>指令级并行 (ILP)</strong>：在一个线程（Thread）内部，并行执行不同的指令。</li>
+<li><strong>线程级并行 (TLP)</strong>：同时执行多个独立的线程。</li>
+</ul>
+<p><strong>设计的哲学转变</strong>：
                 ILP的并行性是由<strong>硬件（动态）或编译器（静态）<strong>来</strong>隐式（Implicitly）<strong>发掘的，对程序员来说是透明的。而TLP的并行性，则是由</strong>程序员或软件</strong>来**显式（Explicitly）**定义的。程序员将一个大任务分解成多个可以并发执行的子任务（线程），然后交由多个处理器核心去执行。</p>
-                <p>这种转变，将并行性的来源从微观的指令之间，提升到了宏观的任务之间。我们今天要学习的多处理器系统，正是为承载和加速TLP而设计的。</p>
-                <h4 id="11-%E5%A4%9A%E5%A4%84%E7%90%86%E5%99%A8%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A8%A1%E5%9E%8Bmimd">1.1 多处理器的基本模型：MIMD</h4>
-                <p>根据经典的费林分类法，多处理器属于<strong>MIMD (Multiple Instruction, Multiple Data)</strong> 架构。</p>
+<p>这种转变，将并行性的来源从微观的指令之间，提升到了宏观的任务之间。我们今天要学习的多处理器系统，正是为承载和加速TLP而设计的。</p>
+<h4 id="11-%E5%A4%9A%E5%A4%84%E7%90%86%E5%99%A8%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A8%A1%E5%9E%8Bmimd">1.1 多处理器的基本模型：MIMD</h4>
+<p>根据经典的费林分类法，多处理器属于<strong>MIMD (Multiple Instruction, Multiple Data)</strong> 架构。</p>
+<ul>
+<li><strong>Multiple Instruction Streams</strong>：每个处理器核心都有自己独立的PC和控制单元，可以独立地取指和执行自己的指令序列（线程）。</li>
+<li><strong>Multiple Data Streams</strong>：每个核心操作于自己的数据，但它们通常又需要通过某种机制来访问和操作<strong>共享的数据</strong>，以完成协同工作。</li>
+</ul>
+<p>这种“独立自主”又“需要协作”的特性，是MIMD架构强大灵活性和巨大挑战的根源。</p>
+<h4 id="12-%E7%8E%B0%E4%BB%A3%E5%A4%9A%E5%A4%84%E7%90%86%E5%99%A8%E7%9A%84%E4%B8%A4%E7%A7%8D%E5%BD%A2%E6%80%81">1.2 现代多处理器的两种形态</h4>
+<ul>
+<li><strong>多核处理器 (Multicore)</strong>：将多个处理器核心（Core）集成在<strong>同一块芯片</strong>上。这是我们今天智能手机、笔记本和台式机中的主流形态。</li>
+<li><strong>多芯片多处理器 (Multi-chip Multiprocessor)</strong>：由多个独立的处理器芯片组成一个系统，通常用于服务器和数据中心。这些芯片上的每一个，本身可能就是一个多核处理器。</li>
+</ul>
+<p>无论是哪种形态，它们都面临一个共同的核心设计问题：<strong>这些独立的处理器核心，应该如何共享数据和进行通信？</strong> 这个问题的答案，引出了两种主流的多处理器内存架构。</p>
+<h4 id="13-%E5%A4%9A%E5%A4%84%E7%90%86%E5%99%A8%E6%9E%B6%E6%9E%84">1.3 多处理器架构</h4>
+<ol>
+<li>
+<p><strong>集中式共享内存 (Centralized Shared-Memory) / 对称多处理器 (SMP)</strong>
+<img alt="figure 49" src="../images/imagea049.png"/></p>
+<ul>
+<li><strong>设计哲学</strong>：<strong>“所有内存生而平等”</strong>。系统中只有一个集中的主内存，所有的处理器核心通过一个共享的总线或交换网络连接到这个内存。</li>
+<li><strong>核心特征</strong>：
                 <ul>
-                <li><strong>Multiple Instruction Streams</strong>：每个处理器核心都有自己独立的PC和控制单元，可以独立地取指和执行自己的指令序列（线程）。</li>
-                <li><strong>Multiple Data Streams</strong>：每个核心操作于自己的数据，但它们通常又需要通过某种机制来访问和操作<strong>共享的数据</strong>，以完成协同工作。</li>
-                </ul>
-                <p>这种“独立自主”又“需要协作”的特性，是MIMD架构强大灵活性和巨大挑战的根源。</p>
-                <h4 id="12-%E7%8E%B0%E4%BB%A3%E5%A4%9A%E5%A4%84%E7%90%86%E5%99%A8%E7%9A%84%E4%B8%A4%E7%A7%8D%E5%BD%A2%E6%80%81">1.2 现代多处理器的两种形态</h4>
+<li><strong>统一内存访问 (Uniform Memory Access, UMA)</strong>：任何一个处理器访问内存的任何位置，其延迟都是<strong>相同</strong>的。这极大地简化了编程模型，程序员无需关心数据存放在哪里。</li>
+</ul>
+</li>
+<li><strong>适用范围</strong>：这种架构的可扩展性有限。随着核心数量增加，共享内存总线的带宽会迅速成为瓶颈。因此，它通常用于核心数量较少的系统（例如，小于32核）。</li>
+</ul>
+</li>
+<li>
+<p><strong>分布式共享内存 (Distributed Shared Memory, DSM)</strong>
+<img alt="figure 50" src="../images/imagea050.png"/></p>
+<ul>
+<li><strong>设计哲学</strong>：<strong>“远亲不如近邻”</strong>。为了解决SMP的扩展性问题，DSM将物理内存分布到各个处理器节点（Node）上。每个处理器都拥有自己的“本地内存”。</li>
+<li><strong>核心特征</strong>：
                 <ul>
-                <li><strong>多核处理器 (Multicore)</strong>：将多个处理器核心（Core）集成在<strong>同一块芯片</strong>上。这是我们今天智能手机、笔记本和台式机中的主流形态。</li>
-                <li><strong>多芯片多处理器 (Multi-chip Multiprocessor)</strong>：由多个独立的处理器芯片组成一个系统，通常用于服务器和数据中心。这些芯片上的每一个，本身可能就是一个多核处理器。</li>
-                </ul>
-                <p>无论是哪种形态，它们都面临一个共同的核心设计问题：<strong>这些独立的处理器核心，应该如何共享数据和进行通信？</strong> 这个问题的答案，引出了两种主流的多处理器内存架构。</p>
-                <h4 id="13-%E5%A4%9A%E5%A4%84%E7%90%86%E5%99%A8%E6%9E%B6%E6%9E%84">1.3 多处理器架构</h4>
-                <ol>
-                <li>
-                <p><strong>集中式共享内存 (Centralized Shared-Memory) / 对称多处理器 (SMP)</strong>
-                <img src="../images/imagea049.png" alt="figure 49"></p>
-                <ul>
-                <li><strong>设计哲学</strong>：<strong>“所有内存生而平等”</strong>。系统中只有一个集中的主内存，所有的处理器核心通过一个共享的总线或交换网络连接到这个内存。</li>
-                <li><strong>核心特征</strong>：
-                <ul>
-                <li><strong>统一内存访问 (Uniform Memory Access, UMA)</strong>：任何一个处理器访问内存的任何位置，其延迟都是<strong>相同</strong>的。这极大地简化了编程模型，程序员无需关心数据存放在哪里。</li>
-                </ul>
-                </li>
-                <li><strong>适用范围</strong>：这种架构的可扩展性有限。随着核心数量增加，共享内存总线的带宽会迅速成为瓶颈。因此，它通常用于核心数量较少的系统（例如，小于32核）。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>分布式共享内存 (Distributed Shared Memory, DSM)</strong>
-                <img src="../images/imagea050.png" alt="figure 50"></p>
-                <ul>
-                <li><strong>设计哲学</strong>：<strong>“远亲不如近邻”</strong>。为了解决SMP的扩展性问题，DSM将物理内存分布到各个处理器节点（Node）上。每个处理器都拥有自己的“本地内存”。</li>
-                <li><strong>核心特征</strong>：
-                <ul>
-                <li><strong>非统一内存访问 (Non-Uniform Memory Access, NUMA)</strong>：处理器访问自己的本地内存速度非常快，而访问其他节点的“远程内存”则需要通过互联网络，延迟会高得多。</li>
-                <li><strong>单一地址空间</strong>：尽管物理上是分布的，但所有内存共同组成一个<strong>逻辑上统一的共享地址空间</strong>。这意味着任何处理器都可以通过一个普通的加载/存储指令，访问到系统中的任何一块内存，只是访问速度不同。</li>
-                </ul>
-                </li>
-                <li><strong>设计权衡</strong>：NUMA以牺牲UMA的编程简便性为代价，换来了极高的<strong>内存带宽和可扩展性</strong>，使其能够支持数百甚至数千个处理器核心。但这也给操作系统和程序员带来了新的挑战：如何优化数据布局，使得线程尽可能地访问本地内存（数据局部性）。</li>
-                </ul>
-                </li>
-                </ol>
-                <p>无论采用哪种架构，只要允许多个处理器共享数据，一个幽灵般的问题便会立刻浮现——<strong>缓存一致性 (Cache Coherence)</strong>。</p>
-                <h3 id="2-%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7">2 缓存一致性</h3>
-                <p>我们知道，为了弥补“内存墙”，每个处理器核心都有自己私有的高速缓存（Cache）。</p>
-                <ul>
-                <li><strong>私有数据 (Private data)</strong>：如果一个数据只被一个核心使用，那么缓存工作得非常完美。</li>
-                <li><strong>共享数据 (Shared data)</strong>：问题来了。如果一个数据（例如，一个共享变量 <code>count</code>）被多个核心共享，那么它可能会同时存在于<strong>主内存</strong>以及<strong>多个核心的私有缓存</strong>中，形成多个<strong>副本 (Copies)</strong>。</li>
-                </ul>
-                <p><img src="../images/imagea051.png" alt="figure 51"></p>
-                <p><strong>缓存一致性问题 (Cache Coherence Problem) 的本质</strong>：
+<li><strong>非统一内存访问 (Non-Uniform Memory Access, NUMA)</strong>：处理器访问自己的本地内存速度非常快，而访问其他节点的“远程内存”则需要通过互联网络，延迟会高得多。</li>
+<li><strong>单一地址空间</strong>：尽管物理上是分布的，但所有内存共同组成一个<strong>逻辑上统一的共享地址空间</strong>。这意味着任何处理器都可以通过一个普通的加载/存储指令，访问到系统中的任何一块内存，只是访问速度不同。</li>
+</ul>
+</li>
+<li><strong>设计权衡</strong>：NUMA以牺牲UMA的编程简便性为代价，换来了极高的<strong>内存带宽和可扩展性</strong>，使其能够支持数百甚至数千个处理器核心。但这也给操作系统和程序员带来了新的挑战：如何优化数据布局，使得线程尽可能地访问本地内存（数据局部性）。</li>
+</ul>
+</li>
+</ol>
+<p>无论采用哪种架构，只要允许多个处理器共享数据，一个幽灵般的问题便会立刻浮现——<strong>缓存一致性 (Cache Coherence)</strong>。</p>
+<h3 id="2-%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7">2 缓存一致性</h3>
+<p>我们知道，为了弥补“内存墙”，每个处理器核心都有自己私有的高速缓存（Cache）。</p>
+<ul>
+<li><strong>私有数据 (Private data)</strong>：如果一个数据只被一个核心使用，那么缓存工作得非常完美。</li>
+<li><strong>共享数据 (Shared data)</strong>：问题来了。如果一个数据（例如，一个共享变量 <code>count</code>）被多个核心共享，那么它可能会同时存在于<strong>主内存</strong>以及<strong>多个核心的私有缓存</strong>中，形成多个<strong>副本 (Copies)</strong>。</li>
+</ul>
+<p><img alt="figure 51" src="../images/imagea051.png"/></p>
+<p><strong>缓存一致性问题 (Cache Coherence Problem) 的本质</strong>：
                 当一个处理器修改了它自己缓存中共享数据的副本时，其他处理器缓存中的副本就变成了“<strong>过时的（Stale）</strong>”数据。如果其他处理器此时读取它们自己的旧副本，就会读到错误的值，从而导致整个程序逻辑崩溃。</p>
-                <p><strong>一个简单的例子：</strong></p>
-                <table>
-                <thead>
-                <tr>
-                <th style="text-align:center">时间</th>
-                <th style="text-align:left">事件</th>
-                <th style="text-align:center">处理器 A Cache (X)</th>
-                <th style="text-align:center">处理器 B Cache (X)</th>
-                <th style="text-align:center">主内存 (X)</th>
-                <th style="text-align:left">说明</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                <td style="text-align:center">0</td>
-                <td style="text-align:left">初始状态</td>
-                <td style="text-align:center">(空)</td>
-                <td style="text-align:center">(空)</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:left">内存中X=1</td>
-                </tr>
-                <tr>
-                <td style="text-align:center">1</td>
-                <td style="text-align:left">P_A 读取 X</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">(空)</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:left">P_A 缓存了 X</td>
-                </tr>
-                <tr>
-                <td style="text-align:center">2</td>
-                <td style="text-align:left">P_B 读取 X</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:left">P_B 也缓存了 X</td>
-                </tr>
-                <tr>
-                <td style="text-align:center">3</td>
-                <td style="text-align:left">P_A 写入 X=0</td>
-                <td style="text-align:center"><strong>0</strong></td>
-                <td style="text-align:center"><strong>1</strong></td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:left"><strong>不一致！</strong> P_A更新了自己和内存，但P_B不知道</td>
-                </tr>
-                <tr>
-                <td style="text-align:center">4</td>
-                <td style="text-align:left">P_B 读取 X</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center"><strong>1</strong></td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:left"><strong>错误！</strong> P_B读到了旧值1，而X的最新值应该是0</td>
-                </tr>
-                </tbody>
-                </table>
-                <p><strong>缓存一致性 (Coherence) 的正式定义</strong>：
+<p><strong>一个简单的例子：</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">时间</th>
+<th style="text-align:left">事件</th>
+<th style="text-align:center">处理器 A Cache (X)</th>
+<th style="text-align:center">处理器 B Cache (X)</th>
+<th style="text-align:center">主内存 (X)</th>
+<th style="text-align:left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">0</td>
+<td style="text-align:left">初始状态</td>
+<td style="text-align:center">(空)</td>
+<td style="text-align:center">(空)</td>
+<td style="text-align:center">1</td>
+<td style="text-align:left">内存中X=1</td>
+</tr>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:left">P_A 读取 X</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">(空)</td>
+<td style="text-align:center">1</td>
+<td style="text-align:left">P_A 缓存了 X</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:left">P_B 读取 X</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">1</td>
+<td style="text-align:left">P_B 也缓存了 X</td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td style="text-align:left">P_A 写入 X=0</td>
+<td style="text-align:center"><strong>0</strong></td>
+<td style="text-align:center"><strong>1</strong></td>
+<td style="text-align:center">0</td>
+<td style="text-align:left"><strong>不一致！</strong> P_A更新了自己和内存，但P_B不知道</td>
+</tr>
+<tr>
+<td style="text-align:center">4</td>
+<td style="text-align:left">P_B 读取 X</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center"><strong>1</strong></td>
+<td style="text-align:center">0</td>
+<td style="text-align:left"><strong>错误！</strong> P_B读到了旧值1，而X的最新值应该是0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>缓存一致性 (Coherence) 的正式定义</strong>：
                 一个内存系统被称为是一致的，如果它能保证：</p>
-                <ol>
-                <li><strong>写后读一致性</strong>：一个处理器P对地址X的写操作，必须在P后续对X的读操作之前被观察到。这保证了单个处理器的程序顺序。</li>
-                <li><strong>写传播 (Write Propagation)</strong>：一个处理器对地址X的写操作，最终必须对<strong>所有</strong>其他处理器可见。</li>
-                <li><strong>写串行化 (Write Serialization)</strong>：所有处理器看到的，对<strong>同一个地址</strong>的所有写操作的顺序，必须是<strong>一致的</strong>。</li>
-                </ol>
-                <p>要实现缓存一致性，就必须有一套机制，来协调各个私有缓存之间的行为。这套机制，就是<strong>缓存一致性协议 (Cache Coherence Protocols)</strong>。</p>
-                <h4 id="3-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E4%B8%80%E7%9B%91%E5%90%ACsnooping%E5%8D%8F%E8%AE%AE">3 解决方案一：监听（Snooping）协议”</h4>
-                <p>监听协议是实现缓存一致性的经典方法，尤其适用于采用共享总线的<strong>集中式共享内存（SMP）系统</strong>。</p>
+<ol>
+<li><strong>写后读一致性</strong>：一个处理器P对地址X的写操作，必须在P后续对X的读操作之前被观察到。这保证了单个处理器的程序顺序。</li>
+<li><strong>写传播 (Write Propagation)</strong>：一个处理器对地址X的写操作，最终必须对<strong>所有</strong>其他处理器可见。</li>
+<li><strong>写串行化 (Write Serialization)</strong>：所有处理器看到的，对<strong>同一个地址</strong>的所有写操作的顺序，必须是<strong>一致的</strong>。</li>
+</ol>
+<p>要实现缓存一致性，就必须有一套机制，来协调各个私有缓存之间的行为。这套机制，就是<strong>缓存一致性协议 (Cache Coherence Protocols)</strong>。</p>
+<h4 id="3-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E4%B8%80%E7%9B%91%E5%90%ACsnooping%E5%8D%8F%E8%AE%AE">3 解决方案一：监听（Snooping）协议”</h4>
+<p>监听协议是实现缓存一致性的经典方法，尤其适用于采用共享总线的<strong>集中式共享内存（SMP）系统</strong>。</p>
+<ul>
+<li><strong>核心思想</strong>：<strong>“所有通信都公开化，每个缓存自己负责监听”</strong>。
                 <ul>
-                <li><strong>核心思想</strong>：<strong>“所有通信都公开化，每个缓存自己负责监听”</strong>。
+<li>系统中的所有缓存控制器（Cache Controller）都连接到一个共享总线上。</li>
+<li>任何缓存的任何操作（读miss、写操作等）都必须通过总线进行<strong>广播</strong>。</li>
+<li><strong>每一个</strong>缓存控制器都在**持续不断地“监听”（snooping）**总线上的活动。</li>
+<li>当监听到一个与自己缓存中某个数据块相关的地址时，该缓存控制器就会根据协议规则，采取相应的行动（如更新自己的状态、提供数据、或使自己的副本无效）。</li>
+</ul>
+</li>
+</ul>
+<h4 id="31-%E4%B8%A4%E7%A7%8D%E5%9F%BA%E6%9C%AC%E7%9A%84%E7%9B%91%E5%90%AC%E7%AD%96%E7%95%A5">3.1 两种基本的监听策略</h4>
+<ol>
+<li>
+<p><strong>写更新协议 (Write-Update Protocol)</strong></p>
+<ul>
+<li><strong>策略</strong>：当一个处理器要写入一个共享数据块时，它通过总线<strong>广播新的数据</strong>。所有其他拥有该数据块副本的缓存，都会用新数据<strong>更新</strong>自己的副本。</li>
+<li><strong>缺点</strong>：如果一个数据被频繁写入，但很少被其他处理器读取，每次写入都进行广播会消耗大量的总线带宽，非常浪费。</li>
+</ul>
+</li>
+<li>
+<p><strong>写无效协议 (Write-Invalidate Protocol)</strong></p>
+<ul>
+<li><strong>策略</strong>：当一个处理器要写入一个共享数据块时，它首先需要获得该数据块的<strong>独占所有权</strong>。它会通过总线广播一个<strong>无效化（Invalidate）<strong>命令。所有其他拥有该数据块副本的缓存，在监听到这个命令后，会简单地将自己的副本标记为</strong>无效（Invalid）</strong>。</li>
+<li><strong>优点</strong>：后续的多次写入，只要没有其他处理器来读取，都可以在本地缓存中安静地进行，无需再占用总线。只有当其他处理器需要读取该数据时，才会发生一次缓存miss，并通过总线从持有最新副本的缓存那里获取数据。</li>
+<li><strong>主流选择</strong>：由于其带宽效率更高，<strong>写无效协议是现代多处理器中最普遍采用的策略</strong>。</li>
+</ul>
+</li>
+</ol>
+<h4 id="32-%E5%AE%9E%E7%8E%B0%E5%86%99%E6%97%A0%E6%95%88%E5%8D%8F%E8%AE%AEmsi-%E7%8A%B6%E6%80%81%E6%9C%BA">3.2 实现写无效协议：MSI 状态机</h4>
+<p>为了实现写无效协议，每个缓存块（Cache Line）都需要增加几个状态位，来记录它当前所处的一致性状态。最基础的协议是<strong>MSI协议</strong>，它定义了三个核心状态：</p>
+<p><img alt="figure 52" src="../images/imagea052.png"/>
+<img alt="figure 53" src="../images/imagea053.png"/></p>
+<ul>
+<li>
+<p><strong>M - Modified (已修改)</strong></p>
+<ul>
+<li><strong>含义</strong>：当前缓存块是该数据在整个系统中的<strong>唯一有效副本</strong>，并且它已经被当前处理器修改过（是“脏”的，dirty），其内容与主存<strong>不一致</strong>。</li>
+<li><strong>权限</strong>：当前处理器拥有对该块的<strong>读写权限</strong>。</li>
+</ul>
+</li>
+<li>
+<p><strong>S - Shared (共享)</strong></p>
+<ul>
+<li><strong>含义</strong>：当前缓存块的数据是有效的，且与主存<strong>一致</strong>。系统中<strong>可能存在其他缓存</strong>也拥有该数据块的副本。</li>
+<li><strong>权限</strong>：当前处理器只拥有<strong>只读权限</strong>。</li>
+</ul>
+</li>
+<li>
+<p><strong>I - Invalid (无效)</strong></p>
+<ul>
+<li><strong>含义</strong>：当前缓存块中的数据是<strong>无效的</strong>，不能使用。</li>
+</ul>
+</li>
+</ul>
+<p><strong>状态转换的动态过程（以处理器 P1 的视角）：</strong></p>
+<ul>
+<li>
+<p><strong>场景1：读缺失 (Read Miss)</strong></p>
+<ol>
+<li>P1 想读地址 X，但在其缓存中是 <code>I</code> 状态（或不存在）。</li>
+<li>P1 在总线上广播“<strong>读请求 (BusRd)</strong>”。</li>
+<li><strong>其他缓存监听</strong>：
                 <ul>
-                <li>系统中的所有缓存控制器（Cache Controller）都连接到一个共享总线上。</li>
-                <li>任何缓存的任何操作（读miss、写操作等）都必须通过总线进行<strong>广播</strong>。</li>
-                <li><strong>每一个</strong>缓存控制器都在**持续不断地“监听”（snooping）**总线上的活动。</li>
-                <li>当监听到一个与自己缓存中某个数据块相关的地址时，该缓存控制器就会根据协议规则，采取相应的行动（如更新自己的状态、提供数据、或使自己的副本无效）。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="31-%E4%B8%A4%E7%A7%8D%E5%9F%BA%E6%9C%AC%E7%9A%84%E7%9B%91%E5%90%AC%E7%AD%96%E7%95%A5">3.1 两种基本的监听策略</h4>
-                <ol>
-                <li>
-                <p><strong>写更新协议 (Write-Update Protocol)</strong></p>
-                <ul>
-                <li><strong>策略</strong>：当一个处理器要写入一个共享数据块时，它通过总线<strong>广播新的数据</strong>。所有其他拥有该数据块副本的缓存，都会用新数据<strong>更新</strong>自己的副本。</li>
-                <li><strong>缺点</strong>：如果一个数据被频繁写入，但很少被其他处理器读取，每次写入都进行广播会消耗大量的总线带宽，非常浪费。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>写无效协议 (Write-Invalidate Protocol)</strong></p>
-                <ul>
-                <li><strong>策略</strong>：当一个处理器要写入一个共享数据块时，它首先需要获得该数据块的<strong>独占所有权</strong>。它会通过总线广播一个<strong>无效化（Invalidate）<strong>命令。所有其他拥有该数据块副本的缓存，在监听到这个命令后，会简单地将自己的副本标记为</strong>无效（Invalid）</strong>。</li>
-                <li><strong>优点</strong>：后续的多次写入，只要没有其他处理器来读取，都可以在本地缓存中安静地进行，无需再占用总线。只有当其他处理器需要读取该数据时，才会发生一次缓存miss，并通过总线从持有最新副本的缓存那里获取数据。</li>
-                <li><strong>主流选择</strong>：由于其带宽效率更高，<strong>写无效协议是现代多处理器中最普遍采用的策略</strong>。</li>
-                </ul>
-                </li>
-                </ol>
-                <h4 id="32-%E5%AE%9E%E7%8E%B0%E5%86%99%E6%97%A0%E6%95%88%E5%8D%8F%E8%AE%AEmsi-%E7%8A%B6%E6%80%81%E6%9C%BA">3.2 实现写无效协议：MSI 状态机</h4>
-                <p>为了实现写无效协议，每个缓存块（Cache Line）都需要增加几个状态位，来记录它当前所处的一致性状态。最基础的协议是<strong>MSI协议</strong>，它定义了三个核心状态：</p>
-                <p><img src="../images/imagea052.png" alt="figure 52">
-                <img src="../images/imagea053.png" alt="figure 53"></p>
-                <ul>
-                <li>
-                <p><strong>M - Modified (已修改)</strong></p>
-                <ul>
-                <li><strong>含义</strong>：当前缓存块是该数据在整个系统中的<strong>唯一有效副本</strong>，并且它已经被当前处理器修改过（是“脏”的，dirty），其内容与主存<strong>不一致</strong>。</li>
-                <li><strong>权限</strong>：当前处理器拥有对该块的<strong>读写权限</strong>。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>S - Shared (共享)</strong></p>
-                <ul>
-                <li><strong>含义</strong>：当前缓存块的数据是有效的，且与主存<strong>一致</strong>。系统中<strong>可能存在其他缓存</strong>也拥有该数据块的副本。</li>
-                <li><strong>权限</strong>：当前处理器只拥有<strong>只读权限</strong>。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>I - Invalid (无效)</strong></p>
-                <ul>
-                <li><strong>含义</strong>：当前缓存块中的数据是<strong>无效的</strong>，不能使用。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>状态转换的动态过程（以处理器 P1 的视角）：</strong></p>
-                <ul>
-                <li>
-                <p><strong>场景1：读缺失 (Read Miss)</strong></p>
-                <ol>
-                <li>P1 想读地址 X，但在其缓存中是 <code>I</code> 状态（或不存在）。</li>
-                <li>P1 在总线上广播“<strong>读请求 (BusRd)</strong>”。</li>
-                <li><strong>其他缓存监听</strong>：
-                <ul>
-                <li>如果没有其他缓存拥有 X，主内存响应，将数据块提供给 P1。P1 将该块置为 <code>S</code> 状态。（如果能确定是唯一副本，更优化的协议会置为 <code>E</code> 状态，后面会讲）。</li>
-                <li>如果其他缓存（如 P2）拥有 X 的 <code>S</code> 副本，P2 和主内存都可以响应。</li>
-                <li>如果 P2 拥有 X 的 <code>M</code> 副本，P2 <strong>必须</strong>响应，将它的脏数据提供给 P1，并<strong>同时写回主存</strong>，然后 P1 和 P2 都将该块置为 <code>S</code> 状态。</li>
-                </ul>
-                </li>
-                </ol>
-                </li>
-                <li>
-                <p><strong>场景2：写命中 (Write Hit)</strong></p>
-                <ol>
-                <li>P1 想写地址 X，在其缓存中是 <code>S</code> 状态。</li>
-                <li>因为 <code>S</code> 状态是只读的，P1 必须先升级权限。它在总线上广播一个“<strong>写无效请求 (BusRdX - Read Exclusive or BusUpgr - Upgrade)</strong>”。</li>
-                <li>所有监听到此请求的其他缓存，如果它们有 X 的 <code>S</code> 副本，就必须将自己的副本置为 <code>I</code> 状态。</li>
-                <li>P1 收到确认后，将自己的状态从 <code>S</code> 变为 <code>M</code>，然后执行写入。</li>
-                </ol>
-                </li>
-                <li>
-                <p><strong>场景3：写缺失 (Write Miss)</strong></p>
-                <ol>
-                <li>P1 想写地址 X，但在其缓存中是 <code>I</code> 状态。</li>
-                <li>P1 直接在总线上广播“<strong>写无效请求 (BusRdX)</strong>”。</li>
-                <li>其他拥有 X 副本的缓存（无论是 <code>S</code> 还是 <code>M</code>），都会将自己的副本置为 <code>I</code>，并由拥有最新数据的单元（可能是某个缓存或主存）提供数据。</li>
-                <li>P1 拿到数据后，立即写入，并将状态置为 <code>M</code>。</li>
-                </ol>
-                </li>
-                </ul>
-                <h4 id="33-msi-%E7%9A%84%E8%BF%9B%E5%8C%96mesi-moesi">3.3 MSI 的进化：MESI, MOESI</h4>
-                <p>MSI 协议虽然能工作，但存在效率问题。思考一个场景：P1 读取 X，内存提供数据，P1 置为 <code>S</code>。之后 P1 想写 X，它必须再发一个 <code>BusUpgr</code> 消息来使其他潜在的副本无效，即使此时系统中可能并无其他副本。这次总线通信是多余的。</p>
-                <ul>
-                <li>
-                <p><strong>MESI 协议</strong>：引入了 <strong>E - Exclusive (独占)</strong> 状态。</p>
-                <ul>
-                <li><strong>含义</strong>：当前缓存块是该数据在系统中的<strong>唯一有效副本</strong>，但它尚未被修改（是“干净”的，clean），与主存<strong>一致</strong>。</li>
-                <li><strong>设计优化</strong>：当 P1 读缺失时，如果总线响应表明没有其他缓存共享该数据，P1 可以直接将数据块置为 <code>E</code> 状态。之后，当 P1 要<strong>写入</strong>这个 <code>E</code> 状态的块时，它<strong>无需任何总线通信</strong>，可以直接、安静地将状态变为 <code>M</code> 并写入。这被称为“<strong>静默升级 (silent upgrade)</strong>”，极大地减少了不必要的总线流量。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>MOESI 协议</strong>：在 MESI 的基础上，进一步引入了 <strong>O - Owned (拥有)</strong> 状态。</p>
-                <ul>
-                <li><strong>含义</strong>：当前缓存块是“脏”的（已被修改），但系统中<strong>可能存在其他缓存拥有该数据的 <code>S</code> 副本</strong>。拥有 <code>O</code> 状态的缓存<strong>有责任</strong>在其他缓存需要数据时提供数据，并在最终被替换时将数据写回主存。</li>
-                <li><strong>设计优化</strong>：这个状态主要用于优化缓存到缓存（Cache-to-Cache）的数据传输。当一个缓存持有 <code>M</code> 状态的块，而另一个缓存请求读取该块时，持有方可以将状态变为 <code>O</code>，并将数据直接传给请求方（请求方置为 <code>S</code>），而<strong>无需立即写回主存</strong>。这避免了昂贵的内存写操作。</li>
-                </ul>
-                </li>
-                </ul>
-                <p>这些协议的演进，本质上是在用更复杂的状态机和逻辑，来换取更少的总线通信和更高效的数据共享，这正是体系结构设计中典型的复杂性换性能的权衡。</p>
-                <h4 id="4-%E7%93%B6%E9%A2%88%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88">4 瓶颈与解决方案</h4>
-                <p>监听协议的优雅之处在于其简单和分布式。但它的“命门”在于那条<strong>共享总线</strong>。所有通信都必须通过总线广播，随着处理器核心数量的增加，总线很快会饱和，成为整个系统的瓶颈。</p>
-                <p>为了解决这个问题，现代 SMP 系统采用了多种技术：</p>
-                <ul>
-                <li><strong>分布式共享缓存</strong>：将最后一级缓存（L3 Cache）分块，每个核心负责一部分地址空间的监听，而不是监听所有地址。</li>
-                <li><strong>多总线/Crossbar</strong>：用更复杂的互联结构代替单一总线，提供更高的带宽。</li>
-                </ul>
-                <p>但当核心数量非常多时（例如超过32个），监听协议的广播开销会变得难以承受。这时，我们就需要一种全新的、不依赖于广播的解决方案。</p>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li>如果没有其他缓存拥有 X，主内存响应，将数据块提供给 P1。P1 将该块置为 <code>S</code> 状态。（如果能确定是唯一副本，更优化的协议会置为 <code>E</code> 状态，后面会讲）。</li>
+<li>如果其他缓存（如 P2）拥有 X 的 <code>S</code> 副本，P2 和主内存都可以响应。</li>
+<li>如果 P2 拥有 X 的 <code>M</code> 副本，P2 <strong>必须</strong>响应，将它的脏数据提供给 P1，并<strong>同时写回主存</strong>，然后 P1 和 P2 都将该块置为 <code>S</code> 状态。</li>
+</ul>
+</li>
+</ol>
+</li>
+<li>
+<p><strong>场景2：写命中 (Write Hit)</strong></p>
+<ol>
+<li>P1 想写地址 X，在其缓存中是 <code>S</code> 状态。</li>
+<li>因为 <code>S</code> 状态是只读的，P1 必须先升级权限。它在总线上广播一个“<strong>写无效请求 (BusRdX - Read Exclusive or BusUpgr - Upgrade)</strong>”。</li>
+<li>所有监听到此请求的其他缓存，如果它们有 X 的 <code>S</code> 副本，就必须将自己的副本置为 <code>I</code> 状态。</li>
+<li>P1 收到确认后，将自己的状态从 <code>S</code> 变为 <code>M</code>，然后执行写入。</li>
+</ol>
+</li>
+<li>
+<p><strong>场景3：写缺失 (Write Miss)</strong></p>
+<ol>
+<li>P1 想写地址 X，但在其缓存中是 <code>I</code> 状态。</li>
+<li>P1 直接在总线上广播“<strong>写无效请求 (BusRdX)</strong>”。</li>
+<li>其他拥有 X 副本的缓存（无论是 <code>S</code> 还是 <code>M</code>），都会将自己的副本置为 <code>I</code>，并由拥有最新数据的单元（可能是某个缓存或主存）提供数据。</li>
+<li>P1 拿到数据后，立即写入，并将状态置为 <code>M</code>。</li>
+</ol>
+</li>
+</ul>
+<h4 id="33-msi-%E7%9A%84%E8%BF%9B%E5%8C%96mesi-moesi">3.3 MSI 的进化：MESI, MOESI</h4>
+<p>MSI 协议虽然能工作，但存在效率问题。思考一个场景：P1 读取 X，内存提供数据，P1 置为 <code>S</code>。之后 P1 想写 X，它必须再发一个 <code>BusUpgr</code> 消息来使其他潜在的副本无效，即使此时系统中可能并无其他副本。这次总线通信是多余的。</p>
+<ul>
+<li>
+<p><strong>MESI 协议</strong>：引入了 <strong>E - Exclusive (独占)</strong> 状态。</p>
+<ul>
+<li><strong>含义</strong>：当前缓存块是该数据在系统中的<strong>唯一有效副本</strong>，但它尚未被修改（是“干净”的，clean），与主存<strong>一致</strong>。</li>
+<li><strong>设计优化</strong>：当 P1 读缺失时，如果总线响应表明没有其他缓存共享该数据，P1 可以直接将数据块置为 <code>E</code> 状态。之后，当 P1 要<strong>写入</strong>这个 <code>E</code> 状态的块时，它<strong>无需任何总线通信</strong>，可以直接、安静地将状态变为 <code>M</code> 并写入。这被称为“<strong>静默升级 (silent upgrade)</strong>”，极大地减少了不必要的总线流量。</li>
+</ul>
+</li>
+<li>
+<p><strong>MOESI 协议</strong>：在 MESI 的基础上，进一步引入了 <strong>O - Owned (拥有)</strong> 状态。</p>
+<ul>
+<li><strong>含义</strong>：当前缓存块是“脏”的（已被修改），但系统中<strong>可能存在其他缓存拥有该数据的 <code>S</code> 副本</strong>。拥有 <code>O</code> 状态的缓存<strong>有责任</strong>在其他缓存需要数据时提供数据，并在最终被替换时将数据写回主存。</li>
+<li><strong>设计优化</strong>：这个状态主要用于优化缓存到缓存（Cache-to-Cache）的数据传输。当一个缓存持有 <code>M</code> 状态的块，而另一个缓存请求读取该块时，持有方可以将状态变为 <code>O</code>，并将数据直接传给请求方（请求方置为 <code>S</code>），而<strong>无需立即写回主存</strong>。这避免了昂贵的内存写操作。</li>
+</ul>
+</li>
+</ul>
+<p>这些协议的演进，本质上是在用更复杂的状态机和逻辑，来换取更少的总线通信和更高效的数据共享，这正是体系结构设计中典型的复杂性换性能的权衡。</p>
+<h4 id="4-%E7%93%B6%E9%A2%88%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88">4 瓶颈与解决方案</h4>
+<p>监听协议的优雅之处在于其简单和分布式。但它的“命门”在于那条<strong>共享总线</strong>。所有通信都必须通过总线广播，随着处理器核心数量的增加，总线很快会饱和，成为整个系统的瓶颈。</p>
+<p>为了解决这个问题，现代 SMP 系统采用了多种技术：</p>
+<ul>
+<li><strong>分布式共享缓存</strong>：将最后一级缓存（L3 Cache）分块，每个核心负责一部分地址空间的监听，而不是监听所有地址。</li>
+<li><strong>多总线/Crossbar</strong>：用更复杂的互联结构代替单一总线，提供更高的带宽。</li>
+</ul>
+<p>但当核心数量非常多时（例如超过32个），监听协议的广播开销会变得难以承受。这时，我们就需要一种全新的、不依赖于广播的解决方案。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

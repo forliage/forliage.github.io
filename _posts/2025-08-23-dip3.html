@@ -1,13 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>图像信息处理3:图像几何变换</title>
-    
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    
-    <script>
+<meta charset="utf-8"/>
+<title>图像信息处理3:图像几何变换</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -18,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -32,158 +30,158 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E5%9B%BE%E5%83%8F%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%863%E5%9B%BE%E5%83%8F%E5%87%A0%E4%BD%95%E5%8F%98%E6%8D%A2">图像信息处理3:图像几何变换</h1>
-                <h3 id="1-%E5%87%A0%E4%BD%95%E5%8F%98%E6%8D%A2%E5%9F%BA%E7%A1%80"><strong>1. 几何变换基础</strong></h3>
-                <h4 id="11-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><strong>1.1 核心概念</strong></h4>
-                <p><strong>图像几何变换 (Geometric Transformation)</strong> 是指改变图像中像素的空间位置，从而产生一幅新的图像。其核心在于：</p>
-                <ul>
-                <li><strong>只改变位置，不改变像素值：</strong> 变换本身只涉及坐标的重新映射，像素的灰度值或颜色值在理论上是不变的。</li>
-                <li><strong>空间坐标变换：</strong> 建立源图像 $f(x, y)$ 与目标图像 $g(x', y')$ 之间像素坐标的映射关系。</li>
-                </ul>
-                <p>这个映射关系可以表示为：
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E5%9B%BE%E5%83%8F%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%863%E5%9B%BE%E5%83%8F%E5%87%A0%E4%BD%95%E5%8F%98%E6%8D%A2">图像信息处理3:图像几何变换</h1>
+<h3 id="1-%E5%87%A0%E4%BD%95%E5%8F%98%E6%8D%A2%E5%9F%BA%E7%A1%80"><strong>1. 几何变换基础</strong></h3>
+<h4 id="11-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><strong>1.1 核心概念</strong></h4>
+<p><strong>图像几何变换 (Geometric Transformation)</strong> 是指改变图像中像素的空间位置，从而产生一幅新的图像。其核心在于：</p>
+<ul>
+<li><strong>只改变位置，不改变像素值：</strong> 变换本身只涉及坐标的重新映射，像素的灰度值或颜色值在理论上是不变的。</li>
+<li><strong>空间坐标变换：</strong> 建立源图像 $f(x, y)$ 与目标图像 $g(x', y')$ 之间像素坐标的映射关系。</li>
+</ul>
+<p>这个映射关系可以表示为：
                 $$
                 (x, y) = T(x', y')
                 $$
                 其中，$(x, y)$ 是源图像中的坐标，$(x', y')$ 是目标图像中的坐标，$T$ 是变换函数。这意味着，目标图像中 $(x', y')$ 位置的像素值，应该从源图像中 $(x, y)$ 位置获取。</p>
-                <h4 id="12-%E5%89%8D%E5%90%91%E6%98%A0%E5%B0%84-vs-%E5%90%8E%E5%90%91%E6%98%A0%E5%B0%84"><strong>1.2 前向映射 vs. 后向映射</strong></h4>
-                <p>实现几何变换有两种思路：</p>
-                <ol>
-                <li>
-                <p><strong>前向映射 (Forward Mapping):</strong></p>
-                <ul>
-                <li><strong>思路：</strong> 遍历源图像 $f$ 中的每一个像素 $(x, y)$，通过变换 $T_{fwd}$ 计算它在目标图像 $g$ 中的对应位置 $(x', y')$，然后将 $f(x, y)$ 的值赋给 $g(x', y')$。
+<h4 id="12-%E5%89%8D%E5%90%91%E6%98%A0%E5%B0%84-vs-%E5%90%8E%E5%90%91%E6%98%A0%E5%B0%84"><strong>1.2 前向映射 vs. 后向映射</strong></h4>
+<p>实现几何变换有两种思路：</p>
+<ol>
+<li>
+<p><strong>前向映射 (Forward Mapping):</strong></p>
+<ul>
+<li><strong>思路：</strong> 遍历源图像 $f$ 中的每一个像素 $(x, y)$，通过变换 $T_{fwd}$ 计算它在目标图像 $g$ 中的对应位置 $(x', y')$，然后将 $f(x, y)$ 的值赋给 $g(x', y')$。
                 $$
                 (x', y') = T_{fwd}(x, y)
                 $$</li>
-                <li><strong>问题：</strong>
-                <ul>
-                <li><strong>像素重叠（Collision）：</strong> 多个源像素可能映射到目标图像的同一个位置。</li>
-                <li><strong>空洞（Hole）：</strong> 目标图像的某些像素位置可能没有任何源像素映射过来，形成空洞。</li>
-                <li><strong>浮点坐标：</strong> 计算出的 $(x', y')$ 往往是浮点数，需要取整，导致精度损失。</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>后向映射 (Backward Mapping / Inverse Mapping):</strong></p>
-                <ul>
-                <li><strong>思路：</strong> 遍历目标图像 $g$ 中的每一个像素 $(x', y')$，通过<strong>逆变换</strong> $T_{inv}$ 计算它在源图像 $f$ 中的对应位置 $(x, y)$，然后将 $f(x, y)$ 的值赋给 $g(x', y')$。
+<li><strong>问题：</strong>
+<ul>
+<li><strong>像素重叠（Collision）：</strong> 多个源像素可能映射到目标图像的同一个位置。</li>
+<li><strong>空洞（Hole）：</strong> 目标图像的某些像素位置可能没有任何源像素映射过来，形成空洞。</li>
+<li><strong>浮点坐标：</strong> 计算出的 $(x', y')$ 往往是浮点数，需要取整，导致精度损失。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>后向映射 (Backward Mapping / Inverse Mapping):</strong></p>
+<ul>
+<li><strong>思路：</strong> 遍历目标图像 $g$ 中的每一个像素 $(x', y')$，通过<strong>逆变换</strong> $T_{inv}$ 计算它在源图像 $f$ 中的对应位置 $(x, y)$，然后将 $f(x, y)$ 的值赋给 $g(x', y')$。
                 $$
                 (x, y) = T_{inv}(x', y')
                 $$</li>
-                <li><strong>优点：</strong>
-                <ul>
-                <li><strong>无空洞/重叠：</strong> 目标图像的每个像素都有且仅有一个确定的源坐标。</li>
-                <li><strong>易于实现：</strong> 这是现代图像处理库（如OpenCV）普遍采用的方法。</li>
-                </ul>
-                </li>
-                <li><strong>挑战：</strong> 计算出的源坐标 $(x, y)$ 仍然是浮点数。由于像素坐标必须是整数，我们无法直接获取 $f(x, y)$ 的值。这就引出了<strong>插值 (Interpolation)</strong> 的需求。</li>
-                </ul>
-                </li>
-                </ol>
-                <p><strong>结论：在实际应用中，我们几乎总是使用后向映射+插值的方法来实现几何变换。</strong></p>
-                <h3 id="2-%E4%BB%BF%E5%B0%84%E5%8F%98%E6%8D%A2-affine-transformation"><strong>2. 仿射变换 (Affine Transformation)</strong></h3>
-                <p>仿射变换是一类重要的线性几何变换，它保持了图像的“平直性”（直线变换后仍然是直线）和“平行性”（平行线变换后仍然平行），但不一定保持角度和长度。</p>
-                <h4 id="21-%E9%BD%90%E6%AC%A1%E5%9D%90%E6%A0%87%E4%B8%8E%E5%8F%98%E6%8D%A2%E7%9F%A9%E9%98%B5"><strong>2.1 齐次坐标与变换矩阵</strong></h4>
-                <p>为了将平移（加法）和其他线性变换（乘法）统一到同一个矩阵运算框架下，我们引入<strong>齐次坐标 (Homogeneous Coordinates)</strong>。一个二维点 $(x, y)$ 的齐次坐标表示为 $(x, y, 1)$。</p>
-                <p>一个通用的2D仿射变换可以用一个 $3 \times 3$ 的矩阵来表示：
+<li><strong>优点：</strong>
+<ul>
+<li><strong>无空洞/重叠：</strong> 目标图像的每个像素都有且仅有一个确定的源坐标。</li>
+<li><strong>易于实现：</strong> 这是现代图像处理库（如OpenCV）普遍采用的方法。</li>
+</ul>
+</li>
+<li><strong>挑战：</strong> 计算出的源坐标 $(x, y)$ 仍然是浮点数。由于像素坐标必须是整数，我们无法直接获取 $f(x, y)$ 的值。这就引出了<strong>插值 (Interpolation)</strong> 的需求。</li>
+</ul>
+</li>
+</ol>
+<p><strong>结论：在实际应用中，我们几乎总是使用后向映射+插值的方法来实现几何变换。</strong></p>
+<h3 id="2-%E4%BB%BF%E5%B0%84%E5%8F%98%E6%8D%A2-affine-transformation"><strong>2. 仿射变换 (Affine Transformation)</strong></h3>
+<p>仿射变换是一类重要的线性几何变换，它保持了图像的“平直性”（直线变换后仍然是直线）和“平行性”（平行线变换后仍然平行），但不一定保持角度和长度。</p>
+<h4 id="21-%E9%BD%90%E6%AC%A1%E5%9D%90%E6%A0%87%E4%B8%8E%E5%8F%98%E6%8D%A2%E7%9F%A9%E9%98%B5"><strong>2.1 齐次坐标与变换矩阵</strong></h4>
+<p>为了将平移（加法）和其他线性变换（乘法）统一到同一个矩阵运算框架下，我们引入<strong>齐次坐标 (Homogeneous Coordinates)</strong>。一个二维点 $(x, y)$ 的齐次坐标表示为 $(x, y, 1)$。</p>
+<p>一个通用的2D仿射变换可以用一个 $3 \times 3$ 的矩阵来表示：
                 $$
-                \begin{bmatrix} x' \\ y' \\ 1 \end{bmatrix} = \begin{bmatrix} a & b & c \\ d & e & f \\ 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} x \\ y \\ 1 \end{bmatrix}
+                \begin{bmatrix} x' \\ y' \\ 1 \end{bmatrix} = \begin{bmatrix} a &amp; b &amp; c \\ d &amp; e &amp; f \\ 0 &amp; 0 &amp; 1 \end{bmatrix} \begin{bmatrix} x \\ y \\ 1 \end{bmatrix}
                 $$
                 展开后即为：
                 $$
                 \begin{cases} x' = ax + by + c \\ y' = dx + ey + f \end{cases}
                 $$
                 下面我们来具体看几种基本的仿射变换。</p>
-                <h4 id="22-%E5%9F%BA%E6%9C%AC%E4%BB%BF%E5%B0%84%E5%8F%98%E6%8D%A2"><strong>2.2 基本仿射变换</strong></h4>
-                <ol>
-                <li>
-                <p><strong>平移 (Translation):</strong>
+<h4 id="22-%E5%9F%BA%E6%9C%AC%E4%BB%BF%E5%B0%84%E5%8F%98%E6%8D%A2"><strong>2.2 基本仿射变换</strong></h4>
+<ol>
+<li>
+<p><strong>平移 (Translation):</strong>
                 将图像沿x轴平移 $t_x$，沿y轴平移 $t_y$。</p>
-                <ul>
-                <li><strong>方程：</strong> $x' = x + t_x$, $y' = y + t_y$</li>
-                <li><strong>变换矩阵：</strong>
+<ul>
+<li><strong>方程：</strong> $x' = x + t_x$, $y' = y + t_y$</li>
+<li><strong>变换矩阵：</strong>
                 $$
-                M_{trans} = \begin{bmatrix} 1 & 0 & t_x \\ 0 & 1 & t_y \\ 0 & 0 & 1 \end{bmatrix}
+                M_{trans} = \begin{bmatrix} 1 &amp; 0 &amp; t_x \\ 0 &amp; 1 &amp; t_y \\ 0 &amp; 0 &amp; 1 \end{bmatrix}
                 $$</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>缩放 (Scaling):</strong>
+</ul>
+</li>
+<li>
+<p><strong>缩放 (Scaling):</strong>
                 将图像沿x轴缩放 $s_x$ 倍，沿y轴缩放 $s_y$ 倍（相对于原点）。</p>
-                <ul>
-                <li><strong>方程：</strong> $x' = s_x \cdot x$, $y' = s_y \cdot y$</li>
-                <li><strong>变换矩阵：</strong>
+<ul>
+<li><strong>方程：</strong> $x' = s_x \cdot x$, $y' = s_y \cdot y$</li>
+<li><strong>变换矩阵：</strong>
                 $$
-                M_{scale} = \begin{bmatrix} s_x & 0 & 0 \\ 0 & s_y & 0 \\ 0 & 0 & 1 \end{bmatrix}
+                M_{scale} = \begin{bmatrix} s_x &amp; 0 &amp; 0 \\ 0 &amp; s_y &amp; 0 \\ 0 &amp; 0 &amp; 1 \end{bmatrix}
                 $$</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>旋转 (Rotation):</strong>
+</ul>
+</li>
+<li>
+<p><strong>旋转 (Rotation):</strong>
                 将图像绕原点逆时针旋转 $\theta$ 角度。</p>
-                <ul>
-                <li><strong>方程：</strong> $x' = x \cos\theta - y \sin\theta$, $y' = x \sin\theta + y \cos\theta$</li>
-                <li><strong>变换矩阵：</strong>
+<ul>
+<li><strong>方程：</strong> $x' = x \cos\theta - y \sin\theta$, $y' = x \sin\theta + y \cos\theta$</li>
+<li><strong>变换矩阵：</strong>
                 $$
-                M_{rot} = \begin{bmatrix} \cos\theta & -\sin\theta & 0 \\ \sin\theta & \cos\theta & 0 \\ 0 & 0 & 1 \end{bmatrix}
+                M_{rot} = \begin{bmatrix} \cos\theta &amp; -\sin\theta &amp; 0 \\ \sin\theta &amp; \cos\theta &amp; 0 \\ 0 &amp; 0 &amp; 1 \end{bmatrix}
                 $$</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>镜像/翻转 (Mirror/Flip):</strong></p>
-                <ul>
-                <li><strong>水平翻转 (绕y轴):</strong> $x' = -x$, $y' = y$  ($s_x=-1, s_y=1$)</li>
-                <li><strong>垂直翻转 (绕x轴):</strong> $x' = x$, $y' = -y$  ($s_x=1, s_y=-1$)</li>
-                <li><strong>变换矩阵 (水平翻转):</strong>
+</ul>
+</li>
+<li>
+<p><strong>镜像/翻转 (Mirror/Flip):</strong></p>
+<ul>
+<li><strong>水平翻转 (绕y轴):</strong> $x' = -x$, $y' = y$  ($s_x=-1, s_y=1$)</li>
+<li><strong>垂直翻转 (绕x轴):</strong> $x' = x$, $y' = -y$  ($s_x=1, s_y=-1$)</li>
+<li><strong>变换矩阵 (水平翻转):</strong>
                 $$
-                M_{flipH} = \begin{bmatrix} -1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix}
+                M_{flipH} = \begin{bmatrix} -1 &amp; 0 &amp; 0 \\ 0 &amp; 1 &amp; 0 \\ 0 &amp; 0 &amp; 1 \end{bmatrix}
                 $$</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>剪切 (Shearing):</strong>
+</ul>
+</li>
+<li>
+<p><strong>剪切 (Shearing):</strong>
                 使图像发生倾斜。</p>
-                <ul>
-                <li><strong>水平剪切:</strong> $x' = x + sh_x \cdot y$, $y' = y$</li>
-                <li><strong>垂直剪切:</strong> $x' = x$, $y' = y + sh_y \cdot x$</li>
-                <li><strong>变换矩阵 (水平剪切):</strong>
+<ul>
+<li><strong>水平剪切:</strong> $x' = x + sh_x \cdot y$, $y' = y$</li>
+<li><strong>垂直剪切:</strong> $x' = x$, $y' = y + sh_y \cdot x$</li>
+<li><strong>变换矩阵 (水平剪切):</strong>
                 $$
-                M_{shearH} = \begin{bmatrix} 1 & sh_x & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix}
+                M_{shearH} = \begin{bmatrix} 1 &amp; sh_x &amp; 0 \\ 0 &amp; 1 &amp; 0 \\ 0 &amp; 0 &amp; 1 \end{bmatrix}
                 $$</li>
-                </ul>
-                </li>
-                </ol>
-                <h4 id="23-%E7%BB%84%E5%90%88%E5%8F%98%E6%8D%A2"><strong>2.3 组合变换</strong></h4>
-                <p>仿射变换的强大之处在于可以通过矩阵乘法将多个基本变换组合成一个单一的变换。例如，要先将图像放大2倍，然后绕原点旋转45度，最后再平移(10, 20)，其总变换矩阵为：
+</ul>
+</li>
+</ol>
+<h4 id="23-%E7%BB%84%E5%90%88%E5%8F%98%E6%8D%A2"><strong>2.3 组合变换</strong></h4>
+<p>仿射变换的强大之处在于可以通过矩阵乘法将多个基本变换组合成一个单一的变换。例如，要先将图像放大2倍，然后绕原点旋转45度，最后再平移(10, 20)，其总变换矩阵为：
                 $$
                 M_{total} = M_{trans} \cdot M_{rot} \cdot M_{scale}
                 $$
                 <strong>注意：矩阵乘法不满足交换律，变换的顺序至关重要！</strong></p>
-                <h4 id="24-c-%E5%AE%9E%E7%8E%B0-%E4%BD%BF%E7%94%A8opencv"><strong>2.4 C++ 实现 (使用OpenCV)</strong></h4>
-                <p>OpenCV提供了便捷的函数来执行仿射变换。</p>
-                <pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;opencv2/opencv.hpp&gt;</span></span>
+<h4 id="24-c-%E5%AE%9E%E7%8E%B0-%E4%BD%BF%E7%94%A8opencv"><strong>2.4 C++ 实现 (使用OpenCV)</strong></h4>
+<p>OpenCV提供了便捷的函数来执行仿射变换。</p>
+<pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;opencv2/opencv.hpp&gt;</span></span>
 
                 <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
                     cv::Mat src = cv::imread(<span class="hljs-string">"your_image.jpg"</span>);
@@ -212,119 +210,144 @@
                     <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
                 }
                 </div></code></pre>
-                <h3 id="3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95-interpolation"><strong>3. 插值算法 (Interpolation)</strong></h3>
-                <p>当后向映射计算出的源坐标 $(x, y)$ 是浮点数时，我们需要根据其周围整数坐标像素的值来估算出 $f(x, y)$ 的值。这就是插值。</p>
-                <h4 id="31-%E6%9C%80%E8%BF%91%E9%82%BB%E6%8F%92%E5%80%BC-nearest-neighbor-interpolation"><strong>3.1 最近邻插值 (Nearest Neighbor Interpolation)</strong></h4>
-                <ul>
-                <li><strong>思想：</strong> 最简单的方法，直接选择离 $(x, y)$ 最近的整数坐标点的像素值作为结果。
+<h3 id="3-%E6%8F%92%E5%80%BC%E7%AE%97%E6%B3%95-interpolation"><strong>3. 插值算法 (Interpolation)</strong></h3>
+<p>当后向映射计算出的源坐标 $(x, y)$ 是浮点数时，我们需要根据其周围整数坐标像素的值来估算出 $f(x, y)$ 的值。这就是插值。</p>
+<h4 id="31-%E6%9C%80%E8%BF%91%E9%82%BB%E6%8F%92%E5%80%BC-nearest-neighbor-interpolation"><strong>3.1 最近邻插值 (Nearest Neighbor Interpolation)</strong></h4>
+<ul>
+<li><strong>思想：</strong> 最简单的方法，直接选择离 $(x, y)$ 最近的整数坐标点的像素值作为结果。
                 $$
                 f(x, y) \approx f(\text{round}(x), \text{round}(y))
                 $$</li>
-                <li><strong>优点：</strong> 计算速度最快。</li>
-                <li><strong>缺点：</strong> 效果最差，会产生明显的锯齿和块状效应（马赛克）。</li>
-                </ul>
-                <h4 id="32-%E5%8F%8C%E7%BA%BF%E6%80%A7%E6%8F%92%E5%80%BC-bilinear-interpolation"><strong>3.2 双线性插值 (Bilinear Interpolation)</strong></h4>
-                <ul>
-                <li><strong>思想：</strong> 在 $(x, y)$ 周围的 $2 \times 2$ 邻域内，进行两次线性插值。</li>
-                <li><strong>步骤：</strong>
-                <ol>
-                <li>找到 $(x, y)$ 的四个最近邻像素点：$Q_{11}=(x_1, y_1)$, $Q_{12}=(x_1, y_2)$, $Q_{21}=(x_2, y_1)$, $Q_{22}=(x_2, y_2)$。</li>
-                <li><strong>第一次插值（水平方向）：</strong>
+<li><strong>优点：</strong> 计算速度最快。</li>
+<li><strong>缺点：</strong> 效果最差，会产生明显的锯齿和块状效应（马赛克）。</li>
+</ul>
+<h4 id="32-%E5%8F%8C%E7%BA%BF%E6%80%A7%E6%8F%92%E5%80%BC-bilinear-interpolation"><strong>3.2 双线性插值 (Bilinear Interpolation)</strong></h4>
+<ul>
+<li><strong>思想：</strong> 在 $(x, y)$ 周围的 $2 \times 2$ 邻域内，进行两次线性插值。</li>
+<li><strong>步骤：</strong>
+<ol>
+<li>找到 $(x, y)$ 的四个最近邻像素点：$Q_{11}=(x_1, y_1)$, $Q_{12}=(x_1, y_2)$, $Q_{21}=(x_2, y_1)$, $Q_{22}=(x_2, y_2)$。</li>
+<li><strong>第一次插值（水平方向）：</strong>
                 $$
                 f(R_1) = f(x, y_1) \approx \frac{x_2-x}{x_2-x_1}f(Q_{11}) + \frac{x-x_1}{x_2-x_1}f(Q_{21})
                 $$
                 $$
                 f(R_2) = f(x, y_2) \approx \frac{x_2-x}{x_2-x_1}f(Q_{12}) + \frac{x-x_1}{x_2-x_1}f(Q_{22})
                 $$</li>
-                <li><strong>第二次插值（垂直方向）：</strong>
+<li><strong>第二次插值（垂直方向）：</strong>
                 $$
                 f(x, y) \approx \frac{y_2-y}{y_2-y_1}f(R_1) + \frac{y-y_1}{y_2-y_1}f(R_2)
                 $$</li>
-                </ol>
-                </li>
-                <li><strong>优点：</strong> 效果平滑，是速度和质量之间的一个很好的折中，也是最常用的插值方法。</li>
-                <li><strong>缺点：</strong> 会轻微模糊图像细节。</li>
-                </ul>
-                <h4 id="33-%E5%8F%8C%E4%B8%89%E6%AC%A1%E6%8F%92%E5%80%BC-bicubic-interpolation"><strong>3.3 双三次插值 (Bicubic Interpolation)</strong></h4>
-                <ul>
-                <li><strong>思想：</strong> 使用周围 $4 \times 4$ 邻域内的16个像素点，拟合一个三次多项式曲面来估算像素值。</li>
-                <li><strong>优点：</strong> 效果最好，能更好地保留图像细节，边缘更平滑。</li>
-                <li><strong>缺点：</strong> 计算量最大，速度最慢。</li>
-                </ul>
-                <p><strong>在OpenCV中，<code>cv::warpAffine</code>和<code>cv::resize</code>等函数的<code>flags</code>参数可以指定插值方法，如 <code>cv::INTER_NEAREST</code>, <code>cv::INTER_LINEAR</code> (默认), <code>cv::INTER_CUBIC</code>。</strong></p>
-                <h3 id="4-%E9%AB%98%E7%BA%A7%E5%87%A0%E4%BD%95%E5%8F%98%E6%8D%A2"><strong>4. 高级几何变换</strong></h3>
-                <h4 id="41-%E5%9B%BE%E5%83%8F%E6%89%AD%E6%9B%B2-warping"><strong>4.1 图像扭曲 (Warping)</strong></h4>
-                <p>当变换函数 $T$ 不是简单的仿射变换，而是更复杂的非线性函数时，就称为图像扭曲。例如，透视变换（Perspective Transformation）可以模拟三维空间中的旋转，它需要一个 $3 \times 3$ 的完整矩阵，并且不再保持平行性。局部扭曲则可以产生哈哈镜等效果。</p>
-                <h4 id="42-%E5%9B%BE%E5%83%8F%E6%B8%90%E5%8F%98-morphing"><strong>4.2 图像渐变 (Morphing)</strong></h4>
-                <p>图像渐变（Morphing）是一种更为复杂的动画技术，它将一幅图像（源图像A）平滑地过渡到另一幅图像（目标图像B）。这涉及到两个同步进行的过程：</p>
-                <ol>
-                <li><strong>形状渐变 (Warping)：</strong> 将源图像A的形状逐渐扭曲成目标图像B的形状。这通常通过在两幅图像上定义一组对应的<strong>特征点或特征线</strong>来实现。中间帧的形状是A和B对应特征点位置的加权平均。</li>
-                <li><strong>颜色渐变 (Cross-dissolving)：</strong> 将扭曲后的源图像和扭曲后的目标图像进行颜色上的加权平均（淡入淡出）。</li>
-                </ol>
-                <ul>
-                <li><strong>公式（以像素为单位）：</strong>
+</ol>
+</li>
+<li><strong>优点：</strong> 效果平滑，是速度和质量之间的一个很好的折中，也是最常用的插值方法。</li>
+<li><strong>缺点：</strong> 会轻微模糊图像细节。</li>
+</ul>
+<h4 id="33-%E5%8F%8C%E4%B8%89%E6%AC%A1%E6%8F%92%E5%80%BC-bicubic-interpolation"><strong>3.3 双三次插值 (Bicubic Interpolation)</strong></h4>
+<ul>
+<li><strong>思想：</strong> 使用周围 $4 \times 4$ 邻域内的16个像素点，拟合一个三次多项式曲面来估算像素值。</li>
+<li><strong>优点：</strong> 效果最好，能更好地保留图像细节，边缘更平滑。</li>
+<li><strong>缺点：</strong> 计算量最大，速度最慢。</li>
+</ul>
+<p><strong>在OpenCV中，<code>cv::warpAffine</code>和<code>cv::resize</code>等函数的<code>flags</code>参数可以指定插值方法，如 <code>cv::INTER_NEAREST</code>, <code>cv::INTER_LINEAR</code> (默认), <code>cv::INTER_CUBIC</code>。</strong></p>
+<h3 id="4-%E9%AB%98%E7%BA%A7%E5%87%A0%E4%BD%95%E5%8F%98%E6%8D%A2"><strong>4. 高级几何变换</strong></h3>
+<h4 id="41-%E5%9B%BE%E5%83%8F%E6%89%AD%E6%9B%B2-warping"><strong>4.1 图像扭曲 (Warping)</strong></h4>
+<p>当变换函数 $T$ 不是简单的仿射变换，而是更复杂的非线性函数时，就称为图像扭曲。例如，透视变换（Perspective Transformation）可以模拟三维空间中的旋转，它需要一个 $3 \times 3$ 的完整矩阵，并且不再保持平行性。局部扭曲则可以产生哈哈镜等效果。</p>
+<h4 id="42-%E5%9B%BE%E5%83%8F%E6%B8%90%E5%8F%98-morphing"><strong>4.2 图像渐变 (Morphing)</strong></h4>
+<p>图像渐变（Morphing）是一种更为复杂的动画技术，它将一幅图像（源图像A）平滑地过渡到另一幅图像（目标图像B）。这涉及到两个同步进行的过程：</p>
+<ol>
+<li><strong>形状渐变 (Warping)：</strong> 将源图像A的形状逐渐扭曲成目标图像B的形状。这通常通过在两幅图像上定义一组对应的<strong>特征点或特征线</strong>来实现。中间帧的形状是A和B对应特征点位置的加权平均。</li>
+<li><strong>颜色渐变 (Cross-dissolving)：</strong> 将扭曲后的源图像和扭曲后的目标图像进行颜色上的加权平均（淡入淡出）。</li>
+</ol>
+<ul>
+<li><strong>公式（以像素为单位）：</strong>
                 对于第 $k$ 帧（$k$ 从0到1变化），其像素值 $I_k(p_k)$ 可以表示为：
                 <ul>
-                <li><strong>位置插值：</strong> $p_k = (1-k) \cdot p_A + k \cdot p_B$</li>
-                <li><strong>颜色插值：</strong> $I_k(p_k) = (1-k) \cdot I_A(p_A) + k \cdot I_B(p_B)$</li>
-                </ul>
-                </li>
-                </ul>
-                <p>Morphing的关键在于如何建立两幅图像之间有意义的、稠密的对应关系。</p>
-                <h3 id="5-%E5%BA%94%E7%94%A8%E5%AE%9E%E4%BE%8B%E8%A1%A8%E6%83%85%E8%BF%81%E7%A7%BB-expression-transfer"><strong>5. 应用实例：表情迁移 (Expression Transfer)</strong></h3>
-                <p>几何变换是许多计算机图形学和视觉任务的核心技术，例如表情迁移。</p>
+<li><strong>位置插值：</strong> $p_k = (1-k) \cdot p_A + k \cdot p_B$</li>
+<li><strong>颜色插值：</strong> $I_k(p_k) = (1-k) \cdot I_A(p_A) + k \cdot I_B(p_B)$</li>
+</ul>
+</li>
+</ul>
+<p>Morphing的关键在于如何建立两幅图像之间有意义的、稠密的对应关系。</p>
+<h3 id="5-%E5%BA%94%E7%94%A8%E5%AE%9E%E4%BE%8B%E8%A1%A8%E6%83%85%E8%BF%81%E7%A7%BB-expression-transfer"><strong>5. 应用实例：表情迁移 (Expression Transfer)</strong></h3>
+<p>几何变换是许多计算机图形学和视觉任务的核心技术，例如表情迁移。</p>
+<ul>
+<li><strong>问题描述：</strong> 给定一个源人物的视频A（例如，一个中性表情到微笑的序列 A -&gt; A'），和一个目标人物的静态图像B，目标是生成目标人物做出同样表情的图像B'。</li>
+<li><strong>基于几何变换的简化思路 (Ratio Image):</strong>
+<ol>
+<li><strong>特征点标记：</strong> 在 A, A', B 上手动或自动标记出面部关键特征点（眼角、嘴角、鼻尖等）。</li>
+<li><strong>几何形变计算：</strong> 从 A 到 A' 的每个特征点都发生了一个位移向量。这个位移场代表了“微笑”这个表情的几何形变。</li>
+<li><strong>形变应用 (Warping):</strong> 将这个几何形变场应用到图像B上。对于B中的每个特征点 $v_b$，其在B'中的新位置 $v_{b'}$ 计算为：$v_{b'} = v_b + (v_{a'} - v_a)$。 这就生成了一个初步的、几何上对齐的图像 $B_{warped}$。</li>
+<li><strong>光照与纹理修正 (Ratio Image):</strong> 仅仅几何扭曲是不够的，因为表情变化会引起光照变化（如皱纹产生阴影）。<code>Expression Ratio Image (ERI)</code> 是一种捕捉这种光照变化的方法。
                 <ul>
-                <li><strong>问题描述：</strong> 给定一个源人物的视频A（例如，一个中性表情到微笑的序列 A -&gt; A'），和一个目标人物的静态图像B，目标是生成目标人物做出同样表情的图像B'。</li>
-                <li><strong>基于几何变换的简化思路 (Ratio Image):</strong>
-                <ol>
-                <li><strong>特征点标记：</strong> 在 A, A', B 上手动或自动标记出面部关键特征点（眼角、嘴角、鼻尖等）。</li>
-                <li><strong>几何形变计算：</strong> 从 A 到 A' 的每个特征点都发生了一个位移向量。这个位移场代表了“微笑”这个表情的几何形变。</li>
-                <li><strong>形变应用 (Warping):</strong> 将这个几何形变场应用到图像B上。对于B中的每个特征点 $v_b$，其在B'中的新位置 $v_{b'}$ 计算为：$v_{b'} = v_b + (v_{a'} - v_a)$。 这就生成了一个初步的、几何上对齐的图像 $B_{warped}$。</li>
-                <li><strong>光照与纹理修正 (Ratio Image):</strong> 仅仅几何扭曲是不够的，因为表情变化会引起光照变化（如皱纹产生阴影）。<code>Expression Ratio Image (ERI)</code> 是一种捕捉这种光照变化的方法。
-                <ul>
-                <li>假设图像亮度 $I$ 由反射率 $\rho$ 和光照 $E$ 决定：$I(n) = \rho E(n)$，其中 $n$ 是表面法线。</li>
-                <li>表情变化改变了法线 $n \to n'$，因此 $I' = \rho E(n')$。</li>
-                <li>ERI 定义为 $R = I'/I = E(n')/E(n)$。这个比率<strong>与材质无关</strong>，只捕捉了由形变引起的光照变化。</li>
-                </ul>
-                </li>
-                <li><strong>最终合成：</strong>
-                <ul>
-                <li>计算源图像的ERI: $R_A = A'/A_{warped}$ (A'需要先扭曲以对齐A)。</li>
-                <li>将这个光照变化应用到目标图像上：$B' = B_{warped} \cdot R_A$。</li>
-                </ul>
-                </li>
-                </ol>
-                </li>
-                </ul>
-                <p>这个简化的流程展示了如何结合几何变换（Warping）和其他图像处理技术来实现复杂的视觉效果。</p>
-            </article>
-        </main>
-    </div>
-    
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li>假设图像亮度 $I$ 由反射率 $\rho$ 和光照 $E$ 决定：$I(n) = \rho E(n)$，其中 $n$ 是表面法线。</li>
+<li>表情变化改变了法线 $n \to n'$，因此 $I' = \rho E(n')$。</li>
+<li>ERI 定义为 $R = I'/I = E(n')/E(n)$。这个比率<strong>与材质无关</strong>，只捕捉了由形变引起的光照变化。</li>
+</ul>
+</li>
+<li><strong>最终合成：</strong>
+<ul>
+<li>计算源图像的ERI: $R_A = A'/A_{warped}$ (A'需要先扭曲以对齐A)。</li>
+<li>将这个光照变化应用到目标图像上：$B' = B_{warped} \cdot R_A$。</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<p>这个简化的流程展示了如何结合几何变换（Warping）和其他图像处理技术来实现复杂的视觉效果。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

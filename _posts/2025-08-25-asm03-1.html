@@ -1,13 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>x86汇编03-1:内存</title>
-    
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    
-    <script>
+<meta charset="utf-8"/>
+<title>x86汇编03-1:内存</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -18,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -32,100 +30,100 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="x86%E6%B1%87%E7%BC%9603-1%E5%86%85%E5%AD%98">x86汇编03-1:内存</h1>
-                <h3 id="1-%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80"><strong>1. 逻辑地址</strong></h3>
-                <p>我们故事的起点是Intel 8086处理器。它的寄存器、ALU都是16位的，这意味着它一次最擅长处理16位的数字。如果直接用一个16位寄存器来寻址，它能访问的内存空间是多少？$2^{16}$ 字节，也就是65536字节，仅仅64KB。在1978年，这已经捉襟见肘。</p>
-                <p><strong>设计的核心矛盾：</strong></p>
-                <ul>
-                <li><strong>内部能力：</strong> CPU是16位架构，寄存器只有16位宽。</li>
-                <li><strong>外部需求：</strong> 需要访问比64KB大得多的内存空间。事实上，8086的物理地址总线有20位，能访问 $2^{20}$ 字节，即1MB的内存。</li>
-                </ul>
-                <p><strong>如何用16位的“尺子”去度量20位的“空间”？</strong></p>
-                <p>这就是x86体系结构历史上最重要，也最具争议的设计决策——<strong>分段式内存管理（Segmented Memory）</strong>。Intel的工程师们没有选择彻底革新架构（那样成本太高且不兼容），而是设计了一种“双指针”方案。</p>
-                <p>这个方案的核心是<strong>逻辑地址（Logical Address）</strong>，它由两部分组成：</p>
-                <ol>
-                <li><strong>段地址 (Segment Address)</strong>: 一个16位的值，它指向一个64KB大小内存块的<strong>基址</strong>。</li>
-                <li><strong>偏移地址 (Offset Address)</strong>: 另一个16位的值，它表示目标内存在这个64KB段内的<strong>具体位置</strong>。</li>
-                </ol>
-                <p>我们通常将逻辑地址写作 <code>段地址:偏移地址</code>，例如 <code>2000h:1234h</code>。</p>
-                <p><strong>那么，这个逻辑地址如何映射到20位的物理地址呢？</strong></p>
-                <p>公式如下：
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="x86%E6%B1%87%E7%BC%9603-1%E5%86%85%E5%AD%98">x86汇编03-1:内存</h1>
+<h3 id="1-%E9%80%BB%E8%BE%91%E5%9C%B0%E5%9D%80"><strong>1. 逻辑地址</strong></h3>
+<p>我们故事的起点是Intel 8086处理器。它的寄存器、ALU都是16位的，这意味着它一次最擅长处理16位的数字。如果直接用一个16位寄存器来寻址，它能访问的内存空间是多少？$2^{16}$ 字节，也就是65536字节，仅仅64KB。在1978年，这已经捉襟见肘。</p>
+<p><strong>设计的核心矛盾：</strong></p>
+<ul>
+<li><strong>内部能力：</strong> CPU是16位架构，寄存器只有16位宽。</li>
+<li><strong>外部需求：</strong> 需要访问比64KB大得多的内存空间。事实上，8086的物理地址总线有20位，能访问 $2^{20}$ 字节，即1MB的内存。</li>
+</ul>
+<p><strong>如何用16位的“尺子”去度量20位的“空间”？</strong></p>
+<p>这就是x86体系结构历史上最重要，也最具争议的设计决策——<strong>分段式内存管理（Segmented Memory）</strong>。Intel的工程师们没有选择彻底革新架构（那样成本太高且不兼容），而是设计了一种“双指针”方案。</p>
+<p>这个方案的核心是<strong>逻辑地址（Logical Address）</strong>，它由两部分组成：</p>
+<ol>
+<li><strong>段地址 (Segment Address)</strong>: 一个16位的值，它指向一个64KB大小内存块的<strong>基址</strong>。</li>
+<li><strong>偏移地址 (Offset Address)</strong>: 另一个16位的值，它表示目标内存在这个64KB段内的<strong>具体位置</strong>。</li>
+</ol>
+<p>我们通常将逻辑地址写作 <code>段地址:偏移地址</code>，例如 <code>2000h:1234h</code>。</p>
+<p><strong>那么，这个逻辑地址如何映射到20位的物理地址呢？</strong></p>
+<p>公式如下：
                 <strong>物理地址 (Physical Address) = 段地址 $\times$ 16 + 偏移地址</strong></p>
-                <p>用 $\LaTeX$ 表示就是：
+<p>用 $\LaTeX$ 表示就是：
                 $$PhysicalAddress = SegmentValue \times 16_{10} + OffsetValue$$</p>
-                <p>其中，乘以16在二进制中等价于<strong>左移4位</strong>。这是一个硬件可以瞬间完成的操作。</p>
-                <p>$$PhysicalAddress_{20bit} = (SegmentValue_{16bit} \ll 4) + OffsetValue_{16bit}$$</p>
-                <p><strong>让我们来看一个例子：</strong>
+<p>其中，乘以16在二进制中等价于<strong>左移4位</strong>。这是一个硬件可以瞬间完成的操作。</p>
+<p>$$PhysicalAddress_{20bit} = (SegmentValue_{16bit} \ll 4) + OffsetValue_{16bit}$$</p>
+<p><strong>让我们来看一个例子：</strong>
                 计算逻辑地址 <code>2F00h:0158h</code> 对应的物理地址。</p>
-                <ol>
-                <li>取段地址 <code>2F00h</code>，左移4位（相当于末尾加一个0）：<code>2F000h</code>。</li>
-                <li>加上偏移地址 <code>0158h</code>。<pre class="hljs"><code><div>  2F000h
+<ol>
+<li>取段地址 <code>2F00h</code>，左移4位（相当于末尾加一个0）：<code>2F000h</code>。</li>
+<li>加上偏移地址 <code>0158h</code>。<pre class="hljs"><code><div>  2F000h
                 +  0158h
                 ----------
                   2F158h
                 </div></code></pre>
-                </li>
-                <li>所以，物理地址是 <code>2F158h</code>。</li>
-                </ol>
-                <p><strong>设计的哲学与评价：</strong></p>
+</li>
+<li>所以，物理地址是 <code>2F158h</code>。</li>
+</ol>
+<p><strong>设计的哲学与评价：</strong></p>
+<ul>
+<li>
+<p><strong>优点：</strong></p>
+<ul>
+<li><strong>解决了寻址范围问题</strong>：用两个16位寄存器成功生成了20位地址，实现了1MB寻址。</li>
+<li><strong>向后兼容</strong>：对于那些只需要64KB内存的旧程序，只需固定段地址，就可以像以前一样只操作偏移地址。</li>
+<li><strong>内存保护的雏形</strong>：通过为代码、数据、堆栈分配不同的段，可以提供最基础的内存隔离。</li>
+</ul>
+</li>
+<li>
+<p><strong>缺点：</strong></p>
+<ul>
+<li><strong>复杂性</strong>：程序员必须同时管理段和偏移，心智负担加重。</li>
+<li><strong>地址不唯一</strong>：同一个物理地址可以由多个不同的逻辑地址表示。例如：
                 <ul>
-                <li>
-                <p><strong>优点：</strong></p>
-                <ul>
-                <li><strong>解决了寻址范围问题</strong>：用两个16位寄存器成功生成了20位地址，实现了1MB寻址。</li>
-                <li><strong>向后兼容</strong>：对于那些只需要64KB内存的旧程序，只需固定段地址，就可以像以前一样只操作偏移地址。</li>
-                <li><strong>内存保护的雏形</strong>：通过为代码、数据、堆栈分配不同的段，可以提供最基础的内存隔离。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>缺点：</strong></p>
-                <ul>
-                <li><strong>复杂性</strong>：程序员必须同时管理段和偏移，心智负担加重。</li>
-                <li><strong>地址不唯一</strong>：同一个物理地址可以由多个不同的逻辑地址表示。例如：
-                <ul>
-                <li><code>2F00h:0158h</code> -&gt; <code>2F158h</code></li>
-                <li><code>2F15h:0008h</code> -&gt; <code>2F150h + 0008h</code> -&gt; <code>2F158h</code></li>
-                <li><code>2E00h:1158h</code> -&gt; <code>2E000h + 1158h</code> -&gt; <code>2F158h</code>
+<li><code>2F00h:0158h</code> -&gt; <code>2F158h</code></li>
+<li><code>2F15h:0008h</code> -&gt; <code>2F150h + 0008h</code> -&gt; <code>2F158h</code></li>
+<li><code>2E00h:1158h</code> -&gt; <code>2E000h + 1158h</code> -&gt; <code>2F158h</code>
                 这给编程带来了混乱。</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                </ul>
-                <h3 id="2-%E5%B0%8F%E7%AB%AF%E8%A7%84%E5%88%99-little-endian-byte-order"><strong>2. 小端规则 (Little-Endian Byte Order)</strong></h3>
-                <p>在我们讨论如何在内存中存取数据之前，必须先解决一个基本问题：当一个多字节数据（如一个16位的<code>WORD</code>或32位的<code>DWORD</code>）要存入以字节为单位编址的内存时，是高位字节在前还是低位字节在前？</p>
-                <p>这存在两种设计流派：</p>
-                <ol>
-                <li><strong>大端 (Big-Endian)</strong>: “所见即所得”，高位字节存储在低地址，低位字节存储在高地址。符合人类的阅读习惯。例如，<code>0x12345678</code> 存放在地址 <code>0x100</code>，则 <code>[0x100]=0x12</code>, <code>[0x101]=0x34</code>...</li>
-                <li><strong>小端 (Little-Endian)</strong>: “反着存”，低位字节存储在低地址，高位字节存储在高地址。这是<strong>Intel x86架构的选择</strong>。</li>
-                </ol>
-                <p><strong>为什么Intel选择小端？</strong>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-%E5%B0%8F%E7%AB%AF%E8%A7%84%E5%88%99-little-endian-byte-order"><strong>2. 小端规则 (Little-Endian Byte Order)</strong></h3>
+<p>在我们讨论如何在内存中存取数据之前，必须先解决一个基本问题：当一个多字节数据（如一个16位的<code>WORD</code>或32位的<code>DWORD</code>）要存入以字节为单位编址的内存时，是高位字节在前还是低位字节在前？</p>
+<p>这存在两种设计流派：</p>
+<ol>
+<li><strong>大端 (Big-Endian)</strong>: “所见即所得”，高位字节存储在低地址，低位字节存储在高地址。符合人类的阅读习惯。例如，<code>0x12345678</code> 存放在地址 <code>0x100</code>，则 <code>[0x100]=0x12</code>, <code>[0x101]=0x34</code>...</li>
+<li><strong>小端 (Little-Endian)</strong>: “反着存”，低位字节存储在低地址，高位字节存储在高地址。这是<strong>Intel x86架构的选择</strong>。</li>
+</ol>
+<p><strong>为什么Intel选择小端？</strong>
                 这并非一个随意的决定，而是基于硬件效率的考量。
                 假设你要从内存读取一个32位的<code>DWORD</code>到<code>EAX</code>寄存器，然后再单独使用它的低16位<code>AX</code>或低8位<code>AL</code>。在小端模式下，这个<code>DWORD</code>的地址就是它的最低字节的地址。CPU读取<code>AL</code>或<code>AX</code>时，不需要进行任何地址计算，直接使用原始地址即可。这简化了CPU内部的电路设计，并带来微小的性能优势。</p>
-                <p><strong>示例：</strong>
+<p><strong>示例：</strong>
                 将 <code>DWORD</code> 值 <code>0x12345678</code> 存入以 <code>0x1000</code> 开始的内存地址：</p>
-                <pre class="hljs"><code><div>         内存地址
+<pre class="hljs"><code><div>         内存地址
                        +----------+
                 0x1003 |    12    |  &lt;-- 最高有效字节 (MSB)
                        +----------+
@@ -136,57 +134,57 @@
                 0x1000 |    78    |  &lt;-- 最低有效字节 (LSB)
                        +----------+
                 </div></code></pre>
-                <p>作为汇编程序员，你必须时刻牢记小端规则，尤其是在调试、查看内存时，否则你会对看到的数据感到困惑。</p>
-                <h3 id="3-%E7%9B%B4%E6%8E%A5%E5%AF%BB%E5%9D%80%E5%92%8C%E9%97%B4%E6%8E%A5%E5%AF%BB%E5%9D%80-direct-and-indirect-addressing"><strong>3. 直接寻址和间接寻址 (Direct and Indirect Addressing)</strong></h3>
-                <p>现在我们知道了地址的计算方式和数据的存储格式，那么在指令中如何指定一个内存地址呢？</p>
-                <ul>
-                <li>
-                <p><strong>直接寻址 (Direct Addressing)</strong>
+<p>作为汇编程序员，你必须时刻牢记小端规则，尤其是在调试、查看内存时，否则你会对看到的数据感到困惑。</p>
+<h3 id="3-%E7%9B%B4%E6%8E%A5%E5%AF%BB%E5%9D%80%E5%92%8C%E9%97%B4%E6%8E%A5%E5%AF%BB%E5%9D%80-direct-and-indirect-addressing"><strong>3. 直接寻址和间接寻址 (Direct and Indirect Addressing)</strong></h3>
+<p>现在我们知道了地址的计算方式和数据的存储格式，那么在指令中如何指定一个内存地址呢？</p>
+<ul>
+<li>
+<p><strong>直接寻址 (Direct Addressing)</strong>
                 偏移地址是一个<strong>常量</strong>，直接编码在指令中。这通常用于访问静态分配的全局变量。</p>
-                <pre class="hljs"><code><div>.data
+<pre class="hljs"><code><div>.data
                     myVar dw 1234h ; 在数据段定义一个字变量
                 .code
                     mov ax, [myVar] ; 将myVar的值加载到ax
                     ; 汇编器会将其转换为类似 mov ax, [0x100] 的指令
                     ; 偏移地址0x100是固定的
                 </div></code></pre>
-                <p>优点是简单明了，缺点是缺乏灵活性，因为地址在编译时就已固定。</p>
-                </li>
-                <li>
-                <p><strong>间接寻址 (Indirect Addressing)</strong>
+<p>优点是简单明了，缺点是缺乏灵活性，因为地址在编译时就已固定。</p>
+</li>
+<li>
+<p><strong>间接寻址 (Indirect Addressing)</strong>
                 偏移地址存储在<strong>寄存器</strong>中。这是汇编语言强大功能的体现，是实现指针、数组遍历、动态数据结构的基础。</p>
-                <pre class="hljs"><code><div>mov bx, offset myVar ; 将myVar的偏移地址放入bx寄存器
+<pre class="hljs"><code><div>mov bx, offset myVar ; 将myVar的偏移地址放入bx寄存器
                 mov ax, [bx]         ; 通过bx寄存器间接访问myVar
                                      ; ax的值现在是1234h
 
                 add bx, 2            ; 让bx指向下一个字 (地址+2)
                 mov [bx], 5678h      ; 向新的地址写入数据
                 </div></code></pre>
-                <p>这里，<code>[bx]</code> 的含义是：“取出bx寄存器中的值，把它当作一个内存地址，然后去那个地址进行读写操作”。</p>
-                </li>
-                </ul>
-                <h3 id="4-%E7%BC%BA%E7%9C%81%E6%AE%B5%E5%9C%B0%E5%9D%80%E5%92%8C%E6%AE%B5%E8%A6%86%E7%9B%96-default-segments-and-segment-override"><strong>4. 缺省段地址和段覆盖 (Default Segments and Segment Override)</strong></h3>
-                <p>每次内存访问都要写成 <code>段:偏移</code> 的形式，比如 <code>mov ax, ds:[bx]</code>，这太繁琐了。CPU设计者为此引入了<strong>缺省段</strong>（Default Segments）规则，简化编程。</p>
-                <p><strong>规则:</strong>
+<p>这里，<code>[bx]</code> 的含义是：“取出bx寄存器中的值，把它当作一个内存地址，然后去那个地址进行读写操作”。</p>
+</li>
+</ul>
+<h3 id="4-%E7%BC%BA%E7%9C%81%E6%AE%B5%E5%9C%B0%E5%9D%80%E5%92%8C%E6%AE%B5%E8%A6%86%E7%9B%96-default-segments-and-segment-override"><strong>4. 缺省段地址和段覆盖 (Default Segments and Segment Override)</strong></h3>
+<p>每次内存访问都要写成 <code>段:偏移</code> 的形式，比如 <code>mov ax, ds:[bx]</code>，这太繁琐了。CPU设计者为此引入了<strong>缺省段</strong>（Default Segments）规则，简化编程。</p>
+<p><strong>规则:</strong>
                 CPU根据指令的类型和使用的寄存器，自动选择一个默认的段寄存器。</p>
-                <ul>
-                <li><strong>代码获取</strong>: 总是使用 <strong>CS</strong> (Code Segment)。CPU取下一条指令时，隐式地使用 <code>CS:IP</code>。</li>
-                <li><strong>堆栈操作</strong> (<code>PUSH</code>, <code>POP</code>, <code>CALL</code>, <code>RET</code>): 总是使用 <strong>SS</strong> (Stack Segment)。堆栈指针 <code>SP</code> 或 <code>BP</code> 相关的访问默认段是 <code>SS</code>。</li>
-                <li><strong>数据访问</strong>: 大多数情况使用 <strong>DS</strong> (Data Segment)。当使用 <code>AX, BX, CX, DX, SI, DI</code> 等寄存器进行间接寻址时，默认段是 <code>DS</code>。</li>
-                <li><strong>字符串操作目标地址</strong>: 某些字符串指令（如<code>STOS</code>）的目的操作数默认使用 <strong>ES</strong> (Extra Segment)。</li>
-                </ul>
-                <p><strong>段覆盖 (Segment Override)</strong>:
+<ul>
+<li><strong>代码获取</strong>: 总是使用 <strong>CS</strong> (Code Segment)。CPU取下一条指令时，隐式地使用 <code>CS:IP</code>。</li>
+<li><strong>堆栈操作</strong> (<code>PUSH</code>, <code>POP</code>, <code>CALL</code>, <code>RET</code>): 总是使用 <strong>SS</strong> (Stack Segment)。堆栈指针 <code>SP</code> 或 <code>BP</code> 相关的访问默认段是 <code>SS</code>。</li>
+<li><strong>数据访问</strong>: 大多数情况使用 <strong>DS</strong> (Data Segment)。当使用 <code>AX, BX, CX, DX, SI, DI</code> 等寄存器进行间接寻址时，默认段是 <code>DS</code>。</li>
+<li><strong>字符串操作目标地址</strong>: 某些字符串指令（如<code>STOS</code>）的目的操作数默认使用 <strong>ES</strong> (Extra Segment)。</li>
+</ul>
+<p><strong>段覆盖 (Segment Override)</strong>:
                 当然，这些只是默认规则。如果你需要访问其他段的数据，可以使用<strong>段覆盖前缀</strong>来显式指定。</p>
-                <pre class="hljs"><code><div>mov ax, [bx]          ; 默认从DS段读取, 相当于 mov ax, ds:[bx]
+<pre class="hljs"><code><div>mov ax, [bx]          ; 默认从DS段读取, 相当于 mov ax, ds:[bx]
                 mov ax, es:[bx]       ; 使用段覆盖前缀, 强制从ES段读取
                 mov ax, ss:[bx]       ; 强制从SS段读取
                 mov ax, cs:[bx]       ; 强制从CS段读取
                 </div></code></pre>
-                <p><strong>注意：</strong> CS 通常是只读的，不能作为大多数写入指令的目的段。SS 的修改需要特别小心，否则会造成堆栈崩溃。</p>
-                <h3 id="5-1m%E5%86%85%E5%AD%98%E7%A9%BA%E9%97%B4%E5%88%92%E5%88%86%E5%92%8C%E6%98%BE%E5%8D%A1%E5%9C%B0%E5%9D%80%E6%98%A0%E5%B0%84-a-case-study"><strong>5. 1M内存空间划分和显卡地址映射 (A Case Study)</strong></h3>
-                <p>让我们把前面的知识应用到经典的PC内存布局中。这1MB的空间并不是一块统一的RAM。</p>
-                <p><strong>1M内存空间划分:</strong></p>
-                <pre class="hljs"><code><div>+------------------+ 0xFFFFF (1MB - 1)
+<p><strong>注意：</strong> CS 通常是只读的，不能作为大多数写入指令的目的段。SS 的修改需要特别小心，否则会造成堆栈崩溃。</p>
+<h3 id="5-1m%E5%86%85%E5%AD%98%E7%A9%BA%E9%97%B4%E5%88%92%E5%88%86%E5%92%8C%E6%98%BE%E5%8D%A1%E5%9C%B0%E5%9D%80%E6%98%A0%E5%B0%84-a-case-study"><strong>5. 1M内存空间划分和显卡地址映射 (A Case Study)</strong></h3>
+<p>让我们把前面的知识应用到经典的PC内存布局中。这1MB的空间并不是一块统一的RAM。</p>
+<p><strong>1M内存空间划分:</strong></p>
+<pre class="hljs"><code><div>+------------------+ 0xFFFFF (1MB - 1)
                 |  ROM BIOS        |
                 +------------------+ 0xF0000
                 |  扩展 ROM         |
@@ -205,91 +203,116 @@
                 |  中断向量表      |
                 +------------------+ 0x00000
                 </div></code></pre>
-                <ul>
-                <li><strong>0x00000 - 0x003FF</strong>: 中断向量表 (IVT)。存放中断服务程序的地址。</li>
-                <li><strong>0x00400 - 0x004FF</strong>: BIOS数据区 (BDA)。存放硬件状态信息。</li>
-                <li><strong>... - 0x9FFFF</strong>: 常规内存 (Conventional Memory)。这是用户程序能自由使用的主要RAM区域，最大为640KB。这就是著名的“640KB内存限制”的由来。</li>
-                <li><strong>0xA0000 - 0xBFFFF</strong>: <strong>显存映射区 (Video Memory)</strong>。这是关键！</li>
-                <li><strong>0xC0000 - 0xFFFFF</strong>: BIOS ROM和其他硬件的ROM。存放固化代码。</li>
-                </ul>
-                <p><strong>显卡地址映射 (Memory-Mapped I/O):</strong>
+<ul>
+<li><strong>0x00000 - 0x003FF</strong>: 中断向量表 (IVT)。存放中断服务程序的地址。</li>
+<li><strong>0x00400 - 0x004FF</strong>: BIOS数据区 (BDA)。存放硬件状态信息。</li>
+<li><strong>... - 0x9FFFF</strong>: 常规内存 (Conventional Memory)。这是用户程序能自由使用的主要RAM区域，最大为640KB。这就是著名的“640KB内存限制”的由来。</li>
+<li><strong>0xA0000 - 0xBFFFF</strong>: <strong>显存映射区 (Video Memory)</strong>。这是关键！</li>
+<li><strong>0xC0000 - 0xFFFFF</strong>: BIOS ROM和其他硬件的ROM。存放固化代码。</li>
+</ul>
+<p><strong>显卡地址映射 (Memory-Mapped I/O):</strong>
                 在早期的PC中，要让屏幕显示字符，并不是调用一个复杂的API。而是通过一种叫做<strong>内存映射I/O (Memory-Mapped I/O, MMIO)</strong> 的技术。
                 显卡控制器会监听地址总线。当CPU访问特定地址范围（如 <code>0xB8000</code> 开始的区域）时，物理RAM不会响应，而是显卡会“认领”这个地址，并将CPU写入的数据接收到它自己的显存中。</p>
+<ul>
+<li>
+<p><strong>文本模式显存</strong>:</p>
+<ul>
+<li>物理地址从 <code>0xB8000</code> 开始。</li>
+<li>逻辑地址可以是 <code>B800h:0000</code>。</li>
+<li>屏幕上每个字符位置对应显存中的<strong>2个字节</strong>。
                 <ul>
-                <li>
-                <p><strong>文本模式显存</strong>:</p>
-                <ul>
-                <li>物理地址从 <code>0xB8000</code> 开始。</li>
-                <li>逻辑地址可以是 <code>B800h:0000</code>。</li>
-                <li>屏幕上每个字符位置对应显存中的<strong>2个字节</strong>。
-                <ul>
-                <li><strong>第1字节</strong>: 字符的ASCII码。</li>
-                <li><strong>第2字节</strong>: 字符的属性（前景色、背景色、是否闪烁等）。</li>
-                </ul>
-                </li>
-                </ul>
-                <p>例如，要在屏幕左上角（第0行，第0列）显示一个白底红字的 'A'：</p>
-                <pre class="hljs"><code><div>mov ax, 0B800h
+<li><strong>第1字节</strong>: 字符的ASCII码。</li>
+<li><strong>第2字节</strong>: 字符的属性（前景色、背景色、是否闪烁等）。</li>
+</ul>
+</li>
+</ul>
+<p>例如，要在屏幕左上角（第0行，第0列）显示一个白底红字的 'A'：</p>
+<pre class="hljs"><code><div>mov ax, 0B800h
                 mov es, ax             ; 将ES指向文本显存段
                 mov byte ptr es:[0], 'A'  ; 写入字符 'A' 的 ASCII 码
                 mov byte ptr es:[1], 01110100b ; 写入属性: 白底(0111)红字(0100)
                 </div></code></pre>
-                <p>执行这两条指令后，屏幕左上角会立即出现一个红色的'A'。这就是汇编语言直接操控硬件的魅力所在。</p>
-                </li>
-                </ul>
-                <h3 id="6-%E5%AE%BD%E5%BA%A6%E4%BF%AE%E9%A5%B0%E4%B8%8E%E5%8F%98%E9%87%8F%E5%BC%95%E7%94%A8-type-safety-in-assembly"><strong>6. 宽度修饰与变量引用 (Type Safety in Assembly)</strong></h3>
-                <p>考虑指令 <code>mov [bx], 5</code>。CPU应该写入一个字节(BYTE)、一个字(WORD)还是一个双字(DWORD)？指令本身没有提供这个信息，这会造成歧义。</p>
-                <p>汇编器提供了两种方式解决这个问题：</p>
-                <ol>
-                <li>
-                <p><strong>变量引用 (Variable Reference)</strong>
+<p>执行这两条指令后，屏幕左上角会立即出现一个红色的'A'。这就是汇编语言直接操控硬件的魅力所在。</p>
+</li>
+</ul>
+<h3 id="6-%E5%AE%BD%E5%BA%A6%E4%BF%AE%E9%A5%B0%E4%B8%8E%E5%8F%98%E9%87%8F%E5%BC%95%E7%94%A8-type-safety-in-assembly"><strong>6. 宽度修饰与变量引用 (Type Safety in Assembly)</strong></h3>
+<p>考虑指令 <code>mov [bx], 5</code>。CPU应该写入一个字节(BYTE)、一个字(WORD)还是一个双字(DWORD)？指令本身没有提供这个信息，这会造成歧义。</p>
+<p>汇编器提供了两种方式解决这个问题：</p>
+<ol>
+<li>
+<p><strong>变量引用 (Variable Reference)</strong>
                 如果你的内存操作数是一个已经定义好类型的变量，汇编器会根据变量的定义自动确定操作宽度。</p>
-                <pre class="hljs"><code><div>.data
+<pre class="hljs"><code><div>.data
                     myByte  db ?  ; 定义一个字节
                     myWord  dw ?  ; 定义一个字
                 .code
                     mov [myByte], 5 ; 汇编器知道这是一个字节操作
                     mov [myWord], 5 ; 汇编器知道这是一个字操作
                 </div></code></pre>
-                </li>
-                <li>
-                <p><strong>宽度修饰符 (Size Specifier)</strong>
+</li>
+<li>
+<p><strong>宽度修饰符 (Size Specifier)</strong>
                 当操作数没有明确类型时（如 <code>[bx]</code>），你必须<strong>显式</strong>地告诉汇编器操作的宽度。这通过 <code>PTR</code> 操作符完成。</p>
-                <pre class="hljs"><code><div>mov BYTE PTR [bx], 5  ; 明确写入一个字节 (8位)
+<pre class="hljs"><code><div>mov BYTE PTR [bx], 5  ; 明确写入一个字节 (8位)
                 mov WORD PTR [bx], 5  ; 明确写入一个字 (16位)
                 mov DWORD PTR [bx], 5 ; 明确写入一个双字 (32位, 在386+处理器)
                 </div></code></pre>
-                <p><strong>忘记宽度修饰符是新手在汇编编程中最常犯的错误之一。</strong></p>
-                </li>
-                </ol>
-            </article>
-        </main>
-    </div>
-    
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<p><strong>忘记宽度修饰符是新手在汇编编程中最常犯的错误之一。</strong></p>
+</li>
+</ol>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

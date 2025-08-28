@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机图形学05:二维图形算法-光栅化</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>计算机图形学05:二维图形算法-光栅化</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,60 +30,60 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A605%E4%BA%8C%E7%BB%B4%E5%9B%BE%E5%BD%A2%E7%AE%97%E6%B3%95-%E5%85%89%E6%A0%85%E5%8C%96">计算机图形学05:二维图形算法-光栅化</h1>
-                <h3 id="%E5%BC%95%E8%A8%80%E4%BB%8E%E5%87%A0%E4%BD%95%E5%88%B0%E5%83%8F%E7%B4%A0"><strong>引言：从几何到像素</strong></h3>
-                <p>让我们回顾一下渲染的核心任务：将我们用几何图元（点、线、多边形）建立的虚拟世界，最终呈现为屏幕上的图像。这个过程可以分解为两大步骤：</p>
-                <ol>
-                <li><strong>几何处理阶段：</strong> 对几何体进行变换、投影等操作，确定它们在屏幕空间中的位置和形状。</li>
-                <li><strong>光栅化阶段：</strong> 确定这个经过变换的几何体覆盖了屏幕网格中的哪些像素。</li>
-                <li><strong>着色阶段：</strong> 为这些被覆盖的像素计算出最终的颜色。</li>
-                </ol>
-                <p>今天，我们的焦点就是第二步：<strong>光栅化</strong>，也称为<strong>扫描转换 (Scan Conversion)</strong>。</p>
-                <p>可以想象，GPU每秒需要处理数以亿计的三角形。因此，光栅化算法的效率直接决定了图形系统的性能。现代GPU已经将这些算法固化到了硬件中，但理解其原理，对于我们深入学习图形学，以及进行性能优化都至关重要。这些算法本身，也是算法设计思想的绝佳体现——它们通过巧妙的增量计算和整数运算，将复杂的几何问题转化为了高效的硬件操作。</p>
-                <h3 id="1-%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98%E7%82%B9%E4%BA%AE%E5%93%AA%E4%BA%9B%E5%83%8F%E7%B4%A0"><strong>1. 核心问题：点亮哪些像素？</strong></h3>
-                <p>光栅化算法需要满足一系列苛刻的要求，才能产生高质量的图像：</p>
-                <ul>
-                <li><strong>准确性：</strong> 选择的像素应尽可能贴近理想的几何线条。</li>
-                <li><strong>连续性：</strong> 线条应该是连续的，不能有中断的空洞。</li>
-                <li><strong>亮度均匀：</strong> 线条的视觉亮度不应因其斜率不同而发生明显变化。</li>
-                <li><strong>效率：</strong> 算法必须极快，因为这是渲染管线中最频繁执行的操作之一。</li>
-                <li><strong>可扩展性：</strong> 算法应能支持不同的线宽和线型（如虚线、点线）。</li>
-                </ul>
-                <p>我们将从最简单的图元——直线段开始，探讨如何完美地实现它的光栅化。</p>
-                <h3 id="2-%E7%9B%B4%E7%BA%BF%E7%9A%84%E5%85%89%E6%A0%85%E5%8C%96"><strong>2. 直线的光栅化</strong></h3>
-                <p>我们的任务是：给定直线的两个端点 $P_1(x_1, y_1)$ 和 $P_2(x_2, y_2)$，找出一条最佳的像素路径来近似这条直线。</p>
-                <h4 id="21-%E6%9C%80%E6%9C%B4%E7%B4%A0%E7%9A%84%E7%AE%97%E6%B3%95dda-digital-differential-analyzer"><strong>2.1 最朴素的算法：DDA (Digital Differential Analyzer)</strong></h4>
-                <p>这是最直观的想法。我们知道直线的斜截式方程是 $y = mx + c$，其中斜率 $m = \frac{\Delta y}{\Delta x} = \frac{y_2 - y_1}{x_2 - x_1}$。</p>
-                <p>DDA算法的思路是：</p>
-                <ol>
-                <li>沿着变化更快的坐标轴（主轴）以单位步长前进。</li>
-                <li>根据斜率计算另一个坐标轴的增量。</li>
-                <li>将计算出的浮点坐标四舍五入，得到最终的像素整数坐标。</li>
-                </ol>
-                <p><strong>以斜率 $|m| \le 1$ 的情况为例（X轴是主轴）：</strong></p>
-                <div class="code-container">
-                    <pre class="hljs"><code><div>// 伪代码
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A605%E4%BA%8C%E7%BB%B4%E5%9B%BE%E5%BD%A2%E7%AE%97%E6%B3%95-%E5%85%89%E6%A0%85%E5%8C%96">计算机图形学05:二维图形算法-光栅化</h1>
+<h3 id="%E5%BC%95%E8%A8%80%E4%BB%8E%E5%87%A0%E4%BD%95%E5%88%B0%E5%83%8F%E7%B4%A0"><strong>引言：从几何到像素</strong></h3>
+<p>让我们回顾一下渲染的核心任务：将我们用几何图元（点、线、多边形）建立的虚拟世界，最终呈现为屏幕上的图像。这个过程可以分解为两大步骤：</p>
+<ol>
+<li><strong>几何处理阶段：</strong> 对几何体进行变换、投影等操作，确定它们在屏幕空间中的位置和形状。</li>
+<li><strong>光栅化阶段：</strong> 确定这个经过变换的几何体覆盖了屏幕网格中的哪些像素。</li>
+<li><strong>着色阶段：</strong> 为这些被覆盖的像素计算出最终的颜色。</li>
+</ol>
+<p>今天，我们的焦点就是第二步：<strong>光栅化</strong>，也称为<strong>扫描转换 (Scan Conversion)</strong>。</p>
+<p>可以想象，GPU每秒需要处理数以亿计的三角形。因此，光栅化算法的效率直接决定了图形系统的性能。现代GPU已经将这些算法固化到了硬件中，但理解其原理，对于我们深入学习图形学，以及进行性能优化都至关重要。这些算法本身，也是算法设计思想的绝佳体现——它们通过巧妙的增量计算和整数运算，将复杂的几何问题转化为了高效的硬件操作。</p>
+<h3 id="1-%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98%E7%82%B9%E4%BA%AE%E5%93%AA%E4%BA%9B%E5%83%8F%E7%B4%A0"><strong>1. 核心问题：点亮哪些像素？</strong></h3>
+<p>光栅化算法需要满足一系列苛刻的要求，才能产生高质量的图像：</p>
+<ul>
+<li><strong>准确性：</strong> 选择的像素应尽可能贴近理想的几何线条。</li>
+<li><strong>连续性：</strong> 线条应该是连续的，不能有中断的空洞。</li>
+<li><strong>亮度均匀：</strong> 线条的视觉亮度不应因其斜率不同而发生明显变化。</li>
+<li><strong>效率：</strong> 算法必须极快，因为这是渲染管线中最频繁执行的操作之一。</li>
+<li><strong>可扩展性：</strong> 算法应能支持不同的线宽和线型（如虚线、点线）。</li>
+</ul>
+<p>我们将从最简单的图元——直线段开始，探讨如何完美地实现它的光栅化。</p>
+<h3 id="2-%E7%9B%B4%E7%BA%BF%E7%9A%84%E5%85%89%E6%A0%85%E5%8C%96"><strong>2. 直线的光栅化</strong></h3>
+<p>我们的任务是：给定直线的两个端点 $P_1(x_1, y_1)$ 和 $P_2(x_2, y_2)$，找出一条最佳的像素路径来近似这条直线。</p>
+<h4 id="21-%E6%9C%80%E6%9C%B4%E7%B4%A0%E7%9A%84%E7%AE%97%E6%B3%95dda-digital-differential-analyzer"><strong>2.1 最朴素的算法：DDA (Digital Differential Analyzer)</strong></h4>
+<p>这是最直观的想法。我们知道直线的斜截式方程是 $y = mx + c$，其中斜率 $m = \frac{\Delta y}{\Delta x} = \frac{y_2 - y_1}{x_2 - x_1}$。</p>
+<p>DDA算法的思路是：</p>
+<ol>
+<li>沿着变化更快的坐标轴（主轴）以单位步长前进。</li>
+<li>根据斜率计算另一个坐标轴的增量。</li>
+<li>将计算出的浮点坐标四舍五入，得到最终的像素整数坐标。</li>
+</ol>
+<p><strong>以斜率 $|m| \le 1$ 的情况为例（X轴是主轴）：</strong></p>
+<div class="code-container">
+<pre class="hljs"><code><div>// 伪代码
 float m = (y2 - y1) / (x2 - x1);
 float y = y1;
 for (int x = x1; x &lt;= x2; x++) {
@@ -91,165 +91,191 @@ for (int x = x1; x &lt;= x2; x++) {
     y = y + m; // y递增一个斜率
 }
 </div></code></pre>
-                </div>
-                <p><strong>优点：</strong></p>
-                <ul>
-                <li>思路简单，易于理解。</li>
-                </ul>
-                <p><strong>缺点：</strong></p>
-                <ul>
-                <li><strong>浮点数运算：</strong> 算法中涉及浮点数加法和<code>round</code>函数，这在早期硬件中是非常昂贵的。</li>
-                <li><strong>累积误差：</strong> 浮点数加法会不断累积误差，可能导致绘制的直线偏离理想位置。</li>
-                </ul>
-                <p>DDA是一个<strong>增量式算法</strong>，即每一步的计算都基于上一步的结果。这个思想非常重要，接下来的Bresenham算法将其发挥到了极致。</p>
-                <h4 id="22-%E6%95%B4%E6%95%B0%E7%9A%84%E8%83%9C%E5%88%A9bresenham%E7%9B%B4%E7%BA%BF%E7%AE%97%E6%B3%95"><strong>2.2 整数的胜利：Bresenham直线算法</strong></h4>
-                <p>1965年，IBM的Jack Bresenham发明了一种完全使用整数运算来绘制直线的算法，成为了图形学历史上的一个里程碑。其核心思想被后来的<strong>中点画线法</strong>所借鉴和发展，我们以中点法来讲解这个思路。</p>
-                <p><strong>核心思想：</strong>
+</div>
+<p><strong>优点：</strong></p>
+<ul>
+<li>思路简单，易于理解。</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li><strong>浮点数运算：</strong> 算法中涉及浮点数加法和<code>round</code>函数，这在早期硬件中是非常昂贵的。</li>
+<li><strong>累积误差：</strong> 浮点数加法会不断累积误差，可能导致绘制的直线偏离理想位置。</li>
+</ul>
+<p>DDA是一个<strong>增量式算法</strong>，即每一步的计算都基于上一步的结果。这个思想非常重要，接下来的Bresenham算法将其发挥到了极致。</p>
+<h4 id="22-%E6%95%B4%E6%95%B0%E7%9A%84%E8%83%9C%E5%88%A9bresenham%E7%9B%B4%E7%BA%BF%E7%AE%97%E6%B3%95"><strong>2.2 整数的胜利：Bresenham直线算法</strong></h4>
+<p>1965年，IBM的Jack Bresenham发明了一种完全使用整数运算来绘制直线的算法，成为了图形学历史上的一个里程碑。其核心思想被后来的<strong>中点画线法</strong>所借鉴和发展，我们以中点法来讲解这个思路。</p>
+<p><strong>核心思想：</strong>
                 假设我们已经画好了像素 $P(x_p, y_p)$，下一步我们只能在两个候选像素中选择一个：<strong>东向 (E)</strong> 的 $(x_p+1, y_p)$ 或<strong>东北向 (NE)</strong> 的 $(x_p+1, y_p+1)$。我们该如何做出选择？</p>
-                <p><strong>决策依据：</strong> 检查两个候选像素的中点 $M(x_p+1, y_p+0.5)$ 位于理想直线的上方还是下方。</p>
+<p><strong>决策依据：</strong> 检查两个候选像素的中点 $M(x_p+1, y_p+0.5)$ 位于理想直线的上方还是下方。</p>
+<ul>
+<li>如果中点在理想直线上方，说明直线更靠近E点，我们选择E。</li>
+<li>如果中点在理想直线下方，说明直线更靠近NE点，我们选择NE。</li>
+</ul>
+<p><strong>如何用整数运算实现？</strong></p>
+<ol>
+<li>我们将直线的隐式方程改写为 $F(x, y) = ax + by + c = 0$，其中 $a = y_2 - y_1 = \Delta y$, $b = -(x_2 - x_1) = -\Delta x$。
                 <ul>
-                <li>如果中点在理想直线上方，说明直线更靠近E点，我们选择E。</li>
-                <li>如果中点在理想直线下方，说明直线更靠近NE点，我们选择NE。</li>
-                </ul>
-                <p><strong>如何用整数运算实现？</strong></p>
-                <ol>
-                <li>我们将直线的隐式方程改写为 $F(x, y) = ax + by + c = 0$，其中 $a = y_2 - y_1 = \Delta y$, $b = -(x_2 - x_1) = -\Delta x$。
-                <ul>
-                <li>$F(x, y) > 0$ 表示点在直线上方。</li>
-                <li>$F(x, y) < 0$ 表示点在直线下方。</li>
-                </ul>
-                </li>
-                <li>我们定义一个<strong>决策变量</strong> $d = F(M) = F(x_p+1, y_p+0.5)$。</li>
-                <li>我们发现，<strong>每一步的决策变量都可以通过上一步的决策变量和一个整数增量计算出来！</strong>
-                <ul>
-                <li>如果上一步选择了E，则下一个中点相对于上一个中点只在x方向移动了1，新的决策变量 $d_{new} = d_{old} + \Delta y$。</li>
-                <li>如果上一步选择了NE，则下一个中点在x和y方向都移动了1，新的决策变量 $d_{new} = d_{old} + \Delta y - \Delta x$。</li>
-                </ul>
-                </li>
-                <li>通过将所有计算乘以2，我们可以完全消除初始决策变量中的0.5，从而实现<strong>纯整数运算</strong>。</li>
-                </ol>
-                <p><strong>Bresenham/中点算法的优势：</strong></p>
-                <ul>
-                <li><strong>高效：</strong> 只包含整数加法、减法和位移运算，极其适合硬件实现。</li>
-                <li><strong>精确：</strong> 没有浮点数带来的累积误差。</li>
-                <li><strong>通用：</strong> 可以轻松扩展到处理所有八个象限的直线，以及圆和椭圆的绘制。</li>
-                </ul>
-                <h3 id="3-%E5%A4%9A%E8%BE%B9%E5%BD%A2%E7%9A%84%E5%A1%AB%E5%85%85-polygon-filling"><strong>3. 多边形的填充 (Polygon Filling)</strong></h3>
-                <p>绘制完轮廓线后，我们常常需要填充多边形的内部区域。</p>
-                <h4 id="31-%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98%E7%82%B9%E5%9C%A8%E5%A4%9A%E8%BE%B9%E5%BD%A2%E5%86%85%E8%BF%98%E6%98%AF%E5%A4%96-point-classification"><strong>3.1 核心问题：点在多边形内还是外？ (Point Classification)</strong></h4>
-                <p>这是一个基础的几何问题。我们有两种经典的方法：</p>
-                <ol>
-                <li>
-                <p><strong>奇偶规则 (Even-Odd Rule / Odd-Parity Rule):</strong></p>
-                <ul>
-                <li>从待测点P向任意方向画一条射线。</li>
-                <li>计算射线与多边形边的交点个数。</li>
-                <li>如果交点个数为<strong>奇数</strong>，则点P在多边形<strong>内部</strong>。</li>
-                <li>如果交点个数为<strong>偶数</strong>，则点P在多边形<strong>外部</strong>。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>非零环绕数规则 (Non-Zero Winding Number Rule):</strong></p>
-                <ul>
-                <li>想象一条从点P出发，末端拴在多边形边上的橡皮筋。</li>
-                <li>让橡皮筋的末端沿多边形的边完整地绕行一圈。</li>
-                <li>计算橡皮筋绕点P的总圈数（逆时针为+1，顺时针为-1），这个数就是<strong>环绕数</strong>。</li>
-                <li>如果环绕数<strong>不为零</strong>，则点P在<strong>内部</strong>。</li>
-                <li>如果环绕数为<strong>零</strong>，则点P在<strong>外部</strong>。</li>
-                </ul>
-                </li>
-                </ol>
-                <p>对于简单的凸多边形，两种规则结果相同。但对于自相交的复杂多边形，它们会产生不同的结果。</p>
-                <h4 id="32-%E6%89%AB%E6%8F%8F%E7%BA%BF%E5%A1%AB%E5%85%85%E7%AE%97%E6%B3%95-scan-line-filling"><strong>3.2 扫描线填充算法 (Scan-Line Filling)</strong></h4>
-                <p>逐个像素地进行内外判断效率太低。扫描线算法利用了图形的<strong>相干性 (Coherence)</strong>，即相邻像素、相邻扫描线的属性很可能是相似的。</p>
-                <p><strong>算法流程：</strong></p>
-                <ol>
-                <li>从下到上，逐条扫描线（即y值固定的像素行）进行处理。</li>
-                <li>对于当前扫描线，计算它与多边形所有边的交点。</li>
-                <li>将所有交点按x坐标从小到大排序。</li>
-                <li>将交点两两配对，填充每对交点之间的像素区间。</li>
-                </ol>
-                <p><strong>优化与特殊情况处理：</strong></p>
-                <ul>
-                <li><strong>效率提升：</strong> 使用<strong>活性边表 (Active Edge Table, AET)</strong>，只保留与当前扫描线相交的边，并利用边的斜率倒数，以增量方式高效地更新下一条扫描线的交点x坐标。</li>
-                <li><strong>特殊情况：</strong> 需要妥善处理水平边和交点恰好是多边形顶点的情况，以保证奇偶规则的正确性。</li>
-                </ul>
-                <h4 id="33-%E7%A7%8D%E5%AD%90%E5%A1%AB%E5%85%85%E7%AE%97%E6%B3%95-seed-fill-algorithms"><strong>3.3 种子填充算法 (Seed Fill Algorithms)</strong></h4>
-                <p>这是另一类填充算法，常见于绘图软件中的“油漆桶”工具。</p>
-                <ul>
-                <li><strong>核心思想：</strong> 从多边形内部的一个已知像素点（种子）开始，向四周递归地扩散，直到遇到边界。</li>
-                <li><strong>连通性：</strong>
-                <ul>
-                <li><strong>4-连通：</strong> 每次只扩散到当前像素的上下左右四个邻居。</li>
-                <li><strong>8-连通：</strong> 扩散到上下左右以及对角线的八个邻居。</li>
-                </ul>
-                </li>
-                <li><strong>实现：</strong> 通常使用栈或队列的非递归方式实现，以避免深度递归导致的栈溢出。</li>
-                </ul>
-                <h3 id="4-%E8%B5%B0%E6%A0%B7%E4%B8%8E%E5%8F%8D%E8%B5%B0%E6%A0%B7-aliasing-and-anti-aliasing"><strong>4. 走样与反走样 (Aliasing and Anti-aliasing)</strong></h3>
-                <p>我们所有的光栅化算法，都是在一个离散的像素网格上对一个连续的几何信号进行<strong>采样</strong>。根据采样定理，如果采样率不足，就会产生<strong>走样 (Aliasing)</strong>。
+<li>$F(x, y) &gt; 0$ 表示点在直线上方。</li>
+<li>$F(x, y) &lt; 0$ 表示点在直线下方。</li>
+</ul>
+</li>
+<li>我们定义一个<strong>决策变量</strong> $d = F(M) = F(x_p+1, y_p+0.5)$。</li>
+<li>我们发现，<strong>每一步的决策变量都可以通过上一步的决策变量和一个整数增量计算出来！</strong>
+<ul>
+<li>如果上一步选择了E，则下一个中点相对于上一个中点只在x方向移动了1，新的决策变量 $d_{new} = d_{old} + \Delta y$。</li>
+<li>如果上一步选择了NE，则下一个中点在x和y方向都移动了1，新的决策变量 $d_{new} = d_{old} + \Delta y - \Delta x$。</li>
+</ul>
+</li>
+<li>通过将所有计算乘以2，我们可以完全消除初始决策变量中的0.5，从而实现<strong>纯整数运算</strong>。</li>
+</ol>
+<p><strong>Bresenham/中点算法的优势：</strong></p>
+<ul>
+<li><strong>高效：</strong> 只包含整数加法、减法和位移运算，极其适合硬件实现。</li>
+<li><strong>精确：</strong> 没有浮点数带来的累积误差。</li>
+<li><strong>通用：</strong> 可以轻松扩展到处理所有八个象限的直线，以及圆和椭圆的绘制。</li>
+</ul>
+<h3 id="3-%E5%A4%9A%E8%BE%B9%E5%BD%A2%E7%9A%84%E5%A1%AB%E5%85%85-polygon-filling"><strong>3. 多边形的填充 (Polygon Filling)</strong></h3>
+<p>绘制完轮廓线后，我们常常需要填充多边形的内部区域。</p>
+<h4 id="31-%E6%A0%B8%E5%BF%83%E9%97%AE%E9%A2%98%E7%82%B9%E5%9C%A8%E5%A4%9A%E8%BE%B9%E5%BD%A2%E5%86%85%E8%BF%98%E6%98%AF%E5%A4%96-point-classification"><strong>3.1 核心问题：点在多边形内还是外？ (Point Classification)</strong></h4>
+<p>这是一个基础的几何问题。我们有两种经典的方法：</p>
+<ol>
+<li>
+<p><strong>奇偶规则 (Even-Odd Rule / Odd-Parity Rule):</strong></p>
+<ul>
+<li>从待测点P向任意方向画一条射线。</li>
+<li>计算射线与多边形边的交点个数。</li>
+<li>如果交点个数为<strong>奇数</strong>，则点P在多边形<strong>内部</strong>。</li>
+<li>如果交点个数为<strong>偶数</strong>，则点P在多边形<strong>外部</strong>。</li>
+</ul>
+</li>
+<li>
+<p><strong>非零环绕数规则 (Non-Zero Winding Number Rule):</strong></p>
+<ul>
+<li>想象一条从点P出发，末端拴在多边形边上的橡皮筋。</li>
+<li>让橡皮筋的末端沿多边形的边完整地绕行一圈。</li>
+<li>计算橡皮筋绕点P的总圈数（逆时针为+1，顺时针为-1），这个数就是<strong>环绕数</strong>。</li>
+<li>如果环绕数<strong>不为零</strong>，则点P在<strong>内部</strong>。</li>
+<li>如果环绕数为<strong>零</strong>，则点P在<strong>外部</strong>。</li>
+</ul>
+</li>
+</ol>
+<p>对于简单的凸多边形，两种规则结果相同。但对于自相交的复杂多边形，它们会产生不同的结果。</p>
+<h4 id="32-%E6%89%AB%E6%8F%8F%E7%BA%BF%E5%A1%AB%E5%85%85%E7%AE%97%E6%B3%95-scan-line-filling"><strong>3.2 扫描线填充算法 (Scan-Line Filling)</strong></h4>
+<p>逐个像素地进行内外判断效率太低。扫描线算法利用了图形的<strong>相干性 (Coherence)</strong>，即相邻像素、相邻扫描线的属性很可能是相似的。</p>
+<p><strong>算法流程：</strong></p>
+<ol>
+<li>从下到上，逐条扫描线（即y值固定的像素行）进行处理。</li>
+<li>对于当前扫描线，计算它与多边形所有边的交点。</li>
+<li>将所有交点按x坐标从小到大排序。</li>
+<li>将交点两两配对，填充每对交点之间的像素区间。</li>
+</ol>
+<p><strong>优化与特殊情况处理：</strong></p>
+<ul>
+<li><strong>效率提升：</strong> 使用<strong>活性边表 (Active Edge Table, AET)</strong>，只保留与当前扫描线相交的边，并利用边的斜率倒数，以增量方式高效地更新下一条扫描线的交点x坐标。</li>
+<li><strong>特殊情况：</strong> 需要妥善处理水平边和交点恰好是多边形顶点的情况，以保证奇偶规则的正确性。</li>
+</ul>
+<h4 id="33-%E7%A7%8D%E5%AD%90%E5%A1%AB%E5%85%85%E7%AE%97%E6%B3%95-seed-fill-algorithms"><strong>3.3 种子填充算法 (Seed Fill Algorithms)</strong></h4>
+<p>这是另一类填充算法，常见于绘图软件中的“油漆桶”工具。</p>
+<ul>
+<li><strong>核心思想：</strong> 从多边形内部的一个已知像素点（种子）开始，向四周递归地扩散，直到遇到边界。</li>
+<li><strong>连通性：</strong>
+<ul>
+<li><strong>4-连通：</strong> 每次只扩散到当前像素的上下左右四个邻居。</li>
+<li><strong>8-连通：</strong> 扩散到上下左右以及对角线的八个邻居。</li>
+</ul>
+</li>
+<li><strong>实现：</strong> 通常使用栈或队列的非递归方式实现，以避免深度递归导致的栈溢出。</li>
+</ul>
+<h3 id="4-%E8%B5%B0%E6%A0%B7%E4%B8%8E%E5%8F%8D%E8%B5%B0%E6%A0%B7-aliasing-and-anti-aliasing"><strong>4. 走样与反走样 (Aliasing and Anti-aliasing)</strong></h3>
+<p>我们所有的光栅化算法，都是在一个离散的像素网格上对一个连续的几何信号进行<strong>采样</strong>。根据采样定理，如果采样率不足，就会产生<strong>走样 (Aliasing)</strong>。
                 在图形学中，走样最直观的表现就是：</p>
-                <ul>
-                <li><strong>锯齿 (Jaggies):</strong> 直线和曲线的边缘呈现阶梯状。</li>
-                <li><strong>细节丢失：</strong> 过于微小的物体可能在采样时被完全漏掉。</li>
-                <li><strong>摩尔纹：</strong> 当精细的重复图案与像素网格相互作用时产生的干扰图案。</li>
-                </ul>
-                <p><strong>反走样 (Anti-aliasing)</strong> 就是用于减轻或消除走样现象的技术。</p>
-                <ul>
-                <li><strong>核心思想：</strong> 不再将一个像素视为一个点，而是视为一个有面积的方块。像素的最终颜色，应该由该像素区域内被几何图形<strong>覆盖的面积比例</strong>来决定。</li>
-                <li><strong>区域采样 (Area Sampling):</strong>
-                <ul>
-                <li><strong>超采样 (Supersampling, SSAA):</strong> 以高于屏幕分辨率的倍数进行渲染（例如4x SSAA就是以4倍分辨率渲染），然后将多个子像素的颜色平均，得到最终一个像素的颜色。效果最好，但计算开销巨大。</li>
-                <li><strong>多重采样 (Multisampling, MSAA):</strong> 一种优化的超采样。只对几何体边缘的像素进行多次采样，内部像素只采样一次。这是现代游戏中应用最广泛的反走样技术。</li>
-                </ul>
-                </li>
-                </ul>
-                <h3 id="5-%E8%A3%81%E5%89%AA-clipping"><strong>5. 裁剪 (Clipping)</strong></h3>
-                <p>我们的虚拟世界可能是无限大的，但我们的视口（屏幕或窗口）是有限的。<strong>裁剪</strong>就是丢弃完全在视口之外的图元，并精确计算与视口边界相交的图元的新顶点，只保留视口内部的部分。</p>
-                <p>裁剪通常在光栅化<strong>之前</strong>进行，因为这样可以避免对那些最终看不见的图元进行昂贵的光栅化计算。</p>
-                <ul>
-                <li><strong>Cohen-Sutherland 直线裁剪算法:</strong>
-                <ul>
-                <li>将屏幕空间划分为9个区域，每个区域分配一个4位的“外码”。</li>
-                <li>通过对线段两个端点的外码进行位运算，可以快速地进行“平凡接受”（完全在内部）和“平凡拒绝”（完全在外部）。</li>
-                <li>对于相交情况，则计算交点，用交点替换掉在外部的端点，然后重复此过程。</li>
-                </ul>
-                </li>
-                <li><strong>Sutherland-Hodgeman 多边形裁剪算法:</strong>
-                <ul>
-                <li>一个非常优雅的算法。它将复杂的多边形裁剪问题，分解为对四条边界（上、下、左、右）的依次裁剪。</li>
-                <li>每次用一条边界（一条无限长的直线）去裁剪一个输入的多边形，生成一个新的多边形，作为下一次裁剪的输入。</li>
-                <li>这个过程非常适合流水线处理，易于硬件实现。</li>
-                </ul>
-                </li>
-                </ul>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<ul>
+<li><strong>锯齿 (Jaggies):</strong> 直线和曲线的边缘呈现阶梯状。</li>
+<li><strong>细节丢失：</strong> 过于微小的物体可能在采样时被完全漏掉。</li>
+<li><strong>摩尔纹：</strong> 当精细的重复图案与像素网格相互作用时产生的干扰图案。</li>
+</ul>
+<p><strong>反走样 (Anti-aliasing)</strong> 就是用于减轻或消除走样现象的技术。</p>
+<ul>
+<li><strong>核心思想：</strong> 不再将一个像素视为一个点，而是视为一个有面积的方块。像素的最终颜色，应该由该像素区域内被几何图形<strong>覆盖的面积比例</strong>来决定。</li>
+<li><strong>区域采样 (Area Sampling):</strong>
+<ul>
+<li><strong>超采样 (Supersampling, SSAA):</strong> 以高于屏幕分辨率的倍数进行渲染（例如4x SSAA就是以4倍分辨率渲染），然后将多个子像素的颜色平均，得到最终一个像素的颜色。效果最好，但计算开销巨大。</li>
+<li><strong>多重采样 (Multisampling, MSAA):</strong> 一种优化的超采样。只对几何体边缘的像素进行多次采样，内部像素只采样一次。这是现代游戏中应用最广泛的反走样技术。</li>
+</ul>
+</li>
+</ul>
+<h3 id="5-%E8%A3%81%E5%89%AA-clipping"><strong>5. 裁剪 (Clipping)</strong></h3>
+<p>我们的虚拟世界可能是无限大的，但我们的视口（屏幕或窗口）是有限的。<strong>裁剪</strong>就是丢弃完全在视口之外的图元，并精确计算与视口边界相交的图元的新顶点，只保留视口内部的部分。</p>
+<p>裁剪通常在光栅化<strong>之前</strong>进行，因为这样可以避免对那些最终看不见的图元进行昂贵的光栅化计算。</p>
+<ul>
+<li><strong>Cohen-Sutherland 直线裁剪算法:</strong>
+<ul>
+<li>将屏幕空间划分为9个区域，每个区域分配一个4位的“外码”。</li>
+<li>通过对线段两个端点的外码进行位运算，可以快速地进行“平凡接受”（完全在内部）和“平凡拒绝”（完全在外部）。</li>
+<li>对于相交情况，则计算交点，用交点替换掉在外部的端点，然后重复此过程。</li>
+</ul>
+</li>
+<li><strong>Sutherland-Hodgeman 多边形裁剪算法:</strong>
+<ul>
+<li>一个非常优雅的算法。它将复杂的多边形裁剪问题，分解为对四条边界（上、下、左、右）的依次裁剪。</li>
+<li>每次用一条边界（一条无限长的直线）去裁剪一个输入的多边形，生成一个新的多边形，作为下一次裁剪的输入。</li>
+<li>这个过程非常适合流水线处理，易于硬件实现。</li>
+</ul>
+</li>
+</ul>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

@@ -1,13 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机动画06:群组动画(下)</title>
-    
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    
-    <script>
+<meta charset="utf-8"/>
+<title>计算机动画06:群组动画(下)</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -18,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script"
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -32,157 +30,157 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8A%A8%E7%94%BB06%E7%BE%A4%E7%BB%84%E5%8A%A8%E7%94%BB%E4%B8%8B">计算机动画06:群组动画(下)</h1>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%9F%BA%E4%BA%8E%E7%A4%BE%E4%BC%9A%E5%8A%9B%E6%A8%A1%E5%9E%8B%E7%9A%84%E7%BE%A4%E4%BD%93%E8%A1%8C%E4%B8%BA%E6%A8%A1%E6%8B%9F"><strong>第一部分：基于社会力模型的群体行为模拟</strong></h3>
-                <h4 id="1-%E9%97%AE%E9%A2%98%E7%9A%84%E6%8F%90%E5%87%BA%E5%BD%93%E7%A7%A9%E5%BA%8F%E5%B4%A9%E6%BA%83%E6%97%B6"><strong>1. 问题的提出：当秩序崩溃时</strong></h4>
-                <p>首先，我想让大家看几张触目惊心的图片。这些并非电影特效，而是真实发生过的人类悲剧——<strong>踩踏事件 (Stampedes)</strong>。</p>
-                <ul>
-                <li>2010年德国杜伊斯堡“爱的大游行”音乐节踩踏事件。</li>
-                <li>1989年英国希尔斯堡惨案。</li>
-                <li>1985年比利时海瑟尔体育场惨案。</li>
-                </ul>
-                <p>在这些事件中，成百上千的人聚集在狭小的空间里，当恐慌蔓延时，个体的理性迅速被群体的非理性行为所吞噬，导致了无法挽回的悲剧。</p>
-                <p>这些灾难向我们提出了一个严肃而紧迫的问题：</p>
-                <ul>
-                <li><strong>羊群效应可以是致命的</strong>。在恐慌状态下，人的行为会变得笨拙、危险，甚至会伤害他人。</li>
-                <li><strong>获取真实恐慌数据极其困难</strong>。我们不可能为了研究而去故意制造一场灾难。</li>
-                <li><strong>公共安全意义重大</strong>。体育场、音乐会、地铁站……这些高密度人群聚集地都存在潜在风险。</li>
-                </ul>
-                <p>因此，<strong>建立一个能够有效模拟人群，特别是恐慌人群行为的模型，对于公共安全预警、建筑设计评估、应急疏散方案制定，都具有至关重要的意义。</strong></p>
-                <h4 id="2-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A4%BE%E4%BC%9A%E5%8A%9B%E6%A8%A1%E5%9E%8B-social-force-model"><strong>2. 解决方案：社会力模型 (Social Force Model)</strong></h4>
-                <p>为了应对这一挑战，德国物理学家<strong>Dirk Helbing</strong>教授及其合作者在2000年于《Nature》杂志上发表了一篇里程碑式的论文：《Simulating dynamical features of escape panic》。他们提出了一个极具创新性的概念——<strong>社会力模型</strong>。</p>
-                <p><strong>核心思想：</strong>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8A%A8%E7%94%BB06%E7%BE%A4%E7%BB%84%E5%8A%A8%E7%94%BB%E4%B8%8B">计算机动画06:群组动画(下)</h1>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%9F%BA%E4%BA%8E%E7%A4%BE%E4%BC%9A%E5%8A%9B%E6%A8%A1%E5%9E%8B%E7%9A%84%E7%BE%A4%E4%BD%93%E8%A1%8C%E4%B8%BA%E6%A8%A1%E6%8B%9F"><strong>第一部分：基于社会力模型的群体行为模拟</strong></h3>
+<h4 id="1-%E9%97%AE%E9%A2%98%E7%9A%84%E6%8F%90%E5%87%BA%E5%BD%93%E7%A7%A9%E5%BA%8F%E5%B4%A9%E6%BA%83%E6%97%B6"><strong>1. 问题的提出：当秩序崩溃时</strong></h4>
+<p>首先，我想让大家看几张触目惊心的图片。这些并非电影特效，而是真实发生过的人类悲剧——<strong>踩踏事件 (Stampedes)</strong>。</p>
+<ul>
+<li>2010年德国杜伊斯堡“爱的大游行”音乐节踩踏事件。</li>
+<li>1989年英国希尔斯堡惨案。</li>
+<li>1985年比利时海瑟尔体育场惨案。</li>
+</ul>
+<p>在这些事件中，成百上千的人聚集在狭小的空间里，当恐慌蔓延时，个体的理性迅速被群体的非理性行为所吞噬，导致了无法挽回的悲剧。</p>
+<p>这些灾难向我们提出了一个严肃而紧迫的问题：</p>
+<ul>
+<li><strong>羊群效应可以是致命的</strong>。在恐慌状态下，人的行为会变得笨拙、危险，甚至会伤害他人。</li>
+<li><strong>获取真实恐慌数据极其困难</strong>。我们不可能为了研究而去故意制造一场灾难。</li>
+<li><strong>公共安全意义重大</strong>。体育场、音乐会、地铁站……这些高密度人群聚集地都存在潜在风险。</li>
+</ul>
+<p>因此，<strong>建立一个能够有效模拟人群，特别是恐慌人群行为的模型，对于公共安全预警、建筑设计评估、应急疏散方案制定，都具有至关重要的意义。</strong></p>
+<h4 id="2-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%A4%BE%E4%BC%9A%E5%8A%9B%E6%A8%A1%E5%9E%8B-social-force-model"><strong>2. 解决方案：社会力模型 (Social Force Model)</strong></h4>
+<p>为了应对这一挑战，德国物理学家<strong>Dirk Helbing</strong>教授及其合作者在2000年于《Nature》杂志上发表了一篇里程碑式的论文：《Simulating dynamical features of escape panic》。他们提出了一个极具创新性的概念——<strong>社会力模型</strong>。</p>
+<p><strong>核心思想：</strong>
                 将复杂的、难以量化的<strong>社会心理学影响</strong>，类比为物理世界中可以计算的**“力”**，并将其整合到经典的牛顿动力学框架中。</p>
-                <p><strong>基本原理：</strong></p>
-                <ol>
-                <li><strong>把人抽象为自我驱动的质点</strong>。每个人都有质量、位置、速度。</li>
-                <li><strong>每个人的运动都遵循牛顿第二定律</strong>：$m\vec{a} = \vec{F}_{total}$。</li>
-                <li>这个合力 $\vec{F}_{total}$ 不再仅仅是物理力，它由三部分构成：
+<p><strong>基本原理：</strong></p>
+<ol>
+<li><strong>把人抽象为自我驱动的质点</strong>。每个人都有质量、位置、速度。</li>
+<li><strong>每个人的运动都遵循牛顿第二定律</strong>：$m\vec{a} = \vec{F}_{total}$。</li>
+<li>这个合力 $\vec{F}_{total}$ 不再仅仅是物理力，它由三部分构成：
                 <ul>
-                <li><strong>主观意识</strong>产生的<strong>自身驱动力</strong>。</li>
-                <li>来自<strong>其他行人</strong>的<strong>相互作用力</strong>。</li>
-                <li>来自<strong>障碍物（如墙壁）<strong>的</strong>环境作用力</strong>。</li>
-                </ul>
-                </li>
-                </ol>
-                <p>现在，让我们用数学的语言来精确描述这个模型。</p>
-                <h4 id="3-%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%95%B0%E5%AD%A6%E8%AF%A6%E8%A7%A3"><strong>3. 模型的数学详解</strong></h4>
-                <p>一个行人 $i$ 的运动方程可以写成：</p>
-                <p> $$m_i \frac{d\vec{v}_i}{dt} = \vec{f}_i^0 + \sum_{j(\neq i)} \vec{f}_{ij} + \sum_{w} \vec{f}_{iw}$$ </p>
-                <p>其中：</p>
-                <ul>
-                <li>$m_i$: 行人 $i$ 的质量。</li>
-                <li>$\vec{v}_i(t)$: 行人 $i$ 在时刻 $t$ 的实际速度。</li>
-                <li>$\vec{r}_i(t)$: 行人 $i$ 在时刻 $t$ 的位置。</li>
-                <li>$\frac{d\vec{v}_i}{dt}$: 行人 $i$ 的加速度。</li>
-                </ul>
-                <p>等式右边的三项力分别是：<strong>自身驱动力</strong>、<strong>行人间的相互作用力</strong>和<strong>与障碍物的作用力</strong>。</p>
-                <p><strong>3.1 个体的自身驱动力 $\vec{f}_i^0$</strong></p>
-                <p>这项力代表了行人想要到达目的地的<strong>主观动机</strong>。</p>
-                <p><strong>直觉</strong>：每个人都有一个期望的行走速度和方向。如果我的当前速度与期望速度不符，我就会“发力”来调整，试图在一定时间内（称为“特征时间”或“反应时间”）恢复到我期望的状态。</p>
-                <p><strong>公式</strong>：
+<li><strong>主观意识</strong>产生的<strong>自身驱动力</strong>。</li>
+<li>来自<strong>其他行人</strong>的<strong>相互作用力</strong>。</li>
+<li>来自<strong>障碍物（如墙壁）<strong>的</strong>环境作用力</strong>。</li>
+</ul>
+</li>
+</ol>
+<p>现在，让我们用数学的语言来精确描述这个模型。</p>
+<h4 id="3-%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%95%B0%E5%AD%A6%E8%AF%A6%E8%A7%A3"><strong>3. 模型的数学详解</strong></h4>
+<p>一个行人 $i$ 的运动方程可以写成：</p>
+<p> $$m_i \frac{d\vec{v}_i}{dt} = \vec{f}_i^0 + \sum_{j(\neq i)} \vec{f}_{ij} + \sum_{w} \vec{f}_{iw}$$ </p>
+<p>其中：</p>
+<ul>
+<li>$m_i$: 行人 $i$ 的质量。</li>
+<li>$\vec{v}_i(t)$: 行人 $i$ 在时刻 $t$ 的实际速度。</li>
+<li>$\vec{r}_i(t)$: 行人 $i$ 在时刻 $t$ 的位置。</li>
+<li>$\frac{d\vec{v}_i}{dt}$: 行人 $i$ 的加速度。</li>
+</ul>
+<p>等式右边的三项力分别是：<strong>自身驱动力</strong>、<strong>行人间的相互作用力</strong>和<strong>与障碍物的作用力</strong>。</p>
+<p><strong>3.1 个体的自身驱动力 $\vec{f}_i^0$</strong></p>
+<p>这项力代表了行人想要到达目的地的<strong>主观动机</strong>。</p>
+<p><strong>直觉</strong>：每个人都有一个期望的行走速度和方向。如果我的当前速度与期望速度不符，我就会“发力”来调整，试图在一定时间内（称为“特征时间”或“反应时间”）恢复到我期望的状态。</p>
+<p><strong>公式</strong>：
                 $$\vec{f}_i^0(t) = m_i \frac{v_i^0(t)\vec{e}_i^0(t) - \vec{v}_i(t)}{\tau_i}$$</p>
-                <ul>
-                <li>$v_i^0(t)$: 行人 $i$ 的<strong>期望速率</strong>（一个标量，比如1.2m/s）。</li>
-                <li>$\vec{e}_i^0(t)$: 行人 $i$ 的<strong>期望运动方向</strong>（一个单位向量）。</li>
-                <li>$v_i^0(t)\vec{e}_i^0(t)$: 这就是行人 $i$ 的<strong>期望速度向量</strong>。</li>
-                <li>$\vec{v}_i(t)$: 行人 $i$ 的<strong>当前实际速度向量</strong>。</li>
-                <li>$\tau_i$: 特征时间（或称反应时间），表示行人 $i$ 调整到期望速度所需的时间，通常取0.5秒左右。</li>
-                </ul>
-                <p><strong>期望方向如何计算？</strong>
+<ul>
+<li>$v_i^0(t)$: 行人 $i$ 的<strong>期望速率</strong>（一个标量，比如1.2m/s）。</li>
+<li>$\vec{e}_i^0(t)$: 行人 $i$ 的<strong>期望运动方向</strong>（一个单位向量）。</li>
+<li>$v_i^0(t)\vec{e}_i^0(t)$: 这就是行人 $i$ 的<strong>期望速度向量</strong>。</li>
+<li>$\vec{v}_i(t)$: 行人 $i$ 的<strong>当前实际速度向量</strong>。</li>
+<li>$\tau_i$: 特征时间（或称反应时间），表示行人 $i$ 调整到期望速度所需的时间，通常取0.5秒左右。</li>
+</ul>
+<p><strong>期望方向如何计算？</strong>
                 很简单，它就是从当前位置指向最终目标位置的单位向量。
                 如果目标点位置为 $\vec{p}$，行人当前位置为 $\vec{r}_i$，则：
                 $\vec{e}_i^0(t) = \frac{\vec{p} - \vec{r}_i}{||\vec{p} - \vec{r}_i||}$</p>
-                <p>这个驱动力是整个模型的“引擎”，它体现了行人运动的目的性。</p>
-                <p><strong>3.2 个体对个体产生的力 $\vec{f}_{ij}$</strong></p>
-                <p>这是模型中最复杂也最精妙的部分，它同时包含了<strong>心理层面</strong>的排斥和<strong>物理层面</strong>的接触。</p>
-                <p>$$\vec{f}_{ij} = { A_i \exp[(r_{ij} - d_{ij}) / B_i] + k g(r_{ij} - d_{ij}) } \vec{n}_{ij} + \kappa g(r_{ij} - d_{ij}) \Delta v_{ji}^t \vec{t}_{ij}$$</p>
-                <p>这个公式看起来很吓人，但别担心，我们把它拆解成三个部分：</p>
-                <div class="mermaid">graph TD
-                    F_ij["f_ij (总作用力)"] --> F_psych["心理排斥力 (Social)"];
-                    F_ij --> F_body["身体接触力 (Contact)"];
-                    F_ij --> F_fric["滑动摩擦力 (Friction)"];
+<p>这个驱动力是整个模型的“引擎”，它体现了行人运动的目的性。</p>
+<p><strong>3.2 个体对个体产生的力 $\vec{f}_{ij}$</strong></p>
+<p>这是模型中最复杂也最精妙的部分，它同时包含了<strong>心理层面</strong>的排斥和<strong>物理层面</strong>的接触。</p>
+<p>$$\vec{f}_{ij} = { A_i \exp[(r_{ij} - d_{ij}) / B_i] + k g(r_{ij} - d_{ij}) } \vec{n}_{ij} + \kappa g(r_{ij} - d_{ij}) \Delta v_{ji}^t \vec{t}_{ij}$$</p>
+<p>这个公式看起来很吓人，但别担心，我们把它拆解成三个部分：</p>
+<div class="mermaid">graph TD
+                    F_ij["f_ij (总作用力)"] --&gt; F_psych["心理排斥力 (Social)"];
+                    F_ij --&gt; F_body["身体接触力 (Contact)"];
+                    F_ij --&gt; F_fric["滑动摩擦力 (Friction)"];
 
                     style F_ij fill:#f9f,stroke:#333,stroke-width:2px
                 </div>
-                <ul>
-                <li>$r_{ij} = r_i + r_j$: 两个行人半径之和。</li>
-                <li>$d_{ij} = ||\vec{r}_i - \vec{r}_j||$: 两个行人中心点的距离。</li>
-                <li>$\vec{n}_{ij} = (\vec{r}_i - \vec{r}_j) / d_{ij}$: 从行人 $j$ 指向行人 $i$ 的单位法向向量。</li>
-                <li>$\vec{t}_{ij}$: 与 $\vec{n}_{ij}$ 垂直的单位切向向量。</li>
-                </ul>
-                <p><strong>a) 心理排斥力 (Psychological Repulsion Force)</strong></p>
-                <p>$$A_i \exp[(r_{ij} - d_{ij}) / B_i] \vec{n}_{ij}$$
+<ul>
+<li>$r_{ij} = r_i + r_j$: 两个行人半径之和。</li>
+<li>$d_{ij} = ||\vec{r}_i - \vec{r}_j||$: 两个行人中心点的距离。</li>
+<li>$\vec{n}_{ij} = (\vec{r}_i - \vec{r}_j) / d_{ij}$: 从行人 $j$ 指向行人 $i$ 的单位法向向量。</li>
+<li>$\vec{t}_{ij}$: 与 $\vec{n}_{ij}$ 垂直的单位切向向量。</li>
+</ul>
+<p><strong>a) 心理排斥力 (Psychological Repulsion Force)</strong></p>
+<p>$$A_i \exp[(r_{ij} - d_{ij}) / B_i] \vec{n}_{ij}$$
                 这部分是<strong>纯粹的心理作用</strong>，代表了我们日常生活中下意识与他人保持“社交距离”的行为。</p>
-                <ul>
-                <li>它的方向是沿着两人中心连线向外的。</li>
-                <li>它的核心是<strong>指数函数</strong> $\exp()$。这意味着当两个人离得很远时($d_{ij} \gg r_{ij}$)，这个力几乎为零；但当他们迅速靠近时，这个排斥力会<strong>指数级增长</strong>，产生一个强烈的“刹车”或“避让”效果。</li>
-                <li>$A_i$ 和 $B_i$ 是常数，分别控制了相互作用的强度和距离范围。</li>
-                </ul>
-                <p><strong>b) 身体接触力 (Body Force)</strong></p>
-                <p>$$k g(r_{ij} - d_{ij}) \vec{n}_{ij}$$
+<ul>
+<li>它的方向是沿着两人中心连线向外的。</li>
+<li>它的核心是<strong>指数函数</strong> $\exp()$。这意味着当两个人离得很远时($d_{ij} \gg r_{ij}$)，这个力几乎为零；但当他们迅速靠近时，这个排斥力会<strong>指数级增长</strong>，产生一个强烈的“刹车”或“避让”效果。</li>
+<li>$A_i$ 和 $B_i$ 是常数，分别控制了相互作用的强度和距离范围。</li>
+</ul>
+<p><strong>b) 身体接触力 (Body Force)</strong></p>
+<p>$$k g(r_{ij} - d_{ij}) \vec{n}_{ij}$$
                 这部分是<strong>物理接触</strong>。</p>
+<ul>
+<li>$g(x) = \max(0, x)$。这个函数是关键：
                 <ul>
-                <li>$g(x) = \max(0, x)$。这个函数是关键：
-                <ul>
-                <li>当 $r_{ij} \le d_{ij}$ 时，即两人还未接触或正好相切，$g(x)=0$，<strong>身体接触力为零</strong>。</li>
-                <li>当 $r_{ij} &gt; d_{ij}$ 时，即两人模型发生重叠（代表身体挤压），$g(x) &gt; 0$，<strong>身体接触力被激活</strong>。</li>
-                </ul>
-                </li>
-                <li>这个力的大小与身体的“压缩量” ($r_{ij} - d_{ij}$) 成正比，模拟了身体被挤压时的弹力。$k$ 是一个很大的刚度常数。</li>
-                </ul>
-                <p><strong>c) 滑动摩擦力 (Sliding Friction Force)</strong></p>
-                <p>$$\kappa g(r_{ij} - d_{ij}) \Delta v_{ji}^t \vec{t}_{ij}$$
-                这个力也是在物理接触时 ($g(x)>0$) 才存在。</p>
-                <ul>
-                <li>它的作用是<strong>防止人与人之间发生不真实的“滑过”现象</strong>。</li>
-                <li>$\Delta v_{ji}^t = (\vec{v}_j - \vec{v}_i) \cdot \vec{t}_{ij}$ 是两人在切线方向上的速度差。</li>
-                <li>当两人发生挤压并有相对切向运动时，会产生一个阻碍这种滑动的摩擦力。$\kappa$ 是摩擦系数。</li>
-                </ul>
-                <p><strong>3.3 环境力（与障碍物的作用力）$\vec{f}_{iw}$</strong></p>
-                <p>墙壁和障碍物对人的作用力，可以被建模成一个半径无限大的“行人”。因此，其公式与 $\vec{f}_{ij}$ 非常相似，只是没有心理排斥的指数项（人不会和墙保持社交距离），主要由物理接触力和摩擦力构成。</p>
-                <p>$$\vec{f}_{iw} = { k g(r_i - d_{iw}) } \vec{n}_{iw} + \kappa g(r_i - d_{iw}) (\vec{v}_i \cdot \vec{t}_{iw}) \vec{t}_{iw}$$</p>
-                <p><strong>3.4 模型的惊人发现：“欲速则不达”效应</strong></p>
-                <p>Helbing通过仿真这个模型，发现了一个非常重要的、反直觉的现象：<strong>Faster-is-slower effect (欲速则不达效应)</strong>。</p>
-                <ul>
-                <li>在一个模拟房间疏散的实验中，他让行人以不同的期望速度 $v_0$ 逃离。</li>
-                <li><strong>直觉认为</strong>：期望速度越快，逃离得应该越快。</li>
-                <li><strong>仿真结果</strong>：当期望速度 $v_0$ 超过某个临界值后，出口处会迅速形成“拱形”堵塞，人群像沙漏里的沙子一样卡住。结果，<strong>总的疏散时间反而变长了</strong>，受伤人数也急剧增加。</li>
-                </ul>
-                <p>这个结果告诉我们，在紧急疏散时，单纯地强调“快跑”可能会适得其反，维持秩序、避免在出口过度拥挤才是提高疏散效率的关键。</p>
-                <p><strong>3.5 羊群效应 (Herding Effect)</strong></p>
-                <p>在恐慌状态下，人们往往会盲目跟随大流，而不是独立思考最佳路径。社会力模型通过引入一个“恐慌参数” $p_i$ 来模拟这种行为。</p>
-                <p>行人的期望运动方向 $\vec{e}_i^0$ 不再是单纯地指向出口，而是变成了<strong>个体目标</strong>和<strong>邻居平均方向</strong>的加权平均：</p>
-                <p>$$\vec{e}_i^0(t) = \mathrm{Norm}[ (1-p_i)\vec{e}_{i, \mathrm{individual}} + p_i \langle \vec{e}_j^0(t) \rangle_i ]$$</p>
-                <ul>
-                <li>$p_i=0$ 时，行人完全理性，只朝自己的目标前进。</li>
-                <li>$p_i=1$ 时，行人完全丧失个体目标，纯粹跟随周围的人。</li>
-                </ul>
-                <p>仿真表明，随着恐慌参数 $p$ 的增大，即使有多个出口，人群也会不成比例地涌向某一个出口，导致其他出口被闲置，整体疏散效率大大降低。</p>
-                <h4 id="4-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF"><strong>4. 代码实现思路</strong></h4>
-                <p><strong>数据结构</strong></p>
-                <pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;vector&gt;</span></span>
+<li>当 $r_{ij} \le d_{ij}$ 时，即两人还未接触或正好相切，$g(x)=0$，<strong>身体接触力为零</strong>。</li>
+<li>当 $r_{ij} &gt; d_{ij}$ 时，即两人模型发生重叠（代表身体挤压），$g(x) &gt; 0$，<strong>身体接触力被激活</strong>。</li>
+</ul>
+</li>
+<li>这个力的大小与身体的“压缩量” ($r_{ij} - d_{ij}$) 成正比，模拟了身体被挤压时的弹力。$k$ 是一个很大的刚度常数。</li>
+</ul>
+<p><strong>c) 滑动摩擦力 (Sliding Friction Force)</strong></p>
+<p>$$\kappa g(r_{ij} - d_{ij}) \Delta v_{ji}^t \vec{t}_{ij}$$
+                这个力也是在物理接触时 ($g(x)&gt;0$) 才存在。</p>
+<ul>
+<li>它的作用是<strong>防止人与人之间发生不真实的“滑过”现象</strong>。</li>
+<li>$\Delta v_{ji}^t = (\vec{v}_j - \vec{v}_i) \cdot \vec{t}_{ij}$ 是两人在切线方向上的速度差。</li>
+<li>当两人发生挤压并有相对切向运动时，会产生一个阻碍这种滑动的摩擦力。$\kappa$ 是摩擦系数。</li>
+</ul>
+<p><strong>3.3 环境力（与障碍物的作用力）$\vec{f}_{iw}$</strong></p>
+<p>墙壁和障碍物对人的作用力，可以被建模成一个半径无限大的“行人”。因此，其公式与 $\vec{f}_{ij}$ 非常相似，只是没有心理排斥的指数项（人不会和墙保持社交距离），主要由物理接触力和摩擦力构成。</p>
+<p>$$\vec{f}_{iw} = { k g(r_i - d_{iw}) } \vec{n}_{iw} + \kappa g(r_i - d_{iw}) (\vec{v}_i \cdot \vec{t}_{iw}) \vec{t}_{iw}$$</p>
+<p><strong>3.4 模型的惊人发现：“欲速则不达”效应</strong></p>
+<p>Helbing通过仿真这个模型，发现了一个非常重要的、反直觉的现象：<strong>Faster-is-slower effect (欲速则不达效应)</strong>。</p>
+<ul>
+<li>在一个模拟房间疏散的实验中，他让行人以不同的期望速度 $v_0$ 逃离。</li>
+<li><strong>直觉认为</strong>：期望速度越快，逃离得应该越快。</li>
+<li><strong>仿真结果</strong>：当期望速度 $v_0$ 超过某个临界值后，出口处会迅速形成“拱形”堵塞，人群像沙漏里的沙子一样卡住。结果，<strong>总的疏散时间反而变长了</strong>，受伤人数也急剧增加。</li>
+</ul>
+<p>这个结果告诉我们，在紧急疏散时，单纯地强调“快跑”可能会适得其反，维持秩序、避免在出口过度拥挤才是提高疏散效率的关键。</p>
+<p><strong>3.5 羊群效应 (Herding Effect)</strong></p>
+<p>在恐慌状态下，人们往往会盲目跟随大流，而不是独立思考最佳路径。社会力模型通过引入一个“恐慌参数” $p_i$ 来模拟这种行为。</p>
+<p>行人的期望运动方向 $\vec{e}_i^0$ 不再是单纯地指向出口，而是变成了<strong>个体目标</strong>和<strong>邻居平均方向</strong>的加权平均：</p>
+<p>$$\vec{e}_i^0(t) = \mathrm{Norm}[ (1-p_i)\vec{e}_{i, \mathrm{individual}} + p_i \langle \vec{e}_j^0(t) \rangle_i ]$$</p>
+<ul>
+<li>$p_i=0$ 时，行人完全理性，只朝自己的目标前进。</li>
+<li>$p_i=1$ 时，行人完全丧失个体目标，纯粹跟随周围的人。</li>
+</ul>
+<p>仿真表明，随着恐慌参数 $p$ 的增大，即使有多个出口，人群也会不成比例地涌向某一个出口，导致其他出口被闲置，整体疏散效率大大降低。</p>
+<h4 id="4-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF"><strong>4. 代码实现思路</strong></h4>
+<p><strong>数据结构</strong></p>
+<pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;vector&gt;</span></span>
 
                 <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Vector2D</span> {</span> <span class="hljs-comment">/* ... */</span> };
 
@@ -209,8 +207,8 @@
 
                 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Wall</span> {</span> <span class="hljs-comment">/* ... defines a line segment ... */</span> };
                 </div></code></pre>
-                <p><strong>主循环伪代码</strong></p>
-                <pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">simulate_step</span><span class="hljs-params">(<span class="hljs-keyword">double</span> dt)</span> </span>{
+<p><strong>主循环伪代码</strong></p>
+<pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">simulate_step</span><span class="hljs-params">(<span class="hljs-keyword">double</span> dt)</span> </span>{
                     <span class="hljs-keyword">for</span> (Pedestrian&amp; ped_i : pedestrians) {
                         <span class="hljs-comment">// 1. Calculate Driving Force</span>
                         Vector2D desired_velocity = ped_i.desired_direction * ped_i.desired_speed;
@@ -236,143 +234,168 @@
                     }
                 }
                 </div></code></pre>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E7%9B%B8%E4%BA%92%E9%80%9F%E5%BA%A6%E9%9A%9C%E7%A2%8D%E7%89%A9-rvo---%E4%BC%98%E9%9B%85%E7%9A%84%E5%B1%80%E9%83%A8%E9%81%BF%E9%9A%9C"><strong>第二部分：相互速度障碍物 (RVO) - 优雅的局部避障</strong></h3>
-                <p>社会力模型非常适合模拟高密度、充满物理接触的人群。但是，对于中低密度下、需要进行平滑、无碰撞路径规划的场景（比如机器人导航、游戏角色的日常移动），我们需要一种更侧重于<strong>预判</strong>和<strong>几何</strong>的方法。</p>
-                <p>这就是<strong>速度障碍物 (Velocity Obstacles, VO)</strong> 和其改进版 <strong>相互速度障碍物 (Reciprocal Velocity Obstacles, RVO)</strong> 的用武之地。</p>
-                <h4 id="1-%E8%83%8C%E6%99%AF%E4%B8%8E%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><strong>1. 背景与问题描述</strong></h4>
-                <p><strong>核心问题</strong>：在一个共享环境中，N个智能体都想从各自的起点移动到终点，如何保证它们在运动过程中<strong>相互不发生碰撞</strong>？</p>
-                <ul>
-                <li>这是一个<strong>解耦 (Decoupled)</strong> 的方法：每个智能体独立为自己进行导航决策。</li>
-                <li>它关注的是<strong>局部导航</strong>：我只关心在下一瞬间，我该如何调整速度来避免与眼前的邻居相撞。</li>
-                </ul>
-                <h4 id="2-%E9%80%9F%E5%BA%A6%E9%9A%9C%E7%A2%8D%E7%89%A9-vo-%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3"><strong>2. 速度障碍物 (VO) 的核心思想</strong></h4>
-                <p>想象一下，我是智能体A，正前方有一个智能体B。</p>
-                <p><strong>VO要回答的问题是：在速度空间中，哪些速度是我（A）不能选择的，因为选择它们未来必然会导致和B相撞？</strong></p>
-                <p>这个“禁区”的集合，就是B为A构建的<strong>速度障碍物</strong> $VO_B^A$。</p>
-                <p><strong>几何推导</strong>：</p>
-                <ol>
-                <li><strong>相对速度</strong>：碰撞是否发生，只取决于两者的<strong>相对位置</strong>和<strong>相对速度</strong>。让我们以A为参照系，A静止，B以相对速度 $\vec{v}_B - \vec{v}_A$ 运动。</li>
-                <li><strong>碰撞区域</strong>：如果B的运动轨迹（一条射线）穿过了以A为中心、半径为 $r_A+r_B$ 的圆盘，那么就会发生碰撞。</li>
-                <li><strong>闵可夫斯基和 (Minkowski Sum)</strong>：在几何上，这个碰撞区域可以被优雅地描述为A和B的<strong>闵可夫斯基和</strong>。将B的形状（一个圆）围绕-A的形状（也是一个圆）的边界“滚动”一圈所扫过的区域。对于两个圆盘，其闵可夫斯基和是一个半径为 $r_A+r_B$ 的大圆盘。</li>
-                <li><strong>速度障碍物锥 (VO Cone)</strong>：在速度空间中，从原点（代表A的当前速度）向这个闵可夫斯基和区域张开的所有射线，就构成了一个<strong>锥形区域</strong>。这个锥，就是 $VO_B^A$。</li>
-                </ol>
-                <p><strong>结论</strong>：如果A选择的速度 $\vec{v}_A$ 位于 $VO_B^A(\vec{v}_B)$ 内部，则A和B未来必然碰撞。为了避障，A必须选择一个在锥外部的速度。</p>
-                <h4 id="3-vo%E7%9A%84%E8%87%B4%E5%91%BD%E7%BC%BA%E9%99%B7%E6%8C%AF%E8%8D%A1-oscillation"><strong>3. VO的致命缺陷：振荡 (Oscillation)</strong></h4>
-                <p>如果A和B都是智能体，它们都会为对方计算VO并尝试避让，会发生什么？
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E7%9B%B8%E4%BA%92%E9%80%9F%E5%BA%A6%E9%9A%9C%E7%A2%8D%E7%89%A9-rvo---%E4%BC%98%E9%9B%85%E7%9A%84%E5%B1%80%E9%83%A8%E9%81%BF%E9%9A%9C"><strong>第二部分：相互速度障碍物 (RVO) - 优雅的局部避障</strong></h3>
+<p>社会力模型非常适合模拟高密度、充满物理接触的人群。但是，对于中低密度下、需要进行平滑、无碰撞路径规划的场景（比如机器人导航、游戏角色的日常移动），我们需要一种更侧重于<strong>预判</strong>和<strong>几何</strong>的方法。</p>
+<p>这就是<strong>速度障碍物 (Velocity Obstacles, VO)</strong> 和其改进版 <strong>相互速度障碍物 (Reciprocal Velocity Obstacles, RVO)</strong> 的用武之地。</p>
+<h4 id="1-%E8%83%8C%E6%99%AF%E4%B8%8E%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><strong>1. 背景与问题描述</strong></h4>
+<p><strong>核心问题</strong>：在一个共享环境中，N个智能体都想从各自的起点移动到终点，如何保证它们在运动过程中<strong>相互不发生碰撞</strong>？</p>
+<ul>
+<li>这是一个<strong>解耦 (Decoupled)</strong> 的方法：每个智能体独立为自己进行导航决策。</li>
+<li>它关注的是<strong>局部导航</strong>：我只关心在下一瞬间，我该如何调整速度来避免与眼前的邻居相撞。</li>
+</ul>
+<h4 id="2-%E9%80%9F%E5%BA%A6%E9%9A%9C%E7%A2%8D%E7%89%A9-vo-%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3"><strong>2. 速度障碍物 (VO) 的核心思想</strong></h4>
+<p>想象一下，我是智能体A，正前方有一个智能体B。</p>
+<p><strong>VO要回答的问题是：在速度空间中，哪些速度是我（A）不能选择的，因为选择它们未来必然会导致和B相撞？</strong></p>
+<p>这个“禁区”的集合，就是B为A构建的<strong>速度障碍物</strong> $VO_B^A$。</p>
+<p><strong>几何推导</strong>：</p>
+<ol>
+<li><strong>相对速度</strong>：碰撞是否发生，只取决于两者的<strong>相对位置</strong>和<strong>相对速度</strong>。让我们以A为参照系，A静止，B以相对速度 $\vec{v}_B - \vec{v}_A$ 运动。</li>
+<li><strong>碰撞区域</strong>：如果B的运动轨迹（一条射线）穿过了以A为中心、半径为 $r_A+r_B$ 的圆盘，那么就会发生碰撞。</li>
+<li><strong>闵可夫斯基和 (Minkowski Sum)</strong>：在几何上，这个碰撞区域可以被优雅地描述为A和B的<strong>闵可夫斯基和</strong>。将B的形状（一个圆）围绕-A的形状（也是一个圆）的边界“滚动”一圈所扫过的区域。对于两个圆盘，其闵可夫斯基和是一个半径为 $r_A+r_B$ 的大圆盘。</li>
+<li><strong>速度障碍物锥 (VO Cone)</strong>：在速度空间中，从原点（代表A的当前速度）向这个闵可夫斯基和区域张开的所有射线，就构成了一个<strong>锥形区域</strong>。这个锥，就是 $VO_B^A$。</li>
+</ol>
+<p><strong>结论</strong>：如果A选择的速度 $\vec{v}_A$ 位于 $VO_B^A(\vec{v}_B)$ 内部，则A和B未来必然碰撞。为了避障，A必须选择一个在锥外部的速度。</p>
+<h4 id="3-vo%E7%9A%84%E8%87%B4%E5%91%BD%E7%BC%BA%E9%99%B7%E6%8C%AF%E8%8D%A1-oscillation"><strong>3. VO的致命缺陷：振荡 (Oscillation)</strong></h4>
+<p>如果A和B都是智能体，它们都会为对方计算VO并尝试避让，会发生什么？
                 <strong>灾难性的振荡！</strong></p>
-                <p>请看这个过程：</p>
-                <ol>
-                <li>A和B正对向行驶。</li>
-                <li><strong>时刻t</strong>：A计算出B的VO，决定向右转。B计算出A的VO，也决定向右转（从它自己的角度看）。</li>
-                <li><strong>时刻t+1</strong>：A的新速度已经避开了B的旧VO。但因为B也动了，B的新速度又为A创造了一个新的VO，A发现自己又在新VO里了！于是A再次调整。</li>
-                <li><strong>循环往复</strong>：两者可能会在对方面前像钟摆一样来回晃动，无法做出有效避让，路径变得非常难看和低效。</li>
-                </ol>
-                <p><strong>原因</strong>：每个智能体都把<strong>全部的避障责任</strong>推给了对方，它假设对方会保持当前速度不变，而没有考虑到对方也在智能地避让。</p>
-                <h4 id="4-rvo%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E8%B4%A3%E4%BB%BB%E5%85%B1%E6%8B%85-shared-responsibility"><strong>4. RVO的解决方案：责任共担 (Shared Responsibility)</strong></h4>
-                <p>RVO的核心思想是：<strong>我们不要互相推诿，让我们一人一半，共同承担避障的责任。</strong></p>
-                <p><strong>实现</strong>：
+<p>请看这个过程：</p>
+<ol>
+<li>A和B正对向行驶。</li>
+<li><strong>时刻t</strong>：A计算出B的VO，决定向右转。B计算出A的VO，也决定向右转（从它自己的角度看）。</li>
+<li><strong>时刻t+1</strong>：A的新速度已经避开了B的旧VO。但因为B也动了，B的新速度又为A创造了一个新的VO，A发现自己又在新VO里了！于是A再次调整。</li>
+<li><strong>循环往复</strong>：两者可能会在对方面前像钟摆一样来回晃动，无法做出有效避让，路径变得非常难看和低效。</li>
+</ol>
+<p><strong>原因</strong>：每个智能体都把<strong>全部的避障责任</strong>推给了对方，它假设对方会保持当前速度不变，而没有考虑到对方也在智能地避让。</p>
+<h4 id="4-rvo%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E8%B4%A3%E4%BB%BB%E5%85%B1%E6%8B%85-shared-responsibility"><strong>4. RVO的解决方案：责任共担 (Shared Responsibility)</strong></h4>
+<p>RVO的核心思想是：<strong>我们不要互相推诿，让我们一人一半，共同承担避障的责任。</strong></p>
+<p><strong>实现</strong>：
                 在计算VO时，不再假设对方速度不变。而是假设，为了避障，我和对方将以某种方式协调我们的速度变化。最简单、最公平的协调方式就是：<strong>我们共同努力，将最终的相对速度调整到VO锥的边界上。</strong></p>
-                <p><strong>几何解释</strong>：
+<p><strong>几何解释</strong>：
                 这相当于将原来顶点在 $\vec{v}_B$ 的VO锥，平移到新的顶点 $\frac{\vec{v}_A + \vec{v}_B}{2}$ 处。这个新的锥，就是<strong>相互速度障碍物 $RVO_B^A$</strong>。</p>
-                <p><strong>$$RVO_B^A(\vec{v}_B, \vec{v}_A) = { \vec{v}' | 2\vec{v}' - \vec{v}_A \in VO_B^A(\vec{v}_B) }$$</strong>
+<p><strong>$$RVO_B^A(\vec{v}_B, \vec{v}_A) = { \vec{v}' | 2\vec{v}' - \vec{v}_A \in VO_B^A(\vec{v}_B) }$$</strong>
                 (这公式的几何意义就是把速度 $\vec{v}'$ 放大两倍再减去 $\vec{v}_A$ 来看是否在原VO内，等价于平移)</p>
-                <p><strong>为什么RVO能解决振荡？</strong>
+<p><strong>为什么RVO能解决振荡？</strong>
                 因为它是<strong>互惠的</strong>。如果A选择了它的RVO边界上的一个新速度 $\vec{v}_A'$，同时B也选择了它的RVO边界上的一个新速度 $\vec{v}_B'$，那么这两个选择是<strong>兼容的</strong>，它们的新的相对速度 $(\vec{v}_A' - \vec{v}_B')$ 刚好会落在原始碰撞锥的边界上，从而实现“擦肩而过”的平滑避让。振荡消失了！</p>
-                <p><strong>广义RVO (ORCA - Optimal Reciprocal Collision Avoidance)</strong>
+<p><strong>广义RVO (ORCA - Optimal Reciprocal Collision Avoidance)</strong>
                 更进一步，避障的责任不一定是50/50。我们可以引入一个参数 $\alpha$ 来分配责任。比如，根据社会地位、质量、或者紧急程度来决定谁应该做出更多的避让。这就是ORCA的核心思想，它在RVO的基础上提供了更灵活的控制。</p>
-                <p><strong>实验对比</strong>：
+<p><strong>实验对比</strong>：
                 在一个经典的“圆圈”实验中，让N个智能体均匀分布在一个圆上，每个智能体的目标是到达圆的正对面。</p>
+<ul>
+<li>使用<strong>VO</strong>：智能体在圆心附近挤作一团，路径混乱不堪，充满抖动和振荡。</li>
+<li>使用<strong>RVO/ORCA</strong>：智能体们会自发形成一个美丽的、旋转的涡旋，平滑、高效、无碰撞地到达各自的目标。这是一个非常震撼的涌现现象。</li>
+</ul>
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E8%BF%9E%E7%BB%AD%E4%BA%BA%E7%BE%A4-continuum-crowds---%E5%AE%8F%E8%A7%82%E7%9A%84%E6%B5%81%E5%8A%A8"><strong>第三部分：连续人群 (Continuum Crowds) - 宏观的流动</strong></h3>
+<p>无论是社会力模型还是RVO，它们都属于<strong>基于智能体 (agent-based)</strong> 的方法，核心是模拟每个独立的个体。当人群密度极高，个体的自由意志被群体流动所主导时，我们可以换一个视角。</p>
+<p><strong>核心思想</strong>：不再把人群看作是离散的“粒子”集合，而是把它看作一种<strong>连续的介质</strong>，像水流一样。我们不去计算每个人的力或速度，而是去计算整个空间中的**“场”**。</p>
+<h4 id="1-%E6%96%B9%E6%B3%95%E6%B5%81%E7%A8%8B"><strong>1. 方法流程</strong></h4>
+<ol>
+<li><strong>离散化</strong>：将场景划分为一个<strong>网格 (Grid)</strong>。</li>
+<li><strong>计算场</strong>：在网格上计算各种“场”：
                 <ul>
-                <li>使用<strong>VO</strong>：智能体在圆心附近挤作一团，路径混乱不堪，充满抖动和振荡。</li>
-                <li>使用<strong>RVO/ORCA</strong>：智能体们会自发形成一个美丽的、旋转的涡旋，平滑、高效、无碰撞地到达各自的目标。这是一个非常震撼的涌现现象。</li>
-                </ul>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E8%BF%9E%E7%BB%AD%E4%BA%BA%E7%BE%A4-continuum-crowds---%E5%AE%8F%E8%A7%82%E7%9A%84%E6%B5%81%E5%8A%A8"><strong>第三部分：连续人群 (Continuum Crowds) - 宏观的流动</strong></h3>
-                <p>无论是社会力模型还是RVO，它们都属于<strong>基于智能体 (agent-based)</strong> 的方法，核心是模拟每个独立的个体。当人群密度极高，个体的自由意志被群体流动所主导时，我们可以换一个视角。</p>
-                <p><strong>核心思想</strong>：不再把人群看作是离散的“粒子”集合，而是把它看作一种<strong>连续的介质</strong>，像水流一样。我们不去计算每个人的力或速度，而是去计算整个空间中的**“场”**。</p>
-                <h4 id="1-%E6%96%B9%E6%B3%95%E6%B5%81%E7%A8%8B"><strong>1. 方法流程</strong></h4>
-                <ol>
-                <li><strong>离散化</strong>：将场景划分为一个<strong>网格 (Grid)</strong>。</li>
-                <li><strong>计算场</strong>：在网格上计算各种“场”：
-                <ul>
-                <li><strong>密度场 $\rho(\vec{x})$</strong>：每个格子有多少人。</li>
-                <li><strong>速度场 $\vec{v}(\vec{x})$</strong>：每个格子的人的平均速度。</li>
-                <li><strong>代价场 $C(\vec{x})$</strong>：在每个格子行走的“成本”是多少。</li>
-                <li><strong>势能场 $\phi(\vec{x})$</strong>：从每个格子走到终点的“最小总成本”。</li>
-                </ul>
-                </li>
-                <li><strong>更新</strong>：根据势能场的梯度来驱动人群的流动。</li>
-                </ol>
-                <h4 id="2-%E6%A0%B8%E5%BF%83%E6%95%B0%E5%AD%A6%E6%9C%80%E4%BC%98%E8%B7%AF%E5%BE%84%E4%B8%8E%E5%8A%BF%E8%83%BD%E5%9C%BA"><strong>2. 核心数学：最优路径与势能场</strong></h4>
-                <p><strong>a) 定义代价 (Cost)</strong>
+<li><strong>密度场 $\rho(\vec{x})$</strong>：每个格子有多少人。</li>
+<li><strong>速度场 $\vec{v}(\vec{x})$</strong>：每个格子的人的平均速度。</li>
+<li><strong>代价场 $C(\vec{x})$</strong>：在每个格子行走的“成本”是多少。</li>
+<li><strong>势能场 $\phi(\vec{x})$</strong>：从每个格子走到终点的“最小总成本”。</li>
+</ul>
+</li>
+<li><strong>更新</strong>：根据势能场的梯度来驱动人群的流动。</li>
+</ol>
+<h4 id="2-%E6%A0%B8%E5%BF%83%E6%95%B0%E5%AD%A6%E6%9C%80%E4%BC%98%E8%B7%AF%E5%BE%84%E4%B8%8E%E5%8A%BF%E8%83%BD%E5%9C%BA"><strong>2. 核心数学：最优路径与势能场</strong></h4>
+<p><strong>a) 定义代价 (Cost)</strong>
                 我们希望行人选择一条“最优”路径。什么是最优？可能是<strong>路程最短</strong>，也可能是<strong>时间最短</strong>，或者是<strong>最舒服</strong>。
                 我们可以定义一个总代价 $E$，它是这三者的加权和：
                 $$E(P) = \int_P \alpha , ds + \int_P \beta , dt + \int_P \gamma g , dt$$</p>
-                <ul>
-                <li>$\int ds$ 是路径长度。</li>
-                <li>$\int dt$ 是时间。</li>
-                <li>$\int g dt$ 是“不舒服度”的累积（比如，$g$ 在人多的地方值就高）。</li>
-                </ul>
-                <p>因为速度 $f = ds/dt$，所以 $dt = ds/f$。代入上式，我们可以把所有东西都统一到对路径长度的积分上：
+<ul>
+<li>$\int ds$ 是路径长度。</li>
+<li>$\int dt$ 是时间。</li>
+<li>$\int g dt$ 是“不舒服度”的累积（比如，$g$ 在人多的地方值就高）。</li>
+</ul>
+<p>因为速度 $f = ds/dt$，所以 $dt = ds/f$。代入上式，我们可以把所有东西都统一到对路径长度的积分上：
                 $E(P) = \int_P (\alpha + \frac{\beta}{f} + \frac{\gamma g}{f}) , ds = \int_P C(\vec{x}) , ds$
                 这个 $C(\vec{x}) = \frac{\alpha f + \beta + \gamma g}{f}$ 就是<strong>单位代价场</strong>。它表示在点 $\vec{x}$ 处，走单位长度需要付出的综合成本。</p>
-                <p><strong>b) 求解势能场 $\phi$</strong>
+<p><strong>b) 求解势能场 $\phi$</strong>
                 现在，我们定义一个<strong>势能场 $\phi(\vec{x})$</strong>，它的值等于从点 $\vec{x}$ 出发，沿着最优路径到达目标的<strong>最小总代价</strong>。
                 这个势能场满足一个著名的偏微分方程——<strong>Eikonal方程</strong>：
                 $$||\nabla \phi(\vec{x})|| = C(\vec{x})$$</p>
-                <ul>
-                <li><strong>直观理解</strong>：势能场梯度的“陡峭程度”，就等于该地的行走“成本”。</li>
-                <li>在目标点，$\phi=0$。我们可以用快速行进法（Fast Marching Method）等数值方法高效地求解这个方程，得到整个场景的势能场。</li>
-                </ul>
-                <p><strong>c) 驱动人群运动</strong>
+<ul>
+<li><strong>直观理解</strong>：势能场梯度的“陡峭程度”，就等于该地的行走“成本”。</li>
+<li>在目标点，$\phi=0$。我们可以用快速行进法（Fast Marching Method）等数值方法高效地求解这个方程，得到整个场景的势能场。</li>
+</ul>
+<p><strong>c) 驱动人群运动</strong>
                 有了势能场，行人的最优运动方向就变得异常简单：沿着势能下降最快的方向，即<strong>负梯度方向</strong>。
                 $$\vec{\dot{x}} = -f(\vec{x}, \theta) \frac{\nabla \phi(\vec{x})}{||\nabla \phi(\vec{x})||}$$
                 每个人就像一个放在势能曲面上的小球，会自动地滚向最低点（目标）。</p>
-                <h4 id="3-%E4%BC%98%E7%BC%BA%E7%82%B9"><strong>3. 优缺点</strong></h4>
+<h4 id="3-%E4%BC%98%E7%BC%BA%E7%82%B9"><strong>3. 优缺点</strong></h4>
+<ul>
+<li><strong>优点</strong>：
                 <ul>
-                <li><strong>优点</strong>：
+<li>运动路径非常光滑，天然避免了agent-based方法中的冲突和抖动。</li>
+<li>能很好地刻画一些宏观现象，如人行道的形成、拥塞时的涡旋。</li>
+<li>计算效率高，尤其适合超大规模人群的全局路径规划。</li>
+</ul>
+</li>
+<li><strong>缺点</strong>：
                 <ul>
-                <li>运动路径非常光滑，天然避免了agent-based方法中的冲突和抖动。</li>
-                <li>能很好地刻画一些宏观现象，如人行道的形成、拥塞时的涡旋。</li>
-                <li>计算效率高，尤其适合超大规模人群的全局路径规划。</li>
-                </ul>
-                </li>
-                <li><strong>缺点</strong>：
-                <ul>
-                <li><strong>缺少个体性</strong>。所有在同一个格子的人行为都一样，难以表现个体差异。</li>
-                <li><strong>不适用于未知环境</strong>。它假设了人群对全局的代价场是预知的。</li>
-                <li><strong>惯性缺失</strong>。速度方向可以瞬间改变，缺乏物理真实感。</li>
-                </ul>
-                </li>
-                </ul>
-                <p>在实践中，连续人群模型常常被用来计算一个宏观的引导流场，然后agent-based模型在这个流场的引导下，再进行局部的、富有个性的行为模拟。</p>
-            </article>
-        </main>
-    </div>
-    
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li><strong>缺少个体性</strong>。所有在同一个格子的人行为都一样，难以表现个体差异。</li>
+<li><strong>不适用于未知环境</strong>。它假设了人群对全局的代价场是预知的。</li>
+<li><strong>惯性缺失</strong>。速度方向可以瞬间改变，缺乏物理真实感。</li>
+</ul>
+</li>
+</ul>
+<p>在实践中，连续人群模型常常被用来计算一个宏观的引导流场，然后agent-based模型在这个流场的引导下，再进行局部的、富有个性的行为模拟。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

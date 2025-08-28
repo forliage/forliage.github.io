@@ -1,13 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机组成5-3:存储系统的性能优化与全局视角</title>
-    
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    
-    <script>
+<meta charset="utf-8"/>
+<title>计算机组成5-3:存储系统的性能优化与全局视角</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -18,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -32,111 +30,111 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%905-3%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E4%B8%8E%E5%85%A8%E5%B1%80%E8%A7%86%E8%A7%92">计算机组成5-3:存储系统的性能优化与全局视角</h1>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86cache%E6%80%A7%E8%83%BD%E7%9A%84%E9%87%8F%E5%8C%96%E5%88%86%E6%9E%90amat%E7%9A%84%E5%A8%81%E5%8A%9B"><strong>第一部分：Cache性能的量化分析——AMAT的威力</strong></h3>
-                <p>我们不能仅仅停留在“组相联比直接映射好”这样的定性结论上。一个优秀的架构师，必须能够用数据说话。衡量存储系统性能的黄金公式——<strong>平均访存时间（AMAT）</strong>，是我们手中最锋利的解剖刀。</p>
-                <p>$$
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%905-3%E5%AD%98%E5%82%A8%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E4%B8%8E%E5%85%A8%E5%B1%80%E8%A7%86%E8%A7%92">计算机组成5-3:存储系统的性能优化与全局视角</h1>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86cache%E6%80%A7%E8%83%BD%E7%9A%84%E9%87%8F%E5%8C%96%E5%88%86%E6%9E%90amat%E7%9A%84%E5%A8%81%E5%8A%9B"><strong>第一部分：Cache性能的量化分析——AMAT的威力</strong></h3>
+<p>我们不能仅仅停留在“组相联比直接映射好”这样的定性结论上。一个优秀的架构师，必须能够用数据说话。衡量存储系统性能的黄金公式——<strong>平均访存时间（AMAT）</strong>，是我们手中最锋利的解剖刀。</p>
+<p>$$
                 \text{AMAT} = \text{Hit Time} + \text{Miss Rate} \times \text{Miss Penalty}
                 $$</p>
-                <p>这个公式告诉我们，性能优化有三条路径。但更重要的是，它揭示了三者之间的<strong>内在联系与制约</strong>。例如，增加相联度可以降低<code>Miss Rate</code>，但可能会略微增加<code>Hit Time</code>。我们的目标，是找到让AMAT最小化的“甜点区”。</p>
-                <h4 id="11-%E5%B0%86amat%E4%B8%8Ecpu%E6%80%A7%E8%83%BD%E5%85%AC%E5%BC%8F%E7%BB%93%E5%90%88"><strong>1.1 将AMAT与CPU性能公式结合</strong></h4>
-                <p>AMAT本身只是衡量存储系统的指标。要看它对整个计算机性能的影响，我们必须将它与CPU性能公式结合起来。内存访问导致的CPU停顿，是CPI（每指令周期数）的重要组成部分。</p>
-                <p>$$
+<p>这个公式告诉我们，性能优化有三条路径。但更重要的是，它揭示了三者之间的<strong>内在联系与制约</strong>。例如，增加相联度可以降低<code>Miss Rate</code>，但可能会略微增加<code>Hit Time</code>。我们的目标，是找到让AMAT最小化的“甜点区”。</p>
+<h4 id="11-%E5%B0%86amat%E4%B8%8Ecpu%E6%80%A7%E8%83%BD%E5%85%AC%E5%BC%8F%E7%BB%93%E5%90%88"><strong>1.1 将AMAT与CPU性能公式结合</strong></h4>
+<p>AMAT本身只是衡量存储系统的指标。要看它对整个计算机性能的影响，我们必须将它与CPU性能公式结合起来。内存访问导致的CPU停顿，是CPI（每指令周期数）的重要组成部分。</p>
+<p>$$
                 \text{CPI}<em>{\text{total}} = \text{CPI}</em>{\text{execution}} + \frac{\text{Memory Stall Cycles}}{\text{Instruction Count}}
                 $$</p>
-                <p>而内存停顿周期又可以细分为：
+<p>而内存停顿周期又可以细分为：
                 $$
                 \text{Memory Stall Cycles} = (\text{Reads} \times \text{Read Miss Rate} \times \text{Read Miss Penalty}) + (\text{Writes} \times \text{Write Miss Rate} \times \text{Write Miss Penalty})
                 $$</p>
-                <p>或者更一般地：
+<p>或者更一般地：
                 $$
                 \text{Memory Stall Cycles} = \text{Instruction Count} \times \frac{\text{Memory Accesses}}{\text{Instruction}} \times \text{Miss Rate} \times \text{Miss Penalty}
                 $$</p>
-                <p><strong>示例分析</strong>：
+<p><strong>示例分析</strong>：
                 假设一个处理器：</p>
+<ul>
+<li>基础CPI（假设Cache完美命中）= 2.0</li>
+<li>指令Cache缺失率 = 2%</li>
+<li>数据Cache缺失率 = 4%</li>
+<li>访存指令（ld/sd）占所有指令的36%</li>
+<li>缺失代价（Miss Penalty）= 100个时钟周期</li>
+</ul>
+<p><strong>计算停顿</strong>：</p>
+<ul>
+<li>每100条指令，有 <code>100 * 2% = 2</code> 次指令缺失，带来 <code>2 * 100 = 200</code> 周期停顿。</li>
+<li>每100条指令，有 <code>100 * 36% = 36</code> 次数据访问，其中有 <code>36 * 4% = 1.44</code> 次数据缺失，带来 <code>1.44 * 100 = 144</code> 周期停顿。</li>
+<li>总停顿 = <code>200 + 144 = 344</code> 周期。</li>
+<li>平均每条指令的停顿 = <code>344 / 100 = 3.44</code> 周期。</li>
+</ul>
+<p><strong>最终CPI</strong>：</p>
+<ul>
+<li><code>CPI_total = 2.0 (基础) + 3.44 (停顿) = 5.44</code></li>
+</ul>
+<p><strong>结论</strong>：一个看似“还不错”（96%~98%命中率）的Cache，竟然让CPU的性能<strong>下降了一半以上</strong>！CPU有超过一半的时间（3.44 / 5.44 ≈ 63%）是在无聊地等待内存。这凸显了存储系统性能的极端重要性。</p>
+<p>这个例子也引出了著名的<strong>Amdahl定律</strong>在存储系统中的体现：单纯地加速CPU（例如将基础CPI从2.0降到1.0），而存储系统不变，性能提升将非常有限。因为瓶颈会迅速转移到内存停顿上。</p>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E9%99%8D%E4%BD%8E%E7%BC%BA%E5%A4%B1%E7%8E%87miss-rate%E7%9A%84%E6%A0%B8%E5%BF%83%E6%AD%A6%E5%99%A8"><strong>第二部分：降低缺失率(Miss Rate)的核心武器</strong></h3>
+<p>我们已经探讨了通过增加相联度来降低冲突缺失。另一个强大的武器是<strong>利用空间局部性</strong>。</p>
+<h4 id="21-%E5%A2%9E%E5%A4%A7%E7%BC%93%E5%AD%98%E5%9D%97cache-block%E7%9A%84%E5%A4%A7%E5%B0%8F"><strong>2.1 增大缓存块（Cache Block）的大小</strong></h4>
+<ul>
+<li><strong>基本思想</strong>：当发生一次缺失时，我们不仅仅取回CPU当前需要的那个字，而是把它周围的一片数据（例如64字节）作为一个整体——一个<strong>块（Block）</strong>——都取回缓存。</li>
+<li><strong>理论基础</strong>：<strong>空间局部性</strong>。既然CPU访问了<code>array[i]</code>，那么它很可能马上就要访问<code>array[i+1]</code>, <code>array[i+2]</code>... 将它们一次性取回，后续的访问就都会变成高速的Cache命中。</li>
+<li><strong>效果</strong>：
                 <ul>
-                <li>基础CPI（假设Cache完美命中）= 2.0</li>
-                <li>指令Cache缺失率 = 2%</li>
-                <li>数据Cache缺失率 = 4%</li>
-                <li>访存指令（ld/sd）占所有指令的36%</li>
-                <li>缺失代价（Miss Penalty）= 100个时钟周期</li>
-                </ul>
-                <p><strong>计算停顿</strong>：</p>
-                <ul>
-                <li>每100条指令，有 <code>100 * 2% = 2</code> 次指令缺失，带来 <code>2 * 100 = 200</code> 周期停顿。</li>
-                <li>每100条指令，有 <code>100 * 36% = 36</code> 次数据访问，其中有 <code>36 * 4% = 1.44</code> 次数据缺失，带来 <code>1.44 * 100 = 144</code> 周期停顿。</li>
-                <li>总停顿 = <code>200 + 144 = 344</code> 周期。</li>
-                <li>平均每条指令的停顿 = <code>344 / 100 = 3.44</code> 周期。</li>
-                </ul>
-                <p><strong>最终CPI</strong>：</p>
-                <ul>
-                <li><code>CPI_total = 2.0 (基础) + 3.44 (停顿) = 5.44</code></li>
-                </ul>
-                <p><strong>结论</strong>：一个看似“还不错”（96%~98%命中率）的Cache，竟然让CPU的性能<strong>下降了一半以上</strong>！CPU有超过一半的时间（3.44 / 5.44 ≈ 63%）是在无聊地等待内存。这凸显了存储系统性能的极端重要性。</p>
-                <p>这个例子也引出了著名的<strong>Amdahl定律</strong>在存储系统中的体现：单纯地加速CPU（例如将基础CPI从2.0降到1.0），而存储系统不变，性能提升将非常有限。因为瓶颈会迅速转移到内存停顿上。</p>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E9%99%8D%E4%BD%8E%E7%BC%BA%E5%A4%B1%E7%8E%87miss-rate%E7%9A%84%E6%A0%B8%E5%BF%83%E6%AD%A6%E5%99%A8"><strong>第二部分：降低缺失率(Miss Rate)的核心武器</strong></h3>
-                <p>我们已经探讨了通过增加相联度来降低冲突缺失。另一个强大的武器是<strong>利用空间局部性</strong>。</p>
-                <h4 id="21-%E5%A2%9E%E5%A4%A7%E7%BC%93%E5%AD%98%E5%9D%97cache-block%E7%9A%84%E5%A4%A7%E5%B0%8F"><strong>2.1 增大缓存块（Cache Block）的大小</strong></h4>
-                <ul>
-                <li><strong>基本思想</strong>：当发生一次缺失时，我们不仅仅取回CPU当前需要的那个字，而是把它周围的一片数据（例如64字节）作为一个整体——一个<strong>块（Block）</strong>——都取回缓存。</li>
-                <li><strong>理论基础</strong>：<strong>空间局部性</strong>。既然CPU访问了<code>array[i]</code>，那么它很可能马上就要访问<code>array[i+1]</code>, <code>array[i+2]</code>... 将它们一次性取回，后续的访问就都会变成高速的Cache命中。</li>
-                <li><strong>效果</strong>：
-                <ul>
-                <li><strong>优点</strong>：可以显著降低<strong>强制性缺失（Compulsory Miss）</strong>。对于一段连续内存的首次访问，原本需要N次缺失，现在只需要一次缺失就能把整个区域的数据读入。</li>
-                <li><strong>缺点</strong>：
+<li><strong>优点</strong>：可以显著降低<strong>强制性缺失（Compulsory Miss）</strong>。对于一段连续内存的首次访问，原本需要N次缺失，现在只需要一次缺失就能把整个区域的数据读入。</li>
+<li><strong>缺点</strong>：
                 <ol>
-                <li><strong>增加了缺失代价（Miss Penalty）</strong>：从主存传输一个更大的块需要更长的时间。</li>
-                <li><strong>可能增加冲突缺失</strong>：如果块太大，而缓存总容量不变，那么缓存中的总块数就减少了。这会增加不同内存区域映射到同一个缓存块的概率。</li>
-                <li><strong>带宽浪费</strong>：如果程序没有表现出很好的空间局部性，那么取回一个大块中的大部分数据可能都是无用的，浪费了宝贵的内存带宽。</li>
-                </ol>
-                </li>
-                </ul>
-                </li>
-                </ul>
-                <p><img src="../images/imagec66.png" alt="figure 66"></p>
-                <h4 id="22-%E5%A6%82%E4%BD%95%E9%AB%98%E6%95%88%E5%9C%B0%E6%94%AF%E6%8C%81%E5%A4%A7%E5%9D%97%E4%BC%A0%E8%BE%93%E4%B8%80%E4%B8%BB%E5%AD%98%E7%9A%84%E7%BB%84%E7%BB%87"><strong>2.2 如何高效地支持大块传输？——主存的组织</strong></h4>
-                <p>增大大块的策略，对主存（DRAM）的设计提出了新的要求。如果主存每次只能传输一个字（4或8字节），那么传输一个64字节的块就需要8到16次操作，缺失代价会变得无法接受。因此，需要设计更“宽”的主存系统。</p>
-                <p><img src="../images/imagec67.png" alt="figure 67"></p>
-                <ol>
-                <li><strong>简单模型（窄内存）</strong>：内存总线一次只传一个字。传输4个字需要4次完整的访存周期。</li>
-                <li><strong>宽内存模型</strong>：将内存芯片并联，让内存控制器可以一次性读取多个字（例如，128位或256位总线宽度）。这可以成倍地减少传输次数，但增加了内存控制器的复杂度和成本。</li>
-                <li><strong>交叉/交错内存（Interleaved Memory）</strong>：将内存分成多个独立的<strong>体（Bank）</strong>。连续的地址被映射到不同的Bank上。当需要读取一个大块时，可以同时向多个Bank发出读请求，这些请求可以<strong>并行处理</strong>，然后数据依次（流水线式地）返回。这是一种在成本和性能之间取得良好平衡的高效设计，是现代DRAM模组的标准实践。</li>
-                </ol>
-                <p><img src="../images/imagec68.png" alt="figure 68"></p>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E9%99%8D%E4%BD%8E%E7%BC%BA%E5%A4%B1%E4%BB%A3%E4%BB%B7miss-penalty%E7%9A%84%E6%A0%B8%E5%BF%83%E6%AD%A6%E8%A7%A3%E5%86%B3%E5%A4%9A%E7%BA%A7%E7%BC%93%E5%AD%98"><strong>第三部分：降低缺失代价(Miss Penalty)的核心武解决——多级缓存</strong></h3>
-                <p>既然一次主存访问的延迟（几百个周期）是如此之高，我们能否在CPU和主存之间，再增加一个“中间人”？这就是**多级缓存（Multilevel Caches）**的思想。</p>
-                <h4 id="31-%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6%E4%B8%8E%E7%BB%93%E6%9E%84"><strong>3.1 设计哲学与结构</strong></h4>
+<li><strong>增加了缺失代价（Miss Penalty）</strong>：从主存传输一个更大的块需要更长的时间。</li>
+<li><strong>可能增加冲突缺失</strong>：如果块太大，而缓存总容量不变，那么缓存中的总块数就减少了。这会增加不同内存区域映射到同一个缓存块的概率。</li>
+<li><strong>带宽浪费</strong>：如果程序没有表现出很好的空间局部性，那么取回一个大块中的大部分数据可能都是无用的，浪费了宝贵的内存带宽。</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<p><img alt="figure 66" src="../images/imagec66.png"/></p>
+<h4 id="22-%E5%A6%82%E4%BD%95%E9%AB%98%E6%95%88%E5%9C%B0%E6%94%AF%E6%8C%81%E5%A4%A7%E5%9D%97%E4%BC%A0%E8%BE%93%E4%B8%80%E4%B8%BB%E5%AD%98%E7%9A%84%E7%BB%84%E7%BB%87"><strong>2.2 如何高效地支持大块传输？——主存的组织</strong></h4>
+<p>增大大块的策略，对主存（DRAM）的设计提出了新的要求。如果主存每次只能传输一个字（4或8字节），那么传输一个64字节的块就需要8到16次操作，缺失代价会变得无法接受。因此，需要设计更“宽”的主存系统。</p>
+<p><img alt="figure 67" src="../images/imagec67.png"/></p>
+<ol>
+<li><strong>简单模型（窄内存）</strong>：内存总线一次只传一个字。传输4个字需要4次完整的访存周期。</li>
+<li><strong>宽内存模型</strong>：将内存芯片并联，让内存控制器可以一次性读取多个字（例如，128位或256位总线宽度）。这可以成倍地减少传输次数，但增加了内存控制器的复杂度和成本。</li>
+<li><strong>交叉/交错内存（Interleaved Memory）</strong>：将内存分成多个独立的<strong>体（Bank）</strong>。连续的地址被映射到不同的Bank上。当需要读取一个大块时，可以同时向多个Bank发出读请求，这些请求可以<strong>并行处理</strong>，然后数据依次（流水线式地）返回。这是一种在成本和性能之间取得良好平衡的高效设计，是现代DRAM模组的标准实践。</li>
+</ol>
+<p><img alt="figure 68" src="../images/imagec68.png"/></p>
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E9%99%8D%E4%BD%8E%E7%BC%BA%E5%A4%B1%E4%BB%A3%E4%BB%B7miss-penalty%E7%9A%84%E6%A0%B8%E5%BF%83%E6%AD%A6%E8%A7%A3%E5%86%B3%E5%A4%9A%E7%BA%A7%E7%BC%93%E5%AD%98"><strong>第三部分：降低缺失代价(Miss Penalty)的核心武解决——多级缓存</strong></h3>
+<p>既然一次主存访问的延迟（几百个周期）是如此之高，我们能否在CPU和主存之间，再增加一个“中间人”？这就是**多级缓存（Multilevel Caches）**的思想。</p>
+<h4 id="31-%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6%E4%B8%8E%E7%BB%93%E6%9E%84"><strong>3.1 设计哲学与结构</strong></h4>
+<ul>
+<li><strong>核心思想</strong>：在原有的L1 Cache和主存之间，插入一个容量更大、但速度比L1稍慢的<strong>L2 Cache</strong>。现在，L1的缺失，可以先由L2来服务。
                 <ul>
-                <li><strong>核心思想</strong>：在原有的L1 Cache和主存之间，插入一个容量更大、但速度比L1稍慢的<strong>L2 Cache</strong>。现在，L1的缺失，可以先由L2来服务。
-                <ul>
-                <li><strong>L1 Cache</strong>：设计目标是<strong>极低的命中时间（Hit Time）</strong>。因此它通常容量较小、相联度较低，与CPU核心紧密集成，追求1-2个周期的访问延迟。</li>
-                <li><strong>L2 Cache</strong>：设计目标是<strong>极低的缺失率（Miss Rate）</strong>。它负责捕获绝大多数从L1“漏掉”的访问。因此它的容量要大得多，相联度也更高。它的命中时间虽然比L1长（例如10-20个周期），但远小于访问主存的几百个周期。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="32-%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90%E5%85%A8%E5%B1%80%E4%B8%8E%E5%B1%80%E9%83%A8amat"><strong>3.2 性能分析：全局与局部AMAT</strong></h4>
-                <p>引入L2后，性能公式变得更加复杂：
+<li><strong>L1 Cache</strong>：设计目标是<strong>极低的命中时间（Hit Time）</strong>。因此它通常容量较小、相联度较低，与CPU核心紧密集成，追求1-2个周期的访问延迟。</li>
+<li><strong>L2 Cache</strong>：设计目标是<strong>极低的缺失率（Miss Rate）</strong>。它负责捕获绝大多数从L1“漏掉”的访问。因此它的容量要大得多，相联度也更高。它的命中时间虽然比L1长（例如10-20个周期），但远小于访问主存的几百个周期。</li>
+</ul>
+</li>
+</ul>
+<h4 id="32-%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90%E5%85%A8%E5%B1%80%E4%B8%8E%E5%B1%80%E9%83%A8amat"><strong>3.2 性能分析：全局与局部AMAT</strong></h4>
+<p>引入L2后，性能公式变得更加复杂：
                 $$
                 \text{AMAT}<em>{\text{L1}} = \text{HitTime}</em>{\text{L1}} + \text{MissRate}<em>{\text{L1}} \times \text{MissPenalty}</em>{\text{L1}}
                 $$
@@ -145,157 +143,182 @@
                 \text{MissPenalty}<em>{\text{L1}} = \text{AMAT}</em>{\text{L2}} = \text{HitTime}<em>{\text{L2}} + \text{MissRate}</em>{\text{L2}} \times \text{MissPenalty}_{\text{L2}}
                 $$
                 <code>MissPenalty_L2</code> 才是真正访问主存的代价。</p>
-                <p><strong>示例分析</strong>：
+<p><strong>示例分析</strong>：
                 假设：</p>
+<ul>
+<li>5GHz CPU（时钟周期0.2ns），基础CPI=1.0</li>
+<li>L1 Cache: 2%缺失率</li>
+<li>L2 Cache: 5ns命中时间，加入后，访问主存的全局缺失率降至0.5%</li>
+<li>主存: 100ns访问延迟</li>
+</ul>
+<p><strong>只有L1时</strong>：</p>
+<ul>
+<li>主存缺失代价 = 100ns / 0.2ns/cycle = 500周期</li>
+<li>Total CPI = 1.0 + 2% * 500 = 1.0 + 10 = 11.0</li>
+</ul>
+<p><strong>加入L2后</strong>：</p>
+<ul>
+<li>L2命中时间 = 5ns / 0.2ns/cycle = 25周期</li>
+<li>主存缺失代价 = 500周期</li>
+<li><strong>分析停顿</strong>：
                 <ul>
-                <li>5GHz CPU（时钟周期0.2ns），基础CPI=1.0</li>
-                <li>L1 Cache: 2%缺失率</li>
-                <li>L2 Cache: 5ns命中时间，加入后，访问主存的全局缺失率降至0.5%</li>
-                <li>主存: 100ns访问延迟</li>
-                </ul>
-                <p><strong>只有L1时</strong>：</p>
-                <ul>
-                <li>主存缺失代价 = 100ns / 0.2ns/cycle = 500周期</li>
-                <li>Total CPI = 1.0 + 2% * 500 = 1.0 + 10 = 11.0</li>
-                </ul>
-                <p><strong>加入L2后</strong>：</p>
-                <ul>
-                <li>L2命中时间 = 5ns / 0.2ns/cycle = 25周期</li>
-                <li>主存缺失代价 = 500周期</li>
-                <li><strong>分析停顿</strong>：
-                <ul>
-                <li>L1的访问，有98%是L1命中（代价为0停顿）。</li>
-                <li>有2%是L1缺失。这2%的缺失中，大部分会在L2命中，少部分会L2也缺失。</li>
-                <li>访问L2的次数 = <code>MissRate_L1</code> = 2%</li>
-                <li>访问主存的次数 = <code>GlobalMissRate</code> = 0.5%</li>
-                </ul>
-                </li>
-                <li><strong>Total CPI</strong> = <code>CPI_base + (L1 Misses per Ins * L2 Hit Time) + (Global Misses per Ins * Main Mem Penalty)</code>
-                <ul>
-                <li>在本例的简化计算中: <code>Total CPI = 1.0 + (指令级L1缺失率 * L2命中时间) + (指令级L2缺失率 * 主存缺失代价) = 1.0 + (2% * 25) + (0.5% * 500) = 1.0 + 0.5 + 2.5 = 4.0</code></li>
-                </ul>
-                </li>
-                <li><strong>性能提升</strong> = 11.0 / 4.0 = 2.75倍！</li>
-                </ul>
-                <p><strong>结论</strong>：多级缓存是现代处理器应对“内存墙”问题的<strong>标配</strong>。通过L1和L2（以及L3）的协同工作，实现了对命中时间、缺失率和缺失代价的综合优化。</p>
-                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E6%80%9D%E6%83%B3%E7%9A%84%E5%8D%87%E5%8D%8E%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E4%BD%9C%E4%B8%BA%E4%B8%BB%E5%AD%98%E7%9A%84%E7%BC%93%E5%AD%98"><strong>第四部分：思想的升华——虚拟内存，作为主存的“缓存”</strong></h3>
-                <p>现在，让我们把视野拔高。我们已经建立了存储器层次结构的金字塔。我们一直在讨论金字塔顶端的SRAM Cache和DRAM主存。那么，DRAM主存和更下一层的磁盘之间，是否也存在着类似的关系？</p>
-                <p>答案是肯定的。这就是**虚拟内存（Virtual Memory）**的本质。</p>
-                <p><strong>核心思想</strong>：将<strong>主存（DRAM）<strong>看作是</strong>磁盘（或SSD）<strong>的一个</strong>全相联的、写回式的缓存</strong>。</p>
-                <p><img src="../images/imagec69.png" alt="figure 69"></p>
-                <h4 id="41-%E6%A6%82%E5%BF%B5%E7%9A%84%E7%B1%BB%E6%AF%94%E4%B8%8E%E6%98%A0%E5%B0%84"><strong>4.1 概念的类比与映射</strong></h4>
-                <p>让我们将Cache的术语，一一映射到虚拟内存中：</p>
-                <table>
-                <thead>
-                <tr>
-                <th style="text-align:left">Cache 概念</th>
-                <th style="text-align:left">虚拟内存 概念</th>
-                <th style="text-align:left">描述</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                <td style="text-align:left"><strong>块 (Block)</strong></td>
-                <td style="text-align:left"><strong>页 (Page)</strong></td>
-                <td style="text-align:left">数据传输的基本单位。Page非常大（通常4KB或更大）。</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>缺失 (Miss)</strong></td>
-                <td style="text-align:left"><strong>页错误 (Page Fault)</strong></td>
-                <td style="text-align:left">CPU访问的虚拟地址所对应的页不在主存中。</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>命中 (Hit)</strong></td>
-                <td style="text-align:left">(无特殊术语)</td>
-                <td style="text-align:left">页在主存中，地址翻译成功。</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>地址</strong></td>
-                <td style="text-align:left"><strong>虚拟地址/物理地址</strong></td>
-                <td style="text-align:left">CPU生成的是虚拟地址，需要被翻译成DRAM中的物理地址。</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>索引/标签</strong></td>
-                <td style="text-align:left"><strong>页表 (Page Table)</strong></td>
-                <td style="text-align:left">页表是存储虚拟页号到物理页号映射关系的数据结构。</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>放置策略</strong></td>
-                <td style="text-align:left"><strong>全相联</strong></td>
-                <td style="text-align:left">任何一个虚拟页，可以被加载到物理内存的任何一个空闲的物理页框中。</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>替换策略</strong></td>
-                <td style="text-align:left"><strong>近似LRU</strong></td>
-                <td style="text-align:left">由操作系统软件实现复杂的页替换算法。</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>写策略</strong></td>
-                <td style="text-align:left"><strong>写回 (Write-Back)</strong></td>
-                <td style="text-align:left">使用“脏位”（Dirty Bit）来标记被修改的页。</td>
-                </tr>
-                </tbody>
-                </table>
-                <h4 id="42-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%9A%84%E8%AE%BE%E8%AE%A1%E9%80%89%E6%8B%A9%E5%A6%82%E6%AD%A4%E4%B8%8D%E5%90%8C"><strong>4.2 为什么虚拟内存的设计选择如此不同？</strong></h4>
-                <ol>
-                <li>
-                <p><strong>巨大的缺失代价</strong>：一次磁盘访问的延迟是毫秒（ms）级别，相当于<strong>数百万个</strong>CPU时钟周期！为了摊平如此巨大的代价，我们必须：</p>
-                <ul>
-                <li><strong>采用巨大的块（页）</strong>：4KB的页大小，是为了最大化利用磁盘I/O的效率。</li>
-                <li><strong>采用全相联放置</strong>：不惜一切代价降低缺失率，因为任何一次缺失都是灾难性的。</li>
-                <li><strong>采用复杂的软件替换算法</strong>：百万周期的停顿，足以让操作系统运行复杂的LRU近似算法，做出最明智的替换决策。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>地址翻译</strong>：</p>
-                <ul>
-                <li>这个映射关系（虚拟页号 -&gt; 物理页号）存储在内存中的<strong>页表</strong>里，由操作系统管理。</li>
-                <li>每次访存都需要先查页表，这本身就是一次内存访问，会让所有访存操作慢一倍！</li>
-                <li><strong>解决方案</strong>：再次应用缓存思想！我们为页表项建立一个专用的、高速的、全相联的硬件缓存，称之为<strong>TLB (Translation-Lookaside Buffer)</strong>。绝大多数地址翻译请求都会在TLB中命中，无需访问内存中的页表。</li>
-                </ul>
-                </li>
-                </ol>
-                <p><img src="../images/imagec70.png" alt="figure 70"></p>
-                <h4 id="43-%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%9D%A9%E5%91%BD%E6%80%A7%E4%BC%98%E5%8A%BF"><strong>4.3 虚拟内存带来的革命性优势</strong></h4>
-                <p>虚拟内存不仅仅是为了“缓存”磁盘，它还带来了三大革命性优势：</p>
-                <ol>
-                <li><strong>程序隔离与保护</strong>：每个进程都有自己独立的、私有的虚拟地址空间。操作系统通过控制页表，确保一个进程无法访问另一个进程的内存，提供了坚实的内存保护。</li>
-                <li><strong>内存管理简化</strong>：程序员和编译器可以假设自己拥有一大片连续的内存空间，而无需关心物理内存的碎片化问题。内存的分配和布局由操作系统全权负责。</li>
-                <li><strong>高效的进程间共享</strong>：操作系统可以让不同进程的虚拟页，映射到同一个物理页上，从而实现代码库或共享内存的高效共享。</li>
-                </ol>
-                <p><strong>总结：一个统一的框架</strong></p>
-                <p>我们从量化分析Cache性能出发，学习了通过增大块和构建多级缓存来优化存储系统性能的关键技术。</p>
-                <p>最重要的是，我们建立了一个<strong>统一的视角</strong>来看待整个存储器层次结构。无论是CPU Cache，还是虚拟内存，它们都遵循着相同的基本原则：利用局部性，将数据在不同速度、不同容量的存储介质之间进行分块、分级管理。它们的设计差异，仅仅源于它们在层次结构中所处的位置不同，从而导致了命中时间、缺失代价、块大小等关键参数的巨大差异，并最终决定了它们应该由硬件（Cache）还是软件（虚拟内存）来实现。</p>
-                <p><img src="../images/imagec71.png" alt="figure 71"></p>
-                <p>这个统一的框架，是理解现代计算机系统中从硬件到操作系统协同工作的核心。</p>
-            </article>
-        </main>
-    </div>
-    
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li>L1的访问，有98%是L1命中（代价为0停顿）。</li>
+<li>有2%是L1缺失。这2%的缺失中，大部分会在L2命中，少部分会L2也缺失。</li>
+<li>访问L2的次数 = <code>MissRate_L1</code> = 2%</li>
+<li>访问主存的次数 = <code>GlobalMissRate</code> = 0.5%</li>
+</ul>
+</li>
+<li><strong>Total CPI</strong> = <code>CPI_base + (L1 Misses per Ins * L2 Hit Time) + (Global Misses per Ins * Main Mem Penalty)</code>
+<ul>
+<li>在本例的简化计算中: <code>Total CPI = 1.0 + (指令级L1缺失率 * L2命中时间) + (指令级L2缺失率 * 主存缺失代价) = 1.0 + (2% * 25) + (0.5% * 500) = 1.0 + 0.5 + 2.5 = 4.0</code></li>
+</ul>
+</li>
+<li><strong>性能提升</strong> = 11.0 / 4.0 = 2.75倍！</li>
+</ul>
+<p><strong>结论</strong>：多级缓存是现代处理器应对“内存墙”问题的<strong>标配</strong>。通过L1和L2（以及L3）的协同工作，实现了对命中时间、缺失率和缺失代价的综合优化。</p>
+<h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E6%80%9D%E6%83%B3%E7%9A%84%E5%8D%87%E5%8D%8E%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E4%BD%9C%E4%B8%BA%E4%B8%BB%E5%AD%98%E7%9A%84%E7%BC%93%E5%AD%98"><strong>第四部分：思想的升华——虚拟内存，作为主存的“缓存”</strong></h3>
+<p>现在，让我们把视野拔高。我们已经建立了存储器层次结构的金字塔。我们一直在讨论金字塔顶端的SRAM Cache和DRAM主存。那么，DRAM主存和更下一层的磁盘之间，是否也存在着类似的关系？</p>
+<p>答案是肯定的。这就是**虚拟内存（Virtual Memory）**的本质。</p>
+<p><strong>核心思想</strong>：将<strong>主存（DRAM）<strong>看作是</strong>磁盘（或SSD）<strong>的一个</strong>全相联的、写回式的缓存</strong>。</p>
+<p><img alt="figure 69" src="../images/imagec69.png"/></p>
+<h4 id="41-%E6%A6%82%E5%BF%B5%E7%9A%84%E7%B1%BB%E6%AF%94%E4%B8%8E%E6%98%A0%E5%B0%84"><strong>4.1 概念的类比与映射</strong></h4>
+<p>让我们将Cache的术语，一一映射到虚拟内存中：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Cache 概念</th>
+<th style="text-align:left">虚拟内存 概念</th>
+<th style="text-align:left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>块 (Block)</strong></td>
+<td style="text-align:left"><strong>页 (Page)</strong></td>
+<td style="text-align:left">数据传输的基本单位。Page非常大（通常4KB或更大）。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>缺失 (Miss)</strong></td>
+<td style="text-align:left"><strong>页错误 (Page Fault)</strong></td>
+<td style="text-align:left">CPU访问的虚拟地址所对应的页不在主存中。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>命中 (Hit)</strong></td>
+<td style="text-align:left">(无特殊术语)</td>
+<td style="text-align:left">页在主存中，地址翻译成功。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>地址</strong></td>
+<td style="text-align:left"><strong>虚拟地址/物理地址</strong></td>
+<td style="text-align:left">CPU生成的是虚拟地址，需要被翻译成DRAM中的物理地址。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>索引/标签</strong></td>
+<td style="text-align:left"><strong>页表 (Page Table)</strong></td>
+<td style="text-align:left">页表是存储虚拟页号到物理页号映射关系的数据结构。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>放置策略</strong></td>
+<td style="text-align:left"><strong>全相联</strong></td>
+<td style="text-align:left">任何一个虚拟页，可以被加载到物理内存的任何一个空闲的物理页框中。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>替换策略</strong></td>
+<td style="text-align:left"><strong>近似LRU</strong></td>
+<td style="text-align:left">由操作系统软件实现复杂的页替换算法。</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>写策略</strong></td>
+<td style="text-align:left"><strong>写回 (Write-Back)</strong></td>
+<td style="text-align:left">使用“脏位”（Dirty Bit）来标记被修改的页。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="42-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%9A%84%E8%AE%BE%E8%AE%A1%E9%80%89%E6%8B%A9%E5%A6%82%E6%AD%A4%E4%B8%8D%E5%90%8C"><strong>4.2 为什么虚拟内存的设计选择如此不同？</strong></h4>
+<ol>
+<li>
+<p><strong>巨大的缺失代价</strong>：一次磁盘访问的延迟是毫秒（ms）级别，相当于<strong>数百万个</strong>CPU时钟周期！为了摊平如此巨大的代价，我们必须：</p>
+<ul>
+<li><strong>采用巨大的块（页）</strong>：4KB的页大小，是为了最大化利用磁盘I/O的效率。</li>
+<li><strong>采用全相联放置</strong>：不惜一切代价降低缺失率，因为任何一次缺失都是灾难性的。</li>
+<li><strong>采用复杂的软件替换算法</strong>：百万周期的停顿，足以让操作系统运行复杂的LRU近似算法，做出最明智的替换决策。</li>
+</ul>
+</li>
+<li>
+<p><strong>地址翻译</strong>：</p>
+<ul>
+<li>这个映射关系（虚拟页号 -&gt; 物理页号）存储在内存中的<strong>页表</strong>里，由操作系统管理。</li>
+<li>每次访存都需要先查页表，这本身就是一次内存访问，会让所有访存操作慢一倍！</li>
+<li><strong>解决方案</strong>：再次应用缓存思想！我们为页表项建立一个专用的、高速的、全相联的硬件缓存，称之为<strong>TLB (Translation-Lookaside Buffer)</strong>。绝大多数地址翻译请求都会在TLB中命中，无需访问内存中的页表。</li>
+</ul>
+</li>
+</ol>
+<p><img alt="figure 70" src="../images/imagec70.png"/></p>
+<h4 id="43-%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E5%B8%A6%E6%9D%A5%E7%9A%84%E9%9D%A9%E5%91%BD%E6%80%A7%E4%BC%98%E5%8A%BF"><strong>4.3 虚拟内存带来的革命性优势</strong></h4>
+<p>虚拟内存不仅仅是为了“缓存”磁盘，它还带来了三大革命性优势：</p>
+<ol>
+<li><strong>程序隔离与保护</strong>：每个进程都有自己独立的、私有的虚拟地址空间。操作系统通过控制页表，确保一个进程无法访问另一个进程的内存，提供了坚实的内存保护。</li>
+<li><strong>内存管理简化</strong>：程序员和编译器可以假设自己拥有一大片连续的内存空间，而无需关心物理内存的碎片化问题。内存的分配和布局由操作系统全权负责。</li>
+<li><strong>高效的进程间共享</strong>：操作系统可以让不同进程的虚拟页，映射到同一个物理页上，从而实现代码库或共享内存的高效共享。</li>
+</ol>
+<p><strong>总结：一个统一的框架</strong></p>
+<p>我们从量化分析Cache性能出发，学习了通过增大块和构建多级缓存来优化存储系统性能的关键技术。</p>
+<p>最重要的是，我们建立了一个<strong>统一的视角</strong>来看待整个存储器层次结构。无论是CPU Cache，还是虚拟内存，它们都遵循着相同的基本原则：利用局部性，将数据在不同速度、不同容量的存储介质之间进行分块、分级管理。它们的设计差异，仅仅源于它们在层次结构中所处的位置不同，从而导致了命中时间、缺失代价、块大小等关键参数的巨大差异，并最终决定了它们应该由硬件（Cache）还是软件（虚拟内存）来实现。</p>
+<p><img alt="figure 71" src="../images/imagec71.png"/></p>
+<p>这个统一的框架，是理解现代计算机系统中从硬件到操作系统协同工作的核心。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

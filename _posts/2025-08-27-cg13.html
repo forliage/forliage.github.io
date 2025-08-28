@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机图形学13:全局光照</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>计算机图形学13:全局光照</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,193 +30,219 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A613%E5%85%A8%E5%B1%80%E5%85%89%E7%85%A7">计算机图形学13:全局光照</h1>
-                <h3 id="1-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%85%A8%E5%B1%80%E5%85%89%E7%85%A7"><strong>1. 为什么需要全局光照？</strong></h3>
-                <p>局部光照模型有几个无法克服的根本性缺陷：</p>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A613%E5%85%A8%E5%B1%80%E5%85%89%E7%85%A7">计算机图形学13:全局光照</h1>
+<h3 id="1-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%85%A8%E5%B1%80%E5%85%89%E7%85%A7"><strong>1. 为什么需要全局光照？</strong></h3>
+<p>局部光照模型有几个无法克服的根本性缺陷：</p>
+<ul>
+<li><strong>无法产生阴影：</strong> 物体无法遮挡光线，光会“穿透”所有物体。</li>
+<li><strong>没有相互反射：</strong> 场景中的物体都是孤立的，一个物体的颜色不会影响到另一个物体。</li>
+<li><strong>无法模拟折射与焦散：</strong> 无法表现透明物体（如水、玻璃）扭曲光线的效果，也无法模拟光线透过透镜汇聚形成的亮斑（焦散）。</li>
+</ul>
+<p>要解决这些问题，我们必须跳出“一次光照”的框架，去模拟光线在整个场景中的完整传播路径。这就是全局光照的目标。</p>
+<h3 id="2-%E9%98%B4%E5%BD%B1-shadows"><strong>2. 阴影 (Shadows)</strong></h3>
+<p>阴影可能是全局光照中最直观、最重要的一个元素。它能：</p>
+<ul>
+<li><strong>提供空间关系：</strong> 阴影能明确物体与地面（或其他表面）的接触关系，避免物体看起来像“漂浮”在空中。</li>
+<li><strong>增强立体感：</strong> 阴影的形状和方向揭示了光源的位置和物体的三维形态。</li>
+<li><strong>区分软硬：</strong>
+<ul>
+<li><strong>硬阴影 (Hard Shadows):</strong> 由点光源（无限小的光源）产生，边缘清晰锐利。</li>
+<li><strong>软阴影 (Soft Shadows):</strong> 由面光源（有体积的光源，如窗户、灯管）产生，边缘模糊，有<strong>本影 (Umbra)</strong> 和<strong>半影 (Penumbra)</strong> 的过渡区域。</li>
+</ul>
+</li>
+</ul>
+<h4 id="%E5%AE%9E%E6%97%B6%E9%98%B4%E5%BD%B1%E6%8A%80%E6%9C%AF%E9%98%B4%E5%BD%B1%E8%B4%B4%E5%9B%BE-shadow-mapping"><strong>实时阴影技术：阴影贴图 (Shadow Mapping)</strong></h4>
+<p>在实时渲染（如游戏）中，最常用的阴影生成技术是<strong>阴影贴图 (Shadow Mapping)</strong>，也称为Shadow Z-buffering。</p>
+<ul>
+<li><strong>核心思想：</strong> 一个点是否在阴影中，取决于<strong>它是否能被光源“看见”</strong>。</li>
+<li><strong>算法流程（两步法）：</strong>
+<ol>
+<li><strong>Pass 1 (从光源视角渲染):</strong>
+<ul>
+<li>将虚拟相机移动到<strong>光源的位置</strong>，朝光源的方向看。</li>
+<li>对整个场景进行一次渲染。但这次我们不关心颜色，只关心<strong>深度</strong>。我们将渲染出的深度信息存储到一张特殊的纹理中，这张纹理就是<strong>阴影贴图 (Shadow Map)</strong>。阴影贴图的每个像素记录了从光源出发，到达最近物体的距离。</li>
+</ul>
+</li>
+<li><strong>Pass 2 (从主相机视角渲染):</strong>
+<ul>
+<li>回到主相机的视角，正常渲染场景。</li>
+<li>对于场景中的每一个即将被着色的片元（像素），我们将其坐标变换到光源的视角下。</li>
+<li>用变换后的坐标去查询第一步生成的阴影贴图，得到一个深度值 $D_{map}$（光源到最近遮挡物的距离）。</li>
+<li>比较该片元自身的深度 $D_{current}$（光源到当前片元的距离）与 $D_{map}$。
                 <ul>
-                <li><strong>无法产生阴影：</strong> 物体无法遮挡光线，光会“穿透”所有物体。</li>
-                <li><strong>没有相互反射：</strong> 场景中的物体都是孤立的，一个物体的颜色不会影响到另一个物体。</li>
-                <li><strong>无法模拟折射与焦散：</strong> 无法表现透明物体（如水、玻璃）扭曲光线的效果，也无法模拟光线透过透镜汇聚形成的亮斑（焦散）。</li>
-                </ul>
-                <p>要解决这些问题，我们必须跳出“一次光照”的框架，去模拟光线在整个场景中的完整传播路径。这就是全局光照的目标。</p>
-                <h3 id="2-%E9%98%B4%E5%BD%B1-shadows"><strong>2. 阴影 (Shadows)</strong></h3>
-                <p>阴影可能是全局光照中最直观、最重要的一个元素。它能：</p>
+<li>如果 $D_{current} &gt; D_{map}$，说明在光源和当前片元之间，有一个更近的物体挡住了光线。因此，该片元处于<strong>阴影中</strong>，只计算环境光。</li>
+<li>否则，该片元被光源照亮，正常进行光照计算。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<p>阴影贴图是实时渲染的基石技术之一，但它也有其局限性，比如容易产生锯齿（需要PCF等技术平滑）、无法很好地处理半透明阴影等。</p>
+<h3 id="3-%E5%85%89%E7%BA%BF%E8%BF%BD%E8%B8%AA-ray-tracing"><strong>3. 光线追踪 (Ray Tracing)</strong></h3>
+<p>光线追踪是目前能够生成最逼真图像的渲染技术之一，其原理非常优雅。</p>
+<ul>
+<li><strong>核心思想：</strong> 与物理世界中光从光源发出，最终进入眼睛相反，我们<strong>从眼睛（相机）出发，反向追踪光线的路径</strong>。</li>
+<li><strong>算法流程（经典递归光线追踪）：</strong>
+<ol>
+<li><strong>主光线 (Primary Ray):</strong> 对于屏幕上的每一个像素，从视点（eye）出发，穿过该像素中心，向场景中发射一条<strong>主光线</strong>。</li>
+<li><strong>求交 (Intersection):</strong> 计算这条光线与场景中所有物体的交点，找到<strong>最近的那个交点</strong>。如果没有交点，则该像素显示背景色。</li>
+<li><strong>着色 (Shading):</strong> 在该交点处，进行颜色计算。该点的最终颜色由三部分贡献：
                 <ul>
-                <li><strong>提供空间关系：</strong> 阴影能明确物体与地面（或其他表面）的接触关系，避免物体看起来像“漂浮”在空中。</li>
-                <li><strong>增强立体感：</strong> 阴影的形状和方向揭示了光源的位置和物体的三维形态。</li>
-                <li><strong>区分软硬：</strong>
-                <ul>
-                <li><strong>硬阴影 (Hard Shadows):</strong> 由点光源（无限小的光源）产生，边缘清晰锐利。</li>
-                <li><strong>软阴影 (Soft Shadows):</strong> 由面光源（有体积的光源，如窗户、灯管）产生，边缘模糊，有<strong>本影 (Umbra)</strong> 和<strong>半影 (Penumbra)</strong> 的过渡区域。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="%E5%AE%9E%E6%97%B6%E9%98%B4%E5%BD%B1%E6%8A%80%E6%9C%AF%E9%98%B4%E5%BD%B1%E8%B4%B4%E5%9B%BE-shadow-mapping"><strong>实时阴影技术：阴影贴图 (Shadow Mapping)</strong></h4>
-                <p>在实时渲染（如游戏）中，最常用的阴影生成技术是<strong>阴影贴图 (Shadow Mapping)</strong>，也称为Shadow Z-buffering。</p>
-                <ul>
-                <li><strong>核心思想：</strong> 一个点是否在阴影中，取决于<strong>它是否能被光源“看见”</strong>。</li>
-                <li><strong>算法流程（两步法）：</strong>
-                <ol>
-                <li><strong>Pass 1 (从光源视角渲染):</strong>
-                <ul>
-                <li>将虚拟相机移动到<strong>光源的位置</strong>，朝光源的方向看。</li>
-                <li>对整个场景进行一次渲染。但这次我们不关心颜色，只关心<strong>深度</strong>。我们将渲染出的深度信息存储到一张特殊的纹理中，这张纹理就是<strong>阴影贴图 (Shadow Map)</strong>。阴影贴图的每个像素记录了从光源出发，到达最近物体的距离。</li>
-                </ul>
-                </li>
-                <li><strong>Pass 2 (从主相机视角渲染):</strong>
-                <ul>
-                <li>回到主相机的视角，正常渲染场景。</li>
-                <li>对于场景中的每一个即将被着色的片元（像素），我们将其坐标变换到光源的视角下。</li>
-                <li>用变换后的坐标去查询第一步生成的阴影贴图，得到一个深度值 $D_{map}$（光源到最近遮挡物的距离）。</li>
-                <li>比较该片元自身的深度 $D_{current}$（光源到当前片元的距离）与 $D_{map}$。
-                <ul>
-                <li>如果 $D_{current} > D_{map}$，说明在光源和当前片元之间，有一个更近的物体挡住了光线。因此，该片元处于<strong>阴影中</strong>，只计算环境光。</li>
-                <li>否则，该片元被光源照亮，正常进行光照计算。</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                </ol>
-                </li>
-                </ul>
-                <p>阴影贴图是实时渲染的基石技术之一，但它也有其局限性，比如容易产生锯齿（需要PCF等技术平滑）、无法很好地处理半透明阴影等。</p>
-                <h3 id="3-%E5%85%89%E7%BA%BF%E8%BF%BD%E8%B8%AA-ray-tracing"><strong>3. 光线追踪 (Ray Tracing)</strong></h3>
-                <p>光线追踪是目前能够生成最逼真图像的渲染技术之一，其原理非常优雅。</p>
-                <ul>
-                <li><strong>核心思想：</strong> 与物理世界中光从光源发出，最终进入眼睛相反，我们<strong>从眼睛（相机）出发，反向追踪光线的路径</strong>。</li>
-                <li><strong>算法流程（经典递归光线追踪）：</strong>
-                <ol>
-                <li><strong>主光线 (Primary Ray):</strong> 对于屏幕上的每一个像素，从视点（eye）出发，穿过该像素中心，向场景中发射一条<strong>主光线</strong>。</li>
-                <li><strong>求交 (Intersection):</strong> 计算这条光线与场景中所有物体的交点，找到<strong>最近的那个交点</strong>。如果没有交点，则该像素显示背景色。</li>
-                <li><strong>着色 (Shading):</strong> 在该交点处，进行颜色计算。该点的最终颜色由三部分贡献：
-                <ul>
-                <li><strong>a. 局部光照：</strong> 从交点向<strong>每一个光源</strong>发射一条<strong>阴影光线 (Shadow Ray)</strong>。如果这条光线在到达光源前没有碰到任何其他物体，则该光源对交点有直接贡献，计算其漫反射和镜面反射。否则，该点处于该光源的阴影中。</li>
-                <li><strong>b. 反射光：</strong> 如果交点所在的表面是反射性的（如镜子），则根据反射定律计算出<strong>反射光线 (Reflection Ray)</strong> 的方向，并<strong>递归地</strong>调用光线追踪函数，追踪这条新的光线，将其返回的颜色按材质的反射率叠加到当前颜色上。</li>
-                <li><strong>c. 折射光：</strong> 如果表面是透明的（如玻璃），则根据折射定律（斯涅尔定律）计算出<strong>折射光线 (Refraction Ray)</strong> 的方向，并<strong>递归地</strong>调用光线追踪函数，将其返回的颜色按材质的透射率叠加到当前颜色上。</li>
-                </ul>
-                </li>
-                <li><strong>递归终止：</strong> 当光线没有碰到任何物体，或递归达到预设的最大深度时，递归返回。</li>
-                </ol>
-                </li>
-                </ul>
-                <p><strong>优点：</strong></p>
-                <ul>
-                <li><strong>效果逼真：</strong> 能自然地、物理正确地模拟出精确的阴影、镜面反射和折射效果。</li>
-                <li><strong>对象空间精度：</strong> 计算完全在三维对象空间中进行，结果非常精确。</li>
-                </ul>
-                <p><strong>缺点：</strong></p>
-                <ul>
-                <li><strong>计算量巨大：</strong> 每条光线都可能需要与场景中所有物体进行求交测试，且递归会产生大量的次生光线，计算成本极高，传统上难以实时运行。</li>
-                <li><strong>不擅长模拟漫反射间的相互作用</strong> (Color Bleeding)。</li>
-                </ul>
-                <h3 id="4-%E8%BE%90%E5%B0%84%E5%BA%A6-radiosity"><strong>4. 辐射度 (Radiosity)</strong></h3>
-                <p>辐射度算法与光线追踪正好相反，它专注于完美地模拟光线在<strong>漫反射</strong>表面之间的相互作用。</p>
-                <ul>
-                <li><strong>核心思想：</strong> 基于热辐射传导的物理原理，它不追踪单条光线，而是计算场景中<strong>面片 (Patch)</strong> 之间能量的相互传递。它假设所有表面都是<strong>理想漫反射体 (Lambertian)</strong>。</li>
-                <li><strong>算法流程：</strong>
-                <ol>
-                <li><strong>离散化：</strong> 将场景中的所有表面剖分成许多小的面片。</li>
-                <li><strong>计算形状因子 (Form Factors):</strong> 对于任意两个面片 $i$ 和 $j$，计算一个<strong>形状因子</strong> $F_{ij}$，它表示从面片 $i$ 发出的能量中，有多少比例会直接到达面片 $j$。这个计算是纯粹的几何问题，非常耗时。</li>
-                <li><strong>建立方程组：</strong> 为每个面片建立一个能量平衡方程，描述它射出的总能量（Radiosity）等于它自身发出的能量加上从所有其他面片接收并反射的能量。这将形成一个巨大的线性方程组。</li>
-                <li><strong>求解：</strong> 求解这个方程组，得到每个面片最终的、稳定的光照强度（颜色）。</li>
-                </ol>
-                </li>
-                <li><strong>特点：</strong>
-                <ul>
-                <li><strong>视点无关 (View-Independent):</strong> 计算结果是场景中每个面的固有光照，与观察者位置无关。计算一次后，可以从任意角度快速漫游浏览。</li>
-                <li><strong>效果柔和真实：</strong> 能完美模拟漫反射表面间的颜色渗透（Color Bleeding）和极其柔和的软阴影。非常适合渲染室内建筑、艺术馆等场景。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>优点：</strong></p>
-                <ul>
-                <li>能产生物理精确的柔和光照效果。</li>
-                <li>计算结果与视点无关。</li>
-                </ul>
-                <p><strong>缺点：</strong></p>
-                <ul>
-                <li><strong>只能处理漫反射：</strong> 无法模拟镜面反射和高光。</li>
-                <li><strong>预处理计算量大：</strong> 计算形状因子和求解方程组非常耗时。</li>
-                <li><strong>不适用于动态场景。</strong></li>
-                </ul>
-                <h3 id="5-%E4%B8%A4%E5%A4%A7%E6%8A%80%E6%9C%AF%E7%9A%84%E8%9E%8D%E5%90%88%E4%B8%8E%E6%9C%AA%E6%9D%A5"><strong>5. 两大技术的融合与未来</strong></h3>
-                <p>光线追踪和辐射度各有擅长，它们像是全局光照的“一体两面”：</p>
-                <table>
-                <thead>
-                <tr>
-                <th style="text-align:left">特性</th>
-                <th style="text-align:left">光线追踪 (Ray Tracing)</th>
-                <th style="text-align:left">辐射度 (Radiosity)</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                <td style="text-align:left"><strong>擅长</strong></td>
-                <td style="text-align:left">镜面反射、折射、硬阴影</td>
-                <td style="text-align:left">漫反射、颜色渗透、软阴影</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>视点关系</strong></td>
-                <td style="text-align:left">视点相关</td>
-                <td style="text-align:left">视点无关</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>核心</strong></td>
-                <td style="text-align:left">追踪光线</td>
-                <td style="text-align:left">计算能量平衡</td>
-                </tr>
-                </tbody>
-                </table>
-                <p>为了结合两者的优点，人们发展出了许多<strong>混合渲染技术</strong>，如<strong>双向路径追踪 (Bidirectional Path Tracing)</strong>、<strong>光子映射 (Photon Mapping)</strong> 等，它们同时模拟漫反射和镜面反射，是当今离线渲染（如电影特效）领域的主流。</p>
-                <p>随着NVIDIA RTX等实时光线追踪硬件的出现，曾经遥不可及的光线追踪技术正逐步进入实时游戏领域，通常与传统的光栅化渲染相结合，用于生成高质量的阴影、反射和全局光照效果，标志着实时渲染正向着电影级画质的目标大步迈进。</p>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li><strong>a. 局部光照：</strong> 从交点向<strong>每一个光源</strong>发射一条<strong>阴影光线 (Shadow Ray)</strong>。如果这条光线在到达光源前没有碰到任何其他物体，则该光源对交点有直接贡献，计算其漫反射和镜面反射。否则，该点处于该光源的阴影中。</li>
+<li><strong>b. 反射光：</strong> 如果交点所在的表面是反射性的（如镜子），则根据反射定律计算出<strong>反射光线 (Reflection Ray)</strong> 的方向，并<strong>递归地</strong>调用光线追踪函数，追踪这条新的光线，将其返回的颜色按材质的反射率叠加到当前颜色上。</li>
+<li><strong>c. 折射光：</strong> 如果表面是透明的（如玻璃），则根据折射定律（斯涅尔定律）计算出<strong>折射光线 (Refraction Ray)</strong> 的方向，并<strong>递归地</strong>调用光线追踪函数，将其返回的颜色按材质的透射率叠加到当前颜色上。</li>
+</ul>
+</li>
+<li><strong>递归终止：</strong> 当光线没有碰到任何物体，或递归达到预设的最大深度时，递归返回。</li>
+</ol>
+</li>
+</ul>
+<p><strong>优点：</strong></p>
+<ul>
+<li><strong>效果逼真：</strong> 能自然地、物理正确地模拟出精确的阴影、镜面反射和折射效果。</li>
+<li><strong>对象空间精度：</strong> 计算完全在三维对象空间中进行，结果非常精确。</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li><strong>计算量巨大：</strong> 每条光线都可能需要与场景中所有物体进行求交测试，且递归会产生大量的次生光线，计算成本极高，传统上难以实时运行。</li>
+<li><strong>不擅长模拟漫反射间的相互作用</strong> (Color Bleeding)。</li>
+</ul>
+<h3 id="4-%E8%BE%90%E5%B0%84%E5%BA%A6-radiosity"><strong>4. 辐射度 (Radiosity)</strong></h3>
+<p>辐射度算法与光线追踪正好相反，它专注于完美地模拟光线在<strong>漫反射</strong>表面之间的相互作用。</p>
+<ul>
+<li><strong>核心思想：</strong> 基于热辐射传导的物理原理，它不追踪单条光线，而是计算场景中<strong>面片 (Patch)</strong> 之间能量的相互传递。它假设所有表面都是<strong>理想漫反射体 (Lambertian)</strong>。</li>
+<li><strong>算法流程：</strong>
+<ol>
+<li><strong>离散化：</strong> 将场景中的所有表面剖分成许多小的面片。</li>
+<li><strong>计算形状因子 (Form Factors):</strong> 对于任意两个面片 $i$ 和 $j$，计算一个<strong>形状因子</strong> $F_{ij}$，它表示从面片 $i$ 发出的能量中，有多少比例会直接到达面片 $j$。这个计算是纯粹的几何问题，非常耗时。</li>
+<li><strong>建立方程组：</strong> 为每个面片建立一个能量平衡方程，描述它射出的总能量（Radiosity）等于它自身发出的能量加上从所有其他面片接收并反射的能量。这将形成一个巨大的线性方程组。</li>
+<li><strong>求解：</strong> 求解这个方程组，得到每个面片最终的、稳定的光照强度（颜色）。</li>
+</ol>
+</li>
+<li><strong>特点：</strong>
+<ul>
+<li><strong>视点无关 (View-Independent):</strong> 计算结果是场景中每个面的固有光照，与观察者位置无关。计算一次后，可以从任意角度快速漫游浏览。</li>
+<li><strong>效果柔和真实：</strong> 能完美模拟漫反射表面间的颜色渗透（Color Bleeding）和极其柔和的软阴影。非常适合渲染室内建筑、艺术馆等场景。</li>
+</ul>
+</li>
+</ul>
+<p><strong>优点：</strong></p>
+<ul>
+<li>能产生物理精确的柔和光照效果。</li>
+<li>计算结果与视点无关。</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li><strong>只能处理漫反射：</strong> 无法模拟镜面反射和高光。</li>
+<li><strong>预处理计算量大：</strong> 计算形状因子和求解方程组非常耗时。</li>
+<li><strong>不适用于动态场景。</strong></li>
+</ul>
+<h3 id="5-%E4%B8%A4%E5%A4%A7%E6%8A%80%E6%9C%AF%E7%9A%84%E8%9E%8D%E5%90%88%E4%B8%8E%E6%9C%AA%E6%9D%A5"><strong>5. 两大技术的融合与未来</strong></h3>
+<p>光线追踪和辐射度各有擅长，它们像是全局光照的“一体两面”：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">特性</th>
+<th style="text-align:left">光线追踪 (Ray Tracing)</th>
+<th style="text-align:left">辐射度 (Radiosity)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>擅长</strong></td>
+<td style="text-align:left">镜面反射、折射、硬阴影</td>
+<td style="text-align:left">漫反射、颜色渗透、软阴影</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>视点关系</strong></td>
+<td style="text-align:left">视点相关</td>
+<td style="text-align:left">视点无关</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>核心</strong></td>
+<td style="text-align:left">追踪光线</td>
+<td style="text-align:left">计算能量平衡</td>
+</tr>
+</tbody>
+</table>
+<p>为了结合两者的优点，人们发展出了许多<strong>混合渲染技术</strong>，如<strong>双向路径追踪 (Bidirectional Path Tracing)</strong>、<strong>光子映射 (Photon Mapping)</strong> 等，它们同时模拟漫反射和镜面反射，是当今离线渲染（如电影特效）领域的主流。</p>
+<p>随着NVIDIA RTX等实时光线追踪硬件的出现，曾经遥不可及的光线追踪技术正逐步进入实时游戏领域，通常与传统的光栅化渲染相结合，用于生成高质量的阴影、反射和全局光照效果，标志着实时渲染正向着电影级画质的目标大步迈进。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

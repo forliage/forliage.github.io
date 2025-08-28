@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>数值分析02:单变量非线性方程求解</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>数值分析02:单变量非线性方程求解</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,113 +30,113 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E6%95%B0%E5%80%BC%E5%88%86%E6%9E%9002%E5%8D%95%E5%8F%98%E9%87%8F%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%96%B9%E7%A8%8B%E6%B1%82%E8%A7%A3">数值分析02:单变量非线性方程求解</h1>
-                <h3 id="%E5%BC%95%E8%A8%80%E4%BB%8E%E7%BA%BF%E6%80%A7%E5%88%B0%E9%9D%9E%E7%BA%BF%E6%80%A7"><strong>引言：从线性到非线性</strong></h3>
-                <p>在上一讲中，我们深入探讨了数值计算的基石：误差的来源、度量和传播。我们认识到，由于计算机的有限性，近似和误差是不可避免的。一个好的数值算法，其核心目标就是在保证效率的同时，有效地控制误差的增长。</p>
-                <p>今天，我们将应用这些基础知识，来解决一个在科学与工程领域中极为常见的问题：<strong>求解非线性方程 (Solving Nonlinear Equations)</strong>。</p>
-                <p>我们在线性代数中学习过如何求解线性方程组 $A\mathbf{x} = \mathbf{b}$。线性问题之所以“简单”，是因为它们具有叠加原理等优良性质，存在着如高斯消元法这样直接、普适的解法。</p>
-                <p>然而，现实世界充满了非线性。例如：</p>
-                <ul>
-                <li>一个物体在空气中下落，其运动方程会因为空气阻力而变得非线性。</li>
-                <li>电路中晶体管的伏安特性是非线性的。</li>
-                <li>在金融学中，计算债券的到期收益率（YTM）需要求解一个高次多项式方程。</li>
-                <li>甚至简单的几何问题，如计算 $\cos(x) = x$ 的解，也是一个非线性问题。</li>
-                </ul>
-                <p>这类问题都可以抽象为寻找一个函数 $f(x)$ 的<strong>根 (Root)</strong>，即求解方程 $f(x) = 0$。</p>
-                <p>与线性问题不同，非线性方程求解<strong>不存在通用的直接解法</strong>。除了极少数特例外（如一元二次方程），我们无法写出根的解析表达式。因此，我们必须依赖<strong>迭代法 (Iterative Methods)</strong>。</p>
-                <p>迭代法的思想非常直观：</p>
-                <ol>
-                <li>从一个对根的初始猜测 $p_0$ 开始。</li>
-                <li>通过一个特定的迭代规则，生成一个序列 $p_1, p_2, p_3, \dots$。</li>
-                <li>如果算法设计得好，这个序列会越来越接近真实的根 $p$，即 $\lim_{n \to \infty} p_n = p$。</li>
-                </ol>
-                <p>今天，我们将学习几种最基本也是最重要的迭代求根算法：</p>
-                <ol>
-                <li><strong>二分法 (Bisection Method):</strong> 最简单、最可靠，但收敛缓慢。</li>
-                <li><strong>不动点迭代法 (Fixed-Point Iteration):</strong> 一个更通用的框架，为后续方法提供理论基础。</li>
-                <li><strong>牛顿法 (Newton's Method):</strong> 强大、收敛快，但对初始值有要求。</li>
-                <li>（拓展内容）<strong>割线法 (Secant Method):</strong> 牛顿法的一个实用变种。</li>
-                </ol>
-                <p>对于每一种方法，我们不仅要学习其<strong>如何操作</strong>，更要深入分析其<strong>为何有效</strong>，以及它的<strong>收敛速度</strong>和<strong>适用范围</strong>。</p>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E4%BA%8C%E5%88%86%E6%B3%95"><strong>第一部分：二分法</strong></h3>
-                <h4 id="21-%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80%E4%BB%8B%E5%80%BC%E5%AE%9A%E7%90%86"><strong>2.1 理论基础：介值定理</strong></h4>
-                <p>二分法的理论根基是微积分中一个非常直观的定理。</p>
-                <p><strong>定理 (介值定理 - Intermediate Value Theorem):</strong>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E6%95%B0%E5%80%BC%E5%88%86%E6%9E%9002%E5%8D%95%E5%8F%98%E9%87%8F%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%96%B9%E7%A8%8B%E6%B1%82%E8%A7%A3">数值分析02:单变量非线性方程求解</h1>
+<h3 id="%E5%BC%95%E8%A8%80%E4%BB%8E%E7%BA%BF%E6%80%A7%E5%88%B0%E9%9D%9E%E7%BA%BF%E6%80%A7"><strong>引言：从线性到非线性</strong></h3>
+<p>在上一讲中，我们深入探讨了数值计算的基石：误差的来源、度量和传播。我们认识到，由于计算机的有限性，近似和误差是不可避免的。一个好的数值算法，其核心目标就是在保证效率的同时，有效地控制误差的增长。</p>
+<p>今天，我们将应用这些基础知识，来解决一个在科学与工程领域中极为常见的问题：<strong>求解非线性方程 (Solving Nonlinear Equations)</strong>。</p>
+<p>我们在线性代数中学习过如何求解线性方程组 $A\mathbf{x} = \mathbf{b}$。线性问题之所以“简单”，是因为它们具有叠加原理等优良性质，存在着如高斯消元法这样直接、普适的解法。</p>
+<p>然而，现实世界充满了非线性。例如：</p>
+<ul>
+<li>一个物体在空气中下落，其运动方程会因为空气阻力而变得非线性。</li>
+<li>电路中晶体管的伏安特性是非线性的。</li>
+<li>在金融学中，计算债券的到期收益率（YTM）需要求解一个高次多项式方程。</li>
+<li>甚至简单的几何问题，如计算 $\cos(x) = x$ 的解，也是一个非线性问题。</li>
+</ul>
+<p>这类问题都可以抽象为寻找一个函数 $f(x)$ 的<strong>根 (Root)</strong>，即求解方程 $f(x) = 0$。</p>
+<p>与线性问题不同，非线性方程求解<strong>不存在通用的直接解法</strong>。除了极少数特例外（如一元二次方程），我们无法写出根的解析表达式。因此，我们必须依赖<strong>迭代法 (Iterative Methods)</strong>。</p>
+<p>迭代法的思想非常直观：</p>
+<ol>
+<li>从一个对根的初始猜测 $p_0$ 开始。</li>
+<li>通过一个特定的迭代规则，生成一个序列 $p_1, p_2, p_3, \dots$。</li>
+<li>如果算法设计得好，这个序列会越来越接近真实的根 $p$，即 $\lim_{n \to \infty} p_n = p$。</li>
+</ol>
+<p>今天，我们将学习几种最基本也是最重要的迭代求根算法：</p>
+<ol>
+<li><strong>二分法 (Bisection Method):</strong> 最简单、最可靠，但收敛缓慢。</li>
+<li><strong>不动点迭代法 (Fixed-Point Iteration):</strong> 一个更通用的框架，为后续方法提供理论基础。</li>
+<li><strong>牛顿法 (Newton's Method):</strong> 强大、收敛快，但对初始值有要求。</li>
+<li>（拓展内容）<strong>割线法 (Secant Method):</strong> 牛顿法的一个实用变种。</li>
+</ol>
+<p>对于每一种方法，我们不仅要学习其<strong>如何操作</strong>，更要深入分析其<strong>为何有效</strong>，以及它的<strong>收敛速度</strong>和<strong>适用范围</strong>。</p>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E4%BA%8C%E5%88%86%E6%B3%95"><strong>第一部分：二分法</strong></h3>
+<h4 id="21-%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80%E4%BB%8B%E5%80%BC%E5%AE%9A%E7%90%86"><strong>2.1 理论基础：介值定理</strong></h4>
+<p>二分法的理论根基是微积分中一个非常直观的定理。</p>
+<p><strong>定理 (介值定理 - Intermediate Value Theorem):</strong>
                 如果函数 $f(x)$ 在闭区间 $[a, b]$ 上连续，并且 $K$ 是介于 $f(a)$ 和 $f(b)$ 之间的任意一个数，那么在开区间 $(a, b)$ 内至少存在一个点 $p$，使得 $f(p) = K$。</p>
-                <p>对于求根问题 $f(x)=0$，我们可以得到一个更具体的推论：</p>
-                <p><strong>推论：</strong> 如果 $f(x)$ 在 $[a, b]$ 上连续，且 $f(a)$ 和 $f(b)$ <strong>异号</strong>（即 $f(a) \cdot f(b) < 0$），那么在 $(a, b)$ 内至少存在一个根。</p>
-                <p>这个推论为我们提供了一个<strong>保证</strong>：只要我们能找到这样一个区间，根就一定“藏”在里面。</p>
-                <h4 id="22-%E7%AE%97%E6%B3%95%E6%80%9D%E6%83%B3%E4%B8%8E%E6%AD%A5%E9%AA%A4"><strong>2.2 算法思想与步骤</strong></h4>
-                <p>二分法的思想就是利用这个保证，不断地将包含根的区间<strong>对半分割</strong>，从而逼近根。</p>
-                <p><strong>算法步骤：</strong>
-                假设我们已经找到了一个区间 $[a_1, b_1]$，满足 $f(a_1) \cdot f(b_1) < 0$。</p>
-                <ol>
-                <li><strong>计算中点：</strong> $p_1 = a_1 + \frac{b_1 - a_1}{2} = \frac{a_1 + b_1}{2}$。这个 $p_1$ 是我们对根的第一次近似。</li>
-                <li><strong>检查中点函数值：</strong> 计算 $f(p_1)$。</li>
-                <li><strong>更新区间：</strong>
-                <ul>
-                <li>如果 $f(p_1) = 0$，恭喜你，找到了根，算法结束。</li>
-                <li>如果 $f(p_1)$ 与 $f(a_1)$ 同号（即 $f(a_1) \cdot f(p_1) > 0$），说明根不在 $[a_1, p_1]$ 这一半，而在 $[p_1, b_1]$ 中。于是我们令新的区间为 $[a_2, b_2] = [p_1, b_1]$。</li>
-                <li>如果 $f(p_1)$ 与 $f(b_1)$ 同号（即 $f(p_1) \cdot f(b_1) > 0$），说明根在 $[a_1, p_1]$ 中。于是我们令新的区间为 $[a_2, b_2] = [a_1, p_1]$。</li>
-                </ul>
-                </li>
-                <li><strong>重复：</strong> 回到第1步，对新的、更小的区间 $[a_2, b_2]$ 进行同样的操作，得到 $p_2$ 和 $[a_3, b_3]$，以此类推。</li>
-                </ol>
-                <p>每一次迭代，包含根的区间的长度都<strong>减半</strong>。</p>
-                <h4 id="23-%E5%81%9C%E6%AD%A2%E5%87%86%E5%88%99-stopping-criteria"><strong>2.3 停止准则 (Stopping Criteria)</strong></h4>
-                <p>迭代法必须有停止的条件。<strong>我们应该在什么时候停止？</strong> (Discussion 4)</p>
-                <p>假设我们已经进行了 $N$ 次迭代，得到了近似根 $p_N$。</p>
-                <ol>
-                <li><strong>绝对误差：</strong> $|p_N - p_{N-1}| < \epsilon$。这表示相邻两次迭代的结果足够接近。</li>
-                <li><strong>相对误差：</strong> $\frac{|p_N - p_{N-1}|}{|p_N|} < \epsilon$ (当 $p_N \neq 0$)。这在根的量级很大或很小时更有意义。</li>
-                <li><strong>残差 (Residual)：</strong> $|f(p_N)| < \epsilon$。这表示我们找到的点足够接近于让函数值为零。</li>
-                </ol>
-                <p><strong>警告：</strong> 这三种准则都有其缺陷！</p>
-                <ul>
-                <li>对于准则1和2，存在一些发散的序列，其相邻项之差也趋于0（例如 $p_N = \sum\limits_{k=1}^N \frac{1}{k}$）。</li>
-                <li>对于准则3，如果函数在根附近非常平坦（即 $f'(p)$ 接近0），那么即使 $|f(p_N)|$ 很小，$p_N$ 也可能离真根 $p$ 很远。反之，如果函数非常陡峭，即使 $|f(p_N)|$ 比较大，$p_N$ 也可能已经非常接近真根了。</li>
-                </ul>
-                <p><strong>二分法的独特优势：</strong>
+<p>对于求根问题 $f(x)=0$，我们可以得到一个更具体的推论：</p>
+<p><strong>推论：</strong> 如果 $f(x)$ 在 $[a, b]$ 上连续，且 $f(a)$ 和 $f(b)$ <strong>异号</strong>（即 $f(a) \cdot f(b) &lt; 0$），那么在 $(a, b)$ 内至少存在一个根。</p>
+<p>这个推论为我们提供了一个<strong>保证</strong>：只要我们能找到这样一个区间，根就一定“藏”在里面。</p>
+<h4 id="22-%E7%AE%97%E6%B3%95%E6%80%9D%E6%83%B3%E4%B8%8E%E6%AD%A5%E9%AA%A4"><strong>2.2 算法思想与步骤</strong></h4>
+<p>二分法的思想就是利用这个保证，不断地将包含根的区间<strong>对半分割</strong>，从而逼近根。</p>
+<p><strong>算法步骤：</strong>
+                假设我们已经找到了一个区间 $[a_1, b_1]$，满足 $f(a_1) \cdot f(b_1) &lt; 0$。</p>
+<ol>
+<li><strong>计算中点：</strong> $p_1 = a_1 + \frac{b_1 - a_1}{2} = \frac{a_1 + b_1}{2}$。这个 $p_1$ 是我们对根的第一次近似。</li>
+<li><strong>检查中点函数值：</strong> 计算 $f(p_1)$。</li>
+<li><strong>更新区间：</strong>
+<ul>
+<li>如果 $f(p_1) = 0$，恭喜你，找到了根，算法结束。</li>
+<li>如果 $f(p_1)$ 与 $f(a_1)$ 同号（即 $f(a_1) \cdot f(p_1) &gt; 0$），说明根不在 $[a_1, p_1]$ 这一半，而在 $[p_1, b_1]$ 中。于是我们令新的区间为 $[a_2, b_2] = [p_1, b_1]$。</li>
+<li>如果 $f(p_1)$ 与 $f(b_1)$ 同号（即 $f(p_1) \cdot f(b_1) &gt; 0$），说明根在 $[a_1, p_1]$ 中。于是我们令新的区间为 $[a_2, b_2] = [a_1, p_1]$。</li>
+</ul>
+</li>
+<li><strong>重复：</strong> 回到第1步，对新的、更小的区间 $[a_2, b_2]$ 进行同样的操作，得到 $p_2$ 和 $[a_3, b_3]$，以此类推。</li>
+</ol>
+<p>每一次迭代，包含根的区间的长度都<strong>减半</strong>。</p>
+<h4 id="23-%E5%81%9C%E6%AD%A2%E5%87%86%E5%88%99-stopping-criteria"><strong>2.3 停止准则 (Stopping Criteria)</strong></h4>
+<p>迭代法必须有停止的条件。<strong>我们应该在什么时候停止？</strong> (Discussion 4)</p>
+<p>假设我们已经进行了 $N$ 次迭代，得到了近似根 $p_N$。</p>
+<ol>
+<li><strong>绝对误差：</strong> $|p_N - p_{N-1}| &lt; \epsilon$。这表示相邻两次迭代的结果足够接近。</li>
+<li><strong>相对误差：</strong> $\frac{|p_N - p_{N-1}|}{|p_N|} &lt; \epsilon$ (当 $p_N \neq 0$)。这在根的量级很大或很小时更有意义。</li>
+<li><strong>残差 (Residual)：</strong> $|f(p_N)| &lt; \epsilon$。这表示我们找到的点足够接近于让函数值为零。</li>
+</ol>
+<p><strong>警告：</strong> 这三种准则都有其缺陷！</p>
+<ul>
+<li>对于准则1和2，存在一些发散的序列，其相邻项之差也趋于0（例如 $p_N = \sum\limits_{k=1}^N \frac{1}{k}$）。</li>
+<li>对于准则3，如果函数在根附近非常平坦（即 $f'(p)$ 接近0），那么即使 $|f(p_N)|$ 很小，$p_N$ 也可能离真根 $p$ 很远。反之，如果函数非常陡峭，即使 $|f(p_N)|$ 比较大，$p_N$ 也可能已经非常接近真根了。</li>
+</ul>
+<p><strong>二分法的独特优势：</strong>
                 对于二分法，我们有一个<strong>最可靠的停止准则</strong>：<strong>区间长度</strong>。
                 经过 $n$ 次迭代后，根所在的区间 $[a_n, b_n]$ 的长度为：
                 $$|b_n - a_n| = \frac{|b_1 - a_1|}{2^{n-1}}$$
                 在第 $n$ 次迭代中，我们计算出的中点 $p_n$ 与真实根 $p$ 之间的误差满足：
                 $$|p_n - p| \le \frac{|b_n - a_n|}{2} = \frac{|b_1 - a_1|}{2^n}$$</p>
-                <p>这个不等式非常强大：</p>
-                <ul>
-                <li>它给出了一个<strong>严格的误差上界</strong>。</li>
-                <li>它<strong>与函数 $f(x)$ 的具体形态无关</strong>，只与初始区间长度和迭代次数有关。</li>
-                <li>它允许我们在<strong>算法开始前就预测出需要迭代多少次</strong>才能达到指定的精度。</li>
-                </ul>
-                <p>例如，若要求绝对误差小于 $\epsilon$，我们只需解不等式：
-                $$\frac{b_1 - a_1}{2^n} < \epsilon \implies 2^n > \frac{b_1 - a_1}{\epsilon} \implies n > \log_2\left(\frac{b_1 - a_1}{\epsilon}\right)$$</p>
-                <h4 id="24-%E7%AE%97%E6%B3%95%E4%BC%AA%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%88%86%E6%9E%90"><strong>2.4 算法伪代码与分析</strong></h4>
-                <p><strong>Algorithm: Bisection</strong>
-                <strong>Input:</strong> function <code>f</code>, endpoints <code>a</code>, <code>b</code>, tolerance <code>TOL</code>, max iterations <code>N_max</code>
-                <strong>Precondition:</strong> <code>f</code> is continuous on <code>[a, b]</code> and <code>f(a) * f(b) &lt; 0</code>.</p>
-                <div class="code-container">
-                    <pre class="hljs"><code><div>1.  `i = 1`
+<p>这个不等式非常强大：</p>
+<ul>
+<li>它给出了一个<strong>严格的误差上界</strong>。</li>
+<li>它<strong>与函数 $f(x)$ 的具体形态无关</strong>，只与初始区间长度和迭代次数有关。</li>
+<li>它允许我们在<strong>算法开始前就预测出需要迭代多少次</strong>才能达到指定的精度。</li>
+</ul>
+<p>例如，若要求绝对误差小于 $\epsilon$，我们只需解不等式：
+                $$\frac{b_1 - a_1}{2^n} &lt; \epsilon \implies 2^n &gt; \frac{b_1 - a_1}{\epsilon} \implies n &gt; \log_2\left(\frac{b_1 - a_1}{\epsilon}\right)$$</p>
+<h4 id="24-%E7%AE%97%E6%B3%95%E4%BC%AA%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%88%86%E6%9E%90"><strong>2.4 算法伪代码与分析</strong></h4>
+<p><strong>Algorithm: Bisection</strong>
+<strong>Input:</strong> function <code>f</code>, endpoints <code>a</code>, <code>b</code>, tolerance <code>TOL</code>, max iterations <code>N_max</code>
+<strong>Precondition:</strong> <code>f</code> is continuous on <code>[a, b]</code> and <code>f(a) * f(b) &lt; 0</code>.</p>
+<div class="code-container">
+<pre class="hljs"><code><div>1.  `i = 1`
 2.  `FA = f(a)`
 3.  **WHILE** `i &lt;= N_max`:
 4.      `p = a + (b - a) / 2`  // *使用这种方式计算中点，可以避免 a+b 溢出*
@@ -150,67 +150,67 @@
 12.     **ELSE**:
 13.         `b = p`
 14. **END WHILE**
-15. **OUTPUT** &quot;Method failed after N_max iterations&quot;; **STOP** (Failure)
+15. **OUTPUT** "Method failed after N_max iterations"; **STOP** (Failure)
 </div></code></pre>
-                </div>
-                <p><strong>优点：</strong></p>
-                <ol>
-                <li><strong>简单直观</strong>。</li>
-                <li><strong>永远收敛 (Always Convergent):</strong> 只要初始区间满足条件，二分法保证能找到一个根。这是它最强大的优点，使其成为一个可靠的“保底”方法。</li>
-                </ol>
-                <p><strong>缺点：</strong></p>
-                <ol>
-                <li><strong>收敛缓慢：</strong> 每次迭代，误差大约只减少一半。我们称之为<strong>线性收敛 (Linear Convergence)</strong>，其收敛速度是固定的，无法加速。</li>
-                <li><strong>可能丢弃更好的近似：</strong> 算法只关心区间端点和中点，可能会错过一个非常接近根的迭代点。</li>
-                <li><strong>无法处理多重根或偶次根：</strong> 如果根是偶数重根（如 $f(x)=x^2$ 的根 $p=0$），函数在根的两侧不变号，二分法的前提条件无法满足。</li>
-                <li><strong>无法找到复数根</strong>。</li>
-                </ol>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E4%B8%8D%E5%8A%A8%E7%82%B9%E8%BF%AD%E4%BB%A3"><strong>第二部分：不动点迭代</strong></h3>
-                <p>二分法虽然可靠，但收敛速度慢。为了寻找更快的算法，我们需要一个更具一般性的理论框架，这就是<strong>不动点迭代法</strong>。</p>
-                <h4 id="25-%E4%B8%8D%E5%8A%A8%E7%82%B9%E4%B8%8E%E6%96%B9%E7%A8%8B%E6%B1%82%E6%A0%B9%E7%9A%84%E7%AD%89%E4%BB%B7%E6%80%A7"><strong>2.5 不动点与方程求根的等价性</strong></h4>
-                <p><strong>定义 (不动点 - Fixed Point):</strong>
+</div>
+<p><strong>优点：</strong></p>
+<ol>
+<li><strong>简单直观</strong>。</li>
+<li><strong>永远收敛 (Always Convergent):</strong> 只要初始区间满足条件，二分法保证能找到一个根。这是它最强大的优点，使其成为一个可靠的“保底”方法。</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<ol>
+<li><strong>收敛缓慢：</strong> 每次迭代，误差大约只减少一半。我们称之为<strong>线性收敛 (Linear Convergence)</strong>，其收敛速度是固定的，无法加速。</li>
+<li><strong>可能丢弃更好的近似：</strong> 算法只关心区间端点和中点，可能会错过一个非常接近根的迭代点。</li>
+<li><strong>无法处理多重根或偶次根：</strong> 如果根是偶数重根（如 $f(x)=x^2$ 的根 $p=0$），函数在根的两侧不变号，二分法的前提条件无法满足。</li>
+<li><strong>无法找到复数根</strong>。</li>
+</ol>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E4%B8%8D%E5%8A%A8%E7%82%B9%E8%BF%AD%E4%BB%A3"><strong>第二部分：不动点迭代</strong></h3>
+<p>二分法虽然可靠，但收敛速度慢。为了寻找更快的算法，我们需要一个更具一般性的理论框架，这就是<strong>不动点迭代法</strong>。</p>
+<h4 id="25-%E4%B8%8D%E5%8A%A8%E7%82%B9%E4%B8%8E%E6%96%B9%E7%A8%8B%E6%B1%82%E6%A0%B9%E7%9A%84%E7%AD%89%E4%BB%B7%E6%80%A7"><strong>2.5 不动点与方程求根的等价性</strong></h4>
+<p><strong>定义 (不动点 - Fixed Point):</strong>
                 对于一个函数 $g(x)$，如果一个点 $p$ 满足 $p = g(p)$，则称 $p$ 是函数 $g(x)$ 的一个不动点。</p>
-                <p>从几何上看，函数 $y=g(x)$ 的不动点就是其图像与直线 $y=x$ 的交点的横坐标。</p>
-                <p><strong>核心思想：</strong>
+<p>从几何上看，函数 $y=g(x)$ 的不动点就是其图像与直线 $y=x$ 的交点的横坐标。</p>
+<p><strong>核心思想：</strong>
                 任何求根问题 $f(x)=0$ 都可以通过代数变形，转化为一个等价的<strong>不动点问题 $x=g(x)$</strong>。</p>
-                <p><strong>示例：</strong> 求解 $f(x) = x^3 + 4x^2 - 10 = 0$。
+<p><strong>示例：</strong> 求解 $f(x) = x^3 + 4x^2 - 10 = 0$。
                 我们可以构造出多种不同的 $g(x)$：
                 a) $x = x - (x^3 + 4x^2 - 10) \implies g_1(x) = x - x^3 - 4x^2 + 10$
                 b) $4x^2 = 10 - x^3 \implies x = \pm \frac{1}{2}\sqrt{10-x^3} \implies g_2(x) = \frac{1}{2}\sqrt{10-x^3}$
                 c) $x^2(x+4) = 10 \implies x = \sqrt{\frac{10}{x+4}} \implies g_3(x) = \sqrt{\frac{10}{x+4}}$
                 d) ... 还有很多种。</p>
-                <p>求 $f(x)=0$ 的根就等价于求这些 $g(x)$ 的不动点。</p>
-                <h4 id="26-%E4%B8%8D%E5%8A%A8%E7%82%B9%E8%BF%AD%E4%BB%A3%E7%AE%97%E6%B3%95"><strong>2.6 不动点迭代算法</strong></h4>
-                <p>一旦我们将问题转化为 $x=g(x)$，就可以构造一个简单的迭代格式：</p>
-                <p><strong>Algorithm: Fixed-Point Iteration</strong></p>
-                <ol>
-                <li>选择一个初始猜测值 $p_0$。</li>
-                <li>生成序列：$p_n = g(p_{n-1})$ for $n=1, 2, 3, \dots$。</li>
-                </ol>
-                <p>如果这个序列 ${p_n}$ 收敛于某个值 $p$，并且 $g(x)$ 是连续的，那么：
+<p>求 $f(x)=0$ 的根就等价于求这些 $g(x)$ 的不动点。</p>
+<h4 id="26-%E4%B8%8D%E5%8A%A8%E7%82%B9%E8%BF%AD%E4%BB%A3%E7%AE%97%E6%B3%95"><strong>2.6 不动点迭代算法</strong></h4>
+<p>一旦我们将问题转化为 $x=g(x)$，就可以构造一个简单的迭代格式：</p>
+<p><strong>Algorithm: Fixed-Point Iteration</strong></p>
+<ol>
+<li>选择一个初始猜测值 $p_0$。</li>
+<li>生成序列：$p_n = g(p_{n-1})$ for $n=1, 2, 3, \dots$。</li>
+</ol>
+<p>如果这个序列 ${p_n}$ 收敛于某个值 $p$，并且 $g(x)$ 是连续的，那么：
                 $$p = \lim_{n \to \infty} p_n = \lim_{n \to \infty} g(p_{n-1}) = g(\lim_{n \to \infty} p_{n-1}) = g(p)$$
                 这说明，序列的极限 $p$ 必然是 $g(x)$ 的一个不动点，也就是 $f(x)=0$ 的一个根。</p>
-                <p><strong>关键问题：</strong>
+<p><strong>关键问题：</strong>
                 “Oh yeah? Who tells you that the method is convergent?”
                 对于一个给定的 $g(x)$，这个迭代过程<strong>一定会收敛吗？</strong></p>
-                <h4 id="27-%E6%94%B6%E6%95%9B%E6%80%A7%E5%88%86%E6%9E%90%E4%B8%8D%E5%8A%A8%E7%82%B9%E5%AE%9A%E7%90%86"><strong>2.7 收敛性分析：不动点定理</strong></h4>
-                <p><strong>收敛与发散的关键区别是什么？</strong>
-                观察收敛的图像，在不动点附近，函数 $y=g(x)$ 的曲线都比直线 $y=x$ <strong>更平缓</strong>。这意味着在不动点附近，导数 $|g'(p)|$ 的绝对值小于1。而发散的图像中，曲线比 $y=x$ <strong>更陡峭</strong>，即 $|g'(p)| > 1$。</p>
-                <p>这引出了不动点迭代的收敛性核心定理。</p>
-                <p><strong>定理 (不动点定理 - Fixed-Point Theorem):</strong>
+<h4 id="27-%E6%94%B6%E6%95%9B%E6%80%A7%E5%88%86%E6%9E%90%E4%B8%8D%E5%8A%A8%E7%82%B9%E5%AE%9A%E7%90%86"><strong>2.7 收敛性分析：不动点定理</strong></h4>
+<p><strong>收敛与发散的关键区别是什么？</strong>
+                观察收敛的图像，在不动点附近，函数 $y=g(x)$ 的曲线都比直线 $y=x$ <strong>更平缓</strong>。这意味着在不动点附近，导数 $|g'(p)|$ 的绝对值小于1。而发散的图像中，曲线比 $y=x$ <strong>更陡峭</strong>，即 $|g'(p)| &gt; 1$。</p>
+<p>这引出了不动点迭代的收敛性核心定理。</p>
+<p><strong>定理 (不动点定理 - Fixed-Point Theorem):</strong>
                 假设函数 $g(x)$ 满足以下条件：</p>
-                <ol>
-                <li>$g(x)$ 在闭区间 $[a, b]$ 上连续，且对于任意 $x \in [a, b]$，都有 $g(x) \in [a, b]$。（这个条件保证了迭代过程不会“跑出”这个区间）</li>
-                <li>$g(x)$ 在开区间 $(a, b)$ 上可导，并且存在一个常数 $k$ 满足 $0 < k < 1$，使得对于所有 $x \in (a, b)$，都有 $|g'(x)| \le k$。</li>
-                </ol>
-                <p><strong>结论：</strong>
+<ol>
+<li>$g(x)$ 在闭区间 $[a, b]$ 上连续，且对于任意 $x \in [a, b]$，都有 $g(x) \in [a, b]$。（这个条件保证了迭代过程不会“跑出”这个区间）</li>
+<li>$g(x)$ 在开区间 $(a, b)$ 上可导，并且存在一个常数 $k$ 满足 $0 &lt; k &lt; 1$，使得对于所有 $x \in (a, b)$，都有 $|g'(x)| \le k$。</li>
+</ol>
+<p><strong>结论：</strong>
                 a) 在 $[a, b]$ 中， $g(x)$ 有<strong>唯一</strong>的不动点 $p$。
                 b) 对于<strong>任意</strong>的初始值 $p_0 \in [a, b]$，由 $p_n = g(p_{n-1})$ 生成的序列都将<strong>收敛</strong>于不动点 $p$。</p>
-                <p><strong>证明思路 (简述):</strong></p>
-                <ul>
-                <li><strong>存在性:</strong> 定义 $h(x) = g(x) - x$。由条件1， $h(a) = g(a) - a \ge 0$ 且 $h(b) = g(b) - b \le 0$。根据介值定理，必存在 $p \in [a, b]$ 使得 $h(p)=0$，即 $g(p)=p$。</li>
-                <li><strong>唯一性:</strong> (反证法) 假设存在两个不同的不动点 $p$ 和 $q$。根据中值定理，存在 $\xi$ 介于 $p, q$ 之间，使得 $g'(\xi) = \frac{g(p)-g(q)}{p-q} = \frac{p-q}{p-q} = 1$。但这与条件2中 $|g'(\xi)| \le k < 1$ 矛盾。所以不动点唯一。</li>
-                <li><strong>收敛性:</strong>
+<p><strong>证明思路 (简述):</strong></p>
+<ul>
+<li><strong>存在性:</strong> 定义 $h(x) = g(x) - x$。由条件1， $h(a) = g(a) - a \ge 0$ 且 $h(b) = g(b) - b \le 0$。根据介值定理，必存在 $p \in [a, b]$ 使得 $h(p)=0$，即 $g(p)=p$。</li>
+<li><strong>唯一性:</strong> (反证法) 假设存在两个不同的不动点 $p$ 和 $q$。根据中值定理，存在 $\xi$ 介于 $p, q$ 之间，使得 $g'(\xi) = \frac{g(p)-g(q)}{p-q} = \frac{p-q}{p-q} = 1$。但这与条件2中 $|g'(\xi)| \le k &lt; 1$ 矛盾。所以不动点唯一。</li>
+<li><strong>收敛性:</strong>
                 $$|p_n - p| = |g(p_{n-1}) - g(p)|$$
                 根据中值定理，存在 $\xi_n$ 介于 $p_{n-1}$ 和 $p$ 之间，使得：
                 $$|p_n - p| = |g'(\xi_n)| \cdot |p_{n-1} - p|$$
@@ -218,204 +218,204 @@
                 $$|p_n - p| \le k \cdot |p_{n-1} - p|$$
                 反复应用此不等式：
                 $$|p_n - p| \le k \cdot |p_{n-1} - p| \le k^2 \cdot |p_{n-2} - p| \le \dots \le k^n \cdot |p_0 - p|$$
-                因为 $0 < k < 1$，当 $n \to \infty$ 时，$k^n \to 0$，所以 $\lim_{n \to \infty} |p_n - p| = 0$。证毕。</li>
-                </ul>
-                <h4 id="28-%E8%AF%AF%E5%B7%AE%E7%95%8C%E4%B8%8E%E6%94%B6%E6%95%9B%E9%80%9F%E5%BA%A6"><strong>2.8 误差界与收敛速度</strong></h4>
-                <p>从证明中我们得到了两个重要的推论（Corollary）：</p>
-                <ol>
-                <li><strong>误差上界:</strong> $|p_n - p| \le k^n |p_0 - p|$</li>
-                <li><strong>可计算的误差界:</strong> $|p_n - p| \le \frac{k^n}{1-k}|p_1 - p_0|$</li>
-                </ol>
-                <p><strong>收敛速度:</strong>
+                因为 $0 &lt; k &lt; 1$，当 $n \to \infty$ 时，$k^n \to 0$，所以 $\lim_{n \to \infty} |p_n - p| = 0$。证毕。</li>
+</ul>
+<h4 id="28-%E8%AF%AF%E5%B7%AE%E7%95%8C%E4%B8%8E%E6%94%B6%E6%95%9B%E9%80%9F%E5%BA%A6"><strong>2.8 误差界与收敛速度</strong></h4>
+<p>从证明中我们得到了两个重要的推论（Corollary）：</p>
+<ol>
+<li><strong>误差上界:</strong> $|p_n - p| \le k^n |p_0 - p|$</li>
+<li><strong>可计算的误差界:</strong> $|p_n - p| \le \frac{k^n}{1-k}|p_1 - p_0|$</li>
+</ol>
+<p><strong>收敛速度:</strong>
                 我们称满足 $|p_{n+1}-p| \le C|p_n-p|^\alpha$ 的收敛为 <strong>$\alpha$ 阶收敛</strong>。
                 不动点迭代的误差关系 $|p_n - p| \le k \cdot |p_{n-1} - p|$ 表明，它通常是<strong>一阶收敛</strong>或<strong>线性收敛</strong>。
-                常数 $k$ (即 $|g'(p)|$ 的上界) 越小，收敛得越快。当 $k$ 接近1时，收敛会非常缓慢。当 $k>1$ 时，算法发散。</p>
-                <p><strong>案例分析 (回到 $x^3+4x^2-10=0$):</strong>
+                常数 $k$ (即 $|g'(p)|$ 的上界) 越小，收敛得越快。当 $k$ 接近1时，收敛会非常缓慢。当 $k&gt;1$ 时，算法发散。</p>
+<p><strong>案例分析 (回到 $x^3+4x^2-10=0$):</strong>
                 让我们来检验之前构造的几个 $g(x)$，根在区间 $[1, 2]$ 内，真实根 $p \approx 1.365$。</p>
-                <ul>
-                <li>$g_3(x) = \sqrt{10/(x+4)}$。
+<ul>
+<li>$g_3(x) = \sqrt{10/(x+4)}$。
                 $g_3'(x) = -\frac{1}{2} \left(\frac{10}{x+4}\right)^{-1/2} \frac{10}{(x+4)^2} = -\frac{\sqrt{10}}{2(x+4)^{3/2}}$
-                在区间 $[1,2]$ 内，$|g_3'(x)|$ 的最大值在 $x=1$ 处取得：$|g_3'(1)| = \frac{\sqrt{10}}{2(5)^{3/2}} \approx 0.14 < 1$。<strong>因此，这个迭代格式是收敛的。</strong></li>
-                <li>$g_1(x) = x - x^3 - 4x^2 + 10$。
+                在区间 $[1,2]$ 内，$|g_3'(x)|$ 的最大值在 $x=1$ 处取得：$|g_3'(1)| = \frac{\sqrt{10}}{2(5)^{3/2}} \approx 0.14 &lt; 1$。<strong>因此，这个迭代格式是收敛的。</strong></li>
+<li>$g_1(x) = x - x^3 - 4x^2 + 10$。
                 $g_1'(x) = 1 - 3x^2 - 8x$。
                 在根 $p \approx 1.365$ 附近，$|g_1'(p)| \approx |1 - 3(1.365)^2 - 8(1.365)| \approx |-15.4| \gg 1$。<strong>因此，这个迭代格式是发散的。</strong></li>
-                </ul>
-                <p>这解释了为什么对于同一个求根问题，选择不同的不动点形式会导致截然不同的结果。<strong>成功的关键是构造一个在根附近导数绝对值小于1的迭代函数 $g(x)$。</strong></p>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E7%89%9B%E9%A1%BF%E6%B3%95"><strong>第三部分：牛顿法</strong></h3>
-                <p>不动点迭代法为我们提供了理论基础，但如何系统性地构造一个收敛快（即 $|g'(p)|$ 小）的 $g(x)$ 呢？牛顿法给出了一个绝妙的答案。</p>
-                <h4 id="29-%E6%80%9D%E6%83%B3%E6%9D%A5%E6%BA%90%E6%B3%B0%E5%8B%92%E5%B1%95%E5%BC%80%E4%B8%8E%E7%BA%BF%E6%80%A7%E5%8C%96"><strong>2.9 思想来源：泰勒展开与线性化</strong></h4>
-                <p>牛顿法的核心思想是<strong>线性化 (Linearization)</strong>。在根的一个邻近点 $p_0$ 附近，用函数 $f(x)$ 在该点的<strong>切线</strong>来近似函数本身。</p>
-                <p>将 $f(x)$ 在 $p_0$ 处进行一阶泰勒展开：
+</ul>
+<p>这解释了为什么对于同一个求根问题，选择不同的不动点形式会导致截然不同的结果。<strong>成功的关键是构造一个在根附近导数绝对值小于1的迭代函数 $g(x)$。</strong></p>
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E7%89%9B%E9%A1%BF%E6%B3%95"><strong>第三部分：牛顿法</strong></h3>
+<p>不动点迭代法为我们提供了理论基础，但如何系统性地构造一个收敛快（即 $|g'(p)|$ 小）的 $g(x)$ 呢？牛顿法给出了一个绝妙的答案。</p>
+<h4 id="29-%E6%80%9D%E6%83%B3%E6%9D%A5%E6%BA%90%E6%B3%B0%E5%8B%92%E5%B1%95%E5%BC%80%E4%B8%8E%E7%BA%BF%E6%80%A7%E5%8C%96"><strong>2.9 思想来源：泰勒展开与线性化</strong></h4>
+<p>牛顿法的核心思想是<strong>线性化 (Linearization)</strong>。在根的一个邻近点 $p_0$ 附近，用函数 $f(x)$ 在该点的<strong>切线</strong>来近似函数本身。</p>
+<p>将 $f(x)$ 在 $p_0$ 处进行一阶泰勒展开：
                 $$f(x) \approx f(p_0) + f'(p_0)(x - p_0)$$</p>
-                <p>我们要求解 $f(x)=0$，现在我们转而求解这个线性近似方程：
+<p>我们要求解 $f(x)=0$，现在我们转而求解这个线性近似方程：
                 $$f(p_0) + f'(p_0)(x - p_0) = 0$$
                 解出 $x$:
                 $$x = p_0 - \frac{f(p_0)}{f'(p_0)}$$</p>
-                <p>这个解 $x$ 应该比 $p_0$ 更接近真实的根。我们将其作为下一次迭代的值 $p_1$。</p>
-                <p><strong>牛顿法迭代公式 (Newton-Raphson Method):</strong>
+<p>这个解 $x$ 应该比 $p_0$ 更接近真实的根。我们将其作为下一次迭代的值 $p_1$。</p>
+<p><strong>牛顿法迭代公式 (Newton-Raphson Method):</strong>
                 $$p_n = p_{n-1} - \frac{f(p_{n-1})}{f'(p_{n-1})}, \text{for } n=1, 2, 3, \dots$$</p>
-                <p><strong>几何解释：</strong>
+<p><strong>几何解释：</strong>
                 从点 $(p_n, f(p_n))$ 出发，沿着函数曲线的切线走，直到与 x 轴相交，交点的横坐标就是 $p_{n+1}$。</p>
-                <h4 id="210-%E6%94%B6%E6%95%9B%E6%80%A7%E5%88%86%E6%9E%90"><strong>2.10 收敛性分析</strong></h4>
-                <p>我们可以将牛顿法看作是一种特殊的不动点迭代，其迭代函数为：
+<h4 id="210-%E6%94%B6%E6%95%9B%E6%80%A7%E5%88%86%E6%9E%90"><strong>2.10 收敛性分析</strong></h4>
+<p>我们可以将牛顿法看作是一种特殊的不动点迭代，其迭代函数为：
                 $$g(x) = x - \frac{f(x)}{f'(x)}$$</p>
-                <p>我们来分析它的导数 $g'(x)$：
+<p>我们来分析它的导数 $g'(x)$：
                 $$g'(x) = 1 - \frac{f'(x)f'(x) - f(x)f''(x)}{[f'(x)]^2} = \frac{f(x)f''(x)}{[f'(x)]^2}$$</p>
-                <p>现在，我们考察在真根 $p$ 处的情况（此时 $f(p)=0$）：
+<p>现在，我们考察在真根 $p$ 处的情况（此时 $f(p)=0$）：
                 $$g'(p) = \frac{f(p)f''(p)}{[f'(p)]^2} = \frac{0 \cdot f''(p)}{[f'(p)]^2} = 0$$</p>
-                <p><strong>这是一个惊人的结果！</strong>
+<p><strong>这是一个惊人的结果！</strong>
                 根据不动点定理，收敛速度取决于 $|g'(p)|$ 的大小。$|g'(p)|=0$ 是我们能得到的<strong>最好情况</strong>！这意味着，只要初始猜测 $p_0$ 足够接近根 $p$（使得 $|g'(x)|$ 在这个邻域内小于1），牛顿法就会收敛，并且<strong>收敛得非常快</strong>。</p>
-                <p><strong>收敛阶 (Order of Convergence):</strong>
+<p><strong>收敛阶 (Order of Convergence):</strong>
                 可以证明（通过更高阶的泰勒展开），如果 $f'(p) \neq 0$（即 $p$ 是一个<strong>单根</strong>），牛顿法是<strong>二阶收敛 (Quadratic Convergence)</strong> 的。
                 $$|p_{n+1} - p| \approx C |p_n - p|^2$$
                 这意味着，每一次迭代，有效数字的位数大约会<strong>翻倍</strong>！</p>
-                <p><strong>示例：</strong> 假设 $C=1$，误差序列可能是 $0.1 \to 0.01 \to 0.0001 \to 0.00000001 \to \dots$。</p>
-                <h4 id="211-%E7%89%9B%E9%A1%BF%E6%B3%95%E7%9A%84%E7%BC%BA%E9%99%B7"><strong>2.11 牛顿法的缺陷</strong></h4>
-                <p>尽管牛顿法收敛速度极快，但它并非完美：</p>
-                <ol>
-                <li><strong>需要导数：</strong> 必须能够计算并编程实现 $f'(x)$。对于复杂的函数，这可能很困难或代价高昂。</li>
-                <li><strong>对初始值敏感：</strong> 如果初始值 $p_0$ 离真根太远，迭代序列可能发散，或收敛到另一个根。如果 $f'(p_n)$ 恰好为0或接近0，算法会失败或产生巨大误差。</li>
-                <li><strong>对于重根收敛退化：</strong> 如果 $p$ 是一个 $m$ 重根（即 $f(p)=f'(p)=\dots=f^{(m-1)}(p)=0$ 但 $f^{(m)}(p)\neq 0$），则 $g'(p) = 1 - 1/m \neq 0$。此时牛顿法会退化为<strong>线性收敛</strong>。</li>
-                </ol>
-                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E6%8B%93%E5%B1%95"><strong>第四部分：拓展</strong></h3>
-                <h4 id="212-%E7%A0%94%E7%A9%B6%E8%AF%BE%E9%A2%98-2%E7%89%9B%E9%A1%BF%E6%B3%95%E6%B1%82%E8%A7%A3%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%96%B9%E7%A8%8B%E7%BB%84"><strong>2.12 研究课题 2：牛顿法求解非线性方程组</strong></h4>
-                <p>将牛顿法推广到多维情况，求解方程组：
+<p><strong>示例：</strong> 假设 $C=1$，误差序列可能是 $0.1 \to 0.01 \to 0.0001 \to 0.00000001 \to \dots$。</p>
+<h4 id="211-%E7%89%9B%E9%A1%BF%E6%B3%95%E7%9A%84%E7%BC%BA%E9%99%B7"><strong>2.11 牛顿法的缺陷</strong></h4>
+<p>尽管牛顿法收敛速度极快，但它并非完美：</p>
+<ol>
+<li><strong>需要导数：</strong> 必须能够计算并编程实现 $f'(x)$。对于复杂的函数，这可能很困难或代价高昂。</li>
+<li><strong>对初始值敏感：</strong> 如果初始值 $p_0$ 离真根太远，迭代序列可能发散，或收敛到另一个根。如果 $f'(p_n)$ 恰好为0或接近0，算法会失败或产生巨大误差。</li>
+<li><strong>对于重根收敛退化：</strong> 如果 $p$ 是一个 $m$ 重根（即 $f(p)=f'(p)=\dots=f^{(m-1)}(p)=0$ 但 $f^{(m)}(p)\neq 0$），则 $g'(p) = 1 - 1/m \neq 0$。此时牛顿法会退化为<strong>线性收敛</strong>。</li>
+</ol>
+<h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E6%8B%93%E5%B1%95"><strong>第四部分：拓展</strong></h3>
+<h4 id="212-%E7%A0%94%E7%A9%B6%E8%AF%BE%E9%A2%98-2%E7%89%9B%E9%A1%BF%E6%B3%95%E6%B1%82%E8%A7%A3%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%96%B9%E7%A8%8B%E7%BB%84"><strong>2.12 研究课题 2：牛顿法求解非线性方程组</strong></h4>
+<p>将牛顿法推广到多维情况，求解方程组：
                 $$\begin{cases} f_1(x_1, x_2, \dots, x_n) = 0 \\ f_2(x_1, x_2, \dots, x_n) = 0 \\ \vdots \\ f_n(x_1, x_2, \dots, x_n) = 0 \end{cases}$$</p>
-                <p>可以写成向量形式 $\mathbf{F}(\mathbf{x}) = \mathbf{0}$。
+<p>可以写成向量形式 $\mathbf{F}(\mathbf{x}) = \mathbf{0}$。
                 一维情况下的导数 $f'(x)$ 对应于多维情况下的<strong>雅可比矩阵 (Jacobian Matrix)</strong> $J(\mathbf{x})$，其中 $J_{ij} = \frac{\partial f_i}{\partial x_j}$。
                 一维的除法 $1/f'(x)$ 对应于多维的<strong>矩阵求逆</strong> $J^{-1}(\mathbf{x})$。</p>
-                <p><strong>多维牛顿法迭代公式：</strong>
+<p><strong>多维牛顿法迭代公式：</strong>
                 $$\mathbf{x}^{(k+1)} = \mathbf{x}^{(k)} - [J(\mathbf{x}^{(k)})]^{-1} \mathbf{F}(\mathbf{x}^{(k)})$$</p>
-                <p>在实际计算中，我们不直接求逆，而是求解一个线性方程组：
+<p>在实际计算中，我们不直接求逆，而是求解一个线性方程组：
                 $$J(\mathbf{x}^{(k)}) \Delta\mathbf{x}^{(k)} = -\mathbf{F}(\mathbf{x}^{(k)})$$
                 然后更新：
                 $$\mathbf{x}^{(k+1)} = \mathbf{x}^{(k)} + \Delta\mathbf{x}^{(k)}$$</p>
-                <p>这是求解大型非线性系统（如在计算流体力学、结构分析中）的核心算法之一。</p>
-                <h4 id="213-%E7%A0%94%E7%A9%B6%E8%AF%BE%E9%A2%98-3%E5%89%B2%E7%BA%BF%E6%B3%95-secant-method"><strong>2.13 研究课题 3：割线法 (Secant Method)</strong></h4>
-                <p>牛顿法最大的不便是需要计算导数。割线法通过一个巧妙的近似来规避这个问题。</p>
-                <p>回顾导数的定义：$f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}$。
+<p>这是求解大型非线性系统（如在计算流体力学、结构分析中）的核心算法之一。</p>
+<h4 id="213-%E7%A0%94%E7%A9%B6%E8%AF%BE%E9%A2%98-3%E5%89%B2%E7%BA%BF%E6%B3%95-secant-method"><strong>2.13 研究课题 3：割线法 (Secant Method)</strong></h4>
+<p>牛顿法最大的不便是需要计算导数。割线法通过一个巧妙的近似来规避这个问题。</p>
+<p>回顾导数的定义：$f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}$。
                 在迭代过程中，我们可以用上两点的函数值来近似导数：
                 $$f'(p_{n-1}) \approx \frac{f(p_{n-1}) - f(p_{n-2})}{p_{n-1} - p_{n-2}}$$</p>
-                <p>将这个近似代入牛顿法公式，得到<strong>割线法迭代公式：</strong>
+<p>将这个近似代入牛顿法公式，得到<strong>割线法迭代公式：</strong>
                 $$p_n = p_{n-1} - f(p_{n-1}) \frac{p_{n-1} - p_{n-2}}{f(p_{n-1}) - f(p_{n-2})}$$</p>
-                <p><strong>优点：</strong></p>
-                <ul>
-                <li><strong>无需导数：</strong> 这是它相对于牛顿法最大的优势。</li>
-                <li><strong>每次迭代只需计算一次函数值：</strong> 牛顿法需要计算 $f(x)$ 和 $f'(x)$。</li>
-                </ul>
-                <p><strong>缺点：</strong></p>
-                <ul>
-                <li><strong>需要两个初始点</strong> $p_0$ 和 $p_1$ 来启动。</li>
-                <li><strong>收敛速度稍慢：</strong> 割线法的收敛阶约为 $\alpha \approx 1.618$ (黄金分割数)，介于线性收敛和二阶收敛之间，被称为<strong>超线性收敛 (Superlinear Convergence)</strong>。它仍然比线性收敛快得多。</li>
-                </ul>
-                <p>在实际应用中，当导数难以获得时，割线法及其变种（如Broyden法）是非常受欢迎的选择。</p>
-                <h3 id="%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93"><strong>课程总结</strong></h3>
-                <p><strong>本讲核心方法对比：</strong></p>
-                <table>
-                <thead>
-                <tr>
-                <th>方法</th>
-                <th>核心思想</th>
-                <th>收敛速度</th>
-                <th>可靠性</th>
-                <th>成本 (每次迭代)</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                <td><strong>二分法</strong></td>
-                <td>区间对分</td>
-                <td>线性 ($1$)</td>
-                <td>极高</td>
-                <td>1次函数求值</td>
-                </tr>
-                <tr>
-                <td><strong>不动点迭代</strong></td>
-                <td>$x=g(x)$</td>
-                <td>线性 ($1$)</td>
-                <td>依赖于$g'$</td>
-                <td>1次g求值</td>
-                </tr>
-                <tr>
-                <td><strong>牛顿法</strong></td>
-                <td>切线近似</td>
-                <td>二阶 ($2$)</td>
-                <td>依赖初始值</td>
-                <td>1次f, 1次f'求值</td>
-                </tr>
-                <tr>
-                <td><strong>割线法</strong></td>
-                <td>割线近似导数</td>
-                <td>超线性 ($\approx 1.618$)</td>
-                <td>依赖初始值</td>
-                <td>1次函数求值</td>
-                </tr>
-                </tbody>
-                </table>
-                <p><strong>Lab 02 作业预览：多项式求根</strong>
-                <strong>任务：</strong> 编写一个程序，找到给定区间内一个多项式 $p(x) = a_n x^n + \dots + a_1 x + a_0$ 的根。</p>
-                <p><strong>思考与实现建议：</strong></p>
-                <ol>
-                <li><strong>选择哪种方法？</strong>
-                <ul>
-                <li><strong>二分法</strong> 是最安全的选择，只要你能找到一个包含根的初始区间。</li>
-                <li><strong>牛顿法</strong> 收敛更快。对于多项式，求导非常容易。$p'(x) = na_n x^{n-1} + \dots + a_1$。</li>
-                <li><strong>混合策略 (Hybrid Method)</strong> 是最专业的做法：先用几步二分法，将根“框”在一个很小的区间内，确保初始值足够好，然后再切换到牛顿法进行快速收敛。</li>
-                </ul>
-                </li>
-                <li><strong>多项式求值：</strong> 在你的代码中，记得使用我们在第一讲讨论过的<strong>秦九韶算法 (Horner's Method)</strong> 来高效、稳定地计算 $p(x)$ 和 $p'(x)$ 的值。</li>
-                <li><strong>寻找初始区间：</strong> 如何为二分法找到一个有效的初始区间 $[a,b]$？可以对给定的区间进行扫描，寻找函数值变号的点。</li>
-                </ol>
-                <h5 id="1-%E9%97%AE%E9%A2%98%E9%87%8D%E8%BF%B0%E4%B8%8E%E5%88%86%E6%9E%90"><strong>1. 问题重述与分析</strong></h5>
-                <p><strong>目标：</strong> 编写一个程序，输入一个 $n$ 次多项式 $p(x) = a_n x^n + \dots + a_1 x + a_0$ 的系数和一个区间 $[a, b]$，要求找到该区间内的一个根。</p>
-                <p><strong>核心挑战：</strong></p>
-                <ol>
-                <li><strong>算法选择：</strong> 我们学习了二分法、牛顿法、割线法等。哪一种最适合这个问题？</li>
-                <li><strong>鲁棒性 (Robustness):</strong> 程序需要处理各种可能的情况，例如区间内没有根、有多个根、根是重根等，并且不能轻易因为不好的输入而崩溃。</li>
-                <li><strong>效率与精度：</strong> 算法应在合理的时间内（1秒）收敛到足够精确的解。</li>
-                <li><strong>实现细节：</strong> 如何高效且数值稳定地计算多项式及其导数的值？</li>
-                </ol>
-                <h5 id="2-%E7%AE%97%E6%B3%95%E9%80%89%E6%8B%A9%E4%B8%8E%E6%9D%83%E8%A1%A1"><strong>2. 算法选择与权衡</strong></h5>
-                <p>这是一个典型的“没有最好，只有最合适”的场景。</p>
-                <ul>
-                <li>
-                <p><strong>纯二分法 (Pure Bisection Method):</strong></p>
-                <ul>
-                <li><strong>优点：</strong> 绝对可靠。只要能在给定区间 $[a, b]$ 内找到一个子区间 $[a_k, b_k]$ 满足 $p(a_k) \cdot p(b_k) < 0$，就一定能找到根。</li>
-                <li><strong>缺点：</strong> 收敛速度慢（线性收敛）。对于要求高精度的情况，迭代次数可能较多。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>纯牛顿法 (Pure Newton's Method):</strong></p>
-                <ul>
-                <li><strong>优点：</strong> 收敛速度极快（二阶收敛），尤其是在接近单根时。多项式的导数很容易计算。</li>
-                <li><strong>缺点：</strong> 对初始值非常敏感。如果从区间 $[a, b]$ 中任意选择一个点作为初始值，很可能导致迭代发散或收敛到区间外的根。在导数值接近零的点（驻点）附近表现很差。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>纯割线法 (Pure Secant Method):</strong></p>
-                <ul>
-                <li><strong>优点：</strong> 收敛速度快（超线性），且不需要计算导数。</li>
-                <li><strong>缺点：</strong> 与牛顿法类似，对初始值敏感。需要两个初始点。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>结论：</strong> 单独使用任何一种方法都有明显的短板。纯牛顿法/割线法太“冒险”，纯二分法太“保守”。</p>
-                <p><strong>最佳策略：混合算法 (Hybrid Algorithm)</strong></p>
-                <p>这是数值计算中一种非常常见的、兼具鲁棒性和效率的策略。其思想是：</p>
-                <ol>
-                <li><strong>安全启动阶段 (Bracketing Phase):</strong> 使用可靠但缓慢的方法（如二分法）来确保我们始终将根“包围”在一个不断缩小的区间内。</li>
-                <li><strong>快速收敛阶段 (Acceleration Phase):</strong> 当区间足够小，可以确信当前近似值已经进入牛顿法（或割线法）的“收敛盆地”时，切换到快速算法进行最后的精确打击。</li>
-                </ol>
-                <p>我们将设计一个<strong>结合了二分法和牛顿法的混合求解器</strong>。这种方法通常被称为 <strong>Newton-Bisection Method</strong> 或类似的名称。</p>
-                <h5 id="3-%E6%A0%B8%E5%BF%83%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82%E7%A7%A6%E4%B9%9D%E9%9F%B6%E7%AE%97%E6%B3%95-horners-method"><strong>3. 核心实现细节：秦九韶算法 (Horner's Method)</strong></h5>
-                <p>在第一讲中我们已经学过，评估多项式 $p(x)$ 最有效和数值稳定的方法是秦九韶算法。
+<p><strong>优点：</strong></p>
+<ul>
+<li><strong>无需导数：</strong> 这是它相对于牛顿法最大的优势。</li>
+<li><strong>每次迭代只需计算一次函数值：</strong> 牛顿法需要计算 $f(x)$ 和 $f'(x)$。</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li><strong>需要两个初始点</strong> $p_0$ 和 $p_1$ 来启动。</li>
+<li><strong>收敛速度稍慢：</strong> 割线法的收敛阶约为 $\alpha \approx 1.618$ (黄金分割数)，介于线性收敛和二阶收敛之间，被称为<strong>超线性收敛 (Superlinear Convergence)</strong>。它仍然比线性收敛快得多。</li>
+</ul>
+<p>在实际应用中，当导数难以获得时，割线法及其变种（如Broyden法）是非常受欢迎的选择。</p>
+<h3 id="%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93"><strong>课程总结</strong></h3>
+<p><strong>本讲核心方法对比：</strong></p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>核心思想</th>
+<th>收敛速度</th>
+<th>可靠性</th>
+<th>成本 (每次迭代)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>二分法</strong></td>
+<td>区间对分</td>
+<td>线性 ($1$)</td>
+<td>极高</td>
+<td>1次函数求值</td>
+</tr>
+<tr>
+<td><strong>不动点迭代</strong></td>
+<td>$x=g(x)$</td>
+<td>线性 ($1$)</td>
+<td>依赖于$g'$</td>
+<td>1次g求值</td>
+</tr>
+<tr>
+<td><strong>牛顿法</strong></td>
+<td>切线近似</td>
+<td>二阶 ($2$)</td>
+<td>依赖初始值</td>
+<td>1次f, 1次f'求值</td>
+</tr>
+<tr>
+<td><strong>割线法</strong></td>
+<td>割线近似导数</td>
+<td>超线性 ($\approx 1.618$)</td>
+<td>依赖初始值</td>
+<td>1次函数求值</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Lab 02 作业预览：多项式求根</strong>
+<strong>任务：</strong> 编写一个程序，找到给定区间内一个多项式 $p(x) = a_n x^n + \dots + a_1 x + a_0$ 的根。</p>
+<p><strong>思考与实现建议：</strong></p>
+<ol>
+<li><strong>选择哪种方法？</strong>
+<ul>
+<li><strong>二分法</strong> 是最安全的选择，只要你能找到一个包含根的初始区间。</li>
+<li><strong>牛顿法</strong> 收敛更快。对于多项式，求导非常容易。$p'(x) = na_n x^{n-1} + \dots + a_1$。</li>
+<li><strong>混合策略 (Hybrid Method)</strong> 是最专业的做法：先用几步二分法，将根“框”在一个很小的区间内，确保初始值足够好，然后再切换到牛顿法进行快速收敛。</li>
+</ul>
+</li>
+<li><strong>多项式求值：</strong> 在你的代码中，记得使用我们在第一讲讨论过的<strong>秦九韶算法 (Horner's Method)</strong> 来高效、稳定地计算 $p(x)$ 和 $p'(x)$ 的值。</li>
+<li><strong>寻找初始区间：</strong> 如何为二分法找到一个有效的初始区间 $[a,b]$？可以对给定的区间进行扫描，寻找函数值变号的点。</li>
+</ol>
+<h5 id="1-%E9%97%AE%E9%A2%98%E9%87%8D%E8%BF%B0%E4%B8%8E%E5%88%86%E6%9E%90"><strong>1. 问题重述与分析</strong></h5>
+<p><strong>目标：</strong> 编写一个程序，输入一个 $n$ 次多项式 $p(x) = a_n x^n + \dots + a_1 x + a_0$ 的系数和一个区间 $[a, b]$，要求找到该区间内的一个根。</p>
+<p><strong>核心挑战：</strong></p>
+<ol>
+<li><strong>算法选择：</strong> 我们学习了二分法、牛顿法、割线法等。哪一种最适合这个问题？</li>
+<li><strong>鲁棒性 (Robustness):</strong> 程序需要处理各种可能的情况，例如区间内没有根、有多个根、根是重根等，并且不能轻易因为不好的输入而崩溃。</li>
+<li><strong>效率与精度：</strong> 算法应在合理的时间内（1秒）收敛到足够精确的解。</li>
+<li><strong>实现细节：</strong> 如何高效且数值稳定地计算多项式及其导数的值？</li>
+</ol>
+<h5 id="2-%E7%AE%97%E6%B3%95%E9%80%89%E6%8B%A9%E4%B8%8E%E6%9D%83%E8%A1%A1"><strong>2. 算法选择与权衡</strong></h5>
+<p>这是一个典型的“没有最好，只有最合适”的场景。</p>
+<ul>
+<li>
+<p><strong>纯二分法 (Pure Bisection Method):</strong></p>
+<ul>
+<li><strong>优点：</strong> 绝对可靠。只要能在给定区间 $[a, b]$ 内找到一个子区间 $[a_k, b_k]$ 满足 $p(a_k) \cdot p(b_k) &lt; 0$，就一定能找到根。</li>
+<li><strong>缺点：</strong> 收敛速度慢（线性收敛）。对于要求高精度的情况，迭代次数可能较多。</li>
+</ul>
+</li>
+<li>
+<p><strong>纯牛顿法 (Pure Newton's Method):</strong></p>
+<ul>
+<li><strong>优点：</strong> 收敛速度极快（二阶收敛），尤其是在接近单根时。多项式的导数很容易计算。</li>
+<li><strong>缺点：</strong> 对初始值非常敏感。如果从区间 $[a, b]$ 中任意选择一个点作为初始值，很可能导致迭代发散或收敛到区间外的根。在导数值接近零的点（驻点）附近表现很差。</li>
+</ul>
+</li>
+<li>
+<p><strong>纯割线法 (Pure Secant Method):</strong></p>
+<ul>
+<li><strong>优点：</strong> 收敛速度快（超线性），且不需要计算导数。</li>
+<li><strong>缺点：</strong> 与牛顿法类似，对初始值敏感。需要两个初始点。</li>
+</ul>
+</li>
+</ul>
+<p><strong>结论：</strong> 单独使用任何一种方法都有明显的短板。纯牛顿法/割线法太“冒险”，纯二分法太“保守”。</p>
+<p><strong>最佳策略：混合算法 (Hybrid Algorithm)</strong></p>
+<p>这是数值计算中一种非常常见的、兼具鲁棒性和效率的策略。其思想是：</p>
+<ol>
+<li><strong>安全启动阶段 (Bracketing Phase):</strong> 使用可靠但缓慢的方法（如二分法）来确保我们始终将根“包围”在一个不断缩小的区间内。</li>
+<li><strong>快速收敛阶段 (Acceleration Phase):</strong> 当区间足够小，可以确信当前近似值已经进入牛顿法（或割线法）的“收敛盆地”时，切换到快速算法进行最后的精确打击。</li>
+</ol>
+<p>我们将设计一个<strong>结合了二分法和牛顿法的混合求解器</strong>。这种方法通常被称为 <strong>Newton-Bisection Method</strong> 或类似的名称。</p>
+<h5 id="3-%E6%A0%B8%E5%BF%83%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82%E7%A7%A6%E4%B9%9D%E9%9F%B6%E7%AE%97%E6%B3%95-horners-method"><strong>3. 核心实现细节：秦九韶算法 (Horner's Method)</strong></h5>
+<p>在第一讲中我们已经学过，评估多项式 $p(x)$ 最有效和数值稳定的方法是秦九韶算法。
                 $p(x) = a_0 + x(a_1 + x(a_2 + \dots + x(a_{n-1} + xa_n)\dots))$</p>
-                <p>一个非常巧妙的扩展是，秦九韶算法可以<strong>同时</strong>计算出 $p(x)$ 和 $p'(x)$ 的值，而几乎不需要额外的计算量。</p>
-                <p><strong>算法：秦九韶法同时计算 p(x) 和 p'(x)</strong>
-                <strong>Input:</strong> 多项式系数数组 <code>coeffs</code> ($a_n, a_{n-1}, \dots, a_0$)，求值点 <code>x</code>。</p>
-                <div class="code-container">
-                    <pre class="hljs"><code><div>1.  `n = degree of polynomial`
+<p>一个非常巧妙的扩展是，秦九韶算法可以<strong>同时</strong>计算出 $p(x)$ 和 $p'(x)$ 的值，而几乎不需要额外的计算量。</p>
+<p><strong>算法：秦九韶法同时计算 p(x) 和 p'(x)</strong>
+<strong>Input:</strong> 多项式系数数组 <code>coeffs</code> ($a_n, a_{n-1}, \dots, a_0$)，求值点 <code>x</code>。</p>
+<div class="code-container">
+<pre class="hljs"><code><div>1.  `n = degree of polynomial`
 2.  `y = coeffs[n]` (初始化 $p(x)$ 的值)
 3.  `z = coeffs[n]` (初始化 $p'(x)$ 的值，但这是不完全的)
 4.  **FOR** `i` FROM `n-1` DOWNTO `1`:
@@ -424,46 +424,46 @@
 7.  `y = x * y + coeffs[0]`
 8.  **RETURN** `(y, z)`  // y is p(x), z is p'(x)
 </div></code></pre>
-                </div>
-                <p><em>(注：这个求导的技巧基于对秦九韶算法的综合除法解释，可以证明其正确性。)</em>
+</div>
+<p><em>(注：这个求导的技巧基于对秦九韶算法的综合除法解释，可以证明其正确性。)</em>
                 这个工具将是我们的求解器中计算函数和导数值的核心引擎。</p>
-                <h5 id="4-%E6%9C%80%E7%BB%88%E7%AE%97%E6%B3%95%E8%AE%BE%E8%AE%A1newton-bisection-%E6%B7%B7%E5%90%88%E6%B1%82%E8%A7%A3%E5%99%A8"><strong>4. 最终算法设计：Newton-Bisection 混合求解器</strong></h5>
-                <p><strong>Input:</strong> 系数 <code>coeffs</code>, 区间 <code>[a, b]</code>, 容差 <code>TOL</code>, 最大迭代次数 <code>N_max</code></p>
-                <ol>
-                <li>
-                <p><strong>初始化与预检查：</strong></p>
+<h5 id="4-%E6%9C%80%E7%BB%88%E7%AE%97%E6%B3%95%E8%AE%BE%E8%AE%A1newton-bisection-%E6%B7%B7%E5%90%88%E6%B1%82%E8%A7%A3%E5%99%A8"><strong>4. 最终算法设计：Newton-Bisection 混合求解器</strong></h5>
+<p><strong>Input:</strong> 系数 <code>coeffs</code>, 区间 <code>[a, b]</code>, 容差 <code>TOL</code>, 最大迭代次数 <code>N_max</code></p>
+<ol>
+<li>
+<p><strong>初始化与预检查：</strong></p>
+<ul>
+<li>计算 <code>pa = p(a)</code> 和 <code>pb = p(b)</code> (使用秦九韶法)。</li>
+<li><strong>IF</strong> <code>pa * pb &gt; 0</code>:
                 <ul>
-                <li>计算 <code>pa = p(a)</code> 和 <code>pb = p(b)</code> (使用秦九韶法)。</li>
-                <li><strong>IF</strong> <code>pa * pb &gt; 0</code>:
-                <ul>
-                <li>这表示在区间端点函数值同号。<strong>可能没有根，也可能是有偶数个根</strong>。</li>
-                <li><strong>简单策略：</strong> 报告“无法保证区间内有根”并退出。</li>
-                <li><strong>高级策略：</strong> 将区间 $[a,b]$ 细分成多个子区间，逐个检查是否存在变号。如果找到了变号的子区间，则在该子区间上继续。</li>
-                </ul>
-                </li>
-                <li><strong>IF</strong> <code>abs(pa) &lt; TOL</code>: <strong>RETURN</strong> <code>a</code>。</li>
-                <li><strong>IF</strong> <code>abs(pb) &lt; TOL</code>: <strong>RETURN</strong> <code>b</code>。</li>
-                <li>如果 <code>pa &gt; pb</code>，交换 <code>a</code> 和 <code>b</code>（以及<code>pa</code>和<code>pb</code>），确保 <code>a</code> 始终是函数值为负的一端，<code>b</code> 是函数值为正的一端。这可以简化后续逻辑。</li>
-                <li>初始化当前点 <code>x = (a+b)/2</code>， 上一步的点 <code>dx_old = abs(b-a)</code>。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>主迭代循环：</strong>
-                <strong>FOR</strong> <code>i</code> FROM <code>1</code> TO <code>N_max</code>:
+<li>这表示在区间端点函数值同号。<strong>可能没有根，也可能是有偶数个根</strong>。</li>
+<li><strong>简单策略：</strong> 报告“无法保证区间内有根”并退出。</li>
+<li><strong>高级策略：</strong> 将区间 $[a,b]$ 细分成多个子区间，逐个检查是否存在变号。如果找到了变号的子区间，则在该子区间上继续。</li>
+</ul>
+</li>
+<li><strong>IF</strong> <code>abs(pa) &lt; TOL</code>: <strong>RETURN</strong> <code>a</code>。</li>
+<li><strong>IF</strong> <code>abs(pb) &lt; TOL</code>: <strong>RETURN</strong> <code>b</code>。</li>
+<li>如果 <code>pa &gt; pb</code>，交换 <code>a</code> 和 <code>b</code>（以及<code>pa</code>和<code>pb</code>），确保 <code>a</code> 始终是函数值为负的一端，<code>b</code> 是函数值为正的一端。这可以简化后续逻辑。</li>
+<li>初始化当前点 <code>x = (a+b)/2</code>， 上一步的点 <code>dx_old = abs(b-a)</code>。</li>
+</ul>
+</li>
+<li>
+<p><strong>主迭代循环：</strong>
+<strong>FOR</strong> <code>i</code> FROM <code>1</code> TO <code>N_max</code>:
                 a.  计算 <code>p(x)</code> 和 <code>p'(x)</code> (使用秦九韶法)。
                 b.  <strong>牛顿步长计算：</strong>
-                <code>dx_newton = -p(x) / p'(x)</code>
+<code>dx_newton = -p(x) / p'(x)</code>
                 c.  <strong>二分步长计算：</strong>
-                <code>dx_bisection = (b - x)</code>
+<code>dx_bisection = (b - x)</code>
                 d.  <strong>决策：应该走哪一步？</strong>
-                <ul>
-                <li><strong>条件1 (界内检查):</strong> 牛顿步长是否会将我们带出当前的安全区间 <code>[a, b]</code>？
+<ul>
+<li><strong>条件1 (界内检查):</strong> 牛顿步长是否会将我们带出当前的安全区间 <code>[a, b]</code>？
                 <code>is_newton_safe = (x + dx_newton &gt; a) AND (x + dx_newton &lt; b)</code></li>
-                <li><strong>条件2 (收敛加速检查):</strong> 牛顿步长是否比上一步的步长小得多（表明正在快速收敛）？
+<li><strong>条件2 (收敛加速检查):</strong> 牛顿步长是否比上一步的步长小得多（表明正在快速收敛）？
                 <code>is_newton_fast = abs(dx_newton) &lt; 0.5 * abs(dx_old)</code></li>
-                </ul>
-                <div class="code-container">
-                    <pre><code>    * **IF** `is_newton_safe` AND `is_newton_fast`:
+</ul>
+<div class="code-container">
+<pre><code>    * **IF** `is_newton_safe` AND `is_newton_fast`:
         // **接受牛顿步**
         `dx_old = dx_newton`
         `x = x + dx_newton`
@@ -482,16 +482,16 @@ f.  **更新安全区间 [a, b]** (这是二分法的核心，确保鲁棒性)�
     * **ELSE**:
         `b = x`
 </code></pre>
-                </div>
-                </li>
-                <li>
-                <p><strong>循环结束：</strong>
-                <strong>RETURN</strong> &quot;未能收敛&quot; (Failure)。</p>
-                </li>
-                </ol>
-                <h5 id="5-%E4%BC%AA%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><strong>5. 伪代码实现</strong></h5>
-                <div class="code-container">
-                    <pre class="hljs"><code><div>FUNCTION find_poly_root(coeffs, a, b, TOL=1e-10, N_max=100):
+</div>
+</p></li>
+<li>
+<p><strong>循环结束：</strong>
+<strong>RETURN</strong> "未能收敛" (Failure)。</p>
+</li>
+</ol>
+<h5 id="5-%E4%BC%AA%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><strong>5. 伪代码实现</strong></h5>
+<div class="code-container">
+<pre class="hljs"><code><div>FUNCTION find_poly_root(coeffs, a, b, TOL=1e-10, N_max=100):
     // Helper function to evaluate p(x) and p'(x) using Horner's method
     FUNCTION horner(coeffs, x):
         n = len(coeffs) - 1
@@ -507,7 +507,7 @@ f.  **更新安全区间 [a, b]** (这是二分法的核心，确保鲁棒性)�
     pb, _ = horner(coeffs, b)
 
     IF pa * pb &gt; 0:
-        RAISE ERROR &quot;Root is not bracketed in [a, b]&quot;
+        RAISE ERROR "Root is not bracketed in [a, b]"
     
     IF abs(pa) &lt; TOL: RETURN a
     IF abs(pb) &lt; TOL: RETURN b
@@ -556,45 +556,71 @@ f.  **更新安全区间 [a, b]** (这是二分法的核心，确保鲁棒性)�
         ELSE:
             b = x
             
-    RAISE ERROR &quot;Failed to converge within max iterations&quot;
+    RAISE ERROR "Failed to converge within max iterations"
 </div></code></pre>
-                </div>
-                <p><em>(注：上述伪代码逻辑做了微调，使其更清晰。核心思想是优先考虑牛顿法，当牛顿法不安全或不高效时，立即退回至更保守的二分法。并且，无论走哪一步，都用二分法的思想更新安全区间。)</em></p>
-                <h5 id="6-%E6%80%BB%E7%BB%93"><strong>6. 总结</strong></h5>
-                <p>这个实验的解决方案向学生们传达了几个关键的数值分析实践原则：</p>
-                <ol>
-                <li><strong>没有银弹：</strong> 理论上最优美的算法（牛顿法）在实践中可能很脆弱。最可靠的算法（二分法）可能效率不高。</li>
-                <li><strong>组合的力量：</strong> 将不同算法的优点结合起来，构建混合策略，是开发强大数值软件的常用技巧。</li>
-                <li><strong>底层效率：</strong> 算法的整体性能依赖于其核心计算（如多项式求值）的效率。选择像秦九韶法这样的最优子程序至关重要。</li>
-                <li><strong>防御性编程：</strong> 必须预见到并处理各种边缘情况，如端点就是根、区间内无根、导数为零等，以确保程序的鲁棒性。</li>
-                </ol>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+</div>
+<p><em>(注：上述伪代码逻辑做了微调，使其更清晰。核心思想是优先考虑牛顿法，当牛顿法不安全或不高效时，立即退回至更保守的二分法。并且，无论走哪一步，都用二分法的思想更新安全区间。)</em></p>
+<h5 id="6-%E6%80%BB%E7%BB%93"><strong>6. 总结</strong></h5>
+<p>这个实验的解决方案向学生们传达了几个关键的数值分析实践原则：</p>
+<ol>
+<li><strong>没有银弹：</strong> 理论上最优美的算法（牛顿法）在实践中可能很脆弱。最可靠的算法（二分法）可能效率不高。</li>
+<li><strong>组合的力量：</strong> 将不同算法的优点结合起来，构建混合策略，是开发强大数值软件的常用技巧。</li>
+<li><strong>底层效率：</strong> 算法的整体性能依赖于其核心计算（如多项式求值）的效率。选择像秦九韶法这样的最优子程序至关重要。</li>
+<li><strong>防御性编程：</strong> 必须预见到并处理各种边缘情况，如端点就是根、区间内无根、导数为零等，以确保程序的鲁棒性。</li>
+</ol>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

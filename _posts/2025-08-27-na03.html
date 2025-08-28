@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>数值分析03:迭代收敛性分析与线性方程组求解</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>数值分析03:迭代收敛性分析与线性方程组求解</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,80 +30,80 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E6%95%B0%E5%80%BC%E5%88%86%E6%9E%9003%E8%BF%AD%E4%BB%A3%E6%94%B6%E6%95%9B%E6%80%A7%E5%88%86%E6%9E%90%E4%B8%8E%E7%BA%BF%E6%80%A7%E6%96%B9%E7%A8%8B%E7%BB%84%E6%B1%82%E8%A7%A3">数值分析03:迭代收敛性分析与线性方程组求解</h1>
-                <h3 id="%E5%BC%95%E8%A8%80%E4%BB%8E%E8%83%BD%E4%B8%8D%E8%83%BD%E8%A7%A3%E5%88%B0%E8%A7%A3%E5%BE%97%E5%A5%BD%E4%B8%8D%E5%A5%BD"><strong>引言：从“能不能解”到“解得好不好”</strong></h3>
-                <p>在上一讲中，我们学习了求解非线性方程的几种核心迭代算法：可靠的二分法、通用的不动点迭代以及高效的牛顿法。我们已经掌握了这些算法的“操作手册”。</p>
-                <p>然而，作为数值分析的探索者，我们不能仅仅满足于找到一个“能用”的算法。我们必须问自己更深层次的问题：</p>
-                <ol>
-                <li><strong>“多快？”</strong>：一个算法收敛到解的速度有多快？我们如何精确地度量和比较不同算法的收敛效率？</li>
-                <li><strong>“能不能更快？”</strong>：对于那些收敛缓慢的算法，我们有没有办法对其进行“加速”？</li>
-                <li><strong>“遇到特殊情况怎么办？”</strong>：当算法的理想条件不被满足时（例如，牛顿法遇到重根），会发生什么？我们如何修正算法以应对这些挑战？</li>
-                </ol>
-                <p>今天课程的前半部分，我们将聚焦于<strong>迭代方法的误差分析与加速</strong>，为我们上一讲学习的工具箱打上“性能标签”。</p>
-                <p>课程的后半部分，我们将切换到一个看似完全不同，但实际上在数值计算中更为基础和核心的领域：<strong>求解线性方程组 $A\mathbf{x} = \mathbf{b}$</strong>。大家可能会觉得奇怪，线性代数不是已经教过高斯消元法了吗？为什么还要在数值分析里重学一遍？</p>
-                <p>原因在于，我们在第一讲中反复强调的<strong>舍入误差</strong>。对于大型或某些“病态”的线性系统，经典的高斯消元法在计算机上执行时，微小的舍入误差可能会被急剧放大，导致最终结果与真实解谬以千里。我们将重新审视高斯消元法，从<strong>数值稳定性</strong>的角度出发，探讨如何通过<strong>主元选择 (Pivoting)</strong> 策略来驯服舍入误差，确保我们得到可靠的解。</p>
-                <p>让我们从衡量“快慢”的标准开始。</p>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E8%BF%AD%E4%BB%A3%E6%B3%95%E7%9A%84%E6%94%B6%E6%95%9B%E9%98%B6"><strong>第一部分：迭代法的收敛阶</strong></h3>
-                <h4 id="241-%E6%94%B6%E6%95%9B%E9%80%9F%E5%BA%A6%E7%9A%84%E5%BA%A6%E9%87%8F"><strong>2.4.1 收敛速度的度量</strong></h4>
-                <p>假设我们有一个迭代序列 ${p_n}$ 收敛到真解 $p$。我们定义第 $n$ 步的误差为 $e_n = |p_n - p|$。我们关心的是，误差是如何随着迭代次数 $n$ 的增加而减小的。</p>
-                <p><strong>定义 (收敛阶 - Order of Convergence):</strong>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E6%95%B0%E5%80%BC%E5%88%86%E6%9E%9003%E8%BF%AD%E4%BB%A3%E6%94%B6%E6%95%9B%E6%80%A7%E5%88%86%E6%9E%90%E4%B8%8E%E7%BA%BF%E6%80%A7%E6%96%B9%E7%A8%8B%E7%BB%84%E6%B1%82%E8%A7%A3">数值分析03:迭代收敛性分析与线性方程组求解</h1>
+<h3 id="%E5%BC%95%E8%A8%80%E4%BB%8E%E8%83%BD%E4%B8%8D%E8%83%BD%E8%A7%A3%E5%88%B0%E8%A7%A3%E5%BE%97%E5%A5%BD%E4%B8%8D%E5%A5%BD"><strong>引言：从“能不能解”到“解得好不好”</strong></h3>
+<p>在上一讲中，我们学习了求解非线性方程的几种核心迭代算法：可靠的二分法、通用的不动点迭代以及高效的牛顿法。我们已经掌握了这些算法的“操作手册”。</p>
+<p>然而，作为数值分析的探索者，我们不能仅仅满足于找到一个“能用”的算法。我们必须问自己更深层次的问题：</p>
+<ol>
+<li><strong>“多快？”</strong>：一个算法收敛到解的速度有多快？我们如何精确地度量和比较不同算法的收敛效率？</li>
+<li><strong>“能不能更快？”</strong>：对于那些收敛缓慢的算法，我们有没有办法对其进行“加速”？</li>
+<li><strong>“遇到特殊情况怎么办？”</strong>：当算法的理想条件不被满足时（例如，牛顿法遇到重根），会发生什么？我们如何修正算法以应对这些挑战？</li>
+</ol>
+<p>今天课程的前半部分，我们将聚焦于<strong>迭代方法的误差分析与加速</strong>，为我们上一讲学习的工具箱打上“性能标签”。</p>
+<p>课程的后半部分，我们将切换到一个看似完全不同，但实际上在数值计算中更为基础和核心的领域：<strong>求解线性方程组 $A\mathbf{x} = \mathbf{b}$</strong>。大家可能会觉得奇怪，线性代数不是已经教过高斯消元法了吗？为什么还要在数值分析里重学一遍？</p>
+<p>原因在于，我们在第一讲中反复强调的<strong>舍入误差</strong>。对于大型或某些“病态”的线性系统，经典的高斯消元法在计算机上执行时，微小的舍入误差可能会被急剧放大，导致最终结果与真实解谬以千里。我们将重新审视高斯消元法，从<strong>数值稳定性</strong>的角度出发，探讨如何通过<strong>主元选择 (Pivoting)</strong> 策略来驯服舍入误差，确保我们得到可靠的解。</p>
+<p>让我们从衡量“快慢”的标准开始。</p>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E8%BF%AD%E4%BB%A3%E6%B3%95%E7%9A%84%E6%94%B6%E6%95%9B%E9%98%B6"><strong>第一部分：迭代法的收敛阶</strong></h3>
+<h4 id="241-%E6%94%B6%E6%95%9B%E9%80%9F%E5%BA%A6%E7%9A%84%E5%BA%A6%E9%87%8F"><strong>2.4.1 收敛速度的度量</strong></h4>
+<p>假设我们有一个迭代序列 ${p_n}$ 收敛到真解 $p$。我们定义第 $n$ 步的误差为 $e_n = |p_n - p|$。我们关心的是，误差是如何随着迭代次数 $n$ 的增加而减小的。</p>
+<p><strong>定义 (收敛阶 - Order of Convergence):</strong>
                 设序列 ${p_n}$ 收敛于 $p$，且对所有 $n$，$p_n \neq p$。如果存在正常数 $\alpha$ 和 $\lambda$ 使得：
                 $$\lim_{n \to \infty} \frac{|p_{n+1} - p|}{|p_n - p|^\alpha} = \lim_{n \to \infty} \frac{e_{n+1}}{e_n^\alpha} = \lambda$$
                 则称该序列是 <strong>$\alpha$ 阶收敛</strong>的。</p>
-                <ul>
-                <li>$\alpha$ 被称为<strong>收敛阶 (Order of Convergence)</strong>。</li>
-                <li>$\lambda$ 被称为<strong>渐进误差常数 (Asymptotic Error Constant)</strong>。</li>
-                </ul>
-                <p><strong>直观理解：</strong>
+<ul>
+<li>$\alpha$ 被称为<strong>收敛阶 (Order of Convergence)</strong>。</li>
+<li>$\lambda$ 被称为<strong>渐进误差常数 (Asymptotic Error Constant)</strong>。</li>
+</ul>
+<p><strong>直观理解：</strong>
                 这个定义告诉我们，当 $n$ 足够大时，误差之间近似满足关系 $e_{n+1} \approx \lambda e_n^\alpha$。</p>
-                <ul>
-                <li><strong>$\alpha$ 越大，收敛速度越快。</strong> 它决定了误差缩减的“模式”。</li>
-                <li>如果 $\alpha$ 相同，<strong>$\lambda$ 越小，收敛速度越快。</strong> 它决定了在同一种模式下的“效率”。</li>
-                </ul>
-                <p><strong>两种重要的收敛类型：</strong></p>
-                <ol>
-                <li>
-                <p><strong>线性收敛 (Linear Convergence, $\alpha=1$):</strong>
-                $$e_{n+1} \approx \lambda e_n$$ 要使序列收敛，必须有 $0 < \lambda < 1$。
+<ul>
+<li><strong>$\alpha$ 越大，收敛速度越快。</strong> 它决定了误差缩减的“模式”。</li>
+<li>如果 $\alpha$ 相同，<strong>$\lambda$ 越小，收敛速度越快。</strong> 它决定了在同一种模式下的“效率”。</li>
+</ul>
+<p><strong>两种重要的收敛类型：</strong></p>
+<ol>
+<li>
+<p><strong>线性收敛 (Linear Convergence, $\alpha=1$):</strong>
+                $$e_{n+1} \approx \lambda e_n$$ 要使序列收敛，必须有 $0 &lt; \lambda &lt; 1$。
                 每次迭代，误差大约乘以一个固定的常数。这意味着<strong>每经过固定次数的迭代，有效数字大约增加一位</strong>。例如，如果 $\lambda=0.1$，则每次迭代增加一位有效数字。二分法和一般的不动点迭代法都属于此类。</p>
-                </li>
-                <li>
-                <p><strong>二次收敛 (Quadratic Convergence, $\alpha=2$):</strong>
+</li>
+<li>
+<p><strong>二次收敛 (Quadratic Convergence, $\alpha=2$):</strong>
                 $$e_{n+1} \approx \lambda e_n^2$$
                 这是一种极快的收敛。如果当前误差 $e_n = 10^{-k}$，那么下一步误差 $e_{n+1} \approx \lambda (10^{-k})^2 = \lambda 10^{-2k}$。这意味着<strong>有效数字的位数在每次迭代后大约翻倍</strong>！牛顿法在求解单根时就是典型的二次收敛。</p>
-                </li>
-                </ol>
-                <h4 id="242-%E4%B8%8D%E5%90%8C%E6%96%B9%E6%B3%95%E7%9A%84%E6%94%B6%E6%95%9B%E9%98%B6%E5%88%86%E6%9E%90"><strong>2.4.2 不同方法的收敛阶分析</strong></h4>
-                <p><strong>Q: 对于不动点迭代 $p_n = g(p_{n-1})$，如果 $g'(p) \neq 0$，其收敛阶是多少？</strong>
-                <strong>A: 线性收敛。</strong>
+</li>
+</ol>
+<h4 id="242-%E4%B8%8D%E5%90%8C%E6%96%B9%E6%B3%95%E7%9A%84%E6%94%B6%E6%95%9B%E9%98%B6%E5%88%86%E6%9E%90"><strong>2.4.2 不同方法的收敛阶分析</strong></h4>
+<p><strong>Q: 对于不动点迭代 $p_n = g(p_{n-1})$，如果 $g'(p) \neq 0$，其收敛阶是多少？</strong>
+<strong>A: 线性收敛。</strong>
                 回顾上一讲的推导：
                 $$p_{n+1} - p = g(p_n) - g(p) = g'(\xi_n)(p_n - p)$$其中 $\xi_n$ 在 $p_n$ 和 $p$ 之间。
                 当 $n \to \infty$ 时，$p_n \to p$，因此 $\xi_n \to p$。
                 $$\lim_{n \to \infty} \frac{|p_{n+1} - p|}{|p_n - p|^1} = \lim_{n \to \infty} |g'(\xi_n)| = |g'(p)|$$
-                所以，$\alpha=1$，$\lambda = |g'(p)|$。只要 $|g'(p)| < 1$ 且不为零，该方法就是线性收敛。</p>
-                <p><strong>Discussion 8: 牛顿法的收敛阶 (当 $g'(p) = 0$ 时)</strong>
-                <strong>A: 二次收敛。</strong>
+                所以，$\alpha=1$，$\lambda = |g'(p)|$。只要 $|g'(p)| &lt; 1$ 且不为零，该方法就是线性收敛。</p>
+<p><strong>Discussion 8: 牛顿法的收敛阶 (当 $g'(p) = 0$ 时)</strong>
+<strong>A: 二次收敛。</strong>
                 牛顿法的迭代函数 $g(x) = x - f(x)/f'(x)$ 满足 $g'(p)=0$（对于单根）。我们需要更高阶的分析。
                 将 $g(p_n)$ 在真根 $p$ 附近进行二阶泰勒展开：
                 $$p_{n+1} = g(p_n) = g(p) + g'(p)(p_n - p) + \frac{g''(\xi_n)}{2!}(p_n - p)^2$$
@@ -112,16 +112,16 @@
                 取极限：
                 $$\lim_{n \to \infty} \frac{|p_{n+1} - p|}{|p_n - p|^2} = \lim_{n \to \infty} \left|\frac{g''(\xi_n)}{2}\right| = \left|\frac{g''(p)}{2}\right|$$
                 所以，$\alpha=2$，$\lambda = |g''(p)|/2$。只要 $f'(p) \neq 0$（即 $p$ 是单根），牛顿法至少是二次收敛的。</p>
-                <h4 id="243-%E7%89%9B%E9%A1%BF%E6%B3%95%E5%9C%A8%E9%87%8D%E6%A0%B9%E6%83%85%E5%86%B5%E4%B8%8B%E7%9A%84%E8%A1%A8%E7%8E%B0"><strong>2.4.3 牛顿法在重根情况下的表现</strong></h4>
-                <p><strong>Discussion 9: 如果根不是单根，牛顿法的收敛阶是多少？</strong>
-                <strong>A: 退化为线性收敛。</strong>
+<h4 id="243-%E7%89%9B%E9%A1%BF%E6%B3%95%E5%9C%A8%E9%87%8D%E6%A0%B9%E6%83%85%E5%86%B5%E4%B8%8B%E7%9A%84%E8%A1%A8%E7%8E%B0"><strong>2.4.3 牛顿法在重根情况下的表现</strong></h4>
+<p><strong>Discussion 9: 如果根不是单根，牛顿法的收敛阶是多少？</strong>
+<strong>A: 退化为线性收敛。</strong>
                 假设 $p$ 是 $f(x)$ 的一个 <strong>$m$ 重根</strong>。这意味着 $f(x)$ 可以写作 $f(x) = (x-p)^m q(x)$，其中 $q(p) \neq 0$。
                 在这种情况下，可以证明牛顿法的迭代函数 $g(x)=x-f(x)/f'(x)$ 在根 $p$ 处的导数为：
                 $$g'(p) = 1 - \frac{1}{m}$$
-                由于 $m \ge 2$（重根），我们有 $0 < g'(p) < 1$。
+                由于 $m \ge 2$（重根），我们有 $0 &lt; g'(p) &lt; 1$。
                 根据前面的分析，这正是<strong>线性收敛</strong>的特征，其渐进误差常数 $\lambda = 1 - 1/m$。重数 $m$ 越大，$\lambda$ 越接近1，收敛就越慢。</p>
-                <p><strong>Q: 如何加速牛顿法在重根情况下的收敛？</strong>
-                <strong>A: 改造函数，将重根转化为单根。</strong>
+<p><strong>Q: 如何加速牛顿法在重根情况下的收敛？</strong>
+<strong>A: 改造函数，将重根转化为单根。</strong>
                 我们可以构造一个新函数 $\mu(x) = \frac{f(x)}{f'(x)}$。
                 如果 $f(x) = (x-p)^m q(x)$，那么可以计算出：
                 $$f'(x) = m(x-p)^{m-1}q(x) + (x-p)^m q'(x)$$
@@ -129,193 +129,219 @@
                 令 $$H(x) = \frac{q(x)}{m q(x) + (x-p)q'(x)}$$则 $$\mu(x) = (x-p)H(x)$$
                 由于 $q(p)\neq 0$，所以 $H(p) = \frac{q(p)}{m q(p)} = \frac{1}{m} \neq 0$。
                 这意味着 $p$ 是新函数 $\mu(x)$ 的一个<strong>单根</strong>！</p>
-                <p><strong>修正的牛顿法 (Modified Newton's Method):</strong>
+<p><strong>修正的牛顿法 (Modified Newton's Method):</strong>
                 我们可以对 $\mu(x)=0$ 应用标准的牛顿法，迭代格式为 $p_n = p_{n-1} - \frac{\mu(p_{n-1})}{\mu'(p_{n-1})}$。
                 将 $\mu(x)$ 的表达式代入并化简，得到：
                 $$p_n = p_{n-1} - \frac{f(p_{n-1})f'(p_{n-1})}{[f'(p_{n-1})]^2 - f(p_{n-1})f''(p_{n-1})}$$</p>
-                <p><strong>优点：</strong> 恢复了二次收敛性。
+<p><strong>优点：</strong> 恢复了二次收敛性。
                 <strong>缺点：</strong></p>
-                <ol>
-                <li>需要计算二阶导数 $f''(x)$，计算成本更高。</li>
-                <li>当 $p_n$ 接近根 $p$ 时，分子和分母都趋近于0，可能导致严重的舍入误差（相近数相减）。</li>
-                <li>需要预先知道根的重数 $m$。如果知道 $m$，一个更简单的修正是：$p_n = p_{n-1} - m \frac{f(p_{n-1})}{f'(p_{n-1})}$。</li>
-                </ol>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%8A%A0%E9%80%9F%E6%94%B6%E6%95%9B%E6%8A%80%E6%9C%AF"><strong>第二部分：加速收敛技术</strong></h3>
-                <h4 id="251-aitkens-delta2-%E6%96%B9%E6%B3%95"><strong>2.5.1 Aitken's $\Delta^2$ 方法</strong></h4>
-                <p>对于任何一个线性收敛的序列，我们有没有办法从中“榨取”出更多的信息，以更快地逼近极限？Aitken's $\Delta^2$ 方法给出了一个肯定的答案。</p>
-                <p><strong>思想：</strong>
+<ol>
+<li>需要计算二阶导数 $f''(x)$，计算成本更高。</li>
+<li>当 $p_n$ 接近根 $p$ 时，分子和分母都趋近于0，可能导致严重的舍入误差（相近数相减）。</li>
+<li>需要预先知道根的重数 $m$。如果知道 $m$，一个更简单的修正是：$p_n = p_{n-1} - m \frac{f(p_{n-1})}{f'(p_{n-1})}$。</li>
+</ol>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%8A%A0%E9%80%9F%E6%94%B6%E6%95%9B%E6%8A%80%E6%9C%AF"><strong>第二部分：加速收敛技术</strong></h3>
+<h4 id="251-aitkens-delta2-%E6%96%B9%E6%B3%95"><strong>2.5.1 Aitken's $\Delta^2$ 方法</strong></h4>
+<p>对于任何一个线性收敛的序列，我们有没有办法从中“榨取”出更多的信息，以更快地逼近极限？Aitken's $\Delta^2$ 方法给出了一个肯定的答案。</p>
+<p><strong>思想：</strong>
                 假设有一个线性收敛序列 ${p_n}$ 收敛到 $p$。当 $n$ 很大时，我们有：
                 $\frac{p_{n+1}-p}{p_n-p} \approx \lambda$  和  $\frac{p_{n+2}-p}{p_{n+1}-p} \approx \lambda$
                 联立这两个近似式，消去 $\lambda$，然后解出 $p$：
                 $$p \approx p_n - \frac{(p_{n+1}-p_n)^2}{p_{n+2} - 2p_{n+1} + p_n}$$</p>
-                <p>这个公式利用序列中的连续三项 $(p_n, p_{n+1}, p_{n+2})$ 来构造一个对极限 $p$ 的更好的估计，我们记为 $\hat{p}_n$。</p>
-                <p><strong>定义 (前向差分 - Forward Difference):</strong>
+<p>这个公式利用序列中的连续三项 $(p_n, p_{n+1}, p_{n+2})$ 来构造一个对极限 $p$ 的更好的估计，我们记为 $\hat{p}_n$。</p>
+<p><strong>定义 (前向差分 - Forward Difference):</strong>
                 $$\Delta p_n = p_{n+1} - p_n$$
                 $$\Delta^2 p_n = \Delta(p_{n+1} - p_n) = (p_{n+2}-p_{n+1}) - (p_{n+1}-p_n) = p_{n+2} - 2p_{n+1} + p_n$$</p>
-                <p><strong>Aitken's $\Delta^2$ 方法公式:</strong>
+<p><strong>Aitken's $\Delta^2$ 方法公式:</strong>
                 $$\hat{p}_n = p_n - \frac{(\Delta p_n)^2}{\Delta^2 p_n}$$</p>
-                <p><strong>定理：</strong> 如果 ${p_n}$ 是一个线性收敛序列，那么由Aitken方法构造的新序列 ${\hat{p}_n}$ 将<strong>比 ${p_n}$ 更快地收敛到 $p$</strong>，即 $\lim_{n \to \infty} \frac{\hat{p}_n - p}{p_n - p} = 0$。</p>
-                <h4 id="252-steffensens-%E6%96%B9%E6%B3%95%E5%B0%86%E7%BA%BF%E6%80%A7%E5%8A%A0%E9%80%9F%E4%B8%BA%E4%BA%8C%E6%AC%A1"><strong>2.5.2 Steffensen's 方法：将线性加速为二次</strong></h4>
-                <p>Aitken方法是一个<strong>后处理</strong>技术：它利用一个已经生成的序列来构造一个更好的序列。
+<p><strong>定理：</strong> 如果 ${p_n}$ 是一个线性收敛序列，那么由Aitken方法构造的新序列 ${\hat{p}_n}$ 将<strong>比 ${p_n}$ 更快地收敛到 $p$</strong>，即 $\lim_{n \to \infty} \frac{\hat{p}_n - p}{p_n - p} = 0$。</p>
+<h4 id="252-steffensens-%E6%96%B9%E6%B3%95%E5%B0%86%E7%BA%BF%E6%80%A7%E5%8A%A0%E9%80%9F%E4%B8%BA%E4%BA%8C%E6%AC%A1"><strong>2.5.2 Steffensen's 方法：将线性加速为二次</strong></h4>
+<p>Aitken方法是一个<strong>后处理</strong>技术：它利用一个已经生成的序列来构造一个更好的序列。
                 Steffensen's 方法则将Aitken加速的思想<strong>直接嵌入到不动点迭代过程中</strong>，创造出一个全新的、收敛更快的算法。</p>
-                <p><strong>Steffensen's 算法:</strong></p>
-                <ol>
-                <li>从一个初始值 $p_0^{(0)}$ 开始。</li>
-                <li><strong>在一个迭代步内，执行以下三步：</strong>
+<p><strong>Steffensen's 算法:</strong></p>
+<ol>
+<li>从一个初始值 $p_0^{(0)}$ 开始。</li>
+<li><strong>在一个迭代步内，执行以下三步：</strong>
                 a) 从 $p_0^{(i)}$ 出发，做两步标准的不动点迭代：
                 $p_1^{(i)} = g(p_0^{(i)})$
                 $p_2^{(i)} = g(p_1^{(i)})$
                 b) 用 $(p_0^{(i)}, p_1^{(i)}, p_2^{(i)})$ 这三点，应用Aitken's $\Delta^2$ 公式来计算一个加速后的点：
                 $p_0^{(i+1)} = p_0^{(i)} - \frac{(p_1^{(i)} - p_0^{(i)})^2}{p_2^{(i)} - 2p_1^{(i)} + p_0^{(i)}}$</li>
-                <li>重复第2步，直到收敛。</li>
-                </ol>
-                <p><strong>惊人的结果：</strong> 如果标准的不动点迭代是线性收敛的（即 $g'(p) \neq 0$），Steffensen's 方法通常是<strong>二次收敛</strong>的！它以每次迭代计算三次函数 $g$ 的代价，将一个线性收敛的方法提升到了二次收敛。这在很多情况下是非常划算的。</p>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E6%B1%82%E8%A7%A3%E7%BA%BF%E6%80%A7%E6%96%B9%E7%A8%8B%E7%BB%84%E7%9A%84%E7%9B%B4%E6%8E%A5%E6%B3%95%E9%AB%98%E6%96%AF%E6%B6%88%E5%85%83"><strong>第三部分：求解线性方程组的直接法——高斯消元</strong></h3>
-                <p>现在我们转向一个全新的，也是数值计算中无处不在的主题：求解 $A\mathbf{x}=\mathbf{b}$。</p>
-                <h4 id="611-%E7%AE%97%E6%B3%95%E5%9B%9E%E9%A1%BE%E6%9C%B4%E7%B4%A0%E9%AB%98%E6%96%AF%E6%B6%88%E5%85%83%E6%B3%95-na%C3%AFve-gaussian-elimination"><strong>6.1.1 算法回顾：朴素高斯消元法 (Naïve Gaussian Elimination)</strong></h4>
-                <p>大家在线性代数中学习过，高斯消元法包含两个主要阶段：</p>
-                <ol>
-                <li>
-                <p><strong>消元 (Elimination):</strong> 通过一系列的<strong>行变换</strong>，将增广矩阵 $[A|\mathbf{b}]$ 化为 $[U|\mathbf{c}]$ 的形式，其中 $U$ 是一个<strong>上三角矩阵</strong>。</p>
-                <ul>
-                <li><strong>Step k:</strong> 在第 $k$ 步（$k=1, \dots, n-1$），我们的目标是利用第 $k$ 行，将第 $k$ 列中对角线以下的元素 ($a_{ik}$ for $i=k+1, \dots, n$) 全部变为0。</li>
-                <li>对于第 $i$ 行（$i>k$），我们计算乘数 $m_{ik} = a_{ik}^{(k)} / a_{kk}^{(k)}$，然后执行行变换：<code>Row_i = Row_i - m_ik * Row_k</code>。</li>
-                <li>元素 $a_{kk}^{(k)}$ 在这个过程中被称为<strong>主元 (Pivot Element)</strong>。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>回代 (Backward Substitution):</strong> 对上三角方程组 $U\mathbf{x} = \mathbf{c}$ 进行求解。这是一个非常简单的过程：</p>
-                <ul>
-                <li>首先从最后一行解出 $x_n = c_n / u_{nn}$。</li>
-                <li>然后将 $x_n$ 的值代入倒数第二行，解出 $x_{n-1}$。</li>
-                <li>以此类推，自下而上依次解出所有变量：
+<li>重复第2步，直到收敛。</li>
+</ol>
+<p><strong>惊人的结果：</strong> 如果标准的不动点迭代是线性收敛的（即 $g'(p) \neq 0$），Steffensen's 方法通常是<strong>二次收敛</strong>的！它以每次迭代计算三次函数 $g$ 的代价，将一个线性收敛的方法提升到了二次收敛。这在很多情况下是非常划算的。</p>
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E6%B1%82%E8%A7%A3%E7%BA%BF%E6%80%A7%E6%96%B9%E7%A8%8B%E7%BB%84%E7%9A%84%E7%9B%B4%E6%8E%A5%E6%B3%95%E9%AB%98%E6%96%AF%E6%B6%88%E5%85%83"><strong>第三部分：求解线性方程组的直接法——高斯消元</strong></h3>
+<p>现在我们转向一个全新的，也是数值计算中无处不在的主题：求解 $A\mathbf{x}=\mathbf{b}$。</p>
+<h4 id="611-%E7%AE%97%E6%B3%95%E5%9B%9E%E9%A1%BE%E6%9C%B4%E7%B4%A0%E9%AB%98%E6%96%AF%E6%B6%88%E5%85%83%E6%B3%95-na%C3%AFve-gaussian-elimination"><strong>6.1.1 算法回顾：朴素高斯消元法 (Naïve Gaussian Elimination)</strong></h4>
+<p>大家在线性代数中学习过，高斯消元法包含两个主要阶段：</p>
+<ol>
+<li>
+<p><strong>消元 (Elimination):</strong> 通过一系列的<strong>行变换</strong>，将增广矩阵 $[A|\mathbf{b}]$ 化为 $[U|\mathbf{c}]$ 的形式，其中 $U$ 是一个<strong>上三角矩阵</strong>。</p>
+<ul>
+<li><strong>Step k:</strong> 在第 $k$ 步（$k=1, \dots, n-1$），我们的目标是利用第 $k$ 行，将第 $k$ 列中对角线以下的元素 ($a_{ik}$ for $i=k+1, \dots, n$) 全部变为0。</li>
+<li>对于第 $i$ 行（$i&gt;k$），我们计算乘数 $m_{ik} = a_{ik}^{(k)} / a_{kk}^{(k)}$，然后执行行变换：<code>Row_i = Row_i - m_ik * Row_k</code>。</li>
+<li>元素 $a_{kk}^{(k)}$ 在这个过程中被称为<strong>主元 (Pivot Element)</strong>。</li>
+</ul>
+</li>
+<li>
+<p><strong>回代 (Backward Substitution):</strong> 对上三角方程组 $U\mathbf{x} = \mathbf{c}$ 进行求解。这是一个非常简单的过程：</p>
+<ul>
+<li>首先从最后一行解出 $x_n = c_n / u_{nn}$。</li>
+<li>然后将 $x_n$ 的值代入倒数第二行，解出 $x_{n-1}$。</li>
+<li>以此类推，自下而上依次解出所有变量：
                 $x_i = \frac{1}{u_{ii}} \left( c_i - \sum_{j=i+1}^{n} u_{ij}x_j \right)$, for $i = n-1, \dots, 1$。</li>
-                </ul>
-                </li>
-                </ol>
-                <p><strong>计算量分析 (Operation Count):</strong>
+</ul>
+</li>
+</ol>
+<p><strong>计算量分析 (Operation Count):</strong>
                 可以证明，对于一个 $n \times n$ 的系统：</p>
-                <ul>
-                <li>消元阶段的乘法/除法次数约为 $\frac{n^3}{3}$。</li>
-                <li>回代阶段的乘法/除法次数约为 $\frac{n^2}{2}$。
+<ul>
+<li>消元阶段的乘法/除法次数约为 $\frac{n^3}{3}$。</li>
+<li>回代阶段的乘法/除法次数约为 $\frac{n^2}{2}$。
                 当 $n$ 很大时，总计算量由消元阶段主导，约为 $O(n^3)$。</li>
-                </ul>
-                <h4 id="612-%E6%95%B0%E5%80%BC%E9%99%B7%E9%98%B1%E4%B8%BB%E5%85%83%E4%B8%BA%E9%9B%B6%E6%88%96%E8%BF%87%E5%B0%8F"><strong>6.1.2 数值陷阱：主元为零或过小</strong></h4>
-                <p>朴素高斯消元法有一个致命的假设：在第 $k$ 步，主元 $a_{kk}^{(k)}$ 必须不为零。如果它为零，算法将因除零错误而失败。</p>
-                <p><strong>更隐蔽、更危险的问题是：如果主元 $a_{kk}^{(k)}$ 不是零，但它是一个绝对值非常小的数呢？</strong></p>
-                <p><strong>研究课题 4: 一个灾难性的例子</strong>
+</ul>
+<h4 id="612-%E6%95%B0%E5%80%BC%E9%99%B7%E9%98%B1%E4%B8%BB%E5%85%83%E4%B8%BA%E9%9B%B6%E6%88%96%E8%BF%87%E5%B0%8F"><strong>6.1.2 数值陷阱：主元为零或过小</strong></h4>
+<p>朴素高斯消元法有一个致命的假设：在第 $k$ 步，主元 $a_{kk}^{(k)}$ 必须不为零。如果它为零，算法将因除零错误而失败。</p>
+<p><strong>更隐蔽、更危险的问题是：如果主元 $a_{kk}^{(k)}$ 不是零，但它是一个绝对值非常小的数呢？</strong></p>
+<p><strong>研究课题 4: 一个灾难性的例子</strong>
                 求解线性系统（使用4位四舍五入算术）：
                 $$\begin{cases} 0.003000 x_1 + 59.14 x_2 = 59.17 \\ 5.291 x_1 - 6.130 x_2 = 46.78 \end{cases}$$</p>
-                <p><strong>精确解 (用高精度计算):</strong> $x_1 = 10.00, x_2 = 1.000$。</p>
-                <p><strong>使用朴素高斯消元法（4位算术）：</strong></p>
-                <ol>
-                <li><strong>Step 1:</strong> 主元是 $a_{11} = 0.003000$。这是一个非常小的数！</li>
-                <li>计算乘数：$m_{21} = \frac{5.291}{0.003000} = 1763.66... \to 1764$ (四舍五入)。这是一个非常大的乘数！</li>
-                <li>执行行变换 <code>Row2 = Row2 - 1764 * Row1</code>：
+<p><strong>精确解 (用高精度计算):</strong> $x_1 = 10.00, x_2 = 1.000$。</p>
+<p><strong>使用朴素高斯消元法（4位算术）：</strong></p>
+<ol>
+<li><strong>Step 1:</strong> 主元是 $a_{11} = 0.003000$。这是一个非常小的数！</li>
+<li>计算乘数：$m_{21} = \frac{5.291}{0.003000} = 1763.66... \to 1764$ (四舍五入)。这是一个非常大的乘数！</li>
+<li>执行行变换 <code>Row2 = Row2 - 1764 * Row1</code>：
                 <ul>
-                <li>新的 $a_{22}$:
+<li>新的 $a_{22}$:
                 $-6.130 - 1764 \times 59.14 = -6.130 - 104300 \approx -104300$ (在有限精度下，-6.130被完全“吃掉”了)。</li>
-                <li>新的 $b_2$:
+<li>新的 $b_2$:
                 $46.78 - 1764 \times 59.17 = 46.78 - 104400 \approx -104400$。</li>
-                </ul>
-                </li>
-                <li>得到上三角系统：
+</ul>
+</li>
+<li>得到上三角系统：
                 $$\begin{cases} 0.003000 x_1 + 59.14 x_2 = 59.17 \\ -104300 x_2 = -104400 \end{cases}$$</li>
-                <li><strong>回代求解：</strong>
-                <ul>
-                <li>$x_2 = \frac{-104400}{-104300} \approx 1.001$。这个结果看起来还不错。</li>
-                <li>$x_1 = \frac{59.17 - 59.14 \times 1.001}{0.003000} = \frac{59.17 - 59.20}{0.003000} = \frac{-0.03}{0.003000} = -10.00$。<strong>灾难！</strong> 真实解是+10.00。</li>
-                </ul>
-                </li>
-                </ol>
-                <p><strong>问题出在哪里 (Who is the trouble maker)?</strong></p>
-                <ul>
-                <li><strong>直接原因：</strong> 小主元 $a_{11}=0.003000$ 导致了巨大的乘数 $m_{21}=1764$。</li>
-                <li><strong>根本原因：</strong> 在执行 <code>Row2 - m21 * Row1</code> 时，乘数 $m_{21}$ 将第一行中存在的微小舍入误差放大了1764倍，然后注入到第二行。这种巨大的误差传播彻底污染了方程组的信息。</li>
-                </ul>
-                <h4 id="613-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E9%83%A8%E5%88%86%E4%B8%BB%E5%85%83%E6%B3%95-partial-pivoting"><strong>6.1.3 解决方案：部分主元法 (Partial Pivoting)</strong></h4>
-                <p><strong>核心思想：</strong> 在每一步消元前，<strong>避免使用绝对值小的主元</strong>。</p>
-                <p><strong>部分主元法策略 (Partial Pivoting):</strong>
+<li><strong>回代求解：</strong>
+<ul>
+<li>$x_2 = \frac{-104400}{-104300} \approx 1.001$。这个结果看起来还不错。</li>
+<li>$x_1 = \frac{59.17 - 59.14 \times 1.001}{0.003000} = \frac{59.17 - 59.20}{0.003000} = \frac{-0.03}{0.003000} = -10.00$。<strong>灾难！</strong> 真实解是+10.00。</li>
+</ul>
+</li>
+</ol>
+<p><strong>问题出在哪里 (Who is the trouble maker)?</strong></p>
+<ul>
+<li><strong>直接原因：</strong> 小主元 $a_{11}=0.003000$ 导致了巨大的乘数 $m_{21}=1764$。</li>
+<li><strong>根本原因：</strong> 在执行 <code>Row2 - m21 * Row1</code> 时，乘数 $m_{21}$ 将第一行中存在的微小舍入误差放大了1764倍，然后注入到第二行。这种巨大的误差传播彻底污染了方程组的信息。</li>
+</ul>
+<h4 id="613-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E9%83%A8%E5%88%86%E4%B8%BB%E5%85%83%E6%B3%95-partial-pivoting"><strong>6.1.3 解决方案：部分主元法 (Partial Pivoting)</strong></h4>
+<p><strong>核心思想：</strong> 在每一步消元前，<strong>避免使用绝对值小的主元</strong>。</p>
+<p><strong>部分主元法策略 (Partial Pivoting):</strong>
                 在第 $k$ 步消元开始时：</p>
-                <ol>
-                <li>在第 $k$ 列中，从对角线元素 $a_{kk}^{(k)}$ 开始，向下扫描，找到绝对值最大的元素，即找到行号 $p$ 使得 $|a_{pk}^{(k)}| = \max_{k \le i \le n} |a_{ik}^{(k)}|$。</li>
-                <li><strong>交换 (Swap)</strong> 第 $k$ 行和第 $p$ 行。</li>
-                <li>然后，以新的、绝对值最大的元素 $a_{kk}^{(k)}$ 作为主元，继续进行标准的消元步骤。</li>
-                </ol>
-                <p><strong>效果：</strong>
+<ol>
+<li>在第 $k$ 列中，从对角线元素 $a_{kk}^{(k)}$ 开始，向下扫描，找到绝对值最大的元素，即找到行号 $p$ 使得 $|a_{pk}^{(k)}| = \max_{k \le i \le n} |a_{ik}^{(k)}|$。</li>
+<li><strong>交换 (Swap)</strong> 第 $k$ 行和第 $p$ 行。</li>
+<li>然后，以新的、绝对值最大的元素 $a_{kk}^{(k)}$ 作为主元，继续进行标准的消元步骤。</li>
+</ol>
+<p><strong>效果：</strong>
                 通过这种策略，我们保证了所有的乘数 $m_{ik} = a_{ik}^{(k)}/a_{kk}^{(k)}$ 的绝对值都<strong>小于或等于1</strong>。这有效地抑制了舍入误差在消元过程中的灾难性增长，极大地增强了算法的<strong>数值稳定性 (Numerical Stability)</strong>。</p>
-                <p><strong>用部分主元法再解刚才的例子：</strong></p>
-                <ol>
-                <li><strong>Step 1:</strong>
-                <ul>
-                <li>比较第一列的元素：$|a_{11}|=0.003000, |a_{21}|=5.291$。</li>
-                <li>$|a_{21}|$ 更大，所以交换第一行和第二行。
+<p><strong>用部分主元法再解刚才的例子：</strong></p>
+<ol>
+<li><strong>Step 1:</strong>
+<ul>
+<li>比较第一列的元素：$|a_{11}|=0.003000, |a_{21}|=5.291$。</li>
+<li>$|a_{21}|$ 更大，所以交换第一行和第二行。
                 $\begin{cases} 5.291 x_1 - 6.130 x_2 = 46.78 \\ 0.003000 x_1 + 59.14 x_2 = 59.17 \end{cases}$</li>
-                </ul>
-                </li>
-                <li>现在，主元是 $a_{11}=5.291$。</li>
-                <li>计算乘数：$m_{21} = \frac{0.003000}{5.291} = 0.0005670... \to 0.0005670$。这是一个非常小的乘数。</li>
-                <li>执行行变换 <code>Row2 = Row2 - 0.0005670 * Row1</code>：
+</ul>
+</li>
+<li>现在，主元是 $a_{11}=5.291$。</li>
+<li>计算乘数：$m_{21} = \frac{0.003000}{5.291} = 0.0005670... \to 0.0005670$。这是一个非常小的乘数。</li>
+<li>执行行变换 <code>Row2 = Row2 - 0.0005670 * Row1</code>：
                 <ul>
-                <li>新的 $a_{22}$:
+<li>新的 $a_{22}$:
                 $59.14 - 0.0005670 \times (-6.130) = 59.14 + 0.003476 = 59.143476 \to 59.14$。</li>
-                <li>新的 $b_2$:
+<li>新的 $b_2$:
                 $59.17 - 0.0005670 \times 46.78 = 59.17 - 0.02652 = 59.14348 \to 59.14$。</li>
-                </ul>
-                </li>
-                <li>得到上三角系统：
+</ul>
+</li>
+<li>得到上三角系统：
                 $\begin{cases} 5.291 x_1 - 6.130 x_2 = 46.78 \\ 59.14 x_2 = 59.14 \end{cases}$</li>
-                <li><strong>回代求解：</strong>
-                <ul>
-                <li>$x_2 = \frac{59.14}{59.14} = 1.000$。非常精确！</li>
-                <li>$x_1 = \frac{46.78 - (-6.130) \times 1.000}{5.291} = \frac{46.78 + 6.130}{5.291} = \frac{52.91}{5.291} = 10.00$。完美的结果！</li>
-                </ul>
-                </li>
-                </ol>
-                <p><strong>重要结论：</strong>
+<li><strong>回代求解：</strong>
+<ul>
+<li>$x_2 = \frac{59.14}{59.14} = 1.000$。非常精确！</li>
+<li>$x_1 = \frac{46.78 - (-6.130) \times 1.000}{5.291} = \frac{46.78 + 6.130}{5.291} = \frac{52.91}{5.291} = 10.00$。完美的结果！</li>
+</ul>
+</li>
+</ol>
+<p><strong>重要结论：</strong>
                 在实践中，<strong>永远不要使用没有主元选择策略的朴素高斯消元法</strong>。部分主元法是工业标准，它以很小的额外计算成本（每一步需要一次比较）换来了算法的鲁棒性和解的可靠性。</p>
-                <h3 id="%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93"><strong>课程总结</strong></h3>
-                <p><strong>本讲核心要点：</strong></p>
-                <ol>
-                <li><strong>收敛阶是衡量迭代算法效率的关键指标。</strong> 我们区分了线性收敛（误差按比例缩减）和二次收敛（有效数字位数翻倍），并分析了不动点迭代（线性）和牛顿法（二次）的收敛阶。</li>
-                <li><strong>算法的性能是可以优化的。</strong> 我们学习了如何通过函数变换来修复牛顿法在重根情况下的收敛性，以及如何使用Aitken/Steffensen方法将线性收敛加速到二次收敛。</li>
-                <li><strong>直接法求解线性系统需要关注数值稳定性。</strong> 朴素高斯消元法对主元大小敏感，小主元会导致舍入误差的灾难性放大。</li>
-                <li><strong>部分主元法是高斯消元的标准配置。</strong> 通过每一步选择列中绝对值最大的元素作为主元，可以有效控制误差传播，是保证算法稳定性的关键。</li>
-                </ol>
-                <p><strong>连接与思考：</strong>
+<h3 id="%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93"><strong>课程总结</strong></h3>
+<p><strong>本讲核心要点：</strong></p>
+<ol>
+<li><strong>收敛阶是衡量迭代算法效率的关键指标。</strong> 我们区分了线性收敛（误差按比例缩减）和二次收敛（有效数字位数翻倍），并分析了不动点迭代（线性）和牛顿法（二次）的收敛阶。</li>
+<li><strong>算法的性能是可以优化的。</strong> 我们学习了如何通过函数变换来修复牛顿法在重根情况下的收敛性，以及如何使用Aitken/Steffensen方法将线性收敛加速到二次收敛。</li>
+<li><strong>直接法求解线性系统需要关注数值稳定性。</strong> 朴素高斯消元法对主元大小敏感，小主元会导致舍入误差的灾难性放大。</li>
+<li><strong>部分主元法是高斯消元的标准配置。</strong> 通过每一步选择列中绝对值最大的元素作为主元，可以有效控制误差传播，是保证算法稳定性的关键。</li>
+</ol>
+<p><strong>连接与思考：</strong>
                 今天我们讨论了两种截然不同的求解思路：求解非线性方程的<strong>迭代法</strong>和求解线性方程的<strong>直接法</strong>。</p>
-                <ul>
-                <li><strong>直接法</strong>（如高斯消元）在理论上经过有限步运算后能得到精确解（如果不考虑舍入误差）。</li>
-                <li><strong>迭代法</strong>（如牛顿法）从一个初始猜测开始，产生一个逼近解的序列。</li>
-                </ul>
-                <p>在后续课程中，我们还会学习求解线性方程组的<strong>迭代法</strong>（如Jacobi法、Gauss-Seidel法），这对于处理那些巨大且稀疏的线性系统（例如来自偏微分方程离散化）至关重要，因为直接法的 $O(n^3)$ 计算量和存储需求在这种情况下是无法承受的。</p>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<ul>
+<li><strong>直接法</strong>（如高斯消元）在理论上经过有限步运算后能得到精确解（如果不考虑舍入误差）。</li>
+<li><strong>迭代法</strong>（如牛顿法）从一个初始猜测开始，产生一个逼近解的序列。</li>
+</ul>
+<p>在后续课程中，我们还会学习求解线性方程组的<strong>迭代法</strong>（如Jacobi法、Gauss-Seidel法），这对于处理那些巨大且稀疏的线性系统（例如来自偏微分方程离散化）至关重要，因为直接法的 $O(n^3)$ 计算量和存储需求在这种情况下是无法承受的。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

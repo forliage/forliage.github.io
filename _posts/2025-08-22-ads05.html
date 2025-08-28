@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>ads05:二项队列（Binomial Queue）</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>ads05:二项队列（Binomial Queue）</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,39 +30,39 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="ads05%E4%BA%8C%E9%A1%B9%E9%98%9F%E5%88%97binomial-queue">ads05:二项队列（Binomial Queue）</h1>
-                <p>（补档：将以前的ads笔记做修缮后上传）</p>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E4%BA%8C%E9%A1%B9%E5%A0%86%E7%9A%84%E5%9F%BA%E7%9F%B3--%E4%BA%8C%E9%A1%B9%E6%A0%91-binomial-tree">第一部分：二项堆的基石 —— 二项树 (Binomial Tree)</h3>
-                <p>要理解二项堆，我们必须首先理解它的基本组成部分：<strong>二项树</strong>。</p>
-                <p><strong>定义：</strong>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="ads05%E4%BA%8C%E9%A1%B9%E9%98%9F%E5%88%97binomial-queue">ads05:二项队列（Binomial Queue）</h1>
+<p>（补档：将以前的ads笔记做修缮后上传）</p>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E4%BA%8C%E9%A1%B9%E5%A0%86%E7%9A%84%E5%9F%BA%E7%9F%B3--%E4%BA%8C%E9%A1%B9%E6%A0%91-binomial-tree">第一部分：二项堆的基石 —— 二项树 (Binomial Tree)</h3>
+<p>要理解二项堆，我们必须首先理解它的基本组成部分：<strong>二项树</strong>。</p>
+<p><strong>定义：</strong>
                 二项树是一种递归定义的有序树，我们用 $B_k$ 来表示一棵 $k$ 阶二项树。</p>
-                <ul>
-                <li><strong>$B_0$</strong> 是一棵 <strong>0 阶</strong>二项树，它只有一个节点。</li>
-                <li><strong>$B_k$</strong> 是一棵 <strong>$k$ 阶</strong>二项树，它由两棵 $B_{k-1}$（$k-1$ 阶二项树）连接而成。具体地，我们将其中一棵 $B_{k-1}$ 的根节点，作为另一棵 $B_{k-1}$ 根节点的最左边的孩子。</li>
-                </ul>
-                <p>让我们来看一下前几阶二项树的样子：</p>
-                <div class="mermaid">
+<ul>
+<li><strong>$B_0$</strong> 是一棵 <strong>0 阶</strong>二项树，它只有一个节点。</li>
+<li><strong>$B_k$</strong> 是一棵 <strong>$k$ 阶</strong>二项树，它由两棵 $B_{k-1}$（$k-1$ 阶二项树）连接而成。具体地，我们将其中一棵 $B_{k-1}$ 的根节点，作为另一棵 $B_{k-1}$ 根节点的最左边的孩子。</li>
+</ul>
+<p>让我们来看一下前几阶二项树的样子：</p>
+<div class="mermaid">
                 graph TD
                     subgraph B_0
                         B0_root(( ))
@@ -115,96 +115,96 @@
                         B4_gc2_1 --- B4_ggc2_1(( ))
                     end
                 </div>
-                <p>观察这些树，我们可以发现一些非常重要的数学性质。这些性质不仅优美，而且是二项堆高效运作的理论基础。</p>
-                <h4 id="%E4%BA%8C%E9%A1%B9%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8">二项树的性质</h4>
-                <p>对于一棵 $k$ 阶二项树 $B_k$：</p>
+<p>观察这些树，我们可以发现一些非常重要的数学性质。这些性质不仅优美，而且是二项堆高效运作的理论基础。</p>
+<h4 id="%E4%BA%8C%E9%A1%B9%E6%A0%91%E7%9A%84%E6%80%A7%E8%B4%A8">二项树的性质</h4>
+<p>对于一棵 $k$ 阶二项树 $B_k$：</p>
+<ol>
+<li>
+<p><strong>节点数</strong>: $B_k$ 恰好有 <strong>$2^k$</strong> 个节点。</p>
+<ul>
+<li><strong>证明 (数学归纳法):</strong>
+<ul>
+<li><strong>基础情况 ($k=0$):</strong> $B_0$ 有 1 个节点，$2^0 = 1$。成立。</li>
+<li><strong>归纳假设:</strong> 假设 $B_{k-1}$ 有 $2^{k-1}$ 个节点。</li>
+<li><strong>归纳证明:</strong> $B_k$ 由两棵 $B_{k-1}$ 构成，因此其节点总数为 $2^{k-1} + 2^{k-1} = 2 * 2^{k-1} = 2^k$。</li>
+<li>证毕。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>树高</strong>: $B_k$ 的高度为 <strong>$k$</strong>。</p>
+<ul>
+<li><strong>证明 (数学归纳法):</strong>
+<ul>
+<li><strong>基础情况 ($k=0$):</strong> $B_0$ 的高度为 0。成立。</li>
+<li><strong>归纳假设:</strong> 假设 $B_{k-1}$ 的高度为 $k-1$。</li>
+<li><strong>归纳证明:</strong> $B_k$ 的根是由一棵 $B_{k-1}$ 的根形成的，它的子树是一棵新的 $B_{k-1}$。因此，$B_k$ 的高度是 $B_{k-1}$ 的高度加 1，即 $(k-1) + 1 = k$。</li>
+<li>证毕。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>根的度数</strong>: $B_k$ 的根节点恰好有 <strong>$k$</strong> 个孩子。并且，这些孩子节点恰好是 $B_{k-1}, B_{k-2}, ..., B_0$ 的根（从左到右）。</p>
+<ul>
+<li><strong>证明 (通过构造):</strong>
+<ul>
+<li>$B_k$ 由两棵 $B_{k-1}$ 构成，我们称之为 $T_A$ 和 $T_B$。假设 $T_B$ 的根连接到 $T_A$ 的根。</li>
+<li>$T_A$ 的根原来有 $k-1$ 个孩子，它们是 $B_{k-2}, ..., B_0$ 的根。</li>
+<li>现在，$T_B$ 的根成为 $T_A$ 根的一个新孩子。$T_B$ 本身是一棵 $B_{k-1}$。</li>
+<li>因此，$B_k$ 的根现在有 $(k-1) + 1 = k$ 个孩子，它们分别是 $B_{k-1}, B_{k-2}, ..., B_0$ 的根。</li>
+<li>证毕。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>深度的节点数 (核心性质)</strong>: 在 $B_k$ 中，深度为 $d$ 的节点数量为 <strong>二项式系数 C(k, d)</strong>，即 $k$ 中选 $d$ 的组合数。</p>
+<ul>
+<li><strong>为什么叫“二项树”？</strong> 这就是名字的由来！$(a+b)^k$ 的二项式展开，其系数就与此有关。</li>
+<li><strong>证明 (数学归纳法):</strong>
+<ul>
+<li>令 $N(k, d)$ 为 $B_k$ 在深度 $d$ 的节点数。</li>
+<li><strong>基础情况 ($k=0$):</strong> $B_0$ 在深度 0 有 1 个节点，$N(0, 0) = 1$。而 $C(0, 0) = 1$。成立。</li>
+<li><strong>归纳假设:</strong> 假设对于 $B_{k-1}$，其深度 $d$ 的节点数为 $N(k-1, d) = C(k-1, d)$。</li>
+<li><strong>归纳证明:</strong> $B_k$ 由两棵 $B_{k-1}$（$T_A$ 和 $T_B$）构成。$B_k$ 中深度为 $d$ 的节点来自两个部分：
                 <ol>
-                <li>
-                <p><strong>节点数</strong>: $B_k$ 恰好有 <strong>$2^k$</strong> 个节点。</p>
-                <ul>
-                <li><strong>证明 (数学归纳法):</strong>
-                <ul>
-                <li><strong>基础情况 ($k=0$):</strong> $B_0$ 有 1 个节点，$2^0 = 1$。成立。</li>
-                <li><strong>归纳假设:</strong> 假设 $B_{k-1}$ 有 $2^{k-1}$ 个节点。</li>
-                <li><strong>归纳证明:</strong> $B_k$ 由两棵 $B_{k-1}$ 构成，因此其节点总数为 $2^{k-1} + 2^{k-1} = 2 * 2^{k-1} = 2^k$。</li>
-                <li>证毕。</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>树高</strong>: $B_k$ 的高度为 <strong>$k$</strong>。</p>
-                <ul>
-                <li><strong>证明 (数学归纳法):</strong>
-                <ul>
-                <li><strong>基础情况 ($k=0$):</strong> $B_0$ 的高度为 0。成立。</li>
-                <li><strong>归纳假设:</strong> 假设 $B_{k-1}$ 的高度为 $k-1$。</li>
-                <li><strong>归纳证明:</strong> $B_k$ 的根是由一棵 $B_{k-1}$ 的根形成的，它的子树是一棵新的 $B_{k-1}$。因此，$B_k$ 的高度是 $B_{k-1}$ 的高度加 1，即 $(k-1) + 1 = k$。</li>
-                <li>证毕。</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>根的度数</strong>: $B_k$ 的根节点恰好有 <strong>$k$</strong> 个孩子。并且，这些孩子节点恰好是 $B_{k-1}, B_{k-2}, ..., B_0$ 的根（从左到右）。</p>
-                <ul>
-                <li><strong>证明 (通过构造):</strong>
-                <ul>
-                <li>$B_k$ 由两棵 $B_{k-1}$ 构成，我们称之为 $T_A$ 和 $T_B$。假设 $T_B$ 的根连接到 $T_A$ 的根。</li>
-                <li>$T_A$ 的根原来有 $k-1$ 个孩子，它们是 $B_{k-2}, ..., B_0$ 的根。</li>
-                <li>现在，$T_B$ 的根成为 $T_A$ 根的一个新孩子。$T_B$ 本身是一棵 $B_{k-1}$。</li>
-                <li>因此，$B_k$ 的根现在有 $(k-1) + 1 = k$ 个孩子，它们分别是 $B_{k-1}, B_{k-2}, ..., B_0$ 的根。</li>
-                <li>证毕。</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>深度的节点数 (核心性质)</strong>: 在 $B_k$ 中，深度为 $d$ 的节点数量为 <strong>二项式系数 C(k, d)</strong>，即 $k$ 中选 $d$ 的组合数。</p>
-                <ul>
-                <li><strong>为什么叫“二项树”？</strong> 这就是名字的由来！$(a+b)^k$ 的二项式展开，其系数就与此有关。</li>
-                <li><strong>证明 (数学归纳法):</strong>
-                <ul>
-                <li>令 $N(k, d)$ 为 $B_k$ 在深度 $d$ 的节点数。</li>
-                <li><strong>基础情况 ($k=0$):</strong> $B_0$ 在深度 0 有 1 个节点，$N(0, 0) = 1$。而 $C(0, 0) = 1$。成立。</li>
-                <li><strong>归纳假设:</strong> 假设对于 $B_{k-1}$，其深度 $d$ 的节点数为 $N(k-1, d) = C(k-1, d)$。</li>
-                <li><strong>归纳证明:</strong> $B_k$ 由两棵 $B_{k-1}$（$T_A$ 和 $T_B$）构成。$B_k$ 中深度为 $d$ 的节点来自两个部分：
-                <ol>
-                <li>来自 $T_A$ 中深度为 $d$ 的节点。其数量为 $N(k-1, d)$。</li>
-                <li>来自 $T_B$ 中深度为 $d-1$ 的节点（因为 $T_B$ 的根被挂在了 $B_k$ 的根下，深度增加了1）。其数量为 $N(k-1, d-1)$。</li>
-                </ol>
-                </li>
-                <li>因此，$N(k, d) = N(k-1, d) + N(k-1, d-1)$。</li>
-                <li>根据帕斯卡恒等式（Pascal's Identity），我们知道 $C(k, d) = C(k-1, d) + C(k-1, d-1)$。</li>
-                <li>所以，$N(k, d) = C(k, d)$。</li>
-                <li>证毕。</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                </ol>
-                <hr>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E4%BA%8C%E9%A1%B9%E5%A0%86%E7%9A%84%E7%BB%93%E6%9E%84">第二部分：二项堆的结构</h3>
-                <p>现在我们知道了二项树，那么二项堆是什么呢？</p>
-                <p>一个二项堆不是一棵树，而是一个由<strong>二项树组成的森林</strong>。</p>
-                <p>这个森林必须满足两个核心属性：</p>
-                <ol>
-                <li><strong>堆序属性 (Heap-Ordered):</strong> 森林中的<strong>每一棵</strong>二项树都满足<strong>最小堆</strong>性质。即，每个节点的值都小于或等于其所有孩子节点的值。这也意味着每棵树的根节点是该树中的最小值。</li>
-                <li><strong>结构属性 (Unique Structure):</strong> 对于任意阶数 $k$，森林中<strong>至多只有一棵</strong> $B_k$ 类型的二项树。</li>
-                </ol>
-                <p><strong>关键思想：与二进制的深刻联系</strong></p>
-                <p>这个结构属性非常巧妙。它意味着一个包含 $N$ 个节点的二项堆的结构，是由 $N$ 的二进制表示唯一确定的！</p>
-                <p>假设 $N$ 的二进制表示为 $(...b_k ... b_1 b_0)_2$。
+<li>来自 $T_A$ 中深度为 $d$ 的节点。其数量为 $N(k-1, d)$。</li>
+<li>来自 $T_B$ 中深度为 $d-1$ 的节点（因为 $T_B$ 的根被挂在了 $B_k$ 的根下，深度增加了1）。其数量为 $N(k-1, d-1)$。</li>
+</ol>
+</li>
+<li>因此，$N(k, d) = N(k-1, d) + N(k-1, d-1)$。</li>
+<li>根据帕斯卡恒等式（Pascal's Identity），我们知道 $C(k, d) = C(k-1, d) + C(k-1, d-1)$。</li>
+<li>所以，$N(k, d) = C(k, d)$。</li>
+<li>证毕。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<hr/>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E4%BA%8C%E9%A1%B9%E5%A0%86%E7%9A%84%E7%BB%93%E6%9E%84">第二部分：二项堆的结构</h3>
+<p>现在我们知道了二项树，那么二项堆是什么呢？</p>
+<p>一个二项堆不是一棵树，而是一个由<strong>二项树组成的森林</strong>。</p>
+<p>这个森林必须满足两个核心属性：</p>
+<ol>
+<li><strong>堆序属性 (Heap-Ordered):</strong> 森林中的<strong>每一棵</strong>二项树都满足<strong>最小堆</strong>性质。即，每个节点的值都小于或等于其所有孩子节点的值。这也意味着每棵树的根节点是该树中的最小值。</li>
+<li><strong>结构属性 (Unique Structure):</strong> 对于任意阶数 $k$，森林中<strong>至多只有一棵</strong> $B_k$ 类型的二项树。</li>
+</ol>
+<p><strong>关键思想：与二进制的深刻联系</strong></p>
+<p>这个结构属性非常巧妙。它意味着一个包含 $N$ 个节点的二项堆的结构，是由 $N$ 的二进制表示唯一确定的！</p>
+<p>假设 $N$ 的二进制表示为 $(...b_k ... b_1 b_0)_2$。
                 如果 $b_k$ 位是 $1$，那么这个二项堆中就包含一棵 $B_k$。
                 如果 $b_k$ 位是 $0$，那么这个二项堆中就没有 $B_k$。</p>
-                <p><strong>【示例】一个包含 13 个节点的二项堆</strong></p>
-                <ol>
-                <li><strong>计算:</strong> $13$ 的二进制表示是 $1101_2$。</li>
-                <li><strong>分解:</strong> $13 = 8 + 4 + 0 + 1 = 1<em>2^3 + 1</em>2^2 + 0<em>2^1 + 1</em>2^0$。</li>
-                <li><strong>构建:</strong> 这意味着这个二项堆由 $B_3$ (8个节点), $B_2$ (4个节点), 和 $B_0$ (1个节点) 组成。它没有 $B_1$。</li>
-                </ol>
-                <p>假设我们有13个元素，它们可以构成如下的二项堆（注意，每棵树都满足最小堆性质）：</p>
-                <div class="mermaid">
+<p><strong>【示例】一个包含 13 个节点的二项堆</strong></p>
+<ol>
+<li><strong>计算:</strong> $13$ 的二进制表示是 $1101_2$。</li>
+<li><strong>分解:</strong> $13 = 8 + 4 + 0 + 1 = 1<em>2^3 + 1</em>2^2 + 0<em>2^1 + 1</em>2^0$。</li>
+<li><strong>构建:</strong> 这意味着这个二项堆由 $B_3$ (8个节点), $B_2$ (4个节点), 和 $B_0$ (1个节点) 组成。它没有 $B_1$。</li>
+</ol>
+<p>假设我们有13个元素，它们可以构成如下的二项堆（注意，每棵树都满足最小堆性质）：</p>
+<div class="mermaid">
                 graph TD
                     subgraph "Binomial Heap (Size 13)"
                         subgraph B0
@@ -214,28 +214,28 @@
                         
                         subgraph B2
                             direction TB
-                            B2_R((23)) --> B2_C1((51))
-                            B2_R --> B2_C2((24))
-                            B2_C1 --> B2_GC1((65))
+                            B2_R((23)) --&gt; B2_C1((51))
+                            B2_R --&gt; B2_C2((24))
+                            B2_C1 --&gt; B2_GC1((65))
                         end
                         
                         subgraph B3
                             direction TB
-                            B3_R((12)) --> B3_C1((21))
-                            B3_R --> B3_C2((24))
-                            B3_R --> B3_C3((14))
+                            B3_R((12)) --&gt; B3_C1((21))
+                            B3_R --&gt; B3_C2((24))
+                            B3_R --&gt; B3_C3((14))
                             
-                            B3_C1 --> B3_GC1_1((65))
-                            B3_C1 --> B3_GC1_2((26))
+                            B3_C1 --&gt; B3_GC1_1((65))
+                            B3_C1 --&gt; B3_GC1_2((26))
                             
-                            B3_GC1_2 --> B3_GGC1((18))
+                            B3_GC1_2 --&gt; B3_GGC1((18))
                             
-                            B3_C2 --> B3_GC2_1((16))
+                            B3_C2 --&gt; B3_GC2_1((16))
                         end
                     end
                 </div>
-                <p><em>注意：$B_1$ 是不存在的，用灰色表示其缺失的位置，以强调结构。</em></p>
-                <div class="mermaid">
+<p><em>注意：$B_1$ 是不存在的，用灰色表示其缺失的位置，以强调结构。</em></p>
+<div class="mermaid">
                 graph TD
                     subgraph "Structure for N=13 (Binary 1101)"
                         direction LR
@@ -250,182 +250,182 @@
                         end
 
                         subgraph B2 [Exists]
-                            B2_R((23)) --> B2_C1((51))
-                            B2_R --> B2_C2((24))
-                            B2_C1 --> B2_GC1((65))
+                            B2_R((23)) --&gt; B2_C1((51))
+                            B2_R --&gt; B2_C2((24))
+                            B2_C1 --&gt; B2_GC1((65))
                         end
 
                         subgraph B3 [Exists]
-                            B3_R((12)) --> B3_C1((21))
-                            B3_R --> B3_C2((24))
-                            B3_R --> B3_C3((14))
+                            B3_R((12)) --&gt; B3_C1((21))
+                            B3_R --&gt; B3_C2((24))
+                            B3_R --&gt; B3_C3((14))
                             
-                            B3_C1 --> B3_GC1_1((65)) & B3_GC1_2((26))
-                            B3_GC1_2 --> B3_GGC1((18))
-                            B3_C2 --> B3_GC2_1((16))
+                            B3_C1 --&gt; B3_GC1_1((65)) &amp; B3_GC1_2((26))
+                            B3_GC1_2 --&gt; B3_GGC1((18))
+                            B3_C2 --&gt; B3_GC2_1((16))
                         end
                     end
                 </div>
-                <p>这个根节点的列表（13, 23, 12）是二项堆的核心，我们通常按树的阶数从小到大排序。</p>
-                <hr>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C">第三部分：核心操作</h3>
-                <h4 id="1-%E6%9F%A5%E6%89%BE%E6%9C%80%E5%B0%8F%E5%80%BC-findmin">1. 查找最小值 (FindMin)</h4>
+<p>这个根节点的列表（13, 23, 12）是二项堆的核心，我们通常按树的阶数从小到大排序。</p>
+<hr/>
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E6%A0%B8%E5%BF%83%E6%93%8D%E4%BD%9C">第三部分：核心操作</h3>
+<h4 id="1-%E6%9F%A5%E6%89%BE%E6%9C%80%E5%B0%8F%E5%80%BC-findmin">1. 查找最小值 (FindMin)</h4>
+<ul>
+<li>
+<p><strong>原理:</strong> 由于每棵二项树都满足最小堆性质，整个堆的最小值必然是森林中某棵树的根。</p>
+</li>
+<li>
+<p><strong>实现:</strong> 我们只需要遍历所有树的根节点，找到其中的最小值即可。</p>
+</li>
+<li>
+<p><strong>复杂度:</strong> 一个包含 $N$ 个节点的堆，最多有多少棵树？树的数量等于 $N$ 的二进制表示中 $1$ 的个数。当 $N = 2^k - 1$ 时，树的数量最多，为 $k$。因为 $k = \lfloor \log_2 N\rfloor$，所以根节点的数量是 $O(\log N)$。因此，<code>FindMin</code> 的时间复杂度为 <strong>$O(\log N)$</strong>。</p>
+</li>
+<li>
+<p><strong>优化:</strong> 我们可以像在斐波那契堆中一样，维护一个指向最小根节点的指针。这样，<code>FindMin</code> 操作就可以在 <strong>$O(1)$</strong> 时间内完成。不过，这个指针需要在执行 <code>Insert</code>, <code>Merge</code>, <code>DeleteMin</code> 等修改堆结构的操作时进行更新。</p>
+</li>
+</ul>
+<h4 id="2-%E5%90%88%E5%B9%B6-merge--union">2. 合并 (Merge / Union)</h4>
+<p>这是二项堆的“杀手级应用”。合并两个二项堆 $H_1$ 和 $H_2$ 的过程，与二进制加法惊人地相似。</p>
+<ul>
+<li><strong>思想:</strong> 我们从 $k=0$ 开始，逐阶（就像二进制的每一位）处理。对于每一阶 $k$，我们可能会有来自 $H_1$ 的 $B_k$，来自 $H_2$ 的 $B_k$，以及从前一阶 $k-1$ 合并产生的“进位” $B_k$。</li>
+<li><strong>规则:</strong> 在第 $k$ 阶，我们最多可能有三棵 $B_k$。
                 <ul>
-                <li>
-                <p><strong>原理:</strong> 由于每棵二项树都满足最小堆性质，整个堆的最小值必然是森林中某棵树的根。</p>
-                </li>
-                <li>
-                <p><strong>实现:</strong> 我们只需要遍历所有树的根节点，找到其中的最小值即可。</p>
-                </li>
-                <li>
-                <p><strong>复杂度:</strong> 一个包含 $N$ 个节点的堆，最多有多少棵树？树的数量等于 $N$ 的二进制表示中 $1$ 的个数。当 $N = 2^k - 1$ 时，树的数量最多，为 $k$。因为 $k = \lfloor \log_2 N\rfloor$，所以根节点的数量是 $O(\log N)$。因此，<code>FindMin</code> 的时间复杂度为 <strong>$O(\log N)$</strong>。</p>
-                </li>
-                <li>
-                <p><strong>优化:</strong> 我们可以像在斐波那契堆中一样，维护一个指向最小根节点的指针。这样，<code>FindMin</code> 操作就可以在 <strong>$O(1)$</strong> 时间内完成。不过，这个指针需要在执行 <code>Insert</code>, <code>Merge</code>, <code>DeleteMin</code> 等修改堆结构的操作时进行更新。</p>
-                </li>
-                </ul>
-                <h4 id="2-%E5%90%88%E5%B9%B6-merge--union">2. 合并 (Merge / Union)</h4>
-                <p>这是二项堆的“杀手级应用”。合并两个二项堆 $H_1$ 和 $H_2$ 的过程，与二进制加法惊人地相似。</p>
-                <ul>
-                <li><strong>思想:</strong> 我们从 $k=0$ 开始，逐阶（就像二进制的每一位）处理。对于每一阶 $k$，我们可能会有来自 $H_1$ 的 $B_k$，来自 $H_2$ 的 $B_k$，以及从前一阶 $k-1$ 合并产生的“进位” $B_k$。</li>
-                <li><strong>规则:</strong> 在第 $k$ 阶，我们最多可能有三棵 $B_k$。
-                <ul>
-                <li><strong>0 棵 $B_k$:</strong> 什么都不做。</li>
-                <li><strong>1 棵 $B_k$:</strong> 这棵树直接成为结果堆中的 $B_k$。</li>
-                <li><strong>2 棵 $B_k$:</strong> 将这两棵树合并成一棵 $B_{k+1}$。这棵 $B_{k+1}$ 成为到下一阶的“进位”。结果堆中没有 $B_k$。</li>
-                <li><strong>3 棵 $B_k$:</strong> 保留其中一棵作为结果堆中的 $B_k$，另外两棵合并成一棵 $B_{k+1}$，作为到下一阶的“进位”。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>【合并示例】</strong>
+<li><strong>0 棵 $B_k$:</strong> 什么都不做。</li>
+<li><strong>1 棵 $B_k$:</strong> 这棵树直接成为结果堆中的 $B_k$。</li>
+<li><strong>2 棵 $B_k$:</strong> 将这两棵树合并成一棵 $B_{k+1}$。这棵 $B_{k+1}$ 成为到下一阶的“进位”。结果堆中没有 $B_k$。</li>
+<li><strong>3 棵 $B_k$:</strong> 保留其中一棵作为结果堆中的 $B_k$，另外两棵合并成一棵 $B_{k+1}$，作为到下一阶的“进位”。</li>
+</ul>
+</li>
+</ul>
+<p><strong>【合并示例】</strong>
                 合并 $H_1$ (大小为 6) 和 $H_2$ (大小为 7)。</p>
-                <ul>
-                <li>$6 = (110)_2$ -&gt; $H_1$ 有 $B_2$ 和 $B_1$。</li>
-                <li>$7 = (111)_2$ -&gt; $H_2$ 有 $B_2$, $B_1$, 和 $B_0$。</li>
-                <li>合并结果大小为 13，应该是 $(1101)_2$ -&gt; $B_3$, $B_2$, $B_0$。</li>
-                </ul>
-                <p>让我们模拟这个过程：</p>
-                <table>
-                <thead>
-                <tr>
-                <th style="text-align:center">阶 (k)</th>
-                <th style="text-align:center">H1</th>
-                <th style="text-align:center">H2</th>
-                <th style="text-align:center">Carry In</th>
-                <th style="text-align:center">Sum (棵)</th>
-                <th style="text-align:center">Result</th>
-                <th style="text-align:center">Carry Out</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                <td style="text-align:center"><strong>0</strong></td>
-                <td style="text-align:center">无</td>
-                <td style="text-align:center">B0</td>
-                <td style="text-align:center">无</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">B0</td>
-                <td style="text-align:center">无</td>
-                </tr>
-                <tr>
-                <td style="text-align:center"><strong>1</strong></td>
-                <td style="text-align:center">B1</td>
-                <td style="text-align:center">B1</td>
-                <td style="text-align:center">无</td>
-                <td style="text-align:center">2</td>
-                <td style="text-align:center">无</td>
-                <td style="text-align:center">B2</td>
-                </tr>
-                <tr>
-                <td style="text-align:center"><strong>2</strong></td>
-                <td style="text-align:center">B2</td>
-                <td style="text-align:center">B2</td>
-                <td style="text-align:center">B2 (进位)</td>
-                <td style="text-align:center">3</td>
-                <td style="text-align:center">B2</td>
-                <td style="text-align:center">B3</td>
-                </tr>
-                <tr>
-                <td style="text-align:center"><strong>3</strong></td>
-                <td style="text-align:center">无</td>
-                <td style="text-align:center">无</td>
-                <td style="text-align:center">B3 (进位)</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">B3</td>
-                <td style="text-align:center">无</td>
-                </tr>
-                </tbody>
-                </table>
-                <p>最终结果包含 $B_3$, $B_2$, $B_0$，与预期一致！</p>
-                <p><strong>合并两棵同阶树 <code>CombineTrees(T1, T2)</code></strong>
+<ul>
+<li>$6 = (110)_2$ -&gt; $H_1$ 有 $B_2$ 和 $B_1$。</li>
+<li>$7 = (111)_2$ -&gt; $H_2$ 有 $B_2$, $B_1$, 和 $B_0$。</li>
+<li>合并结果大小为 13，应该是 $(1101)_2$ -&gt; $B_3$, $B_2$, $B_0$。</li>
+</ul>
+<p>让我们模拟这个过程：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">阶 (k)</th>
+<th style="text-align:center">H1</th>
+<th style="text-align:center">H2</th>
+<th style="text-align:center">Carry In</th>
+<th style="text-align:center">Sum (棵)</th>
+<th style="text-align:center">Result</th>
+<th style="text-align:center">Carry Out</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>0</strong></td>
+<td style="text-align:center">无</td>
+<td style="text-align:center">B0</td>
+<td style="text-align:center">无</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">B0</td>
+<td style="text-align:center">无</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>1</strong></td>
+<td style="text-align:center">B1</td>
+<td style="text-align:center">B1</td>
+<td style="text-align:center">无</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">无</td>
+<td style="text-align:center">B2</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>2</strong></td>
+<td style="text-align:center">B2</td>
+<td style="text-align:center">B2</td>
+<td style="text-align:center">B2 (进位)</td>
+<td style="text-align:center">3</td>
+<td style="text-align:center">B2</td>
+<td style="text-align:center">B3</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>3</strong></td>
+<td style="text-align:center">无</td>
+<td style="text-align:center">无</td>
+<td style="text-align:center">B3 (进位)</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">B3</td>
+<td style="text-align:center">无</td>
+</tr>
+</tbody>
+</table>
+<p>最终结果包含 $B_3$, $B_2$, $B_0$，与预期一致！</p>
+<p><strong>合并两棵同阶树 <code>CombineTrees(T1, T2)</code></strong>
                 这是合并操作的基础。假设要合并两棵 $B_k$。</p>
-                <ol>
-                <li>比较它们的根节点 <code>root1</code> 和 <code>root2</code> 的值。</li>
-                <li>假设 <code>value(root1) &lt;= value(root2)</code>。</li>
-                <li>将 <code>T2</code> 变成 <code>T1</code> 的一个新孩子（通常是最左边的孩子）。</li>
-                <li>结果是一棵 $B_{k+1}$，其根是 <code>root1</code>。
+<ol>
+<li>比较它们的根节点 <code>root1</code> 和 <code>root2</code> 的值。</li>
+<li>假设 <code>value(root1) &lt;= value(root2)</code>。</li>
+<li>将 <code>T2</code> 变成 <code>T1</code> 的一个新孩子（通常是最左边的孩子）。</li>
+<li>结果是一棵 $B_{k+1}$，其根是 <code>root1</code>。
                 这个操作是 <strong>O(1)</strong> 的。</li>
-                </ol>
-                <p><strong>复杂度:</strong> 合并过程需要遍历两个堆的根列表，其长度都是 $O(\log N)$。每一步都是 $O(1)$ 的 <code>CombineTrees</code> 操作。因此，总的合并时间复杂度为 <strong>$O(\log N)$</strong>。</p>
-                <h4 id="3-%E6%8F%92%E5%85%A5-insert">3. 插入 (Insert)</h4>
-                <ul>
-                <li><strong>原理:</strong> 插入一个新元素可以看作是<strong>特殊情况的合并</strong>。</li>
-                <li><strong>实现:</strong>
-                <ol>
-                <li>创建一个只包含待插入新元素的二项堆（即一个 $B_0$）。</li>
-                <li>将这个新堆与原有的堆进行合并。</li>
-                </ol>
-                </li>
-                <li><strong>复杂度:</strong>
-                <ul>
-                <li><strong>最坏情况:</strong> $O(\log N)$。例如，向一个包含 $2^k - 1$ 个元素的堆（由 $B_{k-1}, ..., B_0$ 组成）插入一个元素。这会引发一连串的进位，直到形成一棵 $B_k$。</li>
-                <li><strong>均摊情况 (Amortized Analysis):</strong> $O(1)$。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>【均摊分析】</strong>
+</ol>
+<p><strong>复杂度:</strong> 合并过程需要遍历两个堆的根列表，其长度都是 $O(\log N)$。每一步都是 $O(1)$ 的 <code>CombineTrees</code> 操作。因此，总的合并时间复杂度为 <strong>$O(\log N)$</strong>。</p>
+<h4 id="3-%E6%8F%92%E5%85%A5-insert">3. 插入 (Insert)</h4>
+<ul>
+<li><strong>原理:</strong> 插入一个新元素可以看作是<strong>特殊情况的合并</strong>。</li>
+<li><strong>实现:</strong>
+<ol>
+<li>创建一个只包含待插入新元素的二项堆（即一个 $B_0$）。</li>
+<li>将这个新堆与原有的堆进行合并。</li>
+</ol>
+</li>
+<li><strong>复杂度:</strong>
+<ul>
+<li><strong>最坏情况:</strong> $O(\log N)$。例如，向一个包含 $2^k - 1$ 个元素的堆（由 $B_{k-1}, ..., B_0$ 组成）插入一个元素。这会引发一连串的进位，直到形成一棵 $B_k$。</li>
+<li><strong>均摊情况 (Amortized Analysis):</strong> $O(1)$。</li>
+</ul>
+</li>
+</ul>
+<p><strong>【均摊分析】</strong>
                 为什么插入的均摊时间是 $O(1)$？我们可以用两种方法来理解。</p>
-                <p><strong>方法一：聚合分析 (Aggregate Analysis)</strong>
+<p><strong>方法一：聚合分析 (Aggregate Analysis)</strong>
                 考虑连续 $N$ 次插入到一个空堆中。</p>
-                <ul>
-                <li>第1次插入：1次操作 (创建 $B_0$)</li>
-                <li>第2次插入：2次操作 (合并 $B_0$ 和 $B_0$ 成 $B_1$)</li>
-                <li>第3次插入：1次操作 (添加 $B_0$)</li>
-                <li>第4次插入：3次操作 (合并 $B_0$, $B_0$ -&gt; $B_1$；合并 $B_1$, $B_1$ -&gt; $B_2$)
+<ul>
+<li>第1次插入：1次操作 (创建 $B_0$)</li>
+<li>第2次插入：2次操作 (合并 $B_0$ 和 $B_0$ 成 $B_1$)</li>
+<li>第3次插入：1次操作 (添加 $B_0$)</li>
+<li>第4次插入：3次操作 (合并 $B_0$, $B_0$ -&gt; $B_1$；合并 $B_1$, $B_1$ -&gt; $B_2$)
                 ...
                 总的来看，每次插入，元素 $i$ 的二进制表示的最低位是 $0$ 变成 $1$。如果第 $k$ 位是第一个 $0$，则会发生 $k$ 次合并。
                 在 $N$ 次插入中，$B_0$ 合并了 $N/2$ 次，$B_1$ 合并了 $N/4$ 次，$B_2$ 合并了 $N/8$ 次...
                 总合并次数 = $N/2 + N/4 + N/8 + ... &lt; N$。
                 所以 $N$ 次插入总共花费 $O(N)$ 的时间，平均每次就是 <strong>$O(1)$</strong>。</li>
-                </ul>
-                <p><strong>方法二：势能法 (Potential Function Method)</strong>
+</ul>
+<p><strong>方法二：势能法 (Potential Function Method)</strong>
                 这是更严谨的证明。</p>
+<ul>
+<li>定义<strong>势能函数 $\Phi(H)$</strong> 为堆 $H$ 中树的数量。</li>
+<li>第 $i$ 次操作的<strong>实际成本</strong>为 $C_i$。</li>
+<li>第 $i$ 次操作的<strong>均摊成本</strong>为 $a_i = C_i + \Phi(H_i) - \Phi(H_{i-1})$。</li>
+<li>假设第 $i$ 次插入操作需要 $k$ 次 <code>CombineTrees</code> 操作。这意味着在插入前，堆中有 $B_0, B_1, ..., B_{k-1}$。
                 <ul>
-                <li>定义<strong>势能函数 $\Phi(H)$</strong> 为堆 $H$ 中树的数量。</li>
-                <li>第 $i$ 次操作的<strong>实际成本</strong>为 $C_i$。</li>
-                <li>第 $i$ 次操作的<strong>均摊成本</strong>为 $a_i = C_i + \Phi(H_i) - \Phi(H_{i-1})$。</li>
-                <li>假设第 $i$ 次插入操作需要 $k$ 次 <code>CombineTrees</code> 操作。这意味着在插入前，堆中有 $B_0, B_1, ..., B_{k-1}$。
-                <ul>
-                <li>实际成本 $C_i = k + 1$ (k 次合并，1 次创建新堆)。</li>
-                <li>操作前树的数量 $\Phi(H_{i-1}) = k$。</li>
-                <li>操作后，这些树合并成一棵 $B_k$，树的数量 $\Phi(H_i) = 1$（假设堆中更高阶的树不受影响）。</li>
-                <li>势能变化 $\Delta \Phi = \Phi(H_i) - \Phi(H_{i-1}) = 1 - k$。</li>
-                <li>均摊成本 $a_i = (k+1) + (1-k) = 2$。</li>
-                </ul>
-                </li>
-                <li>因此，每次插入的均摊成本是一个常数 <strong>$O(1)$</strong>。</li>
-                </ul>
-                <h4 id="4-%E5%88%A0%E9%99%A4%E6%9C%80%E5%B0%8F%E5%80%BC-deletemin">4. 删除最小值 (DeleteMin)</h4>
-                <p>这是最复杂的操作，但逻辑清晰，可以分解为以下步骤：</p>
-                <ol>
-                <li><strong>找到最小根:</strong> 遍历根列表，找到带有最小值的根。假设它属于 $B_k$。 (复杂度: $O(\log N)$)</li>
-                <li><strong>分离:</strong> 将这棵 $B_k$ 从堆 $H$ 的森林中移除。剩下的树构成一个新的堆 $H'$。 (复杂度: $O(1)$)</li>
-                <li><strong>拆解:</strong> 移除 $B_k$ 的根节点（这就是我们要返回的最小值）。它的 $k$ 个孩子，根据性质，恰好是 $B_{k-1}, B_{k-2}, ..., B_0$ 的根。将这些孩子看作一个独立的二项堆 $H''$。 (复杂度: $O(\log N)$ 来创建 $H''$ 的根列表)</li>
-                <li><strong>合并:</strong> 合并 $H'$ 和 $H''$。 (复杂度: $O(\log N)$)</li>
-                </ol>
-                <p><strong>【DeleteMin 示例】</strong>
+<li>实际成本 $C_i = k + 1$ (k 次合并，1 次创建新堆)。</li>
+<li>操作前树的数量 $\Phi(H_{i-1}) = k$。</li>
+<li>操作后，这些树合并成一棵 $B_k$，树的数量 $\Phi(H_i) = 1$（假设堆中更高阶的树不受影响）。</li>
+<li>势能变化 $\Delta \Phi = \Phi(H_i) - \Phi(H_{i-1}) = 1 - k$。</li>
+<li>均摊成本 $a_i = (k+1) + (1-k) = 2$。</li>
+</ul>
+</li>
+<li>因此，每次插入的均摊成本是一个常数 <strong>$O(1)$</strong>。</li>
+</ul>
+<h4 id="4-%E5%88%A0%E9%99%A4%E6%9C%80%E5%B0%8F%E5%80%BC-deletemin">4. 删除最小值 (DeleteMin)</h4>
+<p>这是最复杂的操作，但逻辑清晰，可以分解为以下步骤：</p>
+<ol>
+<li><strong>找到最小根:</strong> 遍历根列表，找到带有最小值的根。假设它属于 $B_k$。 (复杂度: $O(\log N)$)</li>
+<li><strong>分离:</strong> 将这棵 $B_k$ 从堆 $H$ 的森林中移除。剩下的树构成一个新的堆 $H'$。 (复杂度: $O(1)$)</li>
+<li><strong>拆解:</strong> 移除 $B_k$ 的根节点（这就是我们要返回的最小值）。它的 $k$ 个孩子，根据性质，恰好是 $B_{k-1}, B_{k-2}, ..., B_0$ 的根。将这些孩子看作一个独立的二项堆 $H''$。 (复杂度: $O(\log N)$ 来创建 $H''$ 的根列表)</li>
+<li><strong>合并:</strong> 合并 $H'$ 和 $H''$。 (复杂度: $O(\log N)$)</li>
+</ol>
+<p><strong>【DeleteMin 示例】</strong>
                 假设我们从之前大小为 13 的堆中删除最小值。</p>
-                <div class="mermaid">
+<div class="mermaid">
                 graph TD
                     subgraph "H' (Heap after removing B3)"
                         direction LR
@@ -435,19 +435,19 @@
                         end
 
                         subgraph B2
-                            B2_R((23)) --> B2_C1((51))
-                            B2_R --> B2_C2((24))
-                            B2_C1 --> B2_GC1((65))
+                            B2_R((23)) --&gt; B2_C1((51))
+                            B2_R --&gt; B2_C2((24))
+                            B2_C1 --&gt; B2_GC1((65))
                         end
                     end
                 </div>
-                <ol>
-                <li><strong>FindMin:</strong> 最小值为 12，在 $B_3$ 的根上。</li>
-                <li><strong>分离:</strong>
-                <ul>
-                <li>$H'$ 包含 $B_2$ 和 $B_0$。</li>
-                </ul>
-                <div class="mermaid">
+<ol>
+<li><strong>FindMin:</strong> 最小值为 12，在 $B_3$ 的根上。</li>
+<li><strong>分离:</strong>
+<ul>
+<li>$H'$ 包含 $B_2$ 和 $B_0$。</li>
+</ul>
+<div class="mermaid">
                 graph TD
                 subgraph "H'' (from children of node 12)"
                     direction LR
@@ -456,28 +456,28 @@
                     B0_from_B3((14))
 
                     %% B_1 Tree from B_3's children
-                    B1_from_B3_R((24)) --> B1_from_B3_C((16))
+                    B1_from_B3_R((24)) --&gt; B1_from_B3_C((16))
 
                     %% B_2 Tree from B_3's children
-                    B2_from_B3_R((21)) --> B2_from_B3_C1((65))
-                    B2_from_B3_R --> B2_from_B3_C2((26))
-                    B2_from_B3_C2 --> B2_from_B3_GC((18))
+                    B2_from_B3_R((21)) --&gt; B2_from_B3_C1((65))
+                    B2_from_B3_R --&gt; B2_from_B3_C2((26))
+                    B2_from_B3_C2 --&gt; B2_from_B3_GC((18))
                 end
                 </div>
-                </li>
-                <li><strong>拆解:</strong> 移除 12。$B_3$ 的孩子是 $B_2$, $B_1$, $B_0$ 的根。它们形成 $H''$。<div class="mermaid">
+</li>
+<li><strong>拆解:</strong> 移除 12。$B_3$ 的孩子是 $B_2$, $B_1$, $B_0$ 的根。它们形成 $H''$。<div class="mermaid">
                 graph TD
                 subgraph "H'' (Formed from children of min root 12)"
                     direction LR
 
                     subgraph "Child 1 (B2)"
-                        B2_from_B3_R((21)) --> B2_from_B3_C1((65))
-                        B2_from_B3_R --> B2_from_B3_C2((26))
-                        B2_from_B3_C2 --> B2_from_B3_GC((18))
+                        B2_from_B3_R((21)) --&gt; B2_from_B3_C1((65))
+                        B2_from_B3_R --&gt; B2_from_B3_C2((26))
+                        B2_from_B3_C2 --&gt; B2_from_B3_GC((18))
                     end
 
                     subgraph "Child 2 (B1)"
-                        B1_from_B3_R((24)) --> B1_from_B3_C((16))
+                        B1_from_B3_R((24)) --&gt; B1_from_B3_C((16))
                     end
 
                     subgraph "Child 3 (B0)"
@@ -485,16 +485,16 @@
                     end
                 end
                 </div>
-                </li>
-                <li><strong>合并:</strong> 合并 $H'$ (大小 5) 和 $H''$ (大小 7)。结果是一个大小为 12 的新堆。$5 = (101)_2$, $7 = (111)_2$。$5+7=12 = (1100)_2$。最终结果将包含 $B_3$ 和 $B_2$。</li>
-                </ol>
-                <p>总复杂度为 <strong>$O(\log N)$</strong>。</p>
-                <hr>
-                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82%E4%B8%8E%E4%BB%A3%E7%A0%81">第四部分：实现细节与代码</h3>
-                <p>要高效地实现二项堆，我们需要一个合适的节点表示。<strong>左孩子-右兄弟表示法</strong> 是一个绝佳的选择。</p>
-                <h4 id="%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%AE%9A%E4%B9%89-c">数据结构定义 (C++)</h4>
-                <div class="code-container">
-                <pre><code class="language-cpp">#include &lt;vector&gt;
+</li>
+<li><strong>合并:</strong> 合并 $H'$ (大小 5) 和 $H''$ (大小 7)。结果是一个大小为 12 的新堆。$5 = (101)_2$, $7 = (111)_2$。$5+7=12 = (1100)_2$。最终结果将包含 $B_3$ 和 $B_2$。</li>
+</ol>
+<p>总复杂度为 <strong>$O(\log N)$</strong>。</p>
+<hr/>
+<h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82%E4%B8%8E%E4%BB%A3%E7%A0%81">第四部分：实现细节与代码</h3>
+<p>要高效地实现二项堆，我们需要一个合适的节点表示。<strong>左孩子-右兄弟表示法</strong> 是一个绝佳的选择。</p>
+<h4 id="%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%AE%9A%E4%B9%89-c">数据结构定义 (C++)</h4>
+<div class="code-container">
+<pre><code class="language-cpp">#include &lt;vector&gt;
 #include &lt;iostream&gt;
 #include &lt;algorithm&gt;
 #include &lt;climits&gt;
@@ -533,12 +533,12 @@ public:
     void print() const;
 };
 </code></pre>
-                </div>
-                <h4 id="%E5%85%B3%E9%94%AE%E6%93%8D%E4%BD%9C%E5%AE%9E%E7%8E%B0">关键操作实现</h4>
-                <p><strong>1. Link (对应 <code>CombineTrees</code>)</strong>
+</div>
+<h4 id="%E5%85%B3%E9%94%AE%E6%93%8D%E4%BD%9C%E5%AE%9E%E7%8E%B0">关键操作实现</h4>
+<p><strong>1. Link (对应 <code>CombineTrees</code>)</strong>
                 将一棵树连接到另一棵树下，形成更高一阶的树。</p>
-                <div class="code-container">
-                <pre><code class="language-cpp">// 将 y 的根链接到 z 的根下，z 成为新根
+<div class="code-container">
+<pre><code class="language-cpp">// 将 y 的根链接到 z 的根下，z 成为新根
 void BinomialHeap::link(BinNode* y, BinNode* z) {
     y-&gt;parent = z;
     y-&gt;sibling = z-&gt;child;
@@ -546,11 +546,11 @@ void BinomialHeap::link(BinNode* y, BinNode* z) {
     z-&gt;degree++;
 }
 </code></pre>
-                </div>
-                <p><strong>2. Union (核心合并逻辑)</strong>
+</div>
+<p><strong>2. Union (核心合并逻辑)</strong>
                 模拟二进制加法，合并两个根链表。</p>
-                <div class="code-container">
-                <pre><code class="language-cpp">BinNode* BinomialHeap::union_heaps(BinNode* h1, BinNode* h2) {
+<div class="code-container">
+<pre><code class="language-cpp">BinNode* BinomialHeap::union_heaps(BinNode* h1, BinNode* h2) {
     BinNode* new_head = merge_lists(h1, h2);
     if (new_head == nullptr) {
         return nullptr;
@@ -563,11 +563,11 @@ void BinomialHeap::link(BinNode* y, BinNode* z) {
     while (next_x != nullptr) {
         if ((x-&gt;degree != next_x-&gt;degree) || 
             (next_x-&gt;sibling != nullptr &amp;&amp; next_x-&gt;sibling-&gt;degree == x-&gt;degree)) {
-            // Case 1 & 2: x 和 next_x 的度不同，或者后面还有一个同度的
+            // Case 1 &amp; 2: x 和 next_x 的度不同，或者后面还有一个同度的
             prev_x = x;
             x = next_x;
         } else {
-            // Case 3 & 4: x 和 next_x 的度相同
+            // Case 3 &amp; 4: x 和 next_x 的度相同
             if (x-&gt;key &lt;= next_x-&gt;key) { // x 成为根
                 x-&gt;sibling = next_x-&gt;sibling;
                 link(next_x, x);
@@ -624,20 +624,20 @@ BinNode* BinomialHeap::merge_lists(BinNode* h1, BinNode* h2) {
     return head;
 }
 </code></pre>
-                </div>
-                <p><strong>3. Insert</strong>
+</div>
+<p><strong>3. Insert</strong>
                 创建一个单节点堆，然后合并。</p>
-                <div class="code-container">
-                <pre><code class="language-cpp">void BinomialHeap::insert(int key) {
+<div class="code-container">
+<pre><code class="language-cpp">void BinomialHeap::insert(int key) {
     BinNode* new_node = new BinNode(key);
     head = union_heaps(head, new_node);
 }
 </code></pre>
-                </div>
-                <p><strong>4. ExtractMin</strong>
+</div>
+<p><strong>4. ExtractMin</strong>
                 实现前面描述的四个步骤。</p>
-                <div class="code-container">
-                <pre><code class="language-cpp">int BinomialHeap::extractMin() {
+<div class="code-container">
+<pre><code class="language-cpp">int BinomialHeap::extractMin() {
     if (isEmpty()) {
         std::cerr &lt;&lt; "Heap is empty!" &lt;&lt; std::endl;
         return INT_MIN;
@@ -650,7 +650,7 @@ BinNode* BinomialHeap::merge_lists(BinNode* h1, BinNode* h2) {
     BinNode* prev = head;
     
     while (current != nullptr) {
-        if (current-&gt;key < min_node-&gt;key) {
+        if (current-&gt;key &lt; min_node-&gt;key) {
             min_node = current;
             min_prev = prev;
         }
@@ -693,92 +693,118 @@ BinNode* BinomialHeap::merge_lists(BinNode* h1, BinNode* h2) {
     return min_key;
 }
 </code></pre>
-                </div>
-                <hr>
-                <h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E6%80%BB%E7%BB%93%E4%B8%8E%E6%8B%93%E5%B1%95">第五部分：总结与拓展</h3>
-                <h4 id="%E6%80%A7%E8%83%BD%E5%AF%B9%E6%AF%94">性能对比</h4>
-                <table>
-                <thead>
-                <tr>
-                <th style="text-align:left">操作</th>
-                <th style="text-align:left">二叉堆 (Binary Heap)</th>
-                <th style="text-align:left">二项堆 (Binomial Heap)</th>
-                <th style="text-align:left">斐波那契堆 (Fibonacci Heap)</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                <td style="text-align:left"><strong>Insert</strong></td>
-                <td style="text-align:left">$O(\log N)$</td>
-                <td style="text-align:left"><strong>$O(1)$ (均摊)</strong>, $O(\log N)$</td>
-                <td style="text-align:left"><strong>$O(1)$</strong></td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>FindMin</strong></td>
-                <td style="text-align:left">$O(1)$</td>
-                <td style="text-align:left">$O(1)$ (带指针优化)</td>
-                <td style="text-align:left">$O(1)$</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>DeleteMin</strong></td>
-                <td style="text-align:left">$O(\log N)$</td>
-                <td style="text-align:left">$O(\log N)$</td>
-                <td style="text-align:left">$O(\log N)$ (均摊)</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>Merge(Union)</strong></td>
-                <td style="text-align:left">$O(N)$</td>
-                <td style="text-align:left"><strong>$O(\log N)$</strong></td>
-                <td style="text-align:left"><strong>$O(1)$</strong></td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>DecreaseKey</strong></td>
-                <td style="text-align:left">$O(\log N)$</td>
-                <td style="text-align:left">$O(\log N)$</td>
-                <td style="text-align:left"><strong>$O(1)$ (均摊)</strong></td>
-                </tr>
-                </tbody>
-                </table>
-                <p><strong>结论:</strong></p>
-                <ul>
-                <li>二项堆在<strong>合并</strong>操作上完胜二叉堆。</li>
-                <li>它的 <code>Insert</code> 均摊性能也非常好。</li>
-                <li>虽然斐波那契堆在理论上更快，但其结构复杂，常数因子巨大，在实践中除非数据规模极大且 <code>DecreaseKey</code> 操作非常频繁，否则二项堆可能是更好的选择。</li>
-                </ul>
-                <h4 id="%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF">应用场景</h4>
-                <p>二项堆的 $O(\log N)$ 合并特性使其非常适用于：</p>
-                <ol>
-                <li><strong>事件模拟系统:</strong> 当需要将多个独立的事件队列合并成一个时。</li>
-                <li><strong>实现其他高级算法:</strong> 作为某些算法的内部组件，这些算法需要频繁地合并优先队列。</li>
-                <li><strong>Dijkstra's &amp; Prim's 算法:</strong> 虽然斐波那契堆因其 $O(1)$ 的 <code>DecreaseKey</code> 而成为理论上的最佳选择，但二项堆的 $O(\log N)$ <code>DecreaseKey</code>（通过上浮节点实现）也比二叉堆的实现更灵活，并且整体性能依然优秀。在需要合并图的场景下（例如，处理动态图），二项堆的优势会更加明显。</li>
-                </ol>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+</div>
+<hr/>
+<h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E6%80%BB%E7%BB%93%E4%B8%8E%E6%8B%93%E5%B1%95">第五部分：总结与拓展</h3>
+<h4 id="%E6%80%A7%E8%83%BD%E5%AF%B9%E6%AF%94">性能对比</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">操作</th>
+<th style="text-align:left">二叉堆 (Binary Heap)</th>
+<th style="text-align:left">二项堆 (Binomial Heap)</th>
+<th style="text-align:left">斐波那契堆 (Fibonacci Heap)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>Insert</strong></td>
+<td style="text-align:left">$O(\log N)$</td>
+<td style="text-align:left"><strong>$O(1)$ (均摊)</strong>, $O(\log N)$</td>
+<td style="text-align:left"><strong>$O(1)$</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>FindMin</strong></td>
+<td style="text-align:left">$O(1)$</td>
+<td style="text-align:left">$O(1)$ (带指针优化)</td>
+<td style="text-align:left">$O(1)$</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>DeleteMin</strong></td>
+<td style="text-align:left">$O(\log N)$</td>
+<td style="text-align:left">$O(\log N)$</td>
+<td style="text-align:left">$O(\log N)$ (均摊)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>Merge(Union)</strong></td>
+<td style="text-align:left">$O(N)$</td>
+<td style="text-align:left"><strong>$O(\log N)$</strong></td>
+<td style="text-align:left"><strong>$O(1)$</strong></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>DecreaseKey</strong></td>
+<td style="text-align:left">$O(\log N)$</td>
+<td style="text-align:left">$O(\log N)$</td>
+<td style="text-align:left"><strong>$O(1)$ (均摊)</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>结论:</strong></p>
+<ul>
+<li>二项堆在<strong>合并</strong>操作上完胜二叉堆。</li>
+<li>它的 <code>Insert</code> 均摊性能也非常好。</li>
+<li>虽然斐波那契堆在理论上更快，但其结构复杂，常数因子巨大，在实践中除非数据规模极大且 <code>DecreaseKey</code> 操作非常频繁，否则二项堆可能是更好的选择。</li>
+</ul>
+<h4 id="%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF">应用场景</h4>
+<p>二项堆的 $O(\log N)$ 合并特性使其非常适用于：</p>
+<ol>
+<li><strong>事件模拟系统:</strong> 当需要将多个独立的事件队列合并成一个时。</li>
+<li><strong>实现其他高级算法:</strong> 作为某些算法的内部组件，这些算法需要频繁地合并优先队列。</li>
+<li><strong>Dijkstra's &amp; Prim's 算法:</strong> 虽然斐波那契堆因其 $O(1)$ 的 <code>DecreaseKey</code> 而成为理论上的最佳选择，但二项堆的 $O(\log N)$ <code>DecreaseKey</code>（通过上浮节点实现）也比二叉堆的实现更灵活，并且整体性能依然优秀。在需要合并图的场景下（例如，处理动态图），二项堆的优势会更加明显。</li>
+</ol>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

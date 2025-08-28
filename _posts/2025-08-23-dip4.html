@@ -1,13 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>图像信息处理4:卷积与空间域滤波</title>
-    
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    
-    <script>
+<meta charset="utf-8"/>
+<title>图像信息处理4:卷积与空间域滤波</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -18,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -32,54 +30,54 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E5%9B%BE%E5%83%8F%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%864%E5%8D%B7%E7%A7%AF%E4%B8%8E%E7%A9%BA%E9%97%B4%E5%9F%9F%E6%BB%A4%E6%B3%A2">图像信息处理4:卷积与空间域滤波</h1>
-                <h3 id="1-%E5%8D%B7%E7%A7%AF-convolution"><strong>1. 卷积 (Convolution)</strong></h3>
-                <p>卷积是信号处理和图像处理中最基本、最重要的运算之一。它描述了一个函数（或信号）经过一个线性时不变（LTI）系统后的输出。在图像处理中，输入信号是图像本身，系统通常是一个<strong>滤波器（核）</strong>。</p>
-                <h4 id="11-%E4%B8%80%E7%BB%B4%E8%BF%9E%E7%BB%AD%E5%8D%B7%E7%A7%AF"><strong>1.1 一维连续卷积</strong></h4>
-                <ul>
-                <li><strong>定义：</strong> 两个一维连续函数 $f(x)$（输入信号）和 $h(x)$（系统响应/核函数）的卷积，记为 $g(x) = f(x) * h(x)$，定义为：
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E5%9B%BE%E5%83%8F%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%864%E5%8D%B7%E7%A7%AF%E4%B8%8E%E7%A9%BA%E9%97%B4%E5%9F%9F%E6%BB%A4%E6%B3%A2">图像信息处理4:卷积与空间域滤波</h1>
+<h3 id="1-%E5%8D%B7%E7%A7%AF-convolution"><strong>1. 卷积 (Convolution)</strong></h3>
+<p>卷积是信号处理和图像处理中最基本、最重要的运算之一。它描述了一个函数（或信号）经过一个线性时不变（LTI）系统后的输出。在图像处理中，输入信号是图像本身，系统通常是一个<strong>滤波器（核）</strong>。</p>
+<h4 id="11-%E4%B8%80%E7%BB%B4%E8%BF%9E%E7%BB%AD%E5%8D%B7%E7%A7%AF"><strong>1.1 一维连续卷积</strong></h4>
+<ul>
+<li><strong>定义：</strong> 两个一维连续函数 $f(x)$（输入信号）和 $h(x)$（系统响应/核函数）的卷积，记为 $g(x) = f(x) * h(x)$，定义为：
                 $$
                 g(x) = f(x) * h(x) = \int_{-\infty}^{\infty} f(t) h(x-t) dt
                 $$</li>
-                <li><strong>计算过程的直观理解：</strong>
+<li><strong>计算过程的直观理解：</strong>
                 要计算输出函数在特定点 $x$ 的值 $g(x)$，可以分为四个步骤：
                 <ol>
-                <li><strong>翻转 (Flip):</strong> 将核函数 $h(t)$ 绕其纵轴翻转，得到 $h(-t)$。</li>
-                <li><strong>平移 (Shift):</strong> 将翻转后的核函数 $h(-t)$ 向右平移 $x$ 个单位，得到 $h(x-t)$。</li>
-                <li><strong>乘积 (Multiply):</strong> 将平移后的核函数 $h(x-t)$ 与输入函数 $f(t)$ 逐点相乘。</li>
-                <li><strong>积分 (Integrate):</strong> 计算乘积函数 $f(t)h(x-t)$ 在整个定义域上的积分（即曲线下的面积）。这个积分值就是 $g(x)$。
+<li><strong>翻转 (Flip):</strong> 将核函数 $h(t)$ 绕其纵轴翻转，得到 $h(-t)$。</li>
+<li><strong>平移 (Shift):</strong> 将翻转后的核函数 $h(-t)$ 向右平移 $x$ 个单位，得到 $h(x-t)$。</li>
+<li><strong>乘积 (Multiply):</strong> 将平移后的核函数 $h(x-t)$ 与输入函数 $f(t)$ 逐点相乘。</li>
+<li><strong>积分 (Integrate):</strong> 计算乘积函数 $f(t)h(x-t)$ 在整个定义域上的积分（即曲线下的面积）。这个积分值就是 $g(x)$。
                 通过改变平移量 $x$，并重复上述过程，就可以得到整个输出函数 $g(x)$。<strong>卷积的本质是加权平均</strong>，核函数 $h(x-t)$ 提供了在 $t$ 点附近对 $f(t)$ 的加权权重。</li>
-                </ol>
-                </li>
-                </ul>
-                <h4 id="12-%E5%8D%B7%E7%A7%AF%E7%9A%84%E6%80%A7%E8%B4%A8"><strong>1.2 卷积的性质</strong></h4>
-                <p>卷积运算满足以下重要性质，这些性质在理论分析和算法设计中非常有用。</p>
-                <ol>
-                <li>
-                <p><strong>交换律 (Commutative):</strong> $f * h = h * f$</p>
-                <ul>
-                <li><strong>证明：</strong>
+</ol>
+</li>
+</ul>
+<h4 id="12-%E5%8D%B7%E7%A7%AF%E7%9A%84%E6%80%A7%E8%B4%A8"><strong>1.2 卷积的性质</strong></h4>
+<p>卷积运算满足以下重要性质，这些性质在理论分析和算法设计中非常有用。</p>
+<ol>
+<li>
+<p><strong>交换律 (Commutative):</strong> $f * h = h * f$</p>
+<ul>
+<li><strong>证明：</strong>
                 $$
                 f * h = \int_{-\infty}^{\infty} f(t) h(x-t) dt
                 $$
@@ -87,138 +85,138 @@
                 $$
                 = \int_{\infty}^{-\infty} f(x-s) h(s) (-ds) = \int_{-\infty}^{\infty} h(s) f(x-s) ds = h * f
                 $$</li>
-                <li><strong>意义：</strong> 滤波器作用于图像，等价于图像作用于滤波器。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>分配律 (Distributive):</strong> $f * (g + h) = f * g + f * h$</p>
-                <ul>
-                <li><strong>证明：</strong>
+<li><strong>意义：</strong> 滤波器作用于图像，等价于图像作用于滤波器。</li>
+</ul>
+</li>
+<li>
+<p><strong>分配律 (Distributive):</strong> $f * (g + h) = f * g + f * h$</p>
+<ul>
+<li><strong>证明：</strong>
                 $$
                 f * (g+h) = \int f(t)[g(x-t)+h(x-t)]dt = \int f(t)g(x-t)dt + \int f(t)h(x-t)dt = f<em>g + f</em>h
                 $$</li>
-                <li><strong>意义：</strong> 两个滤波器并联作用于图像，等价于先将两个滤波器相加，再作用于图像。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>结合律 (Associative):</strong> $f * (g * h) = (f * g) * h$</p>
-                <ul>
-                <li><strong>意义：</strong> 图像先经过滤波器 $g$ 再经过滤波器 $h$，等价于先将 $g$ 和 $h$ 卷积得到一个新滤波器，再让这个新滤波器作用于图像。这在设计复杂滤波器时非常有用。</li>
-                </ul>
-                </li>
-                </ol>
-                <h4 id="13-%E4%B8%80%E7%BB%B4%E7%A6%BB%E6%95%A3%E5%8D%B7%E7%A7%AF"><strong>1.3 一维离散卷积</strong></h4>
-                <p>在数字信号处理中，我们处理的是离散序列。积分运算被求和替代。</p>
-                <ul>
-                <li><strong>定义：</strong> 两个离散序列 $f[n]$ 和 $h[n]$ 的卷积 $g[n]$ 为：
+<li><strong>意义：</strong> 两个滤波器并联作用于图像，等价于先将两个滤波器相加，再作用于图像。</li>
+</ul>
+</li>
+<li>
+<p><strong>结合律 (Associative):</strong> $f * (g * h) = (f * g) * h$</p>
+<ul>
+<li><strong>意义：</strong> 图像先经过滤波器 $g$ 再经过滤波器 $h$，等价于先将 $g$ 和 $h$ 卷积得到一个新滤波器，再让这个新滤波器作用于图像。这在设计复杂滤波器时非常有用。</li>
+</ul>
+</li>
+</ol>
+<h4 id="13-%E4%B8%80%E7%BB%B4%E7%A6%BB%E6%95%A3%E5%8D%B7%E7%A7%AF"><strong>1.3 一维离散卷积</strong></h4>
+<p>在数字信号处理中，我们处理的是离散序列。积分运算被求和替代。</p>
+<ul>
+<li><strong>定义：</strong> 两个离散序列 $f[n]$ 和 $h[n]$ 的卷积 $g[n]$ 为：
                 $$
                 g[n] = f[n] * h[n] = \sum_{k=-\infty}^{\infty} f[k] h[n-k]
                 $$
                 计算过程与连续情况类似，只是将积分换成了求和。</li>
-                </ul>
-                <h4 id="14-%E4%BA%8C%E7%BB%B4%E7%A6%BB%E6%95%A3%E5%8D%B7%E7%A7%AF-%E5%9B%BE%E5%83%8F%E5%8D%B7%E7%A7%AF"><strong>1.4 二维离散卷积 (图像卷积)</strong></h4>
-                <p>图像是二维信号，因此图像滤波使用的是二维卷积。</p>
-                <ul>
-                <li><strong>定义：</strong> 对于图像 $f(x, y)$ 和一个二维核 $h(x, y)$，其卷积 $g(x, y)$ 定义为：
+</ul>
+<h4 id="14-%E4%BA%8C%E7%BB%B4%E7%A6%BB%E6%95%A3%E5%8D%B7%E7%A7%AF-%E5%9B%BE%E5%83%8F%E5%8D%B7%E7%A7%AF"><strong>1.4 二维离散卷积 (图像卷积)</strong></h4>
+<p>图像是二维信号，因此图像滤波使用的是二维卷积。</p>
+<ul>
+<li><strong>定义：</strong> 对于图像 $f(x, y)$ 和一个二维核 $h(x, y)$，其卷积 $g(x, y)$ 定义为：
                 $$
                 g(x, y) = f(x, y) * h(x, y) = \sum_{s=-\infty}^{\infty} \sum_{t=-\infty}^{\infty} f(s, t) h(x-s, y-t)
                 $$</li>
-                <li><strong>相关 (Correlation) vs. 卷积 (Convolution):</strong>
+<li><strong>相关 (Correlation) vs. 卷积 (Convolution):</strong>
                 在许多图像处理库（包括OpenCV和深度学习框架）中，出于计算效率的考虑，实际实现的“卷积”操作并没有对核进行翻转。这个<strong>没有翻转</strong>的操作在数学上被称为<strong>互相关 (Cross-correlation)</strong>。
                 $$
                 g_{corr}(x, y) = \sum_{s} \sum_{t} f(x+s, y+t) h(s, t)
                 $$
                 <strong>当且仅当卷积核是中心对称的时，卷积和相关的结果完全相同。</strong> 对于非对称核，两者结果不同。在深度学习中，由于核的权重是通过学习得到的，翻转与否并不影响模型的表达能力，因此通常使用计算更简单的互相关。在本课程中，我们将遵循惯例，将图像滤波操作称为“卷积”，但需知其数学本质多为“相关”。</li>
-                </ul>
-                <h3 id="2-%E7%A9%BA%E9%97%B4%E5%9F%9F%E6%BB%A4%E6%B3%A2-spatial-domain-filtering"><strong>2. 空间域滤波 (Spatial Domain Filtering)</strong></h3>
-                <p>空间域滤波是直接在图像空间上，对像素及其邻域进行操作以改变像素值的过程。其核心工具就是<strong>滤波器 (Filter)</strong>，也称为<strong>核 (Kernel)</strong>、<strong>掩膜 (Mask)</strong> 或 <strong>模板 (Template)</strong>。</p>
-                <ul>
-                <li>
-                <p><strong>原理：</strong> 一个大小为 $m \times n$ 的滤波器（通常 $m, n$ 为奇数）在其中心对准图像中的某个像素 $(x, y)$。输出像素 $g(x, y)$ 的值，由滤波器窗口覆盖下的所有输入像素值与滤波器对应位置的**系数（权重）**进行某种运算得到。</p>
-                </li>
-                <li>
-                <p><strong>线性滤波：</strong> 这种运算是线性的，即加权求和。这正是卷积（或相关）所做的事情。
+</ul>
+<h3 id="2-%E7%A9%BA%E9%97%B4%E5%9F%9F%E6%BB%A4%E6%B3%A2-spatial-domain-filtering"><strong>2. 空间域滤波 (Spatial Domain Filtering)</strong></h3>
+<p>空间域滤波是直接在图像空间上，对像素及其邻域进行操作以改变像素值的过程。其核心工具就是<strong>滤波器 (Filter)</strong>，也称为<strong>核 (Kernel)</strong>、<strong>掩膜 (Mask)</strong> 或 <strong>模板 (Template)</strong>。</p>
+<ul>
+<li>
+<p><strong>原理：</strong> 一个大小为 $m \times n$ 的滤波器（通常 $m, n$ 为奇数）在其中心对准图像中的某个像素 $(x, y)$。输出像素 $g(x, y)$ 的值，由滤波器窗口覆盖下的所有输入像素值与滤波器对应位置的**系数（权重）**进行某种运算得到。</p>
+</li>
+<li>
+<p><strong>线性滤波：</strong> 这种运算是线性的，即加权求和。这正是卷积（或相关）所做的事情。
                 $$
                 g(x, y) = \sum_{s=-a}^{a} \sum_{t=-b}^{b} h(s, t) f(x+s, y+t)
                 $$
                 其中滤波器大小为 $(2a+1) \times (2b+1)$。</p>
-                </li>
-                </ul>
-                <h4 id="21-%E8%BE%B9%E7%95%8C%E5%A4%84%E7%90%86-padding"><strong>2.1 边界处理 (Padding)</strong></h4>
-                <p>当滤波器窗口移动到图像边界时，部分窗口会超出图像范围。有几种常见的处理方式：</p>
-                <ul>
-                <li><strong>忽略边界 (Valid Padding):</strong> 只对滤波器能完全覆盖的内部像素进行计算，导致输出图像尺寸缩小。</li>
-                <li><strong>零填充 (Zero Padding):</strong> 在图像边界外补充0。</li>
-                <li><strong>复制边界 (Replicate Padding):</strong> 复制图像最外围的像素值进行填充。</li>
-                <li><strong>镜像填充 (Reflect Padding):</strong> 以边界为轴，镜像地填充像素。</li>
-                </ul>
-                <p>在OpenCV和深度学习中，最常用的是零填充，通过适当的填充量可以使输出图像尺寸与输入图像保持一致（<code>Same Padding</code>）。</p>
-                <h4 id="22-%E7%BA%BF%E6%80%A7%E5%B9%B3%E6%BB%91%E6%BB%A4%E6%B3%A2%E5%99%A8-smoothing-filters"><strong>2.2 线性平滑滤波器 (Smoothing Filters)</strong></h4>
-                <p>平滑滤波器的主要目的是<strong>模糊图像</strong>和<strong>抑制噪声</strong>。它们本质上是低通滤波器，削弱图像中的高频成分（如边缘、噪声）。</p>
-                <ol>
-                <li>
-                <p><strong>均值滤波器 (Mean/Box Filter):</strong></p>
-                <ul>
-                <li><strong>原理：</strong> 输出像素的值是其邻域内所有像素的平均值。</li>
-                <li><strong>核：</strong> 滤波器核的所有系数都相等，通常为 $1/N^2$（对于 $N \times N$ 的核），以保证图像整体亮度不变。例如，一个 $3 \times 3$ 的均值核：
+</li>
+</ul>
+<h4 id="21-%E8%BE%B9%E7%95%8C%E5%A4%84%E7%90%86-padding"><strong>2.1 边界处理 (Padding)</strong></h4>
+<p>当滤波器窗口移动到图像边界时，部分窗口会超出图像范围。有几种常见的处理方式：</p>
+<ul>
+<li><strong>忽略边界 (Valid Padding):</strong> 只对滤波器能完全覆盖的内部像素进行计算，导致输出图像尺寸缩小。</li>
+<li><strong>零填充 (Zero Padding):</strong> 在图像边界外补充0。</li>
+<li><strong>复制边界 (Replicate Padding):</strong> 复制图像最外围的像素值进行填充。</li>
+<li><strong>镜像填充 (Reflect Padding):</strong> 以边界为轴，镜像地填充像素。</li>
+</ul>
+<p>在OpenCV和深度学习中，最常用的是零填充，通过适当的填充量可以使输出图像尺寸与输入图像保持一致（<code>Same Padding</code>）。</p>
+<h4 id="22-%E7%BA%BF%E6%80%A7%E5%B9%B3%E6%BB%91%E6%BB%A4%E6%B3%A2%E5%99%A8-smoothing-filters"><strong>2.2 线性平滑滤波器 (Smoothing Filters)</strong></h4>
+<p>平滑滤波器的主要目的是<strong>模糊图像</strong>和<strong>抑制噪声</strong>。它们本质上是低通滤波器，削弱图像中的高频成分（如边缘、噪声）。</p>
+<ol>
+<li>
+<p><strong>均值滤波器 (Mean/Box Filter):</strong></p>
+<ul>
+<li><strong>原理：</strong> 输出像素的值是其邻域内所有像素的平均值。</li>
+<li><strong>核：</strong> 滤波器核的所有系数都相等，通常为 $1/N^2$（对于 $N \times N$ 的核），以保证图像整体亮度不变。例如，一个 $3 \times 3$ 的均值核：
                 $$
-                h = \frac{1}{9} \begin{bmatrix} 1 & 1 & 1 \\ 1 & 1 & 1 \\ 1 & 1 & 1 \end{bmatrix}
+                h = \frac{1}{9} \begin{bmatrix} 1 &amp; 1 &amp; 1 \\ 1 &amp; 1 &amp; 1 \\ 1 &amp; 1 &amp; 1 \end{bmatrix}
                 $$</li>
-                <li><strong>特点：</strong> 实现简单，但模糊效果较生硬，可能会产生振铃效应。核越大，模糊效果越强。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>高斯滤波器 (Gaussian Filter):</strong></p>
-                <ul>
-                <li><strong>原理：</strong> 使用高斯函数作为权重。离中心像素越近的邻域像素，其权重越大。</li>
-                <li><strong>核：</strong> 系数由二维高斯函数生成：
+<li><strong>特点：</strong> 实现简单，但模糊效果较生硬，可能会产生振铃效应。核越大，模糊效果越强。</li>
+</ul>
+</li>
+<li>
+<p><strong>高斯滤波器 (Gaussian Filter):</strong></p>
+<ul>
+<li><strong>原理：</strong> 使用高斯函数作为权重。离中心像素越近的邻域像素，其权重越大。</li>
+<li><strong>核：</strong> 系数由二维高斯函数生成：
                 $$
                 G(x, y) = \frac{1}{2\pi\sigma^2} e^{-\frac{x^2+y^2}{2\sigma^2}}
                 $$
                 其中 $\sigma$ (标准差) 控制了模糊的程度。$\sigma$ 越大，模糊越平滑。</li>
-                <li><strong>特点：</strong> 模糊效果非常平滑自然，是应用最广泛的平滑滤波器。高斯核具有可分离性，可以分解为两个一维高斯核的卷积，从而大大提高计算效率。</li>
-                </ul>
-                </li>
-                </ol>
-                <h4 id="23-%E7%BB%9F%E8%AE%A1%E6%8E%92%E5%BA%8F%E6%BB%A4%E6%B3%A2%E5%99%A8-%E9%9D%9E%E7%BA%BF%E6%80%A7"><strong>2.3 统计排序滤波器 (非线性)</strong></h4>
-                <p>这类滤波器的输出取决于邻域像素值的排序结果，而不是加权平均。</p>
-                <ul>
-                <li><strong>中值滤波器 (Median Filter):</strong>
-                <ul>
-                <li><strong>原理：</strong> 输出像素的值是其邻域内所有像素值排序后的<strong>中值</strong>。</li>
-                <li><strong>特点：</strong>
-                <ul>
-                <li><strong>强大的去噪能力：</strong> 对<strong>椒盐噪声 (Salt-and-pepper noise)</strong> 有特效，因为噪声点（极亮或极暗）在排序后通常位于序列的两端，不会被选中为中值。</li>
-                <li><strong>边缘保持性好：</strong> 相比均值滤波，中值滤波在去除噪声的同时能更好地保护图像的边缘，引入的模糊较少。</li>
-                </ul>
-                </li>
-                <li><strong>应用：</strong> 广泛用于去除脉冲噪声。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="24-%E7%BA%BF%E6%80%A7%E9%94%90%E5%8C%96%E6%BB%A4%E6%B3%A2%E5%99%A8-sharpening-filters"><strong>2.4 线性锐化滤波器 (Sharpening Filters)</strong></h4>
-                <p>锐化滤波器的目的是<strong>增强图像的细节和边缘</strong>，与平滑滤波器作用相反。它们是高通滤波器。其基本思想是利用<strong>微分算子</strong>。</p>
-                <ul>
-                <li><strong>微分与图像梯度：</strong>
-                <ul>
-                <li>一阶微分在图像中表现为梯度的变化。在灰度变化平缓的区域，导数小；在边缘、噪声点等灰度突变区域，导数值大。</li>
-                <li>二阶微分（拉普拉斯算子）对灰度变化的起始点和结束点响应更强烈，能更精确地定位边缘。</li>
-                </ul>
-                </li>
-                </ul>
-                <ol>
-                <li>
-                <p><strong>基于二阶微分：拉普拉斯算子 (Laplacian Operator)</strong></p>
-                <ul>
-                <li><strong>原理：</strong> 拉普拉斯算子是二阶导数的各向同性（旋转不变）形式。其离散形式为：
+<li><strong>特点：</strong> 模糊效果非常平滑自然，是应用最广泛的平滑滤波器。高斯核具有可分离性，可以分解为两个一维高斯核的卷积，从而大大提高计算效率。</li>
+</ul>
+</li>
+</ol>
+<h4 id="23-%E7%BB%9F%E8%AE%A1%E6%8E%92%E5%BA%8F%E6%BB%A4%E6%B3%A2%E5%99%A8-%E9%9D%9E%E7%BA%BF%E6%80%A7"><strong>2.3 统计排序滤波器 (非线性)</strong></h4>
+<p>这类滤波器的输出取决于邻域像素值的排序结果，而不是加权平均。</p>
+<ul>
+<li><strong>中值滤波器 (Median Filter):</strong>
+<ul>
+<li><strong>原理：</strong> 输出像素的值是其邻域内所有像素值排序后的<strong>中值</strong>。</li>
+<li><strong>特点：</strong>
+<ul>
+<li><strong>强大的去噪能力：</strong> 对<strong>椒盐噪声 (Salt-and-pepper noise)</strong> 有特效，因为噪声点（极亮或极暗）在排序后通常位于序列的两端，不会被选中为中值。</li>
+<li><strong>边缘保持性好：</strong> 相比均值滤波，中值滤波在去除噪声的同时能更好地保护图像的边缘，引入的模糊较少。</li>
+</ul>
+</li>
+<li><strong>应用：</strong> 广泛用于去除脉冲噪声。</li>
+</ul>
+</li>
+</ul>
+<h4 id="24-%E7%BA%BF%E6%80%A7%E9%94%90%E5%8C%96%E6%BB%A4%E6%B3%A2%E5%99%A8-sharpening-filters"><strong>2.4 线性锐化滤波器 (Sharpening Filters)</strong></h4>
+<p>锐化滤波器的目的是<strong>增强图像的细节和边缘</strong>，与平滑滤波器作用相反。它们是高通滤波器。其基本思想是利用<strong>微分算子</strong>。</p>
+<ul>
+<li><strong>微分与图像梯度：</strong>
+<ul>
+<li>一阶微分在图像中表现为梯度的变化。在灰度变化平缓的区域，导数小；在边缘、噪声点等灰度突变区域，导数值大。</li>
+<li>二阶微分（拉普拉斯算子）对灰度变化的起始点和结束点响应更强烈，能更精确地定位边缘。</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li>
+<p><strong>基于二阶微分：拉普拉斯算子 (Laplacian Operator)</strong></p>
+<ul>
+<li><strong>原理：</strong> 拉普拉斯算子是二阶导数的各向同性（旋转不变）形式。其离散形式为：
                 $$
                 \nabla^2 f = [f(x+1,y) + f(x-1,y) + f(x,y+1) + f(x,y-1)] - 4f(x,y)
                 $$</li>
-                <li><strong>核：</strong>
+<li><strong>核：</strong>
                 $$
-                h_1 = \begin{bmatrix} 0 & 1 & 0 \\ 1 & -4 & 1 \\ 0 & 1 & 0 \end{bmatrix} \quad \text{或 (包含对角线)} \quad h_2 = \begin{bmatrix} 1 & 1 & 1 \\ 1 & -8 & 1 \\ 1 & 1 & 1 \end{bmatrix}
+                h_1 = \begin{bmatrix} 0 &amp; 1 &amp; 0 \\ 1 &amp; -4 &amp; 1 \\ 0 &amp; 1 &amp; 0 \end{bmatrix} \quad \text{或 (包含对角线)} \quad h_2 = \begin{bmatrix} 1 &amp; 1 &amp; 1 \\ 1 &amp; -8 &amp; 1 \\ 1 &amp; 1 &amp; 1 \end{bmatrix}
                 $$</li>
-                <li><strong>图像锐化：</strong> 将拉普拉斯滤波的结果叠加回原图，可以增强边缘。
+<li><strong>图像锐化：</strong> 将拉普拉斯滤波的结果叠加回原图，可以增强边缘。
                 $$
                 g(x, y) = f(x, y) - c \cdot \nabla^2 f(x, y) \quad (\text{如果核中心为负})
                 $$
@@ -228,28 +226,28 @@
                 $$
                 这里的 $c$ 是一个缩放因子。这个过程可以合并为一个单一的锐化核，例如：
                 $$
-                h_{sharp} = \begin{bmatrix} 0 & -1 & 0 \\ -1 & 5 & -1 \\ 0 & -1 & 0 \end{bmatrix}
+                h_{sharp} = \begin{bmatrix} 0 &amp; -1 &amp; 0 \\ -1 &amp; 5 &amp; -1 \\ 0 &amp; -1 &amp; 0 \end{bmatrix}
                 $$</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>基于一阶微分：梯度算子 (Gradient Operators)</strong></p>
-                <ul>
-                <li><strong>原理：</strong> 计算图像在x和y方向的梯度（一阶导数近似），然后合成梯度幅值来表示边缘强度。
+</ul>
+</li>
+<li>
+<p><strong>基于一阶微分：梯度算子 (Gradient Operators)</strong></p>
+<ul>
+<li><strong>原理：</strong> 计算图像在x和y方向的梯度（一阶导数近似），然后合成梯度幅值来表示边缘强度。
                 $$
                 |\nabla f| = \sqrt{G_x^2 + G_y^2} \approx |G_x| + |G_y|
                 $$</li>
-                <li><strong>Sobel算子：</strong>
+<li><strong>Sobel算子：</strong>
                 $$
-                G_x = \begin{bmatrix} -1 & 0 & 1 \\ -2 & 0 & 2 \\ -1 & 0 & 1 \end{bmatrix} * f \quad G_y = \begin{bmatrix} -1 & -2 & -1 \\ 0 & 0 & 0 \\ 1 & 2 & 1 \end{bmatrix} * f
+                G_x = \begin{bmatrix} -1 &amp; 0 &amp; 1 \\ -2 &amp; 0 &amp; 2 \\ -1 &amp; 0 &amp; 1 \end{bmatrix} * f \quad G_y = \begin{bmatrix} -1 &amp; -2 &amp; -1 \\ 0 &amp; 0 &amp; 0 \\ 1 &amp; 2 &amp; 1 \end{bmatrix} * f
                 $$
                 Sobel算子在计算梯度时考虑了中心像素的权重，具有一定的平滑作用，抗噪性较好。</li>
-                <li><strong>Prewitt算子</strong> 和 <strong>Roberts算子</strong> 也是常用的梯度算子，但Sobel效果更佳。</li>
-                </ul>
-                </li>
-                </ol>
-                <h4 id="25-c-%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B-%E4%BD%BF%E7%94%A8opencv"><strong>2.5 C++ 代码示例 (使用OpenCV)</strong></h4>
-                <pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;opencv2/opencv.hpp&gt;</span></span>
+<li><strong>Prewitt算子</strong> 和 <strong>Roberts算子</strong> 也是常用的梯度算子，但Sobel效果更佳。</li>
+</ul>
+</li>
+</ol>
+<h4 id="25-c-%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B-%E4%BD%BF%E7%94%A8opencv"><strong>2.5 C++ 代码示例 (使用OpenCV)</strong></h4>
+<pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;opencv2/opencv.hpp&gt;</span></span>
 
                 <span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
                     cv::Mat src = cv::imread(<span class="hljs-string">"your_image.jpg"</span>, cv::IMREAD_GRAYSCALE);
@@ -290,45 +288,70 @@
                     <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
                 }
                 </div></code></pre>
-                <h3 id="3-%E5%89%8D%E6%B2%BF%E6%8B%93%E5%B1%95%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-convolutional-neural-networks-cnn"><strong>3. 前沿拓展：卷积神经网络 (Convolutional Neural Networks, CNN)</strong></h3>
-                <ul>
-                <li><strong>卷积在CNN中的角色：</strong> CNN是现代计算机视觉的基石，其核心就是<strong>可学习的卷积层</strong>。</li>
-                <li><strong>传统滤波 vs. CNN：</strong>
-                <ul>
-                <li><strong>传统方法：</strong> 滤波器的核是<strong>手动设计</strong>的，例如Sobel核用于边缘检测，高斯核用于平滑。这些核是固定的，用于提取预定义的特征。</li>
-                <li><strong>CNN：</strong> 卷积层的核不再是固定的，而是<strong>模型的参数</strong>。在训练过程中，网络通过反向传播算法<strong>自动学习</strong>这些核的权重，以便最好地提取对当前任务（如图像分类、目标检测）有用的特征。</li>
-                </ul>
-                </li>
-                <li><strong>特征层次：</strong> 浅层的卷积核可能学会检测简单的模式，如边缘、角点和颜色块；深层的卷积核则在浅层特征的基础上组合，学会检测更复杂的模式，如眼睛、轮廓甚至整个物体。</li>
-                </ul>
-            </article>
-        </main>
-    </div>
-    
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<h3 id="3-%E5%89%8D%E6%B2%BF%E6%8B%93%E5%B1%95%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-convolutional-neural-networks-cnn"><strong>3. 前沿拓展：卷积神经网络 (Convolutional Neural Networks, CNN)</strong></h3>
+<ul>
+<li><strong>卷积在CNN中的角色：</strong> CNN是现代计算机视觉的基石，其核心就是<strong>可学习的卷积层</strong>。</li>
+<li><strong>传统滤波 vs. CNN：</strong>
+<ul>
+<li><strong>传统方法：</strong> 滤波器的核是<strong>手动设计</strong>的，例如Sobel核用于边缘检测，高斯核用于平滑。这些核是固定的，用于提取预定义的特征。</li>
+<li><strong>CNN：</strong> 卷积层的核不再是固定的，而是<strong>模型的参数</strong>。在训练过程中，网络通过反向传播算法<strong>自动学习</strong>这些核的权重，以便最好地提取对当前任务（如图像分类、目标检测）有用的特征。</li>
+</ul>
+</li>
+<li><strong>特征层次：</strong> 浅层的卷积核可能学会检测简单的模式，如边缘、角点和颜色块；深层的卷积核则在浅层特征的基础上组合，学会检测更复杂的模式，如眼睛、轮廓甚至整个物体。</li>
+</ul>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

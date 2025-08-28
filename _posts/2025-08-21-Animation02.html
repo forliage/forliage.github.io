@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机动画02：二维图像变形技术(2D Image Morphing)</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>计算机动画02：二维图像变形技术(2D Image Morphing)</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,158 +30,158 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8A%A8%E7%94%BB02%E4%BA%8C%E7%BB%B4%E5%9B%BE%E5%83%8F%E5%8F%98%E5%BD%A2%E6%8A%80%E6%9C%AF2d-image-morphing">计算机动画02：二维图像变形技术(2D Image Morphing)</h1>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86morphing-%E7%9A%84%E6%A6%82%E5%BF%B5%E4%B8%8E%E7%9B%B4%E8%A7%89"><strong>第一部分：Morphing 的概念与直觉</strong></h3>
-                <h4 id="11-%E4%BB%80%E4%B9%88%E6%98%AF%E5%9B%BE%E5%83%8F-morphing"><strong>1.1 什么是图像 Morphing？</strong></h4>
-                <p>大家可能都在电影、广告中见过这样的特效：一个人的脸平滑地变成了另一个人的脸，或者一只猫无缝地变成了一只老虎。这个过程，我们称之为 <strong>Morphing</strong>，即“变形”。</p>
-                <p>从技术上讲，<strong>图像自然渐变 (Image Morphing)</strong> 是指将一幅源数字图像（Source Image）以一种自然流畅、富有戏剧性的方式，变换到另一幅目标数字图像（Destination Image）的过程。这个过程会生成一系列中间帧图像，当它们连续播放时，就形成了平滑过渡的动画效果。</p>
-                <p>最著名的例子莫过于迈克尔·杰克逊在其1991年的音乐录影带《Black or White》结尾处使用的面部变形特效，在当时引起了巨大的轰动，也让这项技术走进了公众视野。</p>
-                <h4 id="12-morphing-%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3%E5%88%86%E8%A7%A3%E4%B8%8E%E5%90%88%E6%88%90"><strong>1.2 Morphing 的核心思想：分解与合成</strong></h4>
-                <p>一个成功的 Morphing 效果，实际上是两种基本操作的完美结合：</p>
-                <ol>
-                <li><strong>图像扭曲 (Image Warping)</strong>：这是一种几何变换，它改变图像中像素的位置，但不改变它们的颜色。它负责将源图像的形状逐渐“捏”成目标图像的形状，同时也将目标图像的形状“反向捏”成源图像的形状。</li>
-                <li><strong>交叉溶解 (Cross-dissolving)</strong>：这是一种颜色变换，它通过对两幅图像的颜色值进行加权平均，实现一幅图像逐渐淡出，另一幅图像逐渐淡入的效果。</li>
-                </ol>
-                <p>我们可以用一个简单的公式来描述在时间点 <code>t</code> (其中 <code>t</code> 从 0 到 1) 的中间帧图像 <code>I_t</code>：</p>
-                <p><code>I_t = (1 - t) * Warped_Source + t * Warped_Destination</code></p>
-                <p>这里的 <code>Warped_Source</code> 是源图像经过扭曲后的结果，<code>Warped_Destination</code> 是目标图像经过扭曲后的结果。当 <code>t=0</code> 时，图像完全是源图像；当 <code>t=1</code> 时，图像完全是目标图像。</p>
-                <h4 id="13-%E4%BA%8C%E7%BB%B4-morphing-vs-%E4%B8%89%E7%BB%B4-morphing"><strong>1.3 二维 Morphing vs. 三维 Morphing</strong></h4>
-                <p>在我们深入二维技术之前，有必要区分它与三维 Morphing 的不同：</p>
-                <ul>
-                <li>
-                <p><strong>三维 Morphing</strong>：</p>
-                <ul>
-                <li>在三维模型上操作。需要先为源对象和目标对象分别建模。</li>
-                <li>对模型的拓扑结构有严格要求（例如，顶点数、面数和连接关系需要一致）。</li>
-                <li>插值的是三维顶点的坐标、法线、纹理坐标等几何与非几何属性。</li>
-                <li>优点：物理上更准确，可以任意改变视角和光照。</li>
-                <li>缺点：建模复杂，建立模型间的对应关系极其困难。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>二维 Morphing</strong>：</p>
-                <ul>
-                <li>在二维图像空间上操作，本质上是像素处理技术。</li>
-                <li>不依赖三维信息，更加灵活和简单。</li>
-                <li>优点：<strong>可以避免复杂的三维造型过程</strong>。当虚拟摄像机位置固定时，效果非常出色，足以产生神奇的“三维形状改变”的错觉。</li>
-                <li>缺点：缺乏真实的三维几何信息，无法处理视角和光照的变化，可能产生不符合物理规律的畸变。</li>
-                </ul>
-                </li>
-                </ul>
-                <p>我们今天将聚焦于二维 Morphing，因为它在很多应用场景下，以较低的成本实现了惊人的视觉效果。</p>
-                <hr>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E7%BB%8F%E5%85%B8-morphing-%E7%AE%97%E6%B3%95"><strong>第二部分：经典 Morphing 算法</strong></h3>
-                <p>现在，我们来探讨实现 Morphing 的两种主流经典方法。</p>
-                <h4 id="21-%E6%96%B9%E6%B3%95%E4%B8%80%E5%9F%BA%E4%BA%8E%E7%BD%91%E6%A0%BC%E7%9A%84-morphing-grid-based-morphing"><strong>2.1 方法一：基于网格的 Morphing (Grid-Based Morphing)</strong></h4>
-                <p>这是最早期的 Morphing 方法之一，其思想非常直观：在源图像和目标图像上覆盖一个控制网格，通过操纵网格来驱动整个图像的变形。</p>
-                <p><strong>2.1.1 算法流程</strong></p>
-                <ol>
-                <li><strong>定义控制网格</strong>：在源图像 <code>I_S</code> 上定义一个控制网格 <code>M_S</code>，在目标图像 <code>I_D</code> 上定义一个对应的控制网格 <code>M_D</code>。<code>M_S</code> 和 <code>M_D</code> 具有相同的拓扑结构（即，相同的行列数），但控制顶点的位置不同，以匹配两幅图像的特征。</li>
-                <li><strong>插值中间网格</strong>：对于任意时间 <code>t</code> (0 ≤ t ≤ 1)，通过对 <code>M_S</code> 和 <code>M_D</code> 的控制顶点坐标进行线性插值，得到一个中间控制网格 <code>M_t</code>。
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8A%A8%E7%94%BB02%E4%BA%8C%E7%BB%B4%E5%9B%BE%E5%83%8F%E5%8F%98%E5%BD%A2%E6%8A%80%E6%9C%AF2d-image-morphing">计算机动画02：二维图像变形技术(2D Image Morphing)</h1>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86morphing-%E7%9A%84%E6%A6%82%E5%BF%B5%E4%B8%8E%E7%9B%B4%E8%A7%89"><strong>第一部分：Morphing 的概念与直觉</strong></h3>
+<h4 id="11-%E4%BB%80%E4%B9%88%E6%98%AF%E5%9B%BE%E5%83%8F-morphing"><strong>1.1 什么是图像 Morphing？</strong></h4>
+<p>大家可能都在电影、广告中见过这样的特效：一个人的脸平滑地变成了另一个人的脸，或者一只猫无缝地变成了一只老虎。这个过程，我们称之为 <strong>Morphing</strong>，即“变形”。</p>
+<p>从技术上讲，<strong>图像自然渐变 (Image Morphing)</strong> 是指将一幅源数字图像（Source Image）以一种自然流畅、富有戏剧性的方式，变换到另一幅目标数字图像（Destination Image）的过程。这个过程会生成一系列中间帧图像，当它们连续播放时，就形成了平滑过渡的动画效果。</p>
+<p>最著名的例子莫过于迈克尔·杰克逊在其1991年的音乐录影带《Black or White》结尾处使用的面部变形特效，在当时引起了巨大的轰动，也让这项技术走进了公众视野。</p>
+<h4 id="12-morphing-%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3%E5%88%86%E8%A7%A3%E4%B8%8E%E5%90%88%E6%88%90"><strong>1.2 Morphing 的核心思想：分解与合成</strong></h4>
+<p>一个成功的 Morphing 效果，实际上是两种基本操作的完美结合：</p>
+<ol>
+<li><strong>图像扭曲 (Image Warping)</strong>：这是一种几何变换，它改变图像中像素的位置，但不改变它们的颜色。它负责将源图像的形状逐渐“捏”成目标图像的形状，同时也将目标图像的形状“反向捏”成源图像的形状。</li>
+<li><strong>交叉溶解 (Cross-dissolving)</strong>：这是一种颜色变换，它通过对两幅图像的颜色值进行加权平均，实现一幅图像逐渐淡出，另一幅图像逐渐淡入的效果。</li>
+</ol>
+<p>我们可以用一个简单的公式来描述在时间点 <code>t</code> (其中 <code>t</code> 从 0 到 1) 的中间帧图像 <code>I_t</code>：</p>
+<p><code>I_t = (1 - t) * Warped_Source + t * Warped_Destination</code></p>
+<p>这里的 <code>Warped_Source</code> 是源图像经过扭曲后的结果，<code>Warped_Destination</code> 是目标图像经过扭曲后的结果。当 <code>t=0</code> 时，图像完全是源图像；当 <code>t=1</code> 时，图像完全是目标图像。</p>
+<h4 id="13-%E4%BA%8C%E7%BB%B4-morphing-vs-%E4%B8%89%E7%BB%B4-morphing"><strong>1.3 二维 Morphing vs. 三维 Morphing</strong></h4>
+<p>在我们深入二维技术之前，有必要区分它与三维 Morphing 的不同：</p>
+<ul>
+<li>
+<p><strong>三维 Morphing</strong>：</p>
+<ul>
+<li>在三维模型上操作。需要先为源对象和目标对象分别建模。</li>
+<li>对模型的拓扑结构有严格要求（例如，顶点数、面数和连接关系需要一致）。</li>
+<li>插值的是三维顶点的坐标、法线、纹理坐标等几何与非几何属性。</li>
+<li>优点：物理上更准确，可以任意改变视角和光照。</li>
+<li>缺点：建模复杂，建立模型间的对应关系极其困难。</li>
+</ul>
+</li>
+<li>
+<p><strong>二维 Morphing</strong>：</p>
+<ul>
+<li>在二维图像空间上操作，本质上是像素处理技术。</li>
+<li>不依赖三维信息，更加灵活和简单。</li>
+<li>优点：<strong>可以避免复杂的三维造型过程</strong>。当虚拟摄像机位置固定时，效果非常出色，足以产生神奇的“三维形状改变”的错觉。</li>
+<li>缺点：缺乏真实的三维几何信息，无法处理视角和光照的变化，可能产生不符合物理规律的畸变。</li>
+</ul>
+</li>
+</ul>
+<p>我们今天将聚焦于二维 Morphing，因为它在很多应用场景下，以较低的成本实现了惊人的视觉效果。</p>
+<hr/>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E7%BB%8F%E5%85%B8-morphing-%E7%AE%97%E6%B3%95"><strong>第二部分：经典 Morphing 算法</strong></h3>
+<p>现在，我们来探讨实现 Morphing 的两种主流经典方法。</p>
+<h4 id="21-%E6%96%B9%E6%B3%95%E4%B8%80%E5%9F%BA%E4%BA%8E%E7%BD%91%E6%A0%BC%E7%9A%84-morphing-grid-based-morphing"><strong>2.1 方法一：基于网格的 Morphing (Grid-Based Morphing)</strong></h4>
+<p>这是最早期的 Morphing 方法之一，其思想非常直观：在源图像和目标图像上覆盖一个控制网格，通过操纵网格来驱动整个图像的变形。</p>
+<p><strong>2.1.1 算法流程</strong></p>
+<ol>
+<li><strong>定义控制网格</strong>：在源图像 <code>I_S</code> 上定义一个控制网格 <code>M_S</code>，在目标图像 <code>I_D</code> 上定义一个对应的控制网格 <code>M_D</code>。<code>M_S</code> 和 <code>M_D</code> 具有相同的拓扑结构（即，相同的行列数），但控制顶点的位置不同，以匹配两幅图像的特征。</li>
+<li><strong>插值中间网格</strong>：对于任意时间 <code>t</code> (0 ≤ t ≤ 1)，通过对 <code>M_S</code> 和 <code>M_D</code> 的控制顶点坐标进行线性插值，得到一个中间控制网格 <code>M_t</code>。
                 <code>M_t(i, j) = (1 - t) * M_S(i, j) + t * M_D(i, j)</code></li>
-                <li><strong>执行图像扭曲 (Warping)</strong>：这是最关键的一步。我们需要生成两幅扭曲后的图像：
+<li><strong>执行图像扭曲 (Warping)</strong>：这是最关键的一步。我们需要生成两幅扭曲后的图像：
                 <ul>
-                <li><code>I_S'</code>：将源图像 <code>I_S</code> 从其原始网格 <code>M_S</code> 扭曲到中间网格 <code>M_t</code>。</li>
-                <li><code>I_D'</code>：将目标图像 <code>I_D</code> 从其原始网格 <code>M_D</code> 扭曲到中间网格 <code>M_t</code>。</li>
-                </ul>
-                </li>
-                <li><strong>交叉溶解</strong>：将两幅扭曲后的图像 <code>I_S'</code> 和 <code>I_D'</code> 进行交叉溶解，得到最终的中间帧 <code>I_t</code>。
+<li><code>I_S'</code>：将源图像 <code>I_S</code> 从其原始网格 <code>M_S</code> 扭曲到中间网格 <code>M_t</code>。</li>
+<li><code>I_D'</code>：将目标图像 <code>I_D</code> 从其原始网格 <code>M_D</code> 扭曲到中间网格 <code>M_t</code>。</li>
+</ul>
+</li>
+<li><strong>交叉溶解</strong>：将两幅扭曲后的图像 <code>I_S'</code> 和 <code>I_D'</code> 进行交叉溶解，得到最终的中间帧 <code>I_t</code>。
                 <code>I_t(p) = (1 - t) * I_S'(p) + t * I_D'(p)</code></li>
-                </ol>
-                <p><strong>2.1.2 扭曲的数学实现：逆向映射与双线性/双三次插值</strong></p>
-                <p>直接从源网格计算像素到目标网格的位置（正向映射）可能会导致目标图像中出现空洞（多个源像素映射到同一位置）或重叠（某些目标像素没有源像素映射过来）的问题。因此，我们通常采用<strong>逆向映射 (Inverse Mapping)</strong>：</p>
-                <p>对于中间帧 <code>I_t</code> 中的每一个像素 <code>p</code>，我们问：它在源图像 <code>I_S</code> 和目标图像 <code>I_D</code> 中对应的原始位置 <code>p_s</code> 和 <code>p_d</code> 是哪里？</p>
-                <ul>
-                <li><strong>步骤</strong>：
+</ol>
+<p><strong>2.1.2 扭曲的数学实现：逆向映射与双线性/双三次插值</strong></p>
+<p>直接从源网格计算像素到目标网格的位置（正向映射）可能会导致目标图像中出现空洞（多个源像素映射到同一位置）或重叠（某些目标像素没有源像素映射过来）的问题。因此，我们通常采用<strong>逆向映射 (Inverse Mapping)</strong>：</p>
+<p>对于中间帧 <code>I_t</code> 中的每一个像素 <code>p</code>，我们问：它在源图像 <code>I_S</code> 和目标图像 <code>I_D</code> 中对应的原始位置 <code>p_s</code> 和 <code>p_d</code> 是哪里？</p>
+<ul>
+<li><strong>步骤</strong>：
                 <ol>
-                <li>确定像素 <code>p</code> 位于中间网格 <code>M_t</code> 的哪个四边形单元格内。</li>
-                <li>根据 <code>p</code> 在该单元格内的相对位置（通常用 <code>(u,v)</code> 坐标表示，0 ≤ u,v ≤ 1），计算出它在源网格 <code>M_S</code> 和目标网格 <code>M_D</code> 对应单元格内的位置 <code>p_s</code> 和 <code>p_d</code>。这个计算过程就是<strong>双线性插值</strong>或更平滑的<strong>双三次样条插值</strong>。</li>
-                <li>由于 <code>p_s</code> 和 <code>p_d</code> 的坐标通常不是整数，我们需要在 <code>I_S</code> 和 <code>I_D</code> 中，使用其周围像素的颜色再次进行双线性插值，来得到精确的颜色值。</li>
-                </ol>
-                </li>
-                </ul>
-                <p><strong>双三次样条曲面 (Bicubic Spline Surface)</strong></p>
-                <p>为了获得更平滑的变形，网格通常被看作是双三次样条曲面的控制点。一个由 <code>(n+1)x(n+1)</code> 控制点 <code>P_ij</code> 定义的样条曲面可以表示为：
+<li>确定像素 <code>p</code> 位于中间网格 <code>M_t</code> 的哪个四边形单元格内。</li>
+<li>根据 <code>p</code> 在该单元格内的相对位置（通常用 <code>(u,v)</code> 坐标表示，0 ≤ u,v ≤ 1），计算出它在源网格 <code>M_S</code> 和目标网格 <code>M_D</code> 对应单元格内的位置 <code>p_s</code> 和 <code>p_d</code>。这个计算过程就是<strong>双线性插值</strong>或更平滑的<strong>双三次样条插值</strong>。</li>
+<li>由于 <code>p_s</code> 和 <code>p_d</code> 的坐标通常不是整数，我们需要在 <code>I_S</code> 和 <code>I_D</code> 中，使用其周围像素的颜色再次进行双线性插值，来得到精确的颜色值。</li>
+</ol>
+</li>
+</ul>
+<p><strong>双三次样条曲面 (Bicubic Spline Surface)</strong></p>
+<p>为了获得更平滑的变形，网格通常被看作是双三次样条曲面的控制点。一个由 <code>(n+1)x(n+1)</code> 控制点 <code>P_ij</code> 定义的样条曲面可以表示为：
                 <code>p(u,v) = Σ_{i=0 to n} Σ_{j=0 to n} B_{i,n}(u) B_{j,n}(v) P_{ij}</code>
                 其中 <code>B_{i,n}</code> 是基函数（例如Bernstein基函数用于Bezier曲面），<code>(u,v)</code> 是参数化坐标 <code>(u,v) ∈ [0,1]x[0,1]</code>。</p>
-                <p>逆向映射的核心挑战在于求解方程 <code>p = p(u,v)</code> 来反向得到 <code>(u,v)</code>。这是一个非线性方程组，通常没有解析解。在实践中，可以使用数值方法，如<strong>梯度下降法</strong>来求解。</p>
-                <ul>
-                <li><strong>目标函数</strong>: <code>F(u,v) = || p(u,v) - p_{target} ||^2</code></li>
-                <li><strong>迭代更新</strong>: <code>(u_{k+1}, v_{k+1}) = (u_k, v_k) - η * ∇F(u_k, v_k)</code>
+<p>逆向映射的核心挑战在于求解方程 <code>p = p(u,v)</code> 来反向得到 <code>(u,v)</code>。这是一个非线性方程组，通常没有解析解。在实践中，可以使用数值方法，如<strong>梯度下降法</strong>来求解。</p>
+<ul>
+<li><strong>目标函数</strong>: <code>F(u,v) = || p(u,v) - p_{target} ||^2</code></li>
+<li><strong>迭代更新</strong>: <code>(u_{k+1}, v_{k+1}) = (u_k, v_k) - η * ∇F(u_k, v_k)</code>
                 其中 <code>η</code> 是学习率，<code>∇F</code> 是梯度。</li>
-                </ul>
-                <p><strong>2.1.3 网格法的优缺点</strong></p>
-                <ul>
-                <li><strong>优点</strong>：概念简单，变形平滑。</li>
-                <li><strong>缺点</strong>：控制不直观。在图像特征复杂区域，需要非常密集的网格，手动放置和调整这些网格点是一项枯燥且繁重的工作。</li>
-                </ul>
-                <hr>
-                <h4 id="22-%E6%96%B9%E6%B3%95%E4%BA%8C%E5%9F%BA%E4%BA%8E%E7%89%B9%E5%BE%81%E7%9A%84-morphing-feature-based-morphing"><strong>2.2 方法二：基于特征的 Morphing (Feature-Based Morphing)</strong></h4>
-                <p>为了解决网格法控制不直观的问题，Thaddeus Beier 和 Shawn Neely 在1992年提出了一种革命性的方法，它允许动画师通过指定<strong>线对 (Line Pairs)</strong> 来控制变形。这项技术成为了行业的标准，并在无数电影特效中被使用。</p>
-                <p><strong>2.2.1 核心思想</strong></p>
-                <p>动画师在源图像和目标图像上画出一系列对应的特征线段。例如，在人脸 Morphing 中，可以在眉毛、眼睛、鼻子、嘴巴和脸的轮廓上画线。这些线对定义了图像空间中点与点之间的映射关系。</p>
-                <p><strong>2.2.2 单个线对定义的变换</strong></p>
-                <p>让我们首先考虑一个从目标图像 <code>I_D</code> 到源图像 <code>I_S</code> 的逆向映射，这个映射由一对线段 <code>P'Q'</code> (在 <code>I_D</code> 中) 和 <code>PQ</code> (在 <code>I_S</code> 中) 定义。</p>
-                <p>对于 <code>I_D</code> 中的任意像素点 <code>X'</code>，我们如何找到它在 <code>I_S</code> 中对应的点 <code>X</code>？</p>
-                <ol>
-                <li>
-                <p><strong>计算 <code>X'</code> 相对于线段 <code>P'Q'</code> 的坐标 <code>(u, v)</code></strong>：</p>
-                <ul>
-                <li><code>u</code>：<code>X'</code> 在线段 <code>P'Q'</code> 上的投影点，沿线段方向的归一化距离。<code>u=0</code> 在 <code>P'</code>，<code>u=1</code> 在 <code>Q'</code>。
+</ul>
+<p><strong>2.1.3 网格法的优缺点</strong></p>
+<ul>
+<li><strong>优点</strong>：概念简单，变形平滑。</li>
+<li><strong>缺点</strong>：控制不直观。在图像特征复杂区域，需要非常密集的网格，手动放置和调整这些网格点是一项枯燥且繁重的工作。</li>
+</ul>
+<hr/>
+<h4 id="22-%E6%96%B9%E6%B3%95%E4%BA%8C%E5%9F%BA%E4%BA%8E%E7%89%B9%E5%BE%81%E7%9A%84-morphing-feature-based-morphing"><strong>2.2 方法二：基于特征的 Morphing (Feature-Based Morphing)</strong></h4>
+<p>为了解决网格法控制不直观的问题，Thaddeus Beier 和 Shawn Neely 在1992年提出了一种革命性的方法，它允许动画师通过指定<strong>线对 (Line Pairs)</strong> 来控制变形。这项技术成为了行业的标准，并在无数电影特效中被使用。</p>
+<p><strong>2.2.1 核心思想</strong></p>
+<p>动画师在源图像和目标图像上画出一系列对应的特征线段。例如，在人脸 Morphing 中，可以在眉毛、眼睛、鼻子、嘴巴和脸的轮廓上画线。这些线对定义了图像空间中点与点之间的映射关系。</p>
+<p><strong>2.2.2 单个线对定义的变换</strong></p>
+<p>让我们首先考虑一个从目标图像 <code>I_D</code> 到源图像 <code>I_S</code> 的逆向映射，这个映射由一对线段 <code>P'Q'</code> (在 <code>I_D</code> 中) 和 <code>PQ</code> (在 <code>I_S</code> 中) 定义。</p>
+<p>对于 <code>I_D</code> 中的任意像素点 <code>X'</code>，我们如何找到它在 <code>I_S</code> 中对应的点 <code>X</code>？</p>
+<ol>
+<li>
+<p><strong>计算 <code>X'</code> 相对于线段 <code>P'Q'</code> 的坐标 <code>(u, v)</code></strong>：</p>
+<ul>
+<li><code>u</code>：<code>X'</code> 在线段 <code>P'Q'</code> 上的投影点，沿线段方向的归一化距离。<code>u=0</code> 在 <code>P'</code>，<code>u=1</code> 在 <code>Q'</code>。
                 <code>u = ((X' - P') · (Q' - P')) / ||Q' - P'||^2</code></li>
-                <li><code>v</code>：<code>X'</code> 到线段 <code>P'Q'</code> 的带符号垂直距离。距离以像素为单位。
+<li><code>v</code>：<code>X'</code> 到线段 <code>P'Q'</code> 的带符号垂直距离。距离以像素为单位。
                 <code>v = ((X' - P') · Perpendicular(Q' - P')) / ||Q' - P'||</code>
                 其中 <code>Perpendicular((dx, dy))</code> 返回 <code>(-dy, dx)</code>。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>根据 <code>(u, v)</code> 在源图像中重建 <code>X</code></strong>：
+</ul>
+</li>
+<li>
+<p><strong>根据 <code>(u, v)</code> 在源图像中重建 <code>X</code></strong>：
                 使用相同的 <code>(u, v)</code> 坐标，我们可以计算出 <code>X</code> 相对于线段 <code>PQ</code> 的位置：
                 <code>X = P + u * (Q - P) + v * Perpendicular(Q - P) / ||Q - P||</code></p>
-                </li>
-                </ol>
-                <p>这个变换本质上是一个由旋转、平移和缩放构成的复合变换。</p>
-                <p><strong>2.2.3 多个线对定义的变换</strong></p>
-                <p>当存在多对特征线时，一个像素会受到所有线对的影响。Beier 和 Neely 的方法是，对每个线对 <code>i</code> 计算一个从 <code>X'</code> 映射到的源位置 <code>X_i</code>，然后对这些 <code>X_i</code> 进行加权平均，得到最终的源位置 <code>X</code>。</p>
-                <ul>
-                <li><strong>位移</strong>：对于每个线对 <code>i</code>，它产生一个从目标点 <code>X'</code> 到源点 <code>X_i</code> 的位移向量 <code>D_i = X_i - X'</code>。</li>
-                <li><strong>加权平均</strong>：最终的源位置 <code>X_{source}</code> 是由目标位置 <code>X'_{dest}</code> 加上所有位移的加权平均值决定的。
+</li>
+</ol>
+<p>这个变换本质上是一个由旋转、平移和缩放构成的复合变换。</p>
+<p><strong>2.2.3 多个线对定义的变换</strong></p>
+<p>当存在多对特征线时，一个像素会受到所有线对的影响。Beier 和 Neely 的方法是，对每个线对 <code>i</code> 计算一个从 <code>X'</code> 映射到的源位置 <code>X_i</code>，然后对这些 <code>X_i</code> 进行加权平均，得到最终的源位置 <code>X</code>。</p>
+<ul>
+<li><strong>位移</strong>：对于每个线对 <code>i</code>，它产生一个从目标点 <code>X'</code> 到源点 <code>X_i</code> 的位移向量 <code>D_i = X_i - X'</code>。</li>
+<li><strong>加权平均</strong>：最终的源位置 <code>X_{source}</code> 是由目标位置 <code>X'_{dest}</code> 加上所有位移的加权平均值决定的。
                 <code>X_{source} = X'_{dest} + (Σ_i D_i * w_i) / (Σ_i w_i)</code></li>
-                <li><strong>权重函数 (Weight Function)</strong>：权重 <code>w_i</code> 的计算至关重要，它决定了每条线的影响范围和强度。
+<li><strong>权重函数 (Weight Function)</strong>：权重 <code>w_i</code> 的计算至关重要，它决定了每条线的影响范围和强度。
                 <code>w_i = (length^p / (a + dist))^b</code>
-                <ul>
-                <li><code>length</code>：线段 <code>P'Q'</code> 的长度。<code>p</code> 参数控制长度的影响力 (<code>p=0</code> 则长度无关，<code>p=1</code> 则长线影响更大)。</li>
-                <li><code>dist</code>：像素 <code>X'</code> 到线段 <code>P'Q'</code> 的最短距离。这是影响力的主要来源，距离越近，影响越大。</li>
-                <li><code>a</code>：一个很小的常数，防止 <code>dist</code> 为0时除零。它也控制了影响力的衰减。</li>
-                <li><code>b</code>：控制影响力随距离衰减的强度。<code>b</code> 越大，影响力衰减越快，变形更“局部”。<code>b</code> 通常在 <code>[0.5, 2]</code> 之间。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>2.2.4 完整的 Beier-Neely Morphing 算法流程</strong></p>
-                <ol>
-                <li><strong>输入</strong>：源图像 <code>I_S</code>，目标图像 <code>I_D</code>，源特征线集 <code>{S_i}</code>，目标特征线集 <code>{D_i}</code>。</li>
-                <li><strong>动画循环</strong>：对于时间 <code>t</code> 从 0 到 1 的每一帧：
+<ul>
+<li><code>length</code>：线段 <code>P'Q'</code> 的长度。<code>p</code> 参数控制长度的影响力 (<code>p=0</code> 则长度无关，<code>p=1</code> 则长线影响更大)。</li>
+<li><code>dist</code>：像素 <code>X'</code> 到线段 <code>P'Q'</code> 的最短距离。这是影响力的主要来源，距离越近，影响越大。</li>
+<li><code>a</code>：一个很小的常数，防止 <code>dist</code> 为0时除零。它也控制了影响力的衰减。</li>
+<li><code>b</code>：控制影响力随距离衰减的强度。<code>b</code> 越大，影响力衰减越快，变形更“局部”。<code>b</code> 通常在 <code>[0.5, 2]</code> 之间。</li>
+</ul>
+</li>
+</ul>
+<p><strong>2.2.4 完整的 Beier-Neely Morphing 算法流程</strong></p>
+<ol>
+<li><strong>输入</strong>：源图像 <code>I_S</code>，目标图像 <code>I_D</code>，源特征线集 <code>{S_i}</code>，目标特征线集 <code>{D_i}</code>。</li>
+<li><strong>动画循环</strong>：对于时间 <code>t</code> 从 0 到 1 的每一帧：
                 a. 创建一个空的中间帧图像 <code>I_t</code>。
                 b. <strong>插值特征线</strong>：计算当前帧的特征线集 <code>{L_i}</code>。
                 <code>L_i = (1 - t) * S_i + t * D_i</code>
@@ -190,13 +190,13 @@
                 ii. <strong>计算目标位置</strong>：使用 <code>{L_i}</code> 作为目标线，<code>{D_i}</code> 作为源线，计算出 <code>p_{dest}</code> 在 <code>I_D</code> 中对应的源像素位置 <code>p_{source_D}</code>。
                 iii. <strong>采样颜色</strong>：在 <code>I_S</code> 和 <code>I_D</code> 中分别对 <code>p_{source_S}</code> 和 <code>p_{source_D}</code> 位置进行双线性插值，得到颜色 <code>Color_S</code> 和 <code>Color_D</code>。
                 iv. <strong>交叉溶解</strong>：计算最终颜色 <code>Color_t = (1 - t) * Color_S + t * Color_D</code>，并赋给 <code>I_t(p_{dest})</code>。</li>
-                <li><strong>输出</strong>：生成的所有中间帧 <code>I_t</code> 序列。</li>
-                </ol>
-                <hr>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0-pythonnumpy"><strong>第三部分：代码实现 (Python/NumPy)</strong></h3>
-                <p>下面我们给出一个基于特征线对的 Morphing 算法的简化 Python 实现，以帮助大家理解核心逻辑。</p>
-                <div class="code-container">
-                <pre><code class="language-python">import numpy as np
+<li><strong>输出</strong>：生成的所有中间帧 <code>I_t</code> 序列。</li>
+</ol>
+<hr/>
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0-pythonnumpy"><strong>第三部分：代码实现 (Python/NumPy)</strong></h3>
+<p>下面我们给出一个基于特征线对的 Morphing 算法的简化 Python 实现，以帮助大家理解核心逻辑。</p>
+<div class="code-container">
+<pre><code class="language-python">import numpy as np
 from PIL import Image
 from scipy.interpolate import interp2d
 
@@ -258,12 +258,12 @@ def warp_image(image, lines_src, lines_dst):
         
         # 计算 dist
         dist = np.zeros_like(u)
-        # u < 0
-        dist[u < 0] = np.linalg.norm(dest_pixels[u < 0] - line_dst.P, axis=1)
-        # u > 1
-        dist[u > 1] = np.linalg.norm(dest_pixels[u > 1] - line_dst.Q, axis=1)
-        # 0 <= u <= 1
-        mask = (u >= 0) & (u <= 1)
+        # u &lt; 0
+        dist[u &lt; 0] = np.linalg.norm(dest_pixels[u &lt; 0] - line_dst.P, axis=1)
+        # u &gt; 1
+        dist[u &gt; 1] = np.linalg.norm(dest_pixels[u &gt; 1] - line_dst.Q, axis=1)
+        # 0 &lt;= u &lt;= 1
+        mask = (u &gt;= 0) &amp; (u &lt;= 1)
         dist[mask] = np.abs(v[mask])
         
         weight = (len(vec_PQ_dst)**p / (a + dist))**b
@@ -348,101 +348,127 @@ def morph(img_src, img_dst, lines_src, lines_dst, t):
 #     morphed_frame = morph(img1, img2, lines1, lines2, t)
 #     Image.fromarray(morphed_frame).save(f'frame_{i:03d}.png')
 </code></pre>
-                </div>
-                <p><strong>代码解读</strong>：</p>
-                <ul>
-                <li>我们使用 NumPy 进行向量化计算，这极大地提高了效率。代码一次性计算所有像素的 <code>u, v</code>、位移和权重。</li>
-                <li><code>warp_image</code> 函数实现了核心的逆向映射和扭曲过程。</li>
-                <li><code>morph</code> 函数封装了整个流程：插值线段、分别扭曲源和目标图像，最后进行交叉溶解。</li>
-                <li>代码中包含了详细的双线性插值实现，这是保证图像质量的关键。</li>
-                </ul>
-                <hr>
-                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E9%AB%98%E7%BA%A7%E4%B8%BB%E9%A2%98%E4%B8%8E%E6%8B%93%E5%B1%95"><strong>第四部分：高级主题与拓展</strong></h3>
-                <h4 id="41-%E8%BF%87%E6%B8%A1%E6%8E%A7%E5%88%B6-transition-control"><strong>4.1 过渡控制 (Transition Control)</strong></h4>
-                <p>在我们的算法中，参数 <code>t</code> 是线性变化的。这意味着变形和颜色溶解的速度是恒定的。我们可以引入一个<strong>非均匀过渡函数</strong> <code>f(t)</code> 来控制节奏，创造更具戏剧性的效果。</p>
-                <p>例如，使用一个 &quot;ease-in-ease-out&quot; 函数，可以让变形在开始和结束时较慢，在中间阶段加速。
+</div>
+<p><strong>代码解读</strong>：</p>
+<ul>
+<li>我们使用 NumPy 进行向量化计算，这极大地提高了效率。代码一次性计算所有像素的 <code>u, v</code>、位移和权重。</li>
+<li><code>warp_image</code> 函数实现了核心的逆向映射和扭曲过程。</li>
+<li><code>morph</code> 函数封装了整个流程：插值线段、分别扭曲源和目标图像，最后进行交叉溶解。</li>
+<li>代码中包含了详细的双线性插值实现，这是保证图像质量的关键。</li>
+</ul>
+<hr/>
+<h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E9%AB%98%E7%BA%A7%E4%B8%BB%E9%A2%98%E4%B8%8E%E6%8B%93%E5%B1%95"><strong>第四部分：高级主题与拓展</strong></h3>
+<h4 id="41-%E8%BF%87%E6%B8%A1%E6%8E%A7%E5%88%B6-transition-control"><strong>4.1 过渡控制 (Transition Control)</strong></h4>
+<p>在我们的算法中，参数 <code>t</code> 是线性变化的。这意味着变形和颜色溶解的速度是恒定的。我们可以引入一个<strong>非均匀过渡函数</strong> <code>f(t)</code> 来控制节奏，创造更具戏剧性的效果。</p>
+<p>例如，使用一个 "ease-in-ease-out" 函数，可以让变形在开始和结束时较慢，在中间阶段加速。
                 <code>t_effective = f(t) = t*t*(3 - 2*t)</code>
                 只需将算法中所有的 <code>t</code> 替换为 <code>t_effective</code> 即可。</p>
-                <h4 id="42-%E5%85%B6%E4%BB%96%E5%8F%98%E5%BD%A2%E6%96%B9%E6%B3%95"><strong>4.2 其他变形方法</strong></h4>
-                <ul>
-                <li><strong>径向基函数 (Radial Basis Functions, RBF)</strong>：这种方法基于点对（而不是线对）的对应关系。每个点对定义一个径向基函数（如高斯函数或薄板样条函数），整个空间的变形是所有这些函数的线性组合。它非常适合处理分散的、非结构化的特征。</li>
-                <li><strong>移动最小二乘法 (Moving Least Squares, MLS)</strong>：这是一种更强大、更灵活的变形技术。对于图像中的每个点，MLS 会计算一个局部的最佳仿射变换（或相似变换、刚性变换），而不是像 Beier-Neely 那样计算一个全局的加权位移。这使得 MLS 在保持图像局部结构方面表现得更好，产生的畸变更少。</li>
-                </ul>
-                <h4 id="43-%E8%A7%86%E5%9F%9F-morphing-view-morphing"><strong>4.3 视域 Morphing (View Morphing)</strong></h4>
-                <p>传统2D Morphing 的一个致命弱点是它不考虑三维空间和透视。当两张图像的拍摄视点不同时，直接进行2D Morphing 会产生严重的几何畸变。例如，三维空间中的一条直线，在 Morphing 过程中可能会弯曲。</p>
-                <p><strong>Seitz 和 Dyer 在1996年提出的视域 Morphing</strong> 解决了这个问题。它旨在生成物理上正确的中间视点图像。</p>
-                <p><strong>核心思想</strong>：将复杂的透视变换问题，通过重投影（reprojection）转化为简单的平行视图插值问题。</p>
-                <p><strong>三步算法</strong>：</p>
-                <ol>
-                <li><strong>预扭曲 (Pre-warp)</strong>：利用两幅图像的相机投影矩阵（或通过特征点计算出的基本矩阵），将源图像 <code>I_S</code> 和目标图像 <code>I_D</code> 分别进行透视变换，重投影到一个与相机基线平行的公共平面上，得到 <code>I_S'</code> 和 <code>I_D'</code>。在这些“校正”后的图像中，对应的点位于同一水平扫描线上。</li>
-                <li><strong>Morphing</strong>：对校正后的图像 <code>I_S'</code> 和 <code>I_D'</code> 进行简单的线性插值或2D Morphing。由于几何已经对齐，这个过程不会产生畸变，只是简单的像素混合和位移。</li>
-                <li><strong>后扭曲 (Post-warp)</strong>：将生成的中间帧 <code>I_t'</code> 从公共平面上，通过插值得到的中间相机矩阵，重投影回最终的中间视点，得到最终结果 <code>I_t</code>。</li>
-                </ol>
-                <p>视域 Morphing 能够产生逼真的三维旋转效果，但它需要关于相机几何的额外信息。</p>
-                <p><strong>伪影处理</strong>：</p>
-                <ul>
-                <li><strong>折叠 (Folds)</strong>：当一个在源视图中可见的表面在目标视图中被遮挡时发生。</li>
-                <li><strong>空洞 (Holes)</strong>：当一个在源视图中被遮挡的表面在目标视图中变得可见时发生。
+<h4 id="42-%E5%85%B6%E4%BB%96%E5%8F%98%E5%BD%A2%E6%96%B9%E6%B3%95"><strong>4.2 其他变形方法</strong></h4>
+<ul>
+<li><strong>径向基函数 (Radial Basis Functions, RBF)</strong>：这种方法基于点对（而不是线对）的对应关系。每个点对定义一个径向基函数（如高斯函数或薄板样条函数），整个空间的变形是所有这些函数的线性组合。它非常适合处理分散的、非结构化的特征。</li>
+<li><strong>移动最小二乘法 (Moving Least Squares, MLS)</strong>：这是一种更强大、更灵活的变形技术。对于图像中的每个点，MLS 会计算一个局部的最佳仿射变换（或相似变换、刚性变换），而不是像 Beier-Neely 那样计算一个全局的加权位移。这使得 MLS 在保持图像局部结构方面表现得更好，产生的畸变更少。</li>
+</ul>
+<h4 id="43-%E8%A7%86%E5%9F%9F-morphing-view-morphing"><strong>4.3 视域 Morphing (View Morphing)</strong></h4>
+<p>传统2D Morphing 的一个致命弱点是它不考虑三维空间和透视。当两张图像的拍摄视点不同时，直接进行2D Morphing 会产生严重的几何畸变。例如，三维空间中的一条直线，在 Morphing 过程中可能会弯曲。</p>
+<p><strong>Seitz 和 Dyer 在1996年提出的视域 Morphing</strong> 解决了这个问题。它旨在生成物理上正确的中间视点图像。</p>
+<p><strong>核心思想</strong>：将复杂的透视变换问题，通过重投影（reprojection）转化为简单的平行视图插值问题。</p>
+<p><strong>三步算法</strong>：</p>
+<ol>
+<li><strong>预扭曲 (Pre-warp)</strong>：利用两幅图像的相机投影矩阵（或通过特征点计算出的基本矩阵），将源图像 <code>I_S</code> 和目标图像 <code>I_D</code> 分别进行透视变换，重投影到一个与相机基线平行的公共平面上，得到 <code>I_S'</code> 和 <code>I_D'</code>。在这些“校正”后的图像中，对应的点位于同一水平扫描线上。</li>
+<li><strong>Morphing</strong>：对校正后的图像 <code>I_S'</code> 和 <code>I_D'</code> 进行简单的线性插值或2D Morphing。由于几何已经对齐，这个过程不会产生畸变，只是简单的像素混合和位移。</li>
+<li><strong>后扭曲 (Post-warp)</strong>：将生成的中间帧 <code>I_t'</code> 从公共平面上，通过插值得到的中间相机矩阵，重投影回最终的中间视点，得到最终结果 <code>I_t</code>。</li>
+</ol>
+<p>视域 Morphing 能够产生逼真的三维旋转效果，但它需要关于相机几何的额外信息。</p>
+<p><strong>伪影处理</strong>：</p>
+<ul>
+<li><strong>折叠 (Folds)</strong>：当一个在源视图中可见的表面在目标视图中被遮挡时发生。</li>
+<li><strong>空洞 (Holes)</strong>：当一个在源视图中被遮挡的表面在目标视图中变得可见时发生。
                 这些问题可以通过深度信息（或其近似值——<strong>视差(disparity)</strong>）来解决。通过 Z-Buffering 的思想，可以判断哪个表面应该在前面，从而正确处理遮挡关系。</li>
-                </ul>
-                <hr>
-                <h3 id="%E7%AC%AC%E4%BA%94%E8%AE%B2%E6%80%BB%E7%BB%93%E4%B8%8E%E5%B1%95%E6%9C%9B"><strong>第五讲：总结与展望</strong></h3>
-                <h4 id="51-%E6%80%BB%E7%BB%93"><strong>5.1 总结</strong></h4>
+</ul>
+<hr/>
+<h3 id="%E7%AC%AC%E4%BA%94%E8%AE%B2%E6%80%BB%E7%BB%93%E4%B8%8E%E5%B1%95%E6%9C%9B"><strong>第五讲：总结与展望</strong></h3>
+<h4 id="51-%E6%80%BB%E7%BB%93"><strong>5.1 总结</strong></h4>
+<ul>
+<li><strong>核心原理</strong>：图像扭曲 + 交叉溶解。</li>
+<li><strong>主要算法</strong>：
                 <ul>
-                <li><strong>核心原理</strong>：图像扭曲 + 交叉溶解。</li>
-                <li><strong>主要算法</strong>：
+<li><strong>基于网格</strong>：直观但控制繁琐。</li>
+<li><strong>基于特征线对 (Beier-Neely)</strong>：控制直观，效果出色，是行业标准。我们深入了其数学推导和代码实现。</li>
+</ul>
+</li>
+<li><strong>高级拓展</strong>：
                 <ul>
-                <li><strong>基于网格</strong>：直观但控制繁琐。</li>
-                <li><strong>基于特征线对 (Beier-Neely)</strong>：控制直观，效果出色，是行业标准。我们深入了其数学推导和代码实现。</li>
-                </ul>
-                </li>
-                <li><strong>高级拓展</strong>：
-                <ul>
-                <li><strong>过渡控制</strong>：实现非线性动画节奏。</li>
-                <li><strong>视域 Morphing</strong>：通过结合相机几何，生成物理上更准确的中间视图，解决了传统2D Morphing 的透视畸变问题。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="52-%E5%B1%80%E9%99%90%E6%80%A7"><strong>5.2 局限性</strong></h4>
-                <p>尽管二维 Morphing 功能强大，但它有其固有的局限性：</p>
-                <ul>
-                <li><strong>缺乏三维信息</strong>：无法处理光照、阴影和材质的变化。</li>
-                <li><strong>依赖人工标注</strong>：无论是网格还是特征线，都需要大量的人工交互来指定对应关系。</li>
-                <li><strong>对大尺度变换敏感</strong>：当源和目标差异巨大时，容易产生不自然的“幽灵”或撕裂效果。</li>
-                </ul>
-                <h4 id="53-%E5%B1%95%E6%9C%9B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E6%97%B6%E4%BB%A3"><strong>5.3 展望：深度学习的时代</strong></h4>
-                <p>近年来，随着深度学习，特别是生成对抗网络（GANs）的发展，图像到图像的转换进入了一个新的纪元。像 StyleGAN、CycleGAN 等模型，可以学习到数据集中的高维特征分布，实现惊人的图像转换效果，例如人脸老化、性别转换、风格迁移等。</p>
-                <p>这些深度学习方法与我们今天学习的经典 Morphing 相比：</p>
-                <ul>
-                <li><strong>优点</strong>：通常不需要手动指定特征，可以生成更真实、细节更丰富的纹理，甚至能“想象”出被遮挡的部分。</li>
-                <li><strong>缺点</strong>：可控性较差（“黑箱”操作），需要大量的训练数据，并且可能会产生与输入无关的、不可预测的结果。</li>
-                </ul>
-                <p>经典 Morphing 技术以其<strong>精确的可控性、对几何的直观操纵和不依赖大规模训练数据</strong>的特点，在许多专业领域（如电影特效、医疗影像、科学可视化）中，至今仍然是不可或TAINI的工具。</p>
-                <p>掌握这些经典算法，不仅能让你理解计算机图形学的基石，更能为你将来理解和开发更先进的生成模型打下坚实的数学和工程基础。</p>
-            </article>
-        </main>
-    </div>
-    <footer>
-        <p>© 2025 我的博客</p>
-    </footer>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<li><strong>过渡控制</strong>：实现非线性动画节奏。</li>
+<li><strong>视域 Morphing</strong>：通过结合相机几何，生成物理上更准确的中间视图，解决了传统2D Morphing 的透视畸变问题。</li>
+</ul>
+</li>
+</ul>
+<h4 id="52-%E5%B1%80%E9%99%90%E6%80%A7"><strong>5.2 局限性</strong></h4>
+<p>尽管二维 Morphing 功能强大，但它有其固有的局限性：</p>
+<ul>
+<li><strong>缺乏三维信息</strong>：无法处理光照、阴影和材质的变化。</li>
+<li><strong>依赖人工标注</strong>：无论是网格还是特征线，都需要大量的人工交互来指定对应关系。</li>
+<li><strong>对大尺度变换敏感</strong>：当源和目标差异巨大时，容易产生不自然的“幽灵”或撕裂效果。</li>
+</ul>
+<h4 id="53-%E5%B1%95%E6%9C%9B%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E6%97%B6%E4%BB%A3"><strong>5.3 展望：深度学习的时代</strong></h4>
+<p>近年来，随着深度学习，特别是生成对抗网络（GANs）的发展，图像到图像的转换进入了一个新的纪元。像 StyleGAN、CycleGAN 等模型，可以学习到数据集中的高维特征分布，实现惊人的图像转换效果，例如人脸老化、性别转换、风格迁移等。</p>
+<p>这些深度学习方法与我们今天学习的经典 Morphing 相比：</p>
+<ul>
+<li><strong>优点</strong>：通常不需要手动指定特征，可以生成更真实、细节更丰富的纹理，甚至能“想象”出被遮挡的部分。</li>
+<li><strong>缺点</strong>：可控性较差（“黑箱”操作），需要大量的训练数据，并且可能会产生与输入无关的、不可预测的结果。</li>
+</ul>
+<p>经典 Morphing 技术以其<strong>精确的可控性、对几何的直观操纵和不依赖大规模训练数据</strong>的特点，在许多专业领域（如电影特效、医疗影像、科学可视化）中，至今仍然是不可或TAINI的工具。</p>
+<p>掌握这些经典算法，不仅能让你理解计算机图形学的基石，更能为你将来理解和开发更先进的生成模型打下坚实的数学和工程基础。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<footer>
+<p>© 2025 我的博客</p>
+</footer>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

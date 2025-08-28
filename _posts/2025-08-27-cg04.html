@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机图形学04:动手实践 - 你的第一个OpenGL程序</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>计算机图形学04:动手实践 - 你的第一个OpenGL程序</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,110 +30,110 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A604%E5%8A%A8%E6%89%8B%E5%AE%9E%E8%B7%B5---%E4%BD%A0%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AAopengl%E7%A8%8B%E5%BA%8F">计算机图形学04:动手实践 - 你的第一个OpenGL程序</h1>
-                <h3 id="%E5%BC%95%E8%A8%80%E4%BB%8E%E7%90%86%E8%AE%BA%E5%88%B0%E4%BB%A3%E7%A0%81%E7%9A%84%E6%A1%A5%E6%A2%81"><strong>引言：从理论到代码的桥梁</strong></h3>
-                <p>到目前为止，我们讨论的都是抽象的概念。但要让计算机为我们绘制图形，我们需要一个具体的工具，一个能让我们通过代码直接与图形硬件（GPU）对话的接口。这个接口，就是<strong>图形应用程序接口 (Graphics API)</strong>。</p>
-                <p>目前业界主流的图形API有三个：</p>
-                <ul>
-                <li><strong>OpenGL (Open Graphics Library):</strong> 我们本课程的重点。它是一个<strong>跨平台</strong>的图形API，意味着你写的代码可以在Windows, macOS, Linux, 甚至移动设备上运行。</li>
-                <li><strong>Direct3D:</strong> 微软公司的私有API，仅限于Windows和Xbox平台。它是PC游戏领域的主导者。</li>
-                <li><strong>Vulkan:</strong> 最新的跨平台API，被看作是OpenGL的继任者。它提供了更底层的硬件控制，性能更高，但学习曲线也更陡峭。</li>
-                </ul>
-                <p>我们选择OpenGL作为学习工具，因为它历史悠久、概念清晰、跨平台性好，非常适合用于教学和理解计算机图形学的核心原理。</p>
-                <h3 id="1-%E4%BB%80%E4%B9%88%E6%98%AFopengl"><strong>1. 什么是OpenGL？</strong></h3>
-                <p>在开始编程之前，我们必须搞清楚OpenGL究竟是什么。</p>
-                <ul>
-                <li><strong>它是一个规范 (Specification)，而不是一个库。</strong> OpenGL本身只是一份长篇文档，由Khronos Group这个行业联盟维护。这份文档精确地定义了一系列函数和常量，以及调用它们后图形硬件应该产生的行为。</li>
-                <li><strong>它是一个状态机 (State Machine)。</strong> 这是理解OpenGL工作方式的<strong>核心关键</strong>。你可以把OpenGL想象成一个非常复杂的绘图机器人。你不能一次性告诉它“画一个红色的、在(0,0)位置的、旋转了45度的正方形”。你必须分步下达指令来改变它的“状态”：
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A604%E5%8A%A8%E6%89%8B%E5%AE%9E%E8%B7%B5---%E4%BD%A0%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AAopengl%E7%A8%8B%E5%BA%8F">计算机图形学04:动手实践 - 你的第一个OpenGL程序</h1>
+<h3 id="%E5%BC%95%E8%A8%80%E4%BB%8E%E7%90%86%E8%AE%BA%E5%88%B0%E4%BB%A3%E7%A0%81%E7%9A%84%E6%A1%A5%E6%A2%81"><strong>引言：从理论到代码的桥梁</strong></h3>
+<p>到目前为止，我们讨论的都是抽象的概念。但要让计算机为我们绘制图形，我们需要一个具体的工具，一个能让我们通过代码直接与图形硬件（GPU）对话的接口。这个接口，就是<strong>图形应用程序接口 (Graphics API)</strong>。</p>
+<p>目前业界主流的图形API有三个：</p>
+<ul>
+<li><strong>OpenGL (Open Graphics Library):</strong> 我们本课程的重点。它是一个<strong>跨平台</strong>的图形API，意味着你写的代码可以在Windows, macOS, Linux, 甚至移动设备上运行。</li>
+<li><strong>Direct3D:</strong> 微软公司的私有API，仅限于Windows和Xbox平台。它是PC游戏领域的主导者。</li>
+<li><strong>Vulkan:</strong> 最新的跨平台API，被看作是OpenGL的继任者。它提供了更底层的硬件控制，性能更高，但学习曲线也更陡峭。</li>
+</ul>
+<p>我们选择OpenGL作为学习工具，因为它历史悠久、概念清晰、跨平台性好，非常适合用于教学和理解计算机图形学的核心原理。</p>
+<h3 id="1-%E4%BB%80%E4%B9%88%E6%98%AFopengl"><strong>1. 什么是OpenGL？</strong></h3>
+<p>在开始编程之前，我们必须搞清楚OpenGL究竟是什么。</p>
+<ul>
+<li><strong>它是一个规范 (Specification)，而不是一个库。</strong> OpenGL本身只是一份长篇文档，由Khronos Group这个行业联盟维护。这份文档精确地定义了一系列函数和常量，以及调用它们后图形硬件应该产生的行为。</li>
+<li><strong>它是一个状态机 (State Machine)。</strong> 这是理解OpenGL工作方式的<strong>核心关键</strong>。你可以把OpenGL想象成一个非常复杂的绘图机器人。你不能一次性告诉它“画一个红色的、在(0,0)位置的、旋转了45度的正方形”。你必须分步下达指令来改变它的“状态”：
                 <ol>
-                <li>“机器人，把你的画笔颜色设置为<strong>红色</strong>。” (设置当前颜色状态)</li>
-                <li>“机器人，移动到<strong>变换后的A点</strong>。” (提交一个顶点)</li>
-                <li>“机器人，移动到<strong>变换后的B点</strong>。” (提交一个顶点)</li>
-                <li>...
+<li>“机器人，把你的画笔颜色设置为<strong>红色</strong>。” (设置当前颜色状态)</li>
+<li>“机器人，移动到<strong>变换后的A点</strong>。” (提交一个顶点)</li>
+<li>“机器人，移动到<strong>变换后的B点</strong>。” (提交一个顶点)</li>
+<li>...
                 这个“当前颜色”就是OpenGL状态机中的一个状态变量。后续所有绘制顶点的命令，都会使用这个颜色，直到你再次下达命令去改变它。</li>
-                </ol>
-                </li>
-                <li><strong>它是一个底层接口。</strong> OpenGL的核心只关心一件事情：接收顶点数据，并将它们按照当前的状态渲染成屏幕上的像素。它不负责创建窗口、处理鼠标键盘输入、加载图片或模型文件。</li>
-                </ul>
-                <h3 id="2-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81glut"><strong>2. 为什么需要GLUT？</strong></h3>
-                <p>既然OpenGL不负责创建窗口，那我们的图形要画在哪里呢？这就是我们需要辅助库的原因。<strong>GLUT (OpenGL Utility Toolkit)</strong> 就是这样一个库。</p>
+</ol>
+</li>
+<li><strong>它是一个底层接口。</strong> OpenGL的核心只关心一件事情：接收顶点数据，并将它们按照当前的状态渲染成屏幕上的像素。它不负责创建窗口、处理鼠标键盘输入、加载图片或模型文件。</li>
+</ul>
+<h3 id="2-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81glut"><strong>2. 为什么需要GLUT？</strong></h3>
+<p>既然OpenGL不负责创建窗口，那我们的图形要画在哪里呢？这就是我们需要辅助库的原因。<strong>GLUT (OpenGL Utility Toolkit)</strong> 就是这样一个库。</p>
+<ul>
+<li><strong>它的作用：</strong> GLUT为我们处理了所有与操作系统相关的繁琐事务，例如：
                 <ul>
-                <li><strong>它的作用：</strong> GLUT为我们处理了所有与操作系统相关的繁琐事务，例如：
+<li>创建和管理窗口。</li>
+<li>处理用户的键盘、鼠标输入事件。</li>
+<li>提供一个简单的事件循环机制。</li>
+</ul>
+</li>
+<li><strong>它的地位：</strong> GLUT是一个非常古老的库，但因其简单易用，至今仍在教学中广泛使用。在现代的、更复杂的项目中，人们通常会使用它的继任者，如 <strong>freeglut</strong>，或者功能更强大的 <strong>GLFW</strong>, <strong>SDL</strong> 等。</li>
+</ul>
+<p>在本课程中，我们将使用GLUT来快速搭建我们的程序框架，从而把精力完全集中在OpenGL的绘图命令上。</p>
+<h3 id="3-%E6%90%AD%E5%BB%BA%E4%BD%A0%E7%9A%84%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83"><strong>3. 搭建你的开发环境</strong></h3>
+<p>我们将以在Windows上使用Visual Studio为例，来搭建我们的开发环境。macOS和Linux的配置过程类似，主要是库文件的路径和链接方式不同。</p>
+<ol>
+<li>
+<p><strong>准备工作：</strong></p>
+<ul>
+<li><strong>IDE:</strong> 安装一个现代的C++集成开发环境，如 Visual Studio 2022 Community (免费)。</li>
+<li><strong>GLUT库:</strong> 从网上下载预编译好的GLUT库文件。你通常会得到三个文件：
                 <ul>
-                <li>创建和管理窗口。</li>
-                <li>处理用户的键盘、鼠标输入事件。</li>
-                <li>提供一个简单的事件循环机制。</li>
-                </ul>
-                </li>
-                <li><strong>它的地位：</strong> GLUT是一个非常古老的库，但因其简单易用，至今仍在教学中广泛使用。在现代的、更复杂的项目中，人们通常会使用它的继任者，如 <strong>freeglut</strong>，或者功能更强大的 <strong>GLFW</strong>, <strong>SDL</strong> 等。</li>
-                </ul>
-                <p>在本课程中，我们将使用GLUT来快速搭建我们的程序框架，从而把精力完全集中在OpenGL的绘图命令上。</p>
-                <h3 id="3-%E6%90%AD%E5%BB%BA%E4%BD%A0%E7%9A%84%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83"><strong>3. 搭建你的开发环境</strong></h3>
-                <p>我们将以在Windows上使用Visual Studio为例，来搭建我们的开发环境。macOS和Linux的配置过程类似，主要是库文件的路径和链接方式不同。</p>
-                <ol>
-                <li>
-                <p><strong>准备工作：</strong></p>
+<li><code>glut.h</code>: 头文件，告诉编译器GLUT有哪些函数。</li>
+<li><code>glut32.lib</code>: 静态链接库文件，在编译链接时使用。</li>
+<li><code>glut32.dll</code>: 动态链接库文件，在程序运行时需要。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>配置Visual Studio项目 (一次性工作):</strong></p>
+<ul>
+<li><strong>第一步：放置文件。</strong> 将上述三个文件放到Visual Studio或系统能够找到的地方。一个常规的做法是：
                 <ul>
-                <li><strong>IDE:</strong> 安装一个现代的C++集成开发环境，如 Visual Studio 2022 Community (免费)。</li>
-                <li><strong>GLUT库:</strong> 从网上下载预编译好的GLUT库文件。你通常会得到三个文件：
-                <ul>
-                <li><code>glut.h</code>: 头文件，告诉编译器GLUT有哪些函数。</li>
-                <li><code>glut32.lib</code>: 静态链接库文件，在编译链接时使用。</li>
-                <li><code>glut32.dll</code>: 动态链接库文件，在程序运行时需要。</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>配置Visual Studio项目 (一次性工作):</strong></p>
-                <ul>
-                <li><strong>第一步：放置文件。</strong> 将上述三个文件放到Visual Studio或系统能够找到的地方。一个常规的做法是：
-                <ul>
-                <li><code>glut.h</code> 放到 <code>.../VC/Tools/MSVC/x.x.x/include/GL/</code> 目录下。</li>
-                <li><code>glut32.lib</code> 放到 <code>.../VC/Tools/MSVC/x.x.x/lib/x64/</code> (或x86) 目录下。</li>
-                <li><code>glut32.dll</code> 放到 <code>C:/Windows/System32</code> (64位系统) 或 <code>C:/Windows/SysWOW64</code> (32位程序在64位系统上) 目录下。</li>
-                <li><em>(专业建议：更好的做法是为项目单独创建一个<code>lib</code>和<code>include</code>文件夹，然后在项目属性中指定路径，这样项目更具可移植性)</em></li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>创建你的第一个项目：</strong></p>
-                <ul>
-                <li>打开Visual Studio，选择“创建新项目”。</li>
-                <li>选择“控制台应用”（C++）。</li>
-                <li>给项目命名，例如 <code>HelloOpenGL</code>。</li>
-                <li><strong>重要设置：</strong> 创建项目后，右键点击项目名称 -&gt; 属性。在 C/C++ -&gt; 预编译头 中，将“预编译头”选项设置为“不使用预编译头”。这可以避免一些初学者常见的编译问题。</li>
-                <li>在链接器 -&gt; 输入 -&gt; 附加依赖项中，添加 <code>opengl32.lib</code> 和 <code>glut32.lib</code>。</li>
-                </ul>
-                </li>
-                </ol>
-                <p>现在，你的开发环境已经准备就绪，可以开始编写代码了！</p>
-                <h3 id="4-%E4%BB%A3%E7%A0%81%E5%89%96%E6%9E%90%E7%BB%98%E5%88%B6%E4%B8%80%E4%B8%AA%E7%BA%A2%E8%89%B2%E6%AD%A3%E6%96%B9%E5%BD%A2"><strong>4. 代码剖析：绘制一个红色正方形</strong></h3>
-                <p>让我们来逐行分析并理解第一个OpenGL程序。这个程序将在屏幕中央绘制一个红色的正方形。</p>
-                <div class="code-container">
-                    <pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;GL/glut.h&gt; // 引入GLUT头文件，它会自动包含OpenGL的核心头文件</span></span>
+<li><code>glut.h</code> 放到 <code>.../VC/Tools/MSVC/x.x.x/include/GL/</code> 目录下。</li>
+<li><code>glut32.lib</code> 放到 <code>.../VC/Tools/MSVC/x.x.x/lib/x64/</code> (或x86) 目录下。</li>
+<li><code>glut32.dll</code> 放到 <code>C:/Windows/System32</code> (64位系统) 或 <code>C:/Windows/SysWOW64</code> (32位程序在64位系统上) 目录下。</li>
+<li><em>(专业建议：更好的做法是为项目单独创建一个<code>lib</code>和<code>include</code>文件夹，然后在项目属性中指定路径，这样项目更具可移植性)</em></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>创建你的第一个项目：</strong></p>
+<ul>
+<li>打开Visual Studio，选择“创建新项目”。</li>
+<li>选择“控制台应用”（C++）。</li>
+<li>给项目命名，例如 <code>HelloOpenGL</code>。</li>
+<li><strong>重要设置：</strong> 创建项目后，右键点击项目名称 -&gt; 属性。在 C/C++ -&gt; 预编译头 中，将“预编译头”选项设置为“不使用预编译头”。这可以避免一些初学者常见的编译问题。</li>
+<li>在链接器 -&gt; 输入 -&gt; 附加依赖项中，添加 <code>opengl32.lib</code> 和 <code>glut32.lib</code>。</li>
+</ul>
+</li>
+</ol>
+<p>现在，你的开发环境已经准备就绪，可以开始编写代码了！</p>
+<h3 id="4-%E4%BB%A3%E7%A0%81%E5%89%96%E6%9E%90%E7%BB%98%E5%88%B6%E4%B8%80%E4%B8%AA%E7%BA%A2%E8%89%B2%E6%AD%A3%E6%96%B9%E5%BD%A2"><strong>4. 代码剖析：绘制一个红色正方形</strong></h3>
+<p>让我们来逐行分析并理解第一个OpenGL程序。这个程序将在屏幕中央绘制一个红色的正方形。</p>
+<div class="code-container">
+<pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;GL/glut.h&gt; // 引入GLUT头文件，它会自动包含OpenGL的核心头文件</span></span>
 <span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;stdlib.h&gt;  // 标准库</span></span>
 
 <span class="hljs-comment">// 核心绘图函数</span>
@@ -180,63 +180,89 @@
     <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>; <span class="hljs-comment">// 这行代码永远不会被执行到</span>
 }
 </div></code></pre>
-                </div>
-                <h4 id="%E4%B8%BB%E5%87%BD%E6%95%B0-main-%E7%9A%84%E6%B5%81%E7%A8%8B%E8%A7%A3%E6%9E%90"><strong>主函数 <code>main</code> 的流程解析：</strong></h4>
+</div>
+<h4 id="%E4%B8%BB%E5%87%BD%E6%95%B0-main-%E7%9A%84%E6%B5%81%E7%A8%8B%E8%A7%A3%E6%9E%90"><strong>主函数 <code>main</code> 的流程解析：</strong></h4>
+<ul>
+<li><strong>A. <code>glutInit</code></strong>: 初始化GLUT库。这是所有GLUT程序的第一步。</li>
+<li><strong>B. <code>glutInitDisplayMode</code></strong>: 设置窗口的显示模式。
                 <ul>
-                <li><strong>A. <code>glutInit</code></strong>: 初始化GLUT库。这是所有GLUT程序的第一步。</li>
-                <li><strong>B. <code>glutInitDisplayMode</code></strong>: 设置窗口的显示模式。
-                <ul>
-                <li><code>GLUT_RGBA</code>: 指定颜色模式为RGBA（红、绿、蓝、透明度）。</li>
-                <li><code>GLUT_DOUBLE</code>: <strong>非常重要！</strong> 这指定了使用<strong>双缓冲 (Double Buffering)</strong>。</li>
-                </ul>
-                </li>
-                <li><strong>C. <code>glutCreateWindow</code></strong>: 创建一个带有指定标题的窗口。</li>
-                <li><strong>D. <code>glutDisplayFunc</code></strong>: 这是<strong>回调机制</strong>的体现。我们在这里注册了我们的<code>redraw</code>函数。这意味着我们把<code>redraw</code>函数的控制权交给了GLUT。当操作系统认为窗口需要被重绘时（例如，窗口刚创建、被其他窗口遮挡后又出现），GLUT就会自动调用我们注册的<code>redraw</code>函数。</li>
-                <li><strong>E. <code>glutMainLoop</code></strong>: 启动GLUT的事件循环。这是一个<strong>无限循环</strong>，它会持续监听鼠标、键盘、重绘等事件。一旦进入这个循环，程序控制权就完全交给了GLUT，它会根据发生的事件去调用我们之前注册的各种回调函数。</li>
-                </ul>
-                <h4 id="%E7%BB%98%E5%9B%BE%E5%87%BD%E6%95%B0-redraw-%E7%9A%84%E6%B5%81%E7%A8%8B%E8%A7%A3%E6%9E%90"><strong>绘图函数 <code>redraw</code> 的流程解析：</strong></h4>
-                <ol>
-                <li><strong><code>glClear(GL_COLOR_BUFFER_BIT)</code></strong>: 清空画布。<code>GL_COLOR_BUFFER_BIT</code>告诉<code>glClear</code>我们要清空的是颜色缓冲区，将其重置为默认的背景色（默认为黑色）。</li>
-                <li><strong><code>glBegin(primitive_type)</code> / <code>glEnd()</code></strong>: 这是一对经典的、现已<strong>废弃</strong>（但教学中极为有用）的函数，用于定义一系列顶点来构成一个或多个图元。<code>GL_QUADS</code>表示我们接下来定义的顶点将用于构成四边形（每四个顶点一组）。</li>
-                <li><strong><code>glColor3f(...)</code></strong>: 设置OpenGL状态机中的“当前颜色”。<code>3f</code>表示3个浮点数参数。此后定义的所有顶点都将是红色的，直到下一次调用<code>glColor</code>。</li>
-                <li><strong><code>glVertex3f(...)</code></strong>: 定义一个三维顶点。在<code>glBegin</code>/<code>glEnd</code>块中，OpenGL会收集这些顶点，并根据<code>glBegin</code>指定的图元类型将它们组合起来。</li>
-                <li><strong><code>glutSwapBuffers()</code></strong>: <strong>双缓冲</strong>的体现。想象我们有两块画板：<strong>前台缓冲区</strong>（当前屏幕上显示的）和<strong>后台缓冲区</strong>（我们在内存中偷偷绘制的）。我们所有的绘制命令（<code>glClear</code>, <code>glVertex</code>等）都是在后台缓冲区进行的。当<code>redraw</code>函数完成所有绘制后，调用<code>glutSwapBuffers()</code>会将后台缓冲区的内容瞬间“交换”到前台，成为屏幕上显示的内容。这样做可以避免用户看到图形绘制的中间过程，防止画面闪烁。</li>
-                </ol>
-                <p>编译并运行这段代码，你将看到一个黑色的窗口，中央有一个红色的正方形。恭喜你，你已经完成了从0到1的跨越！</p>
-                <p>思考以下问题：</p>
-                <ol>
-                <li>你应该使用哪种图元类型来绘制这个形状？<code>GL_TRIANGLES</code>? <code>GL_LINE_LOOP</code>? 或者其他？</li>
-                <li>如果用 <code>GL_TRIANGLES</code>，你需要定义多少个顶点？<code>glVertex</code>函数需要被调用多少次？</li>
-                <li>如果用 <code>GL_LINE_LOOP</code>，又需要多少个顶点？</li>
-                <li>尝试将两个三角形设置成不同的颜色。</li>
-                </ol>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li><code>GLUT_RGBA</code>: 指定颜色模式为RGBA（红、绿、蓝、透明度）。</li>
+<li><code>GLUT_DOUBLE</code>: <strong>非常重要！</strong> 这指定了使用<strong>双缓冲 (Double Buffering)</strong>。</li>
+</ul>
+</li>
+<li><strong>C. <code>glutCreateWindow</code></strong>: 创建一个带有指定标题的窗口。</li>
+<li><strong>D. <code>glutDisplayFunc</code></strong>: 这是<strong>回调机制</strong>的体现。我们在这里注册了我们的<code>redraw</code>函数。这意味着我们把<code>redraw</code>函数的控制权交给了GLUT。当操作系统认为窗口需要被重绘时（例如，窗口刚创建、被其他窗口遮挡后又出现），GLUT就会自动调用我们注册的<code>redraw</code>函数。</li>
+<li><strong>E. <code>glutMainLoop</code></strong>: 启动GLUT的事件循环。这是一个<strong>无限循环</strong>，它会持续监听鼠标、键盘、重绘等事件。一旦进入这个循环，程序控制权就完全交给了GLUT，它会根据发生的事件去调用我们之前注册的各种回调函数。</li>
+</ul>
+<h4 id="%E7%BB%98%E5%9B%BE%E5%87%BD%E6%95%B0-redraw-%E7%9A%84%E6%B5%81%E7%A8%8B%E8%A7%A3%E6%9E%90"><strong>绘图函数 <code>redraw</code> 的流程解析：</strong></h4>
+<ol>
+<li><strong><code>glClear(GL_COLOR_BUFFER_BIT)</code></strong>: 清空画布。<code>GL_COLOR_BUFFER_BIT</code>告诉<code>glClear</code>我们要清空的是颜色缓冲区，将其重置为默认的背景色（默认为黑色）。</li>
+<li><strong><code>glBegin(primitive_type)</code> / <code>glEnd()</code></strong>: 这是一对经典的、现已<strong>废弃</strong>（但教学中极为有用）的函数，用于定义一系列顶点来构成一个或多个图元。<code>GL_QUADS</code>表示我们接下来定义的顶点将用于构成四边形（每四个顶点一组）。</li>
+<li><strong><code>glColor3f(...)</code></strong>: 设置OpenGL状态机中的“当前颜色”。<code>3f</code>表示3个浮点数参数。此后定义的所有顶点都将是红色的，直到下一次调用<code>glColor</code>。</li>
+<li><strong><code>glVertex3f(...)</code></strong>: 定义一个三维顶点。在<code>glBegin</code>/<code>glEnd</code>块中，OpenGL会收集这些顶点，并根据<code>glBegin</code>指定的图元类型将它们组合起来。</li>
+<li><strong><code>glutSwapBuffers()</code></strong>: <strong>双缓冲</strong>的体现。想象我们有两块画板：<strong>前台缓冲区</strong>（当前屏幕上显示的）和<strong>后台缓冲区</strong>（我们在内存中偷偷绘制的）。我们所有的绘制命令（<code>glClear</code>, <code>glVertex</code>等）都是在后台缓冲区进行的。当<code>redraw</code>函数完成所有绘制后，调用<code>glutSwapBuffers()</code>会将后台缓冲区的内容瞬间“交换”到前台，成为屏幕上显示的内容。这样做可以避免用户看到图形绘制的中间过程，防止画面闪烁。</li>
+</ol>
+<p>编译并运行这段代码，你将看到一个黑色的窗口，中央有一个红色的正方形。恭喜你，你已经完成了从0到1的跨越！</p>
+<p>思考以下问题：</p>
+<ol>
+<li>你应该使用哪种图元类型来绘制这个形状？<code>GL_TRIANGLES</code>? <code>GL_LINE_LOOP</code>? 或者其他？</li>
+<li>如果用 <code>GL_TRIANGLES</code>，你需要定义多少个顶点？<code>glVertex</code>函数需要被调用多少次？</li>
+<li>如果用 <code>GL_LINE_LOOP</code>，又需要多少个顶点？</li>
+<li>尝试将两个三角形设置成不同的颜色。</li>
+</ol>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

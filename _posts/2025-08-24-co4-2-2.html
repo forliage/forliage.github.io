@@ -1,13 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机组成4-2-2:流水线的设计</title>
-    
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    
-    <script>
+<meta charset="utf-8"/>
+<title>计算机组成4-2-2:流水线的设计</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -18,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -32,300 +30,325 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%904-2-2%E6%B5%81%E6%B0%B4%E7%BA%BF%E7%9A%84%E8%AE%BE%E8%AE%A1">计算机组成4-2-2:流水线的设计</h1>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E6%B5%81%E6%B0%B4%E7%BA%BF%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0"><strong>第一部分：流水线数据通路的设计与实现</strong></h3>
-                <p>我们的起点，是第一部分课程中构建的单周期数据通路。流水线改造的核心，就是在五个经典阶段之间，插入“防火墙”——<strong>流水线寄存器</strong>。</p>
-                <h4 id="11-%E5%88%87%E5%88%86%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E4%B8%8E%E6%B5%81%E6%B0%B4%E7%BA%BF%E5%AF%84%E5%AD%98%E5%99%A8%E7%9A%84%E5%BC%95%E5%85%A5"><strong>1.1 切分数据通路与流水线寄存器的引入</strong></h4>
-                <p>我们将单周期数据通路按照IF, ID, EX, MEM, WB五个阶段进行切分。</p>
-                <p>（如下的RISC-V Pipelined Datapath图，但暂时忽略Branch和WB的反馈线，只考虑从左到右的数据流）
-                <img src="../images/imagec29.png" alt="figure 29"></p>
-                <p>在每个阶段的边界，我们插入一组寄存器，它们的名字明确地表示了其位置：</p>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%904-2-2%E6%B5%81%E6%B0%B4%E7%BA%BF%E7%9A%84%E8%AE%BE%E8%AE%A1">计算机组成4-2-2:流水线的设计</h1>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E6%B5%81%E6%B0%B4%E7%BA%BF%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E7%9A%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E7%8E%B0"><strong>第一部分：流水线数据通路的设计与实现</strong></h3>
+<p>我们的起点，是第一部分课程中构建的单周期数据通路。流水线改造的核心，就是在五个经典阶段之间，插入“防火墙”——<strong>流水线寄存器</strong>。</p>
+<h4 id="11-%E5%88%87%E5%88%86%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E4%B8%8E%E6%B5%81%E6%B0%B4%E7%BA%BF%E5%AF%84%E5%AD%98%E5%99%A8%E7%9A%84%E5%BC%95%E5%85%A5"><strong>1.1 切分数据通路与流水线寄存器的引入</strong></h4>
+<p>我们将单周期数据通路按照IF, ID, EX, MEM, WB五个阶段进行切分。</p>
+<p>（如下的RISC-V Pipelined Datapath图，但暂时忽略Branch和WB的反馈线，只考虑从左到右的数据流）
+                <img alt="figure 29" src="../images/imagec29.png"/></p>
+<p>在每个阶段的边界，我们插入一组寄存器，它们的名字明确地表示了其位置：</p>
+<ul>
+<li><strong>IF/ID寄存器</strong>：位于IF和ID阶段之间。它存储了从指令存储器中取出的<strong>完整指令</strong>和<strong>PC+4</strong>的值。</li>
+<li><strong>ID/EX寄存器</strong>：位于ID和EX阶段之间。它存储了从寄存器堆读出的<strong>两个操作数</strong>，符号扩展后的<strong>立即数</strong>，指令中的<strong>rs1, rs2, rd字段</strong>，以及来自控制单元的<strong>所有控制信号</strong>。</li>
+<li><strong>EX/MEM寄存器</strong>：位于EX和MEM阶段之间。它存储了ALU的<strong>计算结果</strong>，ALU的<strong>Zero标志</strong>，从ID/EX寄存器传来的<strong>要写入内存的数据</strong>（对于sd指令）和<strong>rd字段</strong>，以及相关的<strong>控制信号</strong>。</li>
+<li><strong>MEM/WB寄存器</strong>：位于MEM和WB阶段之间。它存储了从数据存储器<strong>读出的数据</strong>（对于ld指令），从EX/MEM寄存器传来的<strong>ALU结果</strong>和<strong>rd字段</strong>，以及<strong>写回控制信号</strong>。</li>
+</ul>
+<p><img alt="figure 30" src="../images/imagec30.png"/></p>
+<p><strong>为什么流水线寄存器如此关键？</strong></p>
+<ol>
+<li><strong>隔离</strong>：它们将一个大的组合逻辑路径（整个单周期数据通路）切分成了五个小的、独立的组合逻辑路径。<strong>新的时钟周期只由最长的那个阶段的延迟决定</strong>，而不是所有阶段延迟之和。</li>
+<li><strong>状态传递</strong>：它们像接力赛的接力棒，将一条指令在其生命周期中所需的所有信息（数据、控制信号、目标寄存器地址等）一级一级地向下传递。<strong>一条指令的所有相关信息必须在流水线中“结伴而行”。</strong></li>
+</ol>
+<h4 id="12-%E6%B5%81%E6%B0%B4%E7%BA%BF%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E6%B5%81%E4%B8%80%E4%B8%AAld%E6%8C%87%E4%BB%A4%E7%9A%84%E6%97%85%E7%A8%8B"><strong>1.2 流水线中的数据流：一个<code>ld</code>指令的旅程</strong></h4>
+<p>让我们通过追踪一条<code>ld</code>指令，来直观地感受数据和控制信号是如何在流水线中流动的。</p>
+<ul>
+<li>
+<p><strong>周期1 (IF)</strong>:</p>
+<ul>
+<li>PC指向<code>ld</code>指令地址，指令被读出。</li>
+<li>PC+4被计算。</li>
+<li>在时钟上升沿，<code>ld</code>指令和PC+4的值被写入<strong>IF/ID寄存器</strong>。
+                <img alt="figure 31" src="../images/imagec31.png"/></li>
+</ul>
+</li>
+<li>
+<p><strong>周期2 (ID)</strong>:</p>
+<ul>
+<li><strong>IF/ID寄存器</strong>中的<code>ld</code>指令被译码。</li>
+<li>控制单元生成<code>ld</code>所需的所有控制信号（<code>ALUSrc=1</code>, <code>MemRead=1</code>, <code>RegWrite=1</code>, <code>MemtoReg=1</code>等）。</li>
+<li>根据指令中的<code>rs1</code>字段，从寄存器堆读出基地址。</li>
+<li>立即数被符号扩展。</li>
+<li>在时钟上升沿，读出的基地址、扩展后的立即数、控制信号、<code>rd</code>字段等所有信息被写入<strong>ID/EX寄存器</strong>。</li>
+<li><em>与此同时</em>，下一条指令正在IF阶段被取出。
+                <img alt="figure 32" src="../images/imagec32.png"/></li>
+</ul>
+</li>
+<li>
+<p><strong>周期3 (EX)</strong>:</p>
+<ul>
+<li>ALU从<strong>ID/EX寄存器</strong>中获取基地址和立即数。</li>
+<li><code>ALUSrc</code>控制MUX选择立即数作为ALU的第二个操作数。</li>
+<li>ALU执行加法，计算出有效内存地址。</li>
+<li>在时钟上升沿，计算出的地址、传来的控制信号、<code>rd</code>字段等被写入<strong>EX/MEM寄存器</strong>。</li>
+<li><em>与此同时</em>，第二条指令在ID阶段，第三条指令在IF阶段。
+                <img alt="figure 33" src="../images/imagec33.png"/></li>
+</ul>
+</li>
+<li>
+<p><strong>周期4 (MEM)</strong>:</p>
+<ul>
+<li>有效地址从<strong>EX/MEM寄存器</strong>送入数据存储器。</li>
+<li><code>MemRead=1</code>，数据存储器被读取，数据出现在其输出端口。</li>
+<li>在时钟上升沿，读出的数据、传来的ALU结果（虽然<code>ld</code>不用，但也要传递）、<code>rd</code>字段等被写入<strong>MEM/WB寄存器</strong>。
+                <img alt="figure 34" src="../images/imagec34.png"/></li>
+</ul>
+</li>
+<li>
+<p><strong>周期5 (WB)</strong>:</p>
+<ul>
+<li><strong>MEM/WB寄存器</strong>中的信息被用于最后的写回操作。</li>
+<li><code>MemtoReg=1</code>，MUX选择从内存读出的数据。</li>
+<li><code>RegWrite=1</code>，数据被写入<code>rd</code>字段指定的寄存器。
+                <img alt="figure 35" src="../images/imagec35.png"/></li>
+</ul>
+</li>
+</ul>
+<p><strong>正确的连接</strong>应该是将<code>MEM/WB</code>寄存器中保存的<code>rd</code>字段连接到寄存器堆的写地址端口。</p>
+<p><img alt="figure 36" src="../images/imagec36.png"/></p>
+<p>这个例子生动地说明了<strong>信息结伴而行</strong>这一流水线设计的黄金法则。</p>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E6%95%B0%E6%8D%AE%E5%86%92%E9%99%A9%E7%9A%84%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E6%95%B0%E6%8D%AE%E5%89%8D%E9%80%92"><strong>第二部分：数据冒险的硬件解决方案：数据前递</strong></h3>
+<p>我们已经知道，数据前递是解决数据冒险的关键。现在，我们要设计实现它的硬件逻辑。</p>
+<h4 id="21-%E8%AF%86%E5%88%AB%E5%89%8D%E9%80%92%E7%9A%84%E9%9C%80%E6%B1%82"><strong>2.1 识别前递的需求</strong></h4>
+<p>前递的本质是：<strong>当前EX阶段需要的操作数，是否刚刚被前面指令的EX或MEM阶段计算出来？</strong></p>
+<p>我们需要比较：</p>
+<ul>
+<li><strong>当前指令(在EX阶段)的源寄存器号(rs1, rs2)</strong></li>
+<li><strong>前一条指令(在MEM阶段)的目标寄存器号(rd)</strong></li>
+<li><strong>前前条指令(在WB阶段)的目标寄存器号(rd)</strong></li>
+</ul>
+<p>这些寄存器号，都保存在流水线寄存器中：</p>
+<ul>
+<li>当前指令的源寄存器号：<code>ID/EX.RegisterRs1</code>, <code>ID/EX.RegisterRs2</code></li>
+<li>前一条指令的目标寄存器号：<code>EX/MEM.RegisterRd</code></li>
+<li>前前条指令的目标寄存器号：<code>MEM/WB.RegisterRd</code></li>
+</ul>
+<p><strong>前递条件</strong>：</p>
+<ol>
+<li><strong>EX冒险</strong> (从MEM阶段前递到EX阶段):
                 <ul>
-                <li><strong>IF/ID寄存器</strong>：位于IF和ID阶段之间。它存储了从指令存储器中取出的<strong>完整指令</strong>和<strong>PC+4</strong>的值。</li>
-                <li><strong>ID/EX寄存器</strong>：位于ID和EX阶段之间。它存储了从寄存器堆读出的<strong>两个操作数</strong>，符号扩展后的<strong>立即数</strong>，指令中的<strong>rs1, rs2, rd字段</strong>，以及来自控制单元的<strong>所有控制信号</strong>。</li>
-                <li><strong>EX/MEM寄存器</strong>：位于EX和MEM阶段之间。它存储了ALU的<strong>计算结果</strong>，ALU的<strong>Zero标志</strong>，从ID/EX寄存器传来的<strong>要写入内存的数据</strong>（对于sd指令）和<strong>rd字段</strong>，以及相关的<strong>控制信号</strong>。</li>
-                <li><strong>MEM/WB寄存器</strong>：位于MEM和WB阶段之间。它存储了从数据存储器<strong>读出的数据</strong>（对于ld指令），从EX/MEM寄存器传来的<strong>ALU结果</strong>和<strong>rd字段</strong>，以及<strong>写回控制信号</strong>。</li>
-                </ul>
-                <p><img src="../images/imagec30.png" alt="figure 30"></p>
-                <p><strong>为什么流水线寄存器如此关键？</strong></p>
-                <ol>
-                <li><strong>隔离</strong>：它们将一个大的组合逻辑路径（整个单周期数据通路）切分成了五个小的、独立的组合逻辑路径。<strong>新的时钟周期只由最长的那个阶段的延迟决定</strong>，而不是所有阶段延迟之和。</li>
-                <li><strong>状态传递</strong>：它们像接力赛的接力棒，将一条指令在其生命周期中所需的所有信息（数据、控制信号、目标寄存器地址等）一级一级地向下传递。<strong>一条指令的所有相关信息必须在流水线中“结伴而行”。</strong></li>
-                </ol>
-                <h4 id="12-%E6%B5%81%E6%B0%B4%E7%BA%BF%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E6%B5%81%E4%B8%80%E4%B8%AAld%E6%8C%87%E4%BB%A4%E7%9A%84%E6%97%85%E7%A8%8B"><strong>1.2 流水线中的数据流：一个<code>ld</code>指令的旅程</strong></h4>
-                <p>让我们通过追踪一条<code>ld</code>指令，来直观地感受数据和控制信号是如何在流水线中流动的。</p>
+<li><code>if (EX/MEM.RegWrite and (EX/MEM.RegisterRd ≠ 0) and (EX/MEM.RegisterRd == ID/EX.RegisterRs1))</code>  则 <code>ForwardA = 10</code></li>
+<li><code>if (EX/MEM.RegWrite and (EX/MEM.RegisterRd ≠ 0) and (EX/MEM.RegisterRd == ID/EX.RegisterRs2))</code>  则 <code>ForwardB = 10</code></li>
+</ul>
+</li>
+<li><strong>MEM冒险</strong> (从WB阶段前递到EX阶段):
                 <ul>
-                <li>
-                <p><strong>周期1 (IF)</strong>:</p>
-                <ul>
-                <li>PC指向<code>ld</code>指令地址，指令被读出。</li>
-                <li>PC+4被计算。</li>
-                <li>在时钟上升沿，<code>ld</code>指令和PC+4的值被写入<strong>IF/ID寄存器</strong>。
-                <img src="../images/imagec31.png" alt="figure 31"></li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>周期2 (ID)</strong>:</p>
-                <ul>
-                <li><strong>IF/ID寄存器</strong>中的<code>ld</code>指令被译码。</li>
-                <li>控制单元生成<code>ld</code>所需的所有控制信号（<code>ALUSrc=1</code>, <code>MemRead=1</code>, <code>RegWrite=1</code>, <code>MemtoReg=1</code>等）。</li>
-                <li>根据指令中的<code>rs1</code>字段，从寄存器堆读出基地址。</li>
-                <li>立即数被符号扩展。</li>
-                <li>在时钟上升沿，读出的基地址、扩展后的立即数、控制信号、<code>rd</code>字段等所有信息被写入<strong>ID/EX寄存器</strong>。</li>
-                <li><em>与此同时</em>，下一条指令正在IF阶段被取出。
-                <img src="../images/imagec32.png" alt="figure 32"></li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>周期3 (EX)</strong>:</p>
-                <ul>
-                <li>ALU从<strong>ID/EX寄存器</strong>中获取基地址和立即数。</li>
-                <li><code>ALUSrc</code>控制MUX选择立即数作为ALU的第二个操作数。</li>
-                <li>ALU执行加法，计算出有效内存地址。</li>
-                <li>在时钟上升沿，计算出的地址、传来的控制信号、<code>rd</code>字段等被写入<strong>EX/MEM寄存器</strong>。</li>
-                <li><em>与此同时</em>，第二条指令在ID阶段，第三条指令在IF阶段。
-                <img src="../images/imagec33.png" alt="figure 33"></li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>周期4 (MEM)</strong>:</p>
-                <ul>
-                <li>有效地址从<strong>EX/MEM寄存器</strong>送入数据存储器。</li>
-                <li><code>MemRead=1</code>，数据存储器被读取，数据出现在其输出端口。</li>
-                <li>在时钟上升沿，读出的数据、传来的ALU结果（虽然<code>ld</code>不用，但也要传递）、<code>rd</code>字段等被写入<strong>MEM/WB寄存器</strong>。
-                <img src="../images/imagec34.png" alt="figure 34"></li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>周期5 (WB)</strong>:</p>
-                <ul>
-                <li><strong>MEM/WB寄存器</strong>中的信息被用于最后的写回操作。</li>
-                <li><code>MemtoReg=1</code>，MUX选择从内存读出的数据。</li>
-                <li><code>RegWrite=1</code>，数据被写入<code>rd</code>字段指定的寄存器。
-                <img src="../images/imagec35.png" alt="figure 35"></li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>正确的连接</strong>应该是将<code>MEM/WB</code>寄存器中保存的<code>rd</code>字段连接到寄存器堆的写地址端口。</p>
-                <p><img src="../images/imagec36.png" alt="figure 36"></p>
-                <p>这个例子生动地说明了<strong>信息结伴而行</strong>这一流水线设计的黄金法则。</p>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E6%95%B0%E6%8D%AE%E5%86%92%E9%99%A9%E7%9A%84%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E6%95%B0%E6%8D%AE%E5%89%8D%E9%80%92"><strong>第二部分：数据冒险的硬件解决方案：数据前递</strong></h3>
-                <p>我们已经知道，数据前递是解决数据冒险的关键。现在，我们要设计实现它的硬件逻辑。</p>
-                <h4 id="21-%E8%AF%86%E5%88%AB%E5%89%8D%E9%80%92%E7%9A%84%E9%9C%80%E6%B1%82"><strong>2.1 识别前递的需求</strong></h4>
-                <p>前递的本质是：<strong>当前EX阶段需要的操作数，是否刚刚被前面指令的EX或MEM阶段计算出来？</strong></p>
-                <p>我们需要比较：</p>
-                <ul>
-                <li><strong>当前指令(在EX阶段)的源寄存器号(rs1, rs2)</strong></li>
-                <li><strong>前一条指令(在MEM阶段)的目标寄存器号(rd)</strong></li>
-                <li><strong>前前条指令(在WB阶段)的目标寄存器号(rd)</strong></li>
-                </ul>
-                <p>这些寄存器号，都保存在流水线寄存器中：</p>
-                <ul>
-                <li>当前指令的源寄存器号：<code>ID/EX.RegisterRs1</code>, <code>ID/EX.RegisterRs2</code></li>
-                <li>前一条指令的目标寄存器号：<code>EX/MEM.RegisterRd</code></li>
-                <li>前前条指令的目标寄存器号：<code>MEM/WB.RegisterRd</code></li>
-                </ul>
-                <p><strong>前递条件</strong>：</p>
-                <ol>
-                <li><strong>EX冒险</strong> (从MEM阶段前递到EX阶段):
-                <ul>
-                <li><code>if (EX/MEM.RegWrite and (EX/MEM.RegisterRd ≠ 0) and (EX/MEM.RegisterRd == ID/EX.RegisterRs1))</code>  则 <code>ForwardA = 10</code></li>
-                <li><code>if (EX/MEM.RegWrite and (EX/MEM.RegisterRd ≠ 0) and (EX/MEM.RegisterRd == ID/EX.RegisterRs2))</code>  则 <code>ForwardB = 10</code></li>
-                </ul>
-                </li>
-                <li><strong>MEM冒险</strong> (从WB阶段前递到EX阶段):
-                <ul>
-                <li><code>if (MEM/WB.RegWrite and (MEM/WB.RegisterRd ≠ 0) and (MEM/WB.RegisterRd == ID/EX.RegisterRs1))</code>  则 <code>ForwardA = 01</code></li>
-                <li><code>if (MEM/WB.RegWrite and (MEM/WB.RegisterRd ≠ 0) and (MEM/WB.RegisterRd == ID/EX.RegisterRs2))</code>  则 <code>ForwardB = 01</code></li>
-                </ul>
-                </li>
-                </ol>
-                <p><strong>注意事项</strong>：</p>
-                <ul>
-                <li>必须检查<code>RegWrite</code>信号，因为<code>sd</code>或<code>beq</code>这类不写寄存器的指令，即使<code>rd</code>字段碰巧相同，也不需要前递。</li>
-                <li>必须检查<code>rd ≠ 0</code>，因为<code>x0</code>寄存器永远是0，不能被写入，所以也不存在对<code>x0</code>的依赖。</li>
-                </ul>
-                <h4 id="22-%E5%A4%84%E7%90%86%E5%8F%8C%E9%87%8D%E6%95%B0%E6%8D%AE%E5%86%92%E9%99%A9"><strong>2.2 处理“双重数据冒险”</strong></h4>
-                <p>考虑这个序列：</p>
-                <pre class="hljs"><code><div>add x1, x1, x2  // 指令1
+<li><code>if (MEM/WB.RegWrite and (MEM/WB.RegisterRd ≠ 0) and (MEM/WB.RegisterRd == ID/EX.RegisterRs1))</code>  则 <code>ForwardA = 01</code></li>
+<li><code>if (MEM/WB.RegWrite and (MEM/WB.RegisterRd ≠ 0) and (MEM/WB.RegisterRd == ID/EX.RegisterRs2))</code>  则 <code>ForwardB = 01</code></li>
+</ul>
+</li>
+</ol>
+<p><strong>注意事项</strong>：</p>
+<ul>
+<li>必须检查<code>RegWrite</code>信号，因为<code>sd</code>或<code>beq</code>这类不写寄存器的指令，即使<code>rd</code>字段碰巧相同，也不需要前递。</li>
+<li>必须检查<code>rd ≠ 0</code>，因为<code>x0</code>寄存器永远是0，不能被写入，所以也不存在对<code>x0</code>的依赖。</li>
+</ul>
+<h4 id="22-%E5%A4%84%E7%90%86%E5%8F%8C%E9%87%8D%E6%95%B0%E6%8D%AE%E5%86%92%E9%99%A9"><strong>2.2 处理“双重数据冒险”</strong></h4>
+<p>考虑这个序列：</p>
+<pre class="hljs"><code><div>add x1, x1, x2  // 指令1
                 add x1, x1, x3  // 指令2
                 add x1, x1, x4  // 指令3
                 </div></code></pre>
-                <p>当指令3在EX阶段时，指令2在MEM阶段，指令1在WB阶段。指令3的源操作数<code>x1</code>，与指令1和指令2的目标<code>x1</code>都匹配。我们应该从哪里前递？</p>
-                <p><strong>原则：总是使用最新的数据。</strong> 指令2的结果比指令1的结果更新。因此，我们应该从MEM阶段（指令2）前递，而不是WB阶段（指令1）。</p>
-                <p><strong>修正后的MEM冒险逻辑</strong>：
+<p>当指令3在EX阶段时，指令2在MEM阶段，指令1在WB阶段。指令3的源操作数<code>x1</code>，与指令1和指令2的目标<code>x1</code>都匹配。我们应该从哪里前递？</p>
+<p><strong>原则：总是使用最新的数据。</strong> 指令2的结果比指令1的结果更新。因此，我们应该从MEM阶段（指令2）前递，而不是WB阶段（指令1）。</p>
+<p><strong>修正后的MEM冒险逻辑</strong>：
                 我们需要在MEM冒险的判断条件中，加入一个“排除条款”：<strong>仅当不存在EX冒险时，才考虑MEM冒险。</strong></p>
+<ul>
+<li><code>if (MEM/WB.RegWrite and ... and (MEM/WB.RegisterRd == ID/EX.RegisterRs1) and NOT(EX冒险条件 for Rs1))</code> 则 <code>ForwardA = 01</code></li>
+</ul>
+<p><img alt="figure 37" src="../images/imagec37.png"/></p>
+<h4 id="23-%E6%9E%84%E5%BB%BA%E5%89%8D%E9%80%92%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF"><strong>2.3 构建前递数据通路</strong></h4>
+<p>硬件实现非常直观：</p>
+<ol>
+<li>在ALU的两个输入端前，各放置一个<strong>3选1的MUX</strong>。
                 <ul>
-                <li><code>if (MEM/WB.RegWrite and ... and (MEM/WB.RegisterRd == ID/EX.RegisterRs1) and NOT(EX冒险条件 for Rs1))</code> 则 <code>ForwardA = 01</code></li>
-                </ul>
-                <p><img src="../images/imagec37.png" alt="figure 37"></p>
-                <h4 id="23-%E6%9E%84%E5%BB%BA%E5%89%8D%E9%80%92%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF"><strong>2.3 构建前递数据通路</strong></h4>
-                <p>硬件实现非常直观：</p>
+<li><code>00</code>输入：来自ID/EX寄存器（正常路径）。</li>
+<li><code>01</code>输入：来自MEM/WB寄存器中的写回数据（MEM冒险前递路径）。</li>
+<li><code>10</code>输入：来自EX/MEM寄存器中的ALU结果（EX冒险前递路径）。</li>
+</ul>
+</li>
+<li>设计一个<strong>前递单元 (Forwarding Unit)</strong>。它是一个组合逻辑块，输入是<code>ID/EX</code>, <code>EX/MEM</code>, <code>MEM/WB</code>中的相关寄存器号和控制信号，输出是控制这两个新MUX的<code>ForwardA</code>和<code>ForwardB</code>信号。</li>
+</ol>
+<p><img alt="figure 38" src="../images/imagec38.png"/>
+<img alt="figure 39" src="../images/imagec39.png"/></p>
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E5%A4%84%E7%90%86load-use%E5%86%92%E9%99%A9%E6%9A%82%E5%81%9C%E6%B5%81%E6%B0%B4%E7%BA%BF"><strong>第三部分：处理Load-Use冒险：暂停流水线</strong></h3>
+<p>数据前递无法解决Load-Use冒险，我们必须引入<strong>暂停 (Stall)</strong> 机制。</p>
+<h4 id="31-%E5%86%92%E9%99%A9%E6%A3%80%E6%B5%8B"><strong>3.1 冒险检测</strong></h4>
+<p>暂停的检测逻辑必须在<strong>ID阶段</strong>完成，因为我们需要在指令进入EX阶段之前阻止它。</p>
+<ul>
+<li><strong>Load-Use冒险发生条件</strong> (在ID阶段检测)：
+                <ul>
+<li><code>if (ID/EX.MemRead and ((ID/EX.RegisterRd == IF/ID.RegisterRs1) or (ID/EX.RegisterRd == IF/ID.RegisterRs2)))</code></li>
+<li><strong>解读</strong>：如果ID/EX流水线寄存器中的指令是一条<code>load</code>指令（由<code>MemRead=1</code>判断），并且它要写入的寄存器<code>Rd</code>，正是当前IF/ID寄存器中的指令（即下一条指令）要读取的源寄存器<code>Rs1</code>或<code>Rs2</code>。</li>
+</ul>
+</li>
+</ul>
+<h4 id="32-%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%9A%82%E5%81%9C"><strong>3.2 如何实现暂停</strong></h4>
+<p>当<strong>冒险检测单元 (Hazard Detection Unit)</strong> 在ID阶段检测到Load-Use冒险时，它需要同时做两件事来让流水线暂停一周期：</p>
+<ol>
+<li>
+<p><strong>“冻结”前半部分流水线</strong>：</p>
+<ul>
+<li><strong>阻止PC更新</strong>：向控制PC写入的逻辑发出一个信号，使其保持原值。</li>
+<li><strong>阻止IF/ID寄存器更新</strong>：禁止IF/ID寄存器的写入。</li>
+<li><strong>效果</strong>：这样，在下一个时钟周期，PC不会增加，IF/ID寄存器也保持不变。结果就是，当前在ID阶段的指令会“重新被译码”，而当前在IF阶段的指令会“重新被取指”。前半段流水线仿佛“时间倒流”了一个周期。</li>
+</ul>
+</li>
+<li>
+<p><strong>在后半部分流水线中插入一个“气泡 (Bubble)”</strong>：</p>
+<ul>
+<li><strong>清空ID/EX寄存器</strong>：强制将送往ID/EX寄存器的所有<strong>控制信号</strong>清零。</li>
+<li><strong>效果</strong>：在下一个周期，EX阶段接收到的控制信号全为0（例如 <code>RegWrite=0</code>, <code>MemWrite=0</code>），这相当于执行了一条<strong>NOP (No-Operation)</strong> 指令。这个NOP会像一个气泡一样，在后续的流水线中继续向后传递，占据一个指令的位置，从而为前面的<code>ld</code>指令腾出时间。</li>
+</ul>
+</li>
+</ol>
+<p><strong>总结暂停机制</strong>：<code>PC</code>和<code>IF/ID</code>保持不变，同时向<code>ID/EX</code>注入<code>NOP</code>。</p>
+<p><img alt="figure 40" src="../images/imagec40.png"/></p>
+<p><img alt="figure 41" src="../images/imagec41.png"/></p>
+<h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E6%8E%A7%E5%88%B6%E5%86%92%E9%99%A9%E7%9A%84%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><strong>第四部分：控制冒险的硬件解决方案</strong></h3>
+<p>分支指令是流水线的另一大性能杀手。我们的目标是尽早确定分支结果，减少冲刷带来的损失。</p>
+<h4 id="41-%E6%8F%90%E5%89%8D%E5%88%86%E6%94%AF%E5%86%B3%E7%AD%96"><strong>4.1 提前分支决策</strong></h4>
+<p>在基础的5级流水线中，分支决策在EX阶段完成，这导致了2个周期的惩罚（因为IF和ID阶段已经取了两条错误路径的指令）。</p>
+<p><strong>优化思路</strong>：将分支决策硬件<strong>前移到ID阶段</strong>。</p>
+<ul>
+<li>在ID阶段增加一个<strong>专用加法器</strong>，用于计算分支目标地址 (<code>IF/ID.PC+4 + (sign-extended immediate &lt;&lt; 1)</code>)。</li>
+<li>在ID阶段直接<strong>访问寄存器堆</strong>，并将读出的两个操作数送入一个<strong>专用比较器</strong>（或者一个简化的ALU）。</li>
+<li><strong>结果</strong>：在ID阶段结束时，我们就能知道分支是否跳转以及目标地址。这样，如果发生分支，我们只需要冲刷掉IF阶段正在取的那一条指令即可，<strong>分支惩罚从2个周期降低到1个周期</strong>。</li>
+</ul>
+<h4 id="42-%E5%AE%9E%E7%8E%B0%E6%B5%81%E6%B0%B4%E7%BA%BF%E5%86%B2%E5%88%B7-flush"><strong>4.2 实现流水线冲刷 (Flush)</strong></h4>
+<p>当ID阶段确定分支跳转发生时（且我们的预测是“不跳转”），我们需要冲刷掉错误取入的指令。</p>
+<ul>
+<li><strong>如何冲刷？</strong> 与插入气泡类似，我们可以利用控制信号。当ID阶段检测到分支跳转时，向IF阶段的控制逻辑发出一个<code>IF.Flush</code>信号。</li>
+<li>这个信号会使IF/ID寄存器在下一个时钟周期被写入一个<strong>全0的指令</strong>，这在RISC-V中通常被硬件识别为NOP。</li>
+</ul>
+<p><img alt="figure 42" src="../images/imagec42.png"/></p>
+<h4 id="43-%E5%8A%A8%E6%80%81%E5%88%86%E6%94%AF%E9%A2%84%E6%B5%8B%E7%9A%84%E6%B7%B1%E5%8C%96"><strong>4.3 动态分支预测的深化</strong></h4>
+<p>对于更深的流水线，1个周期的惩罚仍然难以接受。这就需要更强大的<strong>动态分支预测</strong>技术。</p>
+<ul>
+<li><strong>分支目标缓冲 (Branch Target Buffer, BTB)</strong>：一个小型、高速的Cache，由PC索引。它存储了两样东西：(1) 这条PC地址上的指令是否是分支；(2) 如果是，它上一次跳转的目标地址是什么。
+                <ul>
+<li><strong>工作流程</strong>：在<strong>IF阶段</strong>，用当前PC查询BTB。如果命中，我们不仅知道了这是一条分支指令，还<strong>立即获得了预测的目标地址</strong>，可以直接用这个地址去取下一条指令，从而实现<strong>0周期惩罚</strong>的跳转。</li>
+</ul>
+</li>
+<li><strong>分支历史表 (Branch History Table, BHT)</strong>：与BTB协同工作，存储了分支的预测状态（例如，使用2位饱和计数器）。BTB告诉我们“去哪儿”，BHT告诉我们“去不去”。</li>
+<li><strong>预测错误的代价</strong>：如果动态预测失败，处理器必须冲刷掉所有在错误路径上已经进入流水线的指令，这个惩罚在现代深度流水线中可能高达十几个周期。因此，预测的准确率至关重要。</li>
+</ul>
+<p><img alt="figure 43" src="../images/imagec43.png"/></p>
+<h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E5%A4%84%E7%90%86%E5%BC%82%E5%B8%B8%E4%B8%8E%E4%B8%AD%E6%96%AD"><strong>第五部分：处理异常与中断</strong></h3>
+<p>一个健壮的处理器不仅要能正确执行程序，还要能优雅地处理各种“意外”。</p>
+<ul>
+<li><strong>异常 (Exception)</strong>：来自CPU内部的意外事件。如：未定义指令、算术溢出、访存地址越界。</li>
+<li><strong>中断 (Interrupt)</strong>：来自CPU外部I/O设备的信号。如：键盘输入、网络包到达。</li>
+</ul>
+<p>从处理器的角度看，它们都属于<strong>控制流的突变</strong>，因此可以看作一种特殊的<strong>控制冒险</strong>。</p>
+<p><strong>处理流程</strong>：</p>
+<ol>
+<li><strong>保存现场</strong>：
+                <ul>
+<li>将导致异常的指令的PC地址存入一个专用的<strong>异常程序计数器 (SEPC)</strong>。</li>
+<li>将异常的原因（如“未定义指令”的代码是2）存入一个专用的<strong>异常原因寄存器 (SCAUSE)</strong>。</li>
+</ul>
+</li>
+<li><strong>跳转到处理程序</strong>：强制将PC设置为一个预先定义好的<strong>异常/中断处理程序的入口地址</strong>。</li>
+<li><strong>处理</strong>：操作系统接管，执行相应的处理代码。</li>
+<li><strong>返回</strong>：如果异常可以恢复，处理程序会执行一条特殊指令，将SEPC的值恢复到PC，程序从异常发生处继续（或下一条指令）执行。</li>
+</ol>
+<p><strong>在流水线中处理异常</strong>：</p>
+<ul>
+<li><strong>挑战</strong>：异常可能在不同阶段发生（例如，IF阶段的访存错误，EX阶段的算术溢出，MEM阶段的访存错误）。由于流水线的并行性，当一条指令在EX阶段发生异常时，前面和后面的指令可能都处于执行过程中。</li>
+<li><strong>精确异常 (Precise Exceptions)</strong>：这是现代处理器的要求。即，当异常发生时，所有在异常指令之前的指令都必须<strong>完整执行完毕</strong>，而所有在异常指令之后（包括异常指令本身）的指令都必须<strong>像从未执行过一样</strong>被冲刷掉。</li>
+<li><strong>实现</strong>：
                 <ol>
-                <li>在ALU的两个输入端前，各放置一个<strong>3选1的MUX</strong>。
-                <ul>
-                <li><code>00</code>输入：来自ID/EX寄存器（正常路径）。</li>
-                <li><code>01</code>输入：来自MEM/WB寄存器中的写回数据（MEM冒险前递路径）。</li>
-                <li><code>10</code>输入：来自EX/MEM寄存器中的ALU结果（EX冒险前递路径）。</li>
-                </ul>
-                </li>
-                <li>设计一个<strong>前递单元 (Forwarding Unit)</strong>。它是一个组合逻辑块，输入是<code>ID/EX</code>, <code>EX/MEM</code>, <code>MEM/WB</code>中的相关寄存器号和控制信号，输出是控制这两个新MUX的<code>ForwardA</code>和<code>ForwardB</code>信号。</li>
-                </ol>
-                <p><img src="../images/imagec38.png" alt="figure 38">
-                <img src="../images/imagec39.png" alt="figure 39"></p>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E5%A4%84%E7%90%86load-use%E5%86%92%E9%99%A9%E6%9A%82%E5%81%9C%E6%B5%81%E6%B0%B4%E7%BA%BF"><strong>第三部分：处理Load-Use冒险：暂停流水线</strong></h3>
-                <p>数据前递无法解决Load-Use冒险，我们必须引入<strong>暂停 (Stall)</strong> 机制。</p>
-                <h4 id="31-%E5%86%92%E9%99%A9%E6%A3%80%E6%B5%8B"><strong>3.1 冒险检测</strong></h4>
-                <p>暂停的检测逻辑必须在<strong>ID阶段</strong>完成，因为我们需要在指令进入EX阶段之前阻止它。</p>
-                <ul>
-                <li><strong>Load-Use冒险发生条件</strong> (在ID阶段检测)：
-                <ul>
-                <li><code>if (ID/EX.MemRead and ((ID/EX.RegisterRd == IF/ID.RegisterRs1) or (ID/EX.RegisterRd == IF/ID.RegisterRs2)))</code></li>
-                <li><strong>解读</strong>：如果ID/EX流水线寄存器中的指令是一条<code>load</code>指令（由<code>MemRead=1</code>判断），并且它要写入的寄存器<code>Rd</code>，正是当前IF/ID寄存器中的指令（即下一条指令）要读取的源寄存器<code>Rs1</code>或<code>Rs2</code>。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="32-%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%9A%82%E5%81%9C"><strong>3.2 如何实现暂停</strong></h4>
-                <p>当<strong>冒险检测单元 (Hazard Detection Unit)</strong> 在ID阶段检测到Load-Use冒险时，它需要同时做两件事来让流水线暂停一周期：</p>
-                <ol>
-                <li>
-                <p><strong>“冻结”前半部分流水线</strong>：</p>
-                <ul>
-                <li><strong>阻止PC更新</strong>：向控制PC写入的逻辑发出一个信号，使其保持原值。</li>
-                <li><strong>阻止IF/ID寄存器更新</strong>：禁止IF/ID寄存器的写入。</li>
-                <li><strong>效果</strong>：这样，在下一个时钟周期，PC不会增加，IF/ID寄存器也保持不变。结果就是，当前在ID阶段的指令会“重新被译码”，而当前在IF阶段的指令会“重新被取指”。前半段流水线仿佛“时间倒流”了一个周期。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>在后半部分流水线中插入一个“气泡 (Bubble)”</strong>：</p>
-                <ul>
-                <li><strong>清空ID/EX寄存器</strong>：强制将送往ID/EX寄存器的所有<strong>控制信号</strong>清零。</li>
-                <li><strong>效果</strong>：在下一个周期，EX阶段接收到的控制信号全为0（例如 <code>RegWrite=0</code>, <code>MemWrite=0</code>），这相当于执行了一条<strong>NOP (No-Operation)</strong> 指令。这个NOP会像一个气泡一样，在后续的流水线中继续向后传递，占据一个指令的位置，从而为前面的<code>ld</code>指令腾出时间。</li>
-                </ul>
-                </li>
-                </ol>
-                <p><strong>总结暂停机制</strong>：<code>PC</code>和<code>IF/ID</code>保持不变，同时向<code>ID/EX</code>注入<code>NOP</code>。</p>
-                <p><img src="../images/imagec40.png" alt="figure 40"></p>
-                <p><img src="../images/imagec41.png" alt="figure 41"></p>
-                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E6%8E%A7%E5%88%B6%E5%86%92%E9%99%A9%E7%9A%84%E7%A1%AC%E4%BB%B6%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><strong>第四部分：控制冒险的硬件解决方案</strong></h3>
-                <p>分支指令是流水线的另一大性能杀手。我们的目标是尽早确定分支结果，减少冲刷带来的损失。</p>
-                <h4 id="41-%E6%8F%90%E5%89%8D%E5%88%86%E6%94%AF%E5%86%B3%E7%AD%96"><strong>4.1 提前分支决策</strong></h4>
-                <p>在基础的5级流水线中，分支决策在EX阶段完成，这导致了2个周期的惩罚（因为IF和ID阶段已经取了两条错误路径的指令）。</p>
-                <p><strong>优化思路</strong>：将分支决策硬件<strong>前移到ID阶段</strong>。</p>
-                <ul>
-                <li>在ID阶段增加一个<strong>专用加法器</strong>，用于计算分支目标地址 (<code>IF/ID.PC+4 + (sign-extended immediate &lt;&lt; 1)</code>)。</li>
-                <li>在ID阶段直接<strong>访问寄存器堆</strong>，并将读出的两个操作数送入一个<strong>专用比较器</strong>（或者一个简化的ALU）。</li>
-                <li><strong>结果</strong>：在ID阶段结束时，我们就能知道分支是否跳转以及目标地址。这样，如果发生分支，我们只需要冲刷掉IF阶段正在取的那一条指令即可，<strong>分支惩罚从2个周期降低到1个周期</strong>。</li>
-                </ul>
-                <h4 id="42-%E5%AE%9E%E7%8E%B0%E6%B5%81%E6%B0%B4%E7%BA%BF%E5%86%B2%E5%88%B7-flush"><strong>4.2 实现流水线冲刷 (Flush)</strong></h4>
-                <p>当ID阶段确定分支跳转发生时（且我们的预测是“不跳转”），我们需要冲刷掉错误取入的指令。</p>
-                <ul>
-                <li><strong>如何冲刷？</strong> 与插入气泡类似，我们可以利用控制信号。当ID阶段检测到分支跳转时，向IF阶段的控制逻辑发出一个<code>IF.Flush</code>信号。</li>
-                <li>这个信号会使IF/ID寄存器在下一个时钟周期被写入一个<strong>全0的指令</strong>，这在RISC-V中通常被硬件识别为NOP。</li>
-                </ul>
-                <p><img src="../images/imagec42.png" alt="figure 42"></p>
-                <h4 id="43-%E5%8A%A8%E6%80%81%E5%88%86%E6%94%AF%E9%A2%84%E6%B5%8B%E7%9A%84%E6%B7%B1%E5%8C%96"><strong>4.3 动态分支预测的深化</strong></h4>
-                <p>对于更深的流水线，1个周期的惩罚仍然难以接受。这就需要更强大的<strong>动态分支预测</strong>技术。</p>
-                <ul>
-                <li><strong>分支目标缓冲 (Branch Target Buffer, BTB)</strong>：一个小型、高速的Cache，由PC索引。它存储了两样东西：(1) 这条PC地址上的指令是否是分支；(2) 如果是，它上一次跳转的目标地址是什么。
-                <ul>
-                <li><strong>工作流程</strong>：在<strong>IF阶段</strong>，用当前PC查询BTB。如果命中，我们不仅知道了这是一条分支指令，还<strong>立即获得了预测的目标地址</strong>，可以直接用这个地址去取下一条指令，从而实现<strong>0周期惩罚</strong>的跳转。</li>
-                </ul>
-                </li>
-                <li><strong>分支历史表 (Branch History Table, BHT)</strong>：与BTB协同工作，存储了分支的预测状态（例如，使用2位饱和计数器）。BTB告诉我们“去哪儿”，BHT告诉我们“去不去”。</li>
-                <li><strong>预测错误的代价</strong>：如果动态预测失败，处理器必须冲刷掉所有在错误路径上已经进入流水线的指令，这个惩罚在现代深度流水线中可能高达十几个周期。因此，预测的准确率至关重要。</li>
-                </ul>
-                <p><img src="../images/imagec43.png" alt="figure 43"></p>
-                <h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E5%A4%84%E7%90%86%E5%BC%82%E5%B8%B8%E4%B8%8E%E4%B8%AD%E6%96%AD"><strong>第五部分：处理异常与中断</strong></h3>
-                <p>一个健壮的处理器不仅要能正确执行程序，还要能优雅地处理各种“意外”。</p>
-                <ul>
-                <li><strong>异常 (Exception)</strong>：来自CPU内部的意外事件。如：未定义指令、算术溢出、访存地址越界。</li>
-                <li><strong>中断 (Interrupt)</strong>：来自CPU外部I/O设备的信号。如：键盘输入、网络包到达。</li>
-                </ul>
-                <p>从处理器的角度看，它们都属于<strong>控制流的突变</strong>，因此可以看作一种特殊的<strong>控制冒险</strong>。</p>
-                <p><strong>处理流程</strong>：</p>
-                <ol>
-                <li><strong>保存现场</strong>：
-                <ul>
-                <li>将导致异常的指令的PC地址存入一个专用的<strong>异常程序计数器 (SEPC)</strong>。</li>
-                <li>将异常的原因（如“未定义指令”的代码是2）存入一个专用的<strong>异常原因寄存器 (SCAUSE)</strong>。</li>
-                </ul>
-                </li>
-                <li><strong>跳转到处理程序</strong>：强制将PC设置为一个预先定义好的<strong>异常/中断处理程序的入口地址</strong>。</li>
-                <li><strong>处理</strong>：操作系统接管，执行相应的处理代码。</li>
-                <li><strong>返回</strong>：如果异常可以恢复，处理程序会执行一条特殊指令，将SEPC的值恢复到PC，程序从异常发生处继续（或下一条指令）执行。</li>
-                </ol>
-                <p><strong>在流水线中处理异常</strong>：</p>
-                <ul>
-                <li><strong>挑战</strong>：异常可能在不同阶段发生（例如，IF阶段的访存错误，EX阶段的算术溢出，MEM阶段的访存错误）。由于流水线的并行性，当一条指令在EX阶段发生异常时，前面和后面的指令可能都处于执行过程中。</li>
-                <li><strong>精确异常 (Precise Exceptions)</strong>：这是现代处理器的要求。即，当异常发生时，所有在异常指令之前的指令都必须<strong>完整执行完毕</strong>，而所有在异常指令之后（包括异常指令本身）的指令都必须<strong>像从未执行过一样</strong>被冲刷掉。</li>
-                <li><strong>实现</strong>：
-                <ol>
-                <li>当一个阶段检测到异常，它不会立即处理，而是将异常信息（如一个标志位）存入流水线寄存器，随指令一起向下传递。</li>
-                <li>直到指令到达WB阶段的提交点，如果该指令携带了异常标志，处理器才会停止取指，冲刷整个流水线，保存现场，并跳转到处理程序。这确保了状态的精确性。</li>
-                </ol>
-                </li>
-                </ul>
-                <p><img src="../images/imagec44.png" alt="figure 44"></p>
-                <p><strong>总结</strong></p>
-                <p>我们完成了从流水线理论到实践的跨越。我们亲手构建了RISC-V的五级流水线数据通路，并为其配备了处理数据冒险（前递、暂停）和控制冒险（提前决策、冲刷）的复杂控制逻辑，还探讨了异常处理机制。</p>
-                <p>我们所构建的，是一个经典的、静态的、顺序执行的流水线。它是所有现代高性能处理器的起点。</p>
-                <p>然而，性能的追求是无止境的。仅仅每个周期完成一条指令还不够快。计算机架构师们很快就提出了更激进的思想，统称为<strong>指令级并行 (Instruction-Level Parallelism, ILP)</strong>，我们将在未来深入探讨：</p>
-                <ul>
-                <li><strong>超流水线 (Super-pipelining)</strong>：将流水线级数做得更深（如20级、30级），进一步缩短时钟周期。</li>
-                <li><strong>超标量 (Superscalar) / 多发射 (Multiple Issue)</strong>：每个时钟周期发射并执行多于一条指令。这需要复制多套执行单元，并由硬件（动态调度）或编译器（静态调度，如VLIW）来解决更复杂的资源和数据依赖问题。</li>
-                <li><strong>乱序执行 (Out-of-Order Execution)</strong>：允许指令不按程序顺序执行，只要数据依赖得到满足。这可以极大地掩盖由Cache Miss等引起的延迟，是现代高性能CPU的核心。</li>
-                <li><strong>推测执行 (Speculative Execution)</strong>：在分支结果或内存地址确定之前，就大胆地沿着预测的路径执行下去，并将结果暂存。如果预测正确，就获得巨大性能收益；如果错误，就回滚状态。</li>
-                </ul>
-            </article>
-        </main>
-    </div>
-    
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li>当一个阶段检测到异常，它不会立即处理，而是将异常信息（如一个标志位）存入流水线寄存器，随指令一起向下传递。</li>
+<li>直到指令到达WB阶段的提交点，如果该指令携带了异常标志，处理器才会停止取指，冲刷整个流水线，保存现场，并跳转到处理程序。这确保了状态的精确性。</li>
+</ol>
+</li>
+</ul>
+<p><img alt="figure 44" src="../images/imagec44.png"/></p>
+<p><strong>总结</strong></p>
+<p>我们完成了从流水线理论到实践的跨越。我们亲手构建了RISC-V的五级流水线数据通路，并为其配备了处理数据冒险（前递、暂停）和控制冒险（提前决策、冲刷）的复杂控制逻辑，还探讨了异常处理机制。</p>
+<p>我们所构建的，是一个经典的、静态的、顺序执行的流水线。它是所有现代高性能处理器的起点。</p>
+<p>然而，性能的追求是无止境的。仅仅每个周期完成一条指令还不够快。计算机架构师们很快就提出了更激进的思想，统称为<strong>指令级并行 (Instruction-Level Parallelism, ILP)</strong>，我们将在未来深入探讨：</p>
+<ul>
+<li><strong>超流水线 (Super-pipelining)</strong>：将流水线级数做得更深（如20级、30级），进一步缩短时钟周期。</li>
+<li><strong>超标量 (Superscalar) / 多发射 (Multiple Issue)</strong>：每个时钟周期发射并执行多于一条指令。这需要复制多套执行单元，并由硬件（动态调度）或编译器（静态调度，如VLIW）来解决更复杂的资源和数据依赖问题。</li>
+<li><strong>乱序执行 (Out-of-Order Execution)</strong>：允许指令不按程序顺序执行，只要数据依赖得到满足。这可以极大地掩盖由Cache Miss等引起的延迟，是现代高性能CPU的核心。</li>
+<li><strong>推测执行 (Speculative Execution)</strong>：在分支结果或内存地址确定之前，就大胆地沿着预测的路径执行下去，并将结果暂存。如果预测正确，就获得巨大性能收益；如果错误，就回滚状态。</li>
+</ul>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

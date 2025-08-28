@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>数据库系统设计06:查询优化</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>数据库系统设计06:查询优化</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,255 +30,281 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A106%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96">数据库系统设计06:查询优化</h1>
-                <p>在上一讲中，我们扮演了查询执行引擎的角色，学习了如何实现各种关系操作的物理算法，比如不同的<code>JOIN</code>和<code>SELECT</code>方法。我们知道了，对于同一个逻辑操作，存在多种“做法”，它们的性能天差地别。这引出了一个至关重要的问题：当用户提交一条复杂的SQL查询时，数据库是如何从成千上万种可能的执行方式中，选择出那条“最佳路径”的？</p>
-                <p>这就是查询优化的核心任务。它不是一个简单的任务，而是一个极其复杂的<strong>搜索问题</strong>。搜索空间的大小是<strong>组合爆炸</strong>级别的，对于一个涉及10张表的JOIN查询，可能的执行计划数量比宇宙中的原子还要多。一个幼稚的优化器，其优化的时间本身就可能比直接执行一个糟糕计划的时间还要长。</p>
-                <p>因此，一个优秀的查询优化器，必须是一个集**数学家（利用关系代数的严谨规则）、统计学家（基于数据分布进行精确估算）和算法大师（在巨大的搜索空间中进行高效剪枝）**于一身的复杂系统。</p>
-                <p>今天，我们将分为三个部分，完整地模拟一次查询优化的生命周期：</p>
-                <ol>
-                <li><strong>逻辑优化：</strong> 如何在不动用成本计算的情况下，对查询进行“整形”，使其天生就更易于高效执行。</li>
-                <li><strong>成本估算：</strong> 优化器如何利用数据库的“人口普查数据”（统计信息），来预测每一个操作的“开销”。</li>
-                <li><strong>计划选择：</strong> 我们将学习优化器是如何使用动态规划等系统性方法，在众多候选计划中，权衡利弊，做出最终的、基于成本的决策。</li>
-                </ol>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E9%80%BB%E8%BE%91%E4%BC%98%E5%8C%96%E4%B8%8E%E5%85%B3%E7%B3%BB%E4%BB%A3%E6%95%B0%E7%AD%89%E4%BB%B7%E5%8F%98%E6%8D%A2"><strong>第一部分：逻辑优化与关系代数等价变换</strong></h3>
-                <p>查询优化的第一步，是<strong>基于规则的优化 (Rule-Based Optimization, RBO)</strong>，也称为逻辑优化。这个阶段不关心具体的成本，而是运用一系列经过证明的、逻辑上等价的关系代数变换规则，将初始的查询表达式，转化为一个或多个结构上更优的、逻辑上等价的表达式。</p>
-                <h4 id="11-%E4%BB%8Esql%E5%88%B0%E9%80%BB%E8%BE%91%E6%9F%A5%E8%AF%A2%E8%AE%A1%E5%88%92"><strong>1.1 从SQL到逻辑查询计划</strong></h4>
-                <p>这个过程我们在上一讲已经提及，这里再做一次梳理：</p>
-                <ol>
-                <li><strong>解析(Parsing) &amp; 验证(Validation):</strong> SQL语句被转化为一棵初始的、未优化的<strong>逻辑查询计划树</strong>。</li>
-                <li><strong>核心问题:</strong> 这棵初始的树可能非常低效，比如先做笛卡尔积再做选择。</li>
-                </ol>
-                <h4 id="12-%E9%80%BB%E8%BE%91%E4%BC%98%E5%8C%96"><strong>1.2 逻辑优化</strong></h4>
-                <p><strong>启发式优化的核心思想是：尽可能早地减小中间结果集的大小。</strong> 越早过滤掉无用的数据（行和列），后续昂贵的操作（如JOIN）需要处理的数据就越少。</p>
-                <h5 id="%E6%B3%95%E5%88%991%E9%80%89%E6%8B%A9%E4%B8%8B%E6%8E%A8-pushing-selections"><strong>法则1：选择下推 (Pushing Selections)</strong></h5>
-                <p>这是<strong>最重要</strong>的优化手段。</p>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A106%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96">数据库系统设计06:查询优化</h1>
+<p>在上一讲中，我们扮演了查询执行引擎的角色，学习了如何实现各种关系操作的物理算法，比如不同的<code>JOIN</code>和<code>SELECT</code>方法。我们知道了，对于同一个逻辑操作，存在多种“做法”，它们的性能天差地别。这引出了一个至关重要的问题：当用户提交一条复杂的SQL查询时，数据库是如何从成千上万种可能的执行方式中，选择出那条“最佳路径”的？</p>
+<p>这就是查询优化的核心任务。它不是一个简单的任务，而是一个极其复杂的<strong>搜索问题</strong>。搜索空间的大小是<strong>组合爆炸</strong>级别的，对于一个涉及10张表的JOIN查询，可能的执行计划数量比宇宙中的原子还要多。一个幼稚的优化器，其优化的时间本身就可能比直接执行一个糟糕计划的时间还要长。</p>
+<p>因此，一个优秀的查询优化器，必须是一个集**数学家（利用关系代数的严谨规则）、统计学家（基于数据分布进行精确估算）和算法大师（在巨大的搜索空间中进行高效剪枝）**于一身的复杂系统。</p>
+<p>今天，我们将分为三个部分，完整地模拟一次查询优化的生命周期：</p>
+<ol>
+<li><strong>逻辑优化：</strong> 如何在不动用成本计算的情况下，对查询进行“整形”，使其天生就更易于高效执行。</li>
+<li><strong>成本估算：</strong> 优化器如何利用数据库的“人口普查数据”（统计信息），来预测每一个操作的“开销”。</li>
+<li><strong>计划选择：</strong> 我们将学习优化器是如何使用动态规划等系统性方法，在众多候选计划中，权衡利弊，做出最终的、基于成本的决策。</li>
+</ol>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E9%80%BB%E8%BE%91%E4%BC%98%E5%8C%96%E4%B8%8E%E5%85%B3%E7%B3%BB%E4%BB%A3%E6%95%B0%E7%AD%89%E4%BB%B7%E5%8F%98%E6%8D%A2"><strong>第一部分：逻辑优化与关系代数等价变换</strong></h3>
+<p>查询优化的第一步，是<strong>基于规则的优化 (Rule-Based Optimization, RBO)</strong>，也称为逻辑优化。这个阶段不关心具体的成本，而是运用一系列经过证明的、逻辑上等价的关系代数变换规则，将初始的查询表达式，转化为一个或多个结构上更优的、逻辑上等价的表达式。</p>
+<h4 id="11-%E4%BB%8Esql%E5%88%B0%E9%80%BB%E8%BE%91%E6%9F%A5%E8%AF%A2%E8%AE%A1%E5%88%92"><strong>1.1 从SQL到逻辑查询计划</strong></h4>
+<p>这个过程我们在上一讲已经提及，这里再做一次梳理：</p>
+<ol>
+<li><strong>解析(Parsing) &amp; 验证(Validation):</strong> SQL语句被转化为一棵初始的、未优化的<strong>逻辑查询计划树</strong>。</li>
+<li><strong>核心问题:</strong> 这棵初始的树可能非常低效，比如先做笛卡尔积再做选择。</li>
+</ol>
+<h4 id="12-%E9%80%BB%E8%BE%91%E4%BC%98%E5%8C%96"><strong>1.2 逻辑优化</strong></h4>
+<p><strong>启发式优化的核心思想是：尽可能早地减小中间结果集的大小。</strong> 越早过滤掉无用的数据（行和列），后续昂贵的操作（如JOIN）需要处理的数据就越少。</p>
+<h5 id="%E6%B3%95%E5%88%991%E9%80%89%E6%8B%A9%E4%B8%8B%E6%8E%A8-pushing-selections"><strong>法则1：选择下推 (Pushing Selections)</strong></h5>
+<p>这是<strong>最重要</strong>的优化手段。</p>
+<ul>
+<li>
+<p><strong>规则:</strong></p>
+<ul>
+<li><strong>分解合取谓词:</strong> $\sigma_{P1 \land P2}(R) \equiv \sigma_{P1}(\sigma_{P2}(R))$</li>
+<li><strong>将选择移动到连接之前:</strong> $\sigma_{P_R \land P_S}(R \bowtie S) \equiv \sigma_{P_R}(R) \bowtie \sigma_{P_S}(S)$ (其中$P_R$只涉及R, $P_S$只涉及S)</li>
+<li><strong>将选择移动到笛卡尔积之前:</strong> $\sigma_{P_R}(R \times S) \equiv \sigma_{P_R}(R) \times S$</li>
+</ul>
+</li>
+<li>
+<p><strong>直观解释:</strong> 与其连接两个巨大的表，然后再从天文数字般的连接结果中筛选，不如先各自对两个表进行筛选，然后再连接两个小得多的“瘦身”后的表。</p>
+</li>
+</ul>
+<h5 id="%E6%B3%95%E5%88%992%E6%8A%95%E5%BD%B1%E4%B8%8B%E6%8E%A8-pushing-projections"><strong>法则2：投影下推 (Pushing Projections)</strong></h5>
+<ul>
+<li><strong>规则:</strong> $\pi_A(R \bowtie S) \equiv \pi_A(\pi_{A_R \cup J}(R) \bowtie \pi_{A_S \cup J}(S))$
                 <ul>
-                <li>
-                <p><strong>规则:</strong></p>
+<li>$J$: 连接所需的属性集合。</li>
+<li>$A_R, A_S$: 分别是$R, S$中，最终输出或后续操作需要的属性。</li>
+</ul>
+</li>
+<li><strong>直观解释:</strong> 在连接之前，就把那些未来肯定用不到的列给“扔掉”。这不仅减少了中间结果的I/O（数据更窄），也减少了内存消耗。</li>
+</ul>
+<h5 id="%E6%B3%95%E5%88%993%E5%90%88%E5%B9%B6%E9%80%89%E6%8B%A9%E4%B8%8E%E7%AC%9B%E5%8D%A1%E5%B0%94%E7%A7%AF%E4%B8%BA%E8%BF%9E%E6%8E%A5"><strong>法则3：合并选择与笛卡尔积为连接</strong></h5>
+<ul>
+<li><strong>规则:</strong> $\sigma_{R.a=S.b}(R \times S) \equiv R \bowtie_{R.a=S.b} S$</li>
+<li><strong>重要性:</strong> 这是优化器最基本的“常识”。它看到一个带有连接条件的<code>WHERE</code>子句作用于一个<code>FROM</code>子句的笛卡尔积上时，会自动将其识别为一个JOIN操作，从而可以使用高效的JOIN算法（如哈希连接），而不是真的去计算笛卡尔积。</li>
+</ul>
+<h4 id="13-%E8%BF%9E%E6%8E%A5%E7%9A%84%E9%87%8D%E5%A1%91%E4%BA%A4%E6%8D%A2%E5%BE%8B%E4%B8%8E%E7%BB%93%E5%90%88%E5%BE%8B"><strong>1.3 连接的重塑：交换律与结合律</strong></h4>
+<ul>
+<li><strong>交换律:</strong> $R \bowtie S \equiv S \bowtie R$</li>
+<li><strong>结合律:</strong> $(R \bowtie S) \bowtie T \equiv R \bowtie (S \bowtie T)$</li>
+<li><strong>战略意义:</strong> 这两条规则赋予了优化器<strong>重新安排连接顺序</strong>的权力。这对于基于成本的优化至关重要，因为不同的连接顺序，其产生的中间结果集大小和总成本可能有数量级的差异。逻辑优化阶段会生成所有可能的连接树形态（如左深树、右深树、浓密树），供后续的物理优化阶段进行成本评估。</li>
+</ul>
+<h4 id="14-%E6%9E%9A%E4%B8%BE%E7%AD%89%E4%BB%B7%E8%A1%A8%E8%BE%BE%E5%BC%8F"><strong>1.4 枚举等价表达式</strong></h4>
+<p>优化器会递归地应用上述规则，系统性地生成一个等价表达式的集合。这个过程通常从初始的逻辑计划树开始，自顶向下或自底向上地尝试应用所有适用的规则，直到无法生成新的、不同的表达式为止。</p>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E7%94%A8%E4%BA%8E%E6%88%90%E6%9C%AC%E4%BC%B0%E7%AE%97%E7%9A%84%E7%BB%9F%E8%AE%A1%E4%BF%A1%E6%81%AF"><strong>第二部分：用于成本估算的统计信息</strong></h3>
+<p>逻辑优化告诉了我们“哪些计划是合理的”，但没有告诉我们“哪个计划是最好的”。要回答这个问题，我们必须进入<strong>基于成本的优化 (Cost-Based Optimization, CBO)</strong> 阶段。而CBO的基石，就是对每一个操作的成本进行<strong>估算</strong>，这又依赖于对中间结果大小的<strong>基数估算 (Cardinality Estimation)</strong>。</p>
+<h4 id="21-%E7%B3%BB%E7%BB%9F%E7%9B%AE%E5%BD%95-system-catalog"><strong>2.1 系统目录 (System Catalog)</strong></h4>
+<p>优化器进行估算所依赖的数据，都存储在系统目录中。对于每个关系<code>r</code>，它至少需要知道：</p>
+<ul>
+<li>$T(r)$: <code>r</code>中的元组总数。</li>
+<li>$B(r)$: <code>r</code>占用的磁盘块数。</li>
+<li>$S(r)$: <code>r</code>中每个元组的平均大小（字节）。</li>
+<li>对于<code>r</code>中的每个属性<code>A</code>：
                 <ul>
-                <li><strong>分解合取谓词:</strong> $\sigma_{P1 \land P2}(R) \equiv \sigma_{P1}(\sigma_{P2}(R))$</li>
-                <li><strong>将选择移动到连接之前:</strong> $\sigma_{P_R \land P_S}(R \bowtie S) \equiv \sigma_{P_R}(R) \bowtie \sigma_{P_S}(S)$ (其中$P_R$只涉及R, $P_S$只涉及S)</li>
-                <li><strong>将选择移动到笛卡尔积之前:</strong> $\sigma_{P_R}(R \times S) \equiv \sigma_{P_R}(R) \times S$</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>直观解释:</strong> 与其连接两个巨大的表，然后再从天文数字般的连接结果中筛选，不如先各自对两个表进行筛选，然后再连接两个小得多的“瘦身”后的表。</p>
-                </li>
-                </ul>
-                <h5 id="%E6%B3%95%E5%88%992%E6%8A%95%E5%BD%B1%E4%B8%8B%E6%8E%A8-pushing-projections"><strong>法则2：投影下推 (Pushing Projections)</strong></h5>
-                <ul>
-                <li><strong>规则:</strong> $\pi_A(R \bowtie S) \equiv \pi_A(\pi_{A_R \cup J}(R) \bowtie \pi_{A_S \cup J}(S))$
-                <ul>
-                <li>$J$: 连接所需的属性集合。</li>
-                <li>$A_R, A_S$: 分别是$R, S$中，最终输出或后续操作需要的属性。</li>
-                </ul>
-                </li>
-                <li><strong>直观解释:</strong> 在连接之前，就把那些未来肯定用不到的列给“扔掉”。这不仅减少了中间结果的I/O（数据更窄），也减少了内存消耗。</li>
-                </ul>
-                <h5 id="%E6%B3%95%E5%88%993%E5%90%88%E5%B9%B6%E9%80%89%E6%8B%A9%E4%B8%8E%E7%AC%9B%E5%8D%A1%E5%B0%94%E7%A7%AF%E4%B8%BA%E8%BF%9E%E6%8E%A5"><strong>法则3：合并选择与笛卡尔积为连接</strong></h5>
-                <ul>
-                <li><strong>规则:</strong> $\sigma_{R.a=S.b}(R \times S) \equiv R \bowtie_{R.a=S.b} S$</li>
-                <li><strong>重要性:</strong> 这是优化器最基本的“常识”。它看到一个带有连接条件的<code>WHERE</code>子句作用于一个<code>FROM</code>子句的笛卡尔积上时，会自动将其识别为一个JOIN操作，从而可以使用高效的JOIN算法（如哈希连接），而不是真的去计算笛卡尔积。</li>
-                </ul>
-                <h4 id="13-%E8%BF%9E%E6%8E%A5%E7%9A%84%E9%87%8D%E5%A1%91%E4%BA%A4%E6%8D%A2%E5%BE%8B%E4%B8%8E%E7%BB%93%E5%90%88%E5%BE%8B"><strong>1.3 连接的重塑：交换律与结合律</strong></h4>
-                <ul>
-                <li><strong>交换律:</strong> $R \bowtie S \equiv S \bowtie R$</li>
-                <li><strong>结合律:</strong> $(R \bowtie S) \bowtie T \equiv R \bowtie (S \bowtie T)$</li>
-                <li><strong>战略意义:</strong> 这两条规则赋予了优化器<strong>重新安排连接顺序</strong>的权力。这对于基于成本的优化至关重要，因为不同的连接顺序，其产生的中间结果集大小和总成本可能有数量级的差异。逻辑优化阶段会生成所有可能的连接树形态（如左深树、右深树、浓密树），供后续的物理优化阶段进行成本评估。</li>
-                </ul>
-                <h4 id="14-%E6%9E%9A%E4%B8%BE%E7%AD%89%E4%BB%B7%E8%A1%A8%E8%BE%BE%E5%BC%8F"><strong>1.4 枚举等价表达式</strong></h4>
-                <p>优化器会递归地应用上述规则，系统性地生成一个等价表达式的集合。这个过程通常从初始的逻辑计划树开始，自顶向下或自底向上地尝试应用所有适用的规则，直到无法生成新的、不同的表达式为止。</p>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E7%94%A8%E4%BA%8E%E6%88%90%E6%9C%AC%E4%BC%B0%E7%AE%97%E7%9A%84%E7%BB%9F%E8%AE%A1%E4%BF%A1%E6%81%AF"><strong>第二部分：用于成本估算的统计信息</strong></h3>
-                <p>逻辑优化告诉了我们“哪些计划是合理的”，但没有告诉我们“哪个计划是最好的”。要回答这个问题，我们必须进入<strong>基于成本的优化 (Cost-Based Optimization, CBO)</strong> 阶段。而CBO的基石，就是对每一个操作的成本进行<strong>估算</strong>，这又依赖于对中间结果大小的<strong>基数估算 (Cardinality Estimation)</strong>。</p>
-                <h4 id="21-%E7%B3%BB%E7%BB%9F%E7%9B%AE%E5%BD%95-system-catalog"><strong>2.1 系统目录 (System Catalog)</strong></h4>
-                <p>优化器进行估算所依赖的数据，都存储在系统目录中。对于每个关系<code>r</code>，它至少需要知道：</p>
-                <ul>
-                <li>$T(r)$: <code>r</code>中的元组总数。</li>
-                <li>$B(r)$: <code>r</code>占用的磁盘块数。</li>
-                <li>$S(r)$: <code>r</code>中每个元组的平均大小（字节）。</li>
-                <li>对于<code>r</code>中的每个属性<code>A</code>：
-                <ul>
-                <li>$V(A, r)$: <code>A</code>属性的不同值的数量（值的基数）。</li>
-                <li>$\min(A, r), \max(A, r)$: <code>A</code>属性的最小值和最大值。</li>
-                <li><strong>直方图 (Histograms):</strong> 更详细地描述<code>A</code>属性的值分布。</li>
-                </ul>
-                </li>
-                </ul>
-                <p>这些统计信息通常由数据库后台任务（如<code>ANALYZE</code>命令）定期收集和更新。<strong>过时的统计信息是导致优化器选择次优计划的最常见原因。</strong></p>
-                <h4 id="22-%E9%80%89%E6%8B%A9%E6%93%8D%E4%BD%9C%E7%9A%84%E5%9F%BA%E6%95%B0%E4%BC%B0%E7%AE%97"><strong>2.2 选择操作的基数估算</strong></h4>
-                <ul>
-                <li><strong>等值选择 $\sigma_{A=v}(r)$:</strong>
-                <ul>
-                <li><strong>估算:</strong> $T(r) / V(A, r)$</li>
-                <li><strong>选择率 (Selectivity):</strong> $1 / V(A, r)$</li>
-                </ul>
-                </li>
-                <li><strong>范围选择 $\sigma_{A > v}(r)$:</strong>
-                <ul>
-                <li><strong>简单估算 (均匀分布假设):</strong> $T(r) \times (\max(A, r) - v) / (\max(A, r) - \min(A, r))$</li>
-                <li><strong>基于直方图的估算:</strong> 查找<code>v</code>所在的桶，根据桶内信息和<code>v</code>在桶内的相对位置，进行更精确的估算。</li>
-                </ul>
-                </li>
-                <li><strong>复杂谓词:</strong>
-                <ul>
-                <li><strong>合取 ($\land$):</strong> 假设谓词独立，选择率相乘。$\text{Sel}(P1 \land P2) = \text{Sel}(P1) \times \text{Sel}(P2)$。</li>
-                <li><strong>析取 ($\lor$):</strong> $\text{Sel}(P1 \lor P2) = \text{Sel}(P1) + \text{Sel}(P2) - \text{Sel}(P1) \times \text{Sel}(P2)$。</li>
-                <li><strong>否定 ($\neg$):</strong> $\text{Sel}(\neg P) = 1 - \text{Sel}(P)$。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="23-%E8%BF%9E%E6%8E%A5%E6%93%8D%E4%BD%9C%E7%9A%84%E5%9F%BA%E6%95%B0%E4%BC%B0%E7%AE%97"><strong>2.3 连接操作的基数估算</strong></h4>
-                <p>这是最困难也最重要的估算。</p>
-                <ul>
-                <li><strong>笛卡尔积 $r \times s$:</strong> $T(r \times s) = T(r) \times T(s)$</li>
-                <li><strong>自然连接/等值连接 $r \bowtie_{r.A=s.B} s$:</strong>
-                <ul>
-                <li><strong>核心思想:</strong> 考虑<code>r</code>中的一个元组，它能与<code>s</code>中多少个元组匹配？平均而言，是 $T(s) / V(B, s)$ 个。</li>
-                <li><strong>通用估算公式:</strong>
+<li>$V(A, r)$: <code>A</code>属性的不同值的数量（值的基数）。</li>
+<li>$\min(A, r), \max(A, r)$: <code>A</code>属性的最小值和最大值。</li>
+<li><strong>直方图 (Histograms):</strong> 更详细地描述<code>A</code>属性的值分布。</li>
+</ul>
+</li>
+</ul>
+<p>这些统计信息通常由数据库后台任务（如<code>ANALYZE</code>命令）定期收集和更新。<strong>过时的统计信息是导致优化器选择次优计划的最常见原因。</strong></p>
+<h4 id="22-%E9%80%89%E6%8B%A9%E6%93%8D%E4%BD%9C%E7%9A%84%E5%9F%BA%E6%95%B0%E4%BC%B0%E7%AE%97"><strong>2.2 选择操作的基数估算</strong></h4>
+<ul>
+<li><strong>等值选择 $\sigma_{A=v}(r)$:</strong>
+<ul>
+<li><strong>估算:</strong> $T(r) / V(A, r)$</li>
+<li><strong>选择率 (Selectivity):</strong> $1 / V(A, r)$</li>
+</ul>
+</li>
+<li><strong>范围选择 $\sigma_{A &gt; v}(r)$:</strong>
+<ul>
+<li><strong>简单估算 (均匀分布假设):</strong> $T(r) \times (\max(A, r) - v) / (\max(A, r) - \min(A, r))$</li>
+<li><strong>基于直方图的估算:</strong> 查找<code>v</code>所在的桶，根据桶内信息和<code>v</code>在桶内的相对位置，进行更精确的估算。</li>
+</ul>
+</li>
+<li><strong>复杂谓词:</strong>
+<ul>
+<li><strong>合取 ($\land$):</strong> 假设谓词独立，选择率相乘。$\text{Sel}(P1 \land P2) = \text{Sel}(P1) \times \text{Sel}(P2)$。</li>
+<li><strong>析取 ($\lor$):</strong> $\text{Sel}(P1 \lor P2) = \text{Sel}(P1) + \text{Sel}(P2) - \text{Sel}(P1) \times \text{Sel}(P2)$。</li>
+<li><strong>否定 ($\neg$):</strong> $\text{Sel}(\neg P) = 1 - \text{Sel}(P)$。</li>
+</ul>
+</li>
+</ul>
+<h4 id="23-%E8%BF%9E%E6%8E%A5%E6%93%8D%E4%BD%9C%E7%9A%84%E5%9F%BA%E6%95%B0%E4%BC%B0%E7%AE%97"><strong>2.3 连接操作的基数估算</strong></h4>
+<p>这是最困难也最重要的估算。</p>
+<ul>
+<li><strong>笛卡尔积 $r \times s$:</strong> $T(r \times s) = T(r) \times T(s)$</li>
+<li><strong>自然连接/等值连接 $r \bowtie_{r.A=s.B} s$:</strong>
+<ul>
+<li><strong>核心思想:</strong> 考虑<code>r</code>中的一个元组，它能与<code>s</code>中多少个元组匹配？平均而言，是 $T(s) / V(B, s)$ 个。</li>
+<li><strong>通用估算公式:</strong>
                 $$ T(r \bowtie s) = \frac{T(r) \times T(s)}{\max(V(A, r), V(B, s))} $$</li>
-                <li><strong>直观解释:</strong> 连接结果的大小，受限于两个连接列中<strong>不同值较多</strong>的那个列。</li>
-                <li><strong>外键约束下的估算:</strong> 如果<code>A</code>是<code>r</code>中引用<code>s</code>的主键<code>B</code>的外键，那么<code>r</code>中的每个元组最多只会与<code>s</code>中的一个元组匹配。因此，$T(r \bowtie s) \le T(r)$。在这种情况下，通常估算 $T(r \bowtie s) = T(r)$。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="24-%E5%85%B6%E4%BB%96%E6%93%8D%E4%BD%9C%E7%9A%84%E5%9F%BA%E6%95%B0%E4%BC%B0%E7%AE%97"><strong>2.4 其他操作的基数估算</strong></h4>
+<li><strong>直观解释:</strong> 连接结果的大小，受限于两个连接列中<strong>不同值较多</strong>的那个列。</li>
+<li><strong>外键约束下的估算:</strong> 如果<code>A</code>是<code>r</code>中引用<code>s</code>的主键<code>B</code>的外键，那么<code>r</code>中的每个元组最多只会与<code>s</code>中的一个元组匹配。因此，$T(r \bowtie s) \le T(r)$。在这种情况下，通常估算 $T(r \bowtie s) = T(r)$。</li>
+</ul>
+</li>
+</ul>
+<h4 id="24-%E5%85%B6%E4%BB%96%E6%93%8D%E4%BD%9C%E7%9A%84%E5%9F%BA%E6%95%B0%E4%BC%B0%E7%AE%97"><strong>2.4 其他操作的基数估算</strong></h4>
+<ul>
+<li><strong>投影 $\pi_L(r)$:</strong>
+<ul>
+<li>如果不去重，结果大小为 $T(r)$。</li>
+<li>如果去重 (<code>DISTINCT</code>)，结果大小为 $V(L, r)$，即属性集<code>L</code>的不同值组合数。这个值的估算比较复杂，通常近似为 $\min(T(r), \prod_{A_i \in L} V(A_i, r))$。</li>
+</ul>
+</li>
+<li><strong>分组/聚合 <code>GROUP BY G</code>:</strong> 结果大小为 $V(G, r)$，即分组属性<code>G</code>的不同值组合数。</li>
+</ul>
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E8%AF%84%E4%BC%B0%E8%AE%A1%E5%88%92%E7%9A%84%E9%80%89%E6%8B%A9%E4%B8%8E%E6%90%9C%E7%B4%A2"><strong>第三部分：评估计划的选择与搜索</strong></h3>
+<p>有了逻辑计划的候选集，又有了估算每个操作成本的工具，现在我们进入最后一步：<strong>系统性地搜索并选择全局最优的物理执行计划。</strong></p>
+<h4 id="31-%E7%8B%AC%E7%AB%8B%E9%80%89%E6%8B%A9%E7%9A%84%E8%B0%AC%E8%AF%AF"><strong>3.1 独立选择的谬误</strong></h4>
+<p>一个常见的误区是：为每个逻辑算子独立地选择其成本最低的物理实现。</p>
+<ul>
+<li><strong>反例:</strong> 考虑一个<code>JOIN</code>操作后跟一个<code>ORDER BY</code>。
                 <ul>
-                <li><strong>投影 $\pi_L(r)$:</strong>
+<li>独立来看，<code>Hash Join</code>的成本可能低于<code>Sort-Merge Join</code>。</li>
+<li>但是，<code>Sort-Merge Join</code>的输出结果<strong>本身就是有序的</strong>。如果这个顺序恰好是<code>ORDER BY</code>所需要的，那么后续的排序操作成本就为0！</li>
+<li>而选择<code>Hash Join</code>后，我们还需要对无序的连接结果进行一次昂贵的外部排序。</li>
+<li><strong>全局来看，<code>Sort-Merge Join</code> + (免费的) <code>Sort</code> 的总成本，可能远低于 <code>Hash Join</code> + (昂贵的) <code>Sort</code>。</strong></li>
+</ul>
+</li>
+<li><strong>结论:</strong> 必须以<strong>整个计划的总成本</strong>为目标进行优化，而不是局部的最优。物理属性（如排序顺序）的传递是优化器必须考虑的重要因素。</li>
+</ul>
+<h4 id="32-%E6%90%9C%E7%B4%A2%E6%9C%80%E4%BD%B3%E8%AE%A1%E5%88%92"><strong>3.2 搜索最佳计划</strong></h4>
+<p>这是CBO的核心算法，我们在上一讲已经概述，这里我们深入其细节。</p>
+<p><strong>算法流程:</strong></p>
+<ol>
+<li>
+<p><strong>初始化 (Pass 1):</strong></p>
+<ul>
+<li>对每个单表<code>R</code>，计算所有可能的<strong>访问路径 (Access Paths)</strong> 的成本和物理属性。
                 <ul>
-                <li>如果不去重，结果大小为 $T(r)$。</li>
-                <li>如果去重 (<code>DISTINCT</code>)，结果大小为 $V(L, r)$，即属性集<code>L</code>的不同值组合数。这个值的估算比较复杂，通常近似为 $\min(T(r), \prod_{A_i \in L} V(A_i, r))$。</li>
-                </ul>
-                </li>
-                <li><strong>分组/聚合 <code>GROUP BY G</code>:</strong> 结果大小为 $V(G, r)$，即分组属性<code>G</code>的不同值组合数。</li>
-                </ul>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E8%AF%84%E4%BC%B0%E8%AE%A1%E5%88%92%E7%9A%84%E9%80%89%E6%8B%A9%E4%B8%8E%E6%90%9C%E7%B4%A2"><strong>第三部分：评估计划的选择与搜索</strong></h3>
-                <p>有了逻辑计划的候选集，又有了估算每个操作成本的工具，现在我们进入最后一步：<strong>系统性地搜索并选择全局最优的物理执行计划。</strong></p>
-                <h4 id="31-%E7%8B%AC%E7%AB%8B%E9%80%89%E6%8B%A9%E7%9A%84%E8%B0%AC%E8%AF%AF"><strong>3.1 独立选择的谬误</strong></h4>
-                <p>一个常见的误区是：为每个逻辑算子独立地选择其成本最低的物理实现。</p>
+<li><code>File Scan(R)</code>: 成本为 $B(R)$，输出无序。</li>
+<li><code>Index Scan(R, I)</code> on <code>R.A = v</code>: 成本依赖索引<code>I</code>，输出无序（如果是辅助索引）或按<code>A</code>排序（如果是主索引）。</li>
+</ul>
+</li>
+<li>为每个表保留成本最低的无序计划，以及每个“有趣顺序”下成本最低的计划。</li>
+</ul>
+</li>
+<li>
+<p><strong>迭代构建 (Pass 2 to N):</strong></p>
+<ul>
+<li><strong>For i = 2 to N:</strong>
+<ul>
+<li><strong>For each subset of i tables <code>{R_1, ..., R_i}</code>:</strong>
+<ul>
+<li><strong>For each partitioning of this subset into <code>{S1}</code> and <code>{S2}</code>:</strong>
+<ul>
+<li><code>Plan1 = BestPlan(S1)</code>, <code>Plan2 = BestPlan(S2)</code> (从前一轮次的结果中获取)</li>
+<li><strong>For each join algorithm <code>J</code> (Hash, Merge, Index...):</strong>
+<ul>
+<li><code>Cost = Cost(Plan1) + Cost(Plan2) + Cost(J(Plan1, Plan2))</code></li>
+<li>计算结果的基数和物理属性。</li>
+<li>如果这个新生成的计划 <code>P</code> 的成本，低于当前已知的连接 <code>{R_1, ..., R_i}</code> 的最优计划成本，则更新。</li>
+<li>同时，如果 <code>P</code> 产生了新的有趣顺序，也将其保留。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p><strong>剪枝与启发式:</strong></p>
+<ul>
+<li><strong>只考虑左深树 (Left-Deep Trees):</strong> 如前所述，这极大地缩小了搜索空间，同时有利于流水线执行。</li>
+<li><strong>跳过高成本的笛卡尔积:</strong> 如果两个子集之间没有连接条件，优化器会尽量推迟它们的连接。</li>
+</ul>
+<h4 id="33-%E4%BC%98%E5%8C%96%E5%99%A8%E4%B9%8B%E5%A4%96"><strong>3.3 优化器之外</strong></h4>
+<ul>
+<li><strong>参数化查询 (Prepared Statements):</strong> <code>SELECT * FROM T WHERE id = ?</code>
+<ul>
+<li>优化器在不知道具体<code>?</code>值的情况下，只能生成一个<strong>通用计划 (Generic Plan)</strong>。</li>
+<li>对于某些<code>?</code>值，这个通用计划可能是次优的。现代数据库（如PostgreSQL）会在执行几次后，如果发现通用计划性能不佳，会为特定参数值重新生成<strong>定制计划 (Custom Plan)</strong>。</li>
+</ul>
+</li>
+<li><strong>查询重写 (Query Rewrite):</strong> 在优化之前，某些数据库会对用户的SQL进行更高级的重写，例如：
                 <ul>
-                <li><strong>反例:</strong> 考虑一个<code>JOIN</code>操作后跟一个<code>ORDER BY</code>。
-                <ul>
-                <li>独立来看，<code>Hash Join</code>的成本可能低于<code>Sort-Merge Join</code>。</li>
-                <li>但是，<code>Sort-Merge Join</code>的输出结果<strong>本身就是有序的</strong>。如果这个顺序恰好是<code>ORDER BY</code>所需要的，那么后续的排序操作成本就为0！</li>
-                <li>而选择<code>Hash Join</code>后，我们还需要对无序的连接结果进行一次昂贵的外部排序。</li>
-                <li><strong>全局来看，<code>Sort-Merge Join</code> + (免费的) <code>Sort</code> 的总成本，可能远低于 <code>Hash Join</code> + (昂贵的) <code>Sort</code>。</strong></li>
-                </ul>
-                </li>
-                <li><strong>结论:</strong> 必须以<strong>整个计划的总成本</strong>为目标进行优化，而不是局部的最优。物理属性（如排序顺序）的传递是优化器必须考虑的重要因素。</li>
-                </ul>
-                <h4 id="32-%E6%90%9C%E7%B4%A2%E6%9C%80%E4%BD%B3%E8%AE%A1%E5%88%92"><strong>3.2 搜索最佳计划</strong></h4>
-                <p>这是CBO的核心算法，我们在上一讲已经概述，这里我们深入其细节。</p>
-                <p><strong>算法流程:</strong></p>
-                <ol>
-                <li>
-                <p><strong>初始化 (Pass 1):</strong></p>
-                <ul>
-                <li>对每个单表<code>R</code>，计算所有可能的<strong>访问路径 (Access Paths)</strong> 的成本和物理属性。
-                <ul>
-                <li><code>File Scan(R)</code>: 成本为 $B(R)$，输出无序。</li>
-                <li><code>Index Scan(R, I)</code> on <code>R.A = v</code>: 成本依赖索引<code>I</code>，输出无序（如果是辅助索引）或按<code>A</code>排序（如果是主索引）。</li>
-                </ul>
-                </li>
-                <li>为每个表保留成本最低的无序计划，以及每个“有趣顺序”下成本最低的计划。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>迭代构建 (Pass 2 to N):</strong></p>
-                <ul>
-                <li><strong>For i = 2 to N:</strong>
-                <ul>
-                <li><strong>For each subset of i tables <code>{R_1, ..., R_i}</code>:</strong>
-                <ul>
-                <li><strong>For each partitioning of this subset into <code>{S1}</code> and <code>{S2}</code>:</strong>
-                <ul>
-                <li><code>Plan1 = BestPlan(S1)</code>, <code>Plan2 = BestPlan(S2)</code> (从前一轮次的结果中获取)</li>
-                <li><strong>For each join algorithm <code>J</code> (Hash, Merge, Index...):</strong>
-                <ul>
-                <li><code>Cost = Cost(Plan1) + Cost(Plan2) + Cost(J(Plan1, Plan2))</code></li>
-                <li>计算结果的基数和物理属性。</li>
-                <li>如果这个新生成的计划 <code>P</code> 的成本，低于当前已知的连接 <code>{R_1, ..., R_i}</code> 的最优计划成本，则更新。</li>
-                <li>同时，如果 <code>P</code> 产生了新的有趣顺序，也将其保留。</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                </ol>
-                <p><strong>剪枝与启发式:</strong></p>
-                <ul>
-                <li><strong>只考虑左深树 (Left-Deep Trees):</strong> 如前所述，这极大地缩小了搜索空间，同时有利于流水线执行。</li>
-                <li><strong>跳过高成本的笛卡尔积:</strong> 如果两个子集之间没有连接条件，优化器会尽量推迟它们的连接。</li>
-                </ul>
-                <h4 id="33-%E4%BC%98%E5%8C%96%E5%99%A8%E4%B9%8B%E5%A4%96"><strong>3.3 优化器之外</strong></h4>
-                <ul>
-                <li><strong>参数化查询 (Prepared Statements):</strong> <code>SELECT * FROM T WHERE id = ?</code>
-                <ul>
-                <li>优化器在不知道具体<code>?</code>值的情况下，只能生成一个<strong>通用计划 (Generic Plan)</strong>。</li>
-                <li>对于某些<code>?</code>值，这个通用计划可能是次优的。现代数据库（如PostgreSQL）会在执行几次后，如果发现通用计划性能不佳，会为特定参数值重新生成<strong>定制计划 (Custom Plan)</strong>。</li>
-                </ul>
-                </li>
-                <li><strong>查询重写 (Query Rewrite):</strong> 在优化之前，某些数据库会对用户的SQL进行更高级的重写，例如：
-                <ul>
-                <li><strong>视图展开 (View Expansion):</strong> 将查询中的视图定义直接展开。</li>
-                <li><strong>子查询解关联 (Subquery Unnesting):</strong> 将相关的子查询（<code>WHERE EXISTS ...</code>）改写为<code>JOIN</code>。</li>
-                <li><strong>物化视图匹配:</strong> 如果存在一个物化视图可以满足部分或全部查询，则直接使用物化视图。</li>
-                </ul>
-                </li>
-                </ul>
-                <p>如果你想更详细了解CBO，可以查看我的<a href="https://forliage.github.io/_posts/2025-06-20-CBO.html">另外一篇文章</a>。</p>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li><strong>视图展开 (View Expansion):</strong> 将查询中的视图定义直接展开。</li>
+<li><strong>子查询解关联 (Subquery Unnesting):</strong> 将相关的子查询（<code>WHERE EXISTS ...</code>）改写为<code>JOIN</code>。</li>
+<li><strong>物化视图匹配:</strong> 如果存在一个物化视图可以满足部分或全部查询，则直接使用物化视图。</li>
+</ul>
+</li>
+</ul>
+<p>如果你想更详细了解CBO，可以查看我的<a href="https://forliage.github.io/_posts/2025-06-20-CBO.html">另外一篇文章</a>。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

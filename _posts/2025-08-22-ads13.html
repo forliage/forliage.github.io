@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>ads13:随机算法 (Randomized Algorithms)</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>ads13:随机算法 (Randomized Algorithms)</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,141 +30,141 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="ads13%E9%9A%8F%E6%9C%BA%E7%AE%97%E6%B3%95-randomized-algorithms">ads13:随机算法 (Randomized Algorithms)</h1>
-                <h3 id="1-%E4%BB%80%E4%B9%88%E6%98%AF%E9%9A%8F%E6%9C%BA%E6%88%91%E4%BB%AC%E5%BA%94%E8%AF%A5%E5%AF%B9%E4%BB%80%E4%B9%88%E8%BF%9B%E8%A1%8C%E9%9A%8F%E6%9C%BA%E5%8C%96">1. 什么是随机？我们应该对什么进行随机化？</h3>
-                <p>在算法分析中，我们经常会遇到“随机”这个词，但它可能出现在两个截然不同的语境中。我们必须首先厘清这个核心概念。</p>
-                <h4 id="11-%E5%B9%B3%E5%9D%87%E6%83%85%E5%86%B5%E5%88%86%E6%9E%90-average-case-analysis">1.1 平均情况分析 (Average-case Analysis)</h4>
-                <p>想象一下，我们有一台性能稳定的汽车（一个<strong>确定性算法</strong>）。它的性能好坏，完全取决于路况（<strong>算法的输入</strong>）。如果路况总是很好（随机生成的好输入），那这台车跑得就很快。但如果路况很差（最坏情况输入），它就可能堵在路上动弹不得。</p>
-                <p>这就是<strong>平均情况分析</strong>：
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="ads13%E9%9A%8F%E6%9C%BA%E7%AE%97%E6%B3%95-randomized-algorithms">ads13:随机算法 (Randomized Algorithms)</h1>
+<h3 id="1-%E4%BB%80%E4%B9%88%E6%98%AF%E9%9A%8F%E6%9C%BA%E6%88%91%E4%BB%AC%E5%BA%94%E8%AF%A5%E5%AF%B9%E4%BB%80%E4%B9%88%E8%BF%9B%E8%A1%8C%E9%9A%8F%E6%9C%BA%E5%8C%96">1. 什么是随机？我们应该对什么进行随机化？</h3>
+<p>在算法分析中，我们经常会遇到“随机”这个词，但它可能出现在两个截然不同的语境中。我们必须首先厘清这个核心概念。</p>
+<h4 id="11-%E5%B9%B3%E5%9D%87%E6%83%85%E5%86%B5%E5%88%86%E6%9E%90-average-case-analysis">1.1 平均情况分析 (Average-case Analysis)</h4>
+<p>想象一下，我们有一台性能稳定的汽车（一个<strong>确定性算法</strong>）。它的性能好坏，完全取决于路况（<strong>算法的输入</strong>）。如果路况总是很好（随机生成的好输入），那这台车跑得就很快。但如果路况很差（最坏情况输入），它就可能堵在路上动弹不得。</p>
+<p>这就是<strong>平均情况分析</strong>：
                 <strong>世界是随机的</strong> —— 我们假设算法的输入是随机生成的，并分析一个<strong>传统确定性算法</strong>在这些随机输入下的期望表现。</p>
-                <p>这种分析的优点是能告诉我们算法在“通常”情况下的表现。但它有一个巨大的弱点：它依赖于对输入分布的假设。如果现实世界中的输入不符合我们假设的随机分布，那么分析结果就毫无意义。攻击者可以特意构造一个“最坏情况”的输入，让我们的算法性能急剧下降。</p>
-                <div class="mermaid">
+<p>这种分析的优点是能告诉我们算法在“通常”情况下的表现。但它有一个巨大的弱点：它依赖于对输入分布的假设。如果现实世界中的输入不符合我们假设的随机分布，那么分析结果就毫无意义。攻击者可以特意构造一个“最坏情况”的输入，让我们的算法性能急剧下降。</p>
+<div class="mermaid">
                 graph TD
                     subgraph 平均情况分析
-                        A[随机生成的世界/输入] --> B{确定性算法};
-                        B --> C[性能表现];
+                        A[随机生成的世界/输入] --&gt; B{确定性算法};
+                        B --&gt; C[性能表现];
                     end
                     style A fill:#f9f,stroke:#333,stroke-width:2px
                 </div>
-                <h4 id="12-%E9%9A%8F%E6%9C%BA%E7%AE%97%E6%B3%95-randomized-algorithms">1.2 随机算法 (Randomized Algorithms)</h4>
-                <p>现在，我们换一种思路。我们不再对路况做任何假设，我们承认路况可能非常糟糕（<strong>最坏情况输入</strong>）。但是，我们给汽车装上一个神奇的导航系统，它在每个路口都会<strong>随机选择</strong>一条路走（<strong>算法本身是随机的</strong>）。虽然某一次选择可能很糟糕，但从期望上来看，它总能避开最拥堵的路线，快速到达目的地。</p>
-                <p>这就是<strong>随机算法</strong>的核心思想：
+<h4 id="12-%E9%9A%8F%E6%9C%BA%E7%AE%97%E6%B3%95-randomized-algorithms">1.2 随机算法 (Randomized Algorithms)</h4>
+<p>现在，我们换一种思路。我们不再对路况做任何假设，我们承认路况可能非常糟糕（<strong>最坏情况输入</strong>）。但是，我们给汽车装上一个神奇的导航系统，它在每个路口都会<strong>随机选择</strong>一条路走（<strong>算法本身是随机的</strong>）。虽然某一次选择可能很糟糕，但从期望上来看，它总能避开最拥堵的路线，快速到达目的地。</p>
+<p>这就是<strong>随机算法</strong>的核心思想：
                 <strong>算法是随机的</strong> —— 算法在执行过程中会做出一些随机决策（比如抛硬币）。我们分析的是，对于<strong>任意给定的、甚至是“最坏”的输入</strong>，算法的期望表现。</p>
-                <p>这里的关键在于，随机性掌握在我们自己手中，而不是依赖于外界输入。无论输入有多么“恶意”，我们的算法都能通过内部的随机选择，大概率地避免最坏情况的发生。这就赋予了算法一种强大的鲁棒性。</p>
-                <div class="mermaid">
+<p>这里的关键在于，随机性掌握在我们自己手中，而不是依赖于外界输入。无论输入有多么“恶意”，我们的算法都能通过内部的随机选择，大概率地避免最坏情况的发生。这就赋予了算法一种强大的鲁棒性。</p>
+<div class="mermaid">
                 graph TD
                     subgraph 随机算法
-                        D[最坏情况的世界/输入] --> E{随机化算法};
-                        E --> F[期望性能表现];
+                        D[最坏情况的世界/输入] --&gt; E{随机化算法};
+                        E --&gt; F[期望性能表现];
                     end
                     style E fill:#ccf,stroke:#333,stroke-width:2px
                 </div>
-                <p>我们讨论的，就是第二种，即算法本身是随机的。</p>
-                <h3 id="2-%E6%88%91%E4%BB%AC%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E6%8B%A5%E6%8A%B1%E9%9A%8F%E6%9C%BA">2. 我们为什么要拥抱随机？</h3>
-                <p>引入随机性听起来似乎让算法变得不可靠了，但实际上它带来了诸多好处，甚至在很多场景下是必不可少的。</p>
-                <ol>
-                <li>
-                <p><strong>性能与正确性的权衡</strong>：</p>
-                <ul>
-                <li>一个高效的确定性算法必须在所有情况下都给出正确答案。而一个<strong>高效的随机算法</strong>可能只需要<strong>以高概率</strong>给出正确答案。这种放宽可以带来巨大的性能提升。这类算法被称为<strong>蒙特卡洛算法 (Monte Carlo Algorithms)</strong>。</li>
-                <li>或者，一个随机算法可以<strong>保证答案永远正确</strong>，但其运行时间是随机的，我们只保证它的<strong>期望运行时间</strong>是高效的。这类算法被称为<strong>拉斯维加斯算法 (Las Vegas Algorithms)</strong>。我们今天主要讨论这类算法。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>对称性破缺 (Symmetry-breaking)</strong>：</p>
-                <ul>
-                <li>在分布式系统中，想象有两个完全相同的进程需要竞争同一个资源。如果它们的行为是确定性的，它们可能会永远同步地尝试、失败、再尝试、再失败，陷入死锁。引入随机的等待时间可以有效地打破这种对称性，让其中一个进程获得资源。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>更简洁的设计</strong>：</p>
-                <ul>
-                <li>在很多情况下，随机算法的设计和实现比解决同样问题的确定性算法要简单得多。我们即将看到的快速排序就是一个绝佳的例子。</li>
-                </ul>
-                </li>
-                </ol>
-                <h3 id="3-%E6%A6%82%E7%8E%87%E8%AE%BA%E5%9F%BA%E7%A1%80%E5%BF%AB%E8%A7%88">3. 概率论基础快览</h3>
-                <p>在我们深入具体的例子之前，让我们快速回顾一下几个核心的概率论概念，它们是我们分析随机算法的基石。</p>
-                <ul>
-                <li>
-                <p><strong>概率 (Probability)</strong>:
+<p>我们讨论的，就是第二种，即算法本身是随机的。</p>
+<h3 id="2-%E6%88%91%E4%BB%AC%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E6%8B%A5%E6%8A%B1%E9%9A%8F%E6%9C%BA">2. 我们为什么要拥抱随机？</h3>
+<p>引入随机性听起来似乎让算法变得不可靠了，但实际上它带来了诸多好处，甚至在很多场景下是必不可少的。</p>
+<ol>
+<li>
+<p><strong>性能与正确性的权衡</strong>：</p>
+<ul>
+<li>一个高效的确定性算法必须在所有情况下都给出正确答案。而一个<strong>高效的随机算法</strong>可能只需要<strong>以高概率</strong>给出正确答案。这种放宽可以带来巨大的性能提升。这类算法被称为<strong>蒙特卡洛算法 (Monte Carlo Algorithms)</strong>。</li>
+<li>或者，一个随机算法可以<strong>保证答案永远正确</strong>，但其运行时间是随机的，我们只保证它的<strong>期望运行时间</strong>是高效的。这类算法被称为<strong>拉斯维加斯算法 (Las Vegas Algorithms)</strong>。我们今天主要讨论这类算法。</li>
+</ul>
+</li>
+<li>
+<p><strong>对称性破缺 (Symmetry-breaking)</strong>：</p>
+<ul>
+<li>在分布式系统中，想象有两个完全相同的进程需要竞争同一个资源。如果它们的行为是确定性的，它们可能会永远同步地尝试、失败、再尝试、再失败，陷入死锁。引入随机的等待时间可以有效地打破这种对称性，让其中一个进程获得资源。</li>
+</ul>
+</li>
+<li>
+<p><strong>更简洁的设计</strong>：</p>
+<ul>
+<li>在很多情况下，随机算法的设计和实现比解决同样问题的确定性算法要简单得多。我们即将看到的快速排序就是一个绝佳的例子。</li>
+</ul>
+</li>
+</ol>
+<h3 id="3-%E6%A6%82%E7%8E%87%E8%AE%BA%E5%9F%BA%E7%A1%80%E5%BF%AB%E8%A7%88">3. 概率论基础快览</h3>
+<p>在我们深入具体的例子之前，让我们快速回顾一下几个核心的概率论概念，它们是我们分析随机算法的基石。</p>
+<ul>
+<li>
+<p><strong>概率 (Probability)</strong>:
                 对于一个事件 $A$，我们用 $\Pr[A]$ 来表示它发生的概率。$0 \le \Pr[A] \le 1$。</p>
-                </li>
-                <li>
-                <p><strong>补事件 (Complementary Event)</strong>:
+</li>
+<li>
+<p><strong>补事件 (Complementary Event)</strong>:
                 事件 $\bar{A}$ 表示事件 $A$ <strong>不发生</strong>。它们的概率关系是：
                 $$\Pr[A] + Pr[\bar{A}] = 1$$</p>
-                </li>
-                <li>
-                <p><strong>随机变量 (Random Variable)</strong>:
+</li>
+<li>
+<p><strong>随机变量 (Random Variable)</strong>:
                 一个随机变量（比如 $X$）是一个其值由随机事件决定的变量。例如，掷一次骰子的点数就是一个随机变量。</p>
-                </li>
-                <li>
-                <p><strong>期望 (Expectation)</strong>:
+</li>
+<li>
+<p><strong>期望 (Expectation)</strong>:
                 随机变量 $X$ 的期望，记作 $E[X]$，是它的“平均值”。如果我们多次重复这个随机过程， $E[X]$ 就是我们期望得到的 $X$ 的平均值。对于一个取非负整数值的随机变量 $X$，其计算公式为：
                 $$E[X] = \sum_{j=0}^{\infty} j \cdot Pr[X = j]$$
                 这个公式的直观理解是：将每个可能的取值 $j$ 与其出现的概率 $\Pr[X=j]$ 相乘，然后求和。</p>
-                </li>
-                <li>
-                <p><strong>期望的线性性质 (Linearity of Expectation)</strong>:
+</li>
+<li>
+<p><strong>期望的线性性质 (Linearity of Expectation)</strong>:
                 这是随机算法分析中<strong>最重要</strong>的性质之一！无论随机变量 $X$ 和 $Y$ 是否独立，总有：
                 $$E[X+Y] = E[X] + E[Y]$$
                 这个性质可以推广到任意多个随机变量。它允许我们把一个复杂的随机变量分解成若干个简单的随机变量，分别计算它们的期望，再相加得到总的期望。</p>
-                </li>
-                </ul>
-                <h3 id="4-%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90%E4%B8%80%E6%8B%9B%E8%81%98%E9%97%AE%E9%A2%98-the-hiring-problem">4. 案例分析一：招聘问题 (The Hiring Problem)</h3>
-                <p>这是一个非常经典的例子，它完美地展示了从平均情况分析到随机算法的思维转变。</p>
-                <h4 id="41-%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0">4.1 问题描述</h4>
+</li>
+</ul>
+<h3 id="4-%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90%E4%B8%80%E6%8B%9B%E8%81%98%E9%97%AE%E9%A2%98-the-hiring-problem">4. 案例分析一：招聘问题 (The Hiring Problem)</h3>
+<p>这是一个非常经典的例子，它完美地展示了从平均情况分析到随机算法的思维转变。</p>
+<h4 id="41-%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0">4.1 问题描述</h4>
+<ul>
+<li><strong>场景</strong>: 你需要通过猎头公司招聘一名新的办公室助理。</li>
+<li><strong>流程</strong>: 猎头公司每天会推荐一位候选人，总共有 $N$ 位候选人，持续 $N$ 天。你每天都需要面试一位。</li>
+<li><strong>决策</strong>: 面试后，如果你觉得这位候选人比你当前雇佣的助理更优秀，你就会解雇当前的助理，然后雇佣这位新的候选人。如果你觉得不如当前的，就什么都不做。为了简化问题，我们假设没有两位候选人的能力是完全相同的。</li>
+<li><strong>成本</strong>:
                 <ul>
-                <li><strong>场景</strong>: 你需要通过猎头公司招聘一名新的办公室助理。</li>
-                <li><strong>流程</strong>: 猎头公司每天会推荐一位候选人，总共有 $N$ 位候选人，持续 $N$ 天。你每天都需要面试一位。</li>
-                <li><strong>决策</strong>: 面试后，如果你觉得这位候选人比你当前雇佣的助理更优秀，你就会解雇当前的助理，然后雇佣这位新的候选人。如果你觉得不如当前的，就什么都不做。为了简化问题，我们假设没有两位候选人的能力是完全相同的。</li>
-                <li><strong>成本</strong>:
-                <ul>
-                <li>面试成本: $C_i$ (interview cost)，每次面试都要支付，相对较低。</li>
-                <li>雇佣成本: $C_h$ (hiring cost)，每次雇佣新人时支付（包括解雇旧人、办理入职等），非常高。即 $C_i \ll C_h$。</li>
-                </ul>
-                </li>
-                <li><strong>目标</strong>: 我们不分析算法的运行时间，而是分析整个过程的总成本。</li>
-                </ul>
-                <p>假设我们总共面试了 $N$ 个人，雇佣了 $M$ 个人。那么总成本可以表示为：
+<li>面试成本: $C_i$ (interview cost)，每次面试都要支付，相对较低。</li>
+<li>雇佣成本: $C_h$ (hiring cost)，每次雇佣新人时支付（包括解雇旧人、办理入职等），非常高。即 $C_i \ll C_h$。</li>
+</ul>
+</li>
+<li><strong>目标</strong>: 我们不分析算法的运行时间，而是分析整个过程的总成本。</li>
+</ul>
+<p>假设我们总共面试了 $N$ 个人，雇佣了 $M$ 个人。那么总成本可以表示为：
                 <strong>Total Cost</strong> = $N \cdot C_i + M \cdot C_h$
                 由于面试成本 $N \cdot C_i$ 是固定的，我们的分析重点是最小化雇佣成本，也就是最小化雇佣次数 $M$。</p>
-                <h4 id="42-%E6%9C%B4%E7%B4%A0%E7%9A%84%E7%A1%AE%E5%AE%9A%E6%80%A7%E7%AE%97%E6%B3%95">4.2 朴素的确定性算法</h4>
-                <p>这个问题的算法流程是固定的，非常简单：</p>
-                <div class="code-container">
-                <pre><code>// 伪代码
+<h4 id="42-%E6%9C%B4%E7%B4%A0%E7%9A%84%E7%A1%AE%E5%AE%9A%E6%80%A7%E7%AE%97%E6%B3%95">4.2 朴素的确定性算法</h4>
+<p>这个问题的算法流程是固定的，非常简单：</p>
+<div class="code-container">
+<pre><code>// 伪代码
 int Hiring(Candidate C[], int N) {
     // 为了方便，我们假设一个能力值为0的虚拟候选人0作为初始员工
     int best_so_far_id = 0;
     int best_so_far_quality = 0; // 假设质量是数值，越高越好
     
-    for (int i = 1; i <= N; i++) {
+    for (int i = 1; i &lt;= N; i++) {
         // 面试第 i 位候选人，产生面试成本 Ci
         int current_quality = interview(C[i]); 
         
-        if (current_quality > best_so_far_quality) {
+        if (current_quality &gt; best_so_far_quality) {
             // 发现一个更好的人，雇佣他！产生雇佣成本 Ch
             best_so_far_quality = current_quality;
             best_so_far_id = i;
@@ -174,44 +174,44 @@ int Hiring(Candidate C[], int N) {
     return best_so_far_id;
 }
 </code></pre>
-                </div>
-                <p>现在我们来分析这个确定性算法的成本。</p>
-                <ul>
-                <li><strong>最好情况</strong>: 最优秀的候选人第一天就来了。之后再也没有人比他更优秀。我们只雇佣1次。总成本为 $N \cdot C_i + 1 \cdot C_h$。</li>
-                <li><strong>最坏情况</strong>: 候选人按能力<strong>严格递增</strong>的顺序到来。第一天来的最差，第二天来的第二差，...，最后一天来的最好。这样一来，我们每次面试完都会发现新人比旧人好，所以我们每次都会雇佣！总共雇佣了 $N$ 次。
+</div>
+<p>现在我们来分析这个确定性算法的成本。</p>
+<ul>
+<li><strong>最好情况</strong>: 最优秀的候选人第一天就来了。之后再也没有人比他更优秀。我们只雇佣1次。总成本为 $N \cdot C_i + 1 \cdot C_h$。</li>
+<li><strong>最坏情况</strong>: 候选人按能力<strong>严格递增</strong>的顺序到来。第一天来的最差，第二天来的第二差，...，最后一天来的最好。这样一来，我们每次面试完都会发现新人比旧人好，所以我们每次都会雇佣！总共雇佣了 $N$ 次。
                 总成本为 $O(N \cdot C_i + N \cdot C_h)$。由于 $C_h$ 很高，这个成本是无法接受的。</li>
-                </ul>
-                <p>这个最坏情况是由输入的顺序决定的。如果有人能恶意安排候选人的顺序，我们的成本就会非常高。</p>
-                <h4 id="43-%E5%B9%B3%E5%9D%87%E6%83%85%E5%86%B5%E5%88%86%E6%9E%90%E5%81%87%E8%AE%BE%E8%BE%93%E5%85%A5%E6%98%AF%E9%9A%8F%E6%9C%BA%E7%9A%84">4.3 平均情况分析：假设输入是随机的</h4>
-                <p>现在，我们做一个美好的假设：<strong>这 $N$ 位候选人是以完全随机的顺序出现的</strong>。也就是说，任何一种排列顺序的概率都是 $1/N!$。在这种假设下，我们来计算期望的雇佣次数 $E[M]$。</p>
-                <p>我们用一个强大的工具——<strong>指示器随机变量 (Indicator Random Variables)</strong>。</p>
-                <ul>
-                <li>令 $X$ 为我们总的雇佣次数（也就是上面说的 $M$）。</li>
-                <li>我们定义 $N$ 个指示器随机变量 $X_1, X_2, \ldots, X_N$，其中：
-                $$X_i = \begin{cases} 1 & \text{如果第 i 位候选人被雇佣} \\ 0 & \text{如果第 i 位候选人未被雇佣} \end{cases}$$</li>
-                </ul>
-                <p>那么，总的雇佣次数 $X = \sum_{i=1}^{N} X_i$。
+</ul>
+<p>这个最坏情况是由输入的顺序决定的。如果有人能恶意安排候选人的顺序，我们的成本就会非常高。</p>
+<h4 id="43-%E5%B9%B3%E5%9D%87%E6%83%85%E5%86%B5%E5%88%86%E6%9E%90%E5%81%87%E8%AE%BE%E8%BE%93%E5%85%A5%E6%98%AF%E9%9A%8F%E6%9C%BA%E7%9A%84">4.3 平均情况分析：假设输入是随机的</h4>
+<p>现在，我们做一个美好的假设：<strong>这 $N$ 位候选人是以完全随机的顺序出现的</strong>。也就是说，任何一种排列顺序的概率都是 $1/N!$。在这种假设下，我们来计算期望的雇佣次数 $E[M]$。</p>
+<p>我们用一个强大的工具——<strong>指示器随机变量 (Indicator Random Variables)</strong>。</p>
+<ul>
+<li>令 $X$ 为我们总的雇佣次数（也就是上面说的 $M$）。</li>
+<li>我们定义 $N$ 个指示器随机变量 $X_1, X_2, \ldots, X_N$，其中：
+                $$X_i = \begin{cases} 1 &amp; \text{如果第 i 位候选人被雇佣} \\ 0 &amp; \text{如果第 i 位候选人未被雇佣} \end{cases}$$</li>
+</ul>
+<p>那么，总的雇佣次数 $X = \sum_{i=1}^{N} X_i$。
                 根据期望的线性性质，我们有：
                 $$E[X] = E\left[\sum_{i=1}^{N} X_i\right] = \sum_{i=1}^{N} E[X_i]$$</p>
-                <p>对于一个指示器随机变量，它的期望等于它所指示的事件发生的概率。所以：
+<p>对于一个指示器随机变量，它的期望等于它所指示的事件发生的概率。所以：
                 $$E[X_i] = 1 \cdot Pr[\text{第 i 位候选人被雇佣}] + 0 \cdot Pr[\text{第 i 位候选人未被雇佣}] = Pr[\text{第 i 位候选人被雇佣}]$$</p>
-                <p>现在，问题的核心变成了：<strong>第 $i$ 位候选人被雇佣的概率是多少？</strong></p>
-                <p>第 $i$ 位候选人被雇佣的<strong>充要条件</strong>是：他比前面 $i-1$ 位所有候选人都优秀。
+<p>现在，问题的核心变成了：<strong>第 $i$ 位候选人被雇佣的概率是多少？</strong></p>
+<p>第 $i$ 位候选人被雇佣的<strong>充要条件</strong>是：他比前面 $i-1$ 位所有候选人都优秀。
                 由于我们假设所有 $N$ 个候选人的到来顺序是完全随机的，那么对于前 $i$ 位候选人，他们的任意排列也是完全随机的。在这 $i$ 个候选人中，<strong>最优秀的那个人</strong>出现在第1位、第2位、...、第 $i$ 位的概率是均等的，都是 $1/i$。</p>
-                <p>只有当这 $i$ 个人中最优秀的那个人恰好出现在第 $i$ 个位置时，第 $i$ 位候选人才会被雇佣。
+<p>只有当这 $i$ 个人中最优秀的那个人恰好出现在第 $i$ 个位置时，第 $i$ 位候选人才会被雇佣。
                 因此，$\Pr[\text{第 i 位候选人被雇佣}] = \frac{1}{i}$。</p>
-                <p>现在我们可以计算总的期望雇佣次数了：
+<p>现在我们可以计算总的期望雇佣次数了：
                 $$E[X] = \sum_{i=1}^{N} E[X_i] = \sum_{i=1}^{N} Pr[\text{第 i 位候选人被雇佣}] = \sum_{i=1}^{N} \frac{1}{i}$$</p>
-                <p>这个级数 $\sum\limits_{i=1}^{N} \frac{1}{i}$ 被称为<strong>调和级数 (Harmonic Series)</strong>，记作 $H_N$。它有一个非常著名的近似：
+<p>这个级数 $\sum\limits_{i=1}^{N} \frac{1}{i}$ 被称为<strong>调和级数 (Harmonic Series)</strong>，记作 $H_N$。它有一个非常著名的近似：
                 $$H_N = \ln(N) + \gamma + O(1/N)$$其中 $\gamma \approx 0.577$ 是欧拉-马歇罗尼常数。
                 $E[X] \approx \ln(N)$。</p>
-                <p>在随机输入的假设下，期望总成本为 $$O(N \cdot C_i + \ln(N) \cdot C_h)$$
+<p>在随机输入的假设下，期望总成本为 $$O(N \cdot C_i + \ln(N) \cdot C_h)$$
                 这是一个非常好的结果！例如，如果有10000个候选人，$\ln(10000) \approx 9.2$，我们平均只需要雇佣9-10次，而不是最坏情况的10000次。</p>
-                <p>但是，这个分析的致命弱点在于它依赖“输入是随机的”这个假设。</p>
-                <h4 id="44-%E9%9A%8F%E6%9C%BA%E7%AE%97%E6%B3%95%E8%87%AA%E5%B7%B1%E5%88%9B%E9%80%A0%E9%9A%8F%E6%9C%BA%E6%80%A7">4.4 随机算法：自己创造随机性！</h4>
-                <p>现在我们进入随机算法的领域。我们不再祈祷输入的顺序是随机的，而是<strong>我们自己动手，在算法内部将输入序列随机化</strong>。</p>
-                <div class="code-container">
-                <pre><code>// 伪代码
+<p>但是，这个分析的致命弱点在于它依赖“输入是随机的”这个假设。</p>
+<h4 id="44-%E9%9A%8F%E6%9C%BA%E7%AE%97%E6%B3%95%E8%87%AA%E5%B7%B1%E5%88%9B%E9%80%A0%E9%9A%8F%E6%9C%BA%E6%80%A7">4.4 随机算法：自己创造随机性！</h4>
+<p>现在我们进入随机算法的领域。我们不再祈祷输入的顺序是随机的，而是<strong>我们自己动手，在算法内部将输入序列随机化</strong>。</p>
+<div class="code-container">
+<pre><code>// 伪代码
 int RandomizedHiring(Candidate C[], int N) {
     // 关键步骤：在开始之前，随机打乱候选人数组C！
     RandomlyPermute(C); // 这步是新加的
@@ -220,9 +220,9 @@ int RandomizedHiring(Candidate C[], int N) {
     int best_so_far_id = 0;
     int best_so_far_quality = 0;
     
-    for (int i = 1; i <= N; i++) {
+    for (int i = 1; i &lt;= N; i++) {
         int current_quality = interview(C[i]);
-        if (current_quality > best_so_far_quality) {
+        if (current_quality &gt; best_so_far_quality) {
             best_so_far_quality = current_quality;
             best_so_far_id = i;
             hire(C[i]);
@@ -231,25 +231,25 @@ int RandomizedHiring(Candidate C[], int N) {
     return best_so_far_id;
 }
 </code></pre>
-                </div>
-                <p>我们只是在最开始增加了一步 <code>RandomlyPermute</code>。这一步的意义是革命性的：</p>
-                <ul>
-                <li><strong>我们不再依赖于输入的分布</strong>。无论输入的候选人顺序是按能力递增、递减还是任何其他恶意构造的顺序，经过我们第一步的随机打乱后，它都会变成一个随机排列。</li>
-                <li>因此，对于<strong>任何输入</strong>，后续算法所面对的序列都是随机的。这意味着我们刚才的平均情况分析，现在变成了对这个随机算法在<strong>任何输入下</strong>的<strong>期望性能分析</strong>。</li>
-                </ul>
-                <p>随机化这一步，将“运气”从外部世界拉到了我们自己手中。我们保证了算法的期望性能，使其不再受恶意输入的攻击。</p>
-                <h4 id="45-%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E9%9A%8F%E6%9C%BA%E6%8E%92%E5%88%97">4.5 如何实现随机排列？</h4>
-                <p>那么，<code>RandomlyPermute</code> 该如何实现呢？</p>
-                <p><strong>方法一：基于排序的排列 (Permute-By-Sorting)</strong></p>
-                <p>这是一个很直观的方法：</p>
-                <ol>
-                <li>为数组中的每个元素 $A[i]$ 分配一个随机的优先级 $P[i]$。</li>
-                <li>根据这些优先级对数组 $A$ 进行排序。</li>
-                </ol>
-                <div class="code-container">
-                <pre><code>// 伪代码
+</div>
+<p>我们只是在最开始增加了一步 <code>RandomlyPermute</code>。这一步的意义是革命性的：</p>
+<ul>
+<li><strong>我们不再依赖于输入的分布</strong>。无论输入的候选人顺序是按能力递增、递减还是任何其他恶意构造的顺序，经过我们第一步的随机打乱后，它都会变成一个随机排列。</li>
+<li>因此，对于<strong>任何输入</strong>，后续算法所面对的序列都是随机的。这意味着我们刚才的平均情况分析，现在变成了对这个随机算法在<strong>任何输入下</strong>的<strong>期望性能分析</strong>。</li>
+</ul>
+<p>随机化这一步，将“运气”从外部世界拉到了我们自己手中。我们保证了算法的期望性能，使其不再受恶意输入的攻击。</p>
+<h4 id="45-%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E9%9A%8F%E6%9C%BA%E6%8E%92%E5%88%97">4.5 如何实现随机排列？</h4>
+<p>那么，<code>RandomlyPermute</code> 该如何实现呢？</p>
+<p><strong>方法一：基于排序的排列 (Permute-By-Sorting)</strong></p>
+<p>这是一个很直观的方法：</p>
+<ol>
+<li>为数组中的每个元素 $A[i]$ 分配一个随机的优先级 $P[i]$。</li>
+<li>根据这些优先级对数组 $A$ 进行排序。</li>
+</ol>
+<div class="code-container">
+<pre><code>// 伪代码
 void PermuteBySorting(Element A[], int N) {
-    for (int i = 1; i <= N; i++) {
+    for (int i = 1; i &lt;= N; i++) {
         // 分配一个足够大的范围内的随机数以避免冲突
         A[i].priority = rand() % (N*N*N);
     }
@@ -257,73 +257,73 @@ void PermuteBySorting(Element A[], int N) {
     Sort(A, based_on_priority);
 }
 </code></pre>
-                </div>
-                <p><strong>为什么优先级范围是 $N^3$？</strong> 这是为了极大地降低优先级冲突的概率。根据生日悖论，如果我们在 $M$ 个数中随机选 $N$ 个数，当 $N \approx \sqrt{M}$ 时，冲突概率就会显著上升。为了让冲突概率非常小（例如小于 $1/N$），我们需要 $M \gg N^2$。选择 $N^3$ 是一个比较保险和方便的选择。如果所有优先级都是唯一的，这个方法可以产生一个<strong>均匀随机排列</strong>（即每种排列出现的概率都是 $1/N!$）。</p>
-                <p><strong>方法二：Fisher-Yates (或 Knuth) Shuffle</strong></p>
-                <p>这是一个更高效、原地（in-place）的算法，时间复杂度为 $O(N)$。
+</div>
+<p><strong>为什么优先级范围是 $N^3$？</strong> 这是为了极大地降低优先级冲突的概率。根据生日悖论，如果我们在 $M$ 个数中随机选 $N$ 个数，当 $N \approx \sqrt{M}$ 时，冲突概率就会显著上升。为了让冲突概率非常小（例如小于 $1/N$），我们需要 $M \gg N^2$。选择 $N^3$ 是一个比较保险和方便的选择。如果所有优先级都是唯一的，这个方法可以产生一个<strong>均匀随机排列</strong>（即每种排列出现的概率都是 $1/N!$）。</p>
+<p><strong>方法二：Fisher-Yates (或 Knuth) Shuffle</strong></p>
+<p>这是一个更高效、原地（in-place）的算法，时间复杂度为 $O(N)$。
                 思想是：从后往前（或从前往后）遍历数组，对于当前位置 $i$，从前面的 $i$ 个元素中（包括自己）随机选一个，与当前元素交换。</p>
-                <div class="code-container">
-                <pre><code class="language-cpp">// C++ 实现 Fisher-Yates Shuffle
+<div class="code-container">
+<pre><code class="language-cpp">// C++ 实现 Fisher-Yates Shuffle
 #include &lt;vector&gt;
 #include &lt;random&gt;
 #include &lt;algorithm&gt; // for std::swap
 
 template&lt;typename T&gt;
-void RandomlyPermute(std::vector&lt;T&gt;& arr) {
+void RandomlyPermute(std::vector&lt;T&gt;&amp; arr) {
     int n = arr.size();
     // 使用更好的随机数生成器
     std::random_device rd;
     std::mt19937 gen(rd());
 
-    for (int i = n - 1; i > 0; --i) {
+    for (int i = n - 1; i &gt; 0; --i) {
         std::uniform_int_distribution&lt;&gt; distrib(0, i);
         int j = distrib(gen); // 在 [0, i] 范围内随机选一个索引
         std::swap(arr[i], arr[j]);
     }
 }
 </code></pre>
-                </div>
-                <p>这个算法是目前生成随机排列的标准做法，因为它既高效又保证了均匀性。</p>
-                <h3 id="5-%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90%E4%BA%8C%E5%9C%A8%E7%BA%BF%E6%8B%9B%E8%81%98%E9%97%AE%E9%A2%98-online-hiring-problem--secretary-problem">5. 案例分析二：在线招聘问题 (Online Hiring Problem / Secretary Problem)</h3>
-                <p>现在我们来看一个招聘问题的变种，它更具挑战性，也是一个非常著名的决策问题。</p>
-                <h4 id="51-%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0">5.1 问题描述</h4>
-                <ul>
-                <li><strong>规则变化</strong>: 你仍然要从 $N$ 个随机排列的候选人中选出最好的一个。</li>
-                <li><strong>核心约束</strong>:
+</div>
+<p>这个算法是目前生成随机排列的标准做法，因为它既高效又保证了均匀性。</p>
+<h3 id="5-%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90%E4%BA%8C%E5%9C%A8%E7%BA%BF%E6%8B%9B%E8%81%98%E9%97%AE%E9%A2%98-online-hiring-problem--secretary-problem">5. 案例分析二：在线招聘问题 (Online Hiring Problem / Secretary Problem)</h3>
+<p>现在我们来看一个招聘问题的变种，它更具挑战性，也是一个非常著名的决策问题。</p>
+<h4 id="51-%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0">5.1 问题描述</h4>
+<ul>
+<li><strong>规则变化</strong>: 你仍然要从 $N$ 个随机排列的候选人中选出最好的一个。</li>
+<li><strong>核心约束</strong>:
                 <ol>
-                <li>你只能雇佣<strong>一个人</strong>。</li>
-                <li>对于每个候选人，面试后你必须<strong>立即决定</strong>是否雇佣他。如果决定不雇佣，你以后就再也不能回头选择他了。</li>
-                <li>如果你雇佣了一个人，过程立刻结束。</li>
-                </ol>
-                </li>
-                <li><strong>目标</strong>: 设计一个策略，使得你成功雇佣到<strong>最好的那一位</strong>候选人的概率最大化。</li>
-                </ul>
-                <p>这是一个典型的“在线”问题，充满了不确定性。如果你太早做决定，可能会选到一个 mediocre 的人；如果你太晚做决定，可能最好的那个人已经被你错过了。</p>
-                <h4 id="52-%E6%9C%80%E4%BD%B3%E7%AD%96%E7%95%A5">5.2 最佳策略</h4>
-                <p>一个非常著名且效果惊人的策略如下：</p>
-                <ol>
-                <li>确定一个参数 $k$，其中 $1 &lt; k &lt; N$。</li>
-                <li><strong>考察阶段</strong>: 面试前 $k$ 位候选人，但<strong>一律不雇佣</strong>。只记住这 $k$ 个人中能力最强的人，我们称他的能力值为 <code>best_quality_in_first_k</code>。</li>
-                <li><strong>选择阶段</strong>: 从第 $k+1$ 位候选人开始，只要遇到一个比 <code>best_quality_in_first_k</code> 更优秀的人，就<strong>立即雇佣他</strong>，然后停止过程。</li>
-                <li>如果面试完所有 $N$ 个人都没有找到比 <code>best_quality_in_first_k</code> 更好的人，说明最好的候选人就在前 $k$ 个人当中（我们已经错过了），那么策略失败。为了完整性，我们只能被迫雇佣第 $N$ 个人。</li>
-                </ol>
-                <div class="code-container">
-                <pre><code>// 伪代码
+<li>你只能雇佣<strong>一个人</strong>。</li>
+<li>对于每个候选人，面试后你必须<strong>立即决定</strong>是否雇佣他。如果决定不雇佣，你以后就再也不能回头选择他了。</li>
+<li>如果你雇佣了一个人，过程立刻结束。</li>
+</ol>
+</li>
+<li><strong>目标</strong>: 设计一个策略，使得你成功雇佣到<strong>最好的那一位</strong>候选人的概率最大化。</li>
+</ul>
+<p>这是一个典型的“在线”问题，充满了不确定性。如果你太早做决定，可能会选到一个 mediocre 的人；如果你太晚做决定，可能最好的那个人已经被你错过了。</p>
+<h4 id="52-%E6%9C%80%E4%BD%B3%E7%AD%96%E7%95%A5">5.2 最佳策略</h4>
+<p>一个非常著名且效果惊人的策略如下：</p>
+<ol>
+<li>确定一个参数 $k$，其中 $1 &lt; k &lt; N$。</li>
+<li><strong>考察阶段</strong>: 面试前 $k$ 位候选人，但<strong>一律不雇佣</strong>。只记住这 $k$ 个人中能力最强的人，我们称他的能力值为 <code>best_quality_in_first_k</code>。</li>
+<li><strong>选择阶段</strong>: 从第 $k+1$ 位候选人开始，只要遇到一个比 <code>best_quality_in_first_k</code> 更优秀的人，就<strong>立即雇佣他</strong>，然后停止过程。</li>
+<li>如果面试完所有 $N$ 个人都没有找到比 <code>best_quality_in_first_k</code> 更好的人，说明最好的候选人就在前 $k$ 个人当中（我们已经错过了），那么策略失败。为了完整性，我们只能被迫雇佣第 $N$ 个人。</li>
+</ol>
+<div class="code-container">
+<pre><code>// 伪代码
 int OnlineHiring(Candidate C[], int N, int k) {
     // 假设 C 已经是随机排列
     int best_quality_in_first_k = -1; // 假设质量为非负数
     // 1. 考察阶段
-    for (int i = 1; i <= k; i++) {
+    for (int i = 1; i &lt;= k; i++) {
         int quality = interview(C[i]);
-        if (quality > best_quality_in_first_k) {
+        if (quality &gt; best_quality_in_first_k) {
             best_quality_in_first_k = quality;
         }
     }
     
     // 2. 选择阶段
-    for (int i = k + 1; i <= N; i++) {
+    for (int i = k + 1; i &lt;= N; i++) {
         int quality = interview(C[i]);
-        if (quality > best_quality_in_first_k) {
+        if (quality &gt; best_quality_in_first_k) {
             return hire(C[i]); // 立即雇佣并返回
         }
     }
@@ -332,155 +332,155 @@ int OnlineHiring(Candidate C[], int N, int k) {
     return hire(C[N]);
 }
 </code></pre>
-                </div>
-                <p>现在的问题是：</p>
-                <ol>
-                <li>对于一个给定的 $k$，我们成功雇佣到最佳人选的概率是多少？</li>
-                <li>如何选择最优的 $k$ 来最大化这个概率？</li>
-                </ol>
-                <h4 id="53-%E6%88%90%E5%8A%9F%E6%A6%82%E7%8E%87%E5%88%86%E6%9E%90">5.3 成功概率分析</h4>
-                <ul>
-                <li>令 $S$ 表示我们成功雇佣到最佳人选的事件。</li>
-                <li>令 $S_i$ 表示“第 $i$ 位候选人是最佳人选，并且我们成功雇佣了他”的事件。</li>
-                <li>显然，$S = \bigcup_{i=k+1}^{N} S_i$，因为如果最佳人选在前 $k$ 位，我们肯定会错过他。这些 $S_i$ 事件是互斥的（最佳人选只有一个），所以 $\Pr[S] = \sum\limits_{i=k+1}^{N} \Pr[S_i]$。</li>
-                </ul>
-                <p>现在我们来计算 $\Pr[S_i]$。事件 $S_i$ 发生需要两个条件同时成立：</p>
-                <ul>
-                <li><strong>事件 A</strong>: 第 $i$ 位候选人是所有 $N$ 个人中最好的。</li>
-                <li><strong>事件 B</strong>: 我们没有在第 $k+1$ 到 $i-1$ 位之间雇佣任何人。</li>
-                </ul>
-                <p>这两个事件是<strong>独立</strong>的。为什么？</p>
-                <ul>
-                <li>事件 A 的发生，只取决于所有 $N$ 个人的能力值的排列，具体来说，就是能力值最高的那个人被放在了第 $i$ 个位置。</li>
-                <li>事件 B 的发生，取决于在<strong>前 $i-1$ 个人中</strong>，能力最强的那个人是否出现在前 $k$ 个位置。</li>
-                <li>事件 A 的信息（第 $i$ 个人是全局最佳）并不影响前 $i-1$ 个人的内部相对排序。所以 A 和 B 独立。</li>
-                </ul>
-                <p>我们来计算它们的概率：</p>
-                <ul>
-                <li>$Pr[A]$: 由于是随机排列，最佳人选出现在任何位置的概率都是一样的。所以 $\Pr[A] = \frac{1}{N}$。</li>
-                <li>$Pr[B]$: 我们没有在 $k+1$ 到 $i-1$ 之间雇佣人，意味着从第 $k+1$ 位到第 $i-1$ 位的所有候选人，能力值都<strong>没有超过</strong>前 $k$ 位的最高水平。这等价于说，<strong>在前 $i-1$ 个人中，最优秀的那个人出现在了前 $k$ 个位置</strong>。因为在这 $i-1$ 个位置中，那个最优秀的人是随机分布的，所以他出现在前 $k$ 个位置的概率是 $\frac{k}{i-1}$。</li>
-                </ul>
-                <p>所以，$$\Pr[S_i] = \Pr[A \cap B] = \Pr[A] \cdot \Pr[B] = \frac{1}{N} \cdot \frac{k}{i-1}$$</p>
-                <p>现在我们可以计算总的成功概率了：
+</div>
+<p>现在的问题是：</p>
+<ol>
+<li>对于一个给定的 $k$，我们成功雇佣到最佳人选的概率是多少？</li>
+<li>如何选择最优的 $k$ 来最大化这个概率？</li>
+</ol>
+<h4 id="53-%E6%88%90%E5%8A%9F%E6%A6%82%E7%8E%87%E5%88%86%E6%9E%90">5.3 成功概率分析</h4>
+<ul>
+<li>令 $S$ 表示我们成功雇佣到最佳人选的事件。</li>
+<li>令 $S_i$ 表示“第 $i$ 位候选人是最佳人选，并且我们成功雇佣了他”的事件。</li>
+<li>显然，$S = \bigcup_{i=k+1}^{N} S_i$，因为如果最佳人选在前 $k$ 位，我们肯定会错过他。这些 $S_i$ 事件是互斥的（最佳人选只有一个），所以 $\Pr[S] = \sum\limits_{i=k+1}^{N} \Pr[S_i]$。</li>
+</ul>
+<p>现在我们来计算 $\Pr[S_i]$。事件 $S_i$ 发生需要两个条件同时成立：</p>
+<ul>
+<li><strong>事件 A</strong>: 第 $i$ 位候选人是所有 $N$ 个人中最好的。</li>
+<li><strong>事件 B</strong>: 我们没有在第 $k+1$ 到 $i-1$ 位之间雇佣任何人。</li>
+</ul>
+<p>这两个事件是<strong>独立</strong>的。为什么？</p>
+<ul>
+<li>事件 A 的发生，只取决于所有 $N$ 个人的能力值的排列，具体来说，就是能力值最高的那个人被放在了第 $i$ 个位置。</li>
+<li>事件 B 的发生，取决于在<strong>前 $i-1$ 个人中</strong>，能力最强的那个人是否出现在前 $k$ 个位置。</li>
+<li>事件 A 的信息（第 $i$ 个人是全局最佳）并不影响前 $i-1$ 个人的内部相对排序。所以 A 和 B 独立。</li>
+</ul>
+<p>我们来计算它们的概率：</p>
+<ul>
+<li>$Pr[A]$: 由于是随机排列，最佳人选出现在任何位置的概率都是一样的。所以 $\Pr[A] = \frac{1}{N}$。</li>
+<li>$Pr[B]$: 我们没有在 $k+1$ 到 $i-1$ 之间雇佣人，意味着从第 $k+1$ 位到第 $i-1$ 位的所有候选人，能力值都<strong>没有超过</strong>前 $k$ 位的最高水平。这等价于说，<strong>在前 $i-1$ 个人中，最优秀的那个人出现在了前 $k$ 个位置</strong>。因为在这 $i-1$ 个位置中，那个最优秀的人是随机分布的，所以他出现在前 $k$ 个位置的概率是 $\frac{k}{i-1}$。</li>
+</ul>
+<p>所以，$$\Pr[S_i] = \Pr[A \cap B] = \Pr[A] \cdot \Pr[B] = \frac{1}{N} \cdot \frac{k}{i-1}$$</p>
+<p>现在我们可以计算总的成功概率了：
                 $$\Pr[S] = \sum_{i=k+1}^{N} \Pr[S_i] = \sum_{i=k+1}^{N} \frac{1}{N} \cdot \frac{k}{i-1} = \frac{k}{N} \sum_{i=k+1}^{N} \frac{1}{i-1}$$
                 为了方便，我们换元，令 $j = i-1$，则求和变为：
                 $$\Pr[S] = \frac{k}{N} \sum_{j=k}^{N-1} \frac{1}{j}$$</p>
-                <h4 id="54-%E6%B1%82%E8%A7%A3%E4%B8%8E%E8%AF%81%E6%98%8E">5.4 求解与证明</h4>
-                <p><strong>课堂Discussion: 证明积分不等式</strong></p>
-                <p>我们需要用积分来近似这个求和 $\sum_{j=k}^{N-1} \frac{1}{j}$。
+<h4 id="54-%E6%B1%82%E8%A7%A3%E4%B8%8E%E8%AF%81%E6%98%8E">5.4 求解与证明</h4>
+<p><strong>课堂Discussion: 证明积分不等式</strong></p>
+<p>我们需要用积分来近似这个求和 $\sum_{j=k}^{N-1} \frac{1}{j}$。
                 考虑函数 $f(x) = 1/x$。它是一个递减函数。</p>
-                <div class="mermaid">
+<div class="mermaid">
                 graph TD
                     subgraph 积分与求和
-                        A[积分是曲线下面积] --> B[求和是矩形面积之和];
+                        A[积分是曲线下面积] --&gt; B[求和是矩形面积之和];
                     end
                 </div>
-                <p>我们可以用矩形面积来界定积分面积：</p>
-                <ul>
-                <li><strong>下界</strong>: 对于区间 $[j, j+1]$，矩形高度为 $1/(j+1)$，面积为 $1/(j+1)$。求和 $\sum_{j=k}^{N-1} \frac{1}{j}$ 比积分 $\int_{k}^{N} \frac{1}{x} dx$ 要大。更准确地说，$\sum_{j=k}^{N-1} \frac{1}{j} = \frac{1}{k} + \sum_{j=k+1}^{N-1} \frac{1}{j}$。</li>
-                <li><strong>上界</strong>: 对于区间 $[j-1, j]$，矩形高度为 $1/(j-1)$，面积为 $1/(j-1)$。求和 $\sum_{j=k}^{N-1} \frac{1}{j}$ 比积分 $\int_{k-1}^{N-1} \frac{1}{x} dx$ 要小。</li>
-                </ul>
-                <p>一个更紧凑的界定是：
+<p>我们可以用矩形面积来界定积分面积：</p>
+<ul>
+<li><strong>下界</strong>: 对于区间 $[j, j+1]$，矩形高度为 $1/(j+1)$，面积为 $1/(j+1)$。求和 $\sum_{j=k}^{N-1} \frac{1}{j}$ 比积分 $\int_{k}^{N} \frac{1}{x} dx$ 要大。更准确地说，$\sum_{j=k}^{N-1} \frac{1}{j} = \frac{1}{k} + \sum_{j=k+1}^{N-1} \frac{1}{j}$。</li>
+<li><strong>上界</strong>: 对于区间 $[j-1, j]$，矩形高度为 $1/(j-1)$，面积为 $1/(j-1)$。求和 $\sum_{j=k}^{N-1} \frac{1}{j}$ 比积分 $\int_{k-1}^{N-1} \frac{1}{x} dx$ 要小。</li>
+</ul>
+<p>一个更紧凑的界定是：
                 $$\int_{k}^{N} \frac{1}{x} dx \le \sum_{j=k}^{N-1} \frac{1}{j} \le \int_{k-1}^{N-1} \frac{1}{x} dx$$</p>
-                <p>计算积分：
+<p>计算积分：
                 $$\int \frac{1}{x} dx = \ln(x)$$
                 所以，
                 $$\ln(N) - \ln(k) \le \sum_{j=k}^{N-1} \frac{1}{j} \le \ln(N-1) - \ln(k-1)$$
                 $$\ln(\frac{N}{k}) \le \sum_{j=k}^{N-1} \frac{1}{j} \le \ln(\frac{N-1}{k-1})$$</p>
-                <p>代回到 $\Pr[S]$ 的表达式中，我们得到：
+<p>代回到 $\Pr[S]$ 的表达式中，我们得到：
                 $$\frac{k}{N} \ln\left(\frac{N}{k}\right) \le \Pr[S] \le \frac{k}{N} \ln\left(\frac{N-1}{k-1}\right)$$</p>
-                <p><strong>课堂Discussion: 找到最优的 $k$</strong></p>
-                <p>我们的目标是最大化成功概率 $\Pr[S]$。当 $N$ 很大时，上下界非常接近，我们可以近似地认为 $\Pr[S] \approx \frac{k}{N} \ln(\frac{N}{k})$。</p>
-                <p>我们令 $x = k/N$，问题就变成了求函数 $f(x) = x \ln(\frac{1}{x}) = -x \ln(x)$ 在 $(0, 1)$ 区间上的最大值。
+<p><strong>课堂Discussion: 找到最优的 $k$</strong></p>
+<p>我们的目标是最大化成功概率 $\Pr[S]$。当 $N$ 很大时，上下界非常接近，我们可以近似地认为 $\Pr[S] \approx \frac{k}{N} \ln(\frac{N}{k})$。</p>
+<p>我们令 $x = k/N$，问题就变成了求函数 $f(x) = x \ln(\frac{1}{x}) = -x \ln(x)$ 在 $(0, 1)$ 区间上的最大值。
                 我们使用微积分来求解：
                 求导数 $f'(x)$:
                 $$f'(x) = \frac{d}{dx}(-x \ln x) = -1 \cdot \ln x - x \cdot \frac{1}{x} = -\ln x - 1$$
                 令导数等于0，求极值点：
                 $$f'(x) = 0 \implies -\ln x - 1 = 0 \implies \ln x = -1 \implies x = e^{-1} = \frac{1}{e}$$</p>
-                <p>所以当 $x = k/N = 1/e$ 时，函数取最大值。
+<p>所以当 $x = k/N = 1/e$ 时，函数取最大值。
                 这意味着最优的策略是选择 $$k \approx N/e$$
                 将 $x=1/e$ 代回 $f(x)$，我们得到最大概率：
                 $$\Pr[S]_{max} \approx f(1/e) = -\frac{1}{e} \ln(\frac{1}{e}) = -\frac{1}{e} (-1) = \frac{1}{e}$$</p>
-                <p><strong>结论</strong>:</p>
+<p><strong>结论</strong>:</p>
+<ul>
+<li>最优策略是先拒绝前 $N/e$ 的候选人，然后选择第一个比他们都好的人。</li>
+<li>这个策略能成功雇佣到最佳人选的概率约为 $1/e \approx 0.37$。</li>
+<li>这是一个非常惊人的结果！无论 $N$ 有多大（100人还是100万人），我们都有大约 37% 的机会选到最好的那个人。</li>
+</ul>
+<h3 id="6-%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90%E4%B8%89%E9%9A%8F%E6%9C%BA%E5%8C%96%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F-randomized-quicksort">6. 案例分析三：随机化快速排序 (Randomized Quicksort)</h3>
+<p>快速排序是大家非常熟悉的算法，但它的确定性版本有一个致命弱点。</p>
+<h4 id="61-%E7%A1%AE%E5%AE%9A%E6%80%A7%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%9A%84%E9%97%AE%E9%A2%98">6.1 确定性快速排序的问题</h4>
+<ul>
+<li><strong>工作原理</strong>: 选择一个主元 (pivot)，将数组划分为小于主元和大于主元两部分，然后递归地对两部分进行排序。</li>
+<li><strong>性能</strong>:
                 <ul>
-                <li>最优策略是先拒绝前 $N/e$ 的候选人，然后选择第一个比他们都好的人。</li>
-                <li>这个策略能成功雇佣到最佳人选的概率约为 $1/e \approx 0.37$。</li>
-                <li>这是一个非常惊人的结果！无论 $N$ 有多大（100人还是100万人），我们都有大约 37% 的机会选到最好的那个人。</li>
-                </ul>
-                <h3 id="6-%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90%E4%B8%89%E9%9A%8F%E6%9C%BA%E5%8C%96%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F-randomized-quicksort">6. 案例分析三：随机化快速排序 (Randomized Quicksort)</h3>
-                <p>快速排序是大家非常熟悉的算法，但它的确定性版本有一个致命弱点。</p>
-                <h4 id="61-%E7%A1%AE%E5%AE%9A%E6%80%A7%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E7%9A%84%E9%97%AE%E9%A2%98">6.1 确定性快速排序的问题</h4>
-                <ul>
-                <li><strong>工作原理</strong>: 选择一个主元 (pivot)，将数组划分为小于主元和大于主元两部分，然后递归地对两部分进行排序。</li>
-                <li><strong>性能</strong>:
-                <ul>
-                <li><strong>平均情况</strong>: $O(N \log N)$，前提是输入是随机排列的。</li>
-                <li><strong>最坏情况</strong>: $O(N^2)$。当每次选择的主元都极度不平衡时发生。例如，如果对一个<strong>已经排好序</strong>的数组，每次都选择第一个或最后一个元素作为主元，那么每次划分都会产生一个大小为0和一个大小为 $n-1$ 的子问题，导致递归深度为 $N$，时间复杂度为 $O(N^2)$。</li>
-                </ul>
-                </li>
-                </ul>
-                <p>同样，这个问题又回到了算法性能依赖于输入上。</p>
-                <h4 id="62-%E9%9A%8F%E6%9C%BA%E5%8C%96">6.2 随机化</h4>
-                <p>如何解决这个问题？很简单，<strong>随机选择主元</strong>！
+<li><strong>平均情况</strong>: $O(N \log N)$，前提是输入是随机排列的。</li>
+<li><strong>最坏情况</strong>: $O(N^2)$。当每次选择的主元都极度不平衡时发生。例如，如果对一个<strong>已经排好序</strong>的数组，每次都选择第一个或最后一个元素作为主元，那么每次划分都会产生一个大小为0和一个大小为 $n-1$ 的子问题，导致递归深度为 $N$，时间复杂度为 $O(N^2)$。</li>
+</ul>
+</li>
+</ul>
+<p>同样，这个问题又回到了算法性能依赖于输入上。</p>
+<h4 id="62-%E9%9A%8F%E6%9C%BA%E5%8C%96">6.2 随机化</h4>
+<p>如何解决这个问题？很简单，<strong>随机选择主元</strong>！
                 在划分之前，我们不再固定地选择第一个或最后一个元素，而是在当前子数组中<strong>随机均匀地</strong>选择一个元素作为主元。</p>
-                <p>这个小小的改动带来了巨大的好处：</p>
-                <ul>
-                <li>现在，对于<strong>任何输入</strong>（即使是已经排好序的），由于我们的主元是随机选择的，我们期望每次划分都比较平衡。</li>
-                <li>我们不再有特定的“最坏情况输入”，因为算法的表现只取决于内部的随机数生成器，而不是输入数据的排列。</li>
-                <li>随机化快速排序的<strong>期望运行时间</strong>是 $O(N \log N)$。</li>
-                </ul>
-                <h4 id="63-%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90">6.3 性能分析</h4>
-                <p>我们用一个稍微不同的角度来分析，这个角度在幻灯片中被提及。</p>
-                <ul>
-                <li>
-                <p><strong>中心分割点 (Central Splitter)</strong>: 我们定义一个“好”的主元为“中心分割点”。一个主元是中心分割点，如果它划分后的两个子数组，大小都<strong>至少是原数组大小的 1/4</strong>。</p>
-                <ul>
-                <li>在排好序的数组中，哪些元素是中心分割点？中间那 $N/2$ 个元素（从第 N/4 个到第 3N/4 个）。</li>
-                <li>因此，如果我们随机选一个主元，选到中心分割点的概率是 $\frac{N/2}{N} = \frac{1}{2}$。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>找到中心分割点的期望次数</strong>:</p>
-                <ul>
-                <li>这就像抛硬币，每次有 $1/2$ 的概率正面朝上（找到中心分割点）。</li>
-                <li>这是一个几何分布。为了得到一次成功，期望的试验次数是 $1/p$。在这里，$p=1/2$，所以期望次数是 $1/(1/2) = 2$ 次。</li>
-                <li><strong>结论</strong>: 我们期望只需要进行2次划分（每次成本 $O(n)$）就能找到一个中心分割点，得到一个“好”的划分。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>期望运行时间分析</strong>:</p>
-                <ul>
-                <li>当我们得到一个中心分割点时，最坏的情况是划分成 $1/4$ 和 $3/4$。</li>
-                <li>递归的深度将由最长的路径决定，即每次都沿着 $3/4$ 的分支走。</li>
-                <li>递归树的深度为 $\log_{4/3}(N) = O(\log N)$。</li>
-                <li>在递归树的每一层，所有子问题的总大小是 $O(N)$，所以每一层的总划分成本是 $O(N)$。</li>
-                <li>总的期望运行时间 = (层数) $\times$ (每层成本) = $O(\log N) \cdot O(N) = O(N \log N)$。</li>
-                </ul>
-                </li>
-                </ul>
-                <p>这个分析虽然不是最严格的，但它清晰地展示了随机化如何保证了划分的平衡性（在期望意义上），从而保证了 $O(N \log N)$ 的高效性能。</p>
-                <h3 id="7-%E6%8B%93%E5%B1%95%E5%86%85%E5%AE%B9%E8%B7%B3%E8%A1%A8-skip-lists">7. 拓展内容：跳表 (Skip Lists)</h3>
-                <p>随机化不仅能优化现有算法，还能创造出全新的、优雅的数据结构。<strong>跳表 (Skip List)</strong> 就是一个完美的例子。</p>
-                <h4 id="71-%E5%8A%A8%E6%9C%BA">7.1 动机</h4>
-                <ul>
-                <li><strong>有序链表</strong>: 插入简单，但查找慢，平均 $O(N)$。</li>
-                <li><strong>平衡二叉搜索树 (如AVL树, 红黑树)</strong>: 查找、插入、删除都是 $O(\log N)$，但实现复杂，需要旋转等操作来维持平衡。</li>
-                </ul>
-                <p>有没有一种数据结构，能像平衡树一样快，但实现起来像链表一样简单？跳表就是答案。</p>
-                <h4 id="72-%E7%BB%93%E6%9E%84">7.2 结构</h4>
-                <p>跳表是在有序链表的基础上构建的。它是一个多层的链表结构：</p>
-                <ul>
-                <li><strong>第0层</strong>: 一个包含所有元素的标准有序链表。</li>
-                <li><strong>第1层</strong>: 一个包含第0层部分元素的“快速通道”链表。</li>
-                <li><strong>第i层</strong>: 包含第 $i-1$ 层部分元素的“更快的通道”链表。</li>
-                </ul>
-                <div class="mermaid">
+<p>这个小小的改动带来了巨大的好处：</p>
+<ul>
+<li>现在，对于<strong>任何输入</strong>（即使是已经排好序的），由于我们的主元是随机选择的，我们期望每次划分都比较平衡。</li>
+<li>我们不再有特定的“最坏情况输入”，因为算法的表现只取决于内部的随机数生成器，而不是输入数据的排列。</li>
+<li>随机化快速排序的<strong>期望运行时间</strong>是 $O(N \log N)$。</li>
+</ul>
+<h4 id="63-%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90">6.3 性能分析</h4>
+<p>我们用一个稍微不同的角度来分析，这个角度在幻灯片中被提及。</p>
+<ul>
+<li>
+<p><strong>中心分割点 (Central Splitter)</strong>: 我们定义一个“好”的主元为“中心分割点”。一个主元是中心分割点，如果它划分后的两个子数组，大小都<strong>至少是原数组大小的 1/4</strong>。</p>
+<ul>
+<li>在排好序的数组中，哪些元素是中心分割点？中间那 $N/2$ 个元素（从第 N/4 个到第 3N/4 个）。</li>
+<li>因此，如果我们随机选一个主元，选到中心分割点的概率是 $\frac{N/2}{N} = \frac{1}{2}$。</li>
+</ul>
+</li>
+<li>
+<p><strong>找到中心分割点的期望次数</strong>:</p>
+<ul>
+<li>这就像抛硬币，每次有 $1/2$ 的概率正面朝上（找到中心分割点）。</li>
+<li>这是一个几何分布。为了得到一次成功，期望的试验次数是 $1/p$。在这里，$p=1/2$，所以期望次数是 $1/(1/2) = 2$ 次。</li>
+<li><strong>结论</strong>: 我们期望只需要进行2次划分（每次成本 $O(n)$）就能找到一个中心分割点，得到一个“好”的划分。</li>
+</ul>
+</li>
+<li>
+<p><strong>期望运行时间分析</strong>:</p>
+<ul>
+<li>当我们得到一个中心分割点时，最坏的情况是划分成 $1/4$ 和 $3/4$。</li>
+<li>递归的深度将由最长的路径决定，即每次都沿着 $3/4$ 的分支走。</li>
+<li>递归树的深度为 $\log_{4/3}(N) = O(\log N)$。</li>
+<li>在递归树的每一层，所有子问题的总大小是 $O(N)$，所以每一层的总划分成本是 $O(N)$。</li>
+<li>总的期望运行时间 = (层数) $\times$ (每层成本) = $O(\log N) \cdot O(N) = O(N \log N)$。</li>
+</ul>
+</li>
+</ul>
+<p>这个分析虽然不是最严格的，但它清晰地展示了随机化如何保证了划分的平衡性（在期望意义上），从而保证了 $O(N \log N)$ 的高效性能。</p>
+<h3 id="7-%E6%8B%93%E5%B1%95%E5%86%85%E5%AE%B9%E8%B7%B3%E8%A1%A8-skip-lists">7. 拓展内容：跳表 (Skip Lists)</h3>
+<p>随机化不仅能优化现有算法，还能创造出全新的、优雅的数据结构。<strong>跳表 (Skip List)</strong> 就是一个完美的例子。</p>
+<h4 id="71-%E5%8A%A8%E6%9C%BA">7.1 动机</h4>
+<ul>
+<li><strong>有序链表</strong>: 插入简单，但查找慢，平均 $O(N)$。</li>
+<li><strong>平衡二叉搜索树 (如AVL树, 红黑树)</strong>: 查找、插入、删除都是 $O(\log N)$，但实现复杂，需要旋转等操作来维持平衡。</li>
+</ul>
+<p>有没有一种数据结构，能像平衡树一样快，但实现起来像链表一样简单？跳表就是答案。</p>
+<h4 id="72-%E7%BB%93%E6%9E%84">7.2 结构</h4>
+<p>跳表是在有序链表的基础上构建的。它是一个多层的链表结构：</p>
+<ul>
+<li><strong>第0层</strong>: 一个包含所有元素的标准有序链表。</li>
+<li><strong>第1层</strong>: 一个包含第0层部分元素的“快速通道”链表。</li>
+<li><strong>第i层</strong>: 包含第 $i-1$ 层部分元素的“更快的通道”链表。</li>
+</ul>
+<div class="mermaid">
                 graph TD
                     subgraph Skip List
                         direction LR
-                        H3(H) --> L3_1(30) --> T3(T);
-                        H2(H) --> L2_1(10) --> L2_2(30) --> L2_3(50) --> T2(T);
-                        H1(H) --> L1_1(10) --> L1_2(20) --> L1_3(30) --> L1_4(40) --> L1_5(50) --> T1(T);
+                        H3(H) --&gt; L3_1(30) --&gt; T3(T);
+                        H2(H) --&gt; L2_1(10) --&gt; L2_2(30) --&gt; L2_3(50) --&gt; T2(T);
+                        H1(H) --&gt; L1_1(10) --&gt; L1_2(20) --&gt; L1_3(30) --&gt; L1_4(40) --&gt; L1_5(50) --&gt; T1(T);
 
                         subgraph Level 3
                             H3 --- L3_1 --- T3;
@@ -492,64 +492,64 @@ int OnlineHiring(Candidate C[], int N, int k) {
                             H1 --- L1_1 --- L1_2 --- L1_3 --- L1_4 --- L1_5 --- T1;
                         end
 
-                        H3 -- down --> H2;
-                        H2 -- down --> H1;
+                        H3 -- down --&gt; H2;
+                        H2 -- down --&gt; H1;
                         
-                        L3_1 -- down --> L2_2;
-                        L2_1 -- down --> L1_1;
-                        L2_2 -- down --> L1_3;
-                        L2_3 -- down --> L1_5;
+                        L3_1 -- down --&gt; L2_2;
+                        L2_1 -- down --&gt; L1_1;
+                        L2_2 -- down --&gt; L1_3;
+                        L2_3 -- down --&gt; L1_5;
 
-                        T3 -- down --> T2;
-                        T2 -- down --> T1;
+                        T3 -- down --&gt; T2;
+                        T2 -- down --&gt; T1;
                     end
                 </div>
-                <h4 id="73-%E9%9A%8F%E6%9C%BA%E5%8C%96%E5%9C%A8%E8%BF%99%E9%87%8C%E7%9A%84%E4%BD%9C%E7%94%A8">7.3 随机化在这里的作用</h4>
-                <p>一个节点如何决定它应该出现在哪些层？<strong>抛硬币</strong>！</p>
-                <ul>
-                <li>当插入一个新节点时，它肯定会出现在第0层。</li>
-                <li>然后我们抛一次硬币，如果是正面，我们就将这个节点也插入到第1层。</li>
-                <li>如果第1层插入成功了，我们再抛一次硬币，如果是正面，就继续插入到第2层。</li>
-                <li>这个过程一直持续，直到我们抛出反面，或者达到了预设的最大层数。</li>
-                </ul>
-                <p>这样一来，每一层的节点数大约是下一层的一半，整个结构在期望上是平衡的。</p>
-                <h4 id="74-%E6%93%8D%E4%BD%9C">7.4 操作</h4>
-                <ul>
-                <li>
-                <p><strong>查找 (Search)</strong>:</p>
-                <ol>
-                <li>从最高层的头节点开始。</li>
-                <li>在当前层向右移动，直到下一个节点大于或等于目标值。</li>
-                <li>从当前节点下降一层。</li>
-                <li>重复步骤2和3，直到到达第0层。</li>
-                <li>在第0层找到的最终位置，就是目标元素的位置（如果存在的话）。</li>
-                </ol>
-                </li>
-                <li>
-                <p><strong>插入 (Insert)</strong>:</p>
-                <ol>
-                <li>查找待插入位置，并记录下每层经过的路径。</li>
-                <li>在第0层插入新节点。</li>
-                <li>开始抛硬币，决定新节点的“高度”。</li>
-                <li>对于每一个正面，就在对应层利用之前记录的路径插入新节点。</li>
-                </ol>
-                </li>
-                <li>
-                <p><strong>删除 (Delete)</strong>:</p>
-                <ol>
-                <li>查找待删除元素，并记录路径。</li>
-                <li>在所有包含该元素的层中，利用路径信息将其删除。</li>
-                </ol>
-                </li>
-                </ul>
-                <h4 id="75-%E6%80%A7%E8%83%BD%E4%B8%8E%E5%AE%9E%E7%8E%B0">7.5 性能与实现</h4>
-                <ul>
-                <li><strong>性能</strong>: 因为层数在期望上是 $O(\log N)$，每层查找的步数在期望上是常数，所以查找、插入、删除的<strong>期望时间复杂度都是 $O(\log N)$</strong>。</li>
-                <li><strong>实现</strong>: 跳表的代码实现比红黑树等要简单得多，因为它不涉及复杂的旋转操作，只需要链表指针的操作。</li>
-                </ul>
-                <p><strong>C++ 实现框架</strong>:</p>
-                <div class="code-container">
-                <pre><code class="language-cpp">#include &lt;iostream&gt;
+<h4 id="73-%E9%9A%8F%E6%9C%BA%E5%8C%96%E5%9C%A8%E8%BF%99%E9%87%8C%E7%9A%84%E4%BD%9C%E7%94%A8">7.3 随机化在这里的作用</h4>
+<p>一个节点如何决定它应该出现在哪些层？<strong>抛硬币</strong>！</p>
+<ul>
+<li>当插入一个新节点时，它肯定会出现在第0层。</li>
+<li>然后我们抛一次硬币，如果是正面，我们就将这个节点也插入到第1层。</li>
+<li>如果第1层插入成功了，我们再抛一次硬币，如果是正面，就继续插入到第2层。</li>
+<li>这个过程一直持续，直到我们抛出反面，或者达到了预设的最大层数。</li>
+</ul>
+<p>这样一来，每一层的节点数大约是下一层的一半，整个结构在期望上是平衡的。</p>
+<h4 id="74-%E6%93%8D%E4%BD%9C">7.4 操作</h4>
+<ul>
+<li>
+<p><strong>查找 (Search)</strong>:</p>
+<ol>
+<li>从最高层的头节点开始。</li>
+<li>在当前层向右移动，直到下一个节点大于或等于目标值。</li>
+<li>从当前节点下降一层。</li>
+<li>重复步骤2和3，直到到达第0层。</li>
+<li>在第0层找到的最终位置，就是目标元素的位置（如果存在的话）。</li>
+</ol>
+</li>
+<li>
+<p><strong>插入 (Insert)</strong>:</p>
+<ol>
+<li>查找待插入位置，并记录下每层经过的路径。</li>
+<li>在第0层插入新节点。</li>
+<li>开始抛硬币，决定新节点的“高度”。</li>
+<li>对于每一个正面，就在对应层利用之前记录的路径插入新节点。</li>
+</ol>
+</li>
+<li>
+<p><strong>删除 (Delete)</strong>:</p>
+<ol>
+<li>查找待删除元素，并记录路径。</li>
+<li>在所有包含该元素的层中，利用路径信息将其删除。</li>
+</ol>
+</li>
+</ul>
+<h4 id="75-%E6%80%A7%E8%83%BD%E4%B8%8E%E5%AE%9E%E7%8E%B0">7.5 性能与实现</h4>
+<ul>
+<li><strong>性能</strong>: 因为层数在期望上是 $O(\log N)$，每层查找的步数在期望上是常数，所以查找、插入、删除的<strong>期望时间复杂度都是 $O(\log N)$</strong>。</li>
+<li><strong>实现</strong>: 跳表的代码实现比红黑树等要简单得多，因为它不涉及复杂的旋转操作，只需要链表指针的操作。</li>
+</ul>
+<p><strong>C++ 实现框架</strong>:</p>
+<div class="code-container">
+<pre><code class="language-cpp">#include &lt;iostream&gt;
 #include &lt;vector&gt;
 #include &lt;random&gt;
 #include &lt;memory&gt;
@@ -576,7 +576,7 @@ private:
     int random_level() {
         int lvl = 0;
         std::uniform_real_distribution&lt;&gt; dis(0.0, 1.0);
-        while (dis(gen) < probability && lvl < max_level) {
+        while (dis(gen) &lt; probability &amp;&amp; lvl &lt; max_level) {
             lvl++;
         }
         return lvl;
@@ -595,13 +595,13 @@ public:
     // 搜索
     bool search(T target) {
         auto current = header;
-        for (int i = current_level; i >= 0; i--) {
-            while (current-&gt;forward[i] && current-&gt;forward[i]-&gt;value < target) {
+        for (int i = current_level; i &gt;= 0; i--) {
+            while (current-&gt;forward[i] &amp;&amp; current-&gt;forward[i]-&gt;value &lt; target) {
                 current = current-&gt;forward[i];
             }
         }
         current = current-&gt;forward[0];
-        return current && current-&gt;value == target;
+        return current &amp;&amp; current-&gt;value == target;
     }
 
     // 插入
@@ -609,8 +609,8 @@ public:
         std::vector&lt;std::shared_ptr&lt;SkipNode&lt;T&gt;&gt;&gt; update(max_level + 1, nullptr);
         auto current = header;
 
-        for (int i = current_level; i >= 0; i--) {
-            while (current-&gt;forward[i] && current-&gt;forward[i]-&gt;value < value) {
+        for (int i = current_level; i &gt;= 0; i--) {
+            while (current-&gt;forward[i] &amp;&amp; current-&gt;forward[i]-&gt;value &lt; value) {
                 current = current-&gt;forward[i];
             }
             update[i] = current;
@@ -619,20 +619,20 @@ public:
         current = current-&gt;forward[0];
 
         // 如果值已存在，则不插入
-        if (current && current-&gt;value == value) {
+        if (current &amp;&amp; current-&gt;value == value) {
             return;
         }
 
         int new_level = random_level();
-        if (new_level > current_level) {
-            for (int i = current_level + 1; i <= new_level; i++) {
+        if (new_level &gt; current_level) {
+            for (int i = current_level + 1; i &lt;= new_level; i++) {
                 update[i] = header;
             }
             current_level = new_level;
         }
 
         auto new_node = std::make_shared&lt;SkipNode&lt;T&gt;&gt;(value, new_level);
-        for (int i = 0; i <= new_level; i++) {
+        for (int i = 0; i &lt;= new_level; i++) {
             new_node-&gt;forward[i] = update[i]-&gt;forward[i];
             update[i]-&gt;forward[i] = new_node;
         }
@@ -643,8 +643,8 @@ public:
         std::vector&lt;std::shared_ptr&lt;SkipNode&lt;T&gt;&gt;&gt; update(max_level + 1, nullptr);
         auto current = header;
 
-        for (int i = current_level; i >= 0; i--) {
-            while (current-&gt;forward[i] && current-&gt;forward[i]-&gt;value < value) {
+        for (int i = current_level; i &gt;= 0; i--) {
+            while (current-&gt;forward[i] &amp;&amp; current-&gt;forward[i]-&gt;value &lt; value) {
                 current = current-&gt;forward[i];
             }
             update[i] = current;
@@ -652,49 +652,75 @@ public:
 
         current = current-&gt;forward[0];
 
-        if (current && current-&gt;value == value) {
-            for (int i = 0; i <= current_level; i++) {
+        if (current &amp;&amp; current-&gt;value == value) {
+            for (int i = 0; i &lt;= current_level; i++) {
                 if (update[i]-&gt;forward[i] != current) {
                     break;
                 }
                 update[i]-&gt;forward[i] = current-&gt;forward[i];
             }
 
-            while (current_level > 0 && header-&gt;forward[current_level] == nullptr) {
+            while (current_level &gt; 0 &amp;&amp; header-&gt;forward[current_level] == nullptr) {
                 current_level--;
             }
         }
     }
 };
 </code></pre>
-                </div>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+</div>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

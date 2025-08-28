@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机体系结构4:数据级并行</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>计算机体系结构4:数据级并行</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,116 +30,116 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%844%E6%95%B0%E6%8D%AE%E7%BA%A7%E5%B9%B6%E8%A1%8C">计算机体系结构4:数据级并行</h1>
-                <h3 id="%E4%BB%80%E4%B9%88%E6%98%AF%E6%95%B0%E6%8D%AE%E7%BA%A7%E5%B9%B6%E8%A1%8C">什么是数据级并行？</h3>
-                <p>首先，我们必须从根本上理解DLP与ILP的区别。</p>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%844%E6%95%B0%E6%8D%AE%E7%BA%A7%E5%B9%B6%E8%A1%8C">计算机体系结构4:数据级并行</h1>
+<h3 id="%E4%BB%80%E4%B9%88%E6%98%AF%E6%95%B0%E6%8D%AE%E7%BA%A7%E5%B9%B6%E8%A1%8C">什么是数据级并行？</h3>
+<p>首先，我们必须从根本上理解DLP与ILP的区别。</p>
+<ul>
+<li><strong>指令级并行 (ILP)</strong>：关注于在一个<strong>单一控制流</strong>中，找出并重叠执行<strong>不同</strong>的、独立的指令。例如，<code>a=b+c</code> 和 <code>d=e*f</code> 可以并行。它的并行粒度在<strong>单条指令</strong>层面。</li>
+<li><strong>数据级并行 (DLP)</strong>：关注于将<strong>同一条操作</strong>，同时施加在一个<strong>大型数据集</strong>（如数组、向量、矩阵）的<strong>多个元素</strong>上。例如，对于向量<code>A</code>和<code>B</code>，操作 <code>A[i] = A[i] + B[i]</code> 对所有的 <code>i</code> 都是并行的。它的并行粒度在<strong>整个数据集</strong>层面。</li>
+</ul>
+<p>利用DLP的设计哲学，带来了几个无与伦比的优势：</p>
+<ol>
+<li><strong>更高的能效</strong>：我们不再需要复杂的硬件去动态地检查每一对指令之间的依赖关系。取而代之的是，我们用<strong>一条指令</strong>来启动<strong>成百上千次</strong>相同的、但作用于不同数据的操作。控制开销被极大地摊薄了，能量主要消耗在真正的数据计算上。</li>
+<li><strong>更简洁的编程模型</strong>：相比于管理多个复杂线程（MIMD），程序员只需以数据集合（如向量）为单位来思考问题，代码逻辑更清晰，并行意图更明确，编程难度大大降低。</li>
+<li><strong>巨大的性能潜力</strong>：对于科学计算、图像声音处理、机器学习等天然具备DLP特性的应用，其性能提升可以是数量级的。</li>
+</ol>
+<p>为了高效地利用DLP，体系结构的设计者们发展出了三大主流范式：<strong>向量体系结构（Vector Architecture）</strong>、<strong>多媒体SIMD扩展（Multimedia SIMD Extensions）<strong>以及</strong>图形处理器（GPU）</strong>。</p>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%90%91%E9%87%8F%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84-vector-architecture">第一部分：向量体系结构 (Vector Architecture)</h3>
+<p>向量体系结构的设计思想，源于上世纪70年代的超级计算机（如Cray-1）。它的核心是将处理器从一次处理一个“标量（Scalar）”数据，升级为一次处理一组被称为“<strong>向量（Vector）</strong>”的数据。</p>
+<h4 id="11-%E5%90%91%E9%87%8F%E6%9E%B6%E6%9E%84%E7%9A%84%E6%A0%B8%E5%BF%83%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3">1.1 向量架构的核心设计思想</h4>
+<p>向量架构的运作模式，可以概括为四个步骤：</p>
+<ol>
+<li><strong>Gather (收集)</strong>：从内存中抓取一组数据元素，这些元素在内存中可能是分散的。</li>
+<li><strong>Load (加载)</strong>：将这些元素整齐地装入专用的、大容量的**向量寄存器（Vector Registers）**中。</li>
+<li><strong>Operate (操作)</strong>：用一条向量指令，对向量寄存器中的所有元素执行计算。</li>
+<li><strong>Store/Scatter (存储/发散)</strong>：将计算结果从向量寄存器中写回到内存，同样，目标位置也可能是分散的。</li>
+</ol>
+<p><img alt="figure 45" src="../images/imagea045.png"/></p>
+<p>这张图展示了一个现代向量架构（以RISC-V Vector Extension "V" 为例）的核心组件。让我们来解构它的设计精髓：</p>
+<ul>
+<li>
+<p><strong>向量寄存器 (Vector Registers)</strong>：</p>
+<ul>
+<li><strong>为什么需要？</strong> 这是向量架构的灵魂。它们是超大容量的寄存器文件，每个寄存器可以容纳一个由多个数据元素（例如，64个双精度浮点数）组成的向量。</li>
+<li><strong>设计要点</strong>：
                 <ul>
-                <li><strong>指令级并行 (ILP)</strong>：关注于在一个<strong>单一控制流</strong>中，找出并重叠执行<strong>不同</strong>的、独立的指令。例如，<code>a=b+c</code> 和 <code>d=e*f</code> 可以并行。它的并行粒度在<strong>单条指令</strong>层面。</li>
-                <li><strong>数据级并行 (DLP)</strong>：关注于将<strong>同一条操作</strong>，同时施加在一个<strong>大型数据集</strong>（如数组、向量、矩阵）的<strong>多个元素</strong>上。例如，对于向量<code>A</code>和<code>B</code>，操作 <code>A[i] = A[i] + B[i]</code> 对所有的 <code>i</code> 都是并行的。它的并行粒度在<strong>整个数据集</strong>层面。</li>
-                </ul>
-                <p>利用DLP的设计哲学，带来了几个无与伦比的优势：</p>
-                <ol>
-                <li><strong>更高的能效</strong>：我们不再需要复杂的硬件去动态地检查每一对指令之间的依赖关系。取而代之的是，我们用<strong>一条指令</strong>来启动<strong>成百上千次</strong>相同的、但作用于不同数据的操作。控制开销被极大地摊薄了，能量主要消耗在真正的数据计算上。</li>
-                <li><strong>更简洁的编程模型</strong>：相比于管理多个复杂线程（MIMD），程序员只需以数据集合（如向量）为单位来思考问题，代码逻辑更清晰，并行意图更明确，编程难度大大降低。</li>
-                <li><strong>巨大的性能潜力</strong>：对于科学计算、图像声音处理、机器学习等天然具备DLP特性的应用，其性能提升可以是数量级的。</li>
-                </ol>
-                <p>为了高效地利用DLP，体系结构的设计者们发展出了三大主流范式：<strong>向量体系结构（Vector Architecture）</strong>、<strong>多媒体SIMD扩展（Multimedia SIMD Extensions）<strong>以及</strong>图形处理器（GPU）</strong>。</p>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%90%91%E9%87%8F%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84-vector-architecture">第一部分：向量体系结构 (Vector Architecture)</h3>
-                <p>向量体系结构的设计思想，源于上世纪70年代的超级计算机（如Cray-1）。它的核心是将处理器从一次处理一个“标量（Scalar）”数据，升级为一次处理一组被称为“<strong>向量（Vector）</strong>”的数据。</p>
-                <h4 id="11-%E5%90%91%E9%87%8F%E6%9E%B6%E6%9E%84%E7%9A%84%E6%A0%B8%E5%BF%83%E8%AE%BE%E8%AE%A1%E6%80%9D%E6%83%B3">1.1 向量架构的核心设计思想</h4>
-                <p>向量架构的运作模式，可以概括为四个步骤：</p>
-                <ol>
-                <li><strong>Gather (收集)</strong>：从内存中抓取一组数据元素，这些元素在内存中可能是分散的。</li>
-                <li><strong>Load (加载)</strong>：将这些元素整齐地装入专用的、大容量的**向量寄存器（Vector Registers）**中。</li>
-                <li><strong>Operate (操作)</strong>：用一条向量指令，对向量寄存器中的所有元素执行计算。</li>
-                <li><strong>Store/Scatter (存储/发散)</strong>：将计算结果从向量寄存器中写回到内存，同样，目标位置也可能是分散的。</li>
-                </ol>
-                <p><img src="../images/imagea045.png" alt="figure 45"></p>
-                <p>这张图展示了一个现代向量架构（以RISC-V Vector Extension &quot;V&quot; 为例）的核心组件。让我们来解构它的设计精髓：</p>
+<li><strong>大容量</strong>：足以存放几十到几百个数据元素。</li>
+<li><strong>高带宽</strong>：为了在一个时钟周期内向功能单元“喂饱”多个数据，向量寄存器堆必须具备极高的读写带宽，例如拥有16个读端口和8个写端口，通过Crossbar Switch连接到功能单元。</li>
+<li><strong>与标量寄存器分离</strong>：系统同时拥有传统的标量寄存器（用于处理地址、循环计数等单个数据）和向量寄存器，各司其职。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>向量化的功能单元 (Vector Functional Units)</strong>：</p>
+<ul>
+<li><strong>为什么需要？</strong> 为了实现对向量中所有元素的高效处理。</li>
+<li><strong>设计要点</strong>）：
                 <ul>
-                <li>
-                <p><strong>向量寄存器 (Vector Registers)</strong>：</p>
+<li><strong>深度流水化</strong>：每个功能单元（如FP加法器、乘法器）都被设计成深度流水线。这意味着，一旦流水线被“填满”，它<strong>每个时钟周期都能产出一个结果</strong>。这使得处理一个64元素的向量加法，在启动延迟之后，只需要大约64个周期就能完成。</li>
+<li><strong>并行化（多通道 Lane）</strong>：为了进一步提升性能，一个向量功能单元内部可以包含多个并行的处理通道（Lane）。例如，一个4通道的向量加法器，每个时钟周期可以同时对4对元素进行计算，从而将处理整个向量的时间缩短为原来的1/4。
+                <img alt="figure 46" src="../images/imagea046.png"/></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>向量加载/存储单元 (Vector Load/Store Unit)</strong>：</p>
+<ul>
+<li><strong>为什么需要？</strong> 向量处理的瓶颈往往在于内存带宽。这个单元专门负责高效地在内存和向量寄存器之间传输数据。</li>
+<li><strong>设计要点</strong>：
                 <ul>
-                <li><strong>为什么需要？</strong> 这是向量架构的灵魂。它们是超大容量的寄存器文件，每个寄存器可以容纳一个由多个数据元素（例如，64个双精度浮点数）组成的向量。</li>
-                <li><strong>设计要点</strong>：
-                <ul>
-                <li><strong>大容量</strong>：足以存放几十到几百个数据元素。</li>
-                <li><strong>高带宽</strong>：为了在一个时钟周期内向功能单元“喂饱”多个数据，向量寄存器堆必须具备极高的读写带宽，例如拥有16个读端口和8个写端口，通过Crossbar Switch连接到功能单元。</li>
-                <li><strong>与标量寄存器分离</strong>：系统同时拥有传统的标量寄存器（用于处理地址、循环计数等单个数据）和向量寄存器，各司其职。</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>向量化的功能单元 (Vector Functional Units)</strong>：</p>
-                <ul>
-                <li><strong>为什么需要？</strong> 为了实现对向量中所有元素的高效处理。</li>
-                <li><strong>设计要点</strong>）：
-                <ul>
-                <li><strong>深度流水化</strong>：每个功能单元（如FP加法器、乘法器）都被设计成深度流水线。这意味着，一旦流水线被“填满”，它<strong>每个时钟周期都能产出一个结果</strong>。这使得处理一个64元素的向量加法，在启动延迟之后，只需要大约64个周期就能完成。</li>
-                <li><strong>并行化（多通道 Lane）</strong>：为了进一步提升性能，一个向量功能单元内部可以包含多个并行的处理通道（Lane）。例如，一个4通道的向量加法器，每个时钟周期可以同时对4对元素进行计算，从而将处理整个向量的时间缩短为原来的1/4。
-                <img src="../images/imagea046.png" alt="figure 46"></li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>向量加载/存储单元 (Vector Load/Store Unit)</strong>：</p>
-                <ul>
-                <li><strong>为什么需要？</strong> 向量处理的瓶颈往往在于内存带宽。这个单元专门负责高效地在内存和向量寄存器之间传输数据。</li>
-                <li><strong>设计要点</strong>：
-                <ul>
-                <li><strong>深度流水化</strong>：支持连续的内存访问请求。</li>
-                <li><strong>支持非连续访存</strong>：这是向量架构的一大优势。通过**跨步（Stride）<strong>和</strong>聚集-发散（Gather-Scatter）**机制，它可以高效地处理非连续存储的数据，例如矩阵的列、稀疏矩阵的非零元素等。</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>标量处理器 (Scalar Processor)</strong>：</p>
-                <ul>
-                <li><strong>为什么需要？</strong> 程序中总有无法向量化的部分，例如复杂的控制流、地址计算、循环计数等。标量处理器负责执行这些“常规”指令，并为向量单元提供地址、配置等信息。</li>
-                <li><strong>设计要点</strong>：标量寄存器（如RISC-V的x0-x31）可以直接作为向量指令的输入（例如，向量-标量乘法），或者用于计算向量访存的基地址。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="12-%E5%90%91%E9%87%8F%E6%8C%87%E4%BB%A4%E9%9B%86">1.2 向量指令集</h4>
-                <p>向量架构的优雅之处，在于其简洁而强大的指令集。一条向量指令，就封装了整个循环的操作。</p>
-                <ul>
-                <li>
-                <p><strong>指令格式</strong>：向量指令通常采用类似于标量指令的格式，但其操作对象是向量寄存器。例如：
+<li><strong>深度流水化</strong>：支持连续的内存访问请求。</li>
+<li><strong>支持非连续访存</strong>：这是向量架构的一大优势。通过**跨步（Stride）<strong>和</strong>聚集-发散（Gather-Scatter）**机制，它可以高效地处理非连续存储的数据，例如矩阵的列、稀疏矩阵的非零元素等。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>标量处理器 (Scalar Processor)</strong>：</p>
+<ul>
+<li><strong>为什么需要？</strong> 程序中总有无法向量化的部分，例如复杂的控制流、地址计算、循环计数等。标量处理器负责执行这些“常规”指令，并为向量单元提供地址、配置等信息。</li>
+<li><strong>设计要点</strong>：标量寄存器（如RISC-V的x0-x31）可以直接作为向量指令的输入（例如，向量-标量乘法），或者用于计算向量访存的基地址。</li>
+</ul>
+</li>
+</ul>
+<h4 id="12-%E5%90%91%E9%87%8F%E6%8C%87%E4%BB%A4%E9%9B%86">1.2 向量指令集</h4>
+<p>向量架构的优雅之处，在于其简洁而强大的指令集。一条向量指令，就封装了整个循环的操作。</p>
+<ul>
+<li>
+<p><strong>指令格式</strong>：向量指令通常采用类似于标量指令的格式，但其操作对象是向量寄存器。例如：
                 <code>vadd.vv v3, v1, v2</code>  # Vector-Vector add: v3[i] = v1[i] + v2[i]
                 <code>vmul.vs v1, v0, f0</code>  # Vector-Scalar multiply: v1[i] = v0[i] * f0</p>
-                </li>
-                <li>
-                <p><strong>DAXPY 示例对比</strong>：
+</li>
+<li>
+<p><strong>DAXPY 示例对比</strong>：
                 DAXPY (<code>Y = a*X + Y</code>) 是一个经典的科学计算核心函数。</p>
-                <ul>
-                <li>
-                <p><strong>标量 RISC-V 实现</strong>：</p>
-                <div class="code-container">
-                <pre><code class="language-plaintext">Loop:
+<ul>
+<li>
+<p><strong>标量 RISC-V 实现</strong>：</p>
+<div class="code-container">
+<pre><code class="language-plaintext">Loop:
     fld  f1, 0(x5)      ; Load X[i]
     fmul.d f1, f1, f0   ; a * X[i]
     fld  f2, 0(x6)      ; Load Y[i]
@@ -149,124 +149,150 @@
     addi x6, x6, #8     ; Increment index
     bne  x28, x5, Loop  ; Check if done
 </code></pre>
-                </div>
-                <p>这个循环体有8条指令，其中只有2条是真正的浮点计算，其余都是地址计算、加载/存储和循环控制的<strong>开销</strong>。并且，指令间充满了RAW数据相关，导致流水线频繁停顿。</p>
-                </li>
-                <li>
-                <p><strong>向量 RV64V 实现</strong>：</p>
-                <div class="code-container">
-                <pre><code class="language-plaintext">vld    v0, x5          ; Load vector X
+</div>
+<p>这个循环体有8条指令，其中只有2条是真正的浮点计算，其余都是地址计算、加载/存储和循环控制的<strong>开销</strong>。并且，指令间充满了RAW数据相关，导致流水线频繁停顿。</p>
+</li>
+<li>
+<p><strong>向量 RV64V 实现</strong>：</p>
+<div class="code-container">
+<pre><code class="language-plaintext">vld    v0, x5          ; Load vector X
 vmul.vs v1, v0, f0     ; Vector-scalar multiply a*X
 vld    v2, x6          ; Load vector Y
 vadd.vv v3, v1, v2     ; Vector-vector add
 vst    v3, x6          ; Store the sum
 </code></pre>
-                </div>
-                <p><strong>设计之美</strong>：</p>
+</div>
+<p><strong>设计之美</strong>：</p>
+<ol>
+<li><strong>无循环</strong>：整个循环被5条向量指令替代。循环控制的开销完全消失了。</li>
+<li><strong>依赖清晰</strong>：依赖关系只存在于向量指令之间，对整个向量生效，而不是元素之间。</li>
+<li><strong>停顿减少</strong>：流水线停顿<strong>只在向量操作的第一个元素上发生一次</strong>。一旦第一对元素的乘法结果出来，就可以立即送入加法器的流水线，这种无缝衔接被称为<strong>链接（Chaining）</strong>。Chaining 相当于向量处理器内部的“硬件级前向传播”，极大地隐藏了功能单元之间的延迟。</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="13-%E5%90%91%E9%87%8F%E6%9E%B6%E6%9E%84%E7%9A%84%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7">1.3 向量架构的高级特性</h4>
+<p>为了应对真实世界中复杂的编程场景，向量架构还引入了几个至关重要的特性。</p>
+<h4 id="131-%E5%90%91%E9%87%8F%E9%95%BF%E5%BA%A6%E6%8E%A7%E5%88%B6vl-%E4%B8%8E-mvl">1.3.1 向量长度控制：<code>vl</code> 与 <code>mvl</code></h4>
+<ul>
+<li><strong>问题</strong>：一个向量寄存器能容纳的最大元素个数（Maximum Vector Length, <code>mvl</code>）是由硬件决定的（例如64个元素）。但程序中循环的次数（例如N=100）通常是可变的，并且不一定是 <code>mvl</code> 的整数倍。</li>
+<li><strong>解决方案</strong>：引入一个<strong>向量长度寄存器 <code>vl</code></strong>。<code>vl</code> 的值由程序员设置，它告诉硬件当前这条向量指令需要处理多少个元素。<code>vl</code> 的值不能超过 <code>mvl</code>。</li>
+<li><strong>分条开采 (Strip Mining)</strong>：这是一个由编译器自动完成的技术。对于一个大循环（N &gt; mvl），编译器会生成一个外层循环。在每次外层循环中：
                 <ol>
-                <li><strong>无循环</strong>：整个循环被5条向量指令替代。循环控制的开销完全消失了。</li>
-                <li><strong>依赖清晰</strong>：依赖关系只存在于向量指令之间，对整个向量生效，而不是元素之间。</li>
-                <li><strong>停顿减少</strong>：流水线停顿<strong>只在向量操作的第一个元素上发生一次</strong>。一旦第一对元素的乘法结果出来，就可以立即送入加法器的流水线，这种无缝衔接被称为<strong>链接（Chaining）</strong>。Chaining 相当于向量处理器内部的“硬件级前向传播”，极大地隐藏了功能单元之间的延迟。</li>
-                </ol>
-                </li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="13-%E5%90%91%E9%87%8F%E6%9E%B6%E6%9E%84%E7%9A%84%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7">1.3 向量架构的高级特性</h4>
-                <p>为了应对真实世界中复杂的编程场景，向量架构还引入了几个至关重要的特性。</p>
-                <h4 id="131-%E5%90%91%E9%87%8F%E9%95%BF%E5%BA%A6%E6%8E%A7%E5%88%B6vl-%E4%B8%8E-mvl">1.3.1 向量长度控制：<code>vl</code> 与 <code>mvl</code></h4>
-                <ul>
-                <li><strong>问题</strong>：一个向量寄存器能容纳的最大元素个数（Maximum Vector Length, <code>mvl</code>）是由硬件决定的（例如64个元素）。但程序中循环的次数（例如N=100）通常是可变的，并且不一定是 <code>mvl</code> 的整数倍。</li>
-                <li><strong>解决方案</strong>：引入一个<strong>向量长度寄存器 <code>vl</code></strong>。<code>vl</code> 的值由程序员设置，它告诉硬件当前这条向量指令需要处理多少个元素。<code>vl</code> 的值不能超过 <code>mvl</code>。</li>
-                <li><strong>分条开采 (Strip Mining)</strong>：这是一个由编译器自动完成的技术。对于一个大循环（N &gt; mvl），编译器会生成一个外层循环。在每次外层循环中：
-                <ol>
-                <li>计算本轮需要处理的元素个数：<code>vl = min(N_remaining, mvl)</code>。</li>
-                <li>执行向量指令对 <code>vl</code> 个元素进行操作。</li>
-                <li>更新 <code>N_remaining</code> 和数据指针。</li>
-                <li>重复，直到所有元素处理完毕。
-                <img src="../images/imagea047.png" alt="figure 47">
+<li>计算本轮需要处理的元素个数：<code>vl = min(N_remaining, mvl)</code>。</li>
+<li>执行向量指令对 <code>vl</code> 个元素进行操作。</li>
+<li>更新 <code>N_remaining</code> 和数据指针。</li>
+<li>重复，直到所有元素处理完毕。
+                <img alt="figure 47" src="../images/imagea047.png"/>
                 这段代码完美地展示了 <code>setvl</code> 指令如何与一个常规的标量循环结合，使得同一套向量指令可以处理任意长度的数据。</li>
-                </ol>
-                </li>
-                </ul>
-                <h4 id="132-%E6%9D%A1%E4%BB%B6%E6%89%A7%E8%A1%8C%E5%90%91%E9%87%8F%E6%8E%A9%E7%A0%81%E5%AF%84%E5%AD%98%E5%99%A8">1.3.2 条件执行：向量掩码寄存器</h4>
-                <ul>
-                <li><strong>问题</strong>：循环中经常包含 <code>if</code> 语句，例如：
+</ol>
+</li>
+</ul>
+<h4 id="132-%E6%9D%A1%E4%BB%B6%E6%89%A7%E8%A1%8C%E5%90%91%E9%87%8F%E6%8E%A9%E7%A0%81%E5%AF%84%E5%AD%98%E5%99%A8">1.3.2 条件执行：向量掩码寄存器</h4>
+<ul>
+<li><strong>问题</strong>：循环中经常包含 <code>if</code> 语句，例如：
                 <div class="code-container">
-                <pre><code class="language-c">for (i=0; i&lt;64; i++)
+<pre><code class="language-c">for (i=0; i&lt;64; i++)
     if (X[i] != 0)
         X[i] = X[i] - Y[i];
 </code></pre>
-                </div>
+</div>
                 我们只想对满足条件的元素执行操作。</li>
-                <li><strong>解决方案</strong>：引入<strong>向量掩码寄存器（Vector-Mask Registers）<strong>或称</strong>谓词寄存器（Predicate Registers）</strong>。
+<li><strong>解决方案</strong>：引入<strong>向量掩码寄存器（Vector-Mask Registers）<strong>或称</strong>谓词寄存器（Predicate Registers）</strong>。
                 <ul>
-                <li>这是一个位向量，长度与向量寄存器相同。</li>
-                <li><strong>工作流程</strong>：
+<li>这是一个位向量，长度与向量寄存器相同。</li>
+<li><strong>工作流程</strong>：
                 <ol>
-                <li>先执行一条向量比较指令，生成掩码。例如 <code>vpne p0, v0, f0</code>，它会比较向量 <code>v0</code> (X) 的每个元素是否不等于 <code>f0</code> (0)，并将结果（1或0）存入掩码寄存器 <code>p0</code>。</li>
-                <li>然后，在掩码的控制下执行计算指令。例如 <code>vsub.vv v0, v0, v1</code>，硬件会自动检查掩码寄存器 <code>p0</code>，只对 <code>p0[i]</code> 为 1 的那些元素 <code>i</code> 执行减法操作。<code>p0[i]</code> 为 0 的元素在目标向量寄存器 <code>v0</code> 中保持不变。</li>
-                </ol>
-                </li>
-                <li><strong>设计优势</strong>：这种技术被称为<strong>IF-Conversion</strong>，它将带有分支的复杂控制流，转换成了没有分支的、直线型的向量代码。这避免了传统分支预测可能带来的巨大开销，因为在DLP模型中，一次分支预测失败可能意味着整个流水线中数百个并行操作被冲刷。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="133-%E5%86%85%E5%AD%98%E7%B3%BB%E7%BB%9F%E6%94%AF%E6%8C%81%E8%B7%A8%E6%AD%A5%E4%B8%8E%E8%81%9A%E9%9B%86-%E5%8F%91%E6%95%A3">1.3.3 内存系统支持：跨步与聚集-发散</h4>
+<li>先执行一条向量比较指令，生成掩码。例如 <code>vpne p0, v0, f0</code>，它会比较向量 <code>v0</code> (X) 的每个元素是否不等于 <code>f0</code> (0)，并将结果（1或0）存入掩码寄存器 <code>p0</code>。</li>
+<li>然后，在掩码的控制下执行计算指令。例如 <code>vsub.vv v0, v0, v1</code>，硬件会自动检查掩码寄存器 <code>p0</code>，只对 <code>p0[i]</code> 为 1 的那些元素 <code>i</code> 执行减法操作。<code>p0[i]</code> 为 0 的元素在目标向量寄存器 <code>v0</code> 中保持不变。</li>
+</ol>
+</li>
+<li><strong>设计优势</strong>：这种技术被称为<strong>IF-Conversion</strong>，它将带有分支的复杂控制流，转换成了没有分支的、直线型的向量代码。这避免了传统分支预测可能带来的巨大开销，因为在DLP模型中，一次分支预测失败可能意味着整个流水线中数百个并行操作被冲刷。</li>
+</ul>
+</li>
+</ul>
+<h4 id="133-%E5%86%85%E5%AD%98%E7%B3%BB%E7%BB%9F%E6%94%AF%E6%8C%81%E8%B7%A8%E6%AD%A5%E4%B8%8E%E8%81%9A%E9%9B%86-%E5%8F%91%E6%95%A3">1.3.3 内存系统支持：跨步与聚集-发散</h4>
+<ul>
+<li><strong>问题</strong>：DLP应用中，需要处理的数据在内存中并非总是连续存放的。
                 <ul>
-                <li><strong>问题</strong>：DLP应用中，需要处理的数据在内存中并非总是连续存放的。
+<li><strong>跨步 (Stride)</strong>：处理多维数组的某一列或某个对角线。相邻元素在内存中的地址间隔是一个固定的值（stride）。</li>
+<li><strong>聚集-发散 (Gather-Scatter)</strong>：处理稀疏矩阵。非零元素的位置是完全不规则的，需要一个额外的索引数组来指明它们的位置。</li>
+</ul>
+</li>
+<li><strong>解决方案</strong>：提供专门的硬件支持。
                 <ul>
-                <li><strong>跨步 (Stride)</strong>：处理多维数组的某一列或某个对角线。相邻元素在内存中的地址间隔是一个固定的值（stride）。</li>
-                <li><strong>聚集-发散 (Gather-Scatter)</strong>：处理稀疏矩阵。非零元素的位置是完全不规则的，需要一个额外的索引数组来指明它们的位置。</li>
-                </ul>
-                </li>
-                <li><strong>解决方案</strong>：提供专门的硬件支持。
-                <ul>
-                <li><strong>跨步加载/存储</strong>：<code>vlds</code> 和 <code>vsts</code> 指令允许程序员指定一个步长，硬件会自动计算每个元素的内存地址。</li>
-                <li><strong>聚集加载 (Gather)</strong>：<code>vldx</code> 指令使用一个向量寄存器作为<strong>索引向量</strong>，从多个不连续的内存地址中“聚集”数据到一个密集的向量寄存器中。</li>
-                <li><strong>发散存储 (Scatter)</strong>：<code>vstx</code> 指令则执行相反的操作，将一个密集向量寄存器中的元素，根据索引向量，“发散”地存储到内存的各个位置。
-                <img src="../images/imagea048.png" alt="figure 48">
+<li><strong>跨步加载/存储</strong>：<code>vlds</code> 和 <code>vsts</code> 指令允许程序员指定一个步长，硬件会自动计算每个元素的内存地址。</li>
+<li><strong>聚集加载 (Gather)</strong>：<code>vldx</code> 指令使用一个向量寄存器作为<strong>索引向量</strong>，从多个不连续的内存地址中“聚集”数据到一个密集的向量寄存器中。</li>
+<li><strong>发散存储 (Scatter)</strong>：<code>vstx</code> 指令则执行相反的操作，将一个密集向量寄存器中的元素，根据索引向量，“发散”地存储到内存的各个位置。
+                <img alt="figure 48" src="../images/imagea048.png"/>
                 这段代码展示了如何使用 <code>vldx</code> 和 <code>vstx</code> 来高效处理稀疏矩阵的 <code>A[K[i]] = A[K[i]] + C[M[i]]</code> 操作，这在传统标量处理器上是极其低效的。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="14-%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90">1.4 性能分析</h4>
+</ul>
+</li>
+</ul>
+<h4 id="14-%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90">1.4 性能分析</h4>
+<ul>
+<li><strong>护航队 (Convoy)</strong>：一组可以<strong>同时开始执行</strong>的向量指令。一个护航队中不能有结构相关（例如，不能有两条 <code>vld</code> 指令，因为通常只有一个Load/Store单元），但可以有数据相关（通过Chaining解决）。</li>
+<li><strong>钟鸣 (Chime)</strong>：执行一个护航队所需要的时间。在一个理想的、拥有无限硬件资源（每个功能单元都有）的模型里，一个chime的时间约等于向量长度 <code>vl</code>。</li>
+<li><strong>性能计算</strong>：总执行时间 $\approx$ Chimes 数量 $\times$ 平均向量长度。
                 <ul>
-                <li><strong>护航队 (Convoy)</strong>：一组可以<strong>同时开始执行</strong>的向量指令。一个护航队中不能有结构相关（例如，不能有两条 <code>vld</code> 指令，因为通常只有一个Load/Store单元），但可以有数据相关（通过Chaining解决）。</li>
-                <li><strong>钟鸣 (Chime)</strong>：执行一个护航队所需要的时间。在一个理想的、拥有无限硬件资源（每个功能单元都有）的模型里，一个chime的时间约等于向量长度 <code>vl</code>。</li>
-                <li><strong>性能计算</strong>：总执行时间 $\approx$ Chimes 数量 $\times$ 平均向量长度。
-                <ul>
-                <li><code>m</code> 个护航队（即 <code>m</code> 个 chimes）处理长度为 <code>n</code> 的向量，总时间约为 $m \times n$ 个周期。</li>
-                </ul>
-                </li>
-                </ul>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li><code>m</code> 个护航队（即 <code>m</code> 个 chimes）处理长度为 <code>n</code> 的向量，总时间约为 $m \times n$ 个周期。</li>
+</ul>
+</li>
+</ul>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>ads11:近似算法(Approximation)</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>ads11:近似算法(Approximation)</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,126 +30,126 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="ads%E8%BF%91%E4%BC%BC%E7%AE%97%E6%B3%95approximation">ads11:近似算法(Approximation)</h1>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E4%B8%BA%E4%BD%95%E6%88%91%E4%BB%AC%E9%9C%80%E8%A6%81%E8%BF%91%E4%BC%BC%E7%9B%B4%E9%9D%A2%E8%AE%A1%E7%AE%97%E7%9A%84%E6%9E%81%E9%99%90"><strong>第一部分：为何我们需要“近似”？直面计算的极限</strong></h3>
-                <p>我们首先要问一个根本性的问题：我们为什么要满足于一个“近似”的解，而不是最优解呢？答案在于，我们面对着一类被称为<strong>NP-hard</strong>的“硬”问题。</p>
-                <p>这些问题，比如著名的旅行商问题（TSP）、集合覆盖问题以及我们稍后会详细讨论的装箱问题和背包问题，都具有一个共同的特点：到目前为止，还没有人能找到一个能在多项式时间内（即高效地）求解它们最优解的算法。它们的计算复杂度往往是指数级的，例如 $O(2^N)$。</p>
-                <p>这意味着，当问题规模 $N$ 稍微增大一点，计算时间就会爆炸式增长，甚至超出全球所有计算机的算力总和。</p>
-                <p>面对这种困境，我们有三条路可以走：</p>
-                <ol>
-                <li><strong>接受指数时间</strong>：如果问题规模 <code>N</code> 非常小（比如 N &lt; 30），$O(2^N)$ 的算法或许还能在可接受的时间内运行完毕。但这显然不是一个普适的解决方案。</li>
-                <li><strong>求解特例</strong>：有些 NP-hard 问题在特定条件下会“退化”成简单问题。例如，虽然一般图的顶点覆盖问题是 NP-hard 的，但在二分图上却存在多项式时间的解法。这种方法很有价值，但它无法解决问题的普遍情况。</li>
-                <li><strong>放宽对“最优”的执着</strong>：这是我们今天的核心。如果我们不再强求那个遥不可及的最优解，而是转向寻找一个<strong>在多项式时间内可以找到的、并且质量有保证的“次优解”或“近似解”</strong>，那么问题就变得豁然开朗。</li>
-                </ol>
-                <p>第三条路，正是由<strong>近似算法 (Approximation Algorithm)</strong> 铺就的。我们的目标是：<strong>在效率（多项式时间）和效果（接近最优）之间取得最佳平衡</strong>。</p>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E8%A1%A1%E9%87%8F%E7%9A%84%E6%A0%87%E5%B0%BA--%E8%BF%91%E4%BC%BC%E7%90%86%E8%AE%BA%E7%9A%84%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><strong>第二部分：衡量的标尺 —— 近似理论的核心概念</strong></h3>
-                <p>既然是“近似”，就必须有一个精确的数学工具来衡量我们的解到底有多“好”。这个工具就是<strong>近似比 (Approximation Ratio)</strong>。</p>
-                <h4 id="1-%E8%BF%91%E4%BC%BC%E6%AF%94-approximation-ratio"><strong>1. 近似比 (Approximation Ratio)</strong></h4>
-                <p>【<strong>定义</strong>】 对于一个优化问题，我们假设 $C$ 是我们的近似算法给出的解的成本（对于最小化问题，成本是解的目标函数值；对于最大化问题，成本也是目标函数值），而 $C^*$ 是该问题最优解的成本。如果对于任何规模为 $n$ 的输入，这两个成本的比值都满足以下不等式：</p>
-                <p>$$
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="ads%E8%BF%91%E4%BC%BC%E7%AE%97%E6%B3%95approximation">ads11:近似算法(Approximation)</h1>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E4%B8%BA%E4%BD%95%E6%88%91%E4%BB%AC%E9%9C%80%E8%A6%81%E8%BF%91%E4%BC%BC%E7%9B%B4%E9%9D%A2%E8%AE%A1%E7%AE%97%E7%9A%84%E6%9E%81%E9%99%90"><strong>第一部分：为何我们需要“近似”？直面计算的极限</strong></h3>
+<p>我们首先要问一个根本性的问题：我们为什么要满足于一个“近似”的解，而不是最优解呢？答案在于，我们面对着一类被称为<strong>NP-hard</strong>的“硬”问题。</p>
+<p>这些问题，比如著名的旅行商问题（TSP）、集合覆盖问题以及我们稍后会详细讨论的装箱问题和背包问题，都具有一个共同的特点：到目前为止，还没有人能找到一个能在多项式时间内（即高效地）求解它们最优解的算法。它们的计算复杂度往往是指数级的，例如 $O(2^N)$。</p>
+<p>这意味着，当问题规模 $N$ 稍微增大一点，计算时间就会爆炸式增长，甚至超出全球所有计算机的算力总和。</p>
+<p>面对这种困境，我们有三条路可以走：</p>
+<ol>
+<li><strong>接受指数时间</strong>：如果问题规模 <code>N</code> 非常小（比如 N &lt; 30），$O(2^N)$ 的算法或许还能在可接受的时间内运行完毕。但这显然不是一个普适的解决方案。</li>
+<li><strong>求解特例</strong>：有些 NP-hard 问题在特定条件下会“退化”成简单问题。例如，虽然一般图的顶点覆盖问题是 NP-hard 的，但在二分图上却存在多项式时间的解法。这种方法很有价值，但它无法解决问题的普遍情况。</li>
+<li><strong>放宽对“最优”的执着</strong>：这是我们今天的核心。如果我们不再强求那个遥不可及的最优解，而是转向寻找一个<strong>在多项式时间内可以找到的、并且质量有保证的“次优解”或“近似解”</strong>，那么问题就变得豁然开朗。</li>
+</ol>
+<p>第三条路，正是由<strong>近似算法 (Approximation Algorithm)</strong> 铺就的。我们的目标是：<strong>在效率（多项式时间）和效果（接近最优）之间取得最佳平衡</strong>。</p>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E8%A1%A1%E9%87%8F%E7%9A%84%E6%A0%87%E5%B0%BA--%E8%BF%91%E4%BC%BC%E7%90%86%E8%AE%BA%E7%9A%84%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><strong>第二部分：衡量的标尺 —— 近似理论的核心概念</strong></h3>
+<p>既然是“近似”，就必须有一个精确的数学工具来衡量我们的解到底有多“好”。这个工具就是<strong>近似比 (Approximation Ratio)</strong>。</p>
+<h4 id="1-%E8%BF%91%E4%BC%BC%E6%AF%94-approximation-ratio"><strong>1. 近似比 (Approximation Ratio)</strong></h4>
+<p>【<strong>定义</strong>】 对于一个优化问题，我们假设 $C$ 是我们的近似算法给出的解的成本（对于最小化问题，成本是解的目标函数值；对于最大化问题，成本也是目标函数值），而 $C^*$ 是该问题最优解的成本。如果对于任何规模为 $n$ 的输入，这两个成本的比值都满足以下不等式：</p>
+<p>$$
                 \max \left( \frac{C}{C^*}, \frac{C^*}{C} \right) \le \rho(n)
                 $$</p>
-                <p>我们就称这个算法拥有一个大小为 $\rho(n)$ 的<strong>近似比</strong>。这里 $\rho(n) \ge 1$。</p>
-                <p>这个定义可以根据问题的类型简化：</p>
-                <ul>
-                <li><strong>对于最小化问题</strong>（如装箱问题，目标是箱子数最小），我们总是有 $C \ge C^* $。此时，近似比的定义简化为：$\frac{C}{C^*} \le \rho(n)$。一个近似比为 2 的算法意味着它使用的箱子数最坏不会超过最优解的两倍。</li>
-                <li><strong>对于最大化问题</strong>（如背包问题，目标是利润最大），我们总是有 $C \le C^* $。此时，近似比的定义简化为：$\frac{C^*}{C} \le \rho(n)$。一个近似比为 2 的算法意味着最优解的利润最坏不会超过我们的解的两倍（或者说，我们的解至少达到了最优解利润的 50%）。</li>
-                </ul>
-                <p>如果一个算法的近似比为 $\rho(n)$，我们就称它是一个 <strong>$\rho(n)$-近似算法</strong>。</p>
-                <h4 id="2-%E8%BF%91%E4%BC%BC%E6%96%B9%E6%A1%88-approximation-scheme"><strong>2. 近似方案 (Approximation Scheme)</strong></h4>
-                <p>有些算法更加强大，它们像一个可以调节精度的旋钮，允许用户自己决定想要的近似程度。</p>
-                <p>【<strong>定义</strong>】 一个<strong>近似方案</strong>是一种特殊的近似算法。它除了接收问题的实例作为输入外，还接收一个额外的参数 $\epsilon > 0$。对于任何给定的 $\epsilon$，该算法都能成为一个 <strong>$(1+\epsilon)$-近似算法</strong>。</p>
-                <p>这意味着，我们可以通过减小 $\epsilon$ 来让解无限地逼近最优解。比如，我们想要一个误差在 1% 以内的解，只需设置 $\epsilon = 0.01$，算法就能保证其结果与最优解的差距在 1% 之内。</p>
-                <p>根据运行时间对 $\epsilon$ 的依赖程度，近似方案又分为两类：</p>
-                <ul>
-                <li>
-                <p><strong>多项式时间近似方案 (PTAS - Polynomial-Time Approximation Scheme)</strong>
+<p>我们就称这个算法拥有一个大小为 $\rho(n)$ 的<strong>近似比</strong>。这里 $\rho(n) \ge 1$。</p>
+<p>这个定义可以根据问题的类型简化：</p>
+<ul>
+<li><strong>对于最小化问题</strong>（如装箱问题，目标是箱子数最小），我们总是有 $C \ge C^* $。此时，近似比的定义简化为：$\frac{C}{C^*} \le \rho(n)$。一个近似比为 2 的算法意味着它使用的箱子数最坏不会超过最优解的两倍。</li>
+<li><strong>对于最大化问题</strong>（如背包问题，目标是利润最大），我们总是有 $C \le C^* $。此时，近似比的定义简化为：$\frac{C^*}{C} \le \rho(n)$。一个近似比为 2 的算法意味着最优解的利润最坏不会超过我们的解的两倍（或者说，我们的解至少达到了最优解利润的 50%）。</li>
+</ul>
+<p>如果一个算法的近似比为 $\rho(n)$，我们就称它是一个 <strong>$\rho(n)$-近似算法</strong>。</p>
+<h4 id="2-%E8%BF%91%E4%BC%BC%E6%96%B9%E6%A1%88-approximation-scheme"><strong>2. 近似方案 (Approximation Scheme)</strong></h4>
+<p>有些算法更加强大，它们像一个可以调节精度的旋钮，允许用户自己决定想要的近似程度。</p>
+<p>【<strong>定义</strong>】 一个<strong>近似方案</strong>是一种特殊的近似算法。它除了接收问题的实例作为输入外，还接收一个额外的参数 $\epsilon &gt; 0$。对于任何给定的 $\epsilon$，该算法都能成为一个 <strong>$(1+\epsilon)$-近似算法</strong>。</p>
+<p>这意味着，我们可以通过减小 $\epsilon$ 来让解无限地逼近最优解。比如，我们想要一个误差在 1% 以内的解，只需设置 $\epsilon = 0.01$，算法就能保证其结果与最优解的差距在 1% 之内。</p>
+<p>根据运行时间对 $\epsilon$ 的依赖程度，近似方案又分为两类：</p>
+<ul>
+<li>
+<p><strong>多项式时间近似方案 (PTAS - Polynomial-Time Approximation Scheme)</strong>
                 对于<strong>任意固定</strong>的 $\epsilon &gt; 0$，算法的运行时间是输入规模 <code>n</code> 的多项式。例如，运行时间可能是 $O(n^{2/\epsilon})$。请注意，当 $\epsilon$ 变得非常小时，指数项 $2/\epsilon$ 会变得巨大，导致算法非常慢。但只要 $\epsilon$ 固定，运行时间关于 <code>n</code> 的增长就是多项式的。</p>
-                </li>
-                <li>
-                <p><strong>全多项式时间近似方案 (FPTAS - Fully Polynomial-Time Approximation Scheme)</strong>
+</li>
+<li>
+<p><strong>全多项式时间近似方案 (FPTAS - Fully Polynomial-Time Approximation Scheme)</strong>
                 这是近似算法的“圣杯”。算法的运行时间<strong>同时</strong>是输入规模 <code>n</code> 和 $1/\epsilon$ 的多项式。例如，$O\left(\left(\frac{1}{\epsilon}\right)^2 n^3\right)$。这意味着即使我们要求非常高的精度（即 $\epsilon$ 很小），算法的效率依然能够保持在多项式级别。</p>
-                </li>
-                </ul>
-                <div class="mermaid">
+</li>
+</ul>
+<div class="mermaid">
                 graph TD
-                    A[近似算法] --> B["近似比 &rho;"]
-                    A --> C["近似方案: (1+&epsilon;)-近似"]
-                    C --> D["<b>PTAS</b> <br> 运行时间是 n 的多项式 <br> (对固定的 &epsilon;) <br> e.g., O(n<sup>1/&epsilon;</sup>)"]
-                    C --> E["<b>FPTAS</b> <br> 运行时间是 n 和 1/&epsilon; 的多项式 <br> e.g., O((1/&epsilon;)²n³)"]
+                    A[近似算法] --&gt; B["近似比 ρ"]
+                    A --&gt; C["近似方案: (1+ε)-近似"]
+                    C --&gt; D["<b>PTAS</b> <br/> 运行时间是 n 的多项式 <br/> (对固定的 ε) <br/> e.g., O(n<sup>1/ε</sup>)"]
+                    C --&gt; E["<b>FPTAS</b> <br/> 运行时间是 n 和 1/ε 的多项式 <br/> e.g., O((1/ε)²n³)"]
                     subgraph "性能与灵活性"
-                        E -- "更优" --> D
+                        E -- "更优" --&gt; D
                     end
                 </div>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%E4%B8%80--%E8%A3%85%E7%AE%B1%E9%97%AE%E9%A2%98-bin-packing"><strong>第三部分：案例研究一 —— 装箱问题 (Bin Packing)</strong></h3>
-                <p>让我们通过一个经典的 NP-hard 问题来感受近似算法的魅力。</p>
-                <p><strong>问题描述</strong>：
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%E4%B8%80--%E8%A3%85%E7%AE%B1%E9%97%AE%E9%A2%98-bin-packing"><strong>第三部分：案例研究一 —— 装箱问题 (Bin Packing)</strong></h3>
+<p>让我们通过一个经典的 NP-hard 问题来感受近似算法的魅力。</p>
+<p><strong>问题描述</strong>：
                 给定 <code>N</code> 个物品，其尺寸分别为 $S_1, S_2, ..., S_N$，其中 $0 &lt; S_i \le 1$。我们的任务是将这些物品装入最少数目的箱子中，每个箱子的容量都是单位 1。</p>
-                <p><strong>【一个例子】</strong></p>
+<p><strong>【一个例子】</strong></p>
+<ul>
+<li><strong>输入</strong>: N = 7, 物品尺寸 $S_i$ = {0.2, 0.5, 0.4, 0.7, 0.1, 0.3, 0.8}</li>
+<li><strong>一个最优解</strong>: 需要 3 个箱子。
                 <ul>
-                <li><strong>输入</strong>: N = 7, 物品尺寸 $S_i$ = {0.2, 0.5, 0.4, 0.7, 0.1, 0.3, 0.8}</li>
-                <li><strong>一个最优解</strong>: 需要 3 个箱子。
-                <ul>
-                <li>$B_1 = {0.8, 0.2}$ (总尺寸 = 1.0)</li>
-                <li>$B_2 = {0.7, 0.3}$ (总尺寸 = 1.0)</li>
-                <li>$B_3 = {0.5, 0.4, 0.1}$ (总尺寸 = 1.0)</li>
-                </ul>
-                </li>
-                </ul>
-                <div class="mermaid">
+<li>$B_1 = {0.8, 0.2}$ (总尺寸 = 1.0)</li>
+<li>$B_2 = {0.7, 0.3}$ (总尺寸 = 1.0)</li>
+<li>$B_3 = {0.5, 0.4, 0.1}$ (总尺寸 = 1.0)</li>
+</ul>
+</li>
+</ul>
+<div class="mermaid">
                 graph TD
                     subgraph "最优装箱 (3个箱子)"
                         subgraph "B1 (已用 1.0)"
                             direction TB
-                            b1_1["0.8"] --> b1_2["0.2"]
+                            b1_1["0.8"] --&gt; b1_2["0.2"]
                         end
                         subgraph "B2 (已用 1.0)"
                             direction TB
-                            b2_1["0.7"] --> b2_2["0.3"]
+                            b2_1["0.7"] --&gt; b2_2["0.3"]
                         end
                         subgraph "B3 (已用 1.0)"
                             direction TB
-                            b3_1["0.5"] --> b3_2["0.4"] --> b3_3["0.1"]
+                            b3_1["0.5"] --&gt; b3_2["0.4"] --&gt; b3_3["0.1"]
                         end
                     end
                 </div>
-                <h4 id="1-%E5%9C%A8%E7%BA%BF%E7%AE%97%E6%B3%95"><strong>1. 在线算法</strong></h4>
-                <p>在线算法模拟的是一种信息受限的决策过程：每来一个物品，你必须立刻决定把它放进哪个箱子，并且这个决定是<strong>不可撤销</strong>的。你对未来将要到来的物品一无所知。</p>
-                <h5 id="%E7%AE%97%E6%B3%951next-fit-%E9%82%BB%E8%BF%91%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95"><strong>算法1：Next Fit (邻近适应算法)</strong></h5>
-                <p>这是最简单、最“健忘”的策略。</p>
-                <ul>
-                <li><strong>规则</strong>: 始终只关注当前正在装填的箱子。当一个新物品到来时，检查它是否能放入<strong>当前箱子</strong>。如果能，就放进去。如果不能，就<strong>永久关闭</strong>当前箱子，开启一个新箱子来装这个物品。</li>
-                </ul>
-                <p><strong>伪代码:</strong></p>
-                <div class="code-container">
-                <pre><code>void NextFit(const vector&lt;double&gt;& items) {
+<h4 id="1-%E5%9C%A8%E7%BA%BF%E7%AE%97%E6%B3%95"><strong>1. 在线算法</strong></h4>
+<p>在线算法模拟的是一种信息受限的决策过程：每来一个物品，你必须立刻决定把它放进哪个箱子，并且这个决定是<strong>不可撤销</strong>的。你对未来将要到来的物品一无所知。</p>
+<h5 id="%E7%AE%97%E6%B3%951next-fit-%E9%82%BB%E8%BF%91%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95"><strong>算法1：Next Fit (邻近适应算法)</strong></h5>
+<p>这是最简单、最“健忘”的策略。</p>
+<ul>
+<li><strong>规则</strong>: 始终只关注当前正在装填的箱子。当一个新物品到来时，检查它是否能放入<strong>当前箱子</strong>。如果能，就放进去。如果不能，就<strong>永久关闭</strong>当前箱子，开启一个新箱子来装这个物品。</li>
+</ul>
+<p><strong>伪代码:</strong></p>
+<div class="code-container">
+<pre><code>void NextFit(const vector&lt;double&gt;&amp; items) {
     if (items.empty()) return;
     int bin_count = 1;
     double current_bin_capacity = 1.0;
 
     for (double item_size : items) {
-        if (item_size <= current_bin_capacity) {
+        if (item_size &lt;= current_bin_capacity) {
             current_bin_capacity -= item_size;
         } else {
             bin_count++;
@@ -159,22 +159,22 @@
     // ... return bin_count ...
 }
 </code></pre>
-                </div>
-                <p><strong>【定理】</strong>: 令 M 为最优解所需的箱子数。Next Fit 算法使用的箱子数不会超过 $2M - 1$。</p>
-                <p><strong>【严谨证明】</strong>:
+</div>
+<p><strong>【定理】</strong>: 令 M 为最优解所需的箱子数。Next Fit 算法使用的箱子数不会超过 $2M - 1$。</p>
+<p><strong>【严谨证明】</strong>:
                 让我们用反证法。假设 Next Fit 使用了 $K \ge 2M$ 个箱子，分别为 $B_1, B_2, ..., B_K$。
                 根据 Next Fit 的规则，当算法决定开启箱子 $B_{i+1}$ 时，意味着上一个物品放不进 $B_i$。因此，箱子 $B_i$ 的已用空间和箱子 $B_{i+1}$ 的已用空间之和必然大于1。否则， $B_i$ 和 $B_{i+1}$ 的所有物品本可以被连续地放入一个箱子中。
-                考虑任意两个相邻的箱子 $B_i$ 和 $B_{i+1}$。它们所装物品的总尺寸 $S(B_i) + S(B_{i+1}) > 1$。</p>
-                <p>现在，我们将这 $K$ 个箱子两两配对：$(B_1, B_2), (B_3, B_4), \dots$。由于 $K \ge 2M$，我们至少可以配出 $M$ 对。
-                对于每一对 $(B_{2i-1}, B_{2i})$，我们有 $S(B_{2i-1}) + S(B_{2i}) > 1$。
+                考虑任意两个相邻的箱子 $B_i$ 和 $B_{i+1}$。它们所装物品的总尺寸 $S(B_i) + S(B_{i+1}) &gt; 1$。</p>
+<p>现在，我们将这 $K$ 个箱子两两配对：$(B_1, B_2), (B_3, B_4), \dots$。由于 $K \ge 2M$，我们至少可以配出 $M$ 对。
+                对于每一对 $(B_{2i-1}, B_{2i})$，我们有 $S(B_{2i-1}) + S(B_{2i}) &gt; 1$。
                 将这 $M$ 个不等式相加，我们得到所有物品的总尺寸：
 
                 $$
-                \sum_{j=1}^{K} S(B_j) \ge \sum_{i=1}^{M} (S(B_{2i-1}) + S(B_{2i})) > \sum_{i=1}^{M} 1 = M
+                \sum_{j=1}^{K} S(B_j) \ge \sum_{i=1}^{M} (S(B_{2i-1}) + S(B_{2i})) &gt; \sum_{i=1}^{M} 1 = M
                 $$
                 
                 所有物品的总尺寸严格大于 $M$。</p>
-                <p>另一方面，我们知道一个基本的下界：最优解所需的箱子数 $M$ 必须至少能装下所有物品的总和。即：
+<p>另一方面，我们知道一个基本的下界：最优解所需的箱子数 $M$ 必须至少能装下所有物品的总和。即：
 
                 $$
                 M \ge \sum_{\text{all items}} \text{size} i
@@ -184,302 +184,302 @@
                 $$
                 M \ge \left\lceil \sum{\text{all items}} \text{size}i \right\rceil = \left\lceil \sum{j=1}^{K} S(B_j) \right\rceil
                 $$
-                我们已经证明了 $\sum\limits_{j=1}^{K} S(B_j) > M$。一个大于 $M$ 的数向上取整，结果必然至少是 $M+1$。
+                我们已经证明了 $\sum\limits_{j=1}^{K} S(B_j) &gt; M$。一个大于 $M$ 的数向上取整，结果必然至少是 $M+1$。
                 于是我们推导出 $M \ge M+1$，这是一个明显的矛盾！
                 因此，我们的初始假设“Next Fit 使用了 $K \ge 2M$ 个箱子”是错误的。它最多使用 $2M-1$ 个箱子。
                 这个定理表明 Next Fit 是一个 <strong>2-近似算法</strong>（对于较大的M，-1可以忽略）。</p>
-                <h5 id="%E7%AE%97%E6%B3%952first-fit-%E9%A6%96%E6%AC%A1%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95"><strong>算法2：First Fit (首次适应算法)</strong></h5>
-                <p>First Fit 相比 Next Fit 更有“记忆力”。</p>
-                <ul>
-                <li><strong>规则</strong>: 处理每一个新物品时，<strong>从第一个箱子开始</strong>依次检查，将它放入<strong>第一个</strong>能容纳它的已开箱子。如果所有已开箱子都放不下，才打开一个新箱子。</li>
-                </ul>
-                <p><strong>【定理】</strong>: First Fit 算法使用的箱子数不会超过 $\frac{17}{10}M + 2$。这是一个比 Next Fit 更好的近似保证，大约是 1.7-近似。通过使用平衡二叉搜索树等数据结构维护箱子的剩余空间，其时间复杂度可以优化到 $O(N \log N)$。</p>
-                <h5 id="%E7%AE%97%E6%B3%953best-fit-%E6%9C%80%E4%BD%B3%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95"><strong>算法3：Best Fit (最佳适应算法)</strong></h5>
-                <p>Best Fit 更加“精打细算”。</p>
-                <ul>
-                <li><strong>规则</strong>: 处理每一个新物品时，遍历所有已开箱子，找到一个能放下该物品且<strong>剩余空间最小</strong>的箱子（即最“紧凑”的那个），然后放进去。如果都放不下，才开新箱子。</li>
-                </ul>
-                <p><strong>【定理】</strong>: Best Fit 的近似比与 First Fit 类似，最坏情况下也是 1.7-近似，时间复杂度同样可优化至 $O(N \log N)$。</p>
-                <h5 id="%E5%AE%9E%E4%BE%8B%E6%BC%94%E7%AE%97"><strong>【实例演算】</strong></h5>
-                <p>现在，我们来亲自一下开头那个例子，看看这三种在线算法的表现。
+<h5 id="%E7%AE%97%E6%B3%952first-fit-%E9%A6%96%E6%AC%A1%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95"><strong>算法2：First Fit (首次适应算法)</strong></h5>
+<p>First Fit 相比 Next Fit 更有“记忆力”。</p>
+<ul>
+<li><strong>规则</strong>: 处理每一个新物品时，<strong>从第一个箱子开始</strong>依次检查，将它放入<strong>第一个</strong>能容纳它的已开箱子。如果所有已开箱子都放不下，才打开一个新箱子。</li>
+</ul>
+<p><strong>【定理】</strong>: First Fit 算法使用的箱子数不会超过 $\frac{17}{10}M + 2$。这是一个比 Next Fit 更好的近似保证，大约是 1.7-近似。通过使用平衡二叉搜索树等数据结构维护箱子的剩余空间，其时间复杂度可以优化到 $O(N \log N)$。</p>
+<h5 id="%E7%AE%97%E6%B3%953best-fit-%E6%9C%80%E4%BD%B3%E9%80%82%E5%BA%94%E7%AE%97%E6%B3%95"><strong>算法3：Best Fit (最佳适应算法)</strong></h5>
+<p>Best Fit 更加“精打细算”。</p>
+<ul>
+<li><strong>规则</strong>: 处理每一个新物品时，遍历所有已开箱子，找到一个能放下该物品且<strong>剩余空间最小</strong>的箱子（即最“紧凑”的那个），然后放进去。如果都放不下，才开新箱子。</li>
+</ul>
+<p><strong>【定理】</strong>: Best Fit 的近似比与 First Fit 类似，最坏情况下也是 1.7-近似，时间复杂度同样可优化至 $O(N \log N)$。</p>
+<h5 id="%E5%AE%9E%E4%BE%8B%E6%BC%94%E7%AE%97"><strong>【实例演算】</strong></h5>
+<p>现在，我们来亲自一下开头那个例子，看看这三种在线算法的表现。
                 <strong>输入</strong>: $S_i$ = {0.2, 0.5, 0.4, 0.7, 0.1, 0.3, 0.8}</p>
-                <ul>
-                <li>
-                <p><strong>Next Fit</strong>:</p>
-                <ol>
-                <li><code>0.2</code> -&gt; $B_1$: {0.2} (当前箱)</li>
-                <li><code>0.5</code> -&gt; 放入 $B_1$ -&gt; $B_1$: {0.2, 0.5} (当前箱)</li>
-                <li><code>0.4</code> -&gt; $B_1$ 放不下 (0.7+0.4&gt;1) -&gt; 开 $B_2$: {0.4} (当前箱)</li>
-                <li><code>0.7</code> -&gt; $B_2$ 放不下 (0.4+0.7&gt;1) -&gt; 开 $B_3$: {0.7} (当前箱)</li>
-                <li><code>0.1</code> -&gt; 放入 $B_3$ -&gt; $B_3$: {0.7, 0.1} (当前箱)</li>
-                <li><code>0.3</code> -&gt; $B_3$ 放不下 (0.8+0.3&gt;1) -&gt; 开 $B_4$: {0.3} (当前箱)</li>
-                <li><code>0.8</code> -&gt; $B_4$ 放不下 (0.3+0.8&gt;1) -&gt; 开 $B_5$: {0.8} (当前箱)
+<ul>
+<li>
+<p><strong>Next Fit</strong>:</p>
+<ol>
+<li><code>0.2</code> -&gt; $B_1$: {0.2} (当前箱)</li>
+<li><code>0.5</code> -&gt; 放入 $B_1$ -&gt; $B_1$: {0.2, 0.5} (当前箱)</li>
+<li><code>0.4</code> -&gt; $B_1$ 放不下 (0.7+0.4&gt;1) -&gt; 开 $B_2$: {0.4} (当前箱)</li>
+<li><code>0.7</code> -&gt; $B_2$ 放不下 (0.4+0.7&gt;1) -&gt; 开 $B_3$: {0.7} (当前箱)</li>
+<li><code>0.1</code> -&gt; 放入 $B_3$ -&gt; $B_3$: {0.7, 0.1} (当前箱)</li>
+<li><code>0.3</code> -&gt; $B_3$ 放不下 (0.8+0.3&gt;1) -&gt; 开 $B_4$: {0.3} (当前箱)</li>
+<li><code>0.8</code> -&gt; $B_4$ 放不下 (0.3+0.8&gt;1) -&gt; 开 $B_5$: {0.8} (当前箱)
                 <strong>结果: 5 个箱子。</strong></li>
-                </ol>
-                </li>
-                <li>
-                <p><strong>First Fit</strong>:</p>
-                <ol>
-                <li><code>0.2</code> -&gt; $B_1$: {0.2}</li>
-                <li><code>0.5</code> -&gt; 放入 $B_1$: {0.2, 0.5}</li>
-                <li><code>0.4</code> -&gt; $B_1$ 放不下 -&gt; 开 $B_2$: {0.4}</li>
-                <li><code>0.7</code> -&gt; $B_1, B_2$ 都放不下 -&gt; 开 $B_3$: {0.7}</li>
-                <li><code>0.1</code> -&gt; 检查 $B_1$，能放下 -&gt; $B_1$: {0.2, 0.5, 0.1}</li>
-                <li><code>0.3</code> -&gt; $B_1$ 放不下，检查 $B_2$，能放下 -&gt; $B_2$: {0.4, 0.3}</li>
-                <li><code>0.8</code> -&gt; $B_1, B_2, B_3$ 都放不下 -&gt; 开 $B_4$: {0.8}
+</ol>
+</li>
+<li>
+<p><strong>First Fit</strong>:</p>
+<ol>
+<li><code>0.2</code> -&gt; $B_1$: {0.2}</li>
+<li><code>0.5</code> -&gt; 放入 $B_1$: {0.2, 0.5}</li>
+<li><code>0.4</code> -&gt; $B_1$ 放不下 -&gt; 开 $B_2$: {0.4}</li>
+<li><code>0.7</code> -&gt; $B_1, B_2$ 都放不下 -&gt; 开 $B_3$: {0.7}</li>
+<li><code>0.1</code> -&gt; 检查 $B_1$，能放下 -&gt; $B_1$: {0.2, 0.5, 0.1}</li>
+<li><code>0.3</code> -&gt; $B_1$ 放不下，检查 $B_2$，能放下 -&gt; $B_2$: {0.4, 0.3}</li>
+<li><code>0.8</code> -&gt; $B_1, B_2, B_3$ 都放不下 -&gt; 开 $B_4$: {0.8}
                 <strong>结果: 4 个箱子。</strong></li>
-                </ol>
-                </li>
-                <li>
-                <p><strong>Best Fit</strong>:</p>
-                <ol>
-                <li><code>0.2</code> -&gt; $B_1$: {0.2} (剩 0.8)</li>
-                <li><code>0.5</code> -&gt; 放入 $B_1$: {0.2, 0.5} (剩 0.3)</li>
-                <li><code>0.4</code> -&gt; $B_1$ 放不下 -&gt; 开 $B_2$: {0.4} (剩 0.6)</li>
-                <li><code>0.7</code> -&gt; $B_1, B_2$ 都放不下 -&gt; 开 $B_3$: {0.7} (剩 0.3)</li>
-                <li><code>0.1</code> -&gt; 放入 $B_1$ 剩 0.2，放入 $B_2$ 剩 0.5，放入 $B_3$ 剩 0.2。$B_1, B_3$ 都是最紧的，选第一个 -&gt; $B_1$: {0.2, 0.5, 0.1} (剩 0.2)</li>
-                <li><code>0.3</code> -&gt; 放入 $B_2$ 剩 0.3，放入 $B_3$ 剩 0。$B_3$ 是最佳选择 -&gt; $B_3$: {0.7, 0.3} (剩 0)</li>
-                <li><code>0.8</code> -&gt; $B_1, B_2, B_3$ 都放不下 -&gt; 开 $B_4$: {0.8}
+</ol>
+</li>
+<li>
+<p><strong>Best Fit</strong>:</p>
+<ol>
+<li><code>0.2</code> -&gt; $B_1$: {0.2} (剩 0.8)</li>
+<li><code>0.5</code> -&gt; 放入 $B_1$: {0.2, 0.5} (剩 0.3)</li>
+<li><code>0.4</code> -&gt; $B_1$ 放不下 -&gt; 开 $B_2$: {0.4} (剩 0.6)</li>
+<li><code>0.7</code> -&gt; $B_1, B_2$ 都放不下 -&gt; 开 $B_3$: {0.7} (剩 0.3)</li>
+<li><code>0.1</code> -&gt; 放入 $B_1$ 剩 0.2，放入 $B_2$ 剩 0.5，放入 $B_3$ 剩 0.2。$B_1, B_3$ 都是最紧的，选第一个 -&gt; $B_1$: {0.2, 0.5, 0.1} (剩 0.2)</li>
+<li><code>0.3</code> -&gt; 放入 $B_2$ 剩 0.3，放入 $B_3$ 剩 0。$B_3$ 是最佳选择 -&gt; $B_3$: {0.7, 0.3} (剩 0)</li>
+<li><code>0.8</code> -&gt; $B_1, B_2, B_3$ 都放不下 -&gt; 开 $B_4$: {0.8}
                 <strong>结果: 4 个箱子。</strong></li>
-                </ol>
-                </li>
-                </ul>
-                <p><strong>结论</strong>: 在这个例子中，First Fit 和 Best Fit 表现优于 Next Fit，但仍未达到最优的 3 箱。这揭示了在线算法的固有局限性。</p>
-                <p><strong>【定理】</strong>: 存在特定的输入，会迫使<strong>任何</strong>在线装箱算法使用的箱子数至少是最优解的 $\frac{4}{3}$ 倍（一个更早的结论是5/3）。因为它们无法预知未来，总可能被“刁钻”的输入序列所欺骗。</p>
-                <h4 id="2-%E7%A6%BB%E7%BA%BF%E7%AE%97%E6%B3%95"><strong>2. 离线算法</strong></h4>
-                <p>离线算法拥有“上帝视角”，它可以在开始决策前<strong>审视所有</strong>待装的物品。这给了我们优化的巨大空间。</p>
-                <p><strong>核心洞察</strong>: 装箱问题的“麻烦制造者”通常是那些<strong>大件物品</strong>，它们既占空间又不容易和其它小件凑整。一个自然的想法是：<strong>优先处理大件</strong>。</p>
-                <h5 id="%E7%AE%97%E6%B3%954first-fit-decreasing-ffd"><strong>算法4：First Fit Decreasing (FFD)</strong></h5>
-                <ul>
-                <li><strong>规则</strong>:
+</ol>
+</li>
+</ul>
+<p><strong>结论</strong>: 在这个例子中，First Fit 和 Best Fit 表现优于 Next Fit，但仍未达到最优的 3 箱。这揭示了在线算法的固有局限性。</p>
+<p><strong>【定理】</strong>: 存在特定的输入，会迫使<strong>任何</strong>在线装箱算法使用的箱子数至少是最优解的 $\frac{4}{3}$ 倍（一个更早的结论是5/3）。因为它们无法预知未来，总可能被“刁钻”的输入序列所欺骗。</p>
+<h4 id="2-%E7%A6%BB%E7%BA%BF%E7%AE%97%E6%B3%95"><strong>2. 离线算法</strong></h4>
+<p>离线算法拥有“上帝视角”，它可以在开始决策前<strong>审视所有</strong>待装的物品。这给了我们优化的巨大空间。</p>
+<p><strong>核心洞察</strong>: 装箱问题的“麻烦制造者”通常是那些<strong>大件物品</strong>，它们既占空间又不容易和其它小件凑整。一个自然的想法是：<strong>优先处理大件</strong>。</p>
+<h5 id="%E7%AE%97%E6%B3%954first-fit-decreasing-ffd"><strong>算法4：First Fit Decreasing (FFD)</strong></h5>
+<ul>
+<li><strong>规则</strong>:
                 <ol>
-                <li>将所有物品按尺寸<strong>从大到小</strong>进行排序。</li>
-                <li>按照排序后的顺序，对每个物品使用 First Fit 策略。</li>
-                </ol>
-                </li>
-                </ul>
-                <p><strong>【示例重演】</strong>:</p>
-                <ul>
-                <li><strong>排序后</strong>: {0.8, 0.7, 0.5, 0.4, 0.3, 0.2, 0.1}</li>
-                <li><strong>FFD过程</strong>:
+<li>将所有物品按尺寸<strong>从大到小</strong>进行排序。</li>
+<li>按照排序后的顺序，对每个物品使用 First Fit 策略。</li>
+</ol>
+</li>
+</ul>
+<p><strong>【示例重演】</strong>:</p>
+<ul>
+<li><strong>排序后</strong>: {0.8, 0.7, 0.5, 0.4, 0.3, 0.2, 0.1}</li>
+<li><strong>FFD过程</strong>:
                 <ol>
-                <li><code>0.8</code> -&gt; $B_1$: {0.8}</li>
-                <li><code>0.7</code> -&gt; $B_2$: {0.7}</li>
-                <li><code>0.5</code> -&gt; $B_3$: {0.5}</li>
-                <li><code>0.4</code> -&gt; 放入 $B_3$ (因为 $B_1, B_2$ 放不下) -&gt; $B_3$: {0.5, 0.4}</li>
-                <li><code>0.3</code> -&gt; 放入 $B_2$ -&gt; $B_2$: {0.7, 0.3}</li>
-                <li><code>0.2</code> -&gt; 放入 $B_1$ -&gt; $B_1$: {0.8, 0.2}</li>
-                <li><code>0.1</code> -&gt; 放入 $B_3$ -&gt; $B_3$: {0.5, 0.4, 0.1}</li>
-                </ol>
-                </li>
-                <li><strong>结果</strong>: 3 个箱子！ 我们这次通过简单的预排序，就达到了最优解！</li>
-                </ul>
-                <div class="mermaid">
+<li><code>0.8</code> -&gt; $B_1$: {0.8}</li>
+<li><code>0.7</code> -&gt; $B_2$: {0.7}</li>
+<li><code>0.5</code> -&gt; $B_3$: {0.5}</li>
+<li><code>0.4</code> -&gt; 放入 $B_3$ (因为 $B_1, B_2$ 放不下) -&gt; $B_3$: {0.5, 0.4}</li>
+<li><code>0.3</code> -&gt; 放入 $B_2$ -&gt; $B_2$: {0.7, 0.3}</li>
+<li><code>0.2</code> -&gt; 放入 $B_1$ -&gt; $B_1$: {0.8, 0.2}</li>
+<li><code>0.1</code> -&gt; 放入 $B_3$ -&gt; $B_3$: {0.5, 0.4, 0.1}</li>
+</ol>
+</li>
+<li><strong>结果</strong>: 3 个箱子！ 我们这次通过简单的预排序，就达到了最优解！</li>
+</ul>
+<div class="mermaid">
                 graph TD
                     subgraph "FFD 装箱过程 (达到最优)"
                         direction TB
                         subgraph "B1 (已用 1.0)"
-                            b1_1["0.8"] --> b1_2["0.2"]
+                            b1_1["0.8"] --&gt; b1_2["0.2"]
                         end
                         subgraph "B2 (已用 1.0)"
-                            b2_1["0.7"] --> b2_2["0.3"]
+                            b2_1["0.7"] --&gt; b2_2["0.3"]
                         end
                         subgraph "B3 (已用 1.0)"
-                            b3_1["0.5"] --> b3_2["0.4"] --> b3_3["0.1"]
+                            b3_1["0.5"] --&gt; b3_2["0.4"] --&gt; b3_3["0.1"]
                         end
                     end
                 </div>
-                <p><strong>【定理】</strong>: FFD 算法使用的箱子数 $N_{FFD}$ 不会超过 $\frac{11}{9}M + \frac{6}{9}$。
+<p><strong>【定理】</strong>: FFD 算法使用的箱子数 $N_{FFD}$ 不会超过 $\frac{11}{9}M + \frac{6}{9}$。
                 这是一个非常出色的近似比，大约是 1.22。实践证明，FFD 在绝大多数情况下都表现得极其接近最优。这有力地说明了：<strong>简单的贪心启发式，如果用对地方，就能产生巨大的威力。</strong></p>
-                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%E4%BA%8C--%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98-knapsack-problem"><strong>第四部分：案例研究二 —— 背包问题 (Knapsack Problem)</strong></h3>
-                <p>这是另一个经典的优化问题，与资源分配息息相关。</p>
-                <h4 id="1-%E5%88%86%E6%95%B0%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98%E5%8F%AF%E5%88%86%E5%89%B2%E7%9A%84%E5%AE%9D%E8%97%8F"><strong>1. 分数背包问题：可分割的宝藏</strong></h4>
-                <p><strong>问题描述</strong>:
+<h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%E4%BA%8C--%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98-knapsack-problem"><strong>第四部分：案例研究二 —— 背包问题 (Knapsack Problem)</strong></h3>
+<p>这是另一个经典的优化问题，与资源分配息息相关。</p>
+<h4 id="1-%E5%88%86%E6%95%B0%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98%E5%8F%AF%E5%88%86%E5%89%B2%E7%9A%84%E5%AE%9D%E8%97%8F"><strong>1. 分数背包问题：可分割的宝藏</strong></h4>
+<p><strong>问题描述</strong>:
                 有一个容量为 $M$ 的背包和 $N$ 件物品。每件物品 $i$ 有重量 $w_i$ 和利润 $p_i$。你可以选择将物品的<strong>任意一部分</strong>（分数）放入背包。目标是使装入背包的物品总利润最大化。</p>
-                <p><strong>数学模型</strong>:
+<p><strong>数学模型</strong>:
                 最大化 $\sum\limits_{i=1}^{n} p_i x_i$
                 约束条件: $\sum\limits_{i=1}^{n} w_i x_i \le M$ 并且 $0 \le x_i \le 1$</p>
-                <p><strong>贪心策略</strong>:
+<p><strong>贪心策略</strong>:
                 这个问题存在一个简单且<strong>最优</strong>的贪心解法。我们应该优先装哪个物品？不是最贵的，也不是最轻的，而是<strong>性价比最高</strong>的！我们计算每个物品的<strong>利润密度</strong> $p_i / w_i$，然后按密度从高到低依次装入。</p>
-                <p><strong>【示例】</strong>:</p>
+<p><strong>【示例】</strong>:</p>
+<ul>
+<li>$n = 3, M = 20$</li>
+<li>$(p_1, p_2, p_3) = (25, 24, 15)$</li>
+<li>$(w_1, w_2, w_3) = (18, 15, 10)$</li>
+</ul>
+<ol>
+<li><strong>计算密度</strong>: $d_1 = 25/18 \approx 1.39$, $d_2 = 24/15 = 1.6$, $d_3 = 15/10 = 1.5$</li>
+<li><strong>排序</strong>: Item 2 &gt; Item 3 &gt; Item 1</li>
+<li><strong>装包</strong>:
                 <ul>
-                <li>$n = 3, M = 20$</li>
-                <li>$(p_1, p_2, p_3) = (25, 24, 15)$</li>
-                <li>$(w_1, w_2, w_3) = (18, 15, 10)$</li>
-                </ul>
-                <ol>
-                <li><strong>计算密度</strong>: $d_1 = 25/18 \approx 1.39$, $d_2 = 24/15 = 1.6$, $d_3 = 15/10 = 1.5$</li>
-                <li><strong>排序</strong>: Item 2 &gt; Item 3 &gt; Item 1</li>
-                <li><strong>装包</strong>:
-                <ul>
-                <li>装入全部 Item 2 $(w=15, p=24)$。背包剩余容量 $20 - 15 = 5$。</li>
-                <li>装入 Item 3 $(w=10, p=15)$。背包容量只够装 $5/10 = 0.5$ 的 Item 3。获得利润 $15 \times 0.5 = 7.5$。</li>
-                <li>背包已满。
+<li>装入全部 Item 2 $(w=15, p=24)$。背包剩余容量 $20 - 15 = 5$。</li>
+<li>装入 Item 3 $(w=10, p=15)$。背包容量只够装 $5/10 = 0.5$ 的 Item 3。获得利润 $15 \times 0.5 = 7.5$。</li>
+<li>背包已满。
                 <strong>最优解</strong>: 装入1个Item 2和0.5个Item 3，总利润 $P$ = $24 + 7.5 = 31.5$。</li>
-                </ul>
-                </li>
-                </ol>
-                <h4 id="2-0-1-%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98%E4%B8%8D%E5%8F%AF%E5%88%86%E5%89%B2%E7%9A%84%E6%8A%89%E6%8B%A9"><strong>2. 0-1 背包问题：不可分割的抉择</strong></h4>
-                <p>这是背包问题的 NP-hard 版本。</p>
-                <p><strong>问题描述</strong>:
+</ul>
+</li>
+</ol>
+<h4 id="2-0-1-%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98%E4%B8%8D%E5%8F%AF%E5%88%86%E5%89%B2%E7%9A%84%E6%8A%89%E6%8B%A9"><strong>2. 0-1 背包问题：不可分割的抉择</strong></h4>
+<p>这是背包问题的 NP-hard 版本。</p>
+<p><strong>问题描述</strong>:
                 与分数背包类似，但每个物品要么<strong>整个装入</strong>，要么<strong>完全不装</strong>。</p>
-                <p><strong>贪心策略的“滑铁卢”</strong>:
+<p><strong>贪心策略的“滑铁卢”</strong>:
                 我们沿用刚才的“按密度贪心”策略，看看会发生什么。</p>
-                <p><strong>【示例】</strong>:</p>
-                <ul>
-                <li>$n = 5, M = 11$</li>
-                <li>$p = (1, 6, 18, 22, 28)$</li>
-                <li>$w = (1, 2, 5, 6, 7)$</li>
-                <li><strong>密度</strong>: $d=(1, 3, 3.6, 3.67, 4)$</li>
-                <li><strong>贪心顺序</strong>: Item 5 -&gt; 4 -&gt; 3 -&gt; 2 -&gt; 1</li>
-                </ul>
-                <ol>
-                <li>
-                <p><strong>贪心解</strong>:</p>
-                <ul>
-                <li>装入 Item 5 $(w=7, p=28)$。剩余容量 $11 - 7 = 4$。</li>
-                <li>Item 4 $(w=6)$ 和 Item 3 $(w=5)$ 都装不下了。</li>
-                <li>装入 Item 2 $(w=2, p=6)$。剩余容量 $4 - 2 = 2$。</li>
-                <li>装入 Item 1 $(w=1, p=1)$。</li>
-                <li><strong>贪心解</strong>: {Item 1, 2, 5}。总重量 10，总利润 $1+6+28 = 35$。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>最优解</strong>:</p>
-                <ul>
-                <li>是 {Item 3, Item 4}。总重量 11，总利润 $18+22 = 40$。</li>
-                </ul>
-                </li>
-                </ol>
-                <p>贪心算法失败了。但它的表现有多差呢？</p>
-                <p><strong>【定理】</strong>: 对于 0-1 背包问题，一个改进的贪心策略（按密度贪心，然后与能装下的单个最大价值物品比较，取较大者）是一个 <strong>2-近似算法</strong>。</p>
-                <p><strong>【证明思路】</strong>:
+<p><strong>【示例】</strong>:</p>
+<ul>
+<li>$n = 5, M = 11$</li>
+<li>$p = (1, 6, 18, 22, 28)$</li>
+<li>$w = (1, 2, 5, 6, 7)$</li>
+<li><strong>密度</strong>: $d=(1, 3, 3.6, 3.67, 4)$</li>
+<li><strong>贪心顺序</strong>: Item 5 -&gt; 4 -&gt; 3 -&gt; 2 -&gt; 1</li>
+</ul>
+<ol>
+<li>
+<p><strong>贪心解</strong>:</p>
+<ul>
+<li>装入 Item 5 $(w=7, p=28)$。剩余容量 $11 - 7 = 4$。</li>
+<li>Item 4 $(w=6)$ 和 Item 3 $(w=5)$ 都装不下了。</li>
+<li>装入 Item 2 $(w=2, p=6)$。剩余容量 $4 - 2 = 2$。</li>
+<li>装入 Item 1 $(w=1, p=1)$。</li>
+<li><strong>贪心解</strong>: {Item 1, 2, 5}。总重量 10，总利润 $1+6+28 = 35$。</li>
+</ul>
+</li>
+<li>
+<p><strong>最优解</strong>:</p>
+<ul>
+<li>是 {Item 3, Item 4}。总重量 11，总利润 $18+22 = 40$。</li>
+</ul>
+</li>
+</ol>
+<p>贪心算法失败了。但它的表现有多差呢？</p>
+<p><strong>【定理】</strong>: 对于 0-1 背包问题，一个改进的贪心策略（按密度贪心，然后与能装下的单个最大价值物品比较，取较大者）是一个 <strong>2-近似算法</strong>。</p>
+<p><strong>【证明思路】</strong>:
                 令 $P_{greedy}$ 为贪心算法得到的利润，$P_{opt}$ 为最优利润。令 $P_{frac}$ 为分数背包的最优利润，我们知道 $P_{opt} \le P_{frac}$。
                 在贪心过程中，当第一个物品 $k$ 装不进去时，之前装的物品总利润为 $P_{greedy}$。分数背包的解此时会装入一部分 $k$，所以有 $$P_{frac} \le P_{greedy} + p_k$$
                 结合起来，我们有 $$P_{opt} \le P_{greedy} + p_k$$
                 此时，最优解 $P_{opt}$ 不会同时比 $P_{greedy}$ 和 $p_k$ 都大很多。具体来说，$$P_{opt} \le P_{greedy} + p_k \le 2 \max(P_{greedy}, p_k)$$如果我们算法的输出是 $\max(P_{greedy}, \text{单个能装下的最大利润物品})$，就可以保证 2-近似。</p>
-                <h4 id="3-%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E8%BF%BD%E6%B1%82%E6%9C%80%E4%BC%98%E7%9A%84%E4%BB%A3%E4%BB%B7"><strong>3. 动态规划：追求最优的代价</strong></h4>
-                <p>0-1背包问题虽然是NP-hard，但它有一个著名的<strong>伪多项式时间</strong>解法——动态规划。</p>
-                <p><strong>定义状态</strong>: $W_{i,p}$ 表示从前 $i$ 个物品中，凑出<strong>恰好</strong>为 $p$ 的总利润所需要的<strong>最小重量</strong>。
+<h4 id="3-%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E8%BF%BD%E6%B1%82%E6%9C%80%E4%BC%98%E7%9A%84%E4%BB%A3%E4%BB%B7"><strong>3. 动态规划：追求最优的代价</strong></h4>
+<p>0-1背包问题虽然是NP-hard，但它有一个著名的<strong>伪多项式时间</strong>解法——动态规划。</p>
+<p><strong>定义状态</strong>: $W_{i,p}$ 表示从前 $i$ 个物品中，凑出<strong>恰好</strong>为 $p$ 的总利润所需要的<strong>最小重量</strong>。
                 <strong>状态转移方程</strong>:
                 $$
                 W_{i,p} =
                 \begin{cases}
-                \infty & \text{if } i=0, p>0 \\
-                0 & \text{if } i=0, p=0 \\
-                W_{i-1, p} & \text{if item } i \text{ is not taken (} p_i > p \text{ or we choose not to)} \\
-                \min{ W_{i-1,p}, w_i + W_{i-1,p-p_i} } & \text{otherwise}
+                \infty &amp; \text{if } i=0, p&gt;0 \\
+                0 &amp; \text{if } i=0, p=0 \\
+                W_{i-1, p} &amp; \text{if item } i \text{ is not taken (} p_i &gt; p \text{ or we choose not to)} \\
+                \min{ W_{i-1,p}, w_i + W_{i-1,p-p_i} } &amp; \text{otherwise}
                 \end{cases}
                 $$
                 <strong>时间复杂度</strong>: $O(n \cdot P_{total})$，其中 $P_{total}$ 是所有物品的总利润，或者更精确地说是 $O(n \cdot n \cdot p_{max})$。
                 问题来了：如果利润值 $p_{max}$ 非常巨大（比如64位整数），这个算法的运行时间就不再是多项式了，因为它依赖于输入数值的大小，而不是输入的长度。</p>
-                <p><strong>【示例】</strong>:
+<p><strong>【示例】</strong>:
                 看这两组物品，背包容量 $M=11$:</p>
-                <table>
-                <thead>
-                <tr>
-                <th>Item</th>
-                <th>Profit</th>
-                <th>Weight</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                <td>1</td>
-                <td>134,221</td>
-                <td>1</td>
-                </tr>
-                <tr>
-                <td>2</td>
-                <td>656,342</td>
-                <td>2</td>
-                </tr>
-                <tr>
-                <td>3</td>
-                <td>1,810,013</td>
-                <td>5</td>
-                </tr>
-                <tr>
-                <td>4</td>
-                <td>22,217,800</td>
-                <td>6</td>
-                </tr>
-                <tr>
-                <td>5</td>
-                <td>28,343,199</td>
-                <td>7</td>
-                </tr>
-                </tbody>
-                </table>
-                <table>
-                <thead>
-                <tr>
-                <th>Item</th>
-                <th>Profit</th>
-                <th>Weight</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                <td>1</td>
-                <td>2</td>
-                <td>1</td>
-                </tr>
-                <tr>
-                <td>2</td>
-                <td>7</td>
-                <td>2</td>
-                </tr>
-                <tr>
-                <td>3</td>
-                <td>19</td>
-                <td>5</td>
-                </tr>
-                <tr>
-                <td>4</td>
-                <td>223</td>
-                <td>6</td>
-                </tr>
-                <tr>
-                <td>5</td>
-                <td>284</td>
-                <td>7</td>
-                </tr>
-                </tbody>
-                </table>
-                <p>左边这组数据的利润值极大，会导致动态规划失效。而右边这组数据，其实是左边利润值经过某种“压缩”得到的。两组数据的最优解是相同的！</p>
-                <p>这启发我们：我们能否通过<strong>牺牲一点点精度</strong>来<strong>大幅降低利润值的范围</strong>，从而让动态规划算法变得可用？</p>
-                <h4 id="4-%E6%89%93%E9%80%A0-fptas%E7%BC%A9%E6%94%BE%E4%B8%8E%E8%BF%91%E4%BC%BC%E7%9A%84%E8%89%BA%E6%9C%AF"><strong>4. 打造 FPTAS：缩放与近似的艺术</strong></h4>
-                <p>这正是构建0-1背包问题 FPTAS 的核心思想。</p>
-                <p><strong>算法步骤</strong>:</p>
-                <ol>
-                <li>给定一个精度参数 $\epsilon > 0$。</li>
-                <li>设 $P_{max}$ 是所有物品中的最大利润。</li>
-                <li>定义一个缩放因子 $K = \frac{\epsilon \cdot P_{max}}{n}$。</li>
-                <li>对于每个物品 <code>i</code>，创建一个新的、被“压缩”的利润值 $p'_i = \lfloor \frac{p_i}{K} \rfloor$。</li>
-                <li>使用动态规划算法，以新的利润 $p'_i$ 和原始重量 $w_i$ 来解决这个“压缩后”的背包问题。</li>
-                <li>返回动态规划找到的解所对应的<strong>原始总利润</strong>。</li>
-                </ol>
-                <p><strong>分析</strong>:</p>
-                <ul>
-                <li><strong>运行时间</strong>: 新问题的最大利润 $$p'{max} = \lfloor \frac{P{max}}{K} \rfloor = \lfloor \frac{P_{max}}{\epsilon P_{max} / n} \rfloor = \lfloor \frac{n}{\epsilon} \rfloor$$
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Profit</th>
+<th>Weight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>134,221</td>
+<td>1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>656,342</td>
+<td>2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1,810,013</td>
+<td>5</td>
+</tr>
+<tr>
+<td>4</td>
+<td>22,217,800</td>
+<td>6</td>
+</tr>
+<tr>
+<td>5</td>
+<td>28,343,199</td>
+<td>7</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Profit</th>
+<th>Weight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2</td>
+<td>1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>7</td>
+<td>2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>19</td>
+<td>5</td>
+</tr>
+<tr>
+<td>4</td>
+<td>223</td>
+<td>6</td>
+</tr>
+<tr>
+<td>5</td>
+<td>284</td>
+<td>7</td>
+</tr>
+</tbody>
+</table>
+<p>左边这组数据的利润值极大，会导致动态规划失效。而右边这组数据，其实是左边利润值经过某种“压缩”得到的。两组数据的最优解是相同的！</p>
+<p>这启发我们：我们能否通过<strong>牺牲一点点精度</strong>来<strong>大幅降低利润值的范围</strong>，从而让动态规划算法变得可用？</p>
+<h4 id="4-%E6%89%93%E9%80%A0-fptas%E7%BC%A9%E6%94%BE%E4%B8%8E%E8%BF%91%E4%BC%BC%E7%9A%84%E8%89%BA%E6%9C%AF"><strong>4. 打造 FPTAS：缩放与近似的艺术</strong></h4>
+<p>这正是构建0-1背包问题 FPTAS 的核心思想。</p>
+<p><strong>算法步骤</strong>:</p>
+<ol>
+<li>给定一个精度参数 $\epsilon &gt; 0$。</li>
+<li>设 $P_{max}$ 是所有物品中的最大利润。</li>
+<li>定义一个缩放因子 $K = \frac{\epsilon \cdot P_{max}}{n}$。</li>
+<li>对于每个物品 <code>i</code>，创建一个新的、被“压缩”的利润值 $p'_i = \lfloor \frac{p_i}{K} \rfloor$。</li>
+<li>使用动态规划算法，以新的利润 $p'_i$ 和原始重量 $w_i$ 来解决这个“压缩后”的背包问题。</li>
+<li>返回动态规划找到的解所对应的<strong>原始总利润</strong>。</li>
+</ol>
+<p><strong>分析</strong>:</p>
+<ul>
+<li><strong>运行时间</strong>: 新问题的最大利润 $$p'{max} = \lfloor \frac{P{max}}{K} \rfloor = \lfloor \frac{P_{max}}{\epsilon P_{max} / n} \rfloor = \lfloor \frac{n}{\epsilon} \rfloor$$
                 动态规划的时间复杂度变为 $$O(n \cdot \sum p'i) = O(n \cdot n \cdot p'{max}) = O(n^2 \cdot \frac{n}{\epsilon}) = O(\frac{n^3}{\epsilon})$$
                 这是一个关于 $n$ 和 $1/\epsilon$ 的多项式，所以这是一个 <strong>FPTAS</strong>！</li>
-                <li><strong>近似比证明 (思路)</strong>:
+<li><strong>近似比证明 (思路)</strong>:
                 每一步的取整操作 $\lfloor \cdot \rfloor$ 会带来误差。对于每个物品 $i$，我们有 $$K p'_i \le p_i \le K p'_i + K$$
                 设最优解包含的物品集合为 $O$，我们的算法找到的解的集合为 $A$。
                 最优解的总利润 $$P^* = \sum_{i \in O} p_i$$
                 我们的算法得到的总利润 $$P_{alg} = \sum_{j \in A} p_j$$
                 可以证明，这个算法得到的解 $P_{alg}$ 满足 $P_{alg} \ge (1-\epsilon)P^*$，这等价于一个 $(1+\epsilon')$ 的近似比。关键在于证明，由缩放带来的总误差 $\sum K$ 最多为 $nK = \epsilon P_{max}$，而 $P_{max} \le P^*$，所以总误差不超过 $\epsilon P^*$。</li>
-                </ul>
-                <h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%E4%B8%89--k-%E4%B8%AD%E5%BF%83%E9%97%AE%E9%A2%98-k-center-problem"><strong>第五部分：案例研究三 —— K-中心问题 (K-center Problem)</strong></h3>
-                <p>这是一个在设施选址、数据聚类等领域有广泛应用的问题。</p>
-                <p><strong>问题描述</strong>:</p>
-                <ul>
-                <li><strong>输入</strong>: $n$ 个“站点”（比如居民区、客户位置）$s_1, ..., s_n$ 和一个整数$K$。</li>
-                <li><strong>目标</strong>: 从这些站点中选择 $K$ 个作为“中心”（比如建基站、开超市），使得每个站点到其<strong>最近</strong>的那个中心的<strong>最大距离</strong>被最小化。</li>
-                </ul>
-                <div class="mermaid">
+</ul>
+<h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%E4%B8%89--k-%E4%B8%AD%E5%BF%83%E9%97%AE%E9%A2%98-k-center-problem"><strong>第五部分：案例研究三 —— K-中心问题 (K-center Problem)</strong></h3>
+<p>这是一个在设施选址、数据聚类等领域有广泛应用的问题。</p>
+<p><strong>问题描述</strong>:</p>
+<ul>
+<li><strong>输入</strong>: $n$ 个“站点”（比如居民区、客户位置）$s_1, ..., s_n$ 和一个整数$K$。</li>
+<li><strong>目标</strong>: 从这些站点中选择 $K$ 个作为“中心”（比如建基站、开超市），使得每个站点到其<strong>最近</strong>的那个中心的<strong>最大距离</strong>被最小化。</li>
+</ul>
+<div class="mermaid">
                 graph TD
                     subgraph "K-Center Problem (K=4)"
                         subgraph Cluster1
@@ -509,21 +509,21 @@
                     Goal["目标: 最小化最长的蓝线(覆盖半径)"]
                     style Goal fill:#lightyellow
                 </div>
-                <p>我们假设距离满足度量空间的基本性质：</p>
-                <ul>
-                <li><strong>同一性</strong>: $dist(x, x) = 0$</li>
-                <li><strong>对称性</strong>: $dist(x, y) = dist(y, x)$</li>
-                <li><strong>三角不等式</strong>: $dist(x, z) \le dist(x, y) + dist(y, z)$</li>
-                </ul>
-                <h4 id="1-%E4%B8%80%E4%B8%AA%E5%A4%B1%E8%B4%A5%E7%9A%84%E8%B4%AA%E5%BF%83%E7%AD%96%E7%95%A5"><strong>1. 一个失败的贪心策略</strong></h4>
-                <p>一个很自然的想法是：</p>
-                <ol>
-                <li>找到一个能使覆盖半径最小的“最佳”单中心位置。</li>
-                <li>固定它，然后在此基础上再找第二个中心，使得新的覆盖半径最小。</li>
-                <li>如此迭代 $K$ 次。</li>
-                </ol>
-                <p>这个策略是**任意差 (arbitrarily bad)**的。如下图所示，如果 $K=2$，这个策略可能会把第一个中心放在两大簇点的正中间，导致第二个中心无论放在哪里，覆盖半径都非常大。而最优解是在每个簇里各放一个中心。</p>
-                <div class="mermaid">
+<p>我们假设距离满足度量空间的基本性质：</p>
+<ul>
+<li><strong>同一性</strong>: $dist(x, x) = 0$</li>
+<li><strong>对称性</strong>: $dist(x, y) = dist(y, x)$</li>
+<li><strong>三角不等式</strong>: $dist(x, z) \le dist(x, y) + dist(y, z)$</li>
+</ul>
+<h4 id="1-%E4%B8%80%E4%B8%AA%E5%A4%B1%E8%B4%A5%E7%9A%84%E8%B4%AA%E5%BF%83%E7%AD%96%E7%95%A5"><strong>1. 一个失败的贪心策略</strong></h4>
+<p>一个很自然的想法是：</p>
+<ol>
+<li>找到一个能使覆盖半径最小的“最佳”单中心位置。</li>
+<li>固定它，然后在此基础上再找第二个中心，使得新的覆盖半径最小。</li>
+<li>如此迭代 $K$ 次。</li>
+</ol>
+<p>这个策略是**任意差 (arbitrarily bad)**的。如下图所示，如果 $K=2$，这个策略可能会把第一个中心放在两大簇点的正中间，导致第二个中心无论放在哪里，覆盖半径都非常大。而最优解是在每个簇里各放一个中心。</p>
+<div class="mermaid">
                 graph TD
                     subgraph "糟糕的贪心选择 (K=2)"
                         subgraph "第一步：选择全局最优的单中心"
@@ -540,38 +540,38 @@
                         style C_opt1,C_opt2 fill:green
                     end
                 </div>
-                <h4 id="2-%E4%B8%80%E4%B8%AA%E6%88%90%E5%8A%9F%E7%9A%84-2-%E8%BF%91%E4%BC%BC%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95"><strong>2. 一个成功的 2-近似贪心算法</strong></h4>
-                <p>我们需要一个更聪明的策略。这个算法被称为 <strong>Farthest-First Traversal</strong>。</p>
-                <p><strong>算法步骤</strong>:</p>
-                <ol>
-                <li>任意选择一个站点作为第一个中心 $c_1$，加入中心集合 $C$。</li>
-                <li>当 $|C| &lt; K$ 时，循环执行：
+<h4 id="2-%E4%B8%80%E4%B8%AA%E6%88%90%E5%8A%9F%E7%9A%84-2-%E8%BF%91%E4%BC%BC%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95"><strong>2. 一个成功的 2-近似贪心算法</strong></h4>
+<p>我们需要一个更聪明的策略。这个算法被称为 <strong>Farthest-First Traversal</strong>。</p>
+<p><strong>算法步骤</strong>:</p>
+<ol>
+<li>任意选择一个站点作为第一个中心 $c_1$，加入中心集合 $C$。</li>
+<li>当 $|C| &lt; K$ 时，循环执行：
                 <ul>
-                <li>找到一个站点 $s$，它距离<strong>当前已有的中心集合 $C$</strong> 最远。（即，计算每个站点到它最近的中心的距离，取这个距离最大的那个站点 $s$）。</li>
-                <li>将这个最远的站点 $s$ 作为新的中心，加入集合 $C$。</li>
-                </ul>
-                </li>
-                <li>返回集合 $C$。</li>
-                </ol>
-                <p><strong>伪代码:</strong></p>
-                <div class="code-container">
-                <pre><code>vector&lt;Site&gt; GreedyKCenter(const vector&lt;Site&gt;& sites, int K) {
-    if (sites.empty() || K <= 0) return {};
+<li>找到一个站点 $s$，它距离<strong>当前已有的中心集合 $C$</strong> 最远。（即，计算每个站点到它最近的中心的距离，取这个距离最大的那个站点 $s$）。</li>
+<li>将这个最远的站点 $s$ 作为新的中心，加入集合 $C$。</li>
+</ul>
+</li>
+<li>返回集合 $C$。</li>
+</ol>
+<p><strong>伪代码:</strong></p>
+<div class="code-container">
+<pre><code>vector&lt;Site&gt; GreedyKCenter(const vector&lt;Site&gt;&amp; sites, int K) {
+    if (sites.empty() || K &lt;= 0) return {};
     vector&lt;Site&gt; centers;
     // 1. 任意选择第一个中心
     centers.push_back(sites[0]);
 
     vector&lt;double&gt; min_dist(sites.size(), numeric_limits&lt;double&gt;::max());
 
-    while (centers.size() < K) {
+    while (centers.size() &lt; K) {
         // 更新所有点到中心集的最近距离
         Site new_center = centers.back();
         double max_farthest_dist = -1;
         int farthest_site_idx = -1;
 
-        for (int i = 0; i < sites.size(); ++i) {
+        for (int i = 0; i &lt; sites.size(); ++i) {
             min_dist[i] = min(min_dist[i], distance(sites[i], new_center));
-            if (min_dist[i] > max_farthest_dist) {
+            if (min_dist[i] &gt; max_farthest_dist) {
                 max_farthest_dist = min_dist[i];
                 farthest_site_idx = i;
             }
@@ -586,76 +586,102 @@
     return centers;
 }
 </code></pre>
-                </div>
-                <p><strong>【定理】</strong>: 上述贪心算法是一个 <strong>2-近似算法</strong>。即 $r(C) \le 2r(C^*)$，其中 $r(C)$ 是该算法解的覆盖半径， $r(C^*)$ 是最优解的覆盖半径。</p>
-                <p><strong>【严谨证明】</strong>:
-                我们再次使用反证法。令 $r^*$ 为最优覆盖半径。假设我们的算法产生的覆盖半径 $r(C) > 2r^*$。
+</div>
+<p><strong>【定理】</strong>: 上述贪心算法是一个 <strong>2-近似算法</strong>。即 $r(C) \le 2r(C^*)$，其中 $r(C)$ 是该算法解的覆盖半径， $r(C^*)$ 是最优解的覆盖半径。</p>
+<p><strong>【严谨证明】</strong>:
+                我们再次使用反证法。令 $r^*$ 为最优覆盖半径。假设我们的算法产生的覆盖半径 $r(C) &gt; 2r^*$。
                 这意味着，在我们的解中，存在一个站点 $s$，它到所有我们选择的 $K$ 个中心 $c_1, ..., c_K$ 的距离都大于 $2r^*$。
-                特别地，当算法选择第 $K+1$ 个（假设的）中心 $c_{K+1}$ 时（这个点就是最远的 $s$），我们有 $dist(c_{K+1}, c_i) > 2r^*$ 对于所有 $i=1, ..., K$。
+                特别地，当算法选择第 $K+1$ 个（假设的）中心 $c_{K+1}$ 时（这个点就是最远的 $s$），我们有 $dist(c_{K+1}, c_i) &gt; 2r^*$ 对于所有 $i=1, ..., K$。
                 这样，我们就得到了 $K+1$ 个点 ${c_1, ..., c_{K+1}}$，它们两两之间的距离都大于 $2r^*$。</p>
-                <p>现在考虑最优解。最优解用 $K$ 个中心 $c^*_1, ..., c^*_K$ 覆盖了所有的站点，其半径为 $r^*$。这意味着，我们找到的这 $K+1$ 个点 ${c_1, ..., c_{K+1}}$ 也必然被这 $K$ 个最优中心所覆盖。
+<p>现在考虑最优解。最优解用 $K$ 个中心 $c^*_1, ..., c^*_K$ 覆盖了所有的站点，其半径为 $r^*$。这意味着，我们找到的这 $K+1$ 个点 ${c_1, ..., c_{K+1}}$ 也必然被这 $K$ 个最优中心所覆盖。
                 根据<strong>鸽巢原理</strong>，这 $K+1$ 个点中，必然至少有两个点，比如说 $c_i$ 和 $c_j$，被同一个最优中心 $c^*_m$ 所覆盖。
                 “被覆盖”意味着：</p>
-                <ul>
-                <li>$dist(c_i, c^*_m) \le r^*$</li>
-                <li>$dist(c_j, c^*_m) \le r^*$</li>
-                </ul>
-                <p>现在，利用<strong>三角不等式</strong>，我们可以估算 $c_i$ 和 $c_j$ 之间的距离：
+<ul>
+<li>$dist(c_i, c^*_m) \le r^*$</li>
+<li>$dist(c_j, c^*_m) \le r^*$</li>
+</ul>
+<p>现在，利用<strong>三角不等式</strong>，我们可以估算 $c_i$ 和 $c_j$ 之间的距离：
                 $$
                 dist(c_i, c_j) \le dist(c_i, c^*_m) + dist(c^*_m, c_j) \le r^* + r^* = 2r^*
                 $$
                 这个结论 $dist(c_i, c_j) \le 2r^*$ 与我们之前的推论“它们两两之间的距离都大于 $2r^*$”产生了直接的矛盾！
-                因此，我们的初始假设“$r(C) > 2r^*$”是错误的。必须有 $r(C) \le 2r^*$。证明完毕。</p>
-                <h4 id="3-%E8%BF%91%E4%BC%BC%E6%AF%94%E7%9A%84%E6%9E%81%E9%99%90"><strong>3. 近似比的极限</strong></h4>
-                <p>这个 2-近似算法是不是已经足够好了？我们还能找到比如 1.5-近似或者 1.99-近似的算法吗？答案是<strong>不能，除非 P=NP</strong>。</p>
-                <p><strong>【定理】</strong>: 对于任何 $\rho &lt; 2$，都不存在 K-中心问题的 $\rho$-近似算法，除非 P=NP。</p>
-                <p><strong>【证明思路 (通过规约)】</strong>:
+                因此，我们的初始假设“$r(C) &gt; 2r^*$”是错误的。必须有 $r(C) \le 2r^*$。证明完毕。</p>
+<h4 id="3-%E8%BF%91%E4%BC%BC%E6%AF%94%E7%9A%84%E6%9E%81%E9%99%90"><strong>3. 近似比的极限</strong></h4>
+<p>这个 2-近似算法是不是已经足够好了？我们还能找到比如 1.5-近似或者 1.99-近似的算法吗？答案是<strong>不能，除非 P=NP</strong>。</p>
+<p><strong>【定理】</strong>: 对于任何 $\rho &lt; 2$，都不存在 K-中心问题的 $\rho$-近似算法，除非 P=NP。</p>
+<p><strong>【证明思路 (通过规约)】</strong>:
                 这个证明的核心思想是，如果存在一个 $(2-\epsilon)$-近似算法，我们就可以用它来在多项式时间内解决一个已知的 NP-complete 问题——<strong>支配集 (Dominating Set)</strong> 问题。</p>
-                <ul>
-                <li><strong>支配集问题</strong>: 在图 G=(V,E) 中，找到一个最小的顶点子集 $D \subseteq V$，使得所有不在 D 中的顶点都至少与 D 中一个顶点相邻。</li>
-                <li><strong>规约</strong>:
+<ul>
+<li><strong>支配集问题</strong>: 在图 G=(V,E) 中，找到一个最小的顶点子集 $D \subseteq V$，使得所有不在 D 中的顶点都至少与 D 中一个顶点相邻。</li>
+<li><strong>规约</strong>:
                 <ol>
-                <li>给定一个支配集问题实例图 G。</li>
-                <li>构造一个 K-中心问题实例：图 G 的所有顶点就是我们的“站点”。任意两点间的距离定义为：如果两点在 G 中有边相连，则距离为 1；否则距离为 2。</li>
-                <li>现在，问“是否存在一个大小为 K 的支配集”就等价于问“是否存在 K 个中心，使得覆盖半径为 1”。</li>
-                </ol>
-                </li>
-                <li><strong>关键</strong>:
+<li>给定一个支配集问题实例图 G。</li>
+<li>构造一个 K-中心问题实例：图 G 的所有顶点就是我们的“站点”。任意两点间的距离定义为：如果两点在 G 中有边相连，则距离为 1；否则距离为 2。</li>
+<li>现在，问“是否存在一个大小为 K 的支配集”就等价于问“是否存在 K 个中心，使得覆盖半径为 1”。</li>
+</ol>
+</li>
+<li><strong>关键</strong>:
                 <ul>
-                <li>如果图 G 存在大小为 K 的支配集，那么 K-中心问题的最优半径 $r^*$ 就是 1。</li>
-                <li>如果我们有一个 $(2-\epsilon)$-近似算法，它作用在这个实例上，返回的半径必然是 $(2-\epsilon) \times r^* = 2-\epsilon$。由于距离只能是整数1或2，所以返回的半径必须是 1。这意味着算法找到了一个最优解！</li>
-                <li>因此，我们可以通过调用这个近似算法来判断是否存在大小为 K 的支配集，从而在多项式时间内解决了 NP-complete 问题。这是不可能的，除非 P=NP。</li>
-                </ul>
-                </li>
-                <li><strong>结论</strong>: 2 是我们能为 K-中心问题达到的最佳近似比。</li>
-                </ul>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li>如果图 G 存在大小为 K 的支配集，那么 K-中心问题的最优半径 $r^*$ 就是 1。</li>
+<li>如果我们有一个 $(2-\epsilon)$-近似算法，它作用在这个实例上，返回的半径必然是 $(2-\epsilon) \times r^* = 2-\epsilon$。由于距离只能是整数1或2，所以返回的半径必须是 1。这意味着算法找到了一个最优解！</li>
+<li>因此，我们可以通过调用这个近似算法来判断是否存在大小为 K 的支配集，从而在多项式时间内解决了 NP-complete 问题。这是不可能的，除非 P=NP。</li>
+</ul>
+</li>
+<li><strong>结论</strong>: 2 是我们能为 K-中心问题达到的最佳近似比。</li>
+</ul>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

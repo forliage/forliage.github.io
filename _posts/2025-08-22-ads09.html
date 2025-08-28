@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>ads09:贪心算法 (Greedy Algorithms)</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>ads09:贪心算法 (Greedy Algorithms)</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,111 +30,111 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="ads09%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95-greedy-algorithms">ads09:贪心算法 (Greedy Algorithms)</h1>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3"><strong>第一部分：贪心算法的核心思想</strong></h3>
-                <p>在我们深入代码和证明之前，我们首先要理解，什么是贪心算法？它试图解决什么样的问题？</p>
-                <h4 id="1-%E4%BC%98%E5%8C%96%E9%97%AE%E9%A2%98-optimization-problems"><strong>1. 优化问题 (Optimization Problems)</strong></h4>
-                <p>我们生活和学习中遇到的很多问题，本质上都是<strong>优化问题</strong>。比如，如何规划回家的路线才能时间最短？如何在预算内选择商品才能价值最大？</p>
-                <p>一个标准的优化问题通常包含两个核心要素：</p>
-                <ul>
-                <li><strong>约束 (Constraints)</strong>：解决问题时必须满足的条件。例如，你的总花费不能超过预算，你选择的路线必须能从起点到达终点。</li>
-                <li><strong>优化函数 (Optimization Function)</strong>：一个需要被最大化或最小化的目标。例如，最短的时间，最大的价值。</li>
-                </ul>
-                <p>所有满足约束条件的解，我们称之为<strong>可行解 (Feasible Solutions)</strong>。而在所有可行解中，那个能让优化函数达到最优值（最大或最小）的解，就是我们梦寐以求的<strong>最优解 (Optimal Solution)</strong>。</p>
-                <h4 id="2-%E8%B4%AA%E5%BF%83%E6%96%B9%E6%B3%95-the-greedy-method"><strong>2. 贪心方法 (The Greedy Method)</strong></h4>
-                <p>面对一个复杂的优化问题，我们该如何下手？</p>
-                <p>贪心算法提供了一种非常直观的思路：<strong>“目光短浅”，只看眼前</strong>。它在每一步决策时，都采取当前状态下看起来最好或最优的选择，而不从整体最优上进行考虑。这个“当前最好”的判断标准，我们称之为<strong>贪心准则 (Greedy Criterion)</strong>。</p>
-                <p>贪心算法有一个非常关键的特性：<strong>一旦做出选择，绝不反悔</strong>。也就是说，一个阶段做出的决策，在后面的阶段是<strong>不会被改变 (not changed)</strong> 的。这要求我们每一步的选择都必须保证当前解仍然是<strong>可行 (assure feasibility)</strong> 的。</p>
-                <p>想象一下你在一个岔路口，每条路都标着走到下一个路口的距离。如果你使用贪心策略，你每次都会选择那条距离最短的路，期望最终能最快到达终点。</p>
-                <h4 id="3-%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95%E7%9A%84%E5%8F%8C%E5%88%83%E5%89%91"><strong>3. 贪心算法的“双刃剑”</strong></h4>
-                <p>现在，请思考一个问题：这种“只看眼前”的策略，一定能得到全局最优解吗？</p>
-                <p>答案是：<strong>不一定</strong>。</p>
-                <p><strong>注意 (Note):</strong></p>
-                <ul>
-                <li><strong>什么时候贪心算法有效？</strong> 仅当问题的结构特殊，保证了<strong>局部最优 (local optimum)</strong> 的选择能够推导出<strong>全局最优 (global optimum)</strong> 时，贪心算法才能给出正确的解。</li>
-                <li><strong>什么时候贪心算法无效？</strong> 在大多数情况下，贪心算法<strong>不能保证 (does not guarantee)</strong> 得到最优解。然而，它通常能快速地给出一个<strong>接近最优解的近似解</strong>。这种情况下，贪心算法常作为一种<strong>启发式算法 (heuristics)</strong> 使用。当寻找精确最优解非常耗时（例如指数级时间复杂度）时，贪心算法就显得非常有价值。</li>
-                </ul>
-                <p>总结一下，贪心算法就像一个“急功近利”的决策者，它简单、高效，但在某些问题上会因为缺乏远见而犯错。我们的任务，就是要学会甄别哪些问题可以用贪心解决，并学会证明其正确性。</p>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E7%BB%8F%E5%85%B8%E6%A1%88%E4%BE%8B%E4%B8%80%E6%B4%BB%E5%8A%A8%E9%80%89%E6%8B%A9%E9%97%AE%E9%A2%98-activity-selection-problem"><strong>第二部分：经典案例一：活动选择问题 (Activity Selection Problem)</strong></h3>
-                <p>让我们通过一个经典的例子来感受贪心算法的魅力与挑战。</p>
-                <h4 id="1-%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><strong>1. 问题描述</strong></h4>
-                <p>假设我们有一个资源，比如一间教室。现在有 $n$ 个活动申请使用这个教室，每个活动 $a_i$ 都有一个开始时间 $s_i$ 和一个结束时间 $f_i$。活动占用的时间区间是左闭右开的 $[s_i, f_i)$。</p>
-                <p>如果两个活动 $a_i$ 和 $a_j$ 的时间区间不重叠，我们就说它们是<strong>兼容的 (compatible)</strong>。数学上讲，即 $s_i \ge f_j$ 或者 $s_j \ge f_i$。</p>
-                <p>我们的目标是：从这 $n$ 个活动中，选出一个由<strong>互相兼容</strong>的活动组成的最大子集。也就是说，我们要安排尽可能多的活动。</p>
-                <p>为了方便处理，我们首先假设所有活动已经按照<strong>结束时间的非递减顺序</strong>排好序，即 $f_1 \le f_2 \le \dots \le f_n$。</p>
-                <p><strong>【示例】</strong></p>
-                <p>下面是一个活动安排的例子：</p>
-                <table>
-                <thead>
-                <tr>
-                <th style="text-align:left">活动 $i$</th>
-                <th style="text-align:center">1</th>
-                <th style="text-align:center">2</th>
-                <th style="text-align:center">3</th>
-                <th style="text-align:center">4</th>
-                <th style="text-align:center">5</th>
-                <th style="text-align:center">6</th>
-                <th style="text-align:center">7</th>
-                <th style="text-align:center">8</th>
-                <th style="text-align:center">9</th>
-                <th style="text-align:center">10</th>
-                <th style="text-align:center">11</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                <td style="text-align:left">开始时间 $s_i$</td>
-                <td style="text-align:center">1</td>
-                <td style="text-align:center">3</td>
-                <td style="text-align:center">0</td>
-                <td style="text-align:center">5</td>
-                <td style="text-align:center">3</td>
-                <td style="text-align:center">5</td>
-                <td style="text-align:center">6</td>
-                <td style="text-align:center">8</td>
-                <td style="text-align:center">8</td>
-                <td style="text-align:center">2</td>
-                <td style="text-align:center">12</td>
-                </tr>
-                <tr>
-                <td style="text-align:left">结束时间 $f_i$</td>
-                <td style="text-align:center">4</td>
-                <td style="text-align:center">5</td>
-                <td style="text-align:center">6</td>
-                <td style="text-align:center">7</td>
-                <td style="text-align:center">9</td>
-                <td style="text-align:center">9</td>
-                <td style="text-align:center">10</td>
-                <td style="text-align:center">11</td>
-                <td style="text-align:center">12</td>
-                <td style="text-align:center">14</td>
-                <td style="text-align:center">16</td>
-                </tr>
-                </tbody>
-                </table>
-                <p>我们可以用图形化来表示这些活动的时间区间：</p>
-                <div class="mermaid">
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="ads09%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95-greedy-algorithms">ads09:贪心算法 (Greedy Algorithms)</h1>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3"><strong>第一部分：贪心算法的核心思想</strong></h3>
+<p>在我们深入代码和证明之前，我们首先要理解，什么是贪心算法？它试图解决什么样的问题？</p>
+<h4 id="1-%E4%BC%98%E5%8C%96%E9%97%AE%E9%A2%98-optimization-problems"><strong>1. 优化问题 (Optimization Problems)</strong></h4>
+<p>我们生活和学习中遇到的很多问题，本质上都是<strong>优化问题</strong>。比如，如何规划回家的路线才能时间最短？如何在预算内选择商品才能价值最大？</p>
+<p>一个标准的优化问题通常包含两个核心要素：</p>
+<ul>
+<li><strong>约束 (Constraints)</strong>：解决问题时必须满足的条件。例如，你的总花费不能超过预算，你选择的路线必须能从起点到达终点。</li>
+<li><strong>优化函数 (Optimization Function)</strong>：一个需要被最大化或最小化的目标。例如，最短的时间，最大的价值。</li>
+</ul>
+<p>所有满足约束条件的解，我们称之为<strong>可行解 (Feasible Solutions)</strong>。而在所有可行解中，那个能让优化函数达到最优值（最大或最小）的解，就是我们梦寐以求的<strong>最优解 (Optimal Solution)</strong>。</p>
+<h4 id="2-%E8%B4%AA%E5%BF%83%E6%96%B9%E6%B3%95-the-greedy-method"><strong>2. 贪心方法 (The Greedy Method)</strong></h4>
+<p>面对一个复杂的优化问题，我们该如何下手？</p>
+<p>贪心算法提供了一种非常直观的思路：<strong>“目光短浅”，只看眼前</strong>。它在每一步决策时，都采取当前状态下看起来最好或最优的选择，而不从整体最优上进行考虑。这个“当前最好”的判断标准，我们称之为<strong>贪心准则 (Greedy Criterion)</strong>。</p>
+<p>贪心算法有一个非常关键的特性：<strong>一旦做出选择，绝不反悔</strong>。也就是说，一个阶段做出的决策，在后面的阶段是<strong>不会被改变 (not changed)</strong> 的。这要求我们每一步的选择都必须保证当前解仍然是<strong>可行 (assure feasibility)</strong> 的。</p>
+<p>想象一下你在一个岔路口，每条路都标着走到下一个路口的距离。如果你使用贪心策略，你每次都会选择那条距离最短的路，期望最终能最快到达终点。</p>
+<h4 id="3-%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95%E7%9A%84%E5%8F%8C%E5%88%83%E5%89%91"><strong>3. 贪心算法的“双刃剑”</strong></h4>
+<p>现在，请思考一个问题：这种“只看眼前”的策略，一定能得到全局最优解吗？</p>
+<p>答案是：<strong>不一定</strong>。</p>
+<p><strong>注意 (Note):</strong></p>
+<ul>
+<li><strong>什么时候贪心算法有效？</strong> 仅当问题的结构特殊，保证了<strong>局部最优 (local optimum)</strong> 的选择能够推导出<strong>全局最优 (global optimum)</strong> 时，贪心算法才能给出正确的解。</li>
+<li><strong>什么时候贪心算法无效？</strong> 在大多数情况下，贪心算法<strong>不能保证 (does not guarantee)</strong> 得到最优解。然而，它通常能快速地给出一个<strong>接近最优解的近似解</strong>。这种情况下，贪心算法常作为一种<strong>启发式算法 (heuristics)</strong> 使用。当寻找精确最优解非常耗时（例如指数级时间复杂度）时，贪心算法就显得非常有价值。</li>
+</ul>
+<p>总结一下，贪心算法就像一个“急功近利”的决策者，它简单、高效，但在某些问题上会因为缺乏远见而犯错。我们的任务，就是要学会甄别哪些问题可以用贪心解决，并学会证明其正确性。</p>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E7%BB%8F%E5%85%B8%E6%A1%88%E4%BE%8B%E4%B8%80%E6%B4%BB%E5%8A%A8%E9%80%89%E6%8B%A9%E9%97%AE%E9%A2%98-activity-selection-problem"><strong>第二部分：经典案例一：活动选择问题 (Activity Selection Problem)</strong></h3>
+<p>让我们通过一个经典的例子来感受贪心算法的魅力与挑战。</p>
+<h4 id="1-%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><strong>1. 问题描述</strong></h4>
+<p>假设我们有一个资源，比如一间教室。现在有 $n$ 个活动申请使用这个教室，每个活动 $a_i$ 都有一个开始时间 $s_i$ 和一个结束时间 $f_i$。活动占用的时间区间是左闭右开的 $[s_i, f_i)$。</p>
+<p>如果两个活动 $a_i$ 和 $a_j$ 的时间区间不重叠，我们就说它们是<strong>兼容的 (compatible)</strong>。数学上讲，即 $s_i \ge f_j$ 或者 $s_j \ge f_i$。</p>
+<p>我们的目标是：从这 $n$ 个活动中，选出一个由<strong>互相兼容</strong>的活动组成的最大子集。也就是说，我们要安排尽可能多的活动。</p>
+<p>为了方便处理，我们首先假设所有活动已经按照<strong>结束时间的非递减顺序</strong>排好序，即 $f_1 \le f_2 \le \dots \le f_n$。</p>
+<p><strong>【示例】</strong></p>
+<p>下面是一个活动安排的例子：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">活动 $i$</th>
+<th style="text-align:center">1</th>
+<th style="text-align:center">2</th>
+<th style="text-align:center">3</th>
+<th style="text-align:center">4</th>
+<th style="text-align:center">5</th>
+<th style="text-align:center">6</th>
+<th style="text-align:center">7</th>
+<th style="text-align:center">8</th>
+<th style="text-align:center">9</th>
+<th style="text-align:center">10</th>
+<th style="text-align:center">11</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">开始时间 $s_i$</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">3</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">5</td>
+<td style="text-align:center">3</td>
+<td style="text-align:center">5</td>
+<td style="text-align:center">6</td>
+<td style="text-align:center">8</td>
+<td style="text-align:center">8</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">12</td>
+</tr>
+<tr>
+<td style="text-align:left">结束时间 $f_i$</td>
+<td style="text-align:center">4</td>
+<td style="text-align:center">5</td>
+<td style="text-align:center">6</td>
+<td style="text-align:center">7</td>
+<td style="text-align:center">9</td>
+<td style="text-align:center">9</td>
+<td style="text-align:center">10</td>
+<td style="text-align:center">11</td>
+<td style="text-align:center">12</td>
+<td style="text-align:center">14</td>
+<td style="text-align:center">16</td>
+</tr>
+</tbody>
+</table>
+<p>我们可以用图形化来表示这些活动的时间区间：</p>
+<div class="mermaid">
                 gantt
                     title 活动时间区间
                     dateFormat HH
@@ -163,20 +163,20 @@
                     section 活动11
                     A11: 12, 4h
                 </div>
-                <p><strong>思考一下：</strong> 面对这个问题，我们可以有哪些“贪心”的思路？换句话说，我们的贪心准则可以是什么？</p>
-                <h4 id="2-%E6%8E%A2%E7%B4%A2%E4%B8%8D%E5%90%8C%E7%9A%84%E8%B4%AA%E5%BF%83%E7%AD%96%E7%95%A5"><strong>2. 探索不同的贪心策略</strong></h4>
-                <p>在解决这个问题之前，我们先提一下，这个问题是可以用<strong>动态规划 (Dynamic Programming)</strong> 解决的。</p>
-                <p>如果我们定义 $S_{ij}$ 为在活动 $a_i$ 结束之后开始，且在活动 $a_j$ 开始之前结束的活动集合。令 $c_{ij}$ 为集合 $S_{ij}$ 的最优解的大小。我们可以得到递推式：
+<p><strong>思考一下：</strong> 面对这个问题，我们可以有哪些“贪心”的思路？换句话说，我们的贪心准则可以是什么？</p>
+<h4 id="2-%E6%8E%A2%E7%B4%A2%E4%B8%8D%E5%90%8C%E7%9A%84%E8%B4%AA%E5%BF%83%E7%AD%96%E7%95%A5"><strong>2. 探索不同的贪心策略</strong></h4>
+<p>在解决这个问题之前，我们先提一下，这个问题是可以用<strong>动态规划 (Dynamic Programming)</strong> 解决的。</p>
+<p>如果我们定义 $S_{ij}$ 为在活动 $a_i$ 结束之后开始，且在活动 $a_j$ 开始之前结束的活动集合。令 $c_{ij}$ 为集合 $S_{ij}$ 的最优解的大小。我们可以得到递推式：
                 $$c_{ij} = \max_{a_k \in S_{ij}} {c_{ik} + c_{kj} + 1}$$
                 如果 $S_{ij} = \emptyset$，则 $c_{ij}=0$。
                 这个 DP 解法的时间复杂度大约是 $O(N^3)$，经过优化可以达到 $O(N^2)$。</p>
-                <p><strong>那么，我们能用更快的贪心算法吗？我们来试试看！</strong></p>
-                <h5 id="%E8%B4%AA%E5%BF%83%E7%AD%96%E7%95%A5-1%E9%80%89%E6%8B%A9%E5%BC%80%E5%A7%8B%E6%97%B6%E9%97%B4%E6%9C%80%E6%97%A9%E7%9A%84%E6%B4%BB%E5%8A%A8"><strong>贪心策略 1：选择开始时间最早的活动</strong></h5>
-                <ul>
-                <li><strong>准则：</strong> 每次都从还未安排的活动中，选择一个开始时间最早的。</li>
-                <li><strong>分析：</strong> 这个策略看似合理，因为它能让教室尽早被利用。但我们来看一个反例：</li>
-                </ul>
-                <div class="mermaid">
+<p><strong>那么，我们能用更快的贪心算法吗？我们来试试看！</strong></p>
+<h5 id="%E8%B4%AA%E5%BF%83%E7%AD%96%E7%95%A5-1%E9%80%89%E6%8B%A9%E5%BC%80%E5%A7%8B%E6%97%B6%E9%97%B4%E6%9C%80%E6%97%A9%E7%9A%84%E6%B4%BB%E5%8A%A8"><strong>贪心策略 1：选择开始时间最早的活动</strong></h5>
+<ul>
+<li><strong>准则：</strong> 每次都从还未安排的活动中，选择一个开始时间最早的。</li>
+<li><strong>分析：</strong> 这个策略看似合理，因为它能让教室尽早被利用。但我们来看一个反例：</li>
+</ul>
+<div class="mermaid">
                 gantt
                     title 反例：最早开始
                     dateFormat X
@@ -190,13 +190,13 @@
                     未选择2 : 3, 4
                     未选择3 : 5, 6
                 </div>
-                <p>在这个例子中，贪心策略会首先选择那个持续时间很长的活动 (0-10)，因为它开始得最早。但这样一来，其他所有活动都无法被安排了。而最优解是选择后面三个短的活动。所以，<strong>策略 1 失败</strong>。</p>
-                <h5 id="%E8%B4%AA%E5%BF%83%E7%AD%96%E7%95%A5-2%E9%80%89%E6%8B%A9%E6%8C%81%E7%BB%AD%E6%97%B6%E9%97%B4%E6%9C%80%E7%9F%AD%E7%9A%84%E6%B4%BB%E5%8A%A8"><strong>贪心策略 2：选择持续时间最短的活动</strong></h5>
-                <ul>
-                <li><strong>准则：</strong> 每次都从还未安排的活动中，选择一个持续时间最短的。</li>
-                <li><strong>分析：</strong> 这个策略试图留下更多的时间给其他活动。我们来看一个反例：</li>
-                </ul>
-                <div class="mermaid">
+<p>在这个例子中，贪心策略会首先选择那个持续时间很长的活动 (0-10)，因为它开始得最早。但这样一来，其他所有活动都无法被安排了。而最优解是选择后面三个短的活动。所以，<strong>策略 1 失败</strong>。</p>
+<h5 id="%E8%B4%AA%E5%BF%83%E7%AD%96%E7%95%A5-2%E9%80%89%E6%8B%A9%E6%8C%81%E7%BB%AD%E6%97%B6%E9%97%B4%E6%9C%80%E7%9F%AD%E7%9A%84%E6%B4%BB%E5%8A%A8"><strong>贪心策略 2：选择持续时间最短的活动</strong></h5>
+<ul>
+<li><strong>准则：</strong> 每次都从还未安排的活动中，选择一个持续时间最短的。</li>
+<li><strong>分析：</strong> 这个策略试图留下更多的时间给其他活动。我们来看一个反例：</li>
+</ul>
+<div class="mermaid">
                 gantt
                     title 反例：最短持续
                     dateFormat X
@@ -209,13 +209,13 @@
                     section 贪心选择
                     选择的活动 : 4, 8
                 </div>
-                <p>在这个例子中，最短的活动是中间那个 (4-8)。如果我们选了它，左右两边的活动就都不能选了，总共只能选1个。但最优解是选择左右两个活动，总共可以选2个。所以，<strong>策略 2 失败</strong>。</p>
-                <h5 id="%E8%B4%AA%E5%BF%83%E7%AD%96%E7%95%A5-3%E9%80%89%E6%8B%A9%E5%86%B2%E7%AA%81%E6%9C%80%E5%B0%91%E7%9A%84%E6%B4%BB%E5%8A%A8"><strong>贪心策略 3：选择冲突最少的活动</strong></h5>
-                <ul>
-                <li><strong>准则：</strong> 每次都选择与剩余活动冲突最少的那个。</li>
-                <li><strong>分析：</strong> 这个策略的思路是最大化未来的选择空间。但它的计算量很大，而且同样不是最优的。看下面的反例：</li>
-                </ul>
-                <div class="mermaid">
+<p>在这个例子中，最短的活动是中间那个 (4-8)。如果我们选了它，左右两边的活动就都不能选了，总共只能选1个。但最优解是选择左右两个活动，总共可以选2个。所以，<strong>策略 2 失败</strong>。</p>
+<h5 id="%E8%B4%AA%E5%BF%83%E7%AD%96%E7%95%A5-3%E9%80%89%E6%8B%A9%E5%86%B2%E7%AA%81%E6%9C%80%E5%B0%91%E7%9A%84%E6%B4%BB%E5%8A%A8"><strong>贪心策略 3：选择冲突最少的活动</strong></h5>
+<ul>
+<li><strong>准则：</strong> 每次都选择与剩余活动冲突最少的那个。</li>
+<li><strong>分析：</strong> 这个策略的思路是最大化未来的选择空间。但它的计算量很大，而且同样不是最优的。看下面的反例：</li>
+</ul>
+<div class="mermaid">
                 gantt
                     title 反例：最少冲突
                     dateFormat X
@@ -237,21 +237,21 @@
                     section (a)
                     活动a1: 6, 7
                 </div>
-                <p>在这个复杂的例子中，中间的活动(b1)可能会与很多活动冲突，但选择它可能导致更多的活动被安排。而那些冲突少的边缘活动，可能并不是最优解的一部分。这个策略也<strong>不保证最优</strong>。</p>
-                <h5 id="%E8%B4%AA%E5%BF%83%E7%AD%96%E7%95%A5-4%E9%80%89%E6%8B%A9%E7%BB%93%E6%9D%9F%E6%97%B6%E9%97%B4%E6%9C%80%E6%97%A9%E7%9A%84%E6%B4%BB%E5%8A%A8"><strong>贪心策略 4：选择结束时间最早的活动</strong></h5>
-                <ul>
-                <li><strong>准则：</strong> 每次都从还未安排的活动中，选择一个<strong>结束时间最早</strong>的。</li>
-                <li><strong>分析：</strong> 这个策略的直觉是什么？<strong>让资源尽快被释放出来 (Resource become free as soon as possible)</strong>，这样就可以给后续的活动留下更多的时间窗口。</li>
-                </ul>
-                <p>我们来模拟一下这个策略：</p>
-                <ol>
-                <li>首先，将所有活动按结束时间升序排序。</li>
-                <li>选择第一个活动（结束时间最早的那个）加入解集。</li>
-                <li>从剩下的活动中，剔除掉所有与刚选入的活动冲突的活动。</li>
-                <li>重复步骤2和3，直到没有活动可选。</li>
-                </ol>
-                <p>我们来试试这个策略：</p>
-                <div class="mermaid">
+<p>在这个复杂的例子中，中间的活动(b1)可能会与很多活动冲突，但选择它可能导致更多的活动被安排。而那些冲突少的边缘活动，可能并不是最优解的一部分。这个策略也<strong>不保证最优</strong>。</p>
+<h5 id="%E8%B4%AA%E5%BF%83%E7%AD%96%E7%95%A5-4%E9%80%89%E6%8B%A9%E7%BB%93%E6%9D%9F%E6%97%B6%E9%97%B4%E6%9C%80%E6%97%A9%E7%9A%84%E6%B4%BB%E5%8A%A8"><strong>贪心策略 4：选择结束时间最早的活动</strong></h5>
+<ul>
+<li><strong>准则：</strong> 每次都从还未安排的活动中，选择一个<strong>结束时间最早</strong>的。</li>
+<li><strong>分析：</strong> 这个策略的直觉是什么？<strong>让资源尽快被释放出来 (Resource become free as soon as possible)</strong>，这样就可以给后续的活动留下更多的时间窗口。</li>
+</ul>
+<p>我们来模拟一下这个策略：</p>
+<ol>
+<li>首先，将所有活动按结束时间升序排序。</li>
+<li>选择第一个活动（结束时间最早的那个）加入解集。</li>
+<li>从剩下的活动中，剔除掉所有与刚选入的活动冲突的活动。</li>
+<li>重复步骤2和3，直到没有活动可选。</li>
+</ol>
+<p>我们来试试这个策略：</p>
+<div class="mermaid">
                 gantt
                     title 策略4：最早结束
                     dateFormat X
@@ -272,46 +272,46 @@
                     section E
                     选择 3: 7, 9
                 </div>
-                <p>在这个例子中，我们首先选择 (0, 3)。然后所有在 3 之前结束的、并且与 (0, 3) 冲突的活动都被排除。接下来，在剩下的活动中，我们选择结束时间最早的 (4, 6)。然后排除与它冲突的。最后选择 (7, 9)。这个策略看起来非常有前途！</p>
-                <h4 id="3-%E6%AD%A3%E7%A1%AE%E6%80%A7%E8%AF%81%E6%98%8E"><strong>3. 正确性证明</strong></h4>
-                <p>直觉上感觉正确还不够，我们必须用数学来严格证明。证明一个贪心算法的正确性，通常分两步：<strong>证明贪心选择性质</strong>和<strong>证明最优子结构</strong>。</p>
-                <p><strong>【定理】</strong> 对于任意非空的活动集合 $S_k$，令 $a_m$ 是 $S_k$ 中结束时间最早的活动。那么 $a_m$ 必定存在于 $S_k$ 的某个最大兼容活动子集中。</p>
-                <p>这就是<strong>贪心选择性质 (Greedy-choice property)</strong>。它说明我们做出的第一个贪心选择，一定是通往最优解的正确一步。</p>
-                <p><strong>【证明】</strong></p>
-                <ol>
-                <li>假设 $A_k$ 是 $S_k$ 的一个最大兼容活动子集（即一个最优解）。</li>
-                <li>令 $a_j$ 是 $A_k$ 中结束时间最早的活动。</li>
-                <li><strong>情况一：</strong> 如果 $a_j$ 恰好就是 $a_m$（我们贪心选择的活动），那么定理得证，我们的贪心选择就在这个最优解里。</li>
-                <li><strong>情况二：</strong> 如果 $a_j \neq a_m$。根据我们对 $a_m$ 的定义，它是所有活动中结束时间最早的，所以 $f_m \le f_j$。</li>
-                <li>现在，我们构造一个新的解 $A_k' = (A_k - {a_j}) \cup {a_m}$。也就是说，我们把 $A_k$ 中的 $a_j$ 换成 $a_m$。</li>
-                <li>由于 $a_j$ 是 $A_k$ 中结束最早的活动，所以 $A_k$ 中其他所有活动的开始时间都 $\ge f_j$。</li>
-                <li>因为 $f_m \le f_j$，所以 $A_k$ 中其他所有活动的开始时间也都 $\ge f_m$。这意味着 $a_m$ 与 $A_k - {a_j}$ 中的所有活动都是兼容的。</li>
-                <li>因此，$A_k'$ 是一个合法的兼容活动子集，并且它的大小和 $A_k$ 相同（$|A_k'| = |A_k|$），所以 $A_k'$ 也是一个最优解。</li>
-                <li>在这个新的最优解 $A_k'$ 中，包含了我们的贪心选择 $a_m$。</li>
-                </ol>
-                <p><strong>证明完毕</strong>。这个证明方法叫做<strong>剪切-粘贴法 (cut-and-paste) 或交换论证 (exchange argument)</strong>，是证明贪心算法正确性的常用技巧。</p>
-                <p>接下来是<strong>最优子结构 (Optimal substructure)</strong>。
+<p>在这个例子中，我们首先选择 (0, 3)。然后所有在 3 之前结束的、并且与 (0, 3) 冲突的活动都被排除。接下来，在剩下的活动中，我们选择结束时间最早的 (4, 6)。然后排除与它冲突的。最后选择 (7, 9)。这个策略看起来非常有前途！</p>
+<h4 id="3-%E6%AD%A3%E7%A1%AE%E6%80%A7%E8%AF%81%E6%98%8E"><strong>3. 正确性证明</strong></h4>
+<p>直觉上感觉正确还不够，我们必须用数学来严格证明。证明一个贪心算法的正确性，通常分两步：<strong>证明贪心选择性质</strong>和<strong>证明最优子结构</strong>。</p>
+<p><strong>【定理】</strong> 对于任意非空的活动集合 $S_k$，令 $a_m$ 是 $S_k$ 中结束时间最早的活动。那么 $a_m$ 必定存在于 $S_k$ 的某个最大兼容活动子集中。</p>
+<p>这就是<strong>贪心选择性质 (Greedy-choice property)</strong>。它说明我们做出的第一个贪心选择，一定是通往最优解的正确一步。</p>
+<p><strong>【证明】</strong></p>
+<ol>
+<li>假设 $A_k$ 是 $S_k$ 的一个最大兼容活动子集（即一个最优解）。</li>
+<li>令 $a_j$ 是 $A_k$ 中结束时间最早的活动。</li>
+<li><strong>情况一：</strong> 如果 $a_j$ 恰好就是 $a_m$（我们贪心选择的活动），那么定理得证，我们的贪心选择就在这个最优解里。</li>
+<li><strong>情况二：</strong> 如果 $a_j \neq a_m$。根据我们对 $a_m$ 的定义，它是所有活动中结束时间最早的，所以 $f_m \le f_j$。</li>
+<li>现在，我们构造一个新的解 $A_k' = (A_k - {a_j}) \cup {a_m}$。也就是说，我们把 $A_k$ 中的 $a_j$ 换成 $a_m$。</li>
+<li>由于 $a_j$ 是 $A_k$ 中结束最早的活动，所以 $A_k$ 中其他所有活动的开始时间都 $\ge f_j$。</li>
+<li>因为 $f_m \le f_j$，所以 $A_k$ 中其他所有活动的开始时间也都 $\ge f_m$。这意味着 $a_m$ 与 $A_k - {a_j}$ 中的所有活动都是兼容的。</li>
+<li>因此，$A_k'$ 是一个合法的兼容活动子集，并且它的大小和 $A_k$ 相同（$|A_k'| = |A_k|$），所以 $A_k'$ 也是一个最优解。</li>
+<li>在这个新的最优解 $A_k'$ 中，包含了我们的贪心选择 $a_m$。</li>
+</ol>
+<p><strong>证明完毕</strong>。这个证明方法叫做<strong>剪切-粘贴法 (cut-and-paste) 或交换论证 (exchange argument)</strong>，是证明贪心算法正确性的常用技巧。</p>
+<p>接下来是<strong>最优子结构 (Optimal substructure)</strong>。
                 在我们做出了贪心选择 $a_m$ 之后，原问题就缩减成了一个子问题：在所有与 $a_m$ 兼容的活动中，寻找一个最大兼容活动子集。最优子结构性质表明：<strong>原问题的最优解 = 贪心选择 + 子问题的最优解</strong>。这个性质在本问题中是显而易见的，证明可以省略。</p>
-                <h4 id="4-%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0"><strong>4. 算法实现</strong></h4>
-                <p><strong>伪代码：</strong></p>
-                <div class="code-container">
-                <pre><code>GreedyActivitySelector(s, f):
+<h4 id="4-%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0"><strong>4. 算法实现</strong></h4>
+<p><strong>伪代码：</strong></p>
+<div class="code-container">
+<pre><code>GreedyActivitySelector(s, f):
   n = s.length
   // 假设活动已按结束时间f升序排序
   A = {a_1}  // 直接选择第一个活动
   last_finish_time = f[1]
 
   for i = 2 to n:
-    if s[i] >= last_finish_time: // 如果当前活动与上一个选择的活动兼容
+    if s[i] &gt;= last_finish_time: // 如果当前活动与上一个选择的活动兼容
       A = A U {a_i}
       last_finish_time = f[i]
   
   return A
 </code></pre>
-                </div>
-                <p><strong>C++ 实现:</strong></p>
-                <div class="code-container">
-                <pre><code class="language-cpp">#include &lt;iostream&gt;
+</div>
+<p><strong>C++ 实现:</strong></p>
+<div class="code-container">
+<pre><code class="language-cpp">#include &lt;iostream&gt;
 #include &lt;vector&gt;
 #include &lt;algorithm&gt;
 
@@ -322,11 +322,11 @@ struct Activity {
 };
 
 // 比较函数，用于按结束时间排序
-bool compareActivities(const Activity& a, const Activity& b) {
-    return a.finish < b.finish;
+bool compareActivities(const Activity&amp; a, const Activity&amp; b) {
+    return a.finish &lt; b.finish;
 }
 
-void printActivities(const std::vector&lt;int&gt;& activities) {
+void printActivities(const std::vector&lt;int&gt;&amp; activities) {
     std::cout &lt;&lt; "Selected activities: ";
     for (int id : activities) {
         std::cout &lt;&lt; id &lt;&lt; " ";
@@ -335,7 +335,7 @@ void printActivities(const std::vector&lt;int&gt;& activities) {
 }
 
 // 贪心算法求解活动选择问题
-std::vector&lt;int&gt; selectActivities(std::vector&lt;Activity&gt;& acts) {
+std::vector&lt;int&gt; selectActivities(std::vector&lt;Activity&gt;&amp; acts) {
     // 1. 按结束时间升序排序
     std::sort(acts.begin(), acts.end(), compareActivities);
 
@@ -349,9 +349,9 @@ std::vector&lt;int&gt; selectActivities(std::vector&lt;Activity&gt;& acts) {
     int last_finish_time = acts[0].finish;
 
     // 3. 遍历剩余活动
-    for (size_t i = 1; i < acts.size(); ++i) {
+    for (size_t i = 1; i &lt; acts.size(); ++i) {
         // 如果当前活动的开始时间晚于或等于上一个选定活动的结束时间
-        if (acts[i].start >= last_finish_time) {
+        if (acts[i].start &gt;= last_finish_time) {
             result.push_back(acts[i].id);
             last_finish_time = acts[i].finish;
         }
@@ -371,182 +371,182 @@ int main() {
     return 0;
 }
 </code></pre>
-                </div>
-                <p><strong>时间复杂度分析：</strong></p>
-                <ul>
-                <li>排序需要 $O(N \log N)$ 时间。</li>
-                <li>贪心选择过程只需要一次线性扫描，时间为 $O(N)$。</li>
-                <li>因此，总时间复杂度为 $O(N \log N)$。</li>
-                </ul>
-                <h4 id="5-%E6%8B%93%E5%B1%95%E5%B8%A6%E6%9D%83%E9%87%8D%E7%9A%84%E6%B4%BB%E5%8A%A8%E9%80%89%E6%8B%A9%E9%97%AE%E9%A2%98"><strong>5. 拓展：带权重的活动选择问题</strong></h4>
-                <p>现在，我们给问题增加点难度。如果每个活动 $a_i$ 都有一个权重 $w_j$ (比如参加这个活动能获得的收益)，我们的目标不再是最大化活动数量，而是<strong>最大化总权重</strong>。</p>
-                <p>我们再来看一下动态规划的解法。
+</div>
+<p><strong>时间复杂度分析：</strong></p>
+<ul>
+<li>排序需要 $O(N \log N)$ 时间。</li>
+<li>贪心选择过程只需要一次线性扫描，时间为 $O(N)$。</li>
+<li>因此，总时间复杂度为 $O(N \log N)$。</li>
+</ul>
+<h4 id="5-%E6%8B%93%E5%B1%95%E5%B8%A6%E6%9D%83%E9%87%8D%E7%9A%84%E6%B4%BB%E5%8A%A8%E9%80%89%E6%8B%A9%E9%97%AE%E9%A2%98"><strong>5. 拓展：带权重的活动选择问题</strong></h4>
+<p>现在，我们给问题增加点难度。如果每个活动 $a_i$ 都有一个权重 $w_j$ (比如参加这个活动能获得的收益)，我们的目标不再是最大化活动数量，而是<strong>最大化总权重</strong>。</p>
+<p>我们再来看一下动态规划的解法。
                 令 $c_{1,j}$ 为考虑前 $j$ 个活动（已按结束时间排序）所能获得的最大权重。对于活动 $j$，我们有两种选择：</p>
-                <ol>
-                <li>不选择活动 $j$：最大权重为 $c_{1, j-1}$。</li>
-                <li>选择活动 $j$：我们需要找到在 $j$ 开始之前就结束的、与 $j$ 兼容的最后一个活动 $k(j)$，然后最大权重为 $c_{1, k(j)} + w_j$。</li>
-                </ol>
-                <p>递推公式为：
-                $$c_{1,j} = \begin{cases} 1 &amp; \text{if } j=1 \\ \max{c_{1,j-1}, c_{1,k(j)} + w_j} &amp; \text{if } j>1 \end{cases}$$</p>
-                <p><strong>Q1: 这个 DP 解法在带权重的情况下还正确吗？</strong>
-                <strong>A1:</strong> 是的，完全正确。DP 的本质就是通过穷举所有选择（选或不选）并记录子问题的最优解来构建全局最优解。权重只是改变了我们计算“价值”的方式，而没有改变问题的结构。</p>
-                <p><strong>Q2: 我们之前的“最早结束时间”贪心策略还正确吗？</strong>
-                <strong>A2:</strong> 不正确了！</p>
-                <p><strong>反例：</strong>
+<ol>
+<li>不选择活动 $j$：最大权重为 $c_{1, j-1}$。</li>
+<li>选择活动 $j$：我们需要找到在 $j$ 开始之前就结束的、与 $j$ 兼容的最后一个活动 $k(j)$，然后最大权重为 $c_{1, k(j)} + w_j$。</li>
+</ol>
+<p>递推公式为：
+                $$c_{1,j} = \begin{cases} 1 &amp; \text{if } j=1 \\ \max{c_{1,j-1}, c_{1,k(j)} + w_j} &amp; \text{if } j&gt;1 \end{cases}$$</p>
+<p><strong>Q1: 这个 DP 解法在带权重的情况下还正确吗？</strong>
+<strong>A1:</strong> 是的，完全正确。DP 的本质就是通过穷举所有选择（选或不选）并记录子问题的最优解来构建全局最优解。权重只是改变了我们计算“价值”的方式，而没有改变问题的结构。</p>
+<p><strong>Q2: 我们之前的“最早结束时间”贪心策略还正确吗？</strong>
+<strong>A2:</strong> 不正确了！</p>
+<p><strong>反例：</strong>
                 假设有三个活动：</p>
-                <ul>
-                <li>$a_1$: <code>[0, 5)</code>, weight = 2</li>
-                <li>$a_2$: <code>[4, 8)</code>, weight = 10</li>
-                <li>$a_3$: <code>[6, 10)</code>, weight = 2</li>
-                </ul>
-                <p>按照“最早结束时间”贪心策略：</p>
-                <ol>
-                <li>选择 $a_1$ (结束最早)。总权重 = 2。</li>
-                <li>$a_2$ 与 $a_1$ 冲突，跳过。</li>
-                <li>选择 $a_3$ (与 $a_1$ 兼容)。总权重 = 2 + 2 = 4。
+<ul>
+<li>$a_1$: <code>[0, 5)</code>, weight = 2</li>
+<li>$a_2$: <code>[4, 8)</code>, weight = 10</li>
+<li>$a_3$: <code>[6, 10)</code>, weight = 2</li>
+</ul>
+<p>按照“最早结束时间”贪心策略：</p>
+<ol>
+<li>选择 $a_1$ (结束最早)。总权重 = 2。</li>
+<li>$a_2$ 与 $a_1$ 冲突，跳过。</li>
+<li>选择 $a_3$ (与 $a_1$ 兼容)。总权重 = 2 + 2 = 4。
                 贪心解的总权重为 4。</li>
-                </ol>
-                <p>但最优解是只选择 $a_2$，总权重为 10。</p>
-                <p><strong>结论</strong>：带权重的活动选择问题是一个更复杂的问题，简单的贪心策略失效了，我们需要使用动态规划来求解。这也深刻地揭示了贪心算法的局限性。</p>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E8%B4%AA%E5%BF%83%E7%AD%96%E7%95%A5%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><strong>第三部分：贪心策略的设计原则</strong></h3>
-                <p>通过活动选择的例子，我们可以总结出设计和证明一个贪心算法的通用步骤：</p>
-                <ol>
-                <li><strong>问题转化</strong>：将优化问题描述成这样一个过程：每做一次选择，留下一个规模更小的子问题。</li>
-                <li><strong>证明贪心选择性质</strong>：证明你设计的贪心准则所做出的第一个选择，一定包含在某个最优解之中。这是最关键的一步，通常使用“交换论证”。如果这一步无法证明，那你的贪心策略很可能是错的。</li>
-                <li><strong>证明最优子结构</strong>：证明原问题的最优解等于你做出的贪心选择，加上对产生的子问题应用最优解。</li>
-                </ol>
-                <p>一个重要的观察是：<strong>几乎每一个正确的贪心算法背后，都隐藏着一个更复杂、更笨重的动态规划解法。</strong> 贪心算法之所以能成立，是因为问题的特殊结构使得我们不需要像 DP 那样考虑所有选择，只需要“贪心”地走一条路即可。</p>
-                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E7%BB%8F%E5%85%B8%E6%A1%88%E4%BE%8B%E4%BA%8C%E9%9C%8D%E5%A4%AB%E6%9B%BC%E7%BC%96%E7%A0%81-huffman-codes"><strong>第四部分：经典案例二：霍夫曼编码 (Huffman Codes)</strong></h3>
-                <p>现在我们来看一个贪心算法在现实世界中大放异彩的应用——数据压缩。</p>
-                <h4 id="1-%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF%E6%96%87%E4%BB%B6%E5%8E%8B%E7%BC%A9"><strong>1. 问题背景：文件压缩</strong></h4>
-                <p>【<strong>示例</strong>】假设我们有一段长为1000的文本，只由 <code>a, u, x, z</code> 四个字符组成。如果使用标准的 ASCII 编码，每个字符占 8 位（1字节），那么存储这段文本需要 $1000 \times 8 = 8000$ 位。</p>
-                <p>我们发现，其实只有4个不同的字符，我们可以设计一套更短的编码。比如：</p>
-                <ul>
-                <li><code>a = 00</code></li>
-                <li><code>u = 01</code></li>
-                <li><code>x = 10</code></li>
-                <li><code>z = 11</code></li>
-                </ul>
-                <p>这种每个字符编码长度相同的称为<strong>定长编码</strong>。用这种编码，总长度为 $1000 \times 2 = 2000$ 位，大大节省了空间。</p>
-                <p>我们还能做得更好吗？假设在这1000个字符中，它们的出现<strong>频率 (frequency)</strong> 不同：</p>
-                <ul>
-                <li><code>f(a) = 400</code></li>
-                <li><code>f(x) = 300</code></li>
-                <li><code>f(u) = 200</code></li>
-                <li><code>f(z) = 100</code>
+</ol>
+<p>但最优解是只选择 $a_2$，总权重为 10。</p>
+<p><strong>结论</strong>：带权重的活动选择问题是一个更复杂的问题，简单的贪心策略失效了，我们需要使用动态规划来求解。这也深刻地揭示了贪心算法的局限性。</p>
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E8%B4%AA%E5%BF%83%E7%AD%96%E7%95%A5%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><strong>第三部分：贪心策略的设计原则</strong></h3>
+<p>通过活动选择的例子，我们可以总结出设计和证明一个贪心算法的通用步骤：</p>
+<ol>
+<li><strong>问题转化</strong>：将优化问题描述成这样一个过程：每做一次选择，留下一个规模更小的子问题。</li>
+<li><strong>证明贪心选择性质</strong>：证明你设计的贪心准则所做出的第一个选择，一定包含在某个最优解之中。这是最关键的一步，通常使用“交换论证”。如果这一步无法证明，那你的贪心策略很可能是错的。</li>
+<li><strong>证明最优子结构</strong>：证明原问题的最优解等于你做出的贪心选择，加上对产生的子问题应用最优解。</li>
+</ol>
+<p>一个重要的观察是：<strong>几乎每一个正确的贪心算法背后，都隐藏着一个更复杂、更笨重的动态规划解法。</strong> 贪心算法之所以能成立，是因为问题的特殊结构使得我们不需要像 DP 那样考虑所有选择，只需要“贪心”地走一条路即可。</p>
+<h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E7%BB%8F%E5%85%B8%E6%A1%88%E4%BE%8B%E4%BA%8C%E9%9C%8D%E5%A4%AB%E6%9B%BC%E7%BC%96%E7%A0%81-huffman-codes"><strong>第四部分：经典案例二：霍夫曼编码 (Huffman Codes)</strong></h3>
+<p>现在我们来看一个贪心算法在现实世界中大放异彩的应用——数据压缩。</p>
+<h4 id="1-%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF%E6%96%87%E4%BB%B6%E5%8E%8B%E7%BC%A9"><strong>1. 问题背景：文件压缩</strong></h4>
+<p>【<strong>示例</strong>】假设我们有一段长为1000的文本，只由 <code>a, u, x, z</code> 四个字符组成。如果使用标准的 ASCII 编码，每个字符占 8 位（1字节），那么存储这段文本需要 $1000 \times 8 = 8000$ 位。</p>
+<p>我们发现，其实只有4个不同的字符，我们可以设计一套更短的编码。比如：</p>
+<ul>
+<li><code>a = 00</code></li>
+<li><code>u = 01</code></li>
+<li><code>x = 10</code></li>
+<li><code>z = 11</code></li>
+</ul>
+<p>这种每个字符编码长度相同的称为<strong>定长编码</strong>。用这种编码，总长度为 $1000 \times 2 = 2000$ 位，大大节省了空间。</p>
+<p>我们还能做得更好吗？假设在这1000个字符中，它们的出现<strong>频率 (frequency)</strong> 不同：</p>
+<ul>
+<li><code>f(a) = 400</code></li>
+<li><code>f(x) = 300</code></li>
+<li><code>f(u) = 200</code></li>
+<li><code>f(z) = 100</code>
                 （为方便说明，这里修改了原例中的频数）</li>
-                </ul>
-                <p>直觉告诉我们，应该给出现频率高的字符更短的编码，给出现频率低的字符更长的编码。这就是<strong>变长编码</strong>的思想。</p>
-                <p>例如，我们可以设计这样一套编码：</p>
-                <ul>
-                <li><code>a = 0</code></li>
-                <li><code>x = 10</code></li>
-                <li><code>u = 110</code></li>
-                <li><code>z = 111</code></li>
-                </ul>
-                <p>我们来解码一个字符串试试，比如 <code>010110111</code>。它可以被唯一地解码为 <code>a</code> <code>x</code> <code>u</code> <code>z</code>。</p>
-                <h4 id="2-%E5%89%8D%E7%BC%80%E7%A0%81%E4%B8%8E%E7%BC%96%E7%A0%81%E6%A0%91"><strong>2. 前缀码与编码树</strong></h4>
-                <p>为什么上面这套编码可以被唯一解码？因为它满足一个重要性质：<strong>前缀码 (Prefix Code)</strong>。即任何一个字符的编码都不是另一个字符编码的前缀。</p>
-                <ul>
-                <li><code>a=0</code> 不是 <code>x, u, z</code> 的前缀。</li>
-                <li><code>x=10</code> 不是 <code>u, z</code> 的前缀。</li>
-                <li><code>u=110</code> 不是 <code>z</code> 的前缀。</li>
-                </ul>
-                <p>这种性质保证了我们在解码时不会有歧义。</p>
-                <p>我们可以用二叉树来表示前缀码，这棵树也叫<strong>编码树 (trie)</strong>。</p>
-                <ul>
-                <li>从根节点出发，向左走代表<code>0</code>，向右走代表<code>1</code>。</li>
-                <li>每个字符都位于一个<strong>叶子节点</strong>上。从根到该叶子节点的路径，就构成了该字符的编码。</li>
-                </ul>
-                <p><strong>回答之前的问题：</strong> What must the tree look like if we are to decode unambiguously?
+</ul>
+<p>直觉告诉我们，应该给出现频率高的字符更短的编码，给出现频率低的字符更长的编码。这就是<strong>变长编码</strong>的思想。</p>
+<p>例如，我们可以设计这样一套编码：</p>
+<ul>
+<li><code>a = 0</code></li>
+<li><code>x = 10</code></li>
+<li><code>u = 110</code></li>
+<li><code>z = 111</code></li>
+</ul>
+<p>我们来解码一个字符串试试，比如 <code>010110111</code>。它可以被唯一地解码为 <code>a</code> <code>x</code> <code>u</code> <code>z</code>。</p>
+<h4 id="2-%E5%89%8D%E7%BC%80%E7%A0%81%E4%B8%8E%E7%BC%96%E7%A0%81%E6%A0%91"><strong>2. 前缀码与编码树</strong></h4>
+<p>为什么上面这套编码可以被唯一解码？因为它满足一个重要性质：<strong>前缀码 (Prefix Code)</strong>。即任何一个字符的编码都不是另一个字符编码的前缀。</p>
+<ul>
+<li><code>a=0</code> 不是 <code>x, u, z</code> 的前缀。</li>
+<li><code>x=10</code> 不是 <code>u, z</code> 的前缀。</li>
+<li><code>u=110</code> 不是 <code>z</code> 的前缀。</li>
+</ul>
+<p>这种性质保证了我们在解码时不会有歧义。</p>
+<p>我们可以用二叉树来表示前缀码，这棵树也叫<strong>编码树 (trie)</strong>。</p>
+<ul>
+<li>从根节点出发，向左走代表<code>0</code>，向右走代表<code>1</code>。</li>
+<li>每个字符都位于一个<strong>叶子节点</strong>上。从根到该叶子节点的路径，就构成了该字符的编码。</li>
+</ul>
+<p><strong>回答之前的问题：</strong> What must the tree look like if we are to decode unambiguously?
                 <strong>答案：</strong> 为了能够无歧义地解码，这棵树必须是一棵<strong>满二叉树 (Full Binary Tree)</strong> 的变体，其中所有待编码的字符都必须位于<strong>叶子节点</strong>。如果某个字符位于非叶子节点，那么它的编码必然是它子树中某个字符编码的前缀，这就违反了前缀码的性质。</p>
-                <p>例如，<code>a=0, u=110, x=10, z=111</code> 这套编码对应的树是：</p>
-                <div class="mermaid">
+<p>例如，<code>a=0, u=110, x=10, z=111</code> 这套编码对应的树是：</p>
+<div class="mermaid">
                 graph TD
                     subgraph 编码树
-                        Root(( )) -- 0 --> a[a];
-                        Root -- 1 --> N1(( ));
-                        N1 -- 0 --> x[x];
-                        N1 -- 1 --> N2(( ));
-                        N2 -- 0 --> u[u];
-                        N2 -- 1 --> z[z];
+                        Root(( )) -- 0 --&gt; a[a];
+                        Root -- 1 --&gt; N1(( ));
+                        N1 -- 0 --&gt; x[x];
+                        N1 -- 1 --&gt; N2(( ));
+                        N2 -- 0 --&gt; u[u];
+                        N2 -- 1 --&gt; z[z];
                     end
                 </div>
-                <p><strong>编码成本：</strong>
+<p><strong>编码成本：</strong>
                 如果一个字符 $c_i$ 的频率是 $f(c_i)$，它在编码树中的深度是 $d_T(c_i)$（也即其编码长度），那么编码整个文件的总成本（总位数）为：
                 $$Cost(T) = \sum_{c \in C} f(c) \cdot d_T(c)$$
                 我们的目标就是找到一棵编码树 $T$，使得这个 $Cost(T)$ 最小。</p>
-                <h4 id="3-%E9%9C%8D%E5%A4%AB%E6%9B%BC%E7%9A%84%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95-1952"><strong>3. 霍夫曼的贪心算法 (1952)</strong></h4>
-                <p>大卫·霍夫曼提出了一个非常优雅的贪心算法来解决这个问题。
+<h4 id="3-%E9%9C%8D%E5%A4%AB%E6%9B%BC%E7%9A%84%E8%B4%AA%E5%BF%83%E7%AE%97%E6%B3%95-1952"><strong>3. 霍夫曼的贪心算法 (1952)</strong></h4>
+<p>大卫·霍夫曼提出了一个非常优雅的贪心算法来解决这个问题。
                 <strong>贪心准则：</strong> 每次选择当前集合中<strong>频率最低</strong>的两个字符（或子树），将它们合并成一棵新的子树。新子树的频率等于它两个孩子频率之和。</p>
-                <p><strong>算法步骤：</strong></p>
-                <ol>
-                <li>为每个字符创建一个只包含一个节点的树，该节点的权重就是字符的频率。</li>
-                <li>将这些树放入一个<strong>最小优先队列 (min-priority queue)</strong> 中（按权重排序）。</li>
-                <li>当队列中还有多于一个树时：
+<p><strong>算法步骤：</strong></p>
+<ol>
+<li>为每个字符创建一个只包含一个节点的树，该节点的权重就是字符的频率。</li>
+<li>将这些树放入一个<strong>最小优先队列 (min-priority queue)</strong> 中（按权重排序）。</li>
+<li>当队列中还有多于一个树时：
                 a.  从队列中取出两个权重最小的树（设为 $T_x, T_y$）。
                 b.  创建一个新的内部节点，其权重为 $T_x$ 和 $T_y$ 的权重之和。
                 c.  将 $T_x$ 和 $T_y$ 作为新节点的左右孩子（顺序不重要）。
                 d.  将新生成的树插回优先队列。</li>
-                <li>当队列中只剩一个树时，这个树就是最终的霍夫曼树。</li>
-                </ol>
-                <p><strong>【示例演练】</strong>
+<li>当队列中只剩一个树时，这个树就是最终的霍夫曼树。</li>
+</ol>
+<p><strong>【示例演练】</strong>
                 我们用讲座中的例子来完整走一遍流程。字符集和频率如下：
                 <code>a:10, e:15, i:12, s:3, t:4, sp:13, nl:1</code></p>
-                <p><strong>初始状态</strong> (优先队列)：
+<p><strong>初始状态</strong> (优先队列)：
                 <code>[(nl,1), (s,3), (t,4), (a,10), (i,12), (sp,13), (e,15)]</code></p>
-                <p><strong>第1步:</strong> 合并 <code>nl(1)</code> 和 <code>s(3)</code> -&gt; <code>N1(4)</code>
+<p><strong>第1步:</strong> 合并 <code>nl(1)</code> 和 <code>s(3)</code> -&gt; <code>N1(4)</code>
                 队列: <code>[(t,4), (N1,4), (a,10), (i,12), (sp,13), (e,15)]</code></p>
-                <p><strong>第2步:</strong> 合并 <code>t(4)</code> 和 <code>N1(4)</code> -&gt; <code>N2(8)</code>
+<p><strong>第2步:</strong> 合并 <code>t(4)</code> 和 <code>N1(4)</code> -&gt; <code>N2(8)</code>
                 队列: <code>[(N2,8), (a,10), (i,12), (sp,13), (e,15)]</code></p>
-                <p><strong>第3步:</strong> 合并 <code>N2(8)</code> 和 <code>a(10)</code> -&gt; <code>N3(18)</code>
+<p><strong>第3步:</strong> 合并 <code>N2(8)</code> 和 <code>a(10)</code> -&gt; <code>N3(18)</code>
                 队列: <code>[(i,12), (sp,13), (e,15), (N3,18)]</code></p>
-                <p><strong>第4步:</strong> 合并 <code>i(12)</code> 和 <code>sp(13)</code> -&gt; <code>N4(25)</code>
+<p><strong>第4步:</strong> 合并 <code>i(12)</code> 和 <code>sp(13)</code> -&gt; <code>N4(25)</code>
                 队列: <code>[(e,15), (N3,18), (N4,25)]</code></p>
-                <p><strong>第5步:</strong> 合并 <code>e(15)</code> 和 <code>N3(18)</code> -&gt; <code>N5(33)</code>
+<p><strong>第5步:</strong> 合并 <code>e(15)</code> 和 <code>N3(18)</code> -&gt; <code>N5(33)</code>
                 队列: <code>[(N4,25), (N5,33)]</code></p>
-                <p><strong>第6步:</strong> 合并 <code>N4(25)</code> 和 <code>N5(33)</code> -&gt; <code>Root(58)</code>
+<p><strong>第6步:</strong> 合并 <code>N4(25)</code> 和 <code>N5(33)</code> -&gt; <code>Root(58)</code>
                 队列: <code>[(Root,58)]</code> -&gt; 结束</p>
-                <p>最终构建的树如下：</p>
-                <div class="mermaid">
+<p>最终构建的树如下：</p>
+<div class="mermaid">
                 graph TD
                     subgraph "霍夫曼树 (总权重 58)"
-                        58 -- 0 --> 25;
-                        58 -- 1 --> 33;
+                        58 -- 0 --&gt; 25;
+                        58 -- 1 --&gt; 33;
 
-                        25 -- 0 --> i(i:12);
-                        25 -- 1 --> sp(sp:13);
+                        25 -- 0 --&gt; i(i:12);
+                        25 -- 1 --&gt; sp(sp:13);
                         
-                        33 -- 0 --> e(e:15);
-                        33 -- 1 --> 18;
+                        33 -- 0 --&gt; e(e:15);
+                        33 -- 1 --&gt; 18;
                         
-                        18 -- 0 --> 8;
-                        18 -- 1 --> a(a:10);
+                        18 -- 0 --&gt; 8;
+                        18 -- 1 --&gt; a(a:10);
                         
-                        8 -- 0 --> t(t:4);
-                        8 -- 1 --> 4;
+                        8 -- 0 --&gt; t(t:4);
+                        8 -- 1 --&gt; 4;
                         
-                        4 -- 0 --> nl(nl:1);
-                        4 -- 1 --> s(s:3);
+                        4 -- 0 --&gt; nl(nl:1);
+                        4 -- 1 --&gt; s(s:3);
                     end
                 </div>
-                <p>从这棵树，我们可以得到每个字符的编码：</p>
-                <ul>
-                <li>i: 00</li>
-                <li>sp: 01</li>
-                <li>e: 10</li>
-                <li>t: 1100</li>
-                <li>nl: 11010</li>
-                <li>s: 11011</li>
-                <li>a: 111</li>
-                </ul>
-                <p><strong>计算总成本：</strong>
+<p>从这棵树，我们可以得到每个字符的编码：</p>
+<ul>
+<li>i: 00</li>
+<li>sp: 01</li>
+<li>e: 10</li>
+<li>t: 1100</li>
+<li>nl: 11010</li>
+<li>s: 11011</li>
+<li>a: 111</li>
+</ul>
+<p><strong>计算总成本：</strong>
                 $$Cost = 12 \times 2 (\text{i}) + 13 \times 2 (\text{sp}) + 15 \times 2 (\text{e}) + 4 \times 4 (\text{t}) + 1 \times 5 (\text{nl}) + 3 \times 5 (\text{s}) + 10 \times 3 (\text{a})$$
                 $$Cost = 24 + 26 + 30 + 16 + 5 + 15 + 30 = 146$$</p>
-                <h4 id="4-%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0"><strong>4. 算法实现</strong></h4>
-                <p><strong>伪代码:</strong></p>
-                <div class="code-container">
-                <pre><code>Huffman(C):
+<h4 id="4-%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0"><strong>4. 算法实现</strong></h4>
+<p><strong>伪代码:</strong></p>
+<div class="code-container">
+<pre><code>Huffman(C):
   n = |C|
   Q = C // 将所有字符作为单节点树放入优先队列
   for i = 1 to n-1:
@@ -557,10 +557,10 @@ int main() {
     Q.insert(z)
   return Q.extract_min() // 返回根节点
 </code></pre>
-                </div>
-                <p><strong>C++ 实现:</strong></p>
-                <div class="code-container">
-                <pre><code class="language-cpp">#include &lt;iostream&gt;
+</div>
+<p><strong>C++ 实现:</strong></p>
+<div class="code-container">
+<pre><code class="language-cpp">#include &lt;iostream&gt;
 #include &lt;vector&gt;
 #include &lt;queue&gt;
 #include &lt;string&gt;
@@ -578,13 +578,13 @@ struct HuffmanNode {
 
 // 优先队列的比较结构体
 struct compare {
-    bool operator()(const std::shared_ptr&lt;HuffmanNode&gt;& l, const std::shared_ptr&lt;HuffmanNode&gt;& r) {
-        return l-&gt;freq > r-&gt;freq;
+    bool operator()(const std::shared_ptr&lt;HuffmanNode&gt;&amp; l, const std::shared_ptr&lt;HuffmanNode&gt;&amp; r) {
+        return l-&gt;freq &gt; r-&gt;freq;
     }
 };
 
 // 递归函数，用于打印霍夫曼码
-void printCodes(const std::shared_ptr&lt;HuffmanNode&gt;& root, std::string str, std::map&lt;char, std::string&gt;& huffmanCode) {
+void printCodes(const std::shared_ptr&lt;HuffmanNode&gt;&amp; root, std::string str, std::map&lt;char, std::string&gt;&amp; huffmanCode) {
     if (!root) return;
 
     if (root-&gt;data != '$') { // '$' 表示内部节点
@@ -596,10 +596,10 @@ void printCodes(const std::shared_ptr&lt;HuffmanNode&gt;& root, std::string str,
 }
 
 // 构建并打印霍夫曼树
-void HuffmanCodes(const std::vector&lt;char&gt;& data, const std::vector&lt;unsigned&gt;& freq) {
+void HuffmanCodes(const std::vector&lt;char&gt;&amp; data, const std::vector&lt;unsigned&gt;&amp; freq) {
     std::priority_queue&lt;std::shared_ptr&lt;HuffmanNode&gt;, std::vector&lt;std::shared_ptr&lt;HuffmanNode&gt;&gt;, compare&gt; minHeap;
 
-    for (size_t i = 0; i < data.size(); ++i) {
+    for (size_t i = 0; i &lt; data.size(); ++i) {
         minHeap.push(std::make_shared&lt;HuffmanNode&gt;(data[i], freq[i]));
     }
 
@@ -617,7 +617,7 @@ void HuffmanCodes(const std::vector&lt;char&gt;& data, const std::vector&lt;unsi
     printCodes(minHeap.top(), "", huffmanCode);
 
     std::cout &lt;&lt; "Huffman Codes:\n";
-    for(auto const& [key, val] : huffmanCode) {
+    for(auto const&amp; [key, val] : huffmanCode) {
         std::cout &lt;&lt; key &lt;&lt; ": " &lt;&lt; val &lt;&lt; std::endl;
     }
 }
@@ -631,90 +631,116 @@ int main() {
     return 0;
 }
 </code></pre>
-                </div>
-                <p><strong>时间复杂度分析：</strong>
+</div>
+<p><strong>时间复杂度分析：</strong>
                 假设有 $C$ 个字符。构建优先队列需要 $O(C)$。循环执行 $C-1$ 次，每次循环包含两次 <code>extract_min</code> 和一次 <code>insert</code>。在基于堆的优先队列中，这些操作的时间复杂度都是 $O(\log C)$。因此，总时间复杂度为 $O(C \log C)$。</p>
-                <h4 id="5-%E6%AD%A3%E7%A1%AE%E6%80%A7%E8%AF%81%E6%98%8E"><strong>5. 正确性证明</strong></h4>
-                <p>霍夫曼算法的正确性同样依赖于<strong>贪心选择性质</strong>和<strong>最优子结构</strong>。</p>
-                <h5 id="%E5%BC%95%E7%90%861%E8%B4%AA%E5%BF%83%E9%80%89%E6%8B%A9%E6%80%A7%E8%B4%A8"><strong>引理1：贪心选择性质</strong></h5>
-                <p><strong>【引理】</strong> 令 $C$ 为一个字符集，令 $x$ 和 $y$ 是 $C$ 中频率最低的两个字符。那么必然存在一个最优前缀码的编码树，其中 $x$ 和 $y$ 是兄弟节点，并且位于树的最深层。</p>
-                <p><strong>【证明（交换论证）】</strong></p>
-                <ol>
-                <li>
-                <p>令 $T$ 是任意一棵最优编码树。令 $a$ 和 $b$ 是 $T$ 中深度最深的两个兄弟节点。</p>
-                </li>
-                <li>
-                <p>不失一般性，假设 $f(x) \le f(y)$ 且 $f(a) \le f(b)$。因为 $x, y$ 是频率最低的，所以 $f(x) \le f(a)$ 且 $f(y) \le f(b)$。</p>
-                </li>
-                <li>
-                <p>我们把 $T$ 中的 $a$ 和 $x$ 的位置交换，得到树 $T'$。再把 $b$ 和 $y$ 的位置交换，得到树 $T''$。在 $T''$ 中，$x$ 和 $y$ 成了兄弟。</p>
-                </li>
-                <li>
-                <p>我们来比较 $T$ 和 $T''$ 的成本。成本的变化只与这四个节点有关：</p>
-                <p>$$\begin{aligned}Cost(T) - Cost(T'') &amp;= [f(a)d_T(a) + f(b)d_T(b) + f(x)d_T(x) + f(y)d_T(y)] - [f(x)d_T(a) + f(y)d_T(b) + f(a)d_T(x) + f(b)d_T(y)]\\ &amp;= (f(a)-f(x))d_T(a) + (f(b)-f(y))d_T(b) + (f(x)-f(a))d_T(x) + (f(y)-f(b))d_T(y)\\ &amp;= (f(a)-f(x))d_T(a) + (f(b)-f(y))d_T(b) - (f(a)-f(x))d_T(x) - (f(b)-f(y))d_T(y)\\ &amp;= (f(a)-f(x))(d_T(a)-d_T(x)) + (f(b)-f(y))(d_T(b)-d_T(y))  \end{aligned}$$</p>
-                </li>
-                <li>
-                <p>因为 $a,b$ 在最深层，所以 $d_T(a) \ge d_T(x)$ 且 $d_T(b) \ge d_T(y)$。同时 $f(a) \ge f(x)$ 且 $f(b) \ge f(y)$。</p>
-                </li>
-                <li>
-                <p>因此，上面差值的每一项都是非负的，所以 $Cost(T) - Cost(T'') \ge 0$，即 $Cost(T) \ge Cost(T'')$。</p>
-                </li>
-                <li>
-                <p>因为 $T$ 本身是最优的，所以 $Cost(T) \le Cost(T'')$。结合两者，必有 $Cost(T) = Cost(T'')$。</p>
-                </li>
-                <li>
-                <p>这意味着，将 $x, y$ 放到最深层作为兄弟节点，可以得到一棵成本同样最优的树 $T''$。</p>
-                </li>
-                </ol>
-                <p><strong>证明完毕</strong>。这说明我们的贪心选择（合并频率最低的两个节点）是“安全”的。</p>
-                <h5 id="%E5%BC%95%E7%90%862%E6%9C%80%E4%BC%98%E5%AD%90%E7%BB%93%E6%9E%84"><strong>引理2：最优子结构</strong></h5>
-                <p><strong>【引理】</strong> 令 $x, y$ 为频率最低的两个字符。构造一个新的字符集 $C'$，它由 $C - {x,y}$ 和一个新字符 $z$ 组成，其中 $f(z) = f(x) + f(y)$。如果树 $T'$ 是 $C'$ 的一个最优编码树，那么将 $T'$ 中代表 $z$ 的叶子节点替换为一个以 $x,y$ 为孩子的内部节点，所得到的新树 $T$ 是原字符集 $C$ 的一个最优编码树。</p>
-                <p><strong>【证明（反证法）】</strong></p>
-                <ol>
-                <li>首先，我们观察 $T$ 和 $T'$ 成本的关系：
+<h4 id="5-%E6%AD%A3%E7%A1%AE%E6%80%A7%E8%AF%81%E6%98%8E"><strong>5. 正确性证明</strong></h4>
+<p>霍夫曼算法的正确性同样依赖于<strong>贪心选择性质</strong>和<strong>最优子结构</strong>。</p>
+<h5 id="%E5%BC%95%E7%90%861%E8%B4%AA%E5%BF%83%E9%80%89%E6%8B%A9%E6%80%A7%E8%B4%A8"><strong>引理1：贪心选择性质</strong></h5>
+<p><strong>【引理】</strong> 令 $C$ 为一个字符集，令 $x$ 和 $y$ 是 $C$ 中频率最低的两个字符。那么必然存在一个最优前缀码的编码树，其中 $x$ 和 $y$ 是兄弟节点，并且位于树的最深层。</p>
+<p><strong>【证明（交换论证）】</strong></p>
+<ol>
+<li>
+<p>令 $T$ 是任意一棵最优编码树。令 $a$ 和 $b$ 是 $T$ 中深度最深的两个兄弟节点。</p>
+</li>
+<li>
+<p>不失一般性，假设 $f(x) \le f(y)$ 且 $f(a) \le f(b)$。因为 $x, y$ 是频率最低的，所以 $f(x) \le f(a)$ 且 $f(y) \le f(b)$。</p>
+</li>
+<li>
+<p>我们把 $T$ 中的 $a$ 和 $x$ 的位置交换，得到树 $T'$。再把 $b$ 和 $y$ 的位置交换，得到树 $T''$。在 $T''$ 中，$x$ 和 $y$ 成了兄弟。</p>
+</li>
+<li>
+<p>我们来比较 $T$ 和 $T''$ 的成本。成本的变化只与这四个节点有关：</p>
+<p>$$\begin{aligned}Cost(T) - Cost(T'') &amp;= [f(a)d_T(a) + f(b)d_T(b) + f(x)d_T(x) + f(y)d_T(y)] - [f(x)d_T(a) + f(y)d_T(b) + f(a)d_T(x) + f(b)d_T(y)]\\ &amp;= (f(a)-f(x))d_T(a) + (f(b)-f(y))d_T(b) + (f(x)-f(a))d_T(x) + (f(y)-f(b))d_T(y)\\ &amp;= (f(a)-f(x))d_T(a) + (f(b)-f(y))d_T(b) - (f(a)-f(x))d_T(x) - (f(b)-f(y))d_T(y)\\ &amp;= (f(a)-f(x))(d_T(a)-d_T(x)) + (f(b)-f(y))(d_T(b)-d_T(y))  \end{aligned}$$</p>
+</li>
+<li>
+<p>因为 $a,b$ 在最深层，所以 $d_T(a) \ge d_T(x)$ 且 $d_T(b) \ge d_T(y)$。同时 $f(a) \ge f(x)$ 且 $f(b) \ge f(y)$。</p>
+</li>
+<li>
+<p>因此，上面差值的每一项都是非负的，所以 $Cost(T) - Cost(T'') \ge 0$，即 $Cost(T) \ge Cost(T'')$。</p>
+</li>
+<li>
+<p>因为 $T$ 本身是最优的，所以 $Cost(T) \le Cost(T'')$。结合两者，必有 $Cost(T) = Cost(T'')$。</p>
+</li>
+<li>
+<p>这意味着，将 $x, y$ 放到最深层作为兄弟节点，可以得到一棵成本同样最优的树 $T''$。</p>
+</li>
+</ol>
+<p><strong>证明完毕</strong>。这说明我们的贪心选择（合并频率最低的两个节点）是“安全”的。</p>
+<h5 id="%E5%BC%95%E7%90%862%E6%9C%80%E4%BC%98%E5%AD%90%E7%BB%93%E6%9E%84"><strong>引理2：最优子结构</strong></h5>
+<p><strong>【引理】</strong> 令 $x, y$ 为频率最低的两个字符。构造一个新的字符集 $C'$，它由 $C - {x,y}$ 和一个新字符 $z$ 组成，其中 $f(z) = f(x) + f(y)$。如果树 $T'$ 是 $C'$ 的一个最优编码树，那么将 $T'$ 中代表 $z$ 的叶子节点替换为一个以 $x,y$ 为孩子的内部节点，所得到的新树 $T$ 是原字符集 $C$ 的一个最优编码树。</p>
+<p><strong>【证明（反证法）】</strong></p>
+<ol>
+<li>首先，我们观察 $T$ 和 $T'$ 成本的关系：
                 $$Cost(T) = \sum_{c \in C-{x,y}} f(c)d_T(c) + f(x)d_T(x) + f(y)d_T(y)$$
                 $$d_T(x) = d_T(y) = d_{T'}(z) + 1$$
                 $$d_T(c) = d_{T'}(c) \text{ for } c \in C-{x,y}$$
                 $$Cost(T) = Cost(T') - f(z)d_{T'}(z) + (f(x)+f(y))(d_{T'}(z)+1)$$
                 $$Cost(T) = Cost(T') - f(z)d_{T'}(z) + f(z)d_{T'}(z) + f(z) = Cost(T') + f(x) + f(y)$$
                 即 $$Cost(T) = Cost(T') + f(x) + f(y)$$这个差值是固定的。</li>
-                <li><strong>假设</strong> $T$ 不是 $C$ 的最优编码树。那么存在另一棵树 $T_{opt}$，使得 $Cost(T_{opt}) &lt; Cost(T)$。</li>
-                <li>根据引理1，我们可以假设在 $T_{opt}$ 中，$x$ 和 $y$ 是兄弟节点。</li>
-                <li>现在我们从 $T_{opt}$ 构造一棵用于 $C'$ 的树 $T_{opt}'$：将 $x,y$ 和它们的父节点替换成一个代表 $z$ 的叶子节点。</li>
-                <li>$T_{opt}'$ 的成本为 $Cost(T_{opt}') = Cost(T_{opt}) - f(x) - f(y)$。</li>
-                <li>代入 $Cost(T_{opt}) &lt; Cost(T)$，我们得到 $$Cost(T_{opt}') &lt; Cost(T) - f(x) - f(y) = Cost(T')$$</li>
-                <li>$Cost(T_{opt}') &lt; Cost(T')$ 这意味着 $T'$ 不是字符集 $C'$ 的最优编码树。</li>
-                <li>这与我们的初始条件“$T'$ 是 $C'$ 的一个最优编码树”<strong>相矛盾</strong>。</li>
-                <li>因此，假设不成立，$T$ 必须是 $C$ 的最优编码树。</li>
-                </ol>
-                <p><strong>证明完毕</strong>。两个引理结合，完美地证明了霍夫曼算法的正确性。</p>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li><strong>假设</strong> $T$ 不是 $C$ 的最优编码树。那么存在另一棵树 $T_{opt}$，使得 $Cost(T_{opt}) &lt; Cost(T)$。</li>
+<li>根据引理1，我们可以假设在 $T_{opt}$ 中，$x$ 和 $y$ 是兄弟节点。</li>
+<li>现在我们从 $T_{opt}$ 构造一棵用于 $C'$ 的树 $T_{opt}'$：将 $x,y$ 和它们的父节点替换成一个代表 $z$ 的叶子节点。</li>
+<li>$T_{opt}'$ 的成本为 $Cost(T_{opt}') = Cost(T_{opt}) - f(x) - f(y)$。</li>
+<li>代入 $Cost(T_{opt}) &lt; Cost(T)$，我们得到 $$Cost(T_{opt}') &lt; Cost(T) - f(x) - f(y) = Cost(T')$$</li>
+<li>$Cost(T_{opt}') &lt; Cost(T')$ 这意味着 $T'$ 不是字符集 $C'$ 的最优编码树。</li>
+<li>这与我们的初始条件“$T'$ 是 $C'$ 的一个最优编码树”<strong>相矛盾</strong>。</li>
+<li>因此，假设不成立，$T$ 必须是 $C$ 的最优编码树。</li>
+</ol>
+<p><strong>证明完毕</strong>。两个引理结合，完美地证明了霍夫曼算法的正确性。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

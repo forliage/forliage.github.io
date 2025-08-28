@@ -1,13 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机动画10:变形动画</title>
-    
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    
-    <script>
+<meta charset="utf-8"/>
+<title>计算机动画10:变形动画</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -18,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -32,305 +30,305 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8A%A8%E7%94%BB10%E5%8F%98%E5%BD%A2%E5%8A%A8%E7%94%BB">计算机动画10:变形动画</h1>
-                <p>“变形”最直观的体现：<strong>通过控制少数，来驱动多数</strong>。</p>
-                <h4 id="1-%E4%BB%80%E4%B9%88%E6%98%AF%E5%8F%98%E5%BD%A2-deformation"><strong>1. 什么是变形 (Deformation)？</strong></h4>
-                <p>那么，我们来给“变形”下一个学术性的定义。</p>
-                <ul>
-                <li>
-                <p><strong>变形 (Deformation)</strong> 是指对一个几何对象的形状进行扭曲、弯曲或任意形式的改变，使其达到动画师所期望的新形态。</p>
-                </li>
-                <li>
-                <p>一个至关重要的特性是，在这个过程中，对象的<strong>拓扑关系 (Topological Relationship) 一般保持不变</strong>。什么意思呢？一个甜甜圈（拓扑上是一个环）无论怎么拉伸扭曲，只要不撕裂、不黏合，它就不会变成一个球。点、线、面之间的连接关系是固定的。</p>
-                </li>
-                <li>
-                <p>变形的核心挑战在于<strong>有效控制 (Effective Control)</strong>。我们不可能去手动编辑成千上万个顶点，因此，如何用少量、直观的控制来实现平滑、自然的整体变形，是所有变形技术研究的重中之重。</p>
-                </li>
-                <li>
-                <p><strong>变形 vs. 融合 (Morphing)</strong>: 变形通常是针对单个物体，而融合（Morphing）是指一个物体平滑地过渡到另一个完全不同的物体（比如人脸变成狼脸），这通常涉及到拓扑的改变，是另一个研究分支。</p>
-                </li>
-                <li>
-                <p><strong>自由变形 (Free Form Deformation, FFD)</strong>: 由于空间变形技术通常允许用户进行非常随意的、非刚性的形状修改，所以它也被形象地称为“自由变形”。</p>
-                </li>
-                <li>
-                <p><strong>造型与动画的桥梁</strong>: 空间变形技术既是造型（Modeling）工具，也是动画（Animation）工具。它将静态的造型过程和动态的动画过程有机地结合在了一起。</p>
-                </li>
-                </ul>
-                <h4 id="2-%E5%8F%98%E5%BD%A2%E4%B8%8E%E7%89%A9%E4%BD%93%E7%9A%84%E8%A1%A8%E7%A4%BA%E6%96%B9%E6%B3%95"><strong>2. 变形与物体的表示方法</strong></h4>
-                <p>变形技术可以分为两大类：一类是与物体具体表示方法<strong>无关</strong>的，另一类是<strong>有关</strong>的。</p>
-                <p><strong>a) 与表示无关的变形 (Representation-Independent Deformation)</strong></p>
-                <p>这类技术（如我们即将深入探讨的FFD）将物体视为一个点集，并作用于其所在的整个三维空间。无论物体是用多边形网格、参数曲面还是细分曲面表示，都可以应用。这就像改变了空间本身的“尺子”，空间内的所有东西都会随之改变。</p>
-                <p><strong>核心思想</strong>: 如何用少量的点去有效控制更多的点？</p>
-                <p><strong>b) 与表示有关的变形 (Representation-Dependent Deformation)</strong></p>
-                <ul>
-                <li>
-                <p><strong>参数曲面 (Parametric Surfaces)</strong>: 比如NURBS曲面，广泛用于工业设计（汽车、飞机）。它的形状由一系列控制点决定。移动控制点可以改变曲面形状。</p>
-                <ul>
-                <li><strong>优点</strong>: 曲面天然光滑。</li>
-                <li><strong>缺点</strong>: 控制点的移动对曲面的影响是全局的，要做局部精细调整比较困难，即所谓的**“多点的协调控制 (Coordinated control of many points)”**问题。如下图，左边这种简单的凸起比较容易（easy），而右边这种复杂的鞍形则非常困难（difficult）。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>多边形网格 (Polygon Meshes)</strong>: 这是游戏和电影中最常见的表示方法。变形直接作用于网格的顶点。比如角色摆出各种姿势（Character Posing）。</p>
-                </li>
-                <li>
-                <p><strong>细分曲面 (Subdivision Surfaces)</strong>: 结合了多边形网格的灵活性和参数曲面的光滑性，是现代角色建模的主流技术。</p>
-                </li>
-                </ul>
-                <p>无论是哪种表示，背后都有一个共同的数学基础。接下来，让我们深入到变形技术的数学核心。</p>
-                <h3 id="part-1-%E7%BB%8F%E5%85%B8%E5%8F%98%E5%BD%A2%E6%96%B9%E6%B3%95%E6%95%B0%E5%AD%A6%E5%B7%A5%E5%85%B7%E7%AE%B1"><strong>Part 1: 经典变形方法——数学工具箱</strong></h3>
-                <p>在自由变形（FFD）方法普及之前，计算机图形学先驱们已经探索出了一套经典而强大的变形方法。其中最具代表性的是 <strong>Alan Barr 在1984年</strong> 发表的里程碑式论文 <em>Global and local deformation of solid primitives</em>。这篇论文被引用了上千次，奠定了这个领域的基础。</p>
-                <p>在传统造型方法中，复杂的物体通常由简单的几何体（如立方体、球体、圆柱体）通过<strong>构造实体几何 (Constructive Solid Geometry, CSG)</strong> 的方式组合而成。CSG通过布尔运算（并、交、差）和刚体变换（平移、旋转、缩放）来构建模型。</p>
-                <div class="mermaid">graph TD
-                    A[复合体] --> B(差);
-                    B --> C[方块];
-                    B --> D[球];
-                    A --> E(并);
-                    E --> F[圆柱];
-                    E --> G[圆环];
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%8A%A8%E7%94%BB10%E5%8F%98%E5%BD%A2%E5%8A%A8%E7%94%BB">计算机动画10:变形动画</h1>
+<p>“变形”最直观的体现：<strong>通过控制少数，来驱动多数</strong>。</p>
+<h4 id="1-%E4%BB%80%E4%B9%88%E6%98%AF%E5%8F%98%E5%BD%A2-deformation"><strong>1. 什么是变形 (Deformation)？</strong></h4>
+<p>那么，我们来给“变形”下一个学术性的定义。</p>
+<ul>
+<li>
+<p><strong>变形 (Deformation)</strong> 是指对一个几何对象的形状进行扭曲、弯曲或任意形式的改变，使其达到动画师所期望的新形态。</p>
+</li>
+<li>
+<p>一个至关重要的特性是，在这个过程中，对象的<strong>拓扑关系 (Topological Relationship) 一般保持不变</strong>。什么意思呢？一个甜甜圈（拓扑上是一个环）无论怎么拉伸扭曲，只要不撕裂、不黏合，它就不会变成一个球。点、线、面之间的连接关系是固定的。</p>
+</li>
+<li>
+<p>变形的核心挑战在于<strong>有效控制 (Effective Control)</strong>。我们不可能去手动编辑成千上万个顶点，因此，如何用少量、直观的控制来实现平滑、自然的整体变形，是所有变形技术研究的重中之重。</p>
+</li>
+<li>
+<p><strong>变形 vs. 融合 (Morphing)</strong>: 变形通常是针对单个物体，而融合（Morphing）是指一个物体平滑地过渡到另一个完全不同的物体（比如人脸变成狼脸），这通常涉及到拓扑的改变，是另一个研究分支。</p>
+</li>
+<li>
+<p><strong>自由变形 (Free Form Deformation, FFD)</strong>: 由于空间变形技术通常允许用户进行非常随意的、非刚性的形状修改，所以它也被形象地称为“自由变形”。</p>
+</li>
+<li>
+<p><strong>造型与动画的桥梁</strong>: 空间变形技术既是造型（Modeling）工具，也是动画（Animation）工具。它将静态的造型过程和动态的动画过程有机地结合在了一起。</p>
+</li>
+</ul>
+<h4 id="2-%E5%8F%98%E5%BD%A2%E4%B8%8E%E7%89%A9%E4%BD%93%E7%9A%84%E8%A1%A8%E7%A4%BA%E6%96%B9%E6%B3%95"><strong>2. 变形与物体的表示方法</strong></h4>
+<p>变形技术可以分为两大类：一类是与物体具体表示方法<strong>无关</strong>的，另一类是<strong>有关</strong>的。</p>
+<p><strong>a) 与表示无关的变形 (Representation-Independent Deformation)</strong></p>
+<p>这类技术（如我们即将深入探讨的FFD）将物体视为一个点集，并作用于其所在的整个三维空间。无论物体是用多边形网格、参数曲面还是细分曲面表示，都可以应用。这就像改变了空间本身的“尺子”，空间内的所有东西都会随之改变。</p>
+<p><strong>核心思想</strong>: 如何用少量的点去有效控制更多的点？</p>
+<p><strong>b) 与表示有关的变形 (Representation-Dependent Deformation)</strong></p>
+<ul>
+<li>
+<p><strong>参数曲面 (Parametric Surfaces)</strong>: 比如NURBS曲面，广泛用于工业设计（汽车、飞机）。它的形状由一系列控制点决定。移动控制点可以改变曲面形状。</p>
+<ul>
+<li><strong>优点</strong>: 曲面天然光滑。</li>
+<li><strong>缺点</strong>: 控制点的移动对曲面的影响是全局的，要做局部精细调整比较困难，即所谓的**“多点的协调控制 (Coordinated control of many points)”**问题。如下图，左边这种简单的凸起比较容易（easy），而右边这种复杂的鞍形则非常困难（difficult）。</li>
+</ul>
+</li>
+<li>
+<p><strong>多边形网格 (Polygon Meshes)</strong>: 这是游戏和电影中最常见的表示方法。变形直接作用于网格的顶点。比如角色摆出各种姿势（Character Posing）。</p>
+</li>
+<li>
+<p><strong>细分曲面 (Subdivision Surfaces)</strong>: 结合了多边形网格的灵活性和参数曲面的光滑性，是现代角色建模的主流技术。</p>
+</li>
+</ul>
+<p>无论是哪种表示，背后都有一个共同的数学基础。接下来，让我们深入到变形技术的数学核心。</p>
+<h3 id="part-1-%E7%BB%8F%E5%85%B8%E5%8F%98%E5%BD%A2%E6%96%B9%E6%B3%95%E6%95%B0%E5%AD%A6%E5%B7%A5%E5%85%B7%E7%AE%B1"><strong>Part 1: 经典变形方法——数学工具箱</strong></h3>
+<p>在自由变形（FFD）方法普及之前，计算机图形学先驱们已经探索出了一套经典而强大的变形方法。其中最具代表性的是 <strong>Alan Barr 在1984年</strong> 发表的里程碑式论文 <em>Global and local deformation of solid primitives</em>。这篇论文被引用了上千次，奠定了这个领域的基础。</p>
+<p>在传统造型方法中，复杂的物体通常由简单的几何体（如立方体、球体、圆柱体）通过<strong>构造实体几何 (Constructive Solid Geometry, CSG)</strong> 的方式组合而成。CSG通过布尔运算（并、交、差）和刚体变换（平移、旋转、缩放）来构建模型。</p>
+<div class="mermaid">graph TD
+                    A[复合体] --&gt; B(差);
+                    B --&gt; C[方块];
+                    B --&gt; D[球];
+                    A --&gt; E(并);
+                    E --&gt; F[圆柱];
+                    E --&gt; G[圆环];
                 </div>
-                <p><em>(这是一个CSG树的简单示意图，展示了如何通过基本体和运算构造复杂物体)</em></p>
-                <p>Barr 的天才之处在于，他将<strong>变形</strong>也作为一种新的“运算算子”引入了这个体系，极大地扩展了CSG的表达能力。他提出了三种基本的变形算子：</p>
-                <ul>
-                <li><strong>Tapering (渐细/锥化)</strong>: 使物体沿着一个轴线逐渐变粗或变细。</li>
-                <li><strong>Twisting (扭曲)</strong>: 使物体沿着一个轴线产生螺旋形的扭转。</li>
-                <li><strong>Bending (弯曲)</strong>: 使物体沿着一个轴线进行弯曲。</li>
-                </ul>
-                <p><em>(从上到下：原始物体，Tapering, Twisting, Bending)</em></p>
-                <p>这些算子有两个巨大优势：</p>
-                <ol>
-                <li><strong>扩展了造型能力</strong>: 可以生成许多传统造型方法难以创建的有机形体。</li>
-                <li><strong>法向量可解析计算</strong>: 变形后物体的表面法向量可以通过原始法向量和变换的数学公式直接推导出来，这对于光照计算至关重要。</li>
-                </ol>
-                <h4 id="%E5%8F%98%E5%BD%A2%E7%9A%84%E6%95%B0%E5%AD%A6%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%B3%95%E5%90%91%E9%87%8F%E8%AE%A1%E7%AE%97"><strong>变形的数学模型与法向量计算</strong></h4>
-                <p>现在，我们进入本次讲座的第一个数学核心。请大家跟上我的思路。</p>
-                <p><strong>1. 变形的函数表示</strong></p>
-                <p>标准的刚体变换（平移、旋转、缩放）可以用一个 <strong>4x4 矩阵</strong>来表示。这个矩阵对于物体上的<strong>每一个点</strong>都是相同的。</p>
-                <p>而Barr提出的变形是<strong>非线性</strong>的。这意味着变换本身是<strong>位置的函数</strong>。变换矩阵会随着顶点的不同而变化。</p>
-                <ul>
-                <li>设 $\boldsymbol{X} = (x, y, z)$ 是待变形物体上的一个点。</li>
-                <li>设 $\boldsymbol{X'} = (x', y', z')$ 是变形后对应的点。</li>
-                <li>整个变形过程可以表示为一个函数： $\boldsymbol{X'} = F(\boldsymbol{X})$</li>
-                </ul>
-                <p><strong>2. 关键先生：雅可比矩阵 (Jacobian Matrix)</strong></p>
-                <p>既然变换是非线性的，我们如何分析它对物体微观结构（比如切向量和法向量）的影响呢？答案是使用<strong>雅可比矩阵</strong>。</p>
-                <p>雅可比矩阵是向量值函数的一阶偏导数矩阵。对于我们的变形函数 $F(\boldsymbol{X})$，其雅可比矩阵 $\boldsymbol{J}(\boldsymbol{X})$ 定义为：</p>
-                <p>$$
+<p><em>(这是一个CSG树的简单示意图，展示了如何通过基本体和运算构造复杂物体)</em></p>
+<p>Barr 的天才之处在于，他将<strong>变形</strong>也作为一种新的“运算算子”引入了这个体系，极大地扩展了CSG的表达能力。他提出了三种基本的变形算子：</p>
+<ul>
+<li><strong>Tapering (渐细/锥化)</strong>: 使物体沿着一个轴线逐渐变粗或变细。</li>
+<li><strong>Twisting (扭曲)</strong>: 使物体沿着一个轴线产生螺旋形的扭转。</li>
+<li><strong>Bending (弯曲)</strong>: 使物体沿着一个轴线进行弯曲。</li>
+</ul>
+<p><em>(从上到下：原始物体，Tapering, Twisting, Bending)</em></p>
+<p>这些算子有两个巨大优势：</p>
+<ol>
+<li><strong>扩展了造型能力</strong>: 可以生成许多传统造型方法难以创建的有机形体。</li>
+<li><strong>法向量可解析计算</strong>: 变形后物体的表面法向量可以通过原始法向量和变换的数学公式直接推导出来，这对于光照计算至关重要。</li>
+</ol>
+<h4 id="%E5%8F%98%E5%BD%A2%E7%9A%84%E6%95%B0%E5%AD%A6%E6%A8%A1%E5%9E%8B%E4%B8%8E%E6%B3%95%E5%90%91%E9%87%8F%E8%AE%A1%E7%AE%97"><strong>变形的数学模型与法向量计算</strong></h4>
+<p>现在，我们进入本次讲座的第一个数学核心。请大家跟上我的思路。</p>
+<p><strong>1. 变形的函数表示</strong></p>
+<p>标准的刚体变换（平移、旋转、缩放）可以用一个 <strong>4x4 矩阵</strong>来表示。这个矩阵对于物体上的<strong>每一个点</strong>都是相同的。</p>
+<p>而Barr提出的变形是<strong>非线性</strong>的。这意味着变换本身是<strong>位置的函数</strong>。变换矩阵会随着顶点的不同而变化。</p>
+<ul>
+<li>设 $\boldsymbol{X} = (x, y, z)$ 是待变形物体上的一个点。</li>
+<li>设 $\boldsymbol{X'} = (x', y', z')$ 是变形后对应的点。</li>
+<li>整个变形过程可以表示为一个函数： $\boldsymbol{X'} = F(\boldsymbol{X})$</li>
+</ul>
+<p><strong>2. 关键先生：雅可比矩阵 (Jacobian Matrix)</strong></p>
+<p>既然变换是非线性的，我们如何分析它对物体微观结构（比如切向量和法向量）的影响呢？答案是使用<strong>雅可比矩阵</strong>。</p>
+<p>雅可比矩阵是向量值函数的一阶偏导数矩阵。对于我们的变形函数 $F(\boldsymbol{X})$，其雅可比矩阵 $\boldsymbol{J}(\boldsymbol{X})$ 定义为：</p>
+<p>$$
                 \boldsymbol{J}(\boldsymbol{X}) = \frac{\partial \boldsymbol{X'}}{\partial \boldsymbol{X}} =
                 \begin{bmatrix}
-                \frac{\partial F_x}{\partial x} & \frac{\partial F_x}{\partial y} & \frac{\partial F_x}{\partial z} \\
-                \frac{\partial F_y}{\partial x} & \frac{\partial F_y}{\partial y} & \frac{\partial F_y}{\partial z} \\
-                \frac{\partial F_z}{\partial x} & \frac{\partial F_z}{\partial y} & \frac{\partial F_z}{\partial z}
+                \frac{\partial F_x}{\partial x} &amp; \frac{\partial F_x}{\partial y} &amp; \frac{\partial F_x}{\partial z} \\
+                \frac{\partial F_y}{\partial x} &amp; \frac{\partial F_y}{\partial y} &amp; \frac{\partial F_y}{\partial z} \\
+                \frac{\partial F_z}{\partial x} &amp; \frac{\partial F_z}{\partial y} &amp; \frac{\partial F_z}{\partial z}
                 \end{bmatrix}
                 $$</p>
-                <p>其中 $F_x, F_y, F_z$ 是函数 $F$ 的三个分量，即 $x', y', z'$ 的表达式。</p>
-                <p>雅可比矩阵的几何意义是什么？它描述了在点 $\boldsymbol{X}$ 附近，一个无穷小的邻域是如何被线性地拉伸、旋转和缩放的。<strong>它是非线性变换在某一点的局部线性近似</strong>。</p>
-                <p><strong>3. 推导变形后的切向量 (Tangent Vector)</strong></p>
-                <p>假设物体表面由参数方程 $\boldsymbol{X}(u, v)$ 给出。表面上任意一点的切向量可以通过对参数求偏导得到，例如 $\frac{\partial \boldsymbol{X}}{\partial u}$。</p>
-                <p>变形后的点是 $\boldsymbol{X'} = F(\boldsymbol{X}(u, v))$。我们想求变形后的切向量 $\frac{\partial \boldsymbol{X'}}{\partial u}$。根据多元函数求导的<strong>链式法则</strong>：</p>
-                <p>$$
+<p>其中 $F_x, F_y, F_z$ 是函数 $F$ 的三个分量，即 $x', y', z'$ 的表达式。</p>
+<p>雅可比矩阵的几何意义是什么？它描述了在点 $\boldsymbol{X}$ 附近，一个无穷小的邻域是如何被线性地拉伸、旋转和缩放的。<strong>它是非线性变换在某一点的局部线性近似</strong>。</p>
+<p><strong>3. 推导变形后的切向量 (Tangent Vector)</strong></p>
+<p>假设物体表面由参数方程 $\boldsymbol{X}(u, v)$ 给出。表面上任意一点的切向量可以通过对参数求偏导得到，例如 $\frac{\partial \boldsymbol{X}}{\partial u}$。</p>
+<p>变形后的点是 $\boldsymbol{X'} = F(\boldsymbol{X}(u, v))$。我们想求变形后的切向量 $\frac{\partial \boldsymbol{X'}}{\partial u}$。根据多元函数求导的<strong>链式法则</strong>：</p>
+<p>$$
                 \frac{\partial \boldsymbol{X'}}{\partial u} = \frac{\partial F(\boldsymbol{X})}{\partial \boldsymbol{X}} \frac{\partial \boldsymbol{X}}{\partial u} = \boldsymbol{J}(\boldsymbol{X}) \frac{\partial \boldsymbol{X}}{\partial u}
                 $$</p>
-                <p>这个公式非常漂亮！它告诉我们：<strong>新的切向量 = 雅可比矩阵 × 旧的切向量</strong>。</p>
-                <p><strong>4. 推导变形后的法向量 (Normal Vector)</strong></p>
-                <p>表面法向量 $\boldsymbol{N}$ 通常由两个不平行的切向量的叉积得到：$\boldsymbol{N} = \frac{\partial \boldsymbol{X}}{\partial u} \times \frac{\partial \boldsymbol{X}}{\partial v}$。</p>
-                <p>变形后的法向量 $\boldsymbol{N'}$ 则是：</p>
-                <p>$$
+<p>这个公式非常漂亮！它告诉我们：<strong>新的切向量 = 雅可比矩阵 × 旧的切向量</strong>。</p>
+<p><strong>4. 推导变形后的法向量 (Normal Vector)</strong></p>
+<p>表面法向量 $\boldsymbol{N}$ 通常由两个不平行的切向量的叉积得到：$\boldsymbol{N} = \frac{\partial \boldsymbol{X}}{\partial u} \times \frac{\partial \boldsymbol{X}}{\partial v}$。</p>
+<p>变形后的法向量 $\boldsymbol{N'}$ 则是：</p>
+<p>$$
                 \boldsymbol{N'} = \frac{\partial \boldsymbol{X'}}{\partial u} \times \frac{\partial \boldsymbol{X'}}{\partial v} = \left(\boldsymbol{J} \frac{\partial \boldsymbol{X}}{\partial u}\right) \times \left(\boldsymbol{J} \frac{\partial \boldsymbol{X}}{\partial v}\right)
                 $$</p>
-                <p>这里需要用到一个关于叉积和矩阵的恒等式：对于任意向量 $\boldsymbol{a}, \boldsymbol{b}$ 和矩阵 $\boldsymbol{M}$，有：
+<p>这里需要用到一个关于叉积和矩阵的恒等式：对于任意向量 $\boldsymbol{a}, \boldsymbol{b}$ 和矩阵 $\boldsymbol{M}$，有：
                 $(\boldsymbol{M}\boldsymbol{a}) \times (\boldsymbol{M}\boldsymbol{b}) = \det(\boldsymbol{M})(\boldsymbol{M}^{-1})^T (\boldsymbol{a} \times \boldsymbol{b})$</p>
-                <p>证明这个恒等式需要一些线性代数的知识，我们在这里简要概述一下。设 $\boldsymbol{M}$ 的列向量为 $\boldsymbol{m}_1, \boldsymbol{m}_2, \boldsymbol{m}_3$。
+<p>证明这个恒等式需要一些线性代数的知识，我们在这里简要概述一下。设 $\boldsymbol{M}$ 的列向量为 $\boldsymbol{m}_1, \boldsymbol{m}_2, \boldsymbol{m}_3$。
                 $(\boldsymbol{M}\boldsymbol{a}) \times (\boldsymbol{M}\boldsymbol{b})$ 的第 $i$ 个分量是 $\epsilon_{ijk} (\boldsymbol{M}\boldsymbol{a})_j (\boldsymbol{M}\boldsymbol{b})_k$，其中 $\epsilon_{ijk}$ 是列维-奇维塔符号。
                 经过一系列代数推导，可以证明它等于 $\det(\boldsymbol{M}) ((\boldsymbol{M}^T)^{-1})_{il} (\boldsymbol{a} \times \boldsymbol{b})_l$。</p>
-                <p>将这个恒等式应用到我们的法向量计算中，我们得到：</p>
-                <p>$$
+<p>将这个恒等式应用到我们的法向量计算中，我们得到：</p>
+<p>$$
                 \boldsymbol{N'} = \det(\boldsymbol{J})(\boldsymbol{J}^{-1})^T \left(\frac{\partial \boldsymbol{X}}{\partial u} \times \frac{\partial \boldsymbol{X}}{\partial v}\right) = \det(\boldsymbol{J})(\boldsymbol{J}^{-1})^T \boldsymbol{N}
                 $$</p>
-                <p>这个公式是<strong>变形理论中最重要的结果之一</strong>。它告诉我们如何计算变形后的法向量。</p>
-                <ul>
-                <li>$\boldsymbol{N'}$ 与 $(\boldsymbol{J}^{-1})^T \boldsymbol{N}$ 方向相同。$(\boldsymbol{J}^{-1})^T$ 通常被称为<strong>法向量变换矩阵</strong>。</li>
-                <li>$\det(\boldsymbol{J})$ 是雅可比行列式，它代表了在点 $\boldsymbol{X}$ 处，变换导致的<strong>局部体积变化率</strong>。如果 $\det(\boldsymbol{J}) = 1$，则变换是保体积的。</li>
-                </ul>
-                <p>在实际渲染中，法向量的长度通常不重要（因为会被归一化），所以我们主要关心方向。因此，可以简单记为：
+<p>这个公式是<strong>变形理论中最重要的结果之一</strong>。它告诉我们如何计算变形后的法向量。</p>
+<ul>
+<li>$\boldsymbol{N'}$ 与 $(\boldsymbol{J}^{-1})^T \boldsymbol{N}$ 方向相同。$(\boldsymbol{J}^{-1})^T$ 通常被称为<strong>法向量变换矩阵</strong>。</li>
+<li>$\det(\boldsymbol{J})$ 是雅可比行列式，它代表了在点 $\boldsymbol{X}$ 处，变换导致的<strong>局部体积变化率</strong>。如果 $\det(\boldsymbol{J}) = 1$，则变换是保体积的。</li>
+</ul>
+<p>在实际渲染中，法向量的长度通常不重要（因为会被归一化），所以我们主要关心方向。因此，可以简单记为：
                 $\boldsymbol{N'} \propto (\boldsymbol{J}^{-1})^T \boldsymbol{N}$</p>
-                <h4 id="%E5%AE%9E%E4%BE%8B%E5%88%86%E6%9E%90%E5%B0%86%E6%95%B0%E5%AD%A6%E5%BA%94%E7%94%A8%E4%BA%8E%E7%BB%8F%E5%85%B8%E5%8F%98%E5%BD%A2"><strong>实例分析：将数学应用于经典变形</strong></h4>
-                <p>现在，让我们用这个强大的数学工具来分析Barr提出的三种变形。</p>
-                <p><strong>a) Scaling (缩放)</strong></p>
-                <p>这是最简单的变形。</p>
-                <ul>
-                <li><strong>变形函数 F</strong>:
+<h4 id="%E5%AE%9E%E4%BE%8B%E5%88%86%E6%9E%90%E5%B0%86%E6%95%B0%E5%AD%A6%E5%BA%94%E7%94%A8%E4%BA%8E%E7%BB%8F%E5%85%B8%E5%8F%98%E5%BD%A2"><strong>实例分析：将数学应用于经典变形</strong></h4>
+<p>现在，让我们用这个强大的数学工具来分析Barr提出的三种变形。</p>
+<p><strong>a) Scaling (缩放)</strong></p>
+<p>这是最简单的变形。</p>
+<ul>
+<li><strong>变形函数 F</strong>:
                 $x' = a_1 x$
                 $y' = a_2 y$
                 $z' = a_3 z$</li>
-                <li><strong>雅可比矩阵 J</strong>:
+<li><strong>雅可比矩阵 J</strong>:
                 $$
-                \boldsymbol{J} = \begin{pmatrix} a_1 & 0 & 0 \\ 0 & a_2 & 0 \\ 0 & 0 & a_3 \end{pmatrix}
+                \boldsymbol{J} = \begin{pmatrix} a_1 &amp; 0 &amp; 0 \\ 0 &amp; a_2 &amp; 0 \\ 0 &amp; 0 &amp; a_3 \end{pmatrix}
                 $$</li>
-                <li><strong>雅可比行列式</strong>: $\det(\boldsymbol{J}) = a_1 a_2 a_3$ (体积缩放比)</li>
-                <li><strong>法向量变换矩阵</strong>:
+<li><strong>雅可比行列式</strong>: $\det(\boldsymbol{J}) = a_1 a_2 a_3$ (体积缩放比)</li>
+<li><strong>法向量变换矩阵</strong>:
                 $$
-                (\boldsymbol{J}^{-1})^T = \begin{pmatrix} 1/a_1 & 0 & 0 \\ 0 & 1/a_2 & 0 \\ 0 & 0 & 1/a_3 \end{pmatrix}
+                (\boldsymbol{J}^{-1})^T = \begin{pmatrix} 1/a_1 &amp; 0 &amp; 0 \\ 0 &amp; 1/a_2 &amp; 0 \\ 0 &amp; 0 &amp; 1/a_3 \end{pmatrix}
                 $$
                 所以，如果原始法向量是 $(n_x, n_y, n_z)$，新的法向量方向为 $(n_x/a_1, n_y/a_2, n_z/a_3)$。这与我们熟知的结论完全一致。</li>
-                </ul>
-                <p><strong>b) Tapering (沿z轴锥化)</strong></p>
-                <ul>
-                <li><strong>变形函数 F</strong>: 沿z轴的缩放因子 $r$ 是 $z$ 的函数, $r = f(z)$。
+</ul>
+<p><strong>b) Tapering (沿z轴锥化)</strong></p>
+<ul>
+<li><strong>变形函数 F</strong>: 沿z轴的缩放因子 $r$ 是 $z$ 的函数, $r = f(z)$。
                 $x' = r \cdot x = f(z) \cdot x$
                 $y' = r \cdot y = f(z) \cdot y$
                 $z' = z$</li>
-                <li><strong>雅可比矩阵 J</strong>: 对 $x, y, z$ 求偏导得到
+<li><strong>雅可比矩阵 J</strong>: 对 $x, y, z$ 求偏导得到
                 $$
                 \boldsymbol{J} = \begin{pmatrix}
-                f(z) & 0 & f'(z)x \\
-                0 & f(z) & f'(z)y \\
-                0 & 0 & 1
+                f(z) &amp; 0 &amp; f'(z)x \\
+                0 &amp; f(z) &amp; f'(z)y \\
+                0 &amp; 0 &amp; 1
                 \end{pmatrix}
                 $$</li>
-                <li><strong>雅可比行列式</strong>: $\det(\boldsymbol{J}) = f(z)^2 = r^2$。局部体积变化率是缩放因子 $r$ 的平方。</li>
-                <li><strong>法向量变换矩阵</strong>: 经过计算 $(\boldsymbol{J}^{-1})^T$ (省略具体步骤)，我们得到
+<li><strong>雅可比行列式</strong>: $\det(\boldsymbol{J}) = f(z)^2 = r^2$。局部体积变化率是缩放因子 $r$ 的平方。</li>
+<li><strong>法向量变换矩阵</strong>: 经过计算 $(\boldsymbol{J}^{-1})^T$ (省略具体步骤)，我们得到
                 $$
                 \boldsymbol{N'} \propto \begin{pmatrix}
-                r & 0 & 0 \\
-                0 & r & 0 \\
-                -r f'(z)x & -r f'(z)y & r^2
+                r &amp; 0 &amp; 0 \\
+                0 &amp; r &amp; 0 \\
+                -r f'(z)x &amp; -r f'(z)y &amp; r^2
                 \end{pmatrix} \boldsymbol{N}
                 $$</li>
-                </ul>
-                <p><strong>c) Twisting (沿z轴扭曲)</strong></p>
-                <ul>
-                <li><strong>变形函数 F</strong>: 绕z轴的旋转角度 $\theta$ 是 $z$ 的函数, $\theta = f(z)$。
+</ul>
+<p><strong>c) Twisting (沿z轴扭曲)</strong></p>
+<ul>
+<li><strong>变形函数 F</strong>: 绕z轴的旋转角度 $\theta$ 是 $z$ 的函数, $\theta = f(z)$。
                 $x' = x \cos\theta - y \sin\theta$
                 $y' = x \sin\theta + y \cos\theta$
                 $z' = z$</li>
-                <li><strong>雅可比矩阵 J</strong>: 这是一个更有趣的求导。
+<li><strong>雅可比矩阵 J</strong>: 这是一个更有趣的求导。
                 $$
                 \boldsymbol{J} = \begin{pmatrix}
-                \cos\theta & -\sin\theta & -x\sin\theta f'(z) - y\cos\theta f'(z) \\
-                \sin\theta & \cos\theta & x\cos\theta f'(z) - y\sin\theta f'(z) \\
-                0 & 0 & 1
+                \cos\theta &amp; -\sin\theta &amp; -x\sin\theta f'(z) - y\cos\theta f'(z) \\
+                \sin\theta &amp; \cos\theta &amp; x\cos\theta f'(z) - y\sin\theta f'(z) \\
+                0 &amp; 0 &amp; 1
                 \end{pmatrix}
                 $$</li>
-                <li><strong>雅可比行列式</strong>: $\det(\boldsymbol{J}) = \cos^2\theta - (-\sin^2\theta) = 1$。
+<li><strong>雅可比行列式</strong>: $\det(\boldsymbol{J}) = \cos^2\theta - (-\sin^2\theta) = 1$。
                 这是一个非常重要的结论：<strong>纯扭曲变形是保体积的 (Volume Preserving)</strong>！</li>
-                <li><strong>法向量变换矩阵</strong>:
+<li><strong>法向量变换矩阵</strong>:
                 $$
                 (\boldsymbol{J}^{-1})^T = \begin{pmatrix}
-                \cos\theta & \sin\theta & y f'(z) \\
-                -\sin\theta & \cos\theta & -x f'(z) \\
-                0 & 0 & 1
+                \cos\theta &amp; \sin\theta &amp; y f'(z) \\
+                -\sin\theta &amp; \cos\theta &amp; -x f'(z) \\
+                0 &amp; 0 &amp; 1
                 \end{pmatrix}
                 $$</li>
-                </ul>
-                <p><strong>d) Bending (沿y轴弯曲)</strong></p>
-                <p>弯曲变形的数学形式最为复杂，它通常定义在一个特定的区域内 <code>ymin &lt;= y &lt;= ymax</code>。</p>
-                <ul>
-                <li><strong>核心思想</strong>: 将笛卡尔坐标 $(x, y, z)$ 想象成一个点在一个圆柱体上的坐标。弯曲就是把这个圆柱体“拉直”或者把直线坐标“卷曲”。</li>
-                <li><strong>变形函数 F</strong>: 涉及到分段函数和三角函数，这里我们不展开具体的公式，因为它非常繁琐。关键在于理解其思想：一个点的y坐标决定了它在z-x平面上被旋转的角度，从而形成弯曲效果。</li>
-                <li><strong>雅可比矩阵 J</strong>: 同样可以求导得出。</li>
-                <li><strong>雅可比行列式</strong>: $\det(\boldsymbol{J}) = 1 - kz$，其中 $k$ 是曲率，$z$ 是到中性轴的距离。这意味着离弯曲中心越远的点，体积变化越大。</li>
-                </ul>
-                <h3 id="part-2-%E8%87%AA%E7%94%B1%E5%8F%98%E5%BD%A2%E6%96%B9%E6%B3%95-ffd-free-form-deformation"><strong>Part 2: 自由变形方法 FFD (Free Form Deformation)</strong></h3>
-                <p>Barr的方法非常强大，但它们是<strong>特定</strong>的、<strong>程序化</strong>的。如果我们想做一个“捏橡皮泥”式的，更随意的变形呢？这就是 <strong>FFD</strong> 登场的时刻。</p>
-                <p>FFD 由 Sederberg 和 Parry 在1986年提出，是图形学历史上又一个里程碑。</p>
-                <p><strong>核心思想</strong>:
+</ul>
+<p><strong>d) Bending (沿y轴弯曲)</strong></p>
+<p>弯曲变形的数学形式最为复杂，它通常定义在一个特定的区域内 <code>ymin &lt;= y &lt;= ymax</code>。</p>
+<ul>
+<li><strong>核心思想</strong>: 将笛卡尔坐标 $(x, y, z)$ 想象成一个点在一个圆柱体上的坐标。弯曲就是把这个圆柱体“拉直”或者把直线坐标“卷曲”。</li>
+<li><strong>变形函数 F</strong>: 涉及到分段函数和三角函数，这里我们不展开具体的公式，因为它非常繁琐。关键在于理解其思想：一个点的y坐标决定了它在z-x平面上被旋转的角度，从而形成弯曲效果。</li>
+<li><strong>雅可比矩阵 J</strong>: 同样可以求导得出。</li>
+<li><strong>雅可比行列式</strong>: $\det(\boldsymbol{J}) = 1 - kz$，其中 $k$ 是曲率，$z$ 是到中性轴的距离。这意味着离弯曲中心越远的点，体积变化越大。</li>
+</ul>
+<h3 id="part-2-%E8%87%AA%E7%94%B1%E5%8F%98%E5%BD%A2%E6%96%B9%E6%B3%95-ffd-free-form-deformation"><strong>Part 2: 自由变形方法 FFD (Free Form Deformation)</strong></h3>
+<p>Barr的方法非常强大，但它们是<strong>特定</strong>的、<strong>程序化</strong>的。如果我们想做一个“捏橡皮泥”式的，更随意的变形呢？这就是 <strong>FFD</strong> 登场的时刻。</p>
+<p>FFD 由 Sederberg 和 Parry 在1986年提出，是图形学历史上又一个里程碑。</p>
+<p><strong>核心思想</strong>:
                 不再直接对物体进行变形，而是将物体<strong>嵌入</strong>到一个柔软的、可变形的三维空间中。我们去变形这个空间，物体作为空间的一部分，会“随波逐流”地发生变形。</p>
-                <p>这个可变形的空间，通常是一个由控制点构成的<strong>晶格 (Lattice)</strong>。</p>
-                <p>这个思想的本质是<strong>参数化 (Parameterization)</strong>！</p>
-                <h4 id="%E4%BB%8E%E4%BA%8C%E7%BB%B4-ffd-%E5%88%B0%E4%B8%89%E7%BB%B4-ffd"><strong>从二维 FFD 到三维 FFD</strong></h4>
-                <p><strong>1. 二维 FFD</strong></p>
-                <p>让我们先从二维理解。想象一张二维的橡胶膜，我们可以在上面画一个正方形。如果我们拉伸这个橡胶膜，上面的正方形就会变成一个不规则的曲边四边形。</p>
-                <p>在数学上，这个过程可以用<strong>双变量参数曲面</strong>来描述，最常用的是<strong>贝塞尔曲面 (Bezier Surface)</strong>。</p>
-                <ul>
-                <li>我们定义一个二维的参数空间 $(u, v)$，其中 $u, v \in [0, 1]$。这对应一个单位正方形。</li>
-                <li>我们定义一个 $m \times n$ 的控制点网格 $\boldsymbol{P}_{ij}$。</li>
-                <li>正方形内的任意一点 $(u,v)$ 映射到三维空间中的点 $\boldsymbol{Q}(u,v)$ 的公式是：
+<p>这个可变形的空间，通常是一个由控制点构成的<strong>晶格 (Lattice)</strong>。</p>
+<p>这个思想的本质是<strong>参数化 (Parameterization)</strong>！</p>
+<h4 id="%E4%BB%8E%E4%BA%8C%E7%BB%B4-ffd-%E5%88%B0%E4%B8%89%E7%BB%B4-ffd"><strong>从二维 FFD 到三维 FFD</strong></h4>
+<p><strong>1. 二维 FFD</strong></p>
+<p>让我们先从二维理解。想象一张二维的橡胶膜，我们可以在上面画一个正方形。如果我们拉伸这个橡胶膜，上面的正方形就会变成一个不规则的曲边四边形。</p>
+<p>在数学上，这个过程可以用<strong>双变量参数曲面</strong>来描述，最常用的是<strong>贝塞尔曲面 (Bezier Surface)</strong>。</p>
+<ul>
+<li>我们定义一个二维的参数空间 $(u, v)$，其中 $u, v \in [0, 1]$。这对应一个单位正方形。</li>
+<li>我们定义一个 $m \times n$ 的控制点网格 $\boldsymbol{P}_{ij}$。</li>
+<li>正方形内的任意一点 $(u,v)$ 映射到三维空间中的点 $\boldsymbol{Q}(u,v)$ 的公式是：
                 $$
                 \boldsymbol{Q}(u, v) = \sum_{i=0}^{m} \sum_{j=0}^{n} \boldsymbol{P}_{ij} B_{i,m}(u) B_{j,n}(v)
                 $$
                 其中 $B_{i,m}(u)$ 是伯恩斯坦基函数 (Bernstein Basis Functions)。</li>
-                </ul>
-                <div class="mermaid">graph LR
+</ul>
+<div class="mermaid">graph LR
                     subgraph "参数空间 (R²)"
                         A["单位正方形 (u,v)"]
                     end
                     subgraph "世界空间 (R³)"
                         B["弯曲的曲面"]
                     end
-                    A -- "通过贝塞尔函数映射" --> B
+                    A -- "通过贝塞尔函数映射" --&gt; B
                 </div>
-                <p><strong>2. 三维 FFD</strong></p>
-                <p>三维FFD是二维的自然推广。我们使用的不再是贝塞尔曲面，而是<strong>三变量贝塞尔体 (Trivariate Bezier Volume)</strong>。</p>
-                <ul>
-                <li>我们定义一个三维的参数空间 $(u, v, w)$，其中 $u, v, w \in [0, 1]$。这对应一个单位立方体。</li>
-                <li>我们定义一个 $l \times m \times n$ 的三维控制点晶格 $\boldsymbol{P}_{ijk}$。</li>
-                <li>单位立方体内的任意一点 $(u,v,w)$ 映射到三维空间中的点 $\boldsymbol{Q}(u,v,w)$ 的公式是：
+<p><strong>2. 三维 FFD</strong></p>
+<p>三维FFD是二维的自然推广。我们使用的不再是贝塞尔曲面，而是<strong>三变量贝塞尔体 (Trivariate Bezier Volume)</strong>。</p>
+<ul>
+<li>我们定义一个三维的参数空间 $(u, v, w)$，其中 $u, v, w \in [0, 1]$。这对应一个单位立方体。</li>
+<li>我们定义一个 $l \times m \times n$ 的三维控制点晶格 $\boldsymbol{P}_{ijk}$。</li>
+<li>单位立方体内的任意一点 $(u,v,w)$ 映射到三维空间中的点 $\boldsymbol{Q}(u,v,w)$ 的公式是：
                 $$
                 \boldsymbol{Q}(u, v, w) = \sum_{i=0}^{l} \sum_{j=0}^{m} \sum_{k=0}^{n} \boldsymbol{P}_{ijk} B_{i,l}(u) B_{j,m}(v) B_{k,n}(w)
                 $$
                 最常用的 $l=m=n=3$ 的三三次贝塞尔体，需要 $4 \times 4 \times 4 = 64$ 个控制点。</li>
-                </ul>
-                <h4 id="ffd-%E5%8F%98%E5%BD%A2%E4%B8%89%E6%AD%A5%E6%9B%B2"><strong>FFD 变形三步曲</strong></h4>
-                <p>使用FFD对一个物体进行变形，遵循一个标准流程：</p>
-                <ol>
-                <li>
-                <p><strong>参数化 (Parameterization)</strong>:</p>
-                <ul>
-                <li>首先，在物体周围定义一个初始的、规则的平行六面体晶格（Lattice）。这个晶格定义了一个<strong>局部坐标系</strong>。</li>
-                <li>对于物体上的<strong>每一个顶点</strong> $\boldsymbol{X}$，计算它在这个晶格局部坐标系下的<strong>参数坐标</strong> $(s, t, u)$，其中 $s, t, u \in [0, 1]$。</li>
-                <li>设晶格的原点为 $\boldsymbol{X}_0$，三条轴向量为 $\boldsymbol{S}, \boldsymbol{T}, \boldsymbol{U}$。则有：
+</ul>
+<h4 id="ffd-%E5%8F%98%E5%BD%A2%E4%B8%89%E6%AD%A5%E6%9B%B2"><strong>FFD 变形三步曲</strong></h4>
+<p>使用FFD对一个物体进行变形，遵循一个标准流程：</p>
+<ol>
+<li>
+<p><strong>参数化 (Parameterization)</strong>:</p>
+<ul>
+<li>首先，在物体周围定义一个初始的、规则的平行六面体晶格（Lattice）。这个晶格定义了一个<strong>局部坐标系</strong>。</li>
+<li>对于物体上的<strong>每一个顶点</strong> $\boldsymbol{X}$，计算它在这个晶格局部坐标系下的<strong>参数坐标</strong> $(s, t, u)$，其中 $s, t, u \in [0, 1]$。</li>
+<li>设晶格的原点为 $\boldsymbol{X}_0$，三条轴向量为 $\boldsymbol{S}, \boldsymbol{T}, \boldsymbol{U}$。则有：
                 $$
                 \boldsymbol{X} = \boldsymbol{X}_0 + s\boldsymbol{S} + t\boldsymbol{T} + u\boldsymbol{U}
                 $$</li>
-                <li>这是一个线性方程组，可以解出 $(s, t, u)$：
+<li>这是一个线性方程组，可以解出 $(s, t, u)$：
                 $$
                 s = \frac{(\boldsymbol{T} \times \boldsymbol{U}) \cdot (\boldsymbol{X} - \boldsymbol{X}_0)}{(\boldsymbol{T} \times \boldsymbol{U}) \cdot \boldsymbol{S}}, \quad t = \frac{(\boldsymbol{S} \times \boldsymbol{U}) \cdot (\boldsymbol{X} - \boldsymbol{X}_0)}{(\boldsymbol{S} \times \boldsymbol{U}) \cdot \boldsymbol{T}}, \quad u = \frac{(\boldsymbol{S} \times \boldsymbol{T}) \cdot (\boldsymbol{X} - \boldsymbol{X}_0)}{(\boldsymbol{S} \times \boldsymbol{T}) \cdot \boldsymbol{U}}
                 $$</li>
-                <li><strong>关键点</strong>: 这个 $(s, t, u)$ 坐标是每个顶点<strong>固有</strong>的，在后续步骤中保持不变。它记录了顶点在初始晶格中的相对位置。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>移动控制点 (Manipulate Control Points)</strong>:</p>
-                <ul>
-                <li>动画师通过交互式地移动晶格的控制点 $\boldsymbol{P}_{ijk}$ 到新的位置 $\boldsymbol{P'}_{ijk}$，来设计期望的变形效果。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>重新求值 (Re-evaluation)</strong>:</p>
-                <ul>
-                <li>对于物体上的每一个顶点，使用它在第一步中计算好的、<strong>固定不变</strong>的参数坐标 $(s, t, u)$，以及在第二步中<strong>更新后</strong>的控制点位置 $\boldsymbol{P'}_{ijk}$，代入三变量贝塞尔体公式，计算出顶点的新世界坐标 $\boldsymbol{X'}$。
+<li><strong>关键点</strong>: 这个 $(s, t, u)$ 坐标是每个顶点<strong>固有</strong>的，在后续步骤中保持不变。它记录了顶点在初始晶格中的相对位置。</li>
+</ul>
+</li>
+<li>
+<p><strong>移动控制点 (Manipulate Control Points)</strong>:</p>
+<ul>
+<li>动画师通过交互式地移动晶格的控制点 $\boldsymbol{P}_{ijk}$ 到新的位置 $\boldsymbol{P'}_{ijk}$，来设计期望的变形效果。</li>
+</ul>
+</li>
+<li>
+<p><strong>重新求值 (Re-evaluation)</strong>:</p>
+<ul>
+<li>对于物体上的每一个顶点，使用它在第一步中计算好的、<strong>固定不变</strong>的参数坐标 $(s, t, u)$，以及在第二步中<strong>更新后</strong>的控制点位置 $\boldsymbol{P'}_{ijk}$，代入三变量贝塞尔体公式，计算出顶点的新世界坐标 $\boldsymbol{X'}$。
                 $$
                 \boldsymbol{X'} = \sum_{i} \sum_{j} \sum_{k} \boldsymbol{P'}_{ijk} B_{i,l}(s) B_{j,m}(t) B_{k,n}(u)
                 $$</li>
-                </ul>
-                </li>
-                </ol>
-                <h4 id="%E4%BC%AA%E4%BB%A3%E7%A0%81%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><strong>伪代码与数据结构</strong></h4>
-                <p>为了让大家更清晰地理解这个过程，我们来看一下伪代码和可能的数据结构。</p>
-                <p><strong>C++ 数据结构:</strong></p>
-                <pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;vector&gt;</span></span>
+</ul>
+</li>
+</ol>
+<h4 id="%E4%BC%AA%E4%BB%A3%E7%A0%81%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><strong>伪代码与数据结构</strong></h4>
+<p>为了让大家更清晰地理解这个过程，我们来看一下伪代码和可能的数据结构。</p>
+<p><strong>C++ 数据结构:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;vector&gt;</span></span>
 
                 <span class="hljs-comment">// 简单的三维向量结构</span>
                 <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Vec3</span> {</span>
@@ -363,8 +361,8 @@
                     <span class="hljs-function"><span class="hljs-keyword">float</span> <span class="hljs-title">bernstein</span><span class="hljs-params">(<span class="hljs-keyword">int</span> i, <span class="hljs-keyword">int</span> n, <span class="hljs-keyword">float</span> t)</span></span>;
                 };
                 </div></code></pre>
-                <p><strong>FFD 变形伪代码:</strong></p>
-                <pre class="hljs"><code><div>// 阶段一: 初始化
+<p><strong>FFD 变形伪代码:</strong></p>
+<pre class="hljs"><code><div>// 阶段一: 初始化
                 function initializeFFD(object, lattice):
                   // 计算晶格的逆矩阵，用于快速坐标转换
                   lattice.computeInverseTransform()
@@ -384,74 +382,74 @@
                   // 更新渲染
                   object.updateRenderData()
                 </div></code></pre>
-                <h4 id="ffd-%E7%9A%84%E6%80%A7%E8%B4%A8%E4%B8%8E%E6%80%BB%E7%BB%93"><strong>FFD 的性质与总结</strong></h4>
-                <p>FFD 之所以如此成功和流行，源于它优美的数学性质。</p>
-                <ul>
-                <li><strong>性质1</strong>: 对一个参数曲面进行FFD变形，结果仍然是一个参数曲面。这意味着它能很好地与CAD模型兼容。</li>
-                <li><strong>性质2</strong>: 可以控制体积变化。变形后物体的体积可以通过对FFD变换的雅可比行列式 $\det(\boldsymbol{J}_{ffd})$ 在整个体积上积分得到。通过约束控制点的移动，可以实现近似的保体积变形。</li>
-                </ul>
-                <p><strong>FFD 总结</strong></p>
-                <ul>
-                <li>
-                <p><strong>优点</strong>:</p>
-                <ul>
-                <li><strong>与物体表示无关</strong>: 适用于任何几何体。</li>
-                <li><strong>直观</strong>: 拖拽控制点的操作非常符合人的直觉。</li>
-                <li><strong>高效</strong>: 计算过程主要是多项式求值，速度快。</li>
-                <li><strong>结果平滑</strong>: 贝塞尔/B-样条的性质保证了变形是光滑的。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>缺点</strong>:</p>
-                <ul>
-                <li><strong>晶格形状限制</strong>: 标准FFD的晶格是平行六面体，对于细长或环形的物体，一个晶格可能无法很好地贴合。</li>
-                <li><strong>复杂变形控制难</strong>: 对于需要精确控制的复杂变形，可能需要非常密集的控制点，失去了“以少控多”的优势。</li>
-                <li><strong>细节保持差</strong>: FFD是一种低频变形，倾向于平滑掉物体原有的高频细节。</li>
-                <li><strong>不遵循物理规律</strong>: 变形完全由几何驱动，不考虑物理材质的拉伸、压缩等特性。</li>
-                </ul>
-                </li>
-                </ul>
-                <h3 id="part-3-ffd-%E7%9A%84%E6%89%A9%E5%B1%95%E4%B8%8E%E6%BC%94%E8%BF%9B"><strong>Part 3: FFD 的扩展与演进</strong></h3>
-                <p>标准FFD的缺点也催生了大量的改进和研究工作。</p>
-                <h4 id="1-animated-ffd"><strong>1. Animated FFD</strong></h4>
-                <p>一种有趣的FFD应用是，我们先对FFD晶格进行一次性的、复杂的静态变形，然后让物体<strong>穿过</strong>这个变形后的空间。当物体在逻辑上的FFD空间中移动时，它在世界空间中就会呈现出扭曲、蜿蜒的动画效果。这在制作例如蛇的游动、过山车等效果时非常有用。</p>
-                <h4 id="2-%E6%89%A9%E5%B1%95ffd-extended-ffd-effd"><strong>2. 扩展FFD (Extended FFD, EFFD)</strong></h4>
-                <p>为了解决标准FFD晶格形状单一的问题，Coquillart 在1990年提出了EFFD。EFFD允许使用更灵活的晶格形状，比如<strong>棱柱形、圆柱形</strong>等。</p>
-                <ul>
-                <li><strong>构造</strong>: EFFD晶格可以由多个FFD块拼接而成。例如，一个六棱柱的EFFD可以由6个楔形的FFD块拼接而成，并保证接缝处的连续性。</li>
-                <li><strong>挑战</strong>: 由于晶格不再是简单的平行六面体，从世界坐标 $\boldsymbol{X}$ 反求局部坐标 $(s, t, u)$ 不再是解线性方程，而需要<strong>非线性迭代求解</strong>（如牛顿法），这会增加计算的复杂度。</li>
-                </ul>
-                <h4 id="3-%E5%9F%BA%E4%BA%8Ecage%E7%9A%84%E6%9B%B4%E4%B8%80%E8%88%AC%E5%8F%98%E5%BD%A2"><strong>3. 基于Cage的更一般变形</strong></h4>
-                <p>FFD可以看作是使用<strong>规则网格作为Cage（笼子）</strong> 的一种特例。更进一步，我们可以用任意拓扑的、封闭的低分辨率多边形网格作为Cage来控制内部的高分辨率模型。</p>
-                <p>这引出了一个核心问题：如何定义高分辨率模型顶点相对于任意Cage顶点的“权重”或“坐标”？</p>
-                <ul>
-                <li>
-                <p><strong>Cage坐标</strong>: 本质上是一种<strong>广义重心坐标 (Generalized Barycentric Coordinates)</strong>。我们希望将内部任意一点 $\boldsymbol{p}$ 表示为Cage顶点 $\boldsymbol{v}_i$ 的线性组合：
+<h4 id="ffd-%E7%9A%84%E6%80%A7%E8%B4%A8%E4%B8%8E%E6%80%BB%E7%BB%93"><strong>FFD 的性质与总结</strong></h4>
+<p>FFD 之所以如此成功和流行，源于它优美的数学性质。</p>
+<ul>
+<li><strong>性质1</strong>: 对一个参数曲面进行FFD变形，结果仍然是一个参数曲面。这意味着它能很好地与CAD模型兼容。</li>
+<li><strong>性质2</strong>: 可以控制体积变化。变形后物体的体积可以通过对FFD变换的雅可比行列式 $\det(\boldsymbol{J}_{ffd})$ 在整个体积上积分得到。通过约束控制点的移动，可以实现近似的保体积变形。</li>
+</ul>
+<p><strong>FFD 总结</strong></p>
+<ul>
+<li>
+<p><strong>优点</strong>:</p>
+<ul>
+<li><strong>与物体表示无关</strong>: 适用于任何几何体。</li>
+<li><strong>直观</strong>: 拖拽控制点的操作非常符合人的直觉。</li>
+<li><strong>高效</strong>: 计算过程主要是多项式求值，速度快。</li>
+<li><strong>结果平滑</strong>: 贝塞尔/B-样条的性质保证了变形是光滑的。</li>
+</ul>
+</li>
+<li>
+<p><strong>缺点</strong>:</p>
+<ul>
+<li><strong>晶格形状限制</strong>: 标准FFD的晶格是平行六面体，对于细长或环形的物体，一个晶格可能无法很好地贴合。</li>
+<li><strong>复杂变形控制难</strong>: 对于需要精确控制的复杂变形，可能需要非常密集的控制点，失去了“以少控多”的优势。</li>
+<li><strong>细节保持差</strong>: FFD是一种低频变形，倾向于平滑掉物体原有的高频细节。</li>
+<li><strong>不遵循物理规律</strong>: 变形完全由几何驱动，不考虑物理材质的拉伸、压缩等特性。</li>
+</ul>
+</li>
+</ul>
+<h3 id="part-3-ffd-%E7%9A%84%E6%89%A9%E5%B1%95%E4%B8%8E%E6%BC%94%E8%BF%9B"><strong>Part 3: FFD 的扩展与演进</strong></h3>
+<p>标准FFD的缺点也催生了大量的改进和研究工作。</p>
+<h4 id="1-animated-ffd"><strong>1. Animated FFD</strong></h4>
+<p>一种有趣的FFD应用是，我们先对FFD晶格进行一次性的、复杂的静态变形，然后让物体<strong>穿过</strong>这个变形后的空间。当物体在逻辑上的FFD空间中移动时，它在世界空间中就会呈现出扭曲、蜿蜒的动画效果。这在制作例如蛇的游动、过山车等效果时非常有用。</p>
+<h4 id="2-%E6%89%A9%E5%B1%95ffd-extended-ffd-effd"><strong>2. 扩展FFD (Extended FFD, EFFD)</strong></h4>
+<p>为了解决标准FFD晶格形状单一的问题，Coquillart 在1990年提出了EFFD。EFFD允许使用更灵活的晶格形状，比如<strong>棱柱形、圆柱形</strong>等。</p>
+<ul>
+<li><strong>构造</strong>: EFFD晶格可以由多个FFD块拼接而成。例如，一个六棱柱的EFFD可以由6个楔形的FFD块拼接而成，并保证接缝处的连续性。</li>
+<li><strong>挑战</strong>: 由于晶格不再是简单的平行六面体，从世界坐标 $\boldsymbol{X}$ 反求局部坐标 $(s, t, u)$ 不再是解线性方程，而需要<strong>非线性迭代求解</strong>（如牛顿法），这会增加计算的复杂度。</li>
+</ul>
+<h4 id="3-%E5%9F%BA%E4%BA%8Ecage%E7%9A%84%E6%9B%B4%E4%B8%80%E8%88%AC%E5%8F%98%E5%BD%A2"><strong>3. 基于Cage的更一般变形</strong></h4>
+<p>FFD可以看作是使用<strong>规则网格作为Cage（笼子）</strong> 的一种特例。更进一步，我们可以用任意拓扑的、封闭的低分辨率多边形网格作为Cage来控制内部的高分辨率模型。</p>
+<p>这引出了一个核心问题：如何定义高分辨率模型顶点相对于任意Cage顶点的“权重”或“坐标”？</p>
+<ul>
+<li>
+<p><strong>Cage坐标</strong>: 本质上是一种<strong>广义重心坐标 (Generalized Barycentric Coordinates)</strong>。我们希望将内部任意一点 $\boldsymbol{p}$ 表示为Cage顶点 $\boldsymbol{v}_i$ 的线性组合：
                 $$
                 \boldsymbol{p} = \sum_{i} w_i(\boldsymbol{p}) \boldsymbol{v}_i, \quad \text{且} \quad \sum_{i} w_i(\boldsymbol{p}) = 1
                 $$
                 这些权重 $w_i$ 就是Cage坐标。一旦求出，我们就可以移动Cage顶点到 $\boldsymbol{v'}_i$，内部点的新位置就是 $\boldsymbol{p'} = \sum_{i} w_i(\boldsymbol{p}) \boldsymbol{v'}_i$。</p>
-                </li>
-                <li>
-                <p><strong>均值坐标 (Mean Value Coordinates, MVC)</strong>: 是目前计算这种坐标最流行和稳健的方法之一。它对于任意的星形多边形（2D）或封闭网格（3D）都有良好定义，并且生成的变形非常平滑。它的公式比较复杂，涉及到顶点、边和面之间的距离和角度。</p>
-                </li>
-                </ul>
-                <h4 id="4-%E5%8F%98%E5%BD%A2%E8%BF%81%E7%A7%BB-deformation-transfer"><strong>4. 变形迁移 (Deformation Transfer)</strong></h4>
-                <p>这是一个非常有用的技术：我们对一个简单的模型A（比如一个圆柱体）进行变形，然后将这个“变形操作”本身<strong>迁移</strong>到另一个复杂的模型B（比如一个人的手臂）上。模型A和B可以有完全不同的顶点数和拓扑结构。</p>
-                <p>其核心思想是，将模型的变形表示为每个三角形的<strong>仿射变换矩阵</strong>。通过求解一个优化问题，找到模型B上一系列新的三角形仿射变换，使得它们与模型A的变形“最相似”，同时保持模型B的顶点连接。</p>
-                <h3 id="part-4-%E4%B8%80%E7%A7%8D%E4%B8%8D%E5%90%8C%E7%9A%84%E5%93%B2%E5%AD%A6%E5%9F%BA%E4%BA%8E%E7%BD%91%E6%A0%BC%E5%86%85%E5%9C%A8%E5%B1%9E%E6%80%A7%E7%9A%84%E5%8F%98%E5%BD%A2"><strong>Part 4: 一种不同的哲学——基于网格内在属性的变形</strong></h3>
-                <p>前面讲的所有方法，无论是FFD还是Cage，都属于<strong>空间变形</strong>的范畴。它们的核心是变形物体所处的外部空间。</p>
-                <p>接下来，我们要介绍一种完全不同的思路：直接在网格上操作，通过保持其<strong>内在的、局部的几何细节</strong>来实现变形。这就是<strong>基于拉普拉斯坐标的网格编辑 (Laplacian Surface Editing)</strong>。</p>
-                <h4 id="1-%E5%8A%A8%E6%9C%BA%E4%B8%8E%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3"><strong>1. 动机与核心思想</strong></h4>
-                <p>传统的网格表示（顶点坐标列表）是<strong>全局</strong>的。一个顶点的 <code>(x, y, z)</code> 坐标本身并没有太多关于“形状”的信息。</p>
-                <p>我们能否找到一种<strong>差分(Differential)<strong>的表示方法，来描述每个顶点与其邻居的</strong>相对关系</strong>？</p>
-                <ul>
-                <li><strong>核心思想</strong>: 任何形状都可以分解为 <strong>“基础形状 (Base Shape)” + “细节 (Details)”</strong>。
+</li>
+<li>
+<p><strong>均值坐标 (Mean Value Coordinates, MVC)</strong>: 是目前计算这种坐标最流行和稳健的方法之一。它对于任意的星形多边形（2D）或封闭网格（3D）都有良好定义，并且生成的变形非常平滑。它的公式比较复杂，涉及到顶点、边和面之间的距离和角度。</p>
+</li>
+</ul>
+<h4 id="4-%E5%8F%98%E5%BD%A2%E8%BF%81%E7%A7%BB-deformation-transfer"><strong>4. 变形迁移 (Deformation Transfer)</strong></h4>
+<p>这是一个非常有用的技术：我们对一个简单的模型A（比如一个圆柱体）进行变形，然后将这个“变形操作”本身<strong>迁移</strong>到另一个复杂的模型B（比如一个人的手臂）上。模型A和B可以有完全不同的顶点数和拓扑结构。</p>
+<p>其核心思想是，将模型的变形表示为每个三角形的<strong>仿射变换矩阵</strong>。通过求解一个优化问题，找到模型B上一系列新的三角形仿射变换，使得它们与模型A的变形“最相似”，同时保持模型B的顶点连接。</p>
+<h3 id="part-4-%E4%B8%80%E7%A7%8D%E4%B8%8D%E5%90%8C%E7%9A%84%E5%93%B2%E5%AD%A6%E5%9F%BA%E4%BA%8E%E7%BD%91%E6%A0%BC%E5%86%85%E5%9C%A8%E5%B1%9E%E6%80%A7%E7%9A%84%E5%8F%98%E5%BD%A2"><strong>Part 4: 一种不同的哲学——基于网格内在属性的变形</strong></h3>
+<p>前面讲的所有方法，无论是FFD还是Cage，都属于<strong>空间变形</strong>的范畴。它们的核心是变形物体所处的外部空间。</p>
+<p>接下来，我们要介绍一种完全不同的思路：直接在网格上操作，通过保持其<strong>内在的、局部的几何细节</strong>来实现变形。这就是<strong>基于拉普拉斯坐标的网格编辑 (Laplacian Surface Editing)</strong>。</p>
+<h4 id="1-%E5%8A%A8%E6%9C%BA%E4%B8%8E%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3"><strong>1. 动机与核心思想</strong></h4>
+<p>传统的网格表示（顶点坐标列表）是<strong>全局</strong>的。一个顶点的 <code>(x, y, z)</code> 坐标本身并没有太多关于“形状”的信息。</p>
+<p>我们能否找到一种<strong>差分(Differential)<strong>的表示方法，来描述每个顶点与其邻居的</strong>相对关系</strong>？</p>
+<ul>
+<li><strong>核心思想</strong>: 任何形状都可以分解为 <strong>“基础形状 (Base Shape)” + “细节 (Details)”</strong>。
                 <code>Surface = Smooth(Surface) + Detail</code></li>
-                <li>在网格处理中，<code>Smooth(Surface)</code> 可以通过对顶点及其邻居进行<strong>平均化</strong>得到。</li>
-                <li>那么，<code>Detail = Surface - Smooth(Surface)</code>。这个“Detail”向量，就是所谓的<strong>拉普拉斯坐标 (Laplacian Coordinate)</strong>。</li>
-                </ul>
-                <p>对于顶点 $\boldsymbol{v}_i$，其拉普拉斯坐标 $\boldsymbol{\delta}_i$ 定义为：
+<li>在网格处理中，<code>Smooth(Surface)</code> 可以通过对顶点及其邻居进行<strong>平均化</strong>得到。</li>
+<li>那么，<code>Detail = Surface - Smooth(Surface)</code>。这个“Detail”向量，就是所谓的<strong>拉普拉斯坐标 (Laplacian Coordinate)</strong>。</li>
+</ul>
+<p>对于顶点 $\boldsymbol{v}_i$，其拉普拉斯坐标 $\boldsymbol{\delta}_i$ 定义为：
                 $$
                 \boldsymbol{\delta}_i = \boldsymbol{v}_i - \frac{1}{d_i} \sum_{j \in N(i)} \boldsymbol{v}_j
                 $$
@@ -461,87 +459,112 @@
                 \boldsymbol{\delta}_i = \frac{1}{d_i} \sum_{j \in N(i)} (\boldsymbol{v}_i - \boldsymbol{v}_j)
                 $$
                 它本质上是顶点 $\boldsymbol{v}_i$ 指向其邻居的边的向量和的平均值，描述了局部的曲率信息。</p>
-                <h4 id="2-%E6%8B%89%E6%99%AE%E6%8B%89%E6%96%AF%E7%9F%A9%E9%98%B5"><strong>2. 拉普拉斯矩阵</strong></h4>
-                <p>从全局来看，所有顶点的拉普拉斯坐标 $\boldsymbol{\delta}$ 和它们的笛卡尔坐标 $\boldsymbol{v}$ 之间存在一个<strong>线性关系</strong>：
+<h4 id="2-%E6%8B%89%E6%99%AE%E6%8B%89%E6%96%AF%E7%9F%A9%E9%98%B5"><strong>2. 拉普拉斯矩阵</strong></h4>
+<p>从全局来看，所有顶点的拉普拉斯坐标 $\boldsymbol{\delta}$ 和它们的笛卡尔坐标 $\boldsymbol{v}$ 之间存在一个<strong>线性关系</strong>：
                 $$
                 \boldsymbol{\delta} = \boldsymbol{L} \boldsymbol{v}
                 $$
                 这里的矩阵 $\boldsymbol{L}$ 就被称为<strong>拉普拉斯矩阵</strong>。它是一个稀疏矩阵，其具体形式为 $\boldsymbol{L} = \boldsymbol{I} - \boldsymbol{D}^{-1}\boldsymbol{A}$，其中 $\boldsymbol{A}$ 是邻接矩阵，$\boldsymbol{D}$ 是度矩阵。</p>
-                <p>这个线性关系是双向的。如果我们知道了所有顶点的拉普拉斯坐标 $\boldsymbol{\delta}$，我们就可以通过求解线性方程组 $\boldsymbol{L}\boldsymbol{v} = \boldsymbol{\delta}$ 来重建原始的形状（在允许全局平移的范围内）。</p>
-                <h4 id="3-%E6%8B%89%E6%99%AE%E6%8B%89%E6%96%AF%E7%BC%96%E8%BE%91%E6%A1%86%E6%9E%B6"><strong>3. 拉普拉斯编辑框架</strong></h4>
-                <p>这个理论如何用于编辑呢？</p>
-                <ol>
-                <li>
-                <p><strong>分析 (Analysis)</strong>: 对于一个原始模型，我们首先计算出<strong>所有顶点</strong>的拉普拉斯坐标 $\boldsymbol{\delta}$。这个 $\boldsymbol{\delta}$ 向量集合就成了模型的“几何DNA”，它编码了模型所有的局部细节。</p>
-                </li>
-                <li>
-                <p><strong>交互 (Interaction)</strong>: 用户通过交互来设定一些<strong>约束条件</strong>。</p>
-                <ul>
-                <li><strong>固定约束 (Anchors)</strong>: 选取一些顶点，要求它们在变形后位置不变。</li>
-                <li><strong>移动约束 (Handles)</strong>: 选取一个或多个顶点，将它们拖拽到新的目标位置。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>求解 (Solve)</strong>: 我们的目标是找到一组新的顶点位置 $\boldsymbol{v'}$，它需要同时满足两个条件：</p>
-                <ul>
-                <li><strong>细节保持</strong>: 新顶点 $\boldsymbol{v'}$ 的拉普拉斯坐标应该<strong>尽可能接近</strong>原始的 $\boldsymbol{\delta}$。即 $\boldsymbol{L}\boldsymbol{v'} \approx \boldsymbol{\delta}$。</li>
-                <li><strong>满足用户约束</strong>: 所有被用户指定的顶点，其新位置必须等于目标位置。例如，对于移动的控制点 $j$，必须有 $\boldsymbol{v'}_j = \boldsymbol{c}_j$。</li>
-                </ul>
-                </li>
-                </ol>
-                <p>这是一个典型的<strong>带约束的最小二乘问题 (Constrained Least-Squares Problem)</strong>。我们要最小化以下目标函数：
+<p>这个线性关系是双向的。如果我们知道了所有顶点的拉普拉斯坐标 $\boldsymbol{\delta}$，我们就可以通过求解线性方程组 $\boldsymbol{L}\boldsymbol{v} = \boldsymbol{\delta}$ 来重建原始的形状（在允许全局平移的范围内）。</p>
+<h4 id="3-%E6%8B%89%E6%99%AE%E6%8B%89%E6%96%AF%E7%BC%96%E8%BE%91%E6%A1%86%E6%9E%B6"><strong>3. 拉普拉斯编辑框架</strong></h4>
+<p>这个理论如何用于编辑呢？</p>
+<ol>
+<li>
+<p><strong>分析 (Analysis)</strong>: 对于一个原始模型，我们首先计算出<strong>所有顶点</strong>的拉普拉斯坐标 $\boldsymbol{\delta}$。这个 $\boldsymbol{\delta}$ 向量集合就成了模型的“几何DNA”，它编码了模型所有的局部细节。</p>
+</li>
+<li>
+<p><strong>交互 (Interaction)</strong>: 用户通过交互来设定一些<strong>约束条件</strong>。</p>
+<ul>
+<li><strong>固定约束 (Anchors)</strong>: 选取一些顶点，要求它们在变形后位置不变。</li>
+<li><strong>移动约束 (Handles)</strong>: 选取一个或多个顶点，将它们拖拽到新的目标位置。</li>
+</ul>
+</li>
+<li>
+<p><strong>求解 (Solve)</strong>: 我们的目标是找到一组新的顶点位置 $\boldsymbol{v'}$，它需要同时满足两个条件：</p>
+<ul>
+<li><strong>细节保持</strong>: 新顶点 $\boldsymbol{v'}$ 的拉普拉斯坐标应该<strong>尽可能接近</strong>原始的 $\boldsymbol{\delta}$。即 $\boldsymbol{L}\boldsymbol{v'} \approx \boldsymbol{\delta}$。</li>
+<li><strong>满足用户约束</strong>: 所有被用户指定的顶点，其新位置必须等于目标位置。例如，对于移动的控制点 $j$，必须有 $\boldsymbol{v'}_j = \boldsymbol{c}_j$。</li>
+</ul>
+</li>
+</ol>
+<p>这是一个典型的<strong>带约束的最小二乘问题 (Constrained Least-Squares Problem)</strong>。我们要最小化以下目标函数：
                 $$
                 \min_{\boldsymbol{v'}} \left( |\boldsymbol{L}\boldsymbol{v'} - \boldsymbol{\delta}|^2 + \sum_{j \in \text{constraints}} w_j |\boldsymbol{v'}_j - \boldsymbol{c}_j|^2 \right)
                 $$
                 其中 $w_j$ 是一个很大的权重，用于强制满足用户约束。</p>
-                <p>这个问题最终会转化成求解一个大型的、稀疏的<strong>线性方程组</strong>。由于矩阵的性质（稀疏、对称正定），这个方程组可以被高效地求解。</p>
-                <div class="mermaid">graph TD
-                    A[原始网格 v] -->|计算 L v| B["拉普拉斯坐标 δ<br>几何DNA"];
-                    C[用户交互] --> D{"约束条件<br>v'_j = c_j"};
+<p>这个问题最终会转化成求解一个大型的、稀疏的<strong>线性方程组</strong>。由于矩阵的性质（稀疏、对称正定），这个方程组可以被高效地求解。</p>
+<div class="mermaid">graph TD
+                    A[原始网格 v] --&gt;|计算 L v| B["拉普拉斯坐标 δ<br/>几何DNA"];
+                    C[用户交互] --&gt; D{"约束条件<br/>v'_j = c_j"};
                     
                     subgraph "最小二乘法求解"
-                        B --> E["细节保持项<br>min ||L v' - δ||²"];
-                        D --> F["用户约束项<br>min ||v'_j - c_j||²"];
+                        B --&gt; E["细节保持项<br/>min ||L v' - δ||²"];
+                        D --&gt; F["用户约束项<br/>min ||v'_j - c_j||²"];
                     end
 
-                    E --> G("求解线性方程组");
-                    F --> G("求解线性方程组");
+                    E --&gt; G("求解线性方程组");
+                    F --&gt; G("求解线性方程组");
                     
-                    G --> H[变形后网格 v'];
+                    G --&gt; H[变形后网格 v'];
                 </div>
-                <p><strong>拉普拉斯编辑总结</strong>:</p>
-                <ul>
-                <li><strong>优点</strong>: 能够非常好地<strong>保持模型的高频细节</strong>，变形效果非常自然，符合“拉伸一块橡皮”的直觉。</li>
-                <li><strong>缺点</strong>: 每次编辑都需要求解一个全局的线性系统，对于非常大规模的网格，实时交互性会是一个挑战。</li>
-                </ul>
-            </article>
-        </main>
-    </div>
-    
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<p><strong>拉普拉斯编辑总结</strong>:</p>
+<ul>
+<li><strong>优点</strong>: 能够非常好地<strong>保持模型的高频细节</strong>，变形效果非常自然，符合“拉伸一块橡皮”的直觉。</li>
+<li><strong>缺点</strong>: 每次编辑都需要求解一个全局的线性系统，对于非常大规模的网格，实时交互性会是一个挑战。</li>
+</ul>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

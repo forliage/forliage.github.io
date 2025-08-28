@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>CUDA01: Programming Model</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>CUDA01: Programming Model</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,34 +30,34 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="cuda01programming-model">CUDA01:Programming Model</h1>
-                <p>（所有内容均基于NVIDIA官方CUDA Document。本次内容包含原文档Chapter5）</p>
-                <h2 id="ikernels">I.Kernels</h2>
-                <p>CUDA C++通过允许程序员定义称为内核的C++函数，扩展了C++的功能。当这些内核被调用时，它们将由$N$个不同的CUDA线程并行执行$N$次，而常规的C++函数则仅在单线程中执行。</p>
-                <p>一个kernel 使用 <code>__global__</code> 声明修饰符定义，而给定内核调用中执行该内核的 CUDA 线程数量则通过新的 <code>&lt;&lt;&lt;...&gt;&gt;&gt;</code> 执行配置语法指定。执行该内核的每个线程都会获得一个唯一的线程 ID，该 ID可通过内置变量在内核内部访问。</p>
-                <p>例如，以下示例代码使用内置变量<code>threadIdx</code>，将两个大小为 $N$ 的向量 A 和 B 相加，并将结果存储到向量 C 中。</p>
-                <pre><code class="language-cpp">// Kernel definition
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="cuda01programming-model">CUDA01:Programming Model</h1>
+<p>（所有内容均基于NVIDIA官方CUDA Document。本次内容包含原文档Chapter5）</p>
+<h2 id="ikernels">I.Kernels</h2>
+<p>CUDA C++通过允许程序员定义称为内核的C++函数，扩展了C++的功能。当这些内核被调用时，它们将由$N$个不同的CUDA线程并行执行$N$次，而常规的C++函数则仅在单线程中执行。</p>
+<p>一个kernel 使用 <code>__global__</code> 声明修饰符定义，而给定内核调用中执行该内核的 CUDA 线程数量则通过新的 <code>&lt;&lt;&lt;...&gt;&gt;&gt;</code> 执行配置语法指定。执行该内核的每个线程都会获得一个唯一的线程 ID，该 ID可通过内置变量在内核内部访问。</p>
+<p>例如，以下示例代码使用内置变量<code>threadIdx</code>，将两个大小为 $N$ 的向量 A 和 B 相加，并将结果存储到向量 C 中。</p>
+<pre><code class="language-cpp">// Kernel definition
 __global__ void VecAdd(float* A, float* B, float* C)
 {
     int i = threadIdx.x;
@@ -72,12 +72,12 @@ int main()
     ...
 }
 </code></pre>
-                <p>在这里，每个执行<code>VecAdd()</code>的$N$个线程都会执行一次成对加法运算。</p>
-                <h2 id="iithread-hierarchy">II.Thread Hierarchy</h2>
-                <p>为了方便起见，<code>threadIdx</code> 是一个 3 元素向量，因此可以使用一维、二维或三维线程索引来标识线程，从而形成一维、二维或三维的线程块，称为<strong>a thread block</strong>。这为在域（如向量、矩阵或体积）中的元素之间调用计算提供了一种自然的方式。</p>
-                <p>线程的索引与其线程 ID 之间存在直接对应关系：对于一维块，它们是相同的；对于二维块（尺寸为 $(Dx, Dy)$），索引为 $(x, y)$ 的线程的线程 ID 是 $(x + y Dx)$；对于三维块（尺寸为 $(Dx, Dy, Dz)$），索引为 $(x, y, z)$ 的线程的线程 ID 是 $(x + y Dx + z Dx Dy)$；</p>
-                <p>例如，以下代码将两个大小为 $N\times N$ 的矩阵 A 和 B 相加，并将结果存储到矩阵 C 中。</p>
-                <pre><code class="language-cpp">// Kernel definition
+<p>在这里，每个执行<code>VecAdd()</code>的$N$个线程都会执行一次成对加法运算。</p>
+<h2 id="iithread-hierarchy">II.Thread Hierarchy</h2>
+<p>为了方便起见，<code>threadIdx</code> 是一个 3 元素向量，因此可以使用一维、二维或三维线程索引来标识线程，从而形成一维、二维或三维的线程块，称为<strong>a thread block</strong>。这为在域（如向量、矩阵或体积）中的元素之间调用计算提供了一种自然的方式。</p>
+<p>线程的索引与其线程 ID 之间存在直接对应关系：对于一维块，它们是相同的；对于二维块（尺寸为 $(Dx, Dy)$），索引为 $(x, y)$ 的线程的线程 ID 是 $(x + y Dx)$；对于三维块（尺寸为 $(Dx, Dy, Dz)$），索引为 $(x, y, z)$ 的线程的线程 ID 是 $(x + y Dx + z Dx Dy)$；</p>
+<p>例如，以下代码将两个大小为 $N\times N$ 的矩阵 A 和 B 相加，并将结果存储到矩阵 C 中。</p>
+<pre><code class="language-cpp">// Kernel definition
 __global__ void MatAdd(float A[N][N], float B[N][N], float C[N][N])
 {
     int i = threadIdx.x;
@@ -95,14 +95,14 @@ int main()
     ...
 }
 </code></pre>
-                <p>每个线程块的线程数量存在限制，因为同一线程块中的所有线程都应驻留在同一个流式多处理器核心上，并必须共享该核心的有限内存资源。在当前的GPU上，一个线程块最多可包含1024个线程。</p>
-                <p>然而，一个内核可以由多个形状相同的线程块执行，因此总的线程数等于每个块的线程数乘以块的数量。</p>
-                <p>块被组织成一维、二维或三维的线程块网格，如图4所示。网格中的线程块数量通常由被处理数据的大小决定，而该数据量通常超过系统中的处理器数量。</p>
-                <p><img src="../images/image004.png" alt="Figure 4"></p>
-                <p>块中线程数和网格中块数在<code>&lt;&lt;&lt;...&gt;&gt;&gt;</code>语法中指定的值可以是<code>int</code>类型或<code>dim3</code>类型。二维块或网格可以像上例中所示那样指定。</p>
-                <p>网格中的每个块都可以通过内核中内置的 <code>blockIdx</code> 变量访问的一维、二维或三维唯一索引进行标识。块的维度可以通过内核中内置的 <code>blockDim</code> 变量访问。</p>
-                <p>在之前的 <code>MatAdd()</code> 示例基础上扩展以处理多个块，代码如下所示:</p>
-                <pre><code class="language-cpp">// Kernel definition
+<p>每个线程块的线程数量存在限制，因为同一线程块中的所有线程都应驻留在同一个流式多处理器核心上，并必须共享该核心的有限内存资源。在当前的GPU上，一个线程块最多可包含1024个线程。</p>
+<p>然而，一个内核可以由多个形状相同的线程块执行，因此总的线程数等于每个块的线程数乘以块的数量。</p>
+<p>块被组织成一维、二维或三维的线程块网格，如图4所示。网格中的线程块数量通常由被处理数据的大小决定，而该数据量通常超过系统中的处理器数量。</p>
+<p><img alt="Figure 4" src="../images/image004.png"/></p>
+<p>块中线程数和网格中块数在<code>&lt;&lt;&lt;...&gt;&gt;&gt;</code>语法中指定的值可以是<code>int</code>类型或<code>dim3</code>类型。二维块或网格可以像上例中所示那样指定。</p>
+<p>网格中的每个块都可以通过内核中内置的 <code>blockIdx</code> 变量访问的一维、二维或三维唯一索引进行标识。块的维度可以通过内核中内置的 <code>blockDim</code> 变量访问。</p>
+<p>在之前的 <code>MatAdd()</code> 示例基础上扩展以处理多个块，代码如下所示:</p>
+<pre><code class="language-cpp">// Kernel definition
 __global__ void  MatAdd(float A[N][N], float B[N][N], float C[N][N])
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -120,18 +120,18 @@ int main()
     MatAdd&lt;&lt;&lt;numBlocks, threadsPerBlock&gt;&gt;&gt;(A, B, C);
 }
 </code></pre>
-                <p>线程块大小为16×16（256个线程），尽管在此情况下是任意选择的，但这是一个常见的选择。网格的创建方式与之前相同，确保每个矩阵元素对应一个线程。为了简化起见，本例假设每个维度中网格的线程数能被该维度中块的线程数整除，尽管实际情况不必如此。</p>
-                <p>线程块必须能够独立执行。必须能够以任何顺序、并行或串行方式执行块。这种独立性要求允许线程块以任何顺序调度，并跨任意数量的核心，如图3(CUDA00)所示，从而使程序员能够编写随核心数量扩展的代码。</p>
-                <p>块内的线程可以通过共享内存共享数据，并通过同步执行来协调内存访问。更准确地说，可以通过调用内核中的<code>__syncthreads()</code>内置函数来指定同步点；<code>__syncthreads()</code>作为一个屏障，所有块中的线程都必须在此屏障处等待，直到任何一个线程被允许继续执行。<font color="#32CD32">Shared memory</font>提供了一个使用共享内存的示例。除了<code>__syncthreads()</code>外，协作组API还提供了一组丰富的线程同步原语。</p>
-                <p>为了实现高效协作，共享内存预计将以低延迟内存的形式靠近每个处理器核心（类似于 L1 缓存），而 <code>__syncthreads()</code> 函数预计将非常轻量级。</p>
-                <h3 id="21thread-block-clusters">2.1.Thread Block Clusters</h3>
-                <p>随着NVIDIA计算能力9.0的引入，CUDA编程模型引入了一个可选的层次结构级别，称为线程块集群，由线程块组成。类似于线程块中的线程在流式多处理器上被保证同时调度，集群中的线程块也在GPU处理集群（GPC）上被保证同时调度，该GPC位于GPU中。</p>
-                <p>与线程块类似，集群也组织成一维、二维或三维的线程块集群网格，如图 5 所示。集群中的线程块数量可由用户定义，且 CUDA 中支持的最大集群大小为 8 个线程块，作为可移植的集群大小。
+<p>线程块大小为16×16（256个线程），尽管在此情况下是任意选择的，但这是一个常见的选择。网格的创建方式与之前相同，确保每个矩阵元素对应一个线程。为了简化起见，本例假设每个维度中网格的线程数能被该维度中块的线程数整除，尽管实际情况不必如此。</p>
+<p>线程块必须能够独立执行。必须能够以任何顺序、并行或串行方式执行块。这种独立性要求允许线程块以任何顺序调度，并跨任意数量的核心，如图3(CUDA00)所示，从而使程序员能够编写随核心数量扩展的代码。</p>
+<p>块内的线程可以通过共享内存共享数据，并通过同步执行来协调内存访问。更准确地说，可以通过调用内核中的<code>__syncthreads()</code>内置函数来指定同步点；<code>__syncthreads()</code>作为一个屏障，所有块中的线程都必须在此屏障处等待，直到任何一个线程被允许继续执行。<font color="#32CD32">Shared memory</font>提供了一个使用共享内存的示例。除了<code>__syncthreads()</code>外，协作组API还提供了一组丰富的线程同步原语。</p>
+<p>为了实现高效协作，共享内存预计将以低延迟内存的形式靠近每个处理器核心（类似于 L1 缓存），而 <code>__syncthreads()</code> 函数预计将非常轻量级。</p>
+<h3 id="21thread-block-clusters">2.1.Thread Block Clusters</h3>
+<p>随着NVIDIA计算能力9.0的引入，CUDA编程模型引入了一个可选的层次结构级别，称为线程块集群，由线程块组成。类似于线程块中的线程在流式多处理器上被保证同时调度，集群中的线程块也在GPU处理集群（GPC）上被保证同时调度，该GPC位于GPU中。</p>
+<p>与线程块类似，集群也组织成一维、二维或三维的线程块集群网格，如图 5 所示。集群中的线程块数量可由用户定义，且 CUDA 中支持的最大集群大小为 8 个线程块，作为可移植的集群大小。
                 注意，对于 GPU 硬件或 MIG 配置，如果集群大小过小无法支持 8 个多处理器，则最大集群大小将相应减少。这些较小的配置的识别方式为： 需注意，对于硬件或MIG配置过小而无法支持8个多处理器的场景，最大集群大小将相应缩减。这些较小配置的识别，以及支持线程块集群大小超过8的较大配置的识别，是架构特定的，可通过<code>cudaOccupancyMaxPotentialClusterSize</code> API进行查询。</p>
-                <p><img src="../images/image005.png" alt="Figure 5"></p>
-                <p>注意：在使用集群支持启动的内核中，<code>gridDim</code>变量仍表示以线程块数量为单位的大小，以保持兼容性。集群中块的排名可通过集群组 API 获取。</p>
-                <p>线程块集群可以在内核中通过编译时内核属性使用<code>__cluster_dims__(X,Y,Z)</code>或使用CUDA内核启动API <code>cudaLaunchKernelEx</code>来启用。下面的示例展示了如何使用编译时内核属性启动一个集群。使用内核属性的集群大小在编译时固定，然后可以使用经典的 <code>&lt;&lt;&lt; , &gt;&gt;&gt;</code> 启动内核。如果内核使用编译时集群大小，则在启动内核时无法修改集群大小。</p>
-                <pre><code class="language-cpp">// Kernel definition
+<p><img alt="Figure 5" src="../images/image005.png"/></p>
+<p>注意：在使用集群支持启动的内核中，<code>gridDim</code>变量仍表示以线程块数量为单位的大小，以保持兼容性。集群中块的排名可通过集群组 API 获取。</p>
+<p>线程块集群可以在内核中通过编译时内核属性使用<code>__cluster_dims__(X,Y,Z)</code>或使用CUDA内核启动API <code>cudaLaunchKernelEx</code>来启用。下面的示例展示了如何使用编译时内核属性启动一个集群。使用内核属性的集群大小在编译时固定，然后可以使用经典的 <code>&lt;&lt;&lt; , &gt;&gt;&gt;</code> 启动内核。如果内核使用编译时集群大小，则在启动内核时无法修改集群大小。</p>
+<pre><code class="language-cpp">// Kernel definition
 // Compile time cluster size 2 in X-dimension and 1 in Y and Z dimension
 __global__ void __cluster_dims__ (2, 1, 1) cluster_kernel(float *input, float* output)
 {
@@ -151,8 +151,8 @@ int main()
     cluster_kernel&lt;&lt;&lt;numBlocks, threadsPerBlock&gt;&gt;&gt;(input, output);
 }
 </code></pre>
-                <p>线程块集群大小也可以在运行时设置，内核可以使用CUDA的内核启动API <code>cudaLaunchKernelEx</code> 启动。下面的代码示例展示了如何使用可扩展API启动集群内核</p>
-                <pre><code class="language-cpp">// Kernel definition
+<p>线程块集群大小也可以在运行时设置，内核可以使用CUDA的内核启动API <code>cudaLaunchKernelEx</code> 启动。下面的代码示例展示了如何使用可扩展API启动集群内核</p>
+<pre><code class="language-cpp">// Kernel definition
 // No compile time attribute attached to the kernel
 __global__ void cluster_kernel(float *input, float* output)
 {
@@ -186,99 +186,125 @@ int main()
     }
 }
 </code></pre>
-                <p>在具有计算能力 9.0 的 GPU 中，集群中的所有线程块都保证被调度到单个 GPU 处理集群 (GPC) 上，并允许集群中的线程块使用集群组 API <code>cluster.sync()</code> 进行硬件支持的同步。<code>Clustergroup</code> 集群组还提供了成员函数，用于以线程数或块数为单位查询集群组大小，分别使用<code>num_threads()</code>和<code>num_blocks()</code> API。线程或块在集群组中的排名可分别使用<code>dim_threads()</code>和<code>dim_blocks()</code> API查询。</p>
-                <p>属于同一集群的线程块可以访问分布式共享内存。集群中的线程块具有读取、写入以及对分布式共享内存中任何地址执行原子操作的能力。分布式共享内存提供了一个在分布式共享内存中执行直方图的示例。</p>
-                <h3 id="22blocks-as-clusters">2.2.Blocks as Clusters</h3>
-                <p>使用 <code>__cluster_dims__</code> 时，启动的集群数量是隐式保存的，只能手动计算。</p>
-                <pre><code class="language-cpp">__cluster_dims__((2, 2, 2)) __global__ void foo();
+<p>在具有计算能力 9.0 的 GPU 中，集群中的所有线程块都保证被调度到单个 GPU 处理集群 (GPC) 上，并允许集群中的线程块使用集群组 API <code>cluster.sync()</code> 进行硬件支持的同步。<code>Clustergroup</code> 集群组还提供了成员函数，用于以线程数或块数为单位查询集群组大小，分别使用<code>num_threads()</code>和<code>num_blocks()</code> API。线程或块在集群组中的排名可分别使用<code>dim_threads()</code>和<code>dim_blocks()</code> API查询。</p>
+<p>属于同一集群的线程块可以访问分布式共享内存。集群中的线程块具有读取、写入以及对分布式共享内存中任何地址执行原子操作的能力。分布式共享内存提供了一个在分布式共享内存中执行直方图的示例。</p>
+<h3 id="22blocks-as-clusters">2.2.Blocks as Clusters</h3>
+<p>使用 <code>__cluster_dims__</code> 时，启动的集群数量是隐式保存的，只能手动计算。</p>
+<pre><code class="language-cpp">__cluster_dims__((2, 2, 2)) __global__ void foo();
 
 // 8x8x8 clusters each with 2x2x2 thread blocks.
 foo&lt;&lt;&lt;dim3(16, 16, 16), dim(1024, 1, 1)&gt;&gt;&gt;();
 </code></pre>
-                <p>在上例中，内核以 16x16x16 个线程块的网格形式启动，实际上是 8x8x8 个集群的网格。
+<p>在上例中，内核以 16x16x16 个线程块的网格形式启动，实际上是 8x8x8 个集群的网格。
                 或者，通过另一个编译时内核属性 <code>__block_size__</code>，可以显式配置线程块集群的数量来启动网格。</p>
-                <pre><code class="language-cpp">// Implementation detail of how many threads per block and blocks per cluster
+<pre><code class="language-cpp">// Implementation detail of how many threads per block and blocks per cluster
 // is handled as an attribute of the kernel.
 __block_size__((1024, 1, 1), (2, 2, 2)) __global__ void foo();
 
 // 8x8x8 clusters.
 foo&lt;&lt;&lt;dim3(8, 8, 8)&gt;&gt;&gt;();
 </code></pre>
-                <p><code>__block_size__</code> 需要两个字段，每个字段都是一个包含 3 个元素的元组。第一个元组表示块尺寸，
+<p><code>__block_size__</code> 需要两个字段，每个字段都是一个包含 3 个元素的元组。第一个元组表示块尺寸，
                 第二个元组表示集群大小。如果未传递第二个元组，则假设其值为 (1,1,1)。要指定流，必须将 1 和 0 作为第二个和第三个参数传递给 <code>&lt;&lt;&lt;&gt;&gt;&gt;</code>，最后传递流。传递其他值将导致未定义的行为。</p>
-                <p>请注意，同时指定<code>__block_size__</code>和<code>__cluster_dims__</code>的第二个元组是违法的。当指定<code>__block_size__</code>的第二个元组时，这意味着“块作为集群”已启用，编译器会将<code>&lt;&lt;&lt;&lt;&gt;&gt;&gt;</code>中的第一个参数识别为集群数量，而不是线程块数量。</p>
-                <h2 id="iiimemory-hierarchy">III.Memory Hierarchy</h2>
-                <p>CUDA线程在执行过程中可能访问多个内存空间中的数据，如图6所示。每个线程拥有私有局部内存。每个线程块拥有共享内存，该共享内存对块内的所有线程可见，且与块具有相同的生命周期。线程块集群中的线程块可以对彼此的共享内存执行读取、写入和原子操作。所有线程均可访问相同的全局内存。</p>
-                <p><img src="../images/image006.png" alt="Figure 6"></p>
-                <p>此外，还有两个仅供读取的内存空间可供所有线程访问：常量内存空间和纹理内存空间。全局内存、常量内存和纹理内存空间针对不同的内存使用场景进行了优化。纹理内存还提供了不同的寻址模式，以及针对某些特定数据格式的数据过滤功能。</p>
-                <p>全局、常量和纹理内存空间在同一应用程序启动内核时是持久的。</p>
-                <h2 id="ivheterogeneous-programming">IV.Heterogeneous Programming</h2>
-                <p>如图7所示，CUDA编程模型假设CUDA线程在物理上独立的设备上执行，该设备作为运行C++程序的主机的协处理器。例如，当内核在GPU上执行而C++程序的其余部分在CPU上执行时，就是这种情况。</p>
-                <p><img src="../images/image007.png" alt="Figure 7"></p>
-                <p>CUDA 编程模型还假设主机和设备各自维护自己的独立内存空间在 DRAM 中，分别称为主机内存和设备内存。因此，一个程序通过调用 CUDA 运行时（在编程接口中描述）来管理对内核可见的全局、常量和纹理内存空间。这包括设备内存的分配和释放，以及纹理内存的分配和释放。因此，程序通过调用 CUDA 运行时（在编程接口中描述）来管理对内核可见的全局、常量和纹理内存空间。这包括设备内存的分配和释放，以及主机与设备内存之间的数据传输.</p>
-                <p>统一内存提供管理内存，用于连接主机和设备内存空间。管理内存可被系统中的所有CPU和GPU访问，作为单一、一致的内存映像，具有共同的地址空间。这一功能使设备内存的超额分配成为可能，并能大大简化应用程序移植任务，因为无需显式地在主机和设备上镜像数据。</p>
-                <h2 id="vasynchronous-simt-programming-model">V.Asynchronous SIMT Programming Model</h2>
-                <p>在CUDA编程模型中，线程是执行计算或内存操作的最低抽象级别。从基于NVIDIA Ampere GPU架构的设备开始，CUDA编程模型通过异步编程模型为内存操作提供加速。异步编程模型定义了异步操作相对于CUDA线程的行为。</p>
-                <p>异步编程模型定义了异步屏障（AsynchronousBarrier）在CUDA线程之间进行同步的行为。该模型还解释并定义了如何使用<code>cuda::memcpy_async</code>在GPU上进行计算时，异步地将数据从全局内存中移动。</p>
-                <h3 id="51asynchronous-operations">5.1.Asynchronous Operations</h3>
-                <p>异步操作是指由CUDA线程发起并以异步方式执行的操作，仿佛由另一个线程执行。在结构良好的程序中，一个或多个CUDA线程与异步操作进行同步。发起异步操作的CUDA线程不必是同步线程之一。</p>
-                <p>此类异步线程（即“假设线程”）始终与发起异步操作的 CUDA 线程相关联。异步操作使用同步对象来同步操作的完成。此类同步对象可以由用户显式管理（例如，<code>cuda::memcpy_async</code>），或在库中隐式管理（例如，<code>cooperative_groups::memcpy_async</code>）。</p>
-                <p>同步对象可以是 <code>cuda::barrier</code> 或 <code>cuda::pipeline</code>。这些同步对象可在不同线程作用域中使用。
+<p>请注意，同时指定<code>__block_size__</code>和<code>__cluster_dims__</code>的第二个元组是违法的。当指定<code>__block_size__</code>的第二个元组时，这意味着“块作为集群”已启用，编译器会将<code>&lt;&lt;&lt;&lt;&gt;&gt;&gt;</code>中的第一个参数识别为集群数量，而不是线程块数量。</p>
+<h2 id="iiimemory-hierarchy">III.Memory Hierarchy</h2>
+<p>CUDA线程在执行过程中可能访问多个内存空间中的数据，如图6所示。每个线程拥有私有局部内存。每个线程块拥有共享内存，该共享内存对块内的所有线程可见，且与块具有相同的生命周期。线程块集群中的线程块可以对彼此的共享内存执行读取、写入和原子操作。所有线程均可访问相同的全局内存。</p>
+<p><img alt="Figure 6" src="../images/image006.png"/></p>
+<p>此外，还有两个仅供读取的内存空间可供所有线程访问：常量内存空间和纹理内存空间。全局内存、常量内存和纹理内存空间针对不同的内存使用场景进行了优化。纹理内存还提供了不同的寻址模式，以及针对某些特定数据格式的数据过滤功能。</p>
+<p>全局、常量和纹理内存空间在同一应用程序启动内核时是持久的。</p>
+<h2 id="ivheterogeneous-programming">IV.Heterogeneous Programming</h2>
+<p>如图7所示，CUDA编程模型假设CUDA线程在物理上独立的设备上执行，该设备作为运行C++程序的主机的协处理器。例如，当内核在GPU上执行而C++程序的其余部分在CPU上执行时，就是这种情况。</p>
+<p><img alt="Figure 7" src="../images/image007.png"/></p>
+<p>CUDA 编程模型还假设主机和设备各自维护自己的独立内存空间在 DRAM 中，分别称为主机内存和设备内存。因此，一个程序通过调用 CUDA 运行时（在编程接口中描述）来管理对内核可见的全局、常量和纹理内存空间。这包括设备内存的分配和释放，以及纹理内存的分配和释放。因此，程序通过调用 CUDA 运行时（在编程接口中描述）来管理对内核可见的全局、常量和纹理内存空间。这包括设备内存的分配和释放，以及主机与设备内存之间的数据传输.</p>
+<p>统一内存提供管理内存，用于连接主机和设备内存空间。管理内存可被系统中的所有CPU和GPU访问，作为单一、一致的内存映像，具有共同的地址空间。这一功能使设备内存的超额分配成为可能，并能大大简化应用程序移植任务，因为无需显式地在主机和设备上镜像数据。</p>
+<h2 id="vasynchronous-simt-programming-model">V.Asynchronous SIMT Programming Model</h2>
+<p>在CUDA编程模型中，线程是执行计算或内存操作的最低抽象级别。从基于NVIDIA Ampere GPU架构的设备开始，CUDA编程模型通过异步编程模型为内存操作提供加速。异步编程模型定义了异步操作相对于CUDA线程的行为。</p>
+<p>异步编程模型定义了异步屏障（AsynchronousBarrier）在CUDA线程之间进行同步的行为。该模型还解释并定义了如何使用<code>cuda::memcpy_async</code>在GPU上进行计算时，异步地将数据从全局内存中移动。</p>
+<h3 id="51asynchronous-operations">5.1.Asynchronous Operations</h3>
+<p>异步操作是指由CUDA线程发起并以异步方式执行的操作，仿佛由另一个线程执行。在结构良好的程序中，一个或多个CUDA线程与异步操作进行同步。发起异步操作的CUDA线程不必是同步线程之一。</p>
+<p>此类异步线程（即“假设线程”）始终与发起异步操作的 CUDA 线程相关联。异步操作使用同步对象来同步操作的完成。此类同步对象可以由用户显式管理（例如，<code>cuda::memcpy_async</code>），或在库中隐式管理（例如，<code>cooperative_groups::memcpy_async</code>）。</p>
+<p>同步对象可以是 <code>cuda::barrier</code> 或 <code>cuda::pipeline</code>。这些同步对象可在不同线程作用域中使用。
                 同步对象定义了可使用同步对象与异步操作进行同步的线程集合。下表定义了 CUDA C++ 中可用的线程作用域以及可进行同步的线程。范围定义了可以使用同步对象与异步操作进行同步的线程集合。</p>
-                <table>
-                <thead>
-                <tr>
-                <th>Thread Scope</th>
-                <th>Description</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                <td><code>cuda::thread_scope::thread_scope_thread</code></td>
-                <td>Only the CUDA thread which initiated asynchronous operations synchronizes.</td>
-                </tr>
-                <tr>
-                <td><code>cuda::thread_scope::thread_scope_block</code></td>
-                <td>All or any CUDA threads within the same thread block as the initiating thread synchronizes.</td>
-                </tr>
-                <tr>
-                <td><code>cuda::thread_scope::thread_scope_device</code></td>
-                <td>All or any CUDA threads in the same GPU device as the initiating thread synchronizes.</td>
-                </tr>
-                <tr>
-                <td><code>cuda::thread_scope::thread_scope_system</code></td>
-                <td>All or any CUDA or CPU threads in the same system as the initiating thread synchronizes.</td>
-                </tr>
-                </tbody>
-                </table>
-                <p>这些线程作用域作为标准 C++ 的扩展实现于 CUDA 标准 C++ 库中。</p>
-                <h2 id="vicompute-capability">VI.Compute Capability</h2>
-                <p>设备的计算能力由版本号表示，有时也称为其“SM version”。该版本号标识GPU硬件支持的功能，并在应用程序运行时用于确定当前GPU上可用的硬件功能和/או指令。</p>
-                <p>计算能力由主要版本号X和次要版本号Y组成，并以X.Y表示。</p>
-            </article>
-        </main>
-    </div>
-    <footer>
-        <p>© 2025 我的博客</p>
-    </footer>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<table>
+<thead>
+<tr>
+<th>Thread Scope</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cuda::thread_scope::thread_scope_thread</code></td>
+<td>Only the CUDA thread which initiated asynchronous operations synchronizes.</td>
+</tr>
+<tr>
+<td><code>cuda::thread_scope::thread_scope_block</code></td>
+<td>All or any CUDA threads within the same thread block as the initiating thread synchronizes.</td>
+</tr>
+<tr>
+<td><code>cuda::thread_scope::thread_scope_device</code></td>
+<td>All or any CUDA threads in the same GPU device as the initiating thread synchronizes.</td>
+</tr>
+<tr>
+<td><code>cuda::thread_scope::thread_scope_system</code></td>
+<td>All or any CUDA or CPU threads in the same system as the initiating thread synchronizes.</td>
+</tr>
+</tbody>
+</table>
+<p>这些线程作用域作为标准 C++ 的扩展实现于 CUDA 标准 C++ 库中。</p>
+<h2 id="vicompute-capability">VI.Compute Capability</h2>
+<p>设备的计算能力由版本号表示，有时也称为其“SM version”。该版本号标识GPU硬件支持的功能，并在应用程序运行时用于确定当前GPU上可用的硬件功能和/או指令。</p>
+<p>计算能力由主要版本号X和次要版本号Y组成，并以X.Y表示。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<footer>
+<p>© 2025 我的博客</p>
+</footer>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

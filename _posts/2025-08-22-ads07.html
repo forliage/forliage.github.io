@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>ads07:分治法 (Divide and Conquer)</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>ads07:分治法 (Divide and Conquer)</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,103 +30,103 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="ads07%E5%88%86%E6%B2%BB%E6%B3%95-divide-and-conquer">ads07:分治法 (Divide and Conquer)</h1>
-                <h3 id="1-%E5%88%86%E6%B2%BB%E6%B3%95%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3">1. 分治法的核心思想</h3>
-                <p>分治，正如其名，即“分而治之”。当我们面对一个规模庞大、难以直接下手的复杂问题时，分治策略引导我们将其拆解。具体来说，它遵循一个递归的、三步走的过程：</p>
-                <ol>
-                <li><strong>分解 (Divide):</strong> 将原始问题分解为若干个规模更小、但结构与原问题完全相同的子问题。</li>
-                <li><strong>解决 (Conquer):</strong> 递归地求解这些子问题。当子问题的规模小到足以轻松解决时（即达到递归的“基例”），便直接求解。</li>
-                <li><strong>合并 (Combine):</strong> 将各个子问题的解合并起来，最终构筑成原问题的解。</li>
-                </ol>
-                <p>这种模式的运行时间，或者说时间复杂度，可以用一个统一的<strong>递归关系式</strong>来刻画：</p>
-                <p>$$T(N) = aT(N/b) + f(N)$$</p>
-                <p>我们来解读一下这个公式的每个部分：</p>
-                <ul>
-                <li>$T(N)$ 代表解决规模为 $N$ 的问题所需的总时间。</li>
-                <li>$a$ 是分解后产生的子问题的数量（$a \ge 1$）。</li>
-                <li>$N/b$ 是每个子问题的规模（其中 $b > 1$）。</li>
-                <li>$f(N)$ 代表了<strong>分解</strong>问题与<strong>合并</strong>子问题解这两个步骤所消耗的时间。</li>
-                </ul>
-                <p>分治法的思想在算法的殿堂中熠熠生辉，许多我们熟知的经典算法都是其应用的典范：</p>
-                <ul>
-                <li><strong>最大子序列和问题:</strong> 存在一个复杂度为 $O(N \log N)$ 的分治解法。</li>
-                <li><strong>树的遍历:</strong> 无论是前序、中序还是后序遍历，其本质都是先处理根节点，然后对左右子树进行分治处理，总时间复杂度为 $O(N)$。</li>
-                <li><strong>归并排序 (Mergesort) 与 快速排序 (Quicksort):</strong> 这两大排序算法是分治思想最杰出的代表，它们的平均时间复杂度都达到了高效的 $O(N \log N)$。</li>
-                </ul>
-                <h3 id="2-%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%E6%9C%80%E8%BF%91%E7%82%B9%E5%AF%B9%E9%97%AE%E9%A2%98-closest-points-problem">2. 案例研究：最近点对问题 (Closest Points Problem)</h3>
-                <p><strong>问题描述：</strong>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="ads07%E5%88%86%E6%B2%BB%E6%B3%95-divide-and-conquer">ads07:分治法 (Divide and Conquer)</h1>
+<h3 id="1-%E5%88%86%E6%B2%BB%E6%B3%95%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3">1. 分治法的核心思想</h3>
+<p>分治，正如其名，即“分而治之”。当我们面对一个规模庞大、难以直接下手的复杂问题时，分治策略引导我们将其拆解。具体来说，它遵循一个递归的、三步走的过程：</p>
+<ol>
+<li><strong>分解 (Divide):</strong> 将原始问题分解为若干个规模更小、但结构与原问题完全相同的子问题。</li>
+<li><strong>解决 (Conquer):</strong> 递归地求解这些子问题。当子问题的规模小到足以轻松解决时（即达到递归的“基例”），便直接求解。</li>
+<li><strong>合并 (Combine):</strong> 将各个子问题的解合并起来，最终构筑成原问题的解。</li>
+</ol>
+<p>这种模式的运行时间，或者说时间复杂度，可以用一个统一的<strong>递归关系式</strong>来刻画：</p>
+<p>$$T(N) = aT(N/b) + f(N)$$</p>
+<p>我们来解读一下这个公式的每个部分：</p>
+<ul>
+<li>$T(N)$ 代表解决规模为 $N$ 的问题所需的总时间。</li>
+<li>$a$ 是分解后产生的子问题的数量（$a \ge 1$）。</li>
+<li>$N/b$ 是每个子问题的规模（其中 $b &gt; 1$）。</li>
+<li>$f(N)$ 代表了<strong>分解</strong>问题与<strong>合并</strong>子问题解这两个步骤所消耗的时间。</li>
+</ul>
+<p>分治法的思想在算法的殿堂中熠熠生辉，许多我们熟知的经典算法都是其应用的典范：</p>
+<ul>
+<li><strong>最大子序列和问题:</strong> 存在一个复杂度为 $O(N \log N)$ 的分治解法。</li>
+<li><strong>树的遍历:</strong> 无论是前序、中序还是后序遍历，其本质都是先处理根节点，然后对左右子树进行分治处理，总时间复杂度为 $O(N)$。</li>
+<li><strong>归并排序 (Mergesort) 与 快速排序 (Quicksort):</strong> 这两大排序算法是分治思想最杰出的代表，它们的平均时间复杂度都达到了高效的 $O(N \log N)$。</li>
+</ul>
+<h3 id="2-%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6%E6%9C%80%E8%BF%91%E7%82%B9%E5%AF%B9%E9%97%AE%E9%A2%98-closest-points-problem">2. 案例研究：最近点对问题 (Closest Points Problem)</h3>
+<p><strong>问题描述：</strong>
                 给定二维平面上的 $N$ 个点，请找出其中距离最近的两个点及其距离。
                 (特殊情况：若两点坐标完全相同，则它们是最近点对，距离为 0。)</p>
-                <h4 id="21-%E6%9C%B4%E7%B4%A0%E8%A7%A3%E6%B3%95%E7%A9%B7%E4%B8%BE%E6%90%9C%E7%B4%A2">2.1 朴素解法：穷举搜索</h4>
-                <p>最直接的思路是什么？暴力枚举。计算每对点之间的距离，然后找出其中的最小值。</p>
-                <p>对于 $N$ 个点，总共可以构成多少个点对呢？组合数学告诉我们是 $C(N, 2) = \frac{N(N-1)}{2}$。
+<h4 id="21-%E6%9C%B4%E7%B4%A0%E8%A7%A3%E6%B3%95%E7%A9%B7%E4%B8%BE%E6%90%9C%E7%B4%A2">2.1 朴素解法：穷举搜索</h4>
+<p>最直接的思路是什么？暴力枚举。计算每对点之间的距离，然后找出其中的最小值。</p>
+<p>对于 $N$ 个点，总共可以构成多少个点对呢？组合数学告诉我们是 $C(N, 2) = \frac{N(N-1)}{2}$。
                 因此，我们需要进行 $O(N^2)$ 次的距离计算。这个方法虽然简单易懂，但当点的数量 $N$ 巨大时，其平方级的复杂度是不可接受的。</p>
-                <div class="code-container">
-                <pre><code>// 伪代码：穷举法
+<div class="code-container">
+<pre><code>// 伪代码：穷举法
 function BruteForceClosestPair(points):
   min_dist = infinity
   closest_pair = null
   for i from 0 to n-1:
     for j from i+1 to n-1:
       dist = distance(points[i], points[j])
-      if dist < min_dist:
+      if dist &lt; min_dist:
         min_dist = dist
         closest_pair = (points[i], points[j])
   return min_dist
 </code></pre>
-                </div>
-                <h4 id="22-%E5%88%86%E6%B2%BB%E7%AD%96%E7%95%A5">2.2 分治策略</h4>
-                <p>$O(N^2)$ 显然不是我们追求的极致效率。现在，让我们请出分治法来优化这个问题。</p>
-                <ol>
-                <li>
-                <p><strong>分解 (Divide):</strong></p>
-                <ul>
-                <li>为了有效地“切分”点集，我们首先将所有点按照 $x$ 坐标进行全局排序。</li>
-                <li>找到所有点 $x$ 坐标的中位数 $x_{mid}$，并以此为基准画一条垂直的分割线 $L$。</li>
-                <li>这条线 $L$ 将点集几乎均等地分为左右两个子集：左集 $P_L$ 和右集 $P_R$。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>解决 (Conquer):</strong></p>
-                <ul>
-                <li>递归地在左子集 $P_L$ 中寻找最近点对，得到其最短距离 $\delta_L$。</li>
-                <li>递归地在右子集 $P_R$ 中寻找最近点对，得到其最短距离 $\delta_R$。</li>
-                <li>到目前为止，我们已经获得了两个半区内部的最小距离，令 $\delta = \min(\delta_L, \delta_R)$。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>合并 (Combine):</strong></p>
-                <ul>
-                <li>这是整个算法最核心、最巧妙的部分。我们已经有了 $\delta$，但真正的最近点对有没有可能<strong>跨越</strong>了分割线 $L$？也就是说，一个点来自 $P_L$，另一个点来自 $P_R$。</li>
-                <li>如果存在这样一个“跨界”点对 $(p_l, p_r)$，并且它们的距离小于我们已知的 $\delta$，那么这两个点必然满足一个重要的几何特性：它们各自到分割线 $L$ 的水平距离都必须小于 $\delta$。</li>
-                <li>为什么？可以反证。假设左侧的点 $p_l$ 到 $L$ 的距离大于等于 $\delta$，那么它与任何在 $L$ 右侧的点 $p_r$ 的距离，仅在 $x$ 轴上的投影就已经大于等于 $\delta$ 了，总距离必然也大于 $\delta$，这种点对我们无需考虑。</li>
-                <li>因此，我们的注意力可以聚焦于一个以 $L$ 为中心、宽度为 $2\delta$ 的狭长**“条带” (strip)** 区域。所有可能构成更短距离的跨界点对，都必须位于这个条带内。</li>
-                </ul>
-                </li>
-                </ol>
-                <p>下面这幅流程图清晰地展示了这个过程：</p>
-                <div class="mermaid">
+</div>
+<h4 id="22-%E5%88%86%E6%B2%BB%E7%AD%96%E7%95%A5">2.2 分治策略</h4>
+<p>$O(N^2)$ 显然不是我们追求的极致效率。现在，让我们请出分治法来优化这个问题。</p>
+<ol>
+<li>
+<p><strong>分解 (Divide):</strong></p>
+<ul>
+<li>为了有效地“切分”点集，我们首先将所有点按照 $x$ 坐标进行全局排序。</li>
+<li>找到所有点 $x$ 坐标的中位数 $x_{mid}$，并以此为基准画一条垂直的分割线 $L$。</li>
+<li>这条线 $L$ 将点集几乎均等地分为左右两个子集：左集 $P_L$ 和右集 $P_R$。</li>
+</ul>
+</li>
+<li>
+<p><strong>解决 (Conquer):</strong></p>
+<ul>
+<li>递归地在左子集 $P_L$ 中寻找最近点对，得到其最短距离 $\delta_L$。</li>
+<li>递归地在右子集 $P_R$ 中寻找最近点对，得到其最短距离 $\delta_R$。</li>
+<li>到目前为止，我们已经获得了两个半区内部的最小距离，令 $\delta = \min(\delta_L, \delta_R)$。</li>
+</ul>
+</li>
+<li>
+<p><strong>合并 (Combine):</strong></p>
+<ul>
+<li>这是整个算法最核心、最巧妙的部分。我们已经有了 $\delta$，但真正的最近点对有没有可能<strong>跨越</strong>了分割线 $L$？也就是说，一个点来自 $P_L$，另一个点来自 $P_R$。</li>
+<li>如果存在这样一个“跨界”点对 $(p_l, p_r)$，并且它们的距离小于我们已知的 $\delta$，那么这两个点必然满足一个重要的几何特性：它们各自到分割线 $L$ 的水平距离都必须小于 $\delta$。</li>
+<li>为什么？可以反证。假设左侧的点 $p_l$ 到 $L$ 的距离大于等于 $\delta$，那么它与任何在 $L$ 右侧的点 $p_r$ 的距离，仅在 $x$ 轴上的投影就已经大于等于 $\delta$ 了，总距离必然也大于 $\delta$，这种点对我们无需考虑。</li>
+<li>因此，我们的注意力可以聚焦于一个以 $L$ 为中心、宽度为 $2\delta$ 的狭长**“条带” (strip)** 区域。所有可能构成更短距离的跨界点对，都必须位于这个条带内。</li>
+</ul>
+</li>
+</ol>
+<p>下面这幅流程图清晰地展示了这个过程：</p>
+<div class="mermaid">
                 graph TD
                     subgraph A ["初始状态"]
                         P(["原始点集 P"])
@@ -142,13 +142,13 @@ function BruteForceClosestPair(points):
                             PL(["左点集 P_L"])
                             RecurseL{"递归调用"}
                             delta_L["距离 δ_L"]
-                            PL --> RecurseL --> delta_L
+                            PL --&gt; RecurseL --&gt; delta_L
                         end
                         subgraph C_R ["右子问题"]
                             PR(["右点集 P_R"])
                             RecurseR{"递归调用"}
                             delta_R["距离 δ_R"]
-                            PR --> RecurseR --> delta_R
+                            PR --&gt; RecurseR --&gt; delta_R
                         end
                     end
 
@@ -159,17 +159,17 @@ function BruteForceClosestPair(points):
                         FinalMin["最终结果 = min(δ, δ_cross)"]
                     end
 
-                    P --> DivideProcess
-                    DivideProcess --> PL & PR
+                    P --&gt; DivideProcess
+                    DivideProcess --&gt; PL &amp; PR
                     
-                    delta_L --> delta_LR
-                    delta_R --> delta_LR
+                    delta_L --&gt; delta_LR
+                    delta_R --&gt; delta_LR
                     
-                    delta_LR -- "用 δ 定义条带" --> StripProcess
-                    StripProcess --> delta_cross
+                    delta_LR -- "用 δ 定义条带" --&gt; StripProcess
+                    StripProcess --&gt; delta_cross
                     
-                    delta_LR --> FinalMin
-                    delta_cross --> FinalMin
+                    delta_LR --&gt; FinalMin
+                    delta_cross --&gt; FinalMin
                     
                     style P fill:#f9f,stroke:#333
                     style delta_L fill:#ccf,stroke:#333
@@ -178,49 +178,49 @@ function BruteForceClosestPair(points):
                     style StripProcess fill:#ff9,stroke:#333
                     style FinalMin fill:#9f9,stroke:#333,stroke-width:2px
                 </div>
-                <p>现在，核心问题转化为：<strong>我们能否在线性时间 $O(N)$ 内，高效地处理这个条带区域，找出其中可能存在的更短的跨界点对？</strong></p>
-                <h4 id="23-on-%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E7%9A%84%E5%90%88%E5%B9%B6%E6%AD%A5%E9%AA%A4">2.3 $O(N)$ 时间复杂度的合并步骤</h4>
-                <p>这里的洞察力至关重要。让我们来分析这个宽度为 $2\delta$ 的条带。</p>
-                <ol>
-                <li>将所有位于该条带内的点收集到一个列表 $S$ 中。</li>
-                <li><strong>将列表 $S$ 中的所有点，按照它们的 $y$ 坐标进行排序。</strong></li>
-                <li>现在，我们遍历 $S$ 中的每一个点 $p$。对于点 $p$，我们需要和哪些点比较距离呢？
+<p>现在，核心问题转化为：<strong>我们能否在线性时间 $O(N)$ 内，高效地处理这个条带区域，找出其中可能存在的更短的跨界点对？</strong></p>
+<h4 id="23-on-%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E7%9A%84%E5%90%88%E5%B9%B6%E6%AD%A5%E9%AA%A4">2.3 $O(N)$ 时间复杂度的合并步骤</h4>
+<p>这里的洞察力至关重要。让我们来分析这个宽度为 $2\delta$ 的条带。</p>
+<ol>
+<li>将所有位于该条带内的点收集到一个列表 $S$ 中。</li>
+<li><strong>将列表 $S$ 中的所有点，按照它们的 $y$ 坐标进行排序。</strong></li>
+<li>现在，我们遍历 $S$ 中的每一个点 $p$。对于点 $p$，我们需要和哪些点比较距离呢？
                 <ul>
-                <li>我们只需要检查那些在 $y$ 坐标排序后紧随 $p$ 之后，并且与 $p$ 的 $y$ 坐标之差小于 $\delta$ 的点。因为如果两点间仅 $y$ 坐标的差值就已经不小于 $\delta$，那么它们之间的欧几里得距离必然也大于 $\delta$。</li>
-                <li>那么，在 $y$ 坐标排序的前提下，对于每个点 $p$，需要检查的后续点究竟有多少个？答案是惊人的：<strong>一个常数！</strong></li>
-                </ul>
-                </li>
-                </ol>
-                <p><strong>证明：</strong>
+<li>我们只需要检查那些在 $y$ 坐标排序后紧随 $p$ 之后，并且与 $p$ 的 $y$ 坐标之差小于 $\delta$ 的点。因为如果两点间仅 $y$ 坐标的差值就已经不小于 $\delta$，那么它们之间的欧几里得距离必然也大于 $\delta$。</li>
+<li>那么，在 $y$ 坐标排序的前提下，对于每个点 $p$，需要检查的后续点究竟有多少个？答案是惊人的：<strong>一个常数！</strong></li>
+</ul>
+</li>
+</ol>
+<p><strong>证明：</strong>
                 对于条带中的任意一点 $p$，我们只关心那些 $y$ 坐标在区间 $[p.y, p.y + \delta)$ 内的点 $q$。这些候选点 $q$ 必须位于一个尺寸为 $2\delta \times \delta$ 的矩形区域内。更进一步，由于 $p$ 和 $q$ 分属不同半区，假设 $p$ 在左，那么 $q$ 必须位于右侧一个 $\delta \times \delta$ 的矩形区域内。</p>
-                <p>现在思考一个问题：在一个 $\delta \times \delta$ 的正方形区域内，最多能放入多少个点，才能保证它们两两之间的距离都不小于 $\delta$？
+<p>现在思考一个问题：在一个 $\delta \times \delta$ 的正方形区域内，最多能放入多少个点，才能保证它们两两之间的距离都不小于 $\delta$？
                 我们可以运用<strong>鸽巢原理</strong>。将这个 $\delta \times \delta$ 的正方形划分为四个 $\delta/2 \times \delta/2$ 的小正方形。每个小正方形的对角线长度是 $\frac{\delta}{\sqrt{2}} &lt; \delta$。这意味着每个小正方形内最多只能容纳一个点。因此，这个 $\delta \times \delta$ 区域内最多只能有4个点。</p>
-                <p>一个更严谨的几何证明表明，对于每个点 $p$，我们最多只需要检查其后（按 $y$ 坐标排序）的 <strong>7</strong> 个点就足够了。在实际编程中，这个常数通常更小。</p>
-                <div class="mermaid">
+<p>一个更严谨的几何证明表明，对于每个点 $p$，我们最多只需要检查其后（按 $y$ 坐标排序）的 <strong>7</strong> 个点就足够了。在实际编程中，这个常数通常更小。</p>
+<div class="mermaid">
                 graph TD
                     subgraph "对于点 p 的检查区域"
                         direction TB
                         subgraph "右侧 δ x δ 区域"
                             A["(•)"]; B["(•)"]; C["(•)"]; D["(•)"]
                         end
-                        p("(• p)") -- "检查" --> A
-                        p -- "检查" --> B
-                        p -- "检查" --> C
-                        p -- "检查" --> D
+                        p("(• p)") -- "检查" --&gt; A
+                        p -- "检查" --&gt; B
+                        p -- "检查" --&gt; C
+                        p -- "检查" --&gt; D
                         note["在这个区域内, 最多只有少数几个点需要与 p 比较距离"]
                     end
                 </div>
-                <p><strong>算法流程优化：</strong>
+<p><strong>算法流程优化：</strong>
                 合并步骤中包含一个 $y$ 坐标排序，这本身需要 $O(N \log N)$ 的时间。如果每次递归都进行一次排序，总复杂度会变差。
                 <strong>精妙的优化</strong>在于：在进入递归之前，我们先创建两个点集副本，一个按 $x$ 坐标排序（$P_x$），另一个按 $y$ 坐标排序（$P_y$）。在每次递归调用时，我们可以通过对 $P_y$ 进行一次线性扫描（$O(N)$），根据点的 $x$ 坐标是否小于 $x_{mid}$，将 $P_y$ 划分成对应左右子集的、已按 $y$ 排序的两个列表。这样就避免了在递归中反复排序，使得合并步骤的真正时间复杂度降至 $O(N)$。</p>
-                <h4 id="24-%E6%9C%80%E7%BB%88%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%88%86%E6%9E%90">2.4 最终复杂度分析</h4>
-                <p>经过优化后，最近点对分治算法的递归关系式为：</p>
-                <p>$$T(N) = 2T(N/2) + O(N)$$</p>
-                <p>这个关系式的解是 $T(N) = O(N \log N)$（我们稍后会严格证明这一点）。
+<h4 id="24-%E6%9C%80%E7%BB%88%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%88%86%E6%9E%90">2.4 最终复杂度分析</h4>
+<p>经过优化后，最近点对分治算法的递归关系式为：</p>
+<p>$$T(N) = 2T(N/2) + O(N)$$</p>
+<p>这个关系式的解是 $T(N) = O(N \log N)$（我们稍后会严格证明这一点）。
                 再加上初始的全局排序需要 $O(N \log N)$，整个算法的总时间复杂度为 $O(N \log N)$，这相较于 $O(N^2)$ 是一个巨大的飞跃。</p>
-                <h4 id="25-c-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0">2.5 C++ 代码实现</h4>
-                <div class="code-container">
-                <pre><code class="language-cpp">#include &lt;iostream&gt;
+<h4 id="25-c-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0">2.5 C++ 代码实现</h4>
+<div class="code-container">
+<pre><code class="language-cpp">#include &lt;iostream&gt;
 #include &lt;vector&gt;
 #include &lt;cmath&gt;
 #include &lt;algorithm&gt;
@@ -237,20 +237,20 @@ double dist(Point p1, Point p2) {
 }
 
 // 用于按x坐标排序的比较函数
-bool compareX(const Point& a, const Point& b) {
-    return a.x < b.x;
+bool compareX(const Point&amp; a, const Point&amp; b) {
+    return a.x &lt; b.x;
 }
 
 // 用于按y坐标排序的比较函数
-bool compareY(const Point& a, const Point& b) {
-    return a.y < b.y;
+bool compareY(const Point&amp; a, const Point&amp; b) {
+    return a.y &lt; b.y;
 }
 
 // 朴素解法，用于处理递归基例（点数很少时）
-double bruteForce(const std::vector&lt;Point&gt;& points_by_x, int left, int right) {
+double bruteForce(const std::vector&lt;Point&gt;&amp; points_by_x, int left, int right) {
     double min_dist = std::numeric_limits&lt;double&gt;::max();
-    for (int i = left; i <= right; ++i) {
-        for (int j = i + 1; j <= right; ++j) {
+    for (int i = left; i &lt;= right; ++i) {
+        for (int j = i + 1; j &lt;= right; ++j) {
             min_dist = std::min(min_dist, dist(points_by_x[i], points_by_x[j]));
         }
     }
@@ -258,9 +258,9 @@ double bruteForce(const std::vector&lt;Point&gt;& points_by_x, int left, int rig
 }
 
 // 分治算法的核心递归函数
-double closestUtil(std::vector&lt;Point&gt;& points_by_x, std::vector&lt;Point&gt;& points_by_y, int left, int right) {
+double closestUtil(std::vector&lt;Point&gt;&amp; points_by_x, std::vector&lt;Point&gt;&amp; points_by_y, int left, int right) {
     // 递归基例：当点数很少时，直接用朴素解法
-    if (right - left + 1 <= 3) {
+    if (right - left + 1 &lt;= 3) {
         // 注意：这里需要对 points_by_x 的子集进行操作
         return bruteForce(points_by_x, left, right);
     }
@@ -271,8 +271,8 @@ double closestUtil(std::vector&lt;Point&gt;& points_by_x, std::vector&lt;Point&g
 
     // 将按y排序的数组线性地划分为左右两部分
     std::vector&lt;Point&gt; left_y, right_y;
-    for (const auto& p : points_by_y) {
-        if (p.x <= mid_point.x && (p.x != mid_point.x || p.y != mid_point.y)) { // 避免重复点
+    for (const auto&amp; p : points_by_y) {
+        if (p.x &lt;= mid_point.x &amp;&amp; (p.x != mid_point.x || p.y != mid_point.y)) { // 避免重复点
             left_y.push_back(p);
         } else {
             right_y.push_back(p);
@@ -287,16 +287,16 @@ double closestUtil(std::vector&lt;Point&gt;& points_by_x, std::vector&lt;Point&g
     // 3. 合并 (Combine)
     // 筛选出在2d条带区域内的点
     std::vector&lt;Point&gt; strip;
-    for (const auto& p : points_by_y) {
-        if (std::abs(p.x - mid_point.x) < d) {
+    for (const auto&amp; p : points_by_y) {
+        if (std::abs(p.x - mid_point.x) &lt; d) {
             strip.push_back(p);
         }
     }
 
     // 检查条带内的点对，寻找更小的距离
-    for (size_t i = 0; i < strip.size(); ++i) {
+    for (size_t i = 0; i &lt; strip.size(); ++i) {
         // 对于每个点，只需检查其后常数个点
-        for (size_t j = i + 1; j < strip.size() && (strip[j].y - strip[i].y) < d; ++j) {
+        for (size_t j = i + 1; j &lt; strip.size() &amp;&amp; (strip[j].y - strip[i].y) &lt; d; ++j) {
             d = std::min(d, dist(strip[i], strip[j]));
         }
     }
@@ -305,8 +305,8 @@ double closestUtil(std::vector&lt;Point&gt;& points_by_x, std::vector&lt;Point&g
 }
 
 // 主函数，负责初始排序和调用递归
-double closestPair(std::vector&lt;Point&gt;& points) {
-    if (points.size() < 2) return std::numeric_limits&lt;double&gt;::max();
+double closestPair(std::vector&lt;Point&gt;&amp; points) {
+    if (points.size() &lt; 2) return std::numeric_limits&lt;double&gt;::max();
     
     std::vector&lt;Point&gt; points_by_x = points;
     std::vector&lt;Point&gt; points_by_y = points;
@@ -323,52 +323,52 @@ int main() {
     return 0;
 }
 </code></pre>
-                </div>
-                <hr>
-                <h3 id="3-%E5%A6%82%E4%BD%95%E6%B1%82%E8%A7%A3%E9%80%92%E5%BD%92%E5%85%B3%E7%B3%BB%E5%BC%8F">3. 如何求解递归关系式？</h3>
-                <p>我们已经看到，分析分治算法的效率最终归结为求解形如 $T(N) = aT(N/b) + f(N)$ 的递归式。主要有三种方法来攻克它们：</p>
-                <ol>
-                <li><strong>代入法 (Substitution Method):</strong> 猜测一个解的形式，然后用数学归纳法来严格证明。</li>
-                <li><strong>递归树法 (Recursion-tree Method):</strong> 将递归过程可视化为一棵树，通过累加树中所有节点的代价来求得最终解。</li>
-                <li><strong>主方法 (Master Method):</strong> 提供一个强大的“菜谱式”定理，能直接解决大部分常见形式的递归式。</li>
-                </ol>
-                <p>在分析中，我们通常做一些简化假设，例如忽略 $N/b$ 是否为整数（即地板 <code>floor</code> 和天花板 <code>ceiling</code> 的影响），并假设对于足够小的 $n$， $T(n) = \Theta(1)$。</p>
-                <h4 id="31-%E4%BB%A3%E5%85%A5%E6%B3%95%E7%8C%9C%E6%83%B3%E4%B8%8E%E8%AF%81%E6%98%8E">3.1 代入法：猜想与证明</h4>
-                <p>此方法分为两步：<strong>猜测解</strong> 和 <strong>归纳证明</strong>。</p>
-                <p><strong>【例1】</strong> $T(N) = 2T(N/2) + N$ (归并排序与优化后的最近点对问题的递归式)</p>
-                <ul>
-                <li>
-                <p><strong>猜测:</strong> $T(N) = O(N \log N)$。</p>
-                </li>
-                <li>
-                <p><strong>证明:</strong>
+</div>
+<hr/>
+<h3 id="3-%E5%A6%82%E4%BD%95%E6%B1%82%E8%A7%A3%E9%80%92%E5%BD%92%E5%85%B3%E7%B3%BB%E5%BC%8F">3. 如何求解递归关系式？</h3>
+<p>我们已经看到，分析分治算法的效率最终归结为求解形如 $T(N) = aT(N/b) + f(N)$ 的递归式。主要有三种方法来攻克它们：</p>
+<ol>
+<li><strong>代入法 (Substitution Method):</strong> 猜测一个解的形式，然后用数学归纳法来严格证明。</li>
+<li><strong>递归树法 (Recursion-tree Method):</strong> 将递归过程可视化为一棵树，通过累加树中所有节点的代价来求得最终解。</li>
+<li><strong>主方法 (Master Method):</strong> 提供一个强大的“菜谱式”定理，能直接解决大部分常见形式的递归式。</li>
+</ol>
+<p>在分析中，我们通常做一些简化假设，例如忽略 $N/b$ 是否为整数（即地板 <code>floor</code> 和天花板 <code>ceiling</code> 的影响），并假设对于足够小的 $n$， $T(n) = \Theta(1)$。</p>
+<h4 id="31-%E4%BB%A3%E5%85%A5%E6%B3%95%E7%8C%9C%E6%83%B3%E4%B8%8E%E8%AF%81%E6%98%8E">3.1 代入法：猜想与证明</h4>
+<p>此方法分为两步：<strong>猜测解</strong> 和 <strong>归纳证明</strong>。</p>
+<p><strong>【例1】</strong> $T(N) = 2T(N/2) + N$ (归并排序与优化后的最近点对问题的递归式)</p>
+<ul>
+<li>
+<p><strong>猜测:</strong> $T(N) = O(N \log N)$。</p>
+</li>
+<li>
+<p><strong>证明:</strong>
                 我们需要证明存在正常数 $c$ 和 $N_0$，使得对所有 $N \ge N_0$，不等式 $T(N) \le cN \log N$ 成立。</p>
-                <p><strong>归纳假设:</strong> 假设对于所有 $m &lt; N$， $T(m) \le cm \log m$ 成立。
+<p><strong>归纳假设:</strong> 假设对于所有 $m &lt; N$， $T(m) \le cm \log m$ 成立。
                 特别地，对于 $m = N/2$，我们有 $T(N/2) \le c(N/2) \log(N/2)$。</p>
-                <p><strong>归纳步骤:</strong> 将此假设代入原递归式：
+<p><strong>归纳步骤:</strong> 将此假设代入原递归式：
                 $$\begin{aligned}T(N) &amp;= 2T(N/2) + N\\ &amp;\le 2 \cdot [c(N/2) \log(N/2)] + N\\ &amp;= cN \log(N/2) + N\\ &amp;= cN (\log N - \log 2) + N\\ &amp;= cN \log N - cN \log 2 + N\\ &amp;= cN \log N - cN + N\\ &amp;= cN \log N - (c-1)N \end{aligned}$$</p>
-                <p>我们的目标是证明 $$T(N) \le cN \log N$$我们已经推导出 $$T(N) \le cN \log N - (c-1)N$$
+<p>我们的目标是证明 $$T(N) \le cN \log N$$我们已经推导出 $$T(N) \le cN \log N - (c-1)N$$
                 只要 $$-(c-1)N \le 0$$ 即 $$(c-1)N \ge 0$$该不等式就成立。
                 我们只需选择 $c \ge 1$，即可满足此条件。</p>
-                <p><strong>基例:</strong> 对于小的 $N$ (如 $T(2)$, $T(3)$)，我们总可以通过选择一个足够大的 $c$ 来使得 $T(N) \le cN \log N$ 成立。
+<p><strong>基例:</strong> 对于小的 $N$ (如 $T(2)$, $T(3)$)，我们总可以通过选择一个足够大的 $c$ 来使得 $T(N) \le cN \log N$ 成立。
                 因此，我们的猜测 $T(N) = O(N \log N)$ 是正确的。</p>
-                </li>
-                </ul>
-                <p><strong>【例2】错误猜测的教训</strong></p>
-                <p>对于同样的递归式 $T(N) = 2T(N/2) + N$，如果我们错误地猜测 $T(N) = O(N)$。</p>
-                <ul>
-                <li>
-                <p><strong>证明尝试:</strong>
+</li>
+</ul>
+<p><strong>【例2】错误猜测的教训</strong></p>
+<p>对于同样的递归式 $T(N) = 2T(N/2) + N$，如果我们错误地猜测 $T(N) = O(N)$。</p>
+<ul>
+<li>
+<p><strong>证明尝试:</strong>
                 假设 $T(N/2) \le c(N/2)$。</p>
-                <p>$$\begin{aligned}T(N) &amp;= 2T(N/2) + N\\ &amp;\le 2 \cdot [c(N/2)] + N\\ &amp;= cN + N\\ &amp;= (c+1)N \end{aligned}$$</p>
-                <p>我们希望证明 $T(N) \le cN$，但我们得到的结论是 $T(N) \le (c+1)N$。我们永远无法找到一个常数 $c$ 使得 $cN+N \le cN$ 成立。这说明我们的猜测太紧了， $O(N)$ 是不正确的。<strong>使用代入法时，必须证明猜测的精确形式，而不仅仅是证明其属于某个大O类别。</strong></p>
-                </li>
-                </ul>
-                <h4 id="32-%E9%80%92%E5%BD%92%E6%A0%91%E6%B3%95%E7%9C%BC%E8%A7%81%E4%B8%BA%E5%AE%9E">3.2 递归树法：眼见为实</h4>
-                <p>递归树是将递归过程图形化的强大工具。树的每个节点代表一次函数调用，节点的值是该次调用中非递归部分的代价（即 $f(N)$ 部分）。</p>
-                <p><strong>【例1】</strong> $T(N) = 3T(N/4) + cN^2$</p>
-                <p>我们可以构建如下的递归树：</p>
-                <div class="mermaid">
+<p>$$\begin{aligned}T(N) &amp;= 2T(N/2) + N\\ &amp;\le 2 \cdot [c(N/2)] + N\\ &amp;= cN + N\\ &amp;= (c+1)N \end{aligned}$$</p>
+<p>我们希望证明 $T(N) \le cN$，但我们得到的结论是 $T(N) \le (c+1)N$。我们永远无法找到一个常数 $c$ 使得 $cN+N \le cN$ 成立。这说明我们的猜测太紧了， $O(N)$ 是不正确的。<strong>使用代入法时，必须证明猜测的精确形式，而不仅仅是证明其属于某个大O类别。</strong></p>
+</li>
+</ul>
+<h4 id="32-%E9%80%92%E5%BD%92%E6%A0%91%E6%B3%95%E7%9C%BC%E8%A7%81%E4%B8%BA%E5%AE%9E">3.2 递归树法：眼见为实</h4>
+<p>递归树是将递归过程图形化的强大工具。树的每个节点代表一次函数调用，节点的值是该次调用中非递归部分的代价（即 $f(N)$ 部分）。</p>
+<p><strong>【例1】</strong> $T(N) = 3T(N/4) + cN^2$</p>
+<p>我们可以构建如下的递归树：</p>
+<div class="mermaid">
                 graph TD
                     subgraph "Level 0"
                         A("cN^2")
@@ -383,8 +383,8 @@ int main() {
                         H("...T(1)")
                     end
                     
-                    A --> B & C & D;
-                    B --> E & F & G;
+                    A --&gt; B &amp; C &amp; D;
+                    B --&gt; E &amp; F &amp; G;
 
                     subgraph "Cost per Level"
                         L0["Total: cN^2"]
@@ -393,92 +393,92 @@ int main() {
                         LN["Leaves: 3^{\log_4 N} \cdot T(1) = N^{\log_4 3} \cdot \Theta(1) = \Theta(N^{\log_4 3})"]
                     end
                 </div>
-                <ul>
-                <li><strong>树的深度:</strong> 规模从 $N$ 降到 1，每次除以 4，所以深度为 $\log_4 N$。</li>
-                <li><strong>每层代价:</strong>
-                <ul>
-                <li>第 $i$ 层 (根为第0层) 有 $3^i$ 个节点，每个节点的代价为 $c(N/4^i)^2$。该层总代价为 $3^i \cdot c(N^2/16^i) = (3/16)^i cN^2$。</li>
-                </ul>
-                </li>
-                <li><strong>总代价 T(N):</strong>
+<ul>
+<li><strong>树的深度:</strong> 规模从 $N$ 降到 1，每次除以 4，所以深度为 $\log_4 N$。</li>
+<li><strong>每层代价:</strong>
+<ul>
+<li>第 $i$ 层 (根为第0层) 有 $3^i$ 个节点，每个节点的代价为 $c(N/4^i)^2$。该层总代价为 $3^i \cdot c(N^2/16^i) = (3/16)^i cN^2$。</li>
+</ul>
+</li>
+<li><strong>总代价 T(N):</strong>
                 $T(N) = \sum\limits_{i=0}^{\log_4 N - 1} (\frac{3}{16})^i cN^2 + \Theta(N^{\log_4 3})$
                 这是一个公比为 $r = 3/16 &lt; 1$ 的几何级数求和。
                 该级数的和收敛于一个常数，小于 $\frac{1}{1-3/16} = \frac{16}{13}$。
                 所以求和部分为 $cN^2 \cdot O(1) = O(N^2)$。
                 由于 $\log_4 3 \approx 0.79 &lt; 2$，叶子节点的代价 $\Theta(N^{\log_4 3})$ 被 $O(N^2)$ 所主导。
                 因此，$T(N) = O(N^2)$。</li>
-                </ul>
-                <p><strong>【例2】</strong> $T(N) = T(N/3) + T(2N/3) + cN$ (不平衡的递归树)</p>
-                <ul>
-                <li><strong>每层代价:</strong> 尽管子问题大小不同，但每一层的子问题规模总和都是 $N$。例如，第一层是 $N/3$ 和 $2N/3$，代价是 $c(N/3) + c(2N/3) = cN$。因此，每层的代价都是 $cN$。</li>
-                <li><strong>树的深度:</strong> 树的深度由最长的路径决定，即每次都沿着 $2/3$ 的分支走。设深度为 $k$，则 $N \cdot (2/3)^k \approx 1$，解得 $k \approx \log_{3/2} N$。</li>
-                <li><strong>总代价:</strong> 粗略估计为 (层数) $\times$ (每层代价) = $O(\log N) \cdot O(N) = O(N \log N)$。这个猜测是正确的，可以通过代入法严格证明。</li>
-                </ul>
-                <hr>
-                <h3 id="4-%E4%B8%BB%E6%96%B9%E6%B3%95-master-method">4. 主方法 (Master Method)</h3>
-                <p>主方法为求解 $T(N) = aT(N/b) + f(N)$ 形式的递归式提供了一个强大的、公式化的解决方案。其核心思想是比较<strong>非递归代价 $f(N)$</strong> 与<strong>由递归产生的叶子节点代价相关的函数 $N^{\log_b a}$</strong> 的增长速度。</p>
-                <h4 id="%E4%B8%BB%E5%AE%9A%E7%90%86-master-theorem"><strong>主定理 (Master Theorem)</strong></h4>
-                <p>设 $a \ge 1, b &gt; 1$ 为常数， $f(N)$ 为一个函数， $T(N)$ 的递归定义为 $$T(N) = aT(N/b) + f(N)$$那么 $T(N)$ 的界可以按以下三种情况确定：</p>
-                <ol>
-                <li>
-                <p><strong>情况 1 (叶子节点主导):</strong>
+</ul>
+<p><strong>【例2】</strong> $T(N) = T(N/3) + T(2N/3) + cN$ (不平衡的递归树)</p>
+<ul>
+<li><strong>每层代价:</strong> 尽管子问题大小不同，但每一层的子问题规模总和都是 $N$。例如，第一层是 $N/3$ 和 $2N/3$，代价是 $c(N/3) + c(2N/3) = cN$。因此，每层的代价都是 $cN$。</li>
+<li><strong>树的深度:</strong> 树的深度由最长的路径决定，即每次都沿着 $2/3$ 的分支走。设深度为 $k$，则 $N \cdot (2/3)^k \approx 1$，解得 $k \approx \log_{3/2} N$。</li>
+<li><strong>总代价:</strong> 粗略估计为 (层数) $\times$ (每层代价) = $O(\log N) \cdot O(N) = O(N \log N)$。这个猜测是正确的，可以通过代入法严格证明。</li>
+</ul>
+<hr/>
+<h3 id="4-%E4%B8%BB%E6%96%B9%E6%B3%95-master-method">4. 主方法 (Master Method)</h3>
+<p>主方法为求解 $T(N) = aT(N/b) + f(N)$ 形式的递归式提供了一个强大的、公式化的解决方案。其核心思想是比较<strong>非递归代价 $f(N)$</strong> 与<strong>由递归产生的叶子节点代价相关的函数 $N^{\log_b a}$</strong> 的增长速度。</p>
+<h4 id="%E4%B8%BB%E5%AE%9A%E7%90%86-master-theorem"><strong>主定理 (Master Theorem)</strong></h4>
+<p>设 $a \ge 1, b &gt; 1$ 为常数， $f(N)$ 为一个函数， $T(N)$ 的递归定义为 $$T(N) = aT(N/b) + f(N)$$那么 $T(N)$ 的界可以按以下三种情况确定：</p>
+<ol>
+<li>
+<p><strong>情况 1 (叶子节点主导):</strong>
                 如果 $$f(N) = O(N^{\log_b a - \varepsilon})$$对于某个常数 $\varepsilon &gt; 0$。
                 (即 $f(N)$ 的增长速度<strong>多项式地慢于</strong> $N^{\log_b a}$)
                 那么$$T(N) = \Theta(N^{\log_b a})$$</p>
-                </li>
-                <li>
-                <p><strong>情况 2 (权重均衡):</strong>
+</li>
+<li>
+<p><strong>情况 2 (权重均衡):</strong>
                 如果 $$f(N) = \Theta(N^{\log_b a})$$
                 (即 $f(N)$ 与 $N^{\log_b a}$ 的增长速度相同)
                 那么$$T(N) = \Theta(N^{\log_b a} \log N)$$</p>
-                </li>
-                <li>
-                <p><strong>情况 3 (根节点主导):</strong>
+</li>
+<li>
+<p><strong>情况 3 (根节点主导):</strong>
                 如果 $$f(N) = \Omega(N^{\log_b a + \varepsilon})$$对于某个常数 $\varepsilon &gt; 0$。
                 (即 $f(N)$ 的增长速度<strong>多项式地快于</strong> $N^{\log_b a}$)
                 并且，如果 $f(N)$ 满足<strong>正则条件</strong>: $a f(N/b) \le c f(N)$，对于某个常数 $c &lt; 1$ 和所有足够大的 $N$。
                 那么$$T(N) = \Theta(f(N))$$</p>
-                </li>
-                </ol>
-                <p><strong>【应用示例】</strong></p>
-                <ul>
-                <li>
-                <p><strong>Mergesort:</strong> $T(N) = 2T(N/2) + N$
+</li>
+</ol>
+<p><strong>【应用示例】</strong></p>
+<ul>
+<li>
+<p><strong>Mergesort:</strong> $T(N) = 2T(N/2) + N$
                 $a=2, b=2, f(N)=N$。计算 $N^{\log_b a} = N^{\log_2 2} = N^1 = N$。
                 $f(N) = \Theta(N^{\log_2 2})$，符合<strong>情况2</strong>。
                 因此，$T(N) = \Theta(N \log N)$。</p>
-                </li>
-                <li>
-                <p><strong>$T(N) = 4T(N/2) + N \log N$</strong>
+</li>
+<li>
+<p><strong>$T(N) = 4T(N/2) + N \log N$</strong>
                 $a=4, b=2, f(N)=N \log N$。计算 $N^{\log_b a} = N^{\log_2 4} = N^2$。
                 比较 $f(N) = N \log N$ 和 $N^2$。显然 $N \log N = O(N^{2 - \varepsilon})$ (例如取 $\varepsilon = 0.5$)。
                 符合<strong>情况1</strong>。
                 因此，$T(N) = \Theta(N^2)$。</p>
-                </li>
-                <li>
-                <p><strong>$T(N) = 2T(N/2) + N \log N$</strong>
+</li>
+<li>
+<p><strong>$T(N) = 2T(N/2) + N \log N$</strong>
                 $a=2, b=2, f(N)=N \log N$。计算 $N^{\log_b a} = N^{\log_2 2} = N$。
                 $f(N) = N \log N$ 比 $N$ 增长快，但不满足 $f(N) = \Omega(N^{1+\varepsilon})$。它落在了情况2和情况3的“缝隙”中，<strong>标准主定理不适用</strong>。需要使用扩展版主定理来解决，结果是 $T(N) = \Theta(N \log^2 N)$。</p>
-                </li>
-                </ul>
-                <h4 id="%E4%B8%BB%E5%AE%9A%E7%90%86%E7%9A%84%E4%B8%A5%E8%B0%A8%E6%95%B0%E5%AD%A6%E8%AF%81%E6%98%8E"><strong>主定理的严谨数学证明</strong></h4>
-                <p>递归树的总代价可以表示为所有层级代价之和，加上叶子节点代价：
+</li>
+</ul>
+<h4 id="%E4%B8%BB%E5%AE%9A%E7%90%86%E7%9A%84%E4%B8%A5%E8%B0%A8%E6%95%B0%E5%AD%A6%E8%AF%81%E6%98%8E"><strong>主定理的严谨数学证明</strong></h4>
+<p>递归树的总代价可以表示为所有层级代价之和，加上叶子节点代价：
                 $$T(n) = \sum\limits_{j=0}^{\log_b n - 1} a^j f(n/b^j) + \Theta(n^{\log_b a})$$</p>
-                <p><strong>证明情况 1: $f(n) = O(n^{\log_b a - \varepsilon})$</strong>
-                由条件可知，存在常数 $c_1 > 0$ 使得 $f(n) \le c_1 n^{\log_b a - \varepsilon}$。
+<p><strong>证明情况 1: $f(n) = O(n^{\log_b a - \varepsilon})$</strong>
+                由条件可知，存在常数 $c_1 &gt; 0$ 使得 $f(n) \le c_1 n^{\log_b a - \varepsilon}$。
                 代入求和式：</p>
-                <p>$$\begin{aligned}\sum a^j f(n/b^j) &amp;\le \sum a^j c_1 (n/b^j)^{\log_b a - \varepsilon}\\ &amp;= c_1 n^{\log_b a - \varepsilon} \sum ( \frac{a}{(b^{\log_b a - \varepsilon})^j} )\\ &amp;= c_1 n^{\log_b a - \varepsilon} \sum ( \frac{a}{a \cdot b^{-\varepsilon}} )^j = c_1 n^{\log_b a - \varepsilon} \sum (b^{\varepsilon})^j\end{aligned}$$</p>
-                <p>这是一个公比为 $b^{\varepsilon} > 1$ 的几何级数，其和由最后一项主导：$O((b^{\varepsilon})^{\log_b n}) = O(n^\varepsilon)$。
+<p>$$\begin{aligned}\sum a^j f(n/b^j) &amp;\le \sum a^j c_1 (n/b^j)^{\log_b a - \varepsilon}\\ &amp;= c_1 n^{\log_b a - \varepsilon} \sum ( \frac{a}{(b^{\log_b a - \varepsilon})^j} )\\ &amp;= c_1 n^{\log_b a - \varepsilon} \sum ( \frac{a}{a \cdot b^{-\varepsilon}} )^j = c_1 n^{\log_b a - \varepsilon} \sum (b^{\varepsilon})^j\end{aligned}$$</p>
+<p>这是一个公比为 $b^{\varepsilon} &gt; 1$ 的几何级数，其和由最后一项主导：$O((b^{\varepsilon})^{\log_b n}) = O(n^\varepsilon)$。
                 所以，求和部分为 $O(n^{\log_b a - \varepsilon} \cdot n^\varepsilon) = O(n^{\log_b a})$。
                 因此$$T(n) = O(n^{\log_b a}) + \Theta(n^{\log_b a}) = \Theta(n^{\log_b a})$$</p>
-                <p><strong>证明情况 2: $f(n) = \Theta(n^{\log_b a})$</strong>
+<p><strong>证明情况 2: $f(n) = \Theta(n^{\log_b a})$</strong>
                 由条件可知，$f(n/b^j) = \Theta((n/b^j)^{\log_b a}) = \Theta(n^{\log_b a} / a^j)$。
                 代入求和式：
                 $$\sum a^j f(n/b^j) = \sum a^j \Theta(n^{\log_b a} / a^j) = \sum \Theta(n^{\log_b a})$$
                 这个求和共有 $\log_b n$ 项，每项都是 $\Theta(n^{\log_b a})$。
                 所以，求和部分为 $\Theta(n^{\log_b a} \log_b n) = \Theta(n^{\log_b a} \log n)$。
                 因此$$T(n) = \Theta(n^{\log_b a} \log n) + \Theta(n^{\log_b a}) = \Theta(n^{\log_b a} \log n)$$</p>
-                <p><strong>证明情况 3: $f(n) = \Omega(n^{\log_b a + \varepsilon})$ 和正则条件 $a f(n/b) \le c' f(n)$ for $c' &lt; 1$</strong>
+<p><strong>证明情况 3: $f(n) = \Omega(n^{\log_b a + \varepsilon})$ 和正则条件 $a f(n/b) \le c' f(n)$ for $c' &lt; 1$</strong>
                 从正则条件 $a f(n/b) \le c' f(n)$ 递归展开，可得 $a^j f(n/b^j) \le (c')^j f(n)$。
                 代入求和式：
                 $$\sum a^j f(n/b^j) \le \sum (c')^j f(n) = f(n) \sum_{j=0}^{\log_b n - 1} (c')^j$$
@@ -487,72 +487,98 @@ int main() {
                 $$T(n) = O(f(n)) + \Theta(n^{\log_b a})$$
                 根据情况3的初始条件，$f(n)$ 多项式地快于 $n^{\log_b a}$，所以 $f(n)$ 主导了最终结果。
                 因此$$T(n) = \Theta(f(n))$$</p>
-                <hr>
-                <h3 id="5-%E4%B8%BB%E6%96%B9%E6%B3%95%E7%9A%84%E6%89%A9%E5%B1%95%E5%BD%A2%E5%BC%8F">5. 主方法的扩展形式</h3>
-                <h4 id="51-%E6%9B%B4%E9%80%9A%E7%94%A8%E7%9A%84%E5%AE%9A%E7%90%86">5.1 更通用的定理</h4>
-                <p>对于包含对数因子的更普遍情况，有一个更强大的定理。</p>
-                <p><strong>定理:</strong>
+<hr/>
+<h3 id="5-%E4%B8%BB%E6%96%B9%E6%B3%95%E7%9A%84%E6%89%A9%E5%B1%95%E5%BD%A2%E5%BC%8F">5. 主方法的扩展形式</h3>
+<h4 id="51-%E6%9B%B4%E9%80%9A%E7%94%A8%E7%9A%84%E5%AE%9A%E7%90%86">5.1 更通用的定理</h4>
+<p>对于包含对数因子的更普遍情况，有一个更强大的定理。</p>
+<p><strong>定理:</strong>
                 对于 $$T(N) = aT(N/b) + \Theta(N^k \log^p N)$$其中 $a \ge 1, b &gt; 1, k \ge 0, p$是实数。
                 其解为：</p>
+<ul>
+<li><strong>情况 1:</strong> 如果 $a &gt; b^k$ (等价于 $\log_b a &gt; k$)，则 $T(N) = \Theta(N^{\log_b a})$。</li>
+<li><strong>情况 2:</strong> 如果 $a = b^k$ (等价于 $\log_b a = k$)，则
                 <ul>
-                <li><strong>情况 1:</strong> 如果 $a &gt; b^k$ (等价于 $\log_b a &gt; k$)，则 $T(N) = \Theta(N^{\log_b a})$。</li>
-                <li><strong>情况 2:</strong> 如果 $a = b^k$ (等价于 $\log_b a = k$)，则
-                <ul>
-                <li>如果 $p &gt; -1$，$T(N) = \Theta(N^k \log^{p+1} N)$</li>
-                <li>如果 $p = -1$，$T(N) = \Theta(N^k \log \log N)$</li>
-                <li>如果 $p &lt; -1$，$T(N) = \Theta(N^k)$</li>
-                </ul>
-                </li>
-                <li><strong>情况 3:</strong> 如果 $a &lt; b^k$ (等价于 $\log_b a &lt; k$)，则 $T(N) = \Theta(N^k \log^p N)$。</li>
-                </ul>
-                <p><strong>【应用示例】</strong></p>
-                <ul>
-                <li>
-                <p><strong>$T(N) = 3T(N/2) + O(N)$:</strong>
+<li>如果 $p &gt; -1$，$T(N) = \Theta(N^k \log^{p+1} N)$</li>
+<li>如果 $p = -1$，$T(N) = \Theta(N^k \log \log N)$</li>
+<li>如果 $p &lt; -1$，$T(N) = \Theta(N^k)$</li>
+</ul>
+</li>
+<li><strong>情况 3:</strong> 如果 $a &lt; b^k$ (等价于 $\log_b a &lt; k$)，则 $T(N) = \Theta(N^k \log^p N)$。</li>
+</ul>
+<p><strong>【应用示例】</strong></p>
+<ul>
+<li>
+<p><strong>$T(N) = 3T(N/2) + O(N)$:</strong>
                 $a=3, b=2, k=1, p=0$。
                 $a &gt; b^k$ (因为 $3 &gt; 2^1$)，符合情况1。
                 $T(N) = \Theta(N^{\log_2 3}) \approx \Theta(N^{1.585})$。</p>
-                </li>
-                <li>
-                <p><strong>$T(N) = 3T(N/2) + O(N^2)$:</strong>
+</li>
+<li>
+<p><strong>$T(N) = 3T(N/2) + O(N^2)$:</strong>
                 $a=3, b=2, k=2, p=0$。
                 $a &lt; b^k$ (因为 $3 &lt; 2^2=4$)，符合情况3。
                 $T(N) = \Theta(N^2 \log^0 N) = \Theta(N^2)$。</p>
-                </li>
-                <li>
-                <p><strong>$T(N) = 2T(N/2) + N / \log N$:</strong>
+</li>
+<li>
+<p><strong>$T(N) = 2T(N/2) + N / \log N$:</strong>
                 $a=2, b=2, k=1, p=-1$。
                 $a = b^k$ ($2=2^1$)，符合情况2。
                 $p = -1$，所以 $T(N) = \Theta(N^1 \log \log N) = \Theta(N \log \log N)$。</p>
-                </li>
-                </ul>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+</li>
+</ul>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

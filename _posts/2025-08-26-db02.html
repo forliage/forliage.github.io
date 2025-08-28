@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>数据库系统02:SQL</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>数据库系统02:SQL</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,43 +30,43 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F02sql">数据库系统02:SQL</h1>
-                <h3 id="%E5%BC%95%E8%A8%80sql%E7%9A%84%E8%AF%9E%E7%94%9F"><strong>引言：SQL的诞生</strong></h3>
-                <p>上一讲，我们学习了关系代数——一种简洁、严谨但对人类不那么友好的查询语言。想象一下，如果每次查询数据库都需要写一长串像 $\Pi_{A} ( \sigma_{P} (r_1 \times r_2) )$ 这样的数学公式，数据库恐怕永远无法走出计算机科学家的实验室。</p>
-                <p>世界需要一种更接近自然语言、更易于理解和使用的语言。于是，在上世纪70年代，IBM的Don Chamberlin和Ray Boyce基于Codd的关系模型思想，设计了SEQUEL (Structured English Query Language)，后来演变成了今天的<strong>SQL (Structured Query Language)</strong>。</p>
-                <p><strong>SQL的设计哲学核心：</strong></p>
-                <ol>
-                <li><strong>声明式 (Declarative):</strong> 用户只需<strong>声明</strong>想要什么结果，而无需指定获取结果的具体步骤或算法。你告诉数据库“目的地”，由数据库的查询优化器负责找出“最佳路径”。这与C++或Java等命令式语言形成了鲜明对比。</li>
-                <li><strong>闭包性 (Closure):</strong> SQL操作的输入是表，输出仍然是表。这使得查询可以无限嵌套和组合，构建出强大的数据流水线。</li>
-                <li><strong>综合性 (Comprehensive):</strong> SQL不仅仅是查询语言(DQL)，它还集成了数据定义(DDL)、数据操纵(DML)和数据控制(DCL)的功能，提供了一站式的数据库解决方案。</li>
-                </ol>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E6%95%B0%E6%8D%AE%E5%AE%9A%E4%B9%89%E8%AF%AD%E8%A8%80-ddl"><strong>第一部分：数据定义语言 (DDL)</strong></h3>
-                <p>在查询数据之前，我们必须先为数据构建一个家。DDL就是我们手中的建筑图纸和工具，用来定义数据库的骨架。</p>
-                <h4 id="11-create-table"><strong>1.1 <code>CREATE TABLE</code></strong></h4>
-                <p><code>CREATE TABLE</code> 不仅仅是创建一个表格，它是在定义一个<strong>实体</strong>的<strong>所有属性</strong>和它必须遵守的<strong>宇宙法则（约束）</strong>。</p>
-                <div class="code-container">
-                    <pre class="hljs"><code><div><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> student (
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F02sql">数据库系统02:SQL</h1>
+<h3 id="%E5%BC%95%E8%A8%80sql%E7%9A%84%E8%AF%9E%E7%94%9F"><strong>引言：SQL的诞生</strong></h3>
+<p>上一讲，我们学习了关系代数——一种简洁、严谨但对人类不那么友好的查询语言。想象一下，如果每次查询数据库都需要写一长串像 $\Pi_{A} ( \sigma_{P} (r_1 \times r_2) )$ 这样的数学公式，数据库恐怕永远无法走出计算机科学家的实验室。</p>
+<p>世界需要一种更接近自然语言、更易于理解和使用的语言。于是，在上世纪70年代，IBM的Don Chamberlin和Ray Boyce基于Codd的关系模型思想，设计了SEQUEL (Structured English Query Language)，后来演变成了今天的<strong>SQL (Structured Query Language)</strong>。</p>
+<p><strong>SQL的设计哲学核心：</strong></p>
+<ol>
+<li><strong>声明式 (Declarative):</strong> 用户只需<strong>声明</strong>想要什么结果，而无需指定获取结果的具体步骤或算法。你告诉数据库“目的地”，由数据库的查询优化器负责找出“最佳路径”。这与C++或Java等命令式语言形成了鲜明对比。</li>
+<li><strong>闭包性 (Closure):</strong> SQL操作的输入是表，输出仍然是表。这使得查询可以无限嵌套和组合，构建出强大的数据流水线。</li>
+<li><strong>综合性 (Comprehensive):</strong> SQL不仅仅是查询语言(DQL)，它还集成了数据定义(DDL)、数据操纵(DML)和数据控制(DCL)的功能，提供了一站式的数据库解决方案。</li>
+</ol>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E6%95%B0%E6%8D%AE%E5%AE%9A%E4%B9%89%E8%AF%AD%E8%A8%80-ddl"><strong>第一部分：数据定义语言 (DDL)</strong></h3>
+<p>在查询数据之前，我们必须先为数据构建一个家。DDL就是我们手中的建筑图纸和工具，用来定义数据库的骨架。</p>
+<h4 id="11-create-table"><strong>1.1 <code>CREATE TABLE</code></strong></h4>
+<p><code>CREATE TABLE</code> 不仅仅是创建一个表格，它是在定义一个<strong>实体</strong>的<strong>所有属性</strong>和它必须遵守的<strong>宇宙法则（约束）</strong>。</p>
+<div class="code-container">
+<pre class="hljs"><code><div><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> student (
     s_id     <span class="hljs-built_in">CHAR</span>(<span class="hljs-number">9</span>) PRIMARY <span class="hljs-keyword">KEY</span>,
     s_name   <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">50</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-literal">NULL</span>,
     dept_name <span class="hljs-built_in">VARCHAR</span>(<span class="hljs-number">50</span>),
@@ -74,139 +74,139 @@
     <span class="hljs-keyword">FOREIGN</span> <span class="hljs-keyword">KEY</span> (dept_name) <span class="hljs-keyword">REFERENCES</span> department(dept_name)
 );
 </div></code></pre>
-                </div>
-                <p><strong>设计哲学解析：</strong></p>
-                <ul>
-                <li>
-                <p><strong>数据类型 (Data Types):</strong> 这是最基本的约束。为什么要区分<code>CHAR(9)</code>和<code>VARCHAR(50)</code>？</p>
-                <ul>
-                <li><code>CHAR(n)</code>: 定长。无论存&quot;CS&quot;还是&quot;History&quot;，都占用n个字符的空间。<strong>优点</strong>：处理速度快，因为记录内偏移固定。<strong>缺点</strong>：浪费空间。适合存储长度固定的数据，如学号、身份证号。</li>
-                <li><code>VARCHAR(n)</code>: 变长。只占用实际需要的空间（外加少量长度信息）。<strong>优点</strong>：节省空间。<strong>缺点</strong>：处理略慢。适合存储长度不一的数据，如姓名、地址。</li>
-                <li><code>NUMERIC(p, d)</code> vs. <code>FLOAT</code>: 这是<strong>精度</strong>与<strong>性能</strong>的权衡。<code>NUMERIC</code>用于需要精确计算的场景（如金融），而<code>FLOAT</code>是近似值，计算速度快，但有精度损失。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>完整性约束 (Integrity Constraints):</strong> 这是数据的“法律”，由DBMS强制执行，将数据校验逻辑从应用层下沉到数据库层，保证了数据在任何情况下的<strong>一致性</strong>和<strong>正确性</strong>。</p>
-                <ul>
-                <li><code>NOT NULL</code>: 保证属性值存在。</li>
-                <li><code>PRIMARY KEY</code>: 隐含了<code>NOT NULL</code>和<code>UNIQUE</code>。它是元组的唯一身份标识，是<strong>实体完整性</strong>的基石。</li>
-                <li><code>FOREIGN KEY</code>: 建立了表与表之间的引用关系，是<strong>参照完整性</strong>的守护者。它保证了关系间的联系是有效、不悬空的。</li>
-                <li><code>CHECK</code>: 提供了自定义的业务规则校验，保证了<strong>域完整性</strong>。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="12-alter-table-%E5%92%8C-drop-table"><strong>1.2 <code>ALTER TABLE</code> 和 <code>DROP TABLE</code></strong></h4>
-                <ul>
-                <li><code>ALTER TABLE r ADD A D;</code>: 向现有关系中增加一个新属性。</li>
-                <li><code>ALTER TABLE r DROP A;</code>: 删除一个属性。（注意：这是一个代价高昂且危险的操作，一些早期系统甚至不支持）。</li>
-                <li><code>DROP TABLE r;</code>: 彻底删除一个关系的所有信息（数据、结构、索引）。这是一个不可逆的操作。</li>
-                </ul>
-                <h4 id="13-create-index"><strong>1.3 <code>CREATE INDEX</code></strong></h4>
-                <p><strong>设计哲学：逻辑与物理的分离。</strong> 索引对用户是透明的，它不改变表的逻辑结构，也不影响查询的<strong>结果</strong>，只影响查询的<strong>性能</strong>。它就像一本书的目录，允许DBMS在不扫描整张表的情况下快速定位数据。</p>
-                <div class="code-container">
-                    <pre class="hljs"><code><div><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">UNIQUE</span> <span class="hljs-keyword">INDEX</span> student_name_idx <span class="hljs-keyword">ON</span> student (s_name);
+</div>
+<p><strong>设计哲学解析：</strong></p>
+<ul>
+<li>
+<p><strong>数据类型 (Data Types):</strong> 这是最基本的约束。为什么要区分<code>CHAR(9)</code>和<code>VARCHAR(50)</code>？</p>
+<ul>
+<li><code>CHAR(n)</code>: 定长。无论存"CS"还是"History"，都占用n个字符的空间。<strong>优点</strong>：处理速度快，因为记录内偏移固定。<strong>缺点</strong>：浪费空间。适合存储长度固定的数据，如学号、身份证号。</li>
+<li><code>VARCHAR(n)</code>: 变长。只占用实际需要的空间（外加少量长度信息）。<strong>优点</strong>：节省空间。<strong>缺点</strong>：处理略慢。适合存储长度不一的数据，如姓名、地址。</li>
+<li><code>NUMERIC(p, d)</code> vs. <code>FLOAT</code>: 这是<strong>精度</strong>与<strong>性能</strong>的权衡。<code>NUMERIC</code>用于需要精确计算的场景（如金融），而<code>FLOAT</code>是近似值，计算速度快，但有精度损失。</li>
+</ul>
+</li>
+<li>
+<p><strong>完整性约束 (Integrity Constraints):</strong> 这是数据的“法律”，由DBMS强制执行，将数据校验逻辑从应用层下沉到数据库层，保证了数据在任何情况下的<strong>一致性</strong>和<strong>正确性</strong>。</p>
+<ul>
+<li><code>NOT NULL</code>: 保证属性值存在。</li>
+<li><code>PRIMARY KEY</code>: 隐含了<code>NOT NULL</code>和<code>UNIQUE</code>。它是元组的唯一身份标识，是<strong>实体完整性</strong>的基石。</li>
+<li><code>FOREIGN KEY</code>: 建立了表与表之间的引用关系，是<strong>参照完整性</strong>的守护者。它保证了关系间的联系是有效、不悬空的。</li>
+<li><code>CHECK</code>: 提供了自定义的业务规则校验，保证了<strong>域完整性</strong>。</li>
+</ul>
+</li>
+</ul>
+<h4 id="12-alter-table-%E5%92%8C-drop-table"><strong>1.2 <code>ALTER TABLE</code> 和 <code>DROP TABLE</code></strong></h4>
+<ul>
+<li><code>ALTER TABLE r ADD A D;</code>: 向现有关系中增加一个新属性。</li>
+<li><code>ALTER TABLE r DROP A;</code>: 删除一个属性。（注意：这是一个代价高昂且危险的操作，一些早期系统甚至不支持）。</li>
+<li><code>DROP TABLE r;</code>: 彻底删除一个关系的所有信息（数据、结构、索引）。这是一个不可逆的操作。</li>
+</ul>
+<h4 id="13-create-index"><strong>1.3 <code>CREATE INDEX</code></strong></h4>
+<p><strong>设计哲学：逻辑与物理的分离。</strong> 索引对用户是透明的，它不改变表的逻辑结构，也不影响查询的<strong>结果</strong>，只影响查询的<strong>性能</strong>。它就像一本书的目录，允许DBMS在不扫描整张表的情况下快速定位数据。</p>
+<div class="code-container">
+<pre class="hljs"><code><div><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">UNIQUE</span> <span class="hljs-keyword">INDEX</span> student_name_idx <span class="hljs-keyword">ON</span> student (s_name);
 </div></code></pre>
-                </div>
-                <ul>
-                <li><code>UNIQUE</code>关键字确保了该索引对应的列（或列组合）的值是唯一的，这是一种强制唯一性的高效方式。</li>
-                </ul>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2%E8%AF%AD%E8%A8%80-dql"><strong>第二部分：数据查询语言 (DQL)</strong></h3>
-                <p>这是SQL最核心、最迷人的部分。我们将解构<code>SELECT</code>语句，并理解其背后严谨的逻辑执行顺序。</p>
-                <h4 id="21-select%E8%AF%AD%E5%8F%A5%E7%9A%84%E8%A7%A3%E5%89%96%E4%B8%8E%E9%80%BB%E8%BE%91%E6%89%A7%E8%A1%8C%E6%B5%81"><strong>2.1 <code>SELECT</code>语句的解剖与逻辑执行流</strong></h4>
-                <p>一个看似简单的SQL查询，背后有一个严格的逻辑处理流程。理解这个流程是写对、写好任何复杂查询的关键。</p>
-                <div class="code-container">
-                    <pre class="hljs"><code><div><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DISTINCT</span> T.dept_name, <span class="hljs-keyword">AVG</span>(T.salary) <span class="hljs-keyword">AS</span> avg_salary
+</div>
+<ul>
+<li><code>UNIQUE</code>关键字确保了该索引对应的列（或列组合）的值是唯一的，这是一种强制唯一性的高效方式。</li>
+</ul>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2%E8%AF%AD%E8%A8%80-dql"><strong>第二部分：数据查询语言 (DQL)</strong></h3>
+<p>这是SQL最核心、最迷人的部分。我们将解构<code>SELECT</code>语句，并理解其背后严谨的逻辑执行顺序。</p>
+<h4 id="21-select%E8%AF%AD%E5%8F%A5%E7%9A%84%E8%A7%A3%E5%89%96%E4%B8%8E%E9%80%BB%E8%BE%91%E6%89%A7%E8%A1%8C%E6%B5%81"><strong>2.1 <code>SELECT</code>语句的解剖与逻辑执行流</strong></h4>
+<p>一个看似简单的SQL查询，背后有一个严格的逻辑处理流程。理解这个流程是写对、写好任何复杂查询的关键。</p>
+<div class="code-container">
+<pre class="hljs"><code><div><span class="hljs-keyword">SELECT</span> <span class="hljs-keyword">DISTINCT</span> T.dept_name, <span class="hljs-keyword">AVG</span>(T.salary) <span class="hljs-keyword">AS</span> avg_salary
 <span class="hljs-keyword">FROM</span> instructor <span class="hljs-keyword">AS</span> T
 <span class="hljs-keyword">WHERE</span> T.salary &gt; <span class="hljs-number">50000</span>
 <span class="hljs-keyword">GROUP</span> <span class="hljs-keyword">BY</span> T.dept_name
 <span class="hljs-keyword">HAVING</span> <span class="hljs-keyword">COUNT</span>(*) &gt; <span class="hljs-number">5</span>
 <span class="hljs-keyword">ORDER</span> <span class="hljs-keyword">BY</span> avg_salary <span class="hljs-keyword">DESC</span>;
 </div></code></pre>
-                </div>
-                <p><strong>逻辑执行顺序 (Mental Model):</strong></p>
-                <ol>
-                <li><strong><code>FROM</code></strong>: <strong>数据源</strong>。确定查询涉及哪些表。如果有多张表，此时会形成一个逻辑上的笛卡尔积。<code>AS</code>关键字在这里用于创建别名，是代码可读性和处理自连接的关键。</li>
-                <li><strong><code>WHERE</code></strong>: <strong>行过滤器 (Row Filter)</strong>。对<code>FROM</code>子句产生的每一行数据进行逐一判断，只保留满足条件的行。<strong>注意：</strong> 此阶段无法使用聚合函数（如<code>AVG</code>, <code>COUNT</code>），因为它操作的是单行数据，分组还未发生。</li>
-                <li><strong><code>GROUP BY</code></strong>: <strong>分组</strong>。将通过<code>WHERE</code>筛选的行，按照指定的列进行分组，形成多个“行的集合”。后续的操作都将针对这些“组”进行。</li>
-                <li><strong><code>HAVING</code></strong>: <strong>组过滤器 (Group Filter)</strong>。对<code>GROUP BY</code>产生的每个组进行判断，只保留满足条件的组。这里是聚合函数大显身手的地方。<strong><code>HAVING</code>与<code>WHERE</code>的本质区别</strong>：<code>WHERE</code>过滤行，<code>HAVING</code>过滤组。</li>
-                <li><strong><code>SELECT</code></strong>: <strong>投影与计算</strong>。确定最终结果集要包含哪些列。可以包含分组列、聚合函数计算结果、或其它表达式。<code>AS</code>在这里用于命名输出列。</li>
-                <li><strong><code>DISTINCT</code></strong>: <strong>去重</strong>。在<code>SELECT</code>之后，对结果集进行去重处理。</li>
-                <li><strong><code>ORDER BY</code></strong>: <strong>排序</strong>。对最终结果集进行排序，这纯粹是为了展示。可以使用<code>ASC</code>（升序，默认）或<code>DESC</code>（降序）。</li>
-                </ol>
-                <h4 id="22-%E5%9F%BA%E6%9C%AC%E5%AD%90%E5%8F%A5%E8%AF%A6%E8%A7%A3"><strong>2.2 基本子句详解</strong></h4>
+</div>
+<p><strong>逻辑执行顺序 (Mental Model):</strong></p>
+<ol>
+<li><strong><code>FROM</code></strong>: <strong>数据源</strong>。确定查询涉及哪些表。如果有多张表，此时会形成一个逻辑上的笛卡尔积。<code>AS</code>关键字在这里用于创建别名，是代码可读性和处理自连接的关键。</li>
+<li><strong><code>WHERE</code></strong>: <strong>行过滤器 (Row Filter)</strong>。对<code>FROM</code>子句产生的每一行数据进行逐一判断，只保留满足条件的行。<strong>注意：</strong> 此阶段无法使用聚合函数（如<code>AVG</code>, <code>COUNT</code>），因为它操作的是单行数据，分组还未发生。</li>
+<li><strong><code>GROUP BY</code></strong>: <strong>分组</strong>。将通过<code>WHERE</code>筛选的行，按照指定的列进行分组，形成多个“行的集合”。后续的操作都将针对这些“组”进行。</li>
+<li><strong><code>HAVING</code></strong>: <strong>组过滤器 (Group Filter)</strong>。对<code>GROUP BY</code>产生的每个组进行判断，只保留满足条件的组。这里是聚合函数大显身手的地方。<strong><code>HAVING</code>与<code>WHERE</code>的本质区别</strong>：<code>WHERE</code>过滤行，<code>HAVING</code>过滤组。</li>
+<li><strong><code>SELECT</code></strong>: <strong>投影与计算</strong>。确定最终结果集要包含哪些列。可以包含分组列、聚合函数计算结果、或其它表达式。<code>AS</code>在这里用于命名输出列。</li>
+<li><strong><code>DISTINCT</code></strong>: <strong>去重</strong>。在<code>SELECT</code>之后，对结果集进行去重处理。</li>
+<li><strong><code>ORDER BY</code></strong>: <strong>排序</strong>。对最终结果集进行排序，这纯粹是为了展示。可以使用<code>ASC</code>（升序，默认）或<code>DESC</code>（降序）。</li>
+</ol>
+<h4 id="22-%E5%9F%BA%E6%9C%AC%E5%AD%90%E5%8F%A5%E8%AF%A6%E8%A7%A3"><strong>2.2 基本子句详解</strong></h4>
+<ul>
+<li><strong><code>SELECT</code></strong>:
                 <ul>
-                <li><strong><code>SELECT</code></strong>:
+<li><code>*</code> : 选择所有列。方便，但在生产环境中应避免，因为它降低了代码可读性，且可能传输不必要的数据。</li>
+<li><code>DISTINCT</code> vs. <code>ALL</code> (默认): <code>DISTINCT</code>强制执行集合语义（去重），而SQL默认是多重集语义（保留重复）。<strong>设计哲学：</strong> 默认保留重复是出于性能考虑，去重操作（通常需要排序或哈希）是昂贵的。</li>
+</ul>
+</li>
+<li><strong><code>WHERE</code></strong>:
                 <ul>
-                <li><code>*</code> : 选择所有列。方便，但在生产环境中应避免，因为它降低了代码可读性，且可能传输不必要的数据。</li>
-                <li><code>DISTINCT</code> vs. <code>ALL</code> (默认): <code>DISTINCT</code>强制执行集合语义（去重），而SQL默认是多重集语义（保留重复）。<strong>设计哲学：</strong> 默认保留重复是出于性能考虑，去重操作（通常需要排序或哈希）是昂贵的。</li>
-                </ul>
-                </li>
-                <li><strong><code>WHERE</code></strong>:
-                <ul>
-                <li>丰富的谓词：<code>=, &lt;, &gt;, LIKE, BETWEEN, IN</code>等。</li>
-                <li><code>LIKE '%Ze%'</code>: <code>%</code>匹配任意字符串，<code>_</code>匹配任意单个字符。</li>
-                </ul>
-                </li>
-                <li><strong><code>ORDER BY</code></strong>: 可以对多个列进行排序，并为每个列指定不同的排序方向。</li>
-                </ul>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E8%BF%9E%E6%8E%A5%E4%B8%8E%E9%9B%86%E5%90%88%E6%93%8D%E4%BD%9C"><strong>第三部分：连接与集合操作</strong></h3>
-                <h4 id="31-%E8%BF%9E%E6%8E%A5%E5%85%B3%E7%B3%BB-join%E6%B0%B4%E5%B9%B3%E6%96%B9%E5%90%91%E7%9A%84%E8%9E%8D%E5%90%88"><strong>3.1 连接关系 (<code>JOIN</code>)：水平方向的融合</strong></h4>
-                <p><strong>设计哲学：从隐式到显式。</strong> 早期的SQL连接是在<code>FROM</code>子句中列出多个表，在<code>WHERE</code>子句中写连接条件。</p>
-                <div class="code-container">
-                    <pre class="hljs"><code><div><span class="hljs-comment">-- 旧式（隐式）连接</span>
+<li>丰富的谓词：<code>=, &lt;, &gt;, LIKE, BETWEEN, IN</code>等。</li>
+<li><code>LIKE '%Ze%'</code>: <code>%</code>匹配任意字符串，<code>_</code>匹配任意单个字符。</li>
+</ul>
+</li>
+<li><strong><code>ORDER BY</code></strong>: 可以对多个列进行排序，并为每个列指定不同的排序方向。</li>
+</ul>
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E8%BF%9E%E6%8E%A5%E4%B8%8E%E9%9B%86%E5%90%88%E6%93%8D%E4%BD%9C"><strong>第三部分：连接与集合操作</strong></h3>
+<h4 id="31-%E8%BF%9E%E6%8E%A5%E5%85%B3%E7%B3%BB-join%E6%B0%B4%E5%B9%B3%E6%96%B9%E5%90%91%E7%9A%84%E8%9E%8D%E5%90%88"><strong>3.1 连接关系 (<code>JOIN</code>)：水平方向的融合</strong></h4>
+<p><strong>设计哲学：从隐式到显式。</strong> 早期的SQL连接是在<code>FROM</code>子句中列出多个表，在<code>WHERE</code>子句中写连接条件。</p>
+<div class="code-container">
+<pre class="hljs"><code><div><span class="hljs-comment">-- 旧式（隐式）连接</span>
 <span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> student, takes <span class="hljs-keyword">WHERE</span> student.s_id = takes.s_id;
 </div></code></pre>
-                </div>
-                <p>这种写法的<strong>巨大缺陷</strong>在于，如果你忘记了<code>WHERE</code>条件，查询不会报错，而是会执行一个庞大的笛卡尔积，返回无意义的结果，这被称为“意外的交叉连接”。</p>
-                <p>为了解决这个问题，ANSI SQL-92标准引入了<strong>显式<code>JOIN</code>语法</strong>，这是现代SQL的最佳实践。</p>
-                <div class="code-container">
-                    <pre class="hljs"><code><div><span class="hljs-comment">-- 新式（显式）连接</span>
+</div>
+<p>这种写法的<strong>巨大缺陷</strong>在于，如果你忘记了<code>WHERE</code>条件，查询不会报错，而是会执行一个庞大的笛卡尔积，返回无意义的结果，这被称为“意外的交叉连接”。</p>
+<p>为了解决这个问题，ANSI SQL-92标准引入了<strong>显式<code>JOIN</code>语法</strong>，这是现代SQL的最佳实践。</p>
+<div class="code-container">
+<pre class="hljs"><code><div><span class="hljs-comment">-- 新式（显式）连接</span>
 <span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> student <span class="hljs-keyword">INNER</span> <span class="hljs-keyword">JOIN</span> takes <span class="hljs-keyword">ON</span> student.s_id = takes.s_id;
 </div></code></pre>
-                </div>
-                <p><strong>优点：</strong></p>
+</div>
+<p><strong>优点：</strong></p>
+<ul>
+<li><strong>清晰</strong>：连接条件和过滤条件在语法上被分开了（<code>ON</code> vs <code>WHERE</code>）。</li>
+<li><strong>安全</strong>：不可能意外地忘记连接条件。</li>
+</ul>
+<p><strong>连接的类型：</strong></p>
+<ul>
+<li><strong><code>INNER JOIN</code></strong>: 只返回两个表中能匹配上的行。</li>
+<li><strong><code>OUTER JOIN</code></strong>:
                 <ul>
-                <li><strong>清晰</strong>：连接条件和过滤条件在语法上被分开了（<code>ON</code> vs <code>WHERE</code>）。</li>
-                <li><strong>安全</strong>：不可能意外地忘记连接条件。</li>
-                </ul>
-                <p><strong>连接的类型：</strong></p>
+<li><strong><code>LEFT OUTER JOIN</code></strong>: 返回左表的所有行，以及右表中能匹配上的行。如果右表没有匹配行，则右表的列显示为<code>NULL</code>。<strong>应用场景</strong>：查询所有学生及其选课情况（包括没有选课的学生）。</li>
+<li><strong><code>RIGHT OUTER JOIN</code></strong>: 与<code>LEFT JOIN</code>相反。</li>
+<li><strong><code>FULL OUTER JOIN</code></strong>: 返回左表和右表的所有行，在无法匹配的地方用<code>NULL</code>填充。</li>
+</ul>
+</li>
+<li><strong><code>NATURAL JOIN</code></strong>: 自动在两个表的同名列上进行等值连接。<strong>强烈不推荐在生产代码中使用！</strong> 因为它过于依赖列名，如果表结构发生变化（如新增了一个同名列），查询逻辑可能在不经意间被破坏。</li>
+</ul>
+<h4 id="32-%E9%9B%86%E5%90%88%E6%93%8D%E4%BD%9C%E5%9E%82%E7%9B%B4%E6%96%B9%E5%90%91%E7%9A%84%E8%9E%8D%E5%90%88"><strong>3.2 集合操作：垂直方向的融合</strong></h4>
+<p>这些操作要求参与运算的查询结果具有相同的列数和兼容的数据类型。</p>
+<ul>
+<li><strong><code>UNION</code> / <code>UNION ALL</code></strong>: 合并两个结果集。<code>UNION</code>会自动去重（集合并），<code>UNION ALL</code>保留所有行（多重集并），性能更高。</li>
+<li><strong><code>INTERSECT</code> / <code>INTERSECT ALL</code></strong>: 返回两个结果集的交集。</li>
+<li><strong><code>EXCEPT</code> / <code>EXCEPT ALL</code></strong>: 返回在第一个结果集中存在，但在第二个结果集中不存在的行（集合差）。</li>
+</ul>
+<h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E5%B5%8C%E5%A5%97%E4%B8%8E%E8%81%9A%E5%90%88"><strong>第四部分：嵌套与聚合</strong></h3>
+<h4 id="41-%E8%81%9A%E5%90%88%E5%87%BD%E6%95%B0-avg-count-sum-min-max"><strong>4.1 聚合函数 (<code>AVG</code>, <code>COUNT</code>, <code>SUM</code>, <code>MIN</code>, <code>MAX</code>)</strong></h4>
+<p>这些函数是数据分析的基石。它们将一个“组”的数据压缩成一个单一的值。</p>
+<p>一个重要的细节：除了<code>COUNT(*)</code>，所有聚合函数都会<strong>忽略<code>NULL</code>值</strong>。<code>COUNT(*)</code>统计所有行，而<code>COUNT(column)</code>统计该列中非<code>NULL</code>值的数量。</p>
+<h4 id="42-%E5%B5%8C%E5%A5%97%E5%AD%90%E6%9F%A5%E8%AF%A2-subqueries"><strong>4.2 嵌套子查询 (Subqueries)</strong></h4>
+<p>一个查询可以嵌套在另一个查询的<code>WHERE</code>, <code>FROM</code>, <code>SELECT</code>子句中，这极大地增强了SQL的表达能力。</p>
+<ul>
+<li><strong><code>WHERE</code>子句中的子查询</strong>:
                 <ul>
-                <li><strong><code>INNER JOIN</code></strong>: 只返回两个表中能匹配上的行。</li>
-                <li><strong><code>OUTER JOIN</code></strong>:
-                <ul>
-                <li><strong><code>LEFT OUTER JOIN</code></strong>: 返回左表的所有行，以及右表中能匹配上的行。如果右表没有匹配行，则右表的列显示为<code>NULL</code>。<strong>应用场景</strong>：查询所有学生及其选课情况（包括没有选课的学生）。</li>
-                <li><strong><code>RIGHT OUTER JOIN</code></strong>: 与<code>LEFT JOIN</code>相反。</li>
-                <li><strong><code>FULL OUTER JOIN</code></strong>: 返回左表和右表的所有行，在无法匹配的地方用<code>NULL</code>填充。</li>
-                </ul>
-                </li>
-                <li><strong><code>NATURAL JOIN</code></strong>: 自动在两个表的同名列上进行等值连接。<strong>强烈不推荐在生产代码中使用！</strong> 因为它过于依赖列名，如果表结构发生变化（如新增了一个同名列），查询逻辑可能在不经意间被破坏。</li>
-                </ul>
-                <h4 id="32-%E9%9B%86%E5%90%88%E6%93%8D%E4%BD%9C%E5%9E%82%E7%9B%B4%E6%96%B9%E5%90%91%E7%9A%84%E8%9E%8D%E5%90%88"><strong>3.2 集合操作：垂直方向的融合</strong></h4>
-                <p>这些操作要求参与运算的查询结果具有相同的列数和兼容的数据类型。</p>
-                <ul>
-                <li><strong><code>UNION</code> / <code>UNION ALL</code></strong>: 合并两个结果集。<code>UNION</code>会自动去重（集合并），<code>UNION ALL</code>保留所有行（多重集并），性能更高。</li>
-                <li><strong><code>INTERSECT</code> / <code>INTERSECT ALL</code></strong>: 返回两个结果集的交集。</li>
-                <li><strong><code>EXCEPT</code> / <code>EXCEPT ALL</code></strong>: 返回在第一个结果集中存在，但在第二个结果集中不存在的行（集合差）。</li>
-                </ul>
-                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E5%B5%8C%E5%A5%97%E4%B8%8E%E8%81%9A%E5%90%88"><strong>第四部分：嵌套与聚合</strong></h3>
-                <h4 id="41-%E8%81%9A%E5%90%88%E5%87%BD%E6%95%B0-avg-count-sum-min-max"><strong>4.1 聚合函数 (<code>AVG</code>, <code>COUNT</code>, <code>SUM</code>, <code>MIN</code>, <code>MAX</code>)</strong></h4>
-                <p>这些函数是数据分析的基石。它们将一个“组”的数据压缩成一个单一的值。</p>
-                <p>一个重要的细节：除了<code>COUNT(*)</code>，所有聚合函数都会<strong>忽略<code>NULL</code>值</strong>。<code>COUNT(*)</code>统计所有行，而<code>COUNT(column)</code>统计该列中非<code>NULL</code>值的数量。</p>
-                <h4 id="42-%E5%B5%8C%E5%A5%97%E5%AD%90%E6%9F%A5%E8%AF%A2-subqueries"><strong>4.2 嵌套子查询 (Subqueries)</strong></h4>
-                <p>一个查询可以嵌套在另一个查询的<code>WHERE</code>, <code>FROM</code>, <code>SELECT</code>子句中，这极大地增强了SQL的表达能力。</p>
-                <ul>
-                <li><strong><code>WHERE</code>子句中的子查询</strong>:
-                <ul>
-                <li><code>IN / NOT IN</code>: 判断值是否存在于子查询返回的（单列）集合中。</li>
-                <li><code>EXISTS / NOT EXISTS</code>: 判断子查询是否返回<strong>任何行</strong>。通常用于<strong>相关子查询 (Correlated Subquery)</strong>，即子查询的执行依赖于外层查询的当前行。<code>EXISTS</code>通常比<code>IN</code>更高效，因为它找到一个匹配后就可以停止。</li>
-                <li>比较运算符 (<code>=, &lt;, &gt;</code>) 与 <code>ANY</code> / <code>ALL</code> 结合：例如 <code>&gt; ANY(...)</code> 表示大于子查询结果中的任意一个（即大于最小值），<code>&gt; ALL(...)</code> 表示大于子查询结果中的所有值（即大于最大值）。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="43-%E6%B4%BE%E7%94%9F%E5%85%B3%E7%B3%BBwith%E5%AD%90%E5%8F%A5-common-table-expressions---ctes"><strong>4.3 派生关系：<code>WITH</code>子句 (Common Table Expressions - CTEs)</strong></h4>
-                <p><strong>设计哲学：告别“意大利面条式”查询。</strong> 当子查询嵌套层级过多时，代码会变得极难阅读和维护。<code>WITH</code>子句允许你为子查询命名，像定义临时变量一样，然后在主查询中引用它们。</p>
-                <div class="code-container">
-                    <pre class="hljs"><code><div><span class="hljs-keyword">WITH</span> cs_students <span class="hljs-keyword">AS</span> (
+<li><code>IN / NOT IN</code>: 判断值是否存在于子查询返回的（单列）集合中。</li>
+<li><code>EXISTS / NOT EXISTS</code>: 判断子查询是否返回<strong>任何行</strong>。通常用于<strong>相关子查询 (Correlated Subquery)</strong>，即子查询的执行依赖于外层查询的当前行。<code>EXISTS</code>通常比<code>IN</code>更高效，因为它找到一个匹配后就可以停止。</li>
+<li>比较运算符 (<code>=, &lt;, &gt;</code>) 与 <code>ANY</code> / <code>ALL</code> 结合：例如 <code>&gt; ANY(...)</code> 表示大于子查询结果中的任意一个（即大于最小值），<code>&gt; ALL(...)</code> 表示大于子查询结果中的所有值（即大于最大值）。</li>
+</ul>
+</li>
+</ul>
+<h4 id="43-%E6%B4%BE%E7%94%9F%E5%85%B3%E7%B3%BBwith%E5%AD%90%E5%8F%A5-common-table-expressions---ctes"><strong>4.3 派生关系：<code>WITH</code>子句 (Common Table Expressions - CTEs)</strong></h4>
+<p><strong>设计哲学：告别“意大利面条式”查询。</strong> 当子查询嵌套层级过多时，代码会变得极难阅读和维护。<code>WITH</code>子句允许你为子查询命名，像定义临时变量一样，然后在主查询中引用它们。</p>
+<div class="code-container">
+<pre class="hljs"><code><div><span class="hljs-keyword">WITH</span> cs_students <span class="hljs-keyword">AS</span> (
     <span class="hljs-keyword">SELECT</span> s_id, s_name
     <span class="hljs-keyword">FROM</span> student
     <span class="hljs-keyword">WHERE</span> dept_name = <span class="hljs-string">'Comp. Sci.'</span>
@@ -220,73 +220,99 @@ student_courses_count <span class="hljs-keyword">AS</span> (
 <span class="hljs-keyword">FROM</span> cs_students cs
 <span class="hljs-keyword">JOIN</span> student_courses_count scc <span class="hljs-keyword">ON</span> cs.s_id = scc.s_id;
 </div></code></pre>
-                </div>
-                <p><strong>优点：</strong></p>
-                <ul>
-                <li><strong>可读性</strong>：将复杂查询分解为逻辑上独立的步骤。</li>
-                <li><strong>可维护性</strong>：易于修改和调试每个逻辑单元。</li>
-                <li><strong>递归能力</strong>：<code>WITH RECURSIVE</code>可以用来处理树形或图形结构数据，这是普通子查询无法做到的。</li>
-                </ul>
-                <h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E8%A7%86%E5%9B%BE%E4%B8%8E%E4%BF%AE%E6%94%B9"><strong>第五部分：视图与修改</strong></h3>
-                <h4 id="51-%E8%A7%86%E5%9B%BE-view%E6%95%B0%E6%8D%AE%E7%9A%84%E7%AA%97%E6%88%B7"><strong>5.1 视图 (<code>VIEW</code>)：数据的窗户</strong></h4>
-                <p>视图是一个<strong>虚拟表</strong>，其内容由查询定义。它本身不存储数据，而是像一个动态的窗口，通过它可以看到基表中的数据。</p>
-                <p><strong>设计哲学与用途：</strong></p>
-                <ol>
-                <li><strong>简化复杂性</strong>：将一个复杂的多表连接查询封装成一个简单的视图，供用户使用。</li>
-                <li><strong>安全性</strong>：可以创建一个只暴露部分列（隐藏工资列）或部分行（只显示本部门员工）的视图，对不同用户授予不同视图的权限。</li>
-                <li><strong>逻辑数据独立性</strong>：如果基表的结构发生变化（如拆分了一张表），可以重建视图来保持与旧结构相同的接口，而使用该视图的应用程序代码无需修改。</li>
-                </ol>
-                <p><strong>视图更新的挑战：</strong>
+</div>
+<p><strong>优点：</strong></p>
+<ul>
+<li><strong>可读性</strong>：将复杂查询分解为逻辑上独立的步骤。</li>
+<li><strong>可维护性</strong>：易于修改和调试每个逻辑单元。</li>
+<li><strong>递归能力</strong>：<code>WITH RECURSIVE</code>可以用来处理树形或图形结构数据，这是普通子查询无法做到的。</li>
+</ul>
+<h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E8%A7%86%E5%9B%BE%E4%B8%8E%E4%BF%AE%E6%94%B9"><strong>第五部分：视图与修改</strong></h3>
+<h4 id="51-%E8%A7%86%E5%9B%BE-view%E6%95%B0%E6%8D%AE%E7%9A%84%E7%AA%97%E6%88%B7"><strong>5.1 视图 (<code>VIEW</code>)：数据的窗户</strong></h4>
+<p>视图是一个<strong>虚拟表</strong>，其内容由查询定义。它本身不存储数据，而是像一个动态的窗口，通过它可以看到基表中的数据。</p>
+<p><strong>设计哲学与用途：</strong></p>
+<ol>
+<li><strong>简化复杂性</strong>：将一个复杂的多表连接查询封装成一个简单的视图，供用户使用。</li>
+<li><strong>安全性</strong>：可以创建一个只暴露部分列（隐藏工资列）或部分行（只显示本部门员工）的视图，对不同用户授予不同视图的权限。</li>
+<li><strong>逻辑数据独立性</strong>：如果基表的结构发生变化（如拆分了一张表），可以重建视图来保持与旧结构相同的接口，而使用该视图的应用程序代码无需修改。</li>
+</ol>
+<p><strong>视图更新的挑战：</strong>
                 对视图的<code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>操作最终要映射到对基表的修改。如果视图定义复杂（如包含聚合、<code>GROUP BY</code>、<code>DISTINCT</code>等），DBMS将无法确定如何明确地修改基表，因此这类视图是<strong>不可更新</strong>的。</p>
-                <h4 id="52-%E6%95%B0%E6%8D%AE%E4%BF%AE%E6%94%B9%E8%AF%AD%E8%A8%80-dml"><strong>5.2 数据修改语言 (DML)</strong></h4>
+<h4 id="52-%E6%95%B0%E6%8D%AE%E4%BF%AE%E6%94%B9%E8%AF%AD%E8%A8%80-dml"><strong>5.2 数据修改语言 (DML)</strong></h4>
+<ul>
+<li><strong><code>INSERT INTO ... VALUES ...</code></strong>: 插入单行或多行指定值。</li>
+<li><strong><code>INSERT INTO ... SELECT ...</code></strong>: 将一个查询的结果批量插入到表中。</li>
+<li><strong><code>UPDATE ... SET ... WHERE ...</code></strong>: 更新满足条件的行的列值。<strong>切记：</strong> 如果忘记<code>WHERE</code>子句，将更新<strong>整张表</strong>！</li>
+<li><strong><code>DELETE FROM ... WHERE ...</code></strong>: 删除满足条件的行。同样，忘记<code>WHERE</code>子句将删除<strong>所有数据</strong>！</li>
+</ul>
+<p>这些操作都会受到表上定义的完整性约束的检查。</p>
+<h3 id="%E7%AC%AC%E5%85%AD%E9%83%A8%E5%88%86null"><strong>第六部分：<code>NULL</code></strong></h3>
+<p><code>NULL</code> 可能是SQL中最令人困惑、也最富争议的设计。它不等于0，不等于空字符串，它不等于任何值，甚至不等于它自己 (<code>NULL = NULL</code> 的结果不是<code>TRUE</code>)。</p>
+<ul>
+<li><strong>含义</strong>：未知 (Unknown)、不适用 (Not Applicable)、缺失 (Missing)。</li>
+<li><strong>三值逻辑 (Three-Valued Logic)</strong>: SQL的逻辑运算有三种结果：<code>TRUE</code>, <code>FALSE</code>, <code>UNKNOWN</code>。
                 <ul>
-                <li><strong><code>INSERT INTO ... VALUES ...</code></strong>: 插入单行或多行指定值。</li>
-                <li><strong><code>INSERT INTO ... SELECT ...</code></strong>: 将一个查询的结果批量插入到表中。</li>
-                <li><strong><code>UPDATE ... SET ... WHERE ...</code></strong>: 更新满足条件的行的列值。<strong>切记：</strong> 如果忘记<code>WHERE</code>子句，将更新<strong>整张表</strong>！</li>
-                <li><strong><code>DELETE FROM ... WHERE ...</code></strong>: 删除满足条件的行。同样，忘记<code>WHERE</code>子句将删除<strong>所有数据</strong>！</li>
-                </ul>
-                <p>这些操作都会受到表上定义的完整性约束的检查。</p>
-                <h3 id="%E7%AC%AC%E5%85%AD%E9%83%A8%E5%88%86null"><strong>第六部分：<code>NULL</code></strong></h3>
-                <p><code>NULL</code> 可能是SQL中最令人困惑、也最富争议的设计。它不等于0，不等于空字符串，它不等于任何值，甚至不等于它自己 (<code>NULL = NULL</code> 的结果不是<code>TRUE</code>)。</p>
-                <ul>
-                <li><strong>含义</strong>：未知 (Unknown)、不适用 (Not Applicable)、缺失 (Missing)。</li>
-                <li><strong>三值逻辑 (Three-Valued Logic)</strong>: SQL的逻辑运算有三种结果：<code>TRUE</code>, <code>FALSE</code>, <code>UNKNOWN</code>。
-                <ul>
-                <li><code>'A' = 'A'</code> -&gt; <code>TRUE</code></li>
-                <li><code>'A' = 'B'</code> -&gt; <code>FALSE</code></li>
-                <li><code>'A' = NULL</code> -&gt; <code>UNKNOWN</code></li>
-                </ul>
-                </li>
-                <li><strong><code>WHERE</code>子句的行为</strong>: <code>WHERE</code>子句只保留谓词计算结果为<code>TRUE</code>的行，<code>FALSE</code>和<code>UNKNOWN</code>的行都会被丢弃。</li>
-                <li><strong>正确的<code>NULL</code>判断</strong>: 必须使用 <code>IS NULL</code> 和 <code>IS NOT NULL</code>。</li>
-                </ul>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li><code>'A' = 'A'</code> -&gt; <code>TRUE</code></li>
+<li><code>'A' = 'B'</code> -&gt; <code>FALSE</code></li>
+<li><code>'A' = NULL</code> -&gt; <code>UNKNOWN</code></li>
+</ul>
+</li>
+<li><strong><code>WHERE</code>子句的行为</strong>: <code>WHERE</code>子句只保留谓词计算结果为<code>TRUE</code>的行，<code>FALSE</code>和<code>UNKNOWN</code>的行都会被丢弃。</li>
+<li><strong>正确的<code>NULL</code>判断</strong>: 必须使用 <code>IS NULL</code> 和 <code>IS NOT NULL</code>。</li>
+</ul>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

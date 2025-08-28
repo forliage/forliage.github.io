@@ -1,13 +1,14 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>ads02:红黑树与B+树</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<meta charset="utf-8"/>
+<title>ads02:红黑树与B+树</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -16,75 +17,75 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="ads02%E7%BA%A2%E9%BB%91%E6%A0%91%E4%B8%8Eb%E6%A0%91">ads02:红黑树与B+树</h1>
-                <p>（补档：将以前的ads笔记做修缮后上传）</p>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E7%BA%A2%E9%BB%91%E6%A0%91-red-black-trees">第一部分：红黑树 (Red-Black Trees)</h3>
-                <h4 id="1-%E7%9B%AE%E6%A0%87%E4%B8%8E%E5%AE%9A%E4%B9%89">1. 目标与定义</h4>
-                <p>我们的目标非常明确：构建一个<strong>近似平衡的二叉搜索树</strong>。红黑树通过引入“颜色”属性和一套严格的规则来实现这一目标。</p>
-                <p>首先，我们来看一下红黑树的节点结构。除了二叉搜索树原有的 <code>key</code>（键值）、<code>left</code>（左孩子）、<code>right</code>（右孩子）和 <code>parent</code>（父节点）指针外，它还增加了一个 <code>color</code> 属性。</p>
-                <div class="mermaid">
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="ads02%E7%BA%A2%E9%BB%91%E6%A0%91%E4%B8%8Eb%E6%A0%91">ads02:红黑树与B+树</h1>
+<p>（补档：将以前的ads笔记做修缮后上传）</p>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E7%BA%A2%E9%BB%91%E6%A0%91-red-black-trees">第一部分：红黑树 (Red-Black Trees)</h3>
+<h4 id="1-%E7%9B%AE%E6%A0%87%E4%B8%8E%E5%AE%9A%E4%B9%89">1. 目标与定义</h4>
+<p>我们的目标非常明确：构建一个<strong>近似平衡的二叉搜索树</strong>。红黑树通过引入“颜色”属性和一套严格的规则来实现这一目标。</p>
+<p>首先，我们来看一下红黑树的节点结构。除了二叉搜索树原有的 <code>key</code>（键值）、<code>left</code>（左孩子）、<code>right</code>（右孩子）和 <code>parent</code>（父节点）指针外，它还增加了一个 <code>color</code> 属性。</p>
+<div class="mermaid">
                 graph TD
-                    A[Node] --> B(parent);
-                    A --> C(color);
-                    A --> D(key);
-                    A --> E(left);
-                    A --> F(right);
+                    A[Node] --&gt; B(parent);
+                    A --&gt; C(color);
+                    A --&gt; D(key);
+                    A --&gt; E(left);
+                    A --&gt; F(right);
                 </div>
-                <p>在红黑树中，我们通常将叶子节点视为特殊的 <code>NIL</code> 节点，它们是黑色的。这些 <code>NIL</code> 节点在实际实现中通常用一个共享的哨兵节点（sentinel node）来表示，以简化代码逻辑。所以，下文提到的“叶子节点”均指这些 <code>NIL</code> 节点。</p>
-                <p><strong>【定义】</strong> 一棵红黑树是一棵满足以下五条<strong>红黑性质</strong>的二叉搜索树：</p>
-                <ol>
-                <li><strong>颜色性质</strong>: 每个节点要么是<strong>红色</strong>，要么是<strong>黑色</strong>。</li>
-                <li><strong>根性质</strong>: 根节点是<strong>黑色</strong>。</li>
-                <li><strong>叶子性质</strong>: 所有叶子节点（NIL）都是<strong>黑色</strong>。</li>
-                <li><strong>红色性质</strong>: 如果一个节点是<strong>红色</strong>的，那么它的两个子节点都是<strong>黑色</strong>的。（这也就意味着，从根到叶子的任何路径上，不会有两个连续的红色节点）。</li>
-                <li><strong>黑色性质</strong>: 对每个节点，从该节点到其所有后代叶子节点的简单路径上，均包含相同数目的<strong>黑色</strong>节点。这个数目被称为该节点的<strong>黑高 (black-height)</strong>。</li>
-                </ol>
-                <p>我们来看一个具体的例子。图中，圆形节点代表内部节点，方形的NIL节点是外部叶子节点。红色节点用红色填充，黑色节点用黑色填充。</p>
-                <div class="mermaid">
+<p>在红黑树中，我们通常将叶子节点视为特殊的 <code>NIL</code> 节点，它们是黑色的。这些 <code>NIL</code> 节点在实际实现中通常用一个共享的哨兵节点（sentinel node）来表示，以简化代码逻辑。所以，下文提到的“叶子节点”均指这些 <code>NIL</code> 节点。</p>
+<p><strong>【定义】</strong> 一棵红黑树是一棵满足以下五条<strong>红黑性质</strong>的二叉搜索树：</p>
+<ol>
+<li><strong>颜色性质</strong>: 每个节点要么是<strong>红色</strong>，要么是<strong>黑色</strong>。</li>
+<li><strong>根性质</strong>: 根节点是<strong>黑色</strong>。</li>
+<li><strong>叶子性质</strong>: 所有叶子节点（NIL）都是<strong>黑色</strong>。</li>
+<li><strong>红色性质</strong>: 如果一个节点是<strong>红色</strong>的，那么它的两个子节点都是<strong>黑色</strong>的。（这也就意味着，从根到叶子的任何路径上，不会有两个连续的红色节点）。</li>
+<li><strong>黑色性质</strong>: 对每个节点，从该节点到其所有后代叶子节点的简单路径上，均包含相同数目的<strong>黑色</strong>节点。这个数目被称为该节点的<strong>黑高 (black-height)</strong>。</li>
+</ol>
+<p>我们来看一个具体的例子。图中，圆形节点代表内部节点，方形的NIL节点是外部叶子节点。红色节点用红色填充，黑色节点用黑色填充。</p>
+<div class="mermaid">
                 graph TD
                     subgraph Red-Black Tree Example
-                        R(7) --> N2(2);
-                        R --> N11(11);
-                        N2 --> N1(1);
-                        N2 --> N5(5);
-                        N5 --> N4((4));
-                        N11 --> N8(8);
-                        N11 --> N14(14);
-                        N14 --> N15((15));
+                        R(7) --&gt; N2(2);
+                        R --&gt; N11(11);
+                        N2 --&gt; N1(1);
+                        N2 --&gt; N5(5);
+                        N5 --&gt; N4((4));
+                        N11 --&gt; N8(8);
+                        N11 --&gt; N14(14);
+                        N14 --&gt; N15((15));
 
                         subgraph NIL Leaves
                             direction LR
-                            N1 --> nil1(NIL);
-                            N1 --> nil2(NIL);
-                            N4 --> nil3(NIL);
-                            N4 --> nil4(NIL);
-                            N5 --> nil5(NIL);
-                            N8 --> nil6(NIL);
-                            N8 --> nil7(NIL);
-                            N15 --> nil8(NIL);
-                            N15 --> nil9(NIL);
-                            N14 --> nil10(NIL);
+                            N1 --&gt; nil1(NIL);
+                            N1 --&gt; nil2(NIL);
+                            N4 --&gt; nil3(NIL);
+                            N4 --&gt; nil4(NIL);
+                            N5 --&gt; nil5(NIL);
+                            N8 --&gt; nil6(NIL);
+                            N8 --&gt; nil7(NIL);
+                            N15 --&gt; nil8(NIL);
+                            N15 --&gt; nil9(NIL);
+                            N14 --&gt; nil10(NIL);
                         end
                     end
 
@@ -108,315 +109,315 @@
                     style nil9 fill:#333,color:#fff
                     style nil10 fill:#333,color:#fff
                 </div>
-                <p>可以验证一下，这棵树完全符合上述五条性质。比如，根节点7是黑色的；路径 7 -&gt; 2 -&gt; 1 -&gt; NIL 上有3个黑节点（7, 1, NIL），而路径 7 -&gt; 11 -&gt; 14 -&gt; 15 -&gt; NIL 上也有3个黑节点（7, 14, NIL）。</p>
-                <h4 id="2-%E5%85%B3%E9%94%AE%E6%80%A7%E8%B4%A8%E8%AF%81%E6%98%8E%E4%B8%BA%E4%BB%80%E4%B9%88%E7%BA%A2%E9%BB%91%E6%A0%91%E6%98%AF%E5%B9%B3%E8%A1%A1%E7%9A%84">2. 关键性质证明：为什么红黑树是平衡的？</h4>
-                <p>红黑树的平衡性是由其性质，特别是性质4和5，间接保证的。我们可以通过一个引理来证明一棵包含 N 个内部节点的红黑树，其高度 h 不会超过 <code>2 * log(N+1)</code>。</p>
-                <p><strong>【定义】黑高 (black-height)</strong>
+<p>可以验证一下，这棵树完全符合上述五条性质。比如，根节点7是黑色的；路径 7 -&gt; 2 -&gt; 1 -&gt; NIL 上有3个黑节点（7, 1, NIL），而路径 7 -&gt; 11 -&gt; 14 -&gt; 15 -&gt; NIL 上也有3个黑节点（7, 14, NIL）。</p>
+<h4 id="2-%E5%85%B3%E9%94%AE%E6%80%A7%E8%B4%A8%E8%AF%81%E6%98%8E%E4%B8%BA%E4%BB%80%E4%B9%88%E7%BA%A2%E9%BB%91%E6%A0%91%E6%98%AF%E5%B9%B3%E8%A1%A1%E7%9A%84">2. 关键性质证明：为什么红黑树是平衡的？</h4>
+<p>红黑树的平衡性是由其性质，特别是性质4和5，间接保证的。我们可以通过一个引理来证明一棵包含 N 个内部节点的红黑树，其高度 h 不会超过 <code>2 * log(N+1)</code>。</p>
+<p><strong>【定义】黑高 (black-height)</strong>
                 一个节点 <code>x</code> 的黑高，记为 <code>bh(x)</code>，是指从 <code>x</code> 出发（不含 <code>x</code>）到其任意后代叶子节点路径上的黑色节点数目。整棵树的黑高 <code>bh(Tree)</code> 就是根节点的黑高。</p>
-                <p><strong>【引理】</strong> 一棵以 <code>x</code> 为根的子树，其内部节点的数量 <code>sizeof(x)</code> 至少为 <code>2^(bh(x)) - 1</code>。</p>
-                <p><strong>证明（使用数学归纳法）：</strong></p>
-                <ul>
-                <li>
-                <p><strong>基础情况</strong>: 当 <code>x</code> 的高度 <code>h(x) = 0</code> 时，<code>x</code> 是一个 NIL 节点。此时，其内部节点数为 <code>sizeof(x) = 0</code>。<code>x</code> 的黑高 <code>bh(x) = 0</code>（因为从NIL出发到自身的路径上没有黑节点）。
+<p><strong>【引理】</strong> 一棵以 <code>x</code> 为根的子树，其内部节点的数量 <code>sizeof(x)</code> 至少为 <code>2^(bh(x)) - 1</code>。</p>
+<p><strong>证明（使用数学归纳法）：</strong></p>
+<ul>
+<li>
+<p><strong>基础情况</strong>: 当 <code>x</code> 的高度 <code>h(x) = 0</code> 时，<code>x</code> 是一个 NIL 节点。此时，其内部节点数为 <code>sizeof(x) = 0</code>。<code>x</code> 的黑高 <code>bh(x) = 0</code>（因为从NIL出发到自身的路径上没有黑节点）。
                 <code>2^(bh(x)) - 1 = 2^0 - 1 = 1 - 1 = 0</code>。
                 <code>sizeof(x) &gt;= 0</code> 成立。引理在基础情况下成立。</p>
-                </li>
-                <li>
-                <p><strong>归纳假设</strong>: 假设对于所有高度小于 <code>h(x)</code> 的节点 <code>y</code>，引理 <code>sizeof(y) &gt;= 2^(bh(y)) - 1</code> 均成立。</p>
-                </li>
-                <li>
-                <p><strong>归纳步骤</strong>: 现在我们考虑高度为 <code>h(x)</code> 的节点 <code>x</code>。<code>x</code> 是一个内部节点，它至少有两个孩子节点 <code>child</code>。</p>
+</li>
+<li>
+<p><strong>归纳假设</strong>: 假设对于所有高度小于 <code>h(x)</code> 的节点 <code>y</code>，引理 <code>sizeof(y) &gt;= 2^(bh(y)) - 1</code> 均成立。</p>
+</li>
+<li>
+<p><strong>归纳步骤</strong>: 现在我们考虑高度为 <code>h(x)</code> 的节点 <code>x</code>。<code>x</code> 是一个内部节点，它至少有两个孩子节点 <code>child</code>。</p>
+<ul>
+<li><code>x</code> 的孩子的黑高 <code>bh(child)</code> 是多少？
                 <ul>
-                <li><code>x</code> 的孩子的黑高 <code>bh(child)</code> 是多少？
-                <ul>
-                <li>如果孩子是黑色的，<code>bh(child) = bh(x) - 1</code>。</li>
-                <li>如果孩子是红色的，<code>bh(child) = bh(x)</code> (因为红色节点不计入黑高)。</li>
-                </ul>
-                </li>
-                <li>因此，对于 <code>x</code> 的任何一个孩子 <code>child</code>，其黑高 <code>bh(child)</code> 至少是 <code>bh(x) - 1</code>。</li>
-                <li>根据我们的归纳假设，<code>x</code> 的每个孩子 <code>child</code> 所构成的子树，其内部节点数 <code>sizeof(child) &gt;= 2^(bh(child)) - 1</code>。</li>
-                <li>结合上面两点，我们得到 <code>sizeof(child) &gt;= 2^(bh(x)-1) - 1</code>。</li>
-                <li>那么，以 <code>x</code> 为根的子树的总内部节点数是 <code>sizeof(x) = 1 (x自身) + sizeof(left_child) + sizeof(right_child)</code>。</li>
-                <li>所以，<code>sizeof(x) &gt;= 1 + (2^(bh(x)-1) - 1) + (2^(bh(x)-1) - 1) = 2 * 2^(bh(x)-1) - 1 = 2^(bh(x)) - 1</code>。</li>
-                <li>归纳步骤完成，引理得证。✔</li>
-                </ul>
-                </li>
-                </ul>
-                <p>有了这个引理，我们就可以完成最终的证明了。</p>
-                <p><strong>【定理】</strong> 一棵有 <code>N</code> 个内部节点的红黑树，其高度 <code>h</code> 满足 <code>h &lt;= 2 * log(N+1)</code>。</p>
-                <p><strong>证明：</strong></p>
-                <ol>
-                <li>
-                <p>首先，我们来建立树高 <code>h</code> 和黑高 <code>bh(root)</code> 之间的关系。</p>
-                <ul>
-                <li>在一棵红黑树中，从根到最远的叶子节点的路径（即树高 <code>h</code> 所在的路径），根据性质4（红色节点的孩子必须是黑色），红色节点不能连续出现。</li>
-                <li>这意味着在这条路径上，黑色节点的数量至少是路径总长度的一半（或者更准确地说，至少是 <code>h/2</code>）。</li>
-                <li>路径上的黑色节点数就是根节点的黑高 <code>bh(root)</code>（如果算上根节点本身）。更严谨地说，从根到叶子的简单路径上，黑节点的数量至少是 <code>(h+1)/2</code>，如果将叶子NIL也算作一层的话。通常我们说的黑高不包含起始节点，所以 <code>bh(root)</code> 是路径上除了根之外的黑节点数。</li>
-                <li>考虑从根到叶子的任意路径，路径长度为 <code>k</code>。节点数为 <code>k+1</code>。其中黑节点数至少为 <code>ceil((k+1)/2)</code>。</li>
-                <li>我们可以得到一个更简单的关系：路径上的节点数（不含NIL）最多是 <code>2 * (黑色节点数)</code>。因为每两个黑节点之间最多夹一个红节点。</li>
-                <li>所以，树的高度 <code>h</code> &lt;= <code>2 * bh(root)</code>。✔ (这里的 <code>h</code> 是边的数量，<code>bh(root)</code> 是根到叶子路径上的黑节点数，不含根)。</li>
-                <li>更准确地，<code>bh(root) &gt;= h / 2</code>。</li>
-                </ul>
-                </li>
-                <li>
-                <p>现在，我们将这个关系与之前的引理结合起来。</p>
-                <ul>
-                <li>设 <code>N</code> 是树中内部节点的总数。根据引理，<code>N = sizeof(root) &gt;= 2^(bh(root)) - 1</code>。</li>
-                <li>移项得 <code>N + 1 &gt;= 2^(bh(root))</code>。</li>
-                <li>两边取对数（以2为底），<code>log(N+1) &gt;= bh(root)</code>。</li>
-                <li>结合第1步的结论 <code>bh(root) &gt;= h / 2</code>，我们得到 <code>log(N+1) &gt;= bh(root) &gt;= h / 2</code>。</li>
-                <li>最终得出 <code>h &lt;= 2 * log(N+1)</code>。</li>
-                </ul>
-                </li>
-                </ol>
-                <p><strong>结论</strong>: 红黑树的高度是对数级别的，因此其查找、插入、删除操作的时间复杂度都是 <strong>O(log N)</strong>。</p>
-                <h4 id="3-%E6%8F%92%E5%85%A5%E6%93%8D%E4%BD%9C-insert">3. 插入操作 (Insert)</h4>
-                <p>红黑树的插入过程分为两步：</p>
-                <ol>
-                <li><strong>标准BST插入</strong>: 像普通二叉搜索树一样，找到合适的位置插入新节点。</li>
-                <li><strong>着色与修复</strong>: 将新插入的节点着色为<strong>红色</strong>，然后通过一系列的<strong>旋转</strong>和<strong>重新着色</strong>来修复可能被破坏的红黑性质。</li>
-                </ol>
-                <p><strong>为什么新节点是红色的？</strong></p>
-                <ul>
-                <li>如果我们插入黑色节点，几乎肯定会违反性质5（黑高性质），因为新节点所在路径的黑高会比其他路径多1。修复黑高性质非常复杂。</li>
-                <li>如果我们插入红色节点，性质5一定不会被违反。性质3（叶子是黑色）也不会。唯一可能被违反的是性质2（如果新节点是根节点）或性质4（如果新节点的父节点也是红色）。这两种情况相对容易修复。</li>
-                </ul>
-                <p><strong>插入修复的 Cases (以插入节点 <code>z</code>，其父为 <code>p</code>，祖父为 <code>g</code>，叔叔为 <code>u</code> 为例):</strong></p>
-                <ul>
-                <li>
-                <p><strong>Case 1: 叔叔 <code>u</code> 是红色</strong></p>
-                <ul>
-                <li><strong>情况</strong>: 父节点 <code>p</code> 和叔叔 <code>u</code> 都是红色。</li>
-                <li><strong>操作</strong>: 将父节点 <code>p</code> 和叔叔 <code>u</code> 都变为黑色，将祖父 <code>g</code> 变为红色。然后，将当前节点 <code>z</code> 指向祖父 <code>g</code>，继续向上迭代检查，因为 <code>g</code> 变成红色可能会与它的父节点冲突。这相当于把“问题”（连续的红色）向上推了一层。</li>
-                <li><strong>图示</strong>:</li>
-                </ul>
-                <div class="mermaid">
+<li>如果孩子是黑色的，<code>bh(child) = bh(x) - 1</code>。</li>
+<li>如果孩子是红色的，<code>bh(child) = bh(x)</code> (因为红色节点不计入黑高)。</li>
+</ul>
+</li>
+<li>因此，对于 <code>x</code> 的任何一个孩子 <code>child</code>，其黑高 <code>bh(child)</code> 至少是 <code>bh(x) - 1</code>。</li>
+<li>根据我们的归纳假设，<code>x</code> 的每个孩子 <code>child</code> 所构成的子树，其内部节点数 <code>sizeof(child) &gt;= 2^(bh(child)) - 1</code>。</li>
+<li>结合上面两点，我们得到 <code>sizeof(child) &gt;= 2^(bh(x)-1) - 1</code>。</li>
+<li>那么，以 <code>x</code> 为根的子树的总内部节点数是 <code>sizeof(x) = 1 (x自身) + sizeof(left_child) + sizeof(right_child)</code>。</li>
+<li>所以，<code>sizeof(x) &gt;= 1 + (2^(bh(x)-1) - 1) + (2^(bh(x)-1) - 1) = 2 * 2^(bh(x)-1) - 1 = 2^(bh(x)) - 1</code>。</li>
+<li>归纳步骤完成，引理得证。✔</li>
+</ul>
+</li>
+</ul>
+<p>有了这个引理，我们就可以完成最终的证明了。</p>
+<p><strong>【定理】</strong> 一棵有 <code>N</code> 个内部节点的红黑树，其高度 <code>h</code> 满足 <code>h &lt;= 2 * log(N+1)</code>。</p>
+<p><strong>证明：</strong></p>
+<ol>
+<li>
+<p>首先，我们来建立树高 <code>h</code> 和黑高 <code>bh(root)</code> 之间的关系。</p>
+<ul>
+<li>在一棵红黑树中，从根到最远的叶子节点的路径（即树高 <code>h</code> 所在的路径），根据性质4（红色节点的孩子必须是黑色），红色节点不能连续出现。</li>
+<li>这意味着在这条路径上，黑色节点的数量至少是路径总长度的一半（或者更准确地说，至少是 <code>h/2</code>）。</li>
+<li>路径上的黑色节点数就是根节点的黑高 <code>bh(root)</code>（如果算上根节点本身）。更严谨地说，从根到叶子的简单路径上，黑节点的数量至少是 <code>(h+1)/2</code>，如果将叶子NIL也算作一层的话。通常我们说的黑高不包含起始节点，所以 <code>bh(root)</code> 是路径上除了根之外的黑节点数。</li>
+<li>考虑从根到叶子的任意路径，路径长度为 <code>k</code>。节点数为 <code>k+1</code>。其中黑节点数至少为 <code>ceil((k+1)/2)</code>。</li>
+<li>我们可以得到一个更简单的关系：路径上的节点数（不含NIL）最多是 <code>2 * (黑色节点数)</code>。因为每两个黑节点之间最多夹一个红节点。</li>
+<li>所以，树的高度 <code>h</code> &lt;= <code>2 * bh(root)</code>。✔ (这里的 <code>h</code> 是边的数量，<code>bh(root)</code> 是根到叶子路径上的黑节点数，不含根)。</li>
+<li>更准确地，<code>bh(root) &gt;= h / 2</code>。</li>
+</ul>
+</li>
+<li>
+<p>现在，我们将这个关系与之前的引理结合起来。</p>
+<ul>
+<li>设 <code>N</code> 是树中内部节点的总数。根据引理，<code>N = sizeof(root) &gt;= 2^(bh(root)) - 1</code>。</li>
+<li>移项得 <code>N + 1 &gt;= 2^(bh(root))</code>。</li>
+<li>两边取对数（以2为底），<code>log(N+1) &gt;= bh(root)</code>。</li>
+<li>结合第1步的结论 <code>bh(root) &gt;= h / 2</code>，我们得到 <code>log(N+1) &gt;= bh(root) &gt;= h / 2</code>。</li>
+<li>最终得出 <code>h &lt;= 2 * log(N+1)</code>。</li>
+</ul>
+</li>
+</ol>
+<p><strong>结论</strong>: 红黑树的高度是对数级别的，因此其查找、插入、删除操作的时间复杂度都是 <strong>O(log N)</strong>。</p>
+<h4 id="3-%E6%8F%92%E5%85%A5%E6%93%8D%E4%BD%9C-insert">3. 插入操作 (Insert)</h4>
+<p>红黑树的插入过程分为两步：</p>
+<ol>
+<li><strong>标准BST插入</strong>: 像普通二叉搜索树一样，找到合适的位置插入新节点。</li>
+<li><strong>着色与修复</strong>: 将新插入的节点着色为<strong>红色</strong>，然后通过一系列的<strong>旋转</strong>和<strong>重新着色</strong>来修复可能被破坏的红黑性质。</li>
+</ol>
+<p><strong>为什么新节点是红色的？</strong></p>
+<ul>
+<li>如果我们插入黑色节点，几乎肯定会违反性质5（黑高性质），因为新节点所在路径的黑高会比其他路径多1。修复黑高性质非常复杂。</li>
+<li>如果我们插入红色节点，性质5一定不会被违反。性质3（叶子是黑色）也不会。唯一可能被违反的是性质2（如果新节点是根节点）或性质4（如果新节点的父节点也是红色）。这两种情况相对容易修复。</li>
+</ul>
+<p><strong>插入修复的 Cases (以插入节点 <code>z</code>，其父为 <code>p</code>，祖父为 <code>g</code>，叔叔为 <code>u</code> 为例):</strong></p>
+<ul>
+<li>
+<p><strong>Case 1: 叔叔 <code>u</code> 是红色</strong></p>
+<ul>
+<li><strong>情况</strong>: 父节点 <code>p</code> 和叔叔 <code>u</code> 都是红色。</li>
+<li><strong>操作</strong>: 将父节点 <code>p</code> 和叔叔 <code>u</code> 都变为黑色，将祖父 <code>g</code> 变为红色。然后，将当前节点 <code>z</code> 指向祖父 <code>g</code>，继续向上迭代检查，因为 <code>g</code> 变成红色可能会与它的父节点冲突。这相当于把“问题”（连续的红色）向上推了一层。</li>
+<li><strong>图示</strong>:</li>
+</ul>
+<div class="mermaid">
                 graph TD
                     subgraph Before
-                        G((g: black)) --> P((p: red));
-                        G --> U((u: red));
-                        P --> Z((z: red));
+                        G((g: black)) --&gt; P((p: red));
+                        G --&gt; U((u: red));
+                        P --&gt; Z((z: red));
                     end
                     subgraph Arrow
                         direction LR
-                        A[" "] -- "Recolor & Recurse" --> B[" "]
+                        A[" "] -- "Recolor &amp; Recurse" --&gt; B[" "]
                     end
                     subgraph After
-                        G2((g: red)) --> P2((p: black));
-                        G2 --> U2((u: black));
-                        P2 --> Z2((z: red));
+                        G2((g: red)) --&gt; P2((p: black));
+                        G2 --&gt; U2((u: black));
+                        P2 --&gt; Z2((z: red));
                     end
                 </div>
-                </li>
-                <li>
-                <p><strong>Case 2: 叔叔 <code>u</code> 是黑色，且 <code>z</code> 是 <code>p</code> 的内侧孩子 (形成 &quot;三角&quot; 结构)</strong></p>
-                <ul>
-                <li><strong>情况</strong>: 例如，<code>g</code> 的左孩子是 <code>p</code>，而 <code>z</code> 是 <code>p</code> 的右孩子。</li>
-                <li><strong>操作</strong>: 对父节点 <code>p</code> 进行一次<strong>左旋</strong>。这样就将 Case 2 转化为了 Case 3 的情况。</li>
-                <li><strong>图示</strong>:</li>
-                </ul>
-                <div class="mermaid">
+</li>
+<li>
+<p><strong>Case 2: 叔叔 <code>u</code> 是黑色，且 <code>z</code> 是 <code>p</code> 的内侧孩子 (形成 "三角" 结构)</strong></p>
+<ul>
+<li><strong>情况</strong>: 例如，<code>g</code> 的左孩子是 <code>p</code>，而 <code>z</code> 是 <code>p</code> 的右孩子。</li>
+<li><strong>操作</strong>: 对父节点 <code>p</code> 进行一次<strong>左旋</strong>。这样就将 Case 2 转化为了 Case 3 的情况。</li>
+<li><strong>图示</strong>:</li>
+</ul>
+<div class="mermaid">
                 graph TD
                 subgraph Before
-                    G((g: black)) --> P((p: red));
-                    P --> Z((z: red));
-                    G --> U(u: black);
+                    G((g: black)) --&gt; P((p: red));
+                    P --&gt; Z((z: red));
+                    G --&gt; U(u: black);
                 end
                 subgraph Arrow
                     direction LR
-                    A[" "] -- "Rotate p" --> B[" "]
+                    A[" "] -- "Rotate p" --&gt; B[" "]
                 end
                 subgraph "After (Now Case 3)"
-                    G2((g: black)) --> Z2((z: red));
-                    Z2 --> P2((p: red));
-                    G2 --> U2(u: black);
+                    G2((g: black)) --&gt; Z2((z: red));
+                    Z2 --&gt; P2((p: red));
+                    G2 --&gt; U2(u: black);
                 end
                 </div>
-                </li>
-                <li>
-                <p><strong>Case 3: 叔叔 <code>u</code> 是黑色，且 <code>z</code> 是 <code>p</code> 的外侧孩子 (形成 &quot;直线&quot; 结构)</strong></p>
-                <ul>
-                <li><strong>情况</strong>: 例如，<code>g</code> 的左孩子是 <code>p</code>，<code>z</code> 也是 <code>p</code> 的左孩子。</li>
-                <li><strong>操作</strong>: 将父节点 <code>p</code> 变为黑色，祖父 <code>g</code> 变为红色。然后对祖父 <code>g</code> 进行一次<strong>右旋</strong>。这样修复完成后，红黑性质得到满足，循环结束。</li>
-                <li><strong>图示</strong>:</li>
-                </ul>
-                <div class="mermaid">
+</li>
+<li>
+<p><strong>Case 3: 叔叔 <code>u</code> 是黑色，且 <code>z</code> 是 <code>p</code> 的外侧孩子 (形成 "直线" 结构)</strong></p>
+<ul>
+<li><strong>情况</strong>: 例如，<code>g</code> 的左孩子是 <code>p</code>，<code>z</code> 也是 <code>p</code> 的左孩子。</li>
+<li><strong>操作</strong>: 将父节点 <code>p</code> 变为黑色，祖父 <code>g</code> 变为红色。然后对祖父 <code>g</code> 进行一次<strong>右旋</strong>。这样修复完成后，红黑性质得到满足，循环结束。</li>
+<li><strong>图示</strong>:</li>
+</ul>
+<div class="mermaid">
                 graph TD
                 subgraph Before
-                    G((g: black)) --> P((p: red));
-                    P --> Z((z: red));
-                    G --> U(u: black);
+                    G((g: black)) --&gt; P((p: red));
+                    P --&gt; Z((z: red));
+                    G --&gt; U(u: black);
                 end
                 subgraph Arrow
                     direction LR
-                    A[" "] -- "Recolor & Rotate g" --> B[" "]
+                    A[" "] -- "Recolor &amp; Rotate g" --&gt; B[" "]
                 end
                 subgraph "After (Fixed)"
-                    P2((p: black)) --> Z2((z: red));
-                    P2 --> G2((g: red));
-                    G2 --> U2(u: black);
+                    P2((p: black)) --&gt; Z2((z: red));
+                    P2 --&gt; G2((g: red));
+                    G2 --&gt; U2(u: black);
                 end
                 </div>
-                </li>
-                </ul>
-                <p>当然，以上三种情况都有其对应的<strong>对称情况</strong>（例如 <code>p</code> 是 <code>g</code> 的右孩子）。整个修复过程是迭代或递归的，从插入点开始，一路向上，直到根节点，时间复杂度为 O(log N)。</p>
-                <h4 id="4-%E5%88%A0%E9%99%A4%E6%93%8D%E4%BD%9C-delete">4. 删除操作 (Delete)</h4>
-                <p>删除操作是红黑树中最复杂的部分。</p>
-                <ol>
-                <li>
-                <p><strong>标准BST删除</strong>: 首先，按照二叉搜索树的删除规则找到要删除的节点。</p>
-                <ul>
-                <li><strong>叶子节点</strong>: 直接删除。</li>
-                <li><strong>只有一个孩子的节点</strong>: 用其孩子替换它。</li>
-                <li><strong>有两个孩子的节点</strong>: 找到它的后继节点（右子树中最小的节点），用后继节点的值替换当前节点的值，然后问题转化为删除那个后继节点（后继节点最多只有一个右孩子）。</li>
-                </ul>
-                <p>最终，问题都归结为<strong>删除一个最多只有一个孩子的节点</strong>。</p>
-                </li>
-                <li>
-                <p><strong>修复</strong>:</p>
-                <ul>
-                <li>如果被删除（或被移动来替换）的节点是<strong>红色</strong>的，那么树的红黑性质不会被破坏，操作结束。</li>
-                <li>如果被删除的节点是<strong>黑色</strong>的，这就麻烦了。它会导致它所在路径的黑高减 1，违反了性质5。我们称这个问题为“<strong>双重黑色</strong>”问题。我们需要通过一系列操作来修复它。</li>
-                </ul>
-                </li>
-                </ol>
-                <p><strong>删除修复的 Cases (以被删除黑节点的替代节点 <code>x</code> 和其兄弟 <code>w</code> 为例):</strong>
+</li>
+</ul>
+<p>当然，以上三种情况都有其对应的<strong>对称情况</strong>（例如 <code>p</code> 是 <code>g</code> 的右孩子）。整个修复过程是迭代或递归的，从插入点开始，一路向上，直到根节点，时间复杂度为 O(log N)。</p>
+<h4 id="4-%E5%88%A0%E9%99%A4%E6%93%8D%E4%BD%9C-delete">4. 删除操作 (Delete)</h4>
+<p>删除操作是红黑树中最复杂的部分。</p>
+<ol>
+<li>
+<p><strong>标准BST删除</strong>: 首先，按照二叉搜索树的删除规则找到要删除的节点。</p>
+<ul>
+<li><strong>叶子节点</strong>: 直接删除。</li>
+<li><strong>只有一个孩子的节点</strong>: 用其孩子替换它。</li>
+<li><strong>有两个孩子的节点</strong>: 找到它的后继节点（右子树中最小的节点），用后继节点的值替换当前节点的值，然后问题转化为删除那个后继节点（后继节点最多只有一个右孩子）。</li>
+</ul>
+<p>最终，问题都归结为<strong>删除一个最多只有一个孩子的节点</strong>。</p>
+</li>
+<li>
+<p><strong>修复</strong>:</p>
+<ul>
+<li>如果被删除（或被移动来替换）的节点是<strong>红色</strong>的，那么树的红黑性质不会被破坏，操作结束。</li>
+<li>如果被删除的节点是<strong>黑色</strong>的，这就麻烦了。它会导致它所在路径的黑高减 1，违反了性质5。我们称这个问题为“<strong>双重黑色</strong>”问题。我们需要通过一系列操作来修复它。</li>
+</ul>
+</li>
+</ol>
+<p><strong>删除修复的 Cases (以被删除黑节点的替代节点 <code>x</code> 和其兄弟 <code>w</code> 为例):</strong>
                 这个过程的目标是给 <code>x</code> 所在的路径增加一个黑色，或者把“双重黑色”的属性向上推。</p>
-                <ul>
-                <li>
-                <p><strong>Case 1: 兄弟 <code>w</code> 是红色</strong></p>
-                <ul>
-                <li><strong>操作</strong>: 将 <code>w</code> 变为黑色，父节点 <code>p</code> 变为红色。对 <code>p</code> 进行一次旋转（<code>x</code> 是左孩子则左旋，反之右旋）。这样，<code>x</code> 的新兄弟就变成了一个黑色的节点，问题转化为 Case 2, 3 或 4。</li>
-                <li><strong>图示 (x为左孩子)</strong>:</li>
-                </ul>
-                <div class="mermaid">
+<ul>
+<li>
+<p><strong>Case 1: 兄弟 <code>w</code> 是红色</strong></p>
+<ul>
+<li><strong>操作</strong>: 将 <code>w</code> 变为黑色，父节点 <code>p</code> 变为红色。对 <code>p</code> 进行一次旋转（<code>x</code> 是左孩子则左旋，反之右旋）。这样，<code>x</code> 的新兄弟就变成了一个黑色的节点，问题转化为 Case 2, 3 或 4。</li>
+<li><strong>图示 (x为左孩子)</strong>:</li>
+</ul>
+<div class="mermaid">
                 graph TD
                 subgraph Before
-                    P((p: black)) --> X((x: double black));
-                    P --> W((w: red));
-                    W --> WL(wl: black);
-                    W --> WR(wr: black);
+                    P((p: black)) --&gt; X((x: double black));
+                    P --&gt; W((w: red));
+                    W --&gt; WL(wl: black);
+                    W --&gt; WR(wr: black);
                 end
                 subgraph Arrow
                     direction LR
-                    A[" "] -- "Recolor & Rotate p" --> B[" "]
+                    A[" "] -- "Recolor &amp; Rotate p" --&gt; B[" "]
                 end
                 subgraph "After (Now new sibling is black)"
-                    W2((w: black)) --> P2((p: red));
-                    P2 --> X2((x: double black));
-                    P2 --> WL2(wl: black);
-                    W2 --> WR2(wr: black);
+                    W2((w: black)) --&gt; P2((p: red));
+                    P2 --&gt; X2((x: double black));
+                    P2 --&gt; WL2(wl: black);
+                    W2 --&gt; WR2(wr: black);
                 end
                 </div>
-                </li>
-                <li>
-                <p><strong>Case 2: 兄弟 <code>w</code> 是黑色，且 <code>w</code> 的两个孩子都是黑色</strong></p>
-                <ul>
-                <li><strong>操作</strong>: 将 <code>w</code> 变为红色。这样 <code>x</code> 和 <code>w</code> 所在子树的黑高都恢复了。但是，父节点 <code>p</code> 所在的路径现在少了一个黑色，所以我们将“双重黑色”问题向上移动到 <code>p</code>。继续对 <code>p</code> 进行修复。</li>
-                <li><strong>图示 (x为左孩子)</strong>:</li>
-                </ul>
-                <div class="mermaid">
+</li>
+<li>
+<p><strong>Case 2: 兄弟 <code>w</code> 是黑色，且 <code>w</code> 的两个孩子都是黑色</strong></p>
+<ul>
+<li><strong>操作</strong>: 将 <code>w</code> 变为红色。这样 <code>x</code> 和 <code>w</code> 所在子树的黑高都恢复了。但是，父节点 <code>p</code> 所在的路径现在少了一个黑色，所以我们将“双重黑色”问题向上移动到 <code>p</code>。继续对 <code>p</code> 进行修复。</li>
+<li><strong>图示 (x为左孩子)</strong>:</li>
+</ul>
+<div class="mermaid">
                 graph TD
                 subgraph Before
-                    P((p: ?)) --> X((x: double black));
-                    P --> W((w: black));
-                    W --> WL(wl: black);
-                    W --> WR(wr: black);
+                    P((p: ?)) --&gt; X((x: double black));
+                    P --&gt; W((w: black));
+                    W --&gt; WL(wl: black);
+                    W --&gt; WR(wr: black);
                 end
                 subgraph Arrow
                     direction LR
-                    A[" "] -- "Recolor w, move problem up" --> B[" "]
+                    A[" "] -- "Recolor w, move problem up" --&gt; B[" "]
                 end
                 subgraph "After (Problem moved to p)"
-                    P2((p: double black)) --> X2((x: black));
-                    P2 --> W2((w: red));
-                    W2 --> WL2(wl: black);
-                    W2 --> WR2(wr: black);
+                    P2((p: double black)) --&gt; X2((x: black));
+                    P2 --&gt; W2((w: red));
+                    W2 --&gt; WL2(wl: black);
+                    W2 --&gt; WR2(wr: black);
                 end
                 </div>
-                </li>
-                <li>
-                <p><strong>Case 3: 兄弟 <code>w</code> 是黑色，<code>w</code> 的内侧孩子是红色，外侧孩子是黑色</strong></p>
-                <ul>
-                <li><strong>操作</strong>: 交换 <code>w</code> 和其内侧孩子的颜色，然后对 <code>w</code> 进行一次旋转。这将 Case 3 转化为 Case 4。</li>
-                <li><strong>图示 (x为左孩子)</strong>:</li>
-                </ul>
-                <div class="mermaid">
+</li>
+<li>
+<p><strong>Case 3: 兄弟 <code>w</code> 是黑色，<code>w</code> 的内侧孩子是红色，外侧孩子是黑色</strong></p>
+<ul>
+<li><strong>操作</strong>: 交换 <code>w</code> 和其内侧孩子的颜色，然后对 <code>w</code> 进行一次旋转。这将 Case 3 转化为 Case 4。</li>
+<li><strong>图示 (x为左孩子)</strong>:</li>
+</ul>
+<div class="mermaid">
                 graph TD
                 subgraph Before
-                    P((p: ?)) --> X(x: double black);
-                    P --> W((w: black));
-                    W --> WL((wl: red));
-                    W --> WR(wr: black);
+                    P((p: ?)) --&gt; X(x: double black);
+                    P --&gt; W((w: black));
+                    W --&gt; WL((wl: red));
+                    W --&gt; WR(wr: black);
                 end
                 subgraph Arrow
                     direction LR
-                    A[" "] -- "Recolor & Rotate w" --> B[" "]
+                    A[" "] -- "Recolor &amp; Rotate w" --&gt; B[" "]
                 end
                 subgraph "After (Now Case 4)"
-                    P2((p: ?)) --> X2(x: double black);
-                    P2 --> WL2((wl: black));
-                    WL2 --> W2((w: red));
-                    W2 --> WR2(wr: black);
+                    P2((p: ?)) --&gt; X2(x: double black);
+                    P2 --&gt; WL2((wl: black));
+                    WL2 --&gt; W2((w: red));
+                    W2 --&gt; WR2(wr: black);
                 end
                 </div>
-                </li>
-                <li>
-                <p><strong>Case 4: 兄弟 <code>w</code> 是黑色，且 <code>w</code> 的外侧孩子是红色</strong></p>
-                <ul>
-                <li><strong>操作</strong>: 将 <code>w</code> 的颜色设为父节点 <code>p</code> 的颜色，将 <code>p</code> 设为黑色，将 <code>w</code> 的外侧孩子设为黑色。然后对 <code>p</code> 进行一次旋转。这样，“双重黑色”问题就被彻底解决，循环结束。</li>
-                <li><strong>图示 (x为左孩子)</strong>:</li>
-                </ul>
-                <div class="mermaid">
+</li>
+<li>
+<p><strong>Case 4: 兄弟 <code>w</code> 是黑色，且 <code>w</code> 的外侧孩子是红色</strong></p>
+<ul>
+<li><strong>操作</strong>: 将 <code>w</code> 的颜色设为父节点 <code>p</code> 的颜色，将 <code>p</code> 设为黑色，将 <code>w</code> 的外侧孩子设为黑色。然后对 <code>p</code> 进行一次旋转。这样，“双重黑色”问题就被彻底解决，循环结束。</li>
+<li><strong>图示 (x为左孩子)</strong>:</li>
+</ul>
+<div class="mermaid">
                 graph TD
                 subgraph Before
-                    P((p: ?)) --> X(x: double black);
-                    P --> W((w: black));
-                    W --> WR((wr: red));
+                    P((p: ?)) --&gt; X(x: double black);
+                    P --&gt; W((w: black));
+                    W --&gt; WR((wr: red));
                 end
                 subgraph Arrow
                     direction LR
-                    A[" "] -- "Recolor & Rotate p" --> B[" "]
+                    A[" "] -- "Recolor &amp; Rotate p" --&gt; B[" "]
                 end
                 subgraph "After (Fixed)"
-                    W2((w: color of p)) --> P2((p: black));
-                    P2 --> X2(x: black);
-                    W2 --> WR2((wr: black));
+                    W2((w: color of p)) --&gt; P2((p: black));
+                    P2 --&gt; X2(x: black);
+                    W2 --&gt; WR2((wr: black));
                 end
                 </div>
-                </li>
-                </ul>
-                <p>删除操作虽然复杂，但同样地，它最多需要 O(log N) 的时间和常数次旋转（最多3次）就能完成。</p>
-                <h4 id="5-%E6%80%A7%E8%83%BD%E5%AF%B9%E6%AF%94%E7%BA%A2%E9%BB%91%E6%A0%91-vs-avl%E6%A0%91">5. 性能对比：红黑树 vs AVL树</h4>
-                <table>
-                <thead>
-                <tr>
-                <th style="text-align:left">操作</th>
-                <th style="text-align:left">AVL 树</th>
-                <th style="text-align:left">红黑树</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                <td style="text-align:left"><strong>插入旋转</strong></td>
-                <td style="text-align:left">≤ 1 (单/双旋)</td>
-                <td style="text-align:left">≤ 2</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>删除旋转</strong></td>
-                <td style="text-align:left">O(log N)</td>
-                <td style="text-align:left">≤ 3</td>
-                </tr>
-                </tbody>
-                </table>
-                <ul>
-                <li><strong>AVL树</strong> 是更严格的平衡树（左右子树高度差不超过1），因此它的查找性能理论上略优于红黑树。</li>
-                <li><strong>红黑树</strong> 的平衡条件更宽松，导致它在插入和删除时需要进行的<strong>旋转操作更少</strong>。在写操作频繁的场景下，红黑树的综合性能通常更好。这就是为什么C++的 <code>std::map</code>, <code>std::set</code> 和 Java 的 <code>TreeMap</code>, <code>TreeSet</code> 等底层都采用红黑树实现的原因。</li>
-                </ul>
-                <h4 id="6-%E7%BA%A2%E9%BB%91%E6%A0%91%E4%BC%AA%E4%BB%A3%E7%A0%81%E4%B8%8E-c-%E5%AE%9E%E7%8E%B0">6. 红黑树伪代码与 C++ 实现</h4>
-                <p><strong>伪代码 (插入修复)</strong></p>
-                <div class="code-container">
-                <pre><code>RB-INSERT-FIXUP(T, z)
+</li>
+</ul>
+<p>删除操作虽然复杂，但同样地，它最多需要 O(log N) 的时间和常数次旋转（最多3次）就能完成。</p>
+<h4 id="5-%E6%80%A7%E8%83%BD%E5%AF%B9%E6%AF%94%E7%BA%A2%E9%BB%91%E6%A0%91-vs-avl%E6%A0%91">5. 性能对比：红黑树 vs AVL树</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">操作</th>
+<th style="text-align:left">AVL 树</th>
+<th style="text-align:left">红黑树</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>插入旋转</strong></td>
+<td style="text-align:left">≤ 1 (单/双旋)</td>
+<td style="text-align:left">≤ 2</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>删除旋转</strong></td>
+<td style="text-align:left">O(log N)</td>
+<td style="text-align:left">≤ 3</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>AVL树</strong> 是更严格的平衡树（左右子树高度差不超过1），因此它的查找性能理论上略优于红黑树。</li>
+<li><strong>红黑树</strong> 的平衡条件更宽松，导致它在插入和删除时需要进行的<strong>旋转操作更少</strong>。在写操作频繁的场景下，红黑树的综合性能通常更好。这就是为什么C++的 <code>std::map</code>, <code>std::set</code> 和 Java 的 <code>TreeMap</code>, <code>TreeSet</code> 等底层都采用红黑树实现的原因。</li>
+</ul>
+<h4 id="6-%E7%BA%A2%E9%BB%91%E6%A0%91%E4%BC%AA%E4%BB%A3%E7%A0%81%E4%B8%8E-c-%E5%AE%9E%E7%8E%B0">6. 红黑树伪代码与 C++ 实现</h4>
+<p><strong>伪代码 (插入修复)</strong></p>
+<div class="code-container">
+<pre><code>RB-INSERT-FIXUP(T, z)
   while z.p.color == RED
     if z.p == z.p.p.left  // 父节点是左孩子
       y = z.p.p.right     // y 是叔叔节点
@@ -437,10 +438,10 @@
       ...
   T.root.color = BLACK
 </code></pre>
-                </div>
-                <p><strong>C++ 实现 (核心结构)</strong></p>
-                <div class="code-container">
-                <pre><code class="language-cpp">#include &lt;iostream&gt;
+</div>
+<p><strong>C++ 实现 (核心结构)</strong></p>
+<div class="code-container">
+<pre><code class="language-cpp">#include &lt;iostream&gt;
 
 enum Color { RED, BLACK };
 
@@ -520,94 +521,94 @@ public:
     // ... 其他成员函数，如删除、查找、析构函数等
 };
 </code></pre>
-                </div>
-                <hr>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86b%E6%A0%91%E4%B8%8Eb%E6%A0%91-b-trees-and-b-trees">第二部分：B树与B+树 (B-Trees and B+ Trees)</h3>
-                <p>现在，让我们把视线从内存转向外存。当数据量大到内存无法容纳时，我们就需要将数据存储在磁盘上。磁盘的读写速度比内存慢几个数量级，而且是按“块”（Block/Page）为单位进行的。</p>
-                <p>我们的目标变成了：<strong>设计一种数据结构，使得查找任何数据所需的磁盘I/O次数最少。</strong></p>
-                <p>二叉树，哪怕是平衡的红黑树，它的“扇出”（fan-out，即一个节点能有多少个孩子）太小了，只有2。这意味着树会很高。树高为 h，查找就需要 h 次磁盘I/O。我们需要一种<strong>矮胖</strong>的树结构。</p>
-                <h4 id="1-b%E6%A0%91-b-tree">1. B树 (B-Tree)</h4>
-                <p><strong>【定义】</strong> 一棵 $M$ 阶 (order $M$) 的B树是具有以下性质的多路搜索树：</p>
-                <ol>
-                <li><strong>节点结构</strong>: 每个内部节点最多包含 $M-1$ 个键和 $M$ 个子节点指针。</li>
-                <li><strong>键与子树</strong>: 节点内的键是有序的。<code>key_1 &lt; key_2 &lt; ... &lt; key_k</code>。位于 <code>key_i</code> 和 <code>key_{i+1}</code> 之间的子树指针，指向的子树中所有键的值都介于 <code>key_i</code> 和 <code>key_{i+1}</code> 之间。</li>
-                <li><strong>填充因子</strong>:
+</div>
+<hr/>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86b%E6%A0%91%E4%B8%8Eb%E6%A0%91-b-trees-and-b-trees">第二部分：B树与B+树 (B-Trees and B+ Trees)</h3>
+<p>现在，让我们把视线从内存转向外存。当数据量大到内存无法容纳时，我们就需要将数据存储在磁盘上。磁盘的读写速度比内存慢几个数量级，而且是按“块”（Block/Page）为单位进行的。</p>
+<p>我们的目标变成了：<strong>设计一种数据结构，使得查找任何数据所需的磁盘I/O次数最少。</strong></p>
+<p>二叉树，哪怕是平衡的红黑树，它的“扇出”（fan-out，即一个节点能有多少个孩子）太小了，只有2。这意味着树会很高。树高为 h，查找就需要 h 次磁盘I/O。我们需要一种<strong>矮胖</strong>的树结构。</p>
+<h4 id="1-b%E6%A0%91-b-tree">1. B树 (B-Tree)</h4>
+<p><strong>【定义】</strong> 一棵 $M$ 阶 (order $M$) 的B树是具有以下性质的多路搜索树：</p>
+<ol>
+<li><strong>节点结构</strong>: 每个内部节点最多包含 $M-1$ 个键和 $M$ 个子节点指针。</li>
+<li><strong>键与子树</strong>: 节点内的键是有序的。<code>key_1 &lt; key_2 &lt; ... &lt; key_k</code>。位于 <code>key_i</code> 和 <code>key_{i+1}</code> 之间的子树指针，指向的子树中所有键的值都介于 <code>key_i</code> 和 <code>key_{i+1}</code> 之间。</li>
+<li><strong>填充因子</strong>:
                 <ul>
-                <li>根节点至少有1个键（除非树为空）和2个子节点。</li>
-                <li>除根节点外的所有内部节点，至少有 $\lceil M/2\rceil - 1$ 个键和 $\lceil M/2\rceil$ 个子节点。这保证了树的利用率。</li>
-                </ul>
-                </li>
-                <li><strong>叶子节点</strong>: 所有叶子节点都在同一层。</li>
-                <li><strong>数据存储</strong>: <strong>键和对应的数据（或指向数据的指针）都存储在节点中，包括内部节点和叶子节点。</strong></li>
-                </ol>
-                <p><strong>B树示例 (M=5)</strong>
+<li>根节点至少有1个键（除非树为空）和2个子节点。</li>
+<li>除根节点外的所有内部节点，至少有 $\lceil M/2\rceil - 1$ 个键和 $\lceil M/2\rceil$ 个子节点。这保证了树的利用率。</li>
+</ul>
+</li>
+<li><strong>叶子节点</strong>: 所有叶子节点都在同一层。</li>
+<li><strong>数据存储</strong>: <strong>键和对应的数据（或指向数据的指针）都存储在节点中，包括内部节点和叶子节点。</strong></li>
+</ol>
+<p><strong>B树示例 (M=5)</strong>
                 一个内部节点可能的样子：<code>[ptr1, (key1, data1), ptr2, (key2, data2), ptr3]</code></p>
+<ul>
+<li><code>ptr1</code> 指向的子树所有键 &lt; <code>key1</code></li>
+<li><code>ptr2</code> 指向的子树所有键 &gt; <code>key1</code> 且 &lt; <code>key2</code></li>
+<li><code>ptr3</code> 指向的子树所有键 &gt; <code>key2</code></li>
+</ul>
+<p><strong>操作</strong>:</p>
+<ul>
+<li><strong>查找</strong>: 从根节点开始，在节点内部使用二分查找确定要去哪个子树，然后递归下去，直到找到键或到达叶子节点。</li>
+<li><strong>插入</strong>: 找到要插入的叶子节点。如果叶子节点未满，直接插入。如果叶子节点已满，则<strong>分裂</strong>该节点：将中间的键提升到父节点，节点分裂成两个。这个过程可能向上传播，最坏情况会一直分裂到根节点，使树增高一层。</li>
+<li><strong>删除</strong>: 找到要删除的键。如果键在叶子节点且删除后节点键数仍满足要求，直接删除。如果不满足，尝试从兄弟节点<strong>借一个</strong>键，或者与兄弟节点<strong>合并</strong>。这个过程也可能向上传播。</li>
+</ul>
+<p>B树的优势在于，$M$ 可以设置得很大（例如，等于一个磁盘块能容纳的 <code>(key, ptr)</code> 对的数量），使得树非常矮，大大减少了磁盘I/O次数。</p>
+<h4 id="2-b%E6%A0%91-b-tree">2. B+树 (B+ Tree)</h4>
+<p>B+树是B树的一个重要变种，它在数据库索引领域应用更广。</p>
+<p><strong>【定义】</strong> 一棵 $M$ 阶的B+树具有以下性质：</p>
+<ol>
+<li><strong>节点填充</strong>:
                 <ul>
-                <li><code>ptr1</code> 指向的子树所有键 &lt; <code>key1</code></li>
-                <li><code>ptr2</code> 指向的子树所有键 &gt; <code>key1</code> 且 &lt; <code>key2</code></li>
-                <li><code>ptr3</code> 指向的子树所有键 &gt; <code>key2</code></li>
-                </ul>
-                <p><strong>操作</strong>:</p>
+<li>根节点要么是叶子，要么有 $2$ 到 $M$ 个子节点。</li>
+<li>非叶子节点（除根外）有 $\lceil M/2\rceil$ 到 $M$ 个子节点。</li>
+</ul>
+</li>
+<li><strong>叶子节点</strong>: 所有叶子都在同一层。</li>
+<li><strong>结构差异 (与B树的核心区别)</strong>:
                 <ul>
-                <li><strong>查找</strong>: 从根节点开始，在节点内部使用二分查找确定要去哪个子树，然后递归下去，直到找到键或到达叶子节点。</li>
-                <li><strong>插入</strong>: 找到要插入的叶子节点。如果叶子节点未满，直接插入。如果叶子节点已满，则<strong>分裂</strong>该节点：将中间的键提升到父节点，节点分裂成两个。这个过程可能向上传播，最坏情况会一直分裂到根节点，使树增高一层。</li>
-                <li><strong>删除</strong>: 找到要删除的键。如果键在叶子节点且删除后节点键数仍满足要求，直接删除。如果不满足，尝试从兄弟节点<strong>借一个</strong>键，或者与兄弟节点<strong>合并</strong>。这个过程也可能向上传播。</li>
-                </ul>
-                <p>B树的优势在于，$M$ 可以设置得很大（例如，等于一个磁盘块能容纳的 <code>(key, ptr)</code> 对的数量），使得树非常矮，大大减少了磁盘I/O次数。</p>
-                <h4 id="2-b%E6%A0%91-b-tree">2. B+树 (B+ Tree)</h4>
-                <p>B+树是B树的一个重要变种，它在数据库索引领域应用更广。</p>
-                <p><strong>【定义】</strong> 一棵 $M$ 阶的B+树具有以下性质：</p>
-                <ol>
-                <li><strong>节点填充</strong>:
-                <ul>
-                <li>根节点要么是叶子，要么有 $2$ 到 $M$ 个子节点。</li>
-                <li>非叶子节点（除根外）有 $\lceil M/2\rceil$ 到 $M$ 个子节点。</li>
-                </ul>
-                </li>
-                <li><strong>叶子节点</strong>: 所有叶子都在同一层。</li>
-                <li><strong>结构差异 (与B树的核心区别)</strong>:
-                <ul>
-                <li><strong>所有数据都只存在于叶子节点中</strong>。内部节点只存储键，作为“路标”或索引，不存储数据。这使得内部节点可以容纳更多的键，进一步降低树的高度。</li>
-                <li><strong>所有叶子节点通过指针连接成一个有序链表</strong>。</li>
-                </ul>
-                </li>
-                </ol>
-                <p>我们来看一个 <strong>4阶B+树 (2-3-4树)</strong> 的例子：</p>
-                <div class="mermaid">
+<li><strong>所有数据都只存在于叶子节点中</strong>。内部节点只存储键，作为“路标”或索引，不存储数据。这使得内部节点可以容纳更多的键，进一步降低树的高度。</li>
+<li><strong>所有叶子节点通过指针连接成一个有序链表</strong>。</li>
+</ul>
+</li>
+</ol>
+<p>我们来看一个 <strong>4阶B+树 (2-3-4树)</strong> 的例子：</p>
+<div class="mermaid">
                 graph TD
                     subgraph "B+ Tree (Order 4)"
-                        Root("21 | 48 | 72") --> L1("12 | 15");
-                        Root --> L2("25 | 31 | 41");
-                        Root --> L3("59");
-                        Root --> L4("84 | 91");
+                        Root("21 | 48 | 72") --&gt; L1("12 | 15");
+                        Root --&gt; L2("25 | 31 | 41");
+                        Root --&gt; L3("59");
+                        Root --&gt; L4("84 | 91");
 
                         subgraph "Leaf Nodes (Linked List)"
                             direction LR
-                            D1["1,4,8,11"] --> D2["12,13"];
-                            D2 --> D3["15,18,19"];
-                            D3 --> D4["21,24"];
-                            D4 --> D5["25,26"];
-                            D5 --> D6["31,38"];
-                            D6 --> D7["41,43,46"];
-                            D7 --> D8["48,49,50"];
-                            D8 --> D9["59,68"];
-                            D9 --> D10["72,78"];
-                            D10 --> D11["84,88"];
-                            D11 --> D12["91,92,99"];
+                            D1["1,4,8,11"] --&gt; D2["12,13"];
+                            D2 --&gt; D3["15,18,19"];
+                            D3 --&gt; D4["21,24"];
+                            D4 --&gt; D5["25,26"];
+                            D5 --&gt; D6["31,38"];
+                            D6 --&gt; D7["41,43,46"];
+                            D7 --&gt; D8["48,49,50"];
+                            D8 --&gt; D9["59,68"];
+                            D9 --&gt; D10["72,78"];
+                            D10 --&gt; D11["84,88"];
+                            D11 --&gt; D12["91,92,99"];
                         end
 
-                        L1 --> D1;
-                        L1 --> D2;
-                        L1 --> D3;
-                        L2 --> D4;
-                        L2 --> D5;
-                        L2 --> D6;
-                        L3 --> D7;
-                        L3 --> D8;
-                        L3 --> D9;
-                        L4 --> D10;
-                        L4 --> D11;
-                        L4 --> D12;
+                        L1 --&gt; D1;
+                        L1 --&gt; D2;
+                        L1 --&gt; D3;
+                        L2 --&gt; D4;
+                        L2 --&gt; D5;
+                        L2 --&gt; D6;
+                        L3 --&gt; D7;
+                        L3 --&gt; D8;
+                        L3 --&gt; D9;
+                        L4 --&gt; D10;
+                        L4 --&gt; D11;
+                        L4 --&gt; D12;
 
                     end
                     style Root fill:#eee,stroke:#333,stroke-width:2px
@@ -616,35 +617,35 @@ public:
                     style L3 fill:#eee,stroke:#333,stroke-width:2px
                     style L4 fill:#eee,stroke:#333,stroke-width:2px
                 </div>
-                <p>注意观察，内部节点（如根 &quot;21|48|72&quot;）中的键（如21, 48）也会在叶子节点中作为起始键出现。这是B+树的典型特征，内部节点的键是其右子树中最小键的副本。</p>
-                <p><strong>B+树操作示例</strong> (以 order 3，即2-3树为例)</p>
-                <ul>
-                <li>
-                <p><strong>查找 52</strong>: 从根 <code>22:-</code> 开始，<code>52 &gt; 22</code>，走右边到 <code>41:58</code>。<code>41 &lt; 52 &lt; 58</code>，走中间指针，到叶子节点 <code>41,52</code>，找到！</p>
-                </li>
-                <li>
-                <p><strong>插入 18</strong>:</p>
-                <ol>
-                <li>找到叶子 <code>16,17,18</code>。发现这个节点已经有两个键，是满的。</li>
-                <li>插入 <code>18</code>，节点变为 <code>16,17,18</code>。</li>
-                <li>分裂此节点，中间值 <code>17</code> 不存在，分裂成 <code>16</code> 和 <code>17,18</code>。将 <code>17</code> 提升到父节点 <code>11:16</code>。</li>
-                <li>父节点变为 <code>11:16:17</code>，也满了。</li>
-                <li>分裂父节点，中间值 <code>16</code> 提升到根节点。</li>
-                <li>最终树结构发生较大变化。</li>
-                </ol>
-                </li>
-                <li>
-                <p><strong>插入 28</strong>:</p>
-                <ol>
-                <li>找到叶子 <code>22,23,31</code>。</li>
-                <li>插入 <code>28</code>，节点变为 <code>22,23,28,31</code> (假设阶为4)。</li>
-                <li>分裂，中间 <code>28</code> 提升到父节点。</li>
-                </ol>
-                </li>
-                </ul>
-                <p><strong>B+树操作算法概览 (Insert)</strong></p>
-                <div class="code-container">
-                <pre><code>Btree_Insert(X, T)
+<p>注意观察，内部节点（如根 "21|48|72"）中的键（如21, 48）也会在叶子节点中作为起始键出现。这是B+树的典型特征，内部节点的键是其右子树中最小键的副本。</p>
+<p><strong>B+树操作示例</strong> (以 order 3，即2-3树为例)</p>
+<ul>
+<li>
+<p><strong>查找 52</strong>: 从根 <code>22:-</code> 开始，<code>52 &gt; 22</code>，走右边到 <code>41:58</code>。<code>41 &lt; 52 &lt; 58</code>，走中间指针，到叶子节点 <code>41,52</code>，找到！</p>
+</li>
+<li>
+<p><strong>插入 18</strong>:</p>
+<ol>
+<li>找到叶子 <code>16,17,18</code>。发现这个节点已经有两个键，是满的。</li>
+<li>插入 <code>18</code>，节点变为 <code>16,17,18</code>。</li>
+<li>分裂此节点，中间值 <code>17</code> 不存在，分裂成 <code>16</code> 和 <code>17,18</code>。将 <code>17</code> 提升到父节点 <code>11:16</code>。</li>
+<li>父节点变为 <code>11:16:17</code>，也满了。</li>
+<li>分裂父节点，中间值 <code>16</code> 提升到根节点。</li>
+<li>最终树结构发生较大变化。</li>
+</ol>
+</li>
+<li>
+<p><strong>插入 28</strong>:</p>
+<ol>
+<li>找到叶子 <code>22,23,31</code>。</li>
+<li>插入 <code>28</code>，节点变为 <code>22,23,28,31</code> (假设阶为4)。</li>
+<li>分裂，中间 <code>28</code> 提升到父节点。</li>
+</ol>
+</li>
+</ul>
+<p><strong>B+树操作算法概览 (Insert)</strong></p>
+<div class="code-container">
+<pre><code>Btree_Insert(X, T)
 {
     // 1. 从根到叶子查找合适的插入位置
     Search from root to leaf and find the proper leaf node;
@@ -671,73 +672,73 @@ public:
     }
 }
 </code></pre>
-                </div>
-                <p><strong>复杂度分析</strong></p>
-                <ul>
-                <li><strong>查找</strong>: <code>T_Find(M, N) = O(log_M N)</code>。因为树高是 <code>O(log_M N)</code>，每个节点内部查找是 <code>O(log M)</code>，所以总时间是 <code>O(log M * log_M N) = O(log N)</code>。但关键在于 I/O 次数，就是树高，为 <code>O(log_M N)</code>。</li>
-                <li><strong>深度</strong>: <code>Depth(M, N) = O(log_ceil(M/2) N)</code>。</li>
-                <li><strong>插入/删除</strong>: <code>O(log_M N)</code> 次 I/O。</li>
-                </ul>
-                <p><strong>关于M的选择</strong>
-                课堂的幻灯片中提到 &quot;The best choice of M is 3 or 4&quot;。这个结论适用于<strong>内存中</strong>实现的B树/B+树（如 2-3 树、2-3-4 树），因为它们与红黑树等结构有等价关系，且实现相对简单。
+</div>
+<p><strong>复杂度分析</strong></p>
+<ul>
+<li><strong>查找</strong>: <code>T_Find(M, N) = O(log_M N)</code>。因为树高是 <code>O(log_M N)</code>，每个节点内部查找是 <code>O(log M)</code>，所以总时间是 <code>O(log M * log_M N) = O(log N)</code>。但关键在于 I/O 次数，就是树高，为 <code>O(log_M N)</code>。</li>
+<li><strong>深度</strong>: <code>Depth(M, N) = O(log_ceil(M/2) N)</code>。</li>
+<li><strong>插入/删除</strong>: <code>O(log_M N)</code> 次 I/O。</li>
+</ul>
+<p><strong>关于M的选择</strong>
+                课堂的幻灯片中提到 "The best choice of M is 3 or 4"。这个结论适用于<strong>内存中</strong>实现的B树/B+树（如 2-3 树、2-3-4 树），因为它们与红黑树等结构有等价关系，且实现相对简单。
                 但在<strong>磁盘数据库</strong>中，M 的选择原则是：<strong>让一个节点的大小恰好等于一个磁盘页的大小（例如 4KB）</strong>。这样一次I/O就能读取整个节点。此时 M 的值会很大，可能是几百甚至上千。</p>
-                <h4 id="3-b%E6%A0%91-vs-b%E6%A0%91%E7%BB%88%E6%9E%81%E5%AF%B9%E5%86%B3">3. B树 vs B+树：终极对决</h4>
-                <table>
-                <thead>
-                <tr>
-                <th style="text-align:left">特性</th>
-                <th style="text-align:left">B树</th>
-                <th style="text-align:left">B+树</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                <td style="text-align:left"><strong>数据存储</strong></td>
-                <td style="text-align:left">内部节点和叶子节点都存数据</td>
-                <td style="text-align:left">只有叶子节点存数据</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>内部节点</strong></td>
-                <td style="text-align:left">存储 (key, data)</td>
-                <td style="text-align:left">只存储 key 作为索引</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>查询效率</strong></td>
-                <td style="text-align:left">不稳定，最好的情况在根节点就找到</td>
-                <td style="text-align:left">稳定，任何查询都必须走到叶子节点</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>空间利用率</strong></td>
-                <td style="text-align:left">内部节点因存数据，能放的key较少</td>
-                <td style="text-align:left">内部节点不存数据，key更多，树更矮胖</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>叶子节点结构</strong></td>
-                <td style="text-align:left">无序，不相连</td>
-                <td style="text-align:left">有序，通过指针相连形成链表</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>范围查询</strong></td>
-                <td style="text-align:left">效率低，需要中序遍历，涉及大量回溯</td>
-                <td style="text-align:left"><strong>效率极高</strong>，找到范围起点后，沿链表遍历即可</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>应用场景</strong></td>
-                <td style="text-align:left">文件系统</td>
-                <td style="text-align:left"><strong>数据库索引 (如 MySQL InnoDB)</strong></td>
-                </tr>
-                </tbody>
-                </table>
-                <p><strong>为什么数据库索引偏爱B+树？</strong></p>
-                <ol>
-                <li><strong>更少的I/O</strong>: B+树的内部节点更小，一个磁盘块能装下更多索引键，使得树更矮，单点查询的I/O次数更少。</li>
-                <li><strong>稳定的查询性能</strong>: 所有查询都走到叶子层，查询性能可预测。</li>
-                <li><strong>极佳的范围查询支持</strong>: 这是B+树相对于B树的<strong>杀手级优势</strong>。SQL中的 <code>WHERE age &gt; 20</code> 或 <code>BETWEEN 10 AND 30</code> 这样的查询，在B+树上执行起来行云流水。</li>
-                </ol>
-                <h4 id="4-b%E6%A0%91-c-%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF">4. B+树 C++ 实现思路</h4>
-                <p>B+树的实现比红黑树更复杂，我们只看核心结构和思路。</p>
-                <div class="code-container">
-                <pre><code class="language-cpp">#include &lt;vector&gt;
+<h4 id="3-b%E6%A0%91-vs-b%E6%A0%91%E7%BB%88%E6%9E%81%E5%AF%B9%E5%86%B3">3. B树 vs B+树：终极对决</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">特性</th>
+<th style="text-align:left">B树</th>
+<th style="text-align:left">B+树</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>数据存储</strong></td>
+<td style="text-align:left">内部节点和叶子节点都存数据</td>
+<td style="text-align:left">只有叶子节点存数据</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>内部节点</strong></td>
+<td style="text-align:left">存储 (key, data)</td>
+<td style="text-align:left">只存储 key 作为索引</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>查询效率</strong></td>
+<td style="text-align:left">不稳定，最好的情况在根节点就找到</td>
+<td style="text-align:left">稳定，任何查询都必须走到叶子节点</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>空间利用率</strong></td>
+<td style="text-align:left">内部节点因存数据，能放的key较少</td>
+<td style="text-align:left">内部节点不存数据，key更多，树更矮胖</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>叶子节点结构</strong></td>
+<td style="text-align:left">无序，不相连</td>
+<td style="text-align:left">有序，通过指针相连形成链表</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>范围查询</strong></td>
+<td style="text-align:left">效率低，需要中序遍历，涉及大量回溯</td>
+<td style="text-align:left"><strong>效率极高</strong>，找到范围起点后，沿链表遍历即可</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>应用场景</strong></td>
+<td style="text-align:left">文件系统</td>
+<td style="text-align:left"><strong>数据库索引 (如 MySQL InnoDB)</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>为什么数据库索引偏爱B+树？</strong></p>
+<ol>
+<li><strong>更少的I/O</strong>: B+树的内部节点更小，一个磁盘块能装下更多索引键，使得树更矮，单点查询的I/O次数更少。</li>
+<li><strong>稳定的查询性能</strong>: 所有查询都走到叶子层，查询性能可预测。</li>
+<li><strong>极佳的范围查询支持</strong>: 这是B+树相对于B树的<strong>杀手级优势</strong>。SQL中的 <code>WHERE age &gt; 20</code> 或 <code>BETWEEN 10 AND 30</code> 这样的查询，在B+树上执行起来行云流水。</li>
+</ol>
+<h4 id="4-b%E6%A0%91-c-%E5%AE%9E%E7%8E%B0%E6%80%9D%E8%B7%AF">4. B+树 C++ 实现思路</h4>
+<p>B+树的实现比红黑树更复杂，我们只看核心结构和思路。</p>
+<div class="code-container">
+<pre><code class="language-cpp">#include &lt;vector&gt;
 
 const int ORDER = 4; // B+树的阶
 
@@ -790,34 +791,60 @@ public:
     }
 };
 </code></pre>
-                </div>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+</div>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

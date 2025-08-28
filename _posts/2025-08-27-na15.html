@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>数值分析15:ODE数值方法的稳定性理论与刚性问题</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>数值分析15:ODE数值方法的稳定性理论与刚性问题</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,167 +30,193 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E6%95%B0%E5%80%BC%E5%88%86%E6%9E%9015ode%E6%95%B0%E5%80%BC%E6%96%B9%E6%B3%95%E7%9A%84%E7%A8%B3%E5%AE%9A%E6%80%A7%E7%90%86%E8%AE%BA%E4%B8%8E%E5%88%9A%E6%80%A7%E9%97%AE%E9%A2%98">数值分析15:ODE数值方法的稳定性理论与刚性问题</h1>
-                <h3 id="%E5%BC%95%E8%A8%80%E4%BB%8E%E8%B5%B0%E5%BE%97%E5%87%86%E5%88%B0%E8%B5%B0%E5%BE%97%E7%A8%B3"><strong>引言：从“走得准”到“走得稳”</strong></h3>
-                <p>在过去的几讲中，我们学习了多种求解常微分方程初值问题（IVP）的数值方法，从简单的欧拉法到高精度的龙格-库塔法和多步法。我们一直以<strong>局部截断误差</strong>和<strong>全局误差</strong>作为衡量一个方法“好坏”的主要标准，关注的是数值解在多大程度上能逼近真解，即“<strong>走得准不准</strong>”的问题。</p>
-                <p>然而，还有一个同样重要，甚至在某些情况下更为致命的问题我们尚未系统探讨，那就是“<strong>走得稳不稳</strong>”。想象一下，一个微小的扰动——比如初始条件 $\alpha$ 中一个无法避免的舍入误差，或者计算过程中某一步的舍入误差——是否会在后续的迭代中被急剧放大，最终导致计算结果完全崩溃、毫无意义？</p>
-                <p>&quot;An Engineer complains: 'Math theorems are so unstable that a small perturbation on the conditions will cause a crash on the conclusions!'&quot; <strong>稳定性</strong>是任何一个实用数值算法的生命线。</p>
-                <p>今天，我们将系统地建立ODE数值方法的稳定性理论。我们将回答以下几个核心问题：</p>
-                <ol>
-                <li><strong>何为“好”方法？</strong> 我们将定义<strong>相容性 (Consistency)</strong>、<strong>收敛性 (Convergence)</strong> 和<strong>稳定性 (Stability)</strong> 这三大支柱，并揭示它们之间“相容 + 稳定 = 收敛”这一深刻的内在联系。</li>
-                <li><strong>误差如何演化？</strong> 我们将引入一个简单的<strong>测试方程</strong> $y'=\lambda y$，通过分析数值方法应用于该方程时的表现，来研究误差的传播规律。</li>
-                <li><strong>什么是绝对稳定性？</strong> 我们将定义<strong>绝对稳定域 (Region of Absolute Stability)</strong>，这是一个强大的可视化工具，用于判断一个方法在给定步长下是否会抑制误差。</li>
-                <li><strong>什么是刚性问题 (Stiff Problems)？</strong> 这是显式方法遭遇滑铁卢的“魔鬼”领域。我们将理解刚性问题的本质，并阐明为何<strong>隐式方法</strong>是解决这类问题的唯一可靠途径。</li>
-                </ol>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E6%94%B6%E6%95%9B%E7%9B%B8%E5%AE%B9%E4%B8%8E%E7%A8%B3%E5%AE%9A%E6%80%A7"><strong>第一部分：收敛、相容与稳定性</strong></h3>
-                <h4 id="5101-%E4%B8%89%E5%A4%A7%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><strong>5.10.1 三大核心概念</strong></h4>
-                <p>为了严格地评价一个ODE数值方法，我们需要三个定义。</p>
-                <p><strong>1. 相容性 (Consistency):</strong>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E6%95%B0%E5%80%BC%E5%88%86%E6%9E%9015ode%E6%95%B0%E5%80%BC%E6%96%B9%E6%B3%95%E7%9A%84%E7%A8%B3%E5%AE%9A%E6%80%A7%E7%90%86%E8%AE%BA%E4%B8%8E%E5%88%9A%E6%80%A7%E9%97%AE%E9%A2%98">数值分析15:ODE数值方法的稳定性理论与刚性问题</h1>
+<h3 id="%E5%BC%95%E8%A8%80%E4%BB%8E%E8%B5%B0%E5%BE%97%E5%87%86%E5%88%B0%E8%B5%B0%E5%BE%97%E7%A8%B3"><strong>引言：从“走得准”到“走得稳”</strong></h3>
+<p>在过去的几讲中，我们学习了多种求解常微分方程初值问题（IVP）的数值方法，从简单的欧拉法到高精度的龙格-库塔法和多步法。我们一直以<strong>局部截断误差</strong>和<strong>全局误差</strong>作为衡量一个方法“好坏”的主要标准，关注的是数值解在多大程度上能逼近真解，即“<strong>走得准不准</strong>”的问题。</p>
+<p>然而，还有一个同样重要，甚至在某些情况下更为致命的问题我们尚未系统探讨，那就是“<strong>走得稳不稳</strong>”。想象一下，一个微小的扰动——比如初始条件 $\alpha$ 中一个无法避免的舍入误差，或者计算过程中某一步的舍入误差——是否会在后续的迭代中被急剧放大，最终导致计算结果完全崩溃、毫无意义？</p>
+<p>"An Engineer complains: 'Math theorems are so unstable that a small perturbation on the conditions will cause a crash on the conclusions!'" <strong>稳定性</strong>是任何一个实用数值算法的生命线。</p>
+<p>今天，我们将系统地建立ODE数值方法的稳定性理论。我们将回答以下几个核心问题：</p>
+<ol>
+<li><strong>何为“好”方法？</strong> 我们将定义<strong>相容性 (Consistency)</strong>、<strong>收敛性 (Convergence)</strong> 和<strong>稳定性 (Stability)</strong> 这三大支柱，并揭示它们之间“相容 + 稳定 = 收敛”这一深刻的内在联系。</li>
+<li><strong>误差如何演化？</strong> 我们将引入一个简单的<strong>测试方程</strong> $y'=\lambda y$，通过分析数值方法应用于该方程时的表现，来研究误差的传播规律。</li>
+<li><strong>什么是绝对稳定性？</strong> 我们将定义<strong>绝对稳定域 (Region of Absolute Stability)</strong>，这是一个强大的可视化工具，用于判断一个方法在给定步长下是否会抑制误差。</li>
+<li><strong>什么是刚性问题 (Stiff Problems)？</strong> 这是显式方法遭遇滑铁卢的“魔鬼”领域。我们将理解刚性问题的本质，并阐明为何<strong>隐式方法</strong>是解决这类问题的唯一可靠途径。</li>
+</ol>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E6%94%B6%E6%95%9B%E7%9B%B8%E5%AE%B9%E4%B8%8E%E7%A8%B3%E5%AE%9A%E6%80%A7"><strong>第一部分：收敛、相容与稳定性</strong></h3>
+<h4 id="5101-%E4%B8%89%E5%A4%A7%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><strong>5.10.1 三大核心概念</strong></h4>
+<p>为了严格地评价一个ODE数值方法，我们需要三个定义。</p>
+<p><strong>1. 相容性 (Consistency):</strong>
                 一个方法是否忠实于它所要近似的微分方程？
                 <strong>定义：</strong> 一个单步法（或多步法）被称为是<strong>相容的</strong>，如果其<strong>局部截断误差 (LTE) $\tau_i(h)$</strong> 在步长 $h \to 0$ 时趋于零。
                 $$\lim_{h \to 0} \max_{i} |\tau_i(h)| = 0$$
                 <strong>直观理解：</strong> 相容性意味着，如果我们将真解代入数值格式，其残差会随着步长减小而消失。它衡量的是<strong>算法在一步之内与微分方程的匹配程度</strong>。我们之前学习的所有方法（欧拉、RK、Adams等），只要阶数 $p \ge 1$，都是相容的。</p>
-                <p><strong>2. 收敛性 (Convergence):</strong>
+<p><strong>2. 收敛性 (Convergence):</strong>
                 一个方法的最终目标是什么？当然是得到正确的解。
                 <strong>定义：</strong> 一个方法被称为是<strong>收敛的</strong>，如果对于任意给定的IVP（在适定条件下），当步长 $h \to 0$ 时，其数值解 $w_i$ 在整个区间上一致地趋于真解 $y(t_i)$。
                 $\lim_{h \to 0} \max_{1 \le i \le n} |w_i - y(t_i)| = 0$
                 <strong>直观理解：</strong> 收敛性是我们追求的<strong>最终结果</strong>。只要我们愿意付出足够的计算代价（让 $h$ 足够小），就能得到任意精度的解。</p>
-                <p><strong>3. （零）稳定性 (Zero-Stability):</strong>
+<p><strong>3. （零）稳定性 (Zero-Stability):</strong>
                 一个方法如何处理扰动？
                 <strong>定义：</strong> 一个方法被称为是**（零）稳定的**，如果它能保证对初始条件的微小扰动不产生灾难性的放大。更严格地说，当方法应用于最简单的微分方程 $y'=0$ 时，对于任意有界的初始值序列，其产生的解序列也必须是有界的。
                 对于线性多步法 $w_{i+1} = \sum a_j w_{i-j} + h \sum b_j f_{i-j}$，其稳定与否完全由系数 ${a_j}$ 构成的<strong>特征多项式</strong> $\pi(z) = z^m - \sum\limits_{j=0}^{m-1} a_j z^{m-1-j}$ 的根所决定。<strong>根条件 (Root Condition)</strong> 要求：</p>
-                <ul>
-                <li>所有根的模都 $\le 1$。</li>
-                <li>任何模为 1 的根都必须是<strong>单根</strong>。</li>
-                </ul>
-                <h4 id="5102-%E8%BE%BE%E5%B0%94%E5%A5%8E%E6%96%AF%E7%89%B9%E7%AD%89%E4%BB%B7%E5%AE%9A%E7%90%86-dahlquist-equivalence-theorem"><strong>5.10.2 达尔奎斯特等价定理 (Dahlquist Equivalence Theorem)</strong></h4>
-                <p>这三个概念之间有什么关系？它们由数值分析中最核心的定理之一联系起来。</p>
-                <p><strong>定理 (达尔奎斯特):</strong>
+<ul>
+<li>所有根的模都 $\le 1$。</li>
+<li>任何模为 1 的根都必须是<strong>单根</strong>。</li>
+</ul>
+<h4 id="5102-%E8%BE%BE%E5%B0%94%E5%A5%8E%E6%96%AF%E7%89%B9%E7%AD%89%E4%BB%B7%E5%AE%9A%E7%90%86-dahlquist-equivalence-theorem"><strong>5.10.2 达尔奎斯特等价定理 (Dahlquist Equivalence Theorem)</strong></h4>
+<p>这三个概念之间有什么关系？它们由数值分析中最核心的定理之一联系起来。</p>
+<p><strong>定理 (达尔奎斯特):</strong>
                 对于一个线性多步法，<strong>收敛</strong>的充分必要条件是它既是<strong>相容的</strong>又是**（零）稳定的**。
                 <strong>Consistency + Stability $\iff$ Convergence</strong></p>
-                <p><strong>深刻含义：</strong></p>
-                <ul>
-                <li><strong>相容性</strong>保证了算法在局部是正确的，它瞄准了正确的“靶心”。</li>
-                <li><strong>稳定性</strong>保证了算法在全局是稳健的，它不会因为一路上的微小颠簸（舍入误差、初值误差）而偏离轨道太远。</li>
-                <li>只有<strong>同时具备</strong>这两个品质，算法才能最终命中目标，即<strong>收敛</strong>。</li>
-                </ul>
-                <p>这个定理为我们设计和分析新的数值方法提供了根本性的指导。</p>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E7%BB%9D%E5%AF%B9%E7%A8%B3%E5%AE%9A%E6%80%A7%E4%B8%8E%E5%88%9A%E6%80%A7%E9%97%AE%E9%A2%98"><strong>第二部分：绝对稳定性与刚性问题</strong></h3>
-                <p>零稳定性只关心 $h \to 0$ 的极限情况。但在实践中，我们总是使用一个<strong>有限的步长 $h > 0$</strong>。在有限步长下，误差会如何传播？这就引出了<strong>绝对稳定性</strong>的概念。</p>
-                <h4 id="5103-%E6%B5%8B%E8%AF%95%E6%96%B9%E7%A8%8B%E4%B8%8E%E7%BB%9D%E5%AF%B9%E7%A8%B3%E5%AE%9A%E5%9F%9F"><strong>5.10.3 测试方程与绝对稳定域</strong></h4>
-                <p><strong>定义 (测试方程):</strong>
+<p><strong>深刻含义：</strong></p>
+<ul>
+<li><strong>相容性</strong>保证了算法在局部是正确的，它瞄准了正确的“靶心”。</li>
+<li><strong>稳定性</strong>保证了算法在全局是稳健的，它不会因为一路上的微小颠簸（舍入误差、初值误差）而偏离轨道太远。</li>
+<li>只有<strong>同时具备</strong>这两个品质，算法才能最终命中目标，即<strong>收敛</strong>。</li>
+</ul>
+<p>这个定理为我们设计和分析新的数值方法提供了根本性的指导。</p>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E7%BB%9D%E5%AF%B9%E7%A8%B3%E5%AE%9A%E6%80%A7%E4%B8%8E%E5%88%9A%E6%80%A7%E9%97%AE%E9%A2%98"><strong>第二部分：绝对稳定性与刚性问题</strong></h3>
+<p>零稳定性只关心 $h \to 0$ 的极限情况。但在实践中，我们总是使用一个<strong>有限的步长 $h &gt; 0$</strong>。在有限步长下，误差会如何传播？这就引出了<strong>绝对稳定性</strong>的概念。</p>
+<h4 id="5103-%E6%B5%8B%E8%AF%95%E6%96%B9%E7%A8%8B%E4%B8%8E%E7%BB%9D%E5%AF%B9%E7%A8%B3%E5%AE%9A%E5%9F%9F"><strong>5.10.3 测试方程与绝对稳定域</strong></h4>
+<p><strong>定义 (测试方程):</strong>
                 为了分析算法对误差的抑制能力，我们将其应用于一个最简单但极具代表性的线性<strong>测试方程</strong>：
                 $$y' = \lambda y, \quad y(0)=1$$
                 其中 $\lambda$ 是一个复数。这个方程的真解是 $y(t)=e^{\lambda t}$。</p>
-                <ul>
-                <li>如果 $\text{Re}(\lambda) > 0$，解是<strong>增长</strong>的。</li>
-                <li>如果 $\text{Re}(\lambda) < 0$，解是<strong>衰减</strong>的。</li>
-                <li>如果 $\text{Re}(\lambda) = 0$，解是<strong>振荡</strong>的。</li>
-                </ul>
-                <p>我们特别关心<strong>解衰减</strong>的情况 ($\text{Re}(\lambda) < 0$)。一个好的数值方法应该能复现这种衰减特性，而不是错误地产生一个增长的数值解。</p>
-                <p><strong>绝对稳定性的定义：</strong>
+<ul>
+<li>如果 $\text{Re}(\lambda) &gt; 0$，解是<strong>增长</strong>的。</li>
+<li>如果 $\text{Re}(\lambda) &lt; 0$，解是<strong>衰减</strong>的。</li>
+<li>如果 $\text{Re}(\lambda) = 0$，解是<strong>振荡</strong>的。</li>
+</ul>
+<p>我们特别关心<strong>解衰减</strong>的情况 ($\text{Re}(\lambda) &lt; 0$)。一个好的数值方法应该能复现这种衰减特性，而不是错误地产生一个增长的数值解。</p>
+<p><strong>绝对稳定性的定义：</strong>
                 当一个数值方法应用于测试方程时，它会产生一个递推关系。例如，显式欧拉法给出 $w_{i+1} = (1+h\lambda)w_i$。我们称 $Q(h\lambda) = 1+h\lambda$ 为该方法的<strong>增长因子 (amplification factor)</strong>。
-                如果在一个步长 $h$ 下，这个增长因子的<strong>模小于1</strong>，即 $|Q(h\lambda)| < 1$，那么任何初始误差 $\epsilon_0$ 都会在迭代中被衰减：$|\epsilon_{i+1}| < |\epsilon_i|$。
+                如果在一个步长 $h$ 下，这个增长因子的<strong>模小于1</strong>，即 $|Q(h\lambda)| &lt; 1$，那么任何初始误差 $\epsilon_0$ 都会在迭代中被衰减：$|\epsilon_{i+1}| &lt; |\epsilon_i|$。
                 <strong>定义：</strong> 对于一个给定的方法，其在复平面上所有满足 $|Q(z)| \le 1$ 的点 $z=h\lambda$ 组成的区域，被称为该方法的<strong>绝对稳定域 (Region of Absolute Stability)</strong>。</p>
-                <h4 id="5104-%E6%98%BE%E5%BC%8F%E4%B8%8E%E9%9A%90%E5%BC%8F%E6%96%B9%E6%B3%95%E7%9A%84%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%9F%9F"><strong>5.10.4 显式与隐式方法的稳定性域</strong></h4>
-                <p><strong>1. 显式欧拉法 (Explicit Euler):</strong></p>
-                <ul>
-                <li>递推关系: $w_{i+1} = (1+h\lambda)w_i$</li>
-                <li>稳定性条件: $|1+h\lambda| < 1$。</li>
-                <li>稳定性域: 以复平面上点 $(-1,0)$ 为圆心，半径为 1 的<strong>圆盘内部</strong>。</li>
-                <li><strong>分析：</strong> 这是一个<strong>有界</strong>的区域。对于任意给定的 $\lambda$ (且 $\text{Re}(\lambda)<0$)，为了让 $h\lambda$ 落入这个圆盘，步长 $h$ 必须足够小，满足 $h < 2/|\lambda|$ (当 $\lambda$ 为实数时是 $h<-2/\lambda$)。</li>
-                </ul>
-                <p><strong>2. 隐式欧拉法 (Implicit Euler):</strong></p>
-                <ul>
-                <li>递推关系: $w_{i+1} = w_i + h\lambda w_{i+1} \implies w_{i+1} = \frac{1}{1-h\lambda} w_i$</li>
-                <li>稳定性条件: $|\frac{1}{1-h\lambda}| < 1 \iff |1-h\lambda| > 1$。</li>
-                <li>稳定性域: 以复平面上点 $(1,0)$ 为圆心，半径为 1 的<strong>圆盘外部</strong>。</li>
-                <li><strong>分析：</strong> 这个区域<strong>包含了整个左半复平面</strong> (${z: \text{Re}(z)<0}$)！这意味着，只要真解是衰减的 ($\text{Re}(\lambda)<0$)，无论步长 $h$ 取多大，隐式欧拉法在数值上总是能正确地反映这种衰减特性。我们称这种方法为 <strong>A-稳定 (A-stable)</strong>。</li>
-                </ul>
-                <p><strong>3. 显式龙格-库塔法 (Explicit RK):</strong></p>
-                <ul>
-                <li>对于 $p$ 阶显式RK方法，其增长因子是 $e^z$ 的 $p$ 阶泰勒展开式 $Q(z) = 1+z+\frac{z^2}{2!}+\dots+\frac{z^p}{p!}$。</li>
-                <li>它们的稳定性域是满足 $|Q(z)|\le 1$ 的区域。随着阶数 $p$ 的增加，这个区域会沿着负实轴扩大，但<strong>永远是有界的</strong>。</li>
-                </ul>
-                <h4 id="5105-%E5%88%9A%E6%80%A7%E9%97%AE%E9%A2%98-stiff-problems"><strong>5.10.5 刚性问题 (Stiff Problems)</strong></h4>
-                <p><strong>Discussion 35 &amp; Example (Stiff System):</strong>
+<h4 id="5104-%E6%98%BE%E5%BC%8F%E4%B8%8E%E9%9A%90%E5%BC%8F%E6%96%B9%E6%B3%95%E7%9A%84%E7%A8%B3%E5%AE%9A%E6%80%A7%E5%9F%9F"><strong>5.10.4 显式与隐式方法的稳定性域</strong></h4>
+<p><strong>1. 显式欧拉法 (Explicit Euler):</strong></p>
+<ul>
+<li>递推关系: $w_{i+1} = (1+h\lambda)w_i$</li>
+<li>稳定性条件: $|1+h\lambda| &lt; 1$。</li>
+<li>稳定性域: 以复平面上点 $(-1,0)$ 为圆心，半径为 1 的<strong>圆盘内部</strong>。</li>
+<li><strong>分析：</strong> 这是一个<strong>有界</strong>的区域。对于任意给定的 $\lambda$ (且 $\text{Re}(\lambda)&lt;0$)，为了让 $h\lambda$ 落入这个圆盘，步长 $h$ 必须足够小，满足 $h &lt; 2/|\lambda|$ (当 $\lambda$ 为实数时是 $h&lt;-2/\lambda$)。</li>
+</ul>
+<p><strong>2. 隐式欧拉法 (Implicit Euler):</strong></p>
+<ul>
+<li>递推关系: $w_{i+1} = w_i + h\lambda w_{i+1} \implies w_{i+1} = \frac{1}{1-h\lambda} w_i$</li>
+<li>稳定性条件: $|\frac{1}{1-h\lambda}| &lt; 1 \iff |1-h\lambda| &gt; 1$。</li>
+<li>稳定性域: 以复平面上点 $(1,0)$ 为圆心，半径为 1 的<strong>圆盘外部</strong>。</li>
+<li><strong>分析：</strong> 这个区域<strong>包含了整个左半复平面</strong> (${z: \text{Re}(z)&lt;0}$)！这意味着，只要真解是衰减的 ($\text{Re}(\lambda)&lt;0$)，无论步长 $h$ 取多大，隐式欧拉法在数值上总是能正确地反映这种衰减特性。我们称这种方法为 <strong>A-稳定 (A-stable)</strong>。</li>
+</ul>
+<p><strong>3. 显式龙格-库塔法 (Explicit RK):</strong></p>
+<ul>
+<li>对于 $p$ 阶显式RK方法，其增长因子是 $e^z$ 的 $p$ 阶泰勒展开式 $Q(z) = 1+z+\frac{z^2}{2!}+\dots+\frac{z^p}{p!}$。</li>
+<li>它们的稳定性域是满足 $|Q(z)|\le 1$ 的区域。随着阶数 $p$ 的增加，这个区域会沿着负实轴扩大，但<strong>永远是有界的</strong>。</li>
+</ul>
+<h4 id="5105-%E5%88%9A%E6%80%A7%E9%97%AE%E9%A2%98-stiff-problems"><strong>5.10.5 刚性问题 (Stiff Problems)</strong></h4>
+<p><strong>Discussion 35 &amp; Example (Stiff System):</strong>
                 考虑方程 $y'=-30y, y(0)=1$。真解是 $y(t)=e^{-30t}$，它会非常迅速地衰减到一个稳态值0。</p>
-                <ul>
-                <li><strong>显式欧拉法：</strong> 这里的 $\lambda = -30$。稳定性要求 $h < -2/(-30) \approx 0.067$。如果我们取一个稍大的步长，比如 $h=0.1$，那么 $h\lambda=-3$，这远远超出了稳定域。计算结果 $w_i = (1-3)^i = (-2)^i$ 会产生剧烈振荡并发散，与真解的行为完全背道而驰。</li>
-                <li><strong>隐式欧拉法：</strong> 无论 $h$ 多大，$h\lambda$ 都在左半平面，始终位于其稳定域内。数值解 $w_i = (1/(1-h\lambda))^i$ 会稳定地衰减到0。</li>
-                </ul>
-                <p><strong>定义 (刚性问题):</strong>
+<ul>
+<li><strong>显式欧拉法：</strong> 这里的 $\lambda = -30$。稳定性要求 $h &lt; -2/(-30) \approx 0.067$。如果我们取一个稍大的步长，比如 $h=0.1$，那么 $h\lambda=-3$，这远远超出了稳定域。计算结果 $w_i = (1-3)^i = (-2)^i$ 会产生剧烈振荡并发散，与真解的行为完全背道而驰。</li>
+<li><strong>隐式欧拉法：</strong> 无论 $h$ 多大，$h\lambda$ 都在左半平面，始终位于其稳定域内。数值解 $w_i = (1/(1-h\lambda))^i$ 会稳定地衰减到0。</li>
+</ul>
+<p><strong>定义 (刚性问题):</strong>
                 一个ODE系统被称为是<strong>刚性的</strong>，如果其雅可比矩阵的特征值 $\lambda_i$ 满足：</p>
-                <ol>
-                <li>所有特征值的实部都小于等于零 ($\text{Re}(\lambda_i) \le 0$)。</li>
-                <li><strong>刚性比 (Stiffness Ratio)</strong> 非常大：
+<ol>
+<li>所有特征值的实部都小于等于零 ($\text{Re}(\lambda_i) \le 0$)。</li>
+<li><strong>刚性比 (Stiffness Ratio)</strong> 非常大：
                 $$\frac{\max_i |\text{Re}(\lambda_i)|}{\min_i |\text{Re}(\lambda_i)|} \gg 1$$</li>
-                </ol>
-                <p><strong>物理意义：</strong> 系统中同时存在<strong>变化非常快</strong>的瞬态分量（对应于大的负实部特征值）和<strong>变化非常慢</strong>的稳态分量（对应于接近零的负实部特征值）。
+</ol>
+<p><strong>物理意义：</strong> 系统中同时存在<strong>变化非常快</strong>的瞬态分量（对应于大的负实部特征值）和<strong>变化非常慢</strong>的稳态分量（对应于接近零的负实部特征值）。
                 <strong>数值挑战：</strong> 瞬态分量在极短的时间内就衰减掉了，我们真正关心的是慢分量的长期行为。但是，为了保证数值稳定性，<strong>显式方法</strong>的步长 $h$ 必须由<strong>最快的瞬态分量</strong>来决定，即使这个分量对解的贡献已经可以忽略不计！这会导致极大的计算浪费。
-                &quot;Waste time&quot;</p>
-                <p><strong>结论：</strong></p>
-                <ul>
-                <li><strong>求解非刚性问题时，显式方法（如RK4, Adams-Bashforth）通常更高效。</strong></li>
-                <li><strong>求解刚性问题时，必须使用具有无界稳定域（至少包含整个左半平面）的隐式方法（如隐式欧拉，梯形法，或专门的向后差分公式 BDF）。</strong></li>
-                </ul>
-                <h3 id="%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93"><strong>课程总结</strong></h3>
-                <p><strong>本讲核心要点：</strong></p>
-                <ol>
-                <li>ODE数值方法的<strong>收敛性</strong>由<strong>相容性</strong>和**（零）稳定性**共同保证（达尔奎斯特等价定理），前者关注局部精度，后者关注对扰动的鲁棒性。</li>
-                <li><strong>绝对稳定性</strong>分析研究的是在<strong>有限步长 $h$</strong> 下误差的传播行为，其核心工具是<strong>绝对稳定域</strong>。</li>
-                <li><strong>显式方法</strong>（如显式欧拉、显式RK）的绝对稳定域<strong>总是有界的</strong>，这意味着它们的步长受到稳定性条件的严格限制。</li>
-                <li><strong>隐式方法</strong>（如隐式欧拉、隐式RK）可以拥有<strong>无界</strong>的稳定域，能够处理显式方法无法解决的问题。</li>
-                <li><strong>刚性问题</strong>的本质是系统中存在多个差异巨大的时间尺度。显式方法为了稳定必须采用极小的步长，效率极低，而具有A-稳定性的隐式方法是解决刚性问题的关键。</li>
-                </ol>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+                "Waste time"</p>
+<p><strong>结论：</strong></p>
+<ul>
+<li><strong>求解非刚性问题时，显式方法（如RK4, Adams-Bashforth）通常更高效。</strong></li>
+<li><strong>求解刚性问题时，必须使用具有无界稳定域（至少包含整个左半平面）的隐式方法（如隐式欧拉，梯形法，或专门的向后差分公式 BDF）。</strong></li>
+</ul>
+<h3 id="%E8%AF%BE%E7%A8%8B%E6%80%BB%E7%BB%93"><strong>课程总结</strong></h3>
+<p><strong>本讲核心要点：</strong></p>
+<ol>
+<li>ODE数值方法的<strong>收敛性</strong>由<strong>相容性</strong>和**（零）稳定性**共同保证（达尔奎斯特等价定理），前者关注局部精度，后者关注对扰动的鲁棒性。</li>
+<li><strong>绝对稳定性</strong>分析研究的是在<strong>有限步长 $h$</strong> 下误差的传播行为，其核心工具是<strong>绝对稳定域</strong>。</li>
+<li><strong>显式方法</strong>（如显式欧拉、显式RK）的绝对稳定域<strong>总是有界的</strong>，这意味着它们的步长受到稳定性条件的严格限制。</li>
+<li><strong>隐式方法</strong>（如隐式欧拉、隐式RK）可以拥有<strong>无界</strong>的稳定域，能够处理显式方法无法解决的问题。</li>
+<li><strong>刚性问题</strong>的本质是系统中存在多个差异巨大的时间尺度。显式方法为了稳定必须采用极小的步长，效率极低，而具有A-稳定性的隐式方法是解决刚性问题的关键。</li>
+</ol>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

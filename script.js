@@ -3,6 +3,31 @@ window.onload = function() {
     const ctx = canvas ? canvas.getContext('2d') : null;
     const music = document.getElementById('bg-music');
     const musicBtn = document.getElementById('music-toggle');
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+
+    // Function to apply the saved theme
+    function applyTheme() {
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+            if (darkModeToggle) darkModeToggle.textContent = '☀️'; // Sun icon for light mode
+        } else {
+            document.body.classList.remove('dark-mode');
+            if (darkModeToggle) darkModeToggle.textContent = '🌙'; // Moon icon for dark mode
+        }
+    }
+
+    // Toggle dark mode
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('click', () => {
+            const isDarkMode = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode);
+            darkModeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+        });
+    }
+
+    // Apply theme on initial load
+    applyTheme();
 
     const savedTime = parseFloat(localStorage.getItem('music-current-time') || '0');
     const shouldPlay = localStorage.getItem('music-paused') !== 'true';
@@ -568,4 +593,36 @@ function loadSidebar() {
             .then(html => { container.innerHTML = html; resolve(); })
             .catch(err => { console.error('Failed to load sidebar', err); resolve(); });
     });
+}
+
+function sharePost(event, platform) {
+    event.preventDefault();
+    const postUrl = encodeURIComponent(window.location.href);
+    const postTitle = encodeURIComponent(document.title);
+    let shareUrl = '';
+
+    switch (platform) {
+        case 'weibo':
+            shareUrl = `http://service.weibo.com/share/share.php?url=${postUrl}&title=${postTitle}`;
+            break;
+        case 'twitter':
+            shareUrl = `https://twitter.com/intent/tweet?url=${postUrl}&text=${postTitle}`;
+            break;
+        case 'linkedin':
+            shareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${postUrl}&title=${postTitle}`;
+            break;
+        case 'facebook':
+            shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${postUrl}`;
+            break;
+        case 'qq':
+            shareUrl = `http://connect.qq.com/widget/shareqq/index.html?url=${postUrl}&title=${postTitle}&summary=`;
+            break;
+        case 'wechat':
+            alert('请在微信客户端打开或使用截图、二维码等方式进行分享。');
+            return;
+    }
+
+    if (shareUrl) {
+        window.open(shareUrl, '_blank', 'noopener,noreferrer,width=600,height=400');
+    }
 }

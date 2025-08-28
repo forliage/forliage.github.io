@@ -1,11 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>数据库系统01:关系模型(The Relational Model)</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    <script>
+<meta charset="utf-8"/>
+<title>数据库系统01:关系模型(The Relational Model)</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -16,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -30,139 +30,139 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F01%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8Bthe-relational-model">数据库系统01:关系模型(The Relational Model)</h1>
-                <h3 id="%E5%BC%95%E8%A8%80"><strong>引言</strong></h3>
-                <p>在关系模型诞生之前，数据库世界是怎样的？是<strong>网状模型</strong>和<strong>层次模型</strong>的天下。想象一下，数据就像一个复杂的迷宫，应用程序员需要像探险家一样，手持“指针”或“路径”，小心翼翼地在数据记录之间穿梭。</p>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E6%95%B0%E6%8D%AE%E5%BA%93%E7%B3%BB%E7%BB%9F01%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%9E%8Bthe-relational-model">数据库系统01:关系模型(The Relational Model)</h1>
+<h3 id="%E5%BC%95%E8%A8%80"><strong>引言</strong></h3>
+<p>在关系模型诞生之前，数据库世界是怎样的？是<strong>网状模型</strong>和<strong>层次模型</strong>的天下。想象一下，数据就像一个复杂的迷宫，应用程序员需要像探险家一样，手持“指针”或“路径”，小心翼翼地在数据记录之间穿梭。</p>
+<ul>
+<li><strong>层次模型 (Hierarchical Model):</strong> 数据被组织成树形结构。优点是对于一对多关系描述清晰，查询效率高。但缺点是致命的：如果两个实体是多对多关系（例如，一个学生可以选多门课，一门课可以被多个学生选），就必须通过冗余数据来模拟，极其笨拙。</li>
+<li><strong>网状模型 (Network Model):</strong> 允许多个父节点，解决了多对多问题。但它引入了复杂的“指针链表”来维护记录间的关系。这导致了什么问题？
                 <ul>
-                <li><strong>层次模型 (Hierarchical Model):</strong> 数据被组织成树形结构。优点是对于一对多关系描述清晰，查询效率高。但缺点是致命的：如果两个实体是多对多关系（例如，一个学生可以选多门课，一门课可以被多个学生选），就必须通过冗余数据来模拟，极其笨拙。</li>
-                <li><strong>网状模型 (Network Model):</strong> 允许多个父节点，解决了多对多问题。但它引入了复杂的“指针链表”来维护记录间的关系。这导致了什么问题？
-                <ul>
-                <li><strong>导航式访问 (Navigational Access):</strong> 程序员必须在代码中明确指出如何从一条记录“导航”到下一条。查询逻辑与数据的物理存储路径紧密耦合。</li>
-                <li><strong>数据独立性差:</strong> 一旦底层数据存储结构发生变化（比如为了优化，增加了一个新的索引或路径），所有访问这些数据的应用程序代码都可能需要重写。这是一场维护的噩梦。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>设计哲学之问：</strong> 我们能否创建一个模型，让用户只关心“<strong>要什么数据 (What)</strong>”，而不用关心“<strong>如何获取数据 (How)</strong>”？</p>
-                <p>这就是埃德加·科德（Edgar F. Codd）在1970年那篇划时代的论文《A Relational Model of Data for Large Shared Data Banks》中要解决的核心问题。他的答案是：<strong>关系模型</strong>。其核心思想是，用一种简单、直观、且具有坚实数学基础的结构来组织数据，并将数据的复杂关系交由数据库管理系统（DBMS）处理，从而将程序员从迷宫中解放出来。</p>
-                <h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E4%BD%95%E4%B8%BA%E5%85%B3%E7%B3%BB"><strong>第一部分：何为“关系”？</strong></h3>
-                <p>关系模型只用了极少的几个概念就构建了整个大厦。我们来逐一解构其设计思想。</p>
-                <h4 id="11-%E6%A0%B8%E5%BF%83%E7%BB%93%E6%9E%84%E4%BB%8E%E6%95%B0%E5%AD%A6%E5%88%B0%E8%A1%A8%E6%A0%BC"><strong>1.1 核心结构：从数学到表格</strong></h4>
-                <ul>
-                <li>
-                <p><strong>域 (Domain):</strong> 一个<strong>原子</strong>值的集合。例如，<code>所有整数的集合</code>，<code>所有长度小于20的字符串集合</code>。</p>
-                <ul>
-                <li><strong>设计哲学：原子的重要性 (Atomicity - 第一范式 1NF)</strong>
-                <ul>
-                <li><strong>为什么要求原子性？</strong> 如果一个字段可以再分（比如一个“地址”字段包含“国家-省份-城市”），那么你就无法对“城市”进行独立的查询、排序或建立索引。原子性确保了数据表中每个单元格的值都是不可再分的最小信息单元，这极大地简化了数据处理的逻辑。这是关系模型为简单性做出的第一个重要设计决策。</li>
-                <li><strong>拓展思考：</strong> 现代数据库（如PostgreSQL）支持JSON或数组类型，这是否违背了原子性？是的，在某种程度上是的。这是为了应对半结构化数据存储需求而做出的权衡，牺牲了一部分模型的纯粹性，换取了灵活性。</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>关系 (Relation):</strong></p>
-                <ul>
-                <li><strong>形式化定义:</strong> 给定一组域 $D_1, D_2, \ldots, D_n$，一个<strong>关系</strong> $r$ 是笛卡尔积 $D_1 \times D_2 \times \ldots \times D_n$ 的一个<strong>子集</strong>。</li>
-                <li><strong>直观理解:</strong> 一个关系就是一个<strong>二维表格</strong>。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>元组 (Tuple):</strong> 关系（表格）中的<strong>一行</strong>。代表一个现实世界中的实体或实体间的联系。</p>
-                </li>
-                <li>
-                <p><strong>属性 (Attribute):</strong> 关系（表格）中的<strong>一列</strong>。每个属性都有一个名称和对应的域。</p>
-                </li>
-                </ul>
-                <h4 id="12-%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%BC%8F-schema-vs-%E5%85%B3%E7%B3%BB%E5%AE%9E%E4%BE%8B-instance"><strong>1.2 关系模式 (Schema) vs. 关系实例 (Instance)</strong></h4>
-                <ul>
-                <li><strong>关系模式 (Schema):</strong> 这是关系的“蓝图”或“骨架”，定义了关系的名称、属性及其域。例如：<code>学生(学号: CHAR(10), 姓名: VARCHAR(20), 专业: VARCHAR(30))</code>。我们通常用 $R(A_1, A_2, \ldots, A_n)$ 表示。</li>
-                <li><strong>关系实例 (Instance):</strong> 这是在某一时刻，关系中元组的<strong>具体集合</strong>，即表格中的实际数据。实例是随时间变化的（增删改），而模式通常是稳定的。</li>
-                </ul>
-                <p><strong>设计哲学：蓝图与建筑的分离</strong>
+<li><strong>导航式访问 (Navigational Access):</strong> 程序员必须在代码中明确指出如何从一条记录“导航”到下一条。查询逻辑与数据的物理存储路径紧密耦合。</li>
+<li><strong>数据独立性差:</strong> 一旦底层数据存储结构发生变化（比如为了优化，增加了一个新的索引或路径），所有访问这些数据的应用程序代码都可能需要重写。这是一场维护的噩梦。</li>
+</ul>
+</li>
+</ul>
+<p><strong>设计哲学之问：</strong> 我们能否创建一个模型，让用户只关心“<strong>要什么数据 (What)</strong>”，而不用关心“<strong>如何获取数据 (How)</strong>”？</p>
+<p>这就是埃德加·科德（Edgar F. Codd）在1970年那篇划时代的论文《A Relational Model of Data for Large Shared Data Banks》中要解决的核心问题。他的答案是：<strong>关系模型</strong>。其核心思想是，用一种简单、直观、且具有坚实数学基础的结构来组织数据，并将数据的复杂关系交由数据库管理系统（DBMS）处理，从而将程序员从迷宫中解放出来。</p>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E4%BD%95%E4%B8%BA%E5%85%B3%E7%B3%BB"><strong>第一部分：何为“关系”？</strong></h3>
+<p>关系模型只用了极少的几个概念就构建了整个大厦。我们来逐一解构其设计思想。</p>
+<h4 id="11-%E6%A0%B8%E5%BF%83%E7%BB%93%E6%9E%84%E4%BB%8E%E6%95%B0%E5%AD%A6%E5%88%B0%E8%A1%A8%E6%A0%BC"><strong>1.1 核心结构：从数学到表格</strong></h4>
+<ul>
+<li>
+<p><strong>域 (Domain):</strong> 一个<strong>原子</strong>值的集合。例如，<code>所有整数的集合</code>，<code>所有长度小于20的字符串集合</code>。</p>
+<ul>
+<li><strong>设计哲学：原子的重要性 (Atomicity - 第一范式 1NF)</strong>
+<ul>
+<li><strong>为什么要求原子性？</strong> 如果一个字段可以再分（比如一个“地址”字段包含“国家-省份-城市”），那么你就无法对“城市”进行独立的查询、排序或建立索引。原子性确保了数据表中每个单元格的值都是不可再分的最小信息单元，这极大地简化了数据处理的逻辑。这是关系模型为简单性做出的第一个重要设计决策。</li>
+<li><strong>拓展思考：</strong> 现代数据库（如PostgreSQL）支持JSON或数组类型，这是否违背了原子性？是的，在某种程度上是的。这是为了应对半结构化数据存储需求而做出的权衡，牺牲了一部分模型的纯粹性，换取了灵活性。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>关系 (Relation):</strong></p>
+<ul>
+<li><strong>形式化定义:</strong> 给定一组域 $D_1, D_2, \ldots, D_n$，一个<strong>关系</strong> $r$ 是笛卡尔积 $D_1 \times D_2 \times \ldots \times D_n$ 的一个<strong>子集</strong>。</li>
+<li><strong>直观理解:</strong> 一个关系就是一个<strong>二维表格</strong>。</li>
+</ul>
+</li>
+<li>
+<p><strong>元组 (Tuple):</strong> 关系（表格）中的<strong>一行</strong>。代表一个现实世界中的实体或实体间的联系。</p>
+</li>
+<li>
+<p><strong>属性 (Attribute):</strong> 关系（表格）中的<strong>一列</strong>。每个属性都有一个名称和对应的域。</p>
+</li>
+</ul>
+<h4 id="12-%E5%85%B3%E7%B3%BB%E6%A8%A1%E5%BC%8F-schema-vs-%E5%85%B3%E7%B3%BB%E5%AE%9E%E4%BE%8B-instance"><strong>1.2 关系模式 (Schema) vs. 关系实例 (Instance)</strong></h4>
+<ul>
+<li><strong>关系模式 (Schema):</strong> 这是关系的“蓝图”或“骨架”，定义了关系的名称、属性及其域。例如：<code>学生(学号: CHAR(10), 姓名: VARCHAR(20), 专业: VARCHAR(30))</code>。我们通常用 $R(A_1, A_2, \ldots, A_n)$ 表示。</li>
+<li><strong>关系实例 (Instance):</strong> 这是在某一时刻，关系中元组的<strong>具体集合</strong>，即表格中的实际数据。实例是随时间变化的（增删改），而模式通常是稳定的。</li>
+</ul>
+<p><strong>设计哲学：蓝图与建筑的分离</strong>
                 这种分离是数据独立性的核心体现。应用程序是针对稳定的“蓝图”（Schema）编写的，而DBMS则负责管理不断变化的“建筑”（Instance）。无论数据如何增删，只要不改变蓝图，应用程序就无需修改。</p>
-                <h4 id="13-%E5%85%B3%E7%B3%BB%E7%9A%84%E5%86%85%E5%9C%A8%E5%B1%9E%E6%80%A7%E6%97%A0%E5%BA%8F%E4%B8%8E%E5%94%AF%E4%B8%80"><strong>1.3 关系的内在属性：无序与唯一</strong></h4>
-                <p>Codd的关系模型直接继承自数学上的“集合”理论，这赋予了它两个至关重要的特性：</p>
-                <ol>
-                <li><strong>元组无序性:</strong> 作为一个集合，关系中的元组没有先后顺序。第一行和第五行没有任何本质区别。</li>
-                <li><strong>元组唯一性:</strong> 集合论的基本定义，集合中没有重复的元素。因此，关系中不允许存在两条完全相同的元组。</li>
-                </ol>
-                <p><strong>设计哲学：为何坚持“集合”？</strong></p>
+<h4 id="13-%E5%85%B3%E7%B3%BB%E7%9A%84%E5%86%85%E5%9C%A8%E5%B1%9E%E6%80%A7%E6%97%A0%E5%BA%8F%E4%B8%8E%E5%94%AF%E4%B8%80"><strong>1.3 关系的内在属性：无序与唯一</strong></h4>
+<p>Codd的关系模型直接继承自数学上的“集合”理论，这赋予了它两个至关重要的特性：</p>
+<ol>
+<li><strong>元组无序性:</strong> 作为一个集合，关系中的元组没有先后顺序。第一行和第五行没有任何本质区别。</li>
+<li><strong>元组唯一性:</strong> 集合论的基本定义，集合中没有重复的元素。因此，关系中不允许存在两条完全相同的元组。</li>
+</ol>
+<p><strong>设计哲学：为何坚持“集合”？</strong></p>
+<ul>
+<li><strong>逻辑数据独立性：</strong> “无序性”意味着你可以按任何顺序存储或检索元组，查询结果的正确性不受影响。DBMS可以自由地根据物理存储（如索引）来优化访问路径，而用户无需关心。</li>
+<li><strong>实体完整性：</strong> “唯一性”保证了表中的每一行都唯一地标识一个现实世界的实体。如果存在重复行，那么“学生张三”这条记录到底是指哪个张三？数据将产生歧义。这个特性通过<strong>键 (Key)</strong> 来强制实现。</li>
+</ul>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%AE%8C%E6%95%B4%E6%80%A7%E7%BA%A6%E6%9D%9F"><strong>第二部分：完整性约束</strong></h3>
+<p>如果关系模型仅仅是提供了一个表格结构，那它还不够强大。其真正的威力在于能够定义和强制执行数据世界的“法律”——完整性约束。</p>
+<h4 id="21-%E9%94%AE-keys%E5%AE%9E%E4%BD%93%E7%9A%84%E5%94%AF%E4%B8%80%E6%A0%87%E8%AF%86"><strong>2.1 键 (Keys)：实体的唯一标识</strong></h4>
+<p>如何确保元组的唯一性？通过“键”。</p>
+<ul>
+<li><strong>超键 (Superkey):</strong> 一个或多个属性的集合，其值能<strong>唯一</strong>确定一个元组。例如，在<code>学生</code>表中，<code>{学号}</code>是一个超键，<code>{学号, 姓名}</code>也是一个超键。</li>
+<li><strong>候选键 (Candidate Key):</strong> <strong>最小</strong>的超键。即，从该属性集合中移除任何一个属性，它就不再是超键。例如，<code>{学号}</code>是候选键，而<code>{学号, 姓名}</code>不是，因为移除了<code>姓名</code>后，<code>{学号}</code>依然是超键。如果<code>{身份证号}</code>也能唯一标识学生，那它也是一个候选键。</li>
+<li><strong>主键 (Primary Key):</strong> 被数据库设计者从一个或多个候选键中<strong>选定</strong>的一个，用作该关系中元组的主要标识。
                 <ul>
-                <li><strong>逻辑数据独立性：</strong> “无序性”意味着你可以按任何顺序存储或检索元组，查询结果的正确性不受影响。DBMS可以自由地根据物理存储（如索引）来优化访问路径，而用户无需关心。</li>
-                <li><strong>实体完整性：</strong> “唯一性”保证了表中的每一行都唯一地标识一个现实世界的实体。如果存在重复行，那么“学生张三”这条记录到底是指哪个张三？数据将产生歧义。这个特性通过<strong>键 (Key)</strong> 来强制实现。</li>
-                </ul>
-                <h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%AE%8C%E6%95%B4%E6%80%A7%E7%BA%A6%E6%9D%9F"><strong>第二部分：完整性约束</strong></h3>
-                <p>如果关系模型仅仅是提供了一个表格结构，那它还不够强大。其真正的威力在于能够定义和强制执行数据世界的“法律”——完整性约束。</p>
-                <h4 id="21-%E9%94%AE-keys%E5%AE%9E%E4%BD%93%E7%9A%84%E5%94%AF%E4%B8%80%E6%A0%87%E8%AF%86"><strong>2.1 键 (Keys)：实体的唯一标识</strong></h4>
-                <p>如何确保元组的唯一性？通过“键”。</p>
+<li><strong>设计哲学：为何要指定主键？</strong>
+<ol>
+<li><strong>明确性：</strong> 为表中的每一行提供一个明确、无歧义的“官方”ID。</li>
+<li><strong>性能：</strong> DBMS通常会为主键自动创建索引，以极大地加速基于主键的查找和连接操作。</li>
+<li><strong>引用：</strong> 主键是其他表引用本表记录的“锚点”（通过外键）。</li>
+</ol>
+</li>
+<li><strong>最佳实践：</strong> 通常选择“人造”的、无业务含义的键（如自增ID、UUID）作主键，而不是有业务含义的键（如身份证号），因为业务需求可能会变（比如身份证号可能升位）。</li>
+</ul>
+</li>
+</ul>
+<h4 id="22-%E5%A4%96%E9%94%AE-foreign-key%E5%85%B3%E7%B3%BB%E9%97%B4%E7%9A%84%E6%A1%A5%E6%A2%81"><strong>2.2 外键 (Foreign Key)：关系间的桥梁</strong></h4>
+<p>如果数据库只有一个表，那将毫无意义。外键是建立表与表之间联系的机制，是维护<strong>参照完整性 (Referential Integrity)</strong> 的核心。</p>
+<ul>
+<li><strong>定义：</strong> 关系 $r_1$ 中的一个属性集合 $FK$，它引用了关系 $r_2$ 的主键 $PK$。这意味着，$r_1$ 中 $FK$ 的每一个值，要么必须等于 $r_2$ 中某个元组的 $PK$ 值，要么必须为 <code>NULL</code>。
                 <ul>
-                <li><strong>超键 (Superkey):</strong> 一个或多个属性的集合，其值能<strong>唯一</strong>确定一个元组。例如，在<code>学生</code>表中，<code>{学号}</code>是一个超键，<code>{学号, 姓名}</code>也是一个超键。</li>
-                <li><strong>候选键 (Candidate Key):</strong> <strong>最小</strong>的超键。即，从该属性集合中移除任何一个属性，它就不再是超键。例如，<code>{学号}</code>是候选键，而<code>{学号, 姓名}</code>不是，因为移除了<code>姓名</code>后，<code>{学号}</code>依然是超键。如果<code>{身份证号}</code>也能唯一标识学生，那它也是一个候选键。</li>
-                <li><strong>主键 (Primary Key):</strong> 被数据库设计者从一个或多个候选键中<strong>选定</strong>的一个，用作该关系中元组的主要标识。
-                <ul>
-                <li><strong>设计哲学：为何要指定主键？</strong>
-                <ol>
-                <li><strong>明确性：</strong> 为表中的每一行提供一个明确、无歧义的“官方”ID。</li>
-                <li><strong>性能：</strong> DBMS通常会为主键自动创建索引，以极大地加速基于主键的查找和连接操作。</li>
-                <li><strong>引用：</strong> 主键是其他表引用本表记录的“锚点”（通过外键）。</li>
-                </ol>
-                </li>
-                <li><strong>最佳实践：</strong> 通常选择“人造”的、无业务含义的键（如自增ID、UUID）作主键，而不是有业务含义的键（如身份证号），因为业务需求可能会变（比如身份证号可能升位）。</li>
-                </ul>
-                </li>
-                </ul>
-                <h4 id="22-%E5%A4%96%E9%94%AE-foreign-key%E5%85%B3%E7%B3%BB%E9%97%B4%E7%9A%84%E6%A1%A5%E6%A2%81"><strong>2.2 外键 (Foreign Key)：关系间的桥梁</strong></h4>
-                <p>如果数据库只有一个表，那将毫无意义。外键是建立表与表之间联系的机制，是维护<strong>参照完整性 (Referential Integrity)</strong> 的核心。</p>
-                <ul>
-                <li><strong>定义：</strong> 关系 $r_1$ 中的一个属性集合 $FK$，它引用了关系 $r_2$ 的主键 $PK$。这意味着，$r_1$ 中 $FK$ 的每一个值，要么必须等于 $r_2$ 中某个元组的 $PK$ 值，要么必须为 <code>NULL</code>。
-                <ul>
-                <li>$r_1$ 称为<strong>参照关系 (Referencing Relation)</strong>。</li>
-                <li>$r_2$ 称为<strong>被参照关系 (Referenced Relation)</strong>。</li>
-                </ul>
-                </li>
-                </ul>
-                <p><strong>设计哲学：杜绝“悬空指针”</strong>
+<li>$r_1$ 称为<strong>参照关系 (Referencing Relation)</strong>。</li>
+<li>$r_2$ 称为<strong>被参照关系 (Referenced Relation)</strong>。</li>
+</ul>
+</li>
+</ul>
+<p><strong>设计哲学：杜绝“悬空指针”</strong>
                 外键机制从根本上解决了网状/层次模型中的“悬空指针”问题。它保证了：</p>
-                <ul>
-                <li>你不能在一个<code>选课表</code>中插入一条记录，其<code>学号</code>在一个不存在的<code>学生表</code>中。</li>
-                <li>你不能从<code>学生表</code>中删除一个学生，如果这个学生的<code>学号</code>还在<code>选课表</code>中被引用（除非定义了级联删除等策略）。</li>
-                </ul>
-                <p>这确保了数据的一致性和有效性，将数据校验的责任从成千上万的应用程序代码中解放出来，统一由DBMS保证。</p>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E5%85%B3%E7%B3%BB%E4%BB%A3%E6%95%B0"><strong>第三部分：关系代数</strong></h3>
-                <p>关系代数是一套对关系进行运算的语言，它是查询语言（如SQL）的理论基础。每个操作的输入是一个或多个关系，输出是一个<strong>新的关系</strong>。这个“<strong>闭包</strong>”特性（运算结果仍然是同类对象）使得操作可以被任意嵌套和组合，构建出复杂的查询。</p>
-                <h4 id="31-%E5%85%AD%E7%A7%8D%E5%9F%BA%E6%9C%AC%E8%BF%90%E7%AE%97-fundamental-operations"><strong>3.1 六种基本运算 (Fundamental Operations)</strong></h4>
-                <p>这六种运算构成了关系代数的完备集，理论上可以表达所有的关系查询。</p>
-                <ol>
-                <li>
-                <p><strong>选择 (Select) - $\sigma$</strong></p>
-                <ul>
-                <li><strong>作用：</strong> 过滤元组（行）。</li>
-                <li><strong>语法：</strong> $\sigma_p(r)$，其中 $p$ 是选择谓词（条件）。</li>
-                <li><strong>与SQL的联系：</strong> <code>WHERE</code> 子句。</li>
-                <li><strong>示例：</strong> 查询A=&quot;β&quot;且D&gt;5的元组。 $\sigma_{A='β' \land D&gt;5}(r)$</li>
-                </ul>
-                <p>$$
+<ul>
+<li>你不能在一个<code>选课表</code>中插入一条记录，其<code>学号</code>在一个不存在的<code>学生表</code>中。</li>
+<li>你不能从<code>学生表</code>中删除一个学生，如果这个学生的<code>学号</code>还在<code>选课表</code>中被引用（除非定义了级联删除等策略）。</li>
+</ul>
+<p>这确保了数据的一致性和有效性，将数据校验的责任从成千上万的应用程序代码中解放出来，统一由DBMS保证。</p>
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E5%85%B3%E7%B3%BB%E4%BB%A3%E6%95%B0"><strong>第三部分：关系代数</strong></h3>
+<p>关系代数是一套对关系进行运算的语言，它是查询语言（如SQL）的理论基础。每个操作的输入是一个或多个关系，输出是一个<strong>新的关系</strong>。这个“<strong>闭包</strong>”特性（运算结果仍然是同类对象）使得操作可以被任意嵌套和组合，构建出复杂的查询。</p>
+<h4 id="31-%E5%85%AD%E7%A7%8D%E5%9F%BA%E6%9C%AC%E8%BF%90%E7%AE%97-fundamental-operations"><strong>3.1 六种基本运算 (Fundamental Operations)</strong></h4>
+<p>这六种运算构成了关系代数的完备集，理论上可以表达所有的关系查询。</p>
+<ol>
+<li>
+<p><strong>选择 (Select) - $\sigma$</strong></p>
+<ul>
+<li><strong>作用：</strong> 过滤元组（行）。</li>
+<li><strong>语法：</strong> $\sigma_p(r)$，其中 $p$ 是选择谓词（条件）。</li>
+<li><strong>与SQL的联系：</strong> <code>WHERE</code> 子句。</li>
+<li><strong>示例：</strong> 查询A="β"且D&gt;5的元组。 $\sigma_{A='β' \land D&gt;5}(r)$</li>
+</ul>
+<p>$$
                 r=\begin{array}{|c|c|c|c|}
                 \hline
                 A &amp; B &amp; C &amp; D \\
@@ -177,7 +177,7 @@
                 \hline
                 \end{array}
                 $$</p>
-                <p>$$
+<p>$$
                 \sigma_{A=\beta \land D_{&gt;5}}(r)=\begin{array}{|c|c|c|c|}
                 \hline
                 A &amp; B &amp; C &amp; D\\
@@ -186,15 +186,15 @@
                 \hline
                 \end{array}
                 $$</p>
-                </li>
-                <li>
-                <p><strong>投影 (Project) - $\Pi$</strong></p>
-                <ul>
-                <li><strong>作用：</strong> 选择属性（列）。</li>
-                <li><strong>语法：</strong> $\Pi_{A_1, A_2, \ldots, A_k}(r)$</li>
-                <li><strong>与SQL的联系：</strong> <code>SELECT</code> 后的列名列表。</li>
-                <li><strong>设计哲学：结果仍是集合。</strong> 投影操作后，如果出现重复的元组，会自动被<strong>消除</strong>，因为输出必须是一个合法的关系（集合）。这是关系代数与典型SQL <code>SELECT</code> 的一个重要区别（SQL默认不消除重复，需要使用<code>DISTINCT</code>）。</li>
-                <li><strong>示例：</strong> 从关系r中投影出A和C两列。 $\Pi_{A, C}(r)$
+</li>
+<li>
+<p><strong>投影 (Project) - $\Pi$</strong></p>
+<ul>
+<li><strong>作用：</strong> 选择属性（列）。</li>
+<li><strong>语法：</strong> $\Pi_{A_1, A_2, \ldots, A_k}(r)$</li>
+<li><strong>与SQL的联系：</strong> <code>SELECT</code> 后的列名列表。</li>
+<li><strong>设计哲学：结果仍是集合。</strong> 投影操作后，如果出现重复的元组，会自动被<strong>消除</strong>，因为输出必须是一个合法的关系（集合）。这是关系代数与典型SQL <code>SELECT</code> 的一个重要区别（SQL默认不消除重复，需要使用<code>DISTINCT</code>）。</li>
+<li><strong>示例：</strong> 从关系r中投影出A和C两列。 $\Pi_{A, C}(r)$
                 $$
                 r=\begin{array}{|c|c|c|}
                 \hline
@@ -210,8 +210,8 @@
                 \hline
                 \end{array}
                 $$</li>
-                </ul>
-                <p>$$
+</ul>
+<p>$$
                 \Pi_{A,C}(r)=\begin{array}{|c|c|}
                 \hline
                 A &amp; C \\
@@ -236,20 +236,20 @@
                 \hline
                 \end{array}
                 $$</p>
-                </li>
-                <li>
-                <p><strong>并 (Union) - $\cup$</strong></p>
-                <ul>
-                <li><strong>作用：</strong> 合并两个关系的元组。</li>
-                <li><strong>语法：</strong> $r \cup s$</li>
-                <li><strong>要求：</strong> $r$ 和 $s$ 必须是<strong>并兼容 (Union-compatible)</strong> 的，即：
+</li>
+<li>
+<p><strong>并 (Union) - $\cup$</strong></p>
+<ul>
+<li><strong>作用：</strong> 合并两个关系的元组。</li>
+<li><strong>语法：</strong> $r \cup s$</li>
+<li><strong>要求：</strong> $r$ 和 $s$ 必须是<strong>并兼容 (Union-compatible)</strong> 的，即：
                 <ol>
-                <li>它们具有相同的属性数量（元数相同）。</li>
-                <li>对应属性的域相同（或兼容）。</li>
-                </ol>
-                </li>
-                <li><strong>与SQL的联系：</strong> <code>UNION</code>。</li>
-                <li><strong>示例：</strong>
+<li>它们具有相同的属性数量（元数相同）。</li>
+<li>对应属性的域相同（或兼容）。</li>
+</ol>
+</li>
+<li><strong>与SQL的联系：</strong> <code>UNION</code>。</li>
+<li><strong>示例：</strong>
                 $$
                 r = \begin{array}{|c|c|}
                 \hline
@@ -271,8 +271,8 @@
                 \hline
                 \end{array}
                 $$</li>
-                </ul>
-                <p>$$
+</ul>
+<p>$$
                 r \cup s=\begin{array}{|c|c|}
                 \hline
                 A &amp; B \\
@@ -287,15 +287,15 @@
                 \hline
                 \end{array}
                 $$</p>
-                </li>
-                <li>
-                <p><strong>差 (Set Difference) - $-$</strong></p>
-                <ul>
-                <li><strong>作用：</strong> 从一个关系中减去另一个关系中存在的元组。</li>
-                <li><strong>语法：</strong> $r - s$</li>
-                <li><strong>要求：</strong> 同样需要并兼容。</li>
-                <li><strong>与SQL的联系：</strong> <code>EXCEPT</code> (在某些SQL方言中是 <code>MINUS</code>)。</li>
-                <li><strong>示例：</strong>
+</li>
+<li>
+<p><strong>差 (Set Difference) - $-$</strong></p>
+<ul>
+<li><strong>作用：</strong> 从一个关系中减去另一个关系中存在的元组。</li>
+<li><strong>语法：</strong> $r - s$</li>
+<li><strong>要求：</strong> 同样需要并兼容。</li>
+<li><strong>与SQL的联系：</strong> <code>EXCEPT</code> (在某些SQL方言中是 <code>MINUS</code>)。</li>
+<li><strong>示例：</strong>
                 $$
                 r = \begin{array}{|c|c|}
                 \hline
@@ -317,8 +317,8 @@
                 \hline
                 \end{array}
                 $$</li>
-                </ul>
-                <p>$$
+</ul>
+<p>$$
                 r-s=\begin{array}{|c|c|}
                 \hline
                 A &amp; B \\
@@ -329,14 +329,14 @@
                 \hline
                 \end{array}
                 $$</p>
-                </li>
-                <li>
-                <p><strong>笛卡尔积 (Cartesian Product) - $\times$</strong></p>
-                <ul>
-                <li><strong>作用：</strong> 将两个关系的所有元组进行所有可能的配对，生成一个更“宽”的关系。</li>
-                <li><strong>语法：</strong> $r \times s$</li>
-                <li><strong>设计哲学：所有连接的基础。</strong> 笛卡尔积本身很少直接使用，因为它会产生大量无意义的组合。但它是所有<strong>连接 (Join)</strong> 操作的理论基础。一个连接操作可以被看作是一个<strong>笛卡尔积</strong>紧跟着一个<strong>选择</strong>操作。</li>
-                <li><strong>示例：</strong>
+</li>
+<li>
+<p><strong>笛卡尔积 (Cartesian Product) - $\times$</strong></p>
+<ul>
+<li><strong>作用：</strong> 将两个关系的所有元组进行所有可能的配对，生成一个更“宽”的关系。</li>
+<li><strong>语法：</strong> $r \times s$</li>
+<li><strong>设计哲学：所有连接的基础。</strong> 笛卡尔积本身很少直接使用，因为它会产生大量无意义的组合。但它是所有<strong>连接 (Join)</strong> 操作的理论基础。一个连接操作可以被看作是一个<strong>笛卡尔积</strong>紧跟着一个<strong>选择</strong>操作。</li>
+<li><strong>示例：</strong>
                 $$
                 r = \begin{array}{|c|c|}
                 \hline
@@ -360,8 +360,8 @@
                 \hline
                 \end{array}
                 $$</li>
-                </ul>
-                <p>$$
+</ul>
+<p>$$
                 r \times s = \begin{array}{|c|c|c|c|c|}
                 \hline
                 A &amp; B &amp; C &amp; D &amp; E\\
@@ -384,203 +384,229 @@
                 \hline
                 \end{array}
                 $$</p>
-                <ul>
-                <li><strong>注意：</strong> 如果 $r$ 和 $s$ 有同名属性，需要先用重命名操作解决冲突。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>重命名 (Rename) - $\rho$</strong></p>
-                <ul>
-                <li><strong>作用：</strong> 为关系或其属性赋予新的名称。</li>
-                <li><strong>语法：</strong> $\rho_x(E)$ 将表达式E的结果命名为x；$\rho_{x(A_1, \ldots, A_n)}(E)$ 在命名的同时重命名属性。</li>
-                <li><strong>设计哲学：解决歧义与提高可读性。</strong> 这是关系代数中的一个实用性操作。在进行自连接（一个表与自身连接）或处理有同名属性的笛卡尔积时，重命名是必不可少的。</li>
-                </ul>
-                </li>
-                </ol>
-                <h4 id="32-%E9%99%84%E5%8A%A0%E8%BF%90%E7%AE%97-additional-operations"><strong>3.2 附加运算 (Additional Operations)</strong></h4>
-                <p>这些运算虽然可以用基本运算组合表达，但因为使用频率极高，被定义为独立的操作符。这不仅方便了用户，更重要的是，它为查询优化器提供了重要的<strong>意图信息</strong>。</p>
-                <ol>
-                <li>
-                <p><strong>交 (Intersection) - $\cap$</strong></p>
-                <ul>
-                <li><strong>作用：</strong> 取两个关系的共同元组。</li>
-                <li><strong>语法：</strong> $r \cap s$</li>
-                <li><strong>等价表达：</strong> $r - (r - s)$ 或 $s - (s - r)$。</li>
-                <li><strong>与SQL的联系：</strong> <code>INTERSECT</code>。</li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>连接 (Join)</strong></p>
-                <ul>
-                <li><strong>设计哲学：为何需要专门的Join？</strong>
+<ul>
+<li><strong>注意：</strong> 如果 $r$ 和 $s$ 有同名属性，需要先用重命名操作解决冲突。</li>
+</ul>
+</li>
+<li>
+<p><strong>重命名 (Rename) - $\rho$</strong></p>
+<ul>
+<li><strong>作用：</strong> 为关系或其属性赋予新的名称。</li>
+<li><strong>语法：</strong> $\rho_x(E)$ 将表达式E的结果命名为x；$\rho_{x(A_1, \ldots, A_n)}(E)$ 在命名的同时重命名属性。</li>
+<li><strong>设计哲学：解决歧义与提高可读性。</strong> 这是关系代数中的一个实用性操作。在进行自连接（一个表与自身连接）或处理有同名属性的笛卡尔积时，重命名是必不可少的。</li>
+</ul>
+</li>
+</ol>
+<h4 id="32-%E9%99%84%E5%8A%A0%E8%BF%90%E7%AE%97-additional-operations"><strong>3.2 附加运算 (Additional Operations)</strong></h4>
+<p>这些运算虽然可以用基本运算组合表达，但因为使用频率极高，被定义为独立的操作符。这不仅方便了用户，更重要的是，它为查询优化器提供了重要的<strong>意图信息</strong>。</p>
+<ol>
+<li>
+<p><strong>交 (Intersection) - $\cap$</strong></p>
+<ul>
+<li><strong>作用：</strong> 取两个关系的共同元组。</li>
+<li><strong>语法：</strong> $r \cap s$</li>
+<li><strong>等价表达：</strong> $r - (r - s)$ 或 $s - (s - r)$。</li>
+<li><strong>与SQL的联系：</strong> <code>INTERSECT</code>。</li>
+</ul>
+</li>
+<li>
+<p><strong>连接 (Join)</strong></p>
+<ul>
+<li><strong>设计哲学：为何需要专门的Join？</strong>
                 虽然 <code>Join</code> 可以用 <code>笛卡尔积 + 选择</code> 模拟，但 <code>Join</code> 明确地告诉了DBMS：“我想要基于特定条件的匹配”。DBMS看到 <code>Join</code>，会立即启用高效的连接算法（如Hash Join, Merge Join），而不是真的去计算庞大的笛卡尔积。这是从“数学理论”到“工程实现”的关键一步。</li>
-                <li><strong>$\theta$-连接 (Theta Join):</strong> $r \bowtie_\theta s \equiv \sigma_\theta(r \times s)$
+<li><strong>$\theta$-连接 (Theta Join):</strong> $r \bowtie_\theta s \equiv \sigma_\theta(r \times s)$
                 <ul>
-                <li>最通用的连接，$\theta$ 可以是任何比较条件（如<code>&gt;</code>、<code>&lt;=</code>）。</li>
-                </ul>
-                </li>
-                <li><strong>自然连接 (Natural Join):</strong> $r \bowtie s$
+<li>最通用的连接，$\theta$ 可以是任何比较条件（如<code>&gt;</code>、<code>&lt;=</code>）。</li>
+</ul>
+</li>
+<li><strong>自然连接 (Natural Join):</strong> $r \bowtie s$
                 <ul>
-                <li>这是一个非常重要的特例。它的执行步骤是：
+<li>这是一个非常重要的特例。它的执行步骤是：
                 <ol>
-                <li>找出 $r$ 和 $s$ 中所有<strong>同名</strong>的属性。</li>
-                <li>计算 $r \times s$。</li>
-                <li>选择那些在所有同名属性上<strong>值相等</strong>的元组。</li>
-                <li>对结果进行投影，<strong>去掉重复</strong>的同名属性列。</li>
-                </ol>
-                </li>
-                <li><strong>优点：</strong> 简洁。</li>
-                <li><strong>缺点与风险：</strong> 它是一种“隐式”连接，连接条件由列名决定。如果表结构意外改变（例如，有人给两个本不相关的表添加了同名列），查询结果可能会在不被察觉的情况下出错。因此，在现代SQL中，更推荐使用<code>ON</code>子句显式指定连接条件。</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>除 (Division) - $\div$</strong></p>
+<li>找出 $r$ 和 $s$ 中所有<strong>同名</strong>的属性。</li>
+<li>计算 $r \times s$。</li>
+<li>选择那些在所有同名属性上<strong>值相等</strong>的元组。</li>
+<li>对结果进行投影，<strong>去掉重复</strong>的同名属性列。</li>
+</ol>
+</li>
+<li><strong>优点：</strong> 简洁。</li>
+<li><strong>缺点与风险：</strong> 它是一种“隐式”连接，连接条件由列名决定。如果表结构意外改变（例如，有人给两个本不相关的表添加了同名列），查询结果可能会在不被察觉的情况下出错。因此，在现代SQL中，更推荐使用<code>ON</code>子句显式指定连接条件。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>除 (Division) - $\div$</strong></p>
+<ul>
+<li><strong>作用：</strong> 处理“所有(for all)”类型的查询。</li>
+<li><strong>场景：</strong> “查询选修了<strong>所有</strong>计算机学院开设课程的学生的学号”。</li>
+<li><strong>直观理解：</strong> $r(R) \div s(S)$，其中属性集 $S \subset R$。结果的属性是 $R-S$。一个元组 $t$ 出现在结果中，当且仅当对于 $s$ 中的<strong>每一个</strong>元组 $u$，拼接后的元组 $tu$ 都存在于 $r$ 中。</li>
+<li><strong>等价表达：</strong> $r \div s = \Pi_{R-S}(r) - \Pi_{R-S}((\Pi_{R-S}(r) \times s) - r)$
                 <ul>
-                <li><strong>作用：</strong> 处理“所有(for all)”类型的查询。</li>
-                <li><strong>场景：</strong> “查询选修了<strong>所有</strong>计算机学院开设课程的学生的学号”。</li>
-                <li><strong>直观理解：</strong> $r(R) \div s(S)$，其中属性集 $S \subset R$。结果的属性是 $R-S$。一个元组 $t$ 出现在结果中，当且仅当对于 $s$ 中的<strong>每一个</strong>元组 $u$，拼接后的元组 $tu$ 都存在于 $r$ 中。</li>
-                <li><strong>等价表达：</strong> $r \div s = \Pi_{R-S}(r) - \Pi_{R-S}((\Pi_{R-S}(r) \times s) - r)$
+<li>这个复杂的表达恰恰说明了为“除”法定义一个独立操作符的必要性。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>赋值 (Assignment) - $\leftarrow$</strong></p>
+<ul>
+<li><strong>作用：</strong> 将一个查询的结果保存到一个临时的关系变量中，以便在后续查询中使用。</li>
+<li><strong>与SQL的联系：</strong> <code>WITH</code> 子句 (Common Table Expressions, CTE) 或创建临时视图 (View)。</li>
+<li><strong>设计哲学：</strong> 实现了查询的<strong>过程化</strong>，使得可以将一个极其复杂的查询分解为一系列逻辑清晰的步骤，极大地增强了可读性和可维护性。</li>
+</ul>
+</li>
+</ol>
+<h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E8%81%9A%E5%90%88%E4%B8%8E%E8%AE%A1%E7%AE%97"><strong>第四部分：聚合与计算</strong></h3>
+<p>基本关系代数只能进行数据的筛选和组合。但实际应用中，我们还需要进行统计和计算。</p>
+<h4 id="41-%E5%B9%BF%E4%B9%89%E6%8A%95%E5%BD%B1-generalized-projection"><strong>4.1 广义投影 (Generalized Projection)</strong></h4>
+<p>允许在投影列表 $\Pi$ 中使用算术表达式。</p>
+<ul>
+<li><strong>语法：</strong> $\Pi_{F_1, F_2, \ldots, F_n}(E)$</li>
+<li><strong>示例：</strong> 计算每个员工的年薪。假设<code>employee</code>表有<code>monthly_salary</code>列。
                 <ul>
-                <li>这个复杂的表达恰恰说明了为“除”法定义一个独立操作符的必要性。</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>赋值 (Assignment) - $\leftarrow$</strong></p>
+<li>$\Pi_{\text{name}, \text{monthly_salary} * 12 \rightarrow \text{annual_salary}}(\text{employee})$</li>
+</ul>
+</li>
+<li><strong>与SQL的联系：</strong> <code>SELECT</code> 列表中可以直接进行计算，如 <code>SELECT name, monthly_salary * 12 AS annual_salary FROM employee</code>。</li>
+</ul>
+<h4 id="42-%E8%81%9A%E5%90%88%E5%87%BD%E6%95%B0%E4%B8%8E%E5%88%86%E7%BB%84-aggregation--grouping"><strong>4.2 聚合函数与分组 (Aggregation &amp; Grouping)</strong></h4>
+<ul>
+<li><strong>聚合函数：</strong> 将一组值作为输入，返回一个单一值。常见的有：
                 <ul>
-                <li><strong>作用：</strong> 将一个查询的结果保存到一个临时的关系变量中，以便在后续查询中使用。</li>
-                <li><strong>与SQL的联系：</strong> <code>WITH</code> 子句 (Common Table Expressions, CTE) 或创建临时视图 (View)。</li>
-                <li><strong>设计哲学：</strong> 实现了查询的<strong>过程化</strong>，使得可以将一个极其复杂的查询分解为一系列逻辑清晰的步骤，极大地增强了可读性和可维护性。</li>
-                </ul>
-                </li>
-                </ol>
-                <h3 id="%E7%AC%AC%E5%9B%9B%E9%83%A8%E5%88%86%E8%81%9A%E5%90%88%E4%B8%8E%E8%AE%A1%E7%AE%97"><strong>第四部分：聚合与计算</strong></h3>
-                <p>基本关系代数只能进行数据的筛选和组合。但实际应用中，我们还需要进行统计和计算。</p>
-                <h4 id="41-%E5%B9%BF%E4%B9%89%E6%8A%95%E5%BD%B1-generalized-projection"><strong>4.1 广义投影 (Generalized Projection)</strong></h4>
-                <p>允许在投影列表 $\Pi$ 中使用算术表达式。</p>
+<li><code>AVG</code> (平均值), <code>MIN</code> (最小值), <code>MAX</code> (最大值), <code>SUM</code> (求和), <code>COUNT</code> (计数)。</li>
+</ul>
+</li>
+<li><strong>分组操作符 ($\mathcal{G}$):</strong>
+<ul>
+<li><strong>语法：</strong> $<em>{G_1, G_2, \ldots, G_n} \mathcal{G}</em>{F_1(A_1), F_2(A_2), \ldots, F_m(A_m)}(E)$
                 <ul>
-                <li><strong>语法：</strong> $\Pi_{F_1, F_2, \ldots, F_n}(E)$</li>
-                <li><strong>示例：</strong> 计算每个员工的年薪。假设<code>employee</code>表有<code>monthly_salary</code>列。
+<li>$G_1, \ldots, G_n$ 是分组属性。</li>
+<li>$F_i(A_i)$ 是聚合函数及其作用的属性。</li>
+</ul>
+</li>
+<li><strong>与SQL的联系：</strong>
+<ul>
+<li>分组属性列表对应 <code>GROUP BY</code> 子句。</li>
+<li>聚合函数列表对应 <code>SELECT</code> 子句中的聚合表达式。</li>
+</ul>
+</li>
+<li><strong>示例：</strong> 查询每个专业的学生人数和平均年龄。
                 <ul>
-                <li>$\Pi_{\text{name}, \text{monthly_salary} * 12 \rightarrow \text{annual_salary}}(\text{employee})$</li>
-                </ul>
-                </li>
-                <li><strong>与SQL的联系：</strong> <code>SELECT</code> 列表中可以直接进行计算，如 <code>SELECT name, monthly_salary * 12 AS annual_salary FROM employee</code>。</li>
-                </ul>
-                <h4 id="42-%E8%81%9A%E5%90%88%E5%87%BD%E6%95%B0%E4%B8%8E%E5%88%86%E7%BB%84-aggregation--grouping"><strong>4.2 聚合函数与分组 (Aggregation &amp; Grouping)</strong></h4>
+<li>$<em>{\text{专业}} \mathcal{G}</em>{\text{COUNT(学号)}, \text{AVG(年龄)}}(\text{学生})$</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%BF%AE%E6%94%B9"><strong>第五部分：数据库的修改</strong></h3>
+<p>关系代数不仅可以查询，也可以用来精确地描述数据库的修改操作。所有修改都可以看作是对关系变量的重新赋值。</p>
+<ol>
+<li>
+<p><strong>删除 (Deletion):</strong></p>
+<ul>
+<li><strong>逻辑：</strong> 从关系中减去满足特定条件的元组集合。</li>
+<li><strong>代数表示：</strong> $r \leftarrow r - E$，其中 $E$ 是一个关系代数表达式，其结果是要删除的元组集合。</li>
+<li><strong>示例：</strong> 删除所有计算机专业的学生。
                 <ul>
-                <li><strong>聚合函数：</strong> 将一组值作为输入，返回一个单一值。常见的有：
+<li><code>学生</code> $\leftarrow$ <code>学生</code> - $\sigma_{\text{专业}='计算机'}(\text{学生})$</li>
+</ul>
+</li>
+<li><strong>与SQL的联系：</strong> <code>DELETE FROM 学生 WHERE 专业 = '计算机'</code></li>
+</ul>
+</li>
+<li>
+<p><strong>插入 (Insertion):</strong></p>
+<ul>
+<li><strong>逻辑：</strong> 向关系中并入一个新的元组集合。</li>
+<li><strong>代数表示：</strong> $r \leftarrow r \cup E$，其中 $E$ 的结果是要插入的元组集合。</li>
+<li><strong>示例：</strong> 插入一个新学生。
                 <ul>
-                <li><code>AVG</code> (平均值), <code>MIN</code> (最小值), <code>MAX</code> (最大值), <code>SUM</code> (求和), <code>COUNT</code> (计数)。</li>
-                </ul>
-                </li>
-                <li><strong>分组操作符 ($\mathcal{G}$):</strong>
+<li><code>学生</code> $\leftarrow$ <code>学生</code> $\cup {('2025001', '陈明', '物理')}$</li>
+</ul>
+</li>
+<li><strong>与SQL的联系：</strong> <code>INSERT INTO ...</code></li>
+</ul>
+</li>
+<li>
+<p><strong>更新 (Update):</strong></p>
+<ul>
+<li><strong>逻辑：</strong> 这是最复杂的。更新可以看作是“有条件地用新值替换旧值”。在关系代数中，通常用<strong>广义投影</strong>来模拟。</li>
+<li><strong>代数表示：</strong> $r \leftarrow \Pi_{F_1, F_2, \ldots, F_n}(r)$
                 <ul>
-                <li><strong>语法：</strong> $<em>{G_1, G_2, \ldots, G_n} \mathcal{G}</em>{F_1(A_1), F_2(A_2), \ldots, F_m(A_m)}(E)$
+<li>对于不需要更新的属性 $A_i$, $F_i$ 就是 $A_i$ 本身。</li>
+<li>对于需要更新的属性 $A_j$, $F_j$ 就是一个计算新值的表达式，该表达式可以使用 <code>CASE</code> 类的条件逻辑。</li>
+</ul>
+</li>
+<li><strong>示例：</strong> 将所有计算机专业学生的专业改为“人工智能”。
                 <ul>
-                <li>$G_1, \ldots, G_n$ 是分组属性。</li>
-                <li>$F_i(A_i)$ 是聚合函数及其作用的属性。</li>
-                </ul>
-                </li>
-                <li><strong>与SQL的联系：</strong>
-                <ul>
-                <li>分组属性列表对应 <code>GROUP BY</code> 子句。</li>
-                <li>聚合函数列表对应 <code>SELECT</code> 子句中的聚合表达式。</li>
-                </ul>
-                </li>
-                <li><strong>示例：</strong> 查询每个专业的学生人数和平均年龄。
-                <ul>
-                <li>$<em>{\text{专业}} \mathcal{G}</em>{\text{COUNT(学号)}, \text{AVG(年龄)}}(\text{学生})$</li>
-                </ul>
-                </li>
-                </ul>
-                </li>
-                </ul>
-                <h3 id="%E7%AC%AC%E4%BA%94%E9%83%A8%E5%88%86%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E4%BF%AE%E6%94%B9"><strong>第五部分：数据库的修改</strong></h3>
-                <p>关系代数不仅可以查询，也可以用来精确地描述数据库的修改操作。所有修改都可以看作是对关系变量的重新赋值。</p>
+<li>这是一个更复杂的表达，可以想象成：
                 <ol>
-                <li>
-                <p><strong>删除 (Deletion):</strong></p>
-                <ul>
-                <li><strong>逻辑：</strong> 从关系中减去满足特定条件的元组集合。</li>
-                <li><strong>代数表示：</strong> $r \leftarrow r - E$，其中 $E$ 是一个关系代数表达式，其结果是要删除的元组集合。</li>
-                <li><strong>示例：</strong> 删除所有计算机专业的学生。
-                <ul>
-                <li><code>学生</code> $\leftarrow$ <code>学生</code> - $\sigma_{\text{专业}='计算机'}(\text{学生})$</li>
-                </ul>
-                </li>
-                <li><strong>与SQL的联系：</strong> <code>DELETE FROM 学生 WHERE 专业 = '计算机'</code></li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>插入 (Insertion):</strong></p>
-                <ul>
-                <li><strong>逻辑：</strong> 向关系中并入一个新的元组集合。</li>
-                <li><strong>代数表示：</strong> $r \leftarrow r \cup E$，其中 $E$ 的结果是要插入的元组集合。</li>
-                <li><strong>示例：</strong> 插入一个新学生。
-                <ul>
-                <li><code>学生</code> $\leftarrow$ <code>学生</code> $\cup {('2025001', '陈明', '物理')}$</li>
-                </ul>
-                </li>
-                <li><strong>与SQL的联系：</strong> <code>INSERT INTO ...</code></li>
-                </ul>
-                </li>
-                <li>
-                <p><strong>更新 (Update):</strong></p>
-                <ul>
-                <li><strong>逻辑：</strong> 这是最复杂的。更新可以看作是“有条件地用新值替换旧值”。在关系代数中，通常用<strong>广义投影</strong>来模拟。</li>
-                <li><strong>代数表示：</strong> $r \leftarrow \Pi_{F_1, F_2, \ldots, F_n}(r)$
-                <ul>
-                <li>对于不需要更新的属性 $A_i$, $F_i$ 就是 $A_i$ 本身。</li>
-                <li>对于需要更新的属性 $A_j$, $F_j$ 就是一个计算新值的表达式，该表达式可以使用 <code>CASE</code> 类的条件逻辑。</li>
-                </ul>
-                </li>
-                <li><strong>示例：</strong> 将所有计算机专业学生的专业改为“人工智能”。
-                <ul>
-                <li>这是一个更复杂的表达，可以想象成：
-                <ol>
-                <li>选出需要更新的元组：$T_1 = \sigma_{\text{专业}='计算机'}(\text{学生})$</li>
-                <li>选出不需更新的元组：$T_2 = \sigma_{\text{专业}&lt;&gt;'计算机'}(\text{学生})$</li>
-                <li>对需要更新的元组计算新值：$T'<em>1 = \Pi</em>{\text{学号}, \text{姓名}, '人工智能' \rightarrow \text{专业}}(T_1)$</li>
-                <li>合并结果：<code>学生</code> $\leftarrow T_2 \cup T'_1$</li>
-                </ol>
-                </li>
-                </ul>
-                </li>
-                <li><strong>与SQL的联系：</strong> <code>UPDATE 学生 SET 专业 = '人工智能' WHERE 专业 = '计算机'</code>。SQL语法在这里显然要简洁得多，但底层逻辑是一致的：定位元组，计算新值，替换旧元组。</li>
-                </ul>
-                </li>
-                </ol>
-            </article>
-        </main>
-    </div>
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<li>选出需要更新的元组：$T_1 = \sigma_{\text{专业}='计算机'}(\text{学生})$</li>
+<li>选出不需更新的元组：$T_2 = \sigma_{\text{专业}&lt;&gt;'计算机'}(\text{学生})$</li>
+<li>对需要更新的元组计算新值：$T'<em>1 = \Pi</em>{\text{学号}, \text{姓名}, '人工智能' \rightarrow \text{专业}}(T_1)$</li>
+<li>合并结果：<code>学生</code> $\leftarrow T_2 \cup T'_1$</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><strong>与SQL的联系：</strong> <code>UPDATE 学生 SET 专业 = '人工智能' WHERE 专业 = '计算机'</code>。SQL语法在这里显然要简洁得多，但底层逻辑是一致的：定位元组，计算新值，替换旧元组。</li>
+</ul>
+</li>
+</ol>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>

@@ -1,13 +1,12 @@
 <!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>计算机组成2-3:逻辑运算与决策指令</title>
-    
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="../modal.css">
-    
-    <script>
+<meta charset="utf-8"/>
+<title>计算机组成2-3:逻辑运算与决策指令</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
       MathJax = {
         tex: {
           inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -18,12 +17,11 @@
         }
       };
     </script>
-    <script type="text/javascript" id="MathJax-script" async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
-    <script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -32,191 +30,191 @@
     </script>
 </head>
 <body>
-    <audio id="bg-music" src="../music.mp3" loop></audio>
-    <button id="music-toggle" class="music-control">♪</button>
-    <header>
-        <h1>forliage的blog</h1>
-        <nav>
-            <ul>
-                <li><a href="../index.html">首页</a></li>
-                <li><a href="../posts.html">文章</a></li>
-                <li><a href="../about.html">关于</a></li>
-                <li><a href="../category.html?category=技术文章">技术文章</a></li>
-                <li><a href="../category.html?category=生活随笔">生活随笔</a></li>
-                <li><a href="../category.html?category=学习笔记">学习笔记</a></li>
-                <li><a href="../category.html?category=心情日记">心情日记</a></li>
-                <li><a href="#" id="about-me-btn">ABOUT ME</a></li>
-            </ul>
-        </nav>
-    </header>
-    <div class="container">
-        <div id="sidebar-container"></div>
-        <main>
-            <article>
-                <h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%902-3%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97%E4%B8%8E%E5%86%B3%E7%AD%96%E6%8C%87%E4%BB%A4">计算机组成2-3:逻辑运算与决策指令</h1>
-                <h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%9A%84%E9%80%BB%E8%BE%91%E6%80%9D%E7%BB%B4%E4%B8%8E%E5%86%B3%E7%AD%96%E8%83%BD%E5%8A%9B"><strong>第三部分：计算机的逻辑思维与决策能力</strong></h3>
-                <p><strong>本讲提纲：</strong></p>
-                <ol start="6">
-                <li><strong>计算机的“逻辑思维”——逻辑运算</strong>：我们将学习一系列用于位操作的指令，它们是实现数据掩码、位提取和各种底层优化的强大工具。</li>
-                <li><strong>赋予计算机“决策能力”——决策指令</strong>：我们将学习条件分支指令，探索计算机如何实现 <code>if-else</code> 语句、循环结构以及 <code>switch-case</code> 跳转，真正让程序“活”起来。</li>
-                </ol>
-                <h3 id="6-%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97"><strong>6. 逻辑运算</strong></h3>
-                <p>到目前为止，我们接触的运算主要是算术运算（加、减）。但计算机的能力远不止于此。另一大类至关重要的运算是<strong>逻辑运算</strong>。在高级语言中，我们可能只在布尔表达式（如 <code>if (a &amp;&amp; b)</code>）中见过它，但在计算机底层，逻辑运算的核心作用是<strong>按位操作 (Bitwise Manipulation)</strong>。</p>
-                <p>这意味着我们可以对一个64位寄存器中的每一位独立进行操作，像是有64个并排的小开关一样。这对于提取、插入或修改一个数据字中的特定位域（groups of bits）非常有用。</p>
-                <h4 id="61-%E6%A0%B8%E5%BF%83%E9%80%BB%E8%BE%91%E6%8C%87%E4%BB%A4"><strong>6.1 核心逻辑指令</strong></h4>
-                <p>下表总结了C/Java语言与RISC-V汇编中常见的逻辑运算：</p>
-                <table>
-                <thead>
-                <tr>
-                <th style="text-align:left">运算</th>
-                <th style="text-align:center">C 语言</th>
-                <th style="text-align:center">Java 语言</th>
-                <th style="text-align:left">RISC-V 指令</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                <td style="text-align:left"><strong>按位与 (AND)</strong></td>
-                <td style="text-align:center"><code>&amp;</code></td>
-                <td style="text-align:center"><code>&amp;</code></td>
-                <td style="text-align:left"><code>and</code>, <code>andi</code></td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>按位或 (OR)</strong></td>
-                <td style="text-align:center"><code>|</code></td>
-                <td style="text-align:center"><code>|</code></td>
-                <td style="text-align:left"><code>or</code>, <code>ori</code></td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>按位异或 (XOR)</strong></td>
-                <td style="text-align:center"><code>^</code></td>
-                <td style="text-align:center"><code>^</code></td>
-                <td style="text-align:left"><code>xor</code>, <code>xori</code></td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>按位非 (NOT)</strong></td>
-                <td style="text-align:center"><code>~</code></td>
-                <td style="text-align:center"><code>~</code></td>
-                <td style="text-align:left">(通过<code>xori</code>实现)</td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>左移</strong></td>
-                <td style="text-align:center"><code>&lt;&lt;</code></td>
-                <td style="text-align:center"><code>&lt;&lt;</code></td>
-                <td style="text-align:left"><code>sll</code>, <code>slli</code></td>
-                </tr>
-                <tr>
-                <td style="text-align:left"><strong>右移</strong></td>
-                <td style="text-align:center"><code>&gt;&gt;</code></td>
-                <td style="text-align:center"><code>&gt;&gt;&gt;</code></td>
-                <td style="text-align:left"><code>srl</code>, <code>srli</code></td>
-                </tr>
-                </tbody>
-                </table>
-                <h4 id="62-%E6%8C%89%E4%BD%8D%E4%B8%8E-and"><strong>6.2 按位与 (AND)</strong></h4>
-                <p><code>and rd, rs1, rs2</code> 或 <code>andi rd, rs1, immediate</code></p>
-                <p><strong>规则</strong>：只有当两个操作数的对应位都为1时，结果的对应位才为1；否则为0。</p>
-                <p><strong>核心应用：掩码 (Masking) —— 清零特定位</strong>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%902-3%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97%E4%B8%8E%E5%86%B3%E7%AD%96%E6%8C%87%E4%BB%A4">计算机组成2-3:逻辑运算与决策指令</h1>
+<h3 id="%E7%AC%AC%E4%B8%89%E9%83%A8%E5%88%86%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%9A%84%E9%80%BB%E8%BE%91%E6%80%9D%E7%BB%B4%E4%B8%8E%E5%86%B3%E7%AD%96%E8%83%BD%E5%8A%9B"><strong>第三部分：计算机的逻辑思维与决策能力</strong></h3>
+<p><strong>本讲提纲：</strong></p>
+<ol start="6">
+<li><strong>计算机的“逻辑思维”——逻辑运算</strong>：我们将学习一系列用于位操作的指令，它们是实现数据掩码、位提取和各种底层优化的强大工具。</li>
+<li><strong>赋予计算机“决策能力”——决策指令</strong>：我们将学习条件分支指令，探索计算机如何实现 <code>if-else</code> 语句、循环结构以及 <code>switch-case</code> 跳转，真正让程序“活”起来。</li>
+</ol>
+<h3 id="6-%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97"><strong>6. 逻辑运算</strong></h3>
+<p>到目前为止，我们接触的运算主要是算术运算（加、减）。但计算机的能力远不止于此。另一大类至关重要的运算是<strong>逻辑运算</strong>。在高级语言中，我们可能只在布尔表达式（如 <code>if (a &amp;&amp; b)</code>）中见过它，但在计算机底层，逻辑运算的核心作用是<strong>按位操作 (Bitwise Manipulation)</strong>。</p>
+<p>这意味着我们可以对一个64位寄存器中的每一位独立进行操作，像是有64个并排的小开关一样。这对于提取、插入或修改一个数据字中的特定位域（groups of bits）非常有用。</p>
+<h4 id="61-%E6%A0%B8%E5%BF%83%E9%80%BB%E8%BE%91%E6%8C%87%E4%BB%A4"><strong>6.1 核心逻辑指令</strong></h4>
+<p>下表总结了C/Java语言与RISC-V汇编中常见的逻辑运算：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">运算</th>
+<th style="text-align:center">C 语言</th>
+<th style="text-align:center">Java 语言</th>
+<th style="text-align:left">RISC-V 指令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>按位与 (AND)</strong></td>
+<td style="text-align:center"><code>&amp;</code></td>
+<td style="text-align:center"><code>&amp;</code></td>
+<td style="text-align:left"><code>and</code>, <code>andi</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>按位或 (OR)</strong></td>
+<td style="text-align:center"><code>|</code></td>
+<td style="text-align:center"><code>|</code></td>
+<td style="text-align:left"><code>or</code>, <code>ori</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>按位异或 (XOR)</strong></td>
+<td style="text-align:center"><code>^</code></td>
+<td style="text-align:center"><code>^</code></td>
+<td style="text-align:left"><code>xor</code>, <code>xori</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>按位非 (NOT)</strong></td>
+<td style="text-align:center"><code>~</code></td>
+<td style="text-align:center"><code>~</code></td>
+<td style="text-align:left">(通过<code>xori</code>实现)</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>左移</strong></td>
+<td style="text-align:center"><code>&lt;&lt;</code></td>
+<td style="text-align:center"><code>&lt;&lt;</code></td>
+<td style="text-align:left"><code>sll</code>, <code>slli</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>右移</strong></td>
+<td style="text-align:center"><code>&gt;&gt;</code></td>
+<td style="text-align:center"><code>&gt;&gt;&gt;</code></td>
+<td style="text-align:left"><code>srl</code>, <code>srli</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="62-%E6%8C%89%E4%BD%8D%E4%B8%8E-and"><strong>6.2 按位与 (AND)</strong></h4>
+<p><code>and rd, rs1, rs2</code> 或 <code>andi rd, rs1, immediate</code></p>
+<p><strong>规则</strong>：只有当两个操作数的对应位都为1时，结果的对应位才为1；否则为0。</p>
+<p><strong>核心应用：掩码 (Masking) —— 清零特定位</strong>
                 AND运算就像一个“过滤器”或“遮罩”。我们可以构造一个特定的“掩码”数，其中我们<strong>关心</strong>的位设为1，<strong>不关心</strong>（希望清零）的位设为0。将原始数据与这个掩码进行AND运算，就能精确地保留我们想要的位，同时将其他位全部清零。</p>
-                <p><strong>示例</strong>：假设寄存器 <code>x10</code> 的值为 <code>...00001101 11000000</code>，我们只想保留其低8位中的高4位（即<code>1101</code>中的<code>1100</code>部分），将其他位全部清零。</p>
-                <ol>
-                <li><strong>构造掩码</strong>：我们需要的掩码是 <code>...00000000 00110000</code>。这个掩码被存放在 <code>x11</code> 中。</li>
-                <li><strong>执行AND</strong>：<code>and x9, x10, x11</code></li>
-                </ol>
-                <pre class="hljs"><code><div>  x10:  ... 00000000 00000000 00001101 11000000
+<p><strong>示例</strong>：假设寄存器 <code>x10</code> 的值为 <code>...00001101 11000000</code>，我们只想保留其低8位中的高4位（即<code>1101</code>中的<code>1100</code>部分），将其他位全部清零。</p>
+<ol>
+<li><strong>构造掩码</strong>：我们需要的掩码是 <code>...00000000 00110000</code>。这个掩码被存放在 <code>x11</code> 中。</li>
+<li><strong>执行AND</strong>：<code>and x9, x10, x11</code></li>
+</ol>
+<pre class="hljs"><code><div>  x10:  ... 00000000 00000000 00001101 11000000
                 &amp; x11:  ... 00000000 00000000 00000000 00110000  (掩码)
                 --------------------------------------------------
                 = x9:   ... 00000000 00000000 00000000 00000000
                 </div></code></pre>
-                <p><em>糟糕，我这里犯了个错误，让我们用一个更好的例子，对应PDF中的例子</em>
-                <strong>示例（修正）</strong>：从 <code>x10</code> 中提取 <code>00001101</code> 部分。</p>
-                <ol>
-                <li><strong>构造掩码</strong>：<code>x11</code> 中存放掩码 <code>...00000000 00111100</code></li>
-                <li><strong>执行AND</strong>：<code>and x9, x10, x11</code></li>
-                </ol>
-                <pre class="hljs"><code><div>  x10:  ... 00001101 11000000
+<p><em>糟糕，我这里犯了个错误，让我们用一个更好的例子，对应PDF中的例子</em>
+<strong>示例（修正）</strong>：从 <code>x10</code> 中提取 <code>00001101</code> 部分。</p>
+<ol>
+<li><strong>构造掩码</strong>：<code>x11</code> 中存放掩码 <code>...00000000 00111100</code></li>
+<li><strong>执行AND</strong>：<code>and x9, x10, x11</code></li>
+</ol>
+<pre class="hljs"><code><div>  x10:  ... 00001101 11000000
                 &amp; x11:  ... 00111100 00000000
                 -----------------------------
                 = x9:   ... 00001100 00000000
                 </div></code></pre>
-                <p>结果 <code>x9</code> 中精确地保留了我们感兴趣的位，其余位都被“屏蔽”掉了。</p>
-                <h4 id="63-%E6%8C%89%E4%BD%8D%E6%88%96-or"><strong>6.3 按位或 (OR)</strong></h4>
-                <p><code>or rd, rs1, rs2</code> 或 <code>ori rd, rs1, immediate</code></p>
-                <p><strong>规则</strong>：只要两个操作数的对应位中<strong>至少有一个</strong>为1，结果的对应位就为1。</p>
-                <p><strong>核心应用：置位 (Setting) —— 将特定位置为1</strong>
+<p>结果 <code>x9</code> 中精确地保留了我们感兴趣的位，其余位都被“屏蔽”掉了。</p>
+<h4 id="63-%E6%8C%89%E4%BD%8D%E6%88%96-or"><strong>6.3 按位或 (OR)</strong></h4>
+<p><code>or rd, rs1, rs2</code> 或 <code>ori rd, rs1, immediate</code></p>
+<p><strong>规则</strong>：只要两个操作数的对应位中<strong>至少有一个</strong>为1，结果的对应位就为1。</p>
+<p><strong>核心应用：置位 (Setting) —— 将特定位置为1</strong>
                 OR运算可以强制将数据的某些位置为1，而不影响其他位。我们构造一个掩码，其中需要<strong>置为1</strong>的位设为1，需要<strong>保持不变</strong>的位设为0。</p>
-                <p><strong>示例</strong>：我们希望将寄存器 <code>x10</code> 的值 <code>...00001101 11000000</code> 的低16位中的 <code>...00111100 00000000</code> 这部分强制设为1，而不改变其他位。</p>
-                <ol>
-                <li><strong>构造掩码</strong>：<code>x11</code> 中存放掩码 <code>...00000000 00111100 00000000</code></li>
-                <li><strong>执行OR</strong>：<code>or x9, x10, x11</code></li>
-                </ol>
-                <pre class="hljs"><code><div>  x10:  ... 00001101 11000000
+<p><strong>示例</strong>：我们希望将寄存器 <code>x10</code> 的值 <code>...00001101 11000000</code> 的低16位中的 <code>...00111100 00000000</code> 这部分强制设为1，而不改变其他位。</p>
+<ol>
+<li><strong>构造掩码</strong>：<code>x11</code> 中存放掩码 <code>...00000000 00111100 00000000</code></li>
+<li><strong>执行OR</strong>：<code>or x9, x10, x11</code></li>
+</ol>
+<pre class="hljs"><code><div>  x10:  ... 00001101 11000000
                 | x11:  ... 00111100 00000000
                 -----------------------------
                 = x9:   ... 00111101 11000000
                 </div></code></pre>
-                <p>结果 <code>x9</code> 中，掩码为1的位都被强制置为1了，而掩码为0的位则保持了 <code>x10</code> 的原始值。</p>
-                <h4 id="64-%E6%8C%89%E4%BD%8D%E5%BC%82%E6%88%96-xor"><strong>6.4 按位异或 (XOR)</strong></h4>
-                <p><code>xor rd, rs1, rs2</code> 或 <code>xori rd, rs1, immediate</code></p>
-                <p><strong>规则</strong>：当两个操作数的对应位<strong>不相同</strong>时，结果的对应位为1；相同时为0。</p>
-                <p><strong>核心应用：翻转/取反 (Flipping/Inverting) —— 将特定位反转</strong>
+<p>结果 <code>x9</code> 中，掩码为1的位都被强制置为1了，而掩码为0的位则保持了 <code>x10</code> 的原始值。</p>
+<h4 id="64-%E6%8C%89%E4%BD%8D%E5%BC%82%E6%88%96-xor"><strong>6.4 按位异或 (XOR)</strong></h4>
+<p><code>xor rd, rs1, rs2</code> 或 <code>xori rd, rs1, immediate</code></p>
+<p><strong>规则</strong>：当两个操作数的对应位<strong>不相同</strong>时，结果的对应位为1；相同时为0。</p>
+<p><strong>核心应用：翻转/取反 (Flipping/Inverting) —— 将特定位反转</strong>
                 XOR运算有一个神奇的特性：<code>x ^ 0 = x</code> (与0异或，保持不变)，<code>x ^ 1 = ~x</code> (与1异或，等于取反)。这使得XOR成为一个可编程的“反相器”。</p>
-                <p><strong>示例</strong>：实现 <code>NOT</code> 操作。虽然RISC-V没有单独的 <code>not</code> 指令，但我们可以通过 <code>xori</code> 实现。要对寄存器 <code>x10</code> 的所有位取反，只需将其与全1的数（即-1的补码）进行异或。</p>
-                <ol>
-                <li><strong>构造掩码</strong>：<code>x12</code> 中存放 <code>-1</code>，其二进制表示为全1: <code>1111...1111</code></li>
-                <li><strong>执行XOR</strong>：<code>xor x9, x10, x12</code></li>
-                </ol>
-                <pre class="hljs"><code><div>  x10:  ... 00001101 11000000
+<p><strong>示例</strong>：实现 <code>NOT</code> 操作。虽然RISC-V没有单独的 <code>not</code> 指令，但我们可以通过 <code>xori</code> 实现。要对寄存器 <code>x10</code> 的所有位取反，只需将其与全1的数（即-1的补码）进行异或。</p>
+<ol>
+<li><strong>构造掩码</strong>：<code>x12</code> 中存放 <code>-1</code>，其二进制表示为全1: <code>1111...1111</code></li>
+<li><strong>执行XOR</strong>：<code>xor x9, x10, x12</code></li>
+</ol>
+<pre class="hljs"><code><div>  x10:  ... 00001101 11000000
                 ^ x12:  ... 11111111 11111111
                 -----------------------------
                 = x9:   ... 11110010 00111111
                 </div></code></pre>
-                <p>可以看到，<code>x9</code> 的每一位都与 <code>x10</code> 的对应位相反。</p>
-                <p><strong>思考：</strong> 为什么RISC-V不提供<code>not</code>指令？这再次体现了RISC的设计哲学。<code>not</code>操作可以被<code>xori</code>完美替代，单独为其设计一条指令会增加硬件的复杂性，而收益不大。保持指令集的精简是首要目标。</p>
-                <h4 id="65-%E7%A7%BB%E4%BD%8D%E8%BF%90%E7%AE%97-shift-operations"><strong>6.5 移位运算 (Shift Operations)</strong></h4>
-                <p>移位运算移动寄存器中各位的位置。它们在算术上等同于乘以或除以2的幂，但在硬件上比真正的乘除法器快得多，是性能优化的关键。</p>
-                <ul>
-                <li>
-                <p><strong>逻辑左移 (Shift Left Logical: <code>sll</code>, <code>slli</code>)</strong>
-                <code>slli rd, rs1, shamt</code> (shamt: shift amount, 移位量)
+<p>可以看到，<code>x9</code> 的每一位都与 <code>x10</code> 的对应位相反。</p>
+<p><strong>思考：</strong> 为什么RISC-V不提供<code>not</code>指令？这再次体现了RISC的设计哲学。<code>not</code>操作可以被<code>xori</code>完美替代，单独为其设计一条指令会增加硬件的复杂性，而收益不大。保持指令集的精简是首要目标。</p>
+<h4 id="65-%E7%A7%BB%E4%BD%8D%E8%BF%90%E7%AE%97-shift-operations"><strong>6.5 移位运算 (Shift Operations)</strong></h4>
+<p>移位运算移动寄存器中各位的位置。它们在算术上等同于乘以或除以2的幂，但在硬件上比真正的乘除法器快得多，是性能优化的关键。</p>
+<ul>
+<li>
+<p><strong>逻辑左移 (Shift Left Logical: <code>sll</code>, <code>slli</code>)</strong>
+<code>slli rd, rs1, shamt</code> (shamt: shift amount, 移位量)
                 将 <code>rs1</code> 中的各位向左移动 <code>shamt</code> 位，右边空出的位用<strong>0</strong>填充。
                 <strong>算术意义</strong>：相当于无符号数乘以 $2^{\text{shamt}}$。
                 例如，<code>slli x5, x5, 3</code> 相当于 <code>x5 = x5 * 8</code>。</p>
-                </li>
-                <li>
-                <p><strong>逻辑右移 (Shift Right Logical: <code>srl</code>, <code>srli</code>)</strong>
+</li>
+<li>
+<p><strong>逻辑右移 (Shift Right Logical: <code>srl</code>, <code>srli</code>)</strong>
                 将 <code>rs1</code> 中的各位向右移动 <code>shamt</code> 位，左边空出的位用<strong>0</strong>填充。
                 <strong>算术意义</strong>：相当于<strong>无符号数</strong>除以 $2^{\text{shamt}}$。</p>
-                </li>
-                <li>
-                <p><strong>算术右移 (Shift Right Arithmetic: <code>sra</code>, <code>srai</code>)</strong>
+</li>
+<li>
+<p><strong>算术右移 (Shift Right Arithmetic: <code>sra</code>, <code>srai</code>)</strong>
                 将 <code>rs1</code> 中的各位向右移动 <code>shamt</code> 位，左边空出的位用<strong>原始符号位的副本</strong>填充。
                 <strong>为什么需要它？</strong> 为了正确处理负数。如果一个负数（符号位为1）逻辑右移，左边补0，符号位会变成0，数就从负数变成了正数，这在算术上是错误的。算术右移通过复制符号位，保证了负数在右移后仍然是负数。
                 <strong>算术意义</strong>：相当于<strong>有符号数</strong>除以 $2^{\text{shamt}}$。</p>
-                </li>
-                </ul>
-                <h3 id="7-%E5%86%B3%E7%AD%96%E6%8C%87%E4%BB%A4"><strong>7. 决策指令</strong></h3>
-                <p>如果程序只能从头到尾顺序执行，那么计算机只不过是一个高级计算器。软件的强大威力在于其能够根据不同的条件执行不同的代码路径，这就是<strong>控制流 (Control Flow)</strong>。<code>if-else</code>、<code>while</code>、<code>for</code>、<code>switch</code> 等结构都是控制流的体现。</p>
-                <p>硬件上，控制流是通过<strong>分支 (Branch)</strong> 和 <strong>跳转 (Jump)</strong> 指令实现的。</p>
-                <h4 id="71-%E6%9D%A1%E4%BB%B6%E5%88%86%E6%94%AFif-%E8%AF%AD%E5%8F%A5%E7%9A%84%E5%9F%BA%E7%9F%B3"><strong>7.1 条件分支：<code>if</code> 语句的基石</strong></h4>
-                <p>RISC-V提供了多条条件分支指令，它们根据两个寄存器的比较结果来决定是否改变程序的执行顺序。</p>
-                <ul>
-                <li><code>beq rs1, rs2, Label</code> (Branch on Equal): 如果 <code>rs1 == rs2</code>，则跳转到 <code>Label</code> 标记的指令处执行。</li>
-                <li><code>bne rs1, rs2, Label</code> (Branch on Not Equal): 如果 <code>rs1 != rs2</code>，则跳转到 <code>Label</code> 标记的指令处执行。</li>
-                </ul>
-                <p><strong>示例1：编译 <code>if (i == j) f = g + h;</code></strong>
+</li>
+</ul>
+<h3 id="7-%E5%86%B3%E7%AD%96%E6%8C%87%E4%BB%A4"><strong>7. 决策指令</strong></h3>
+<p>如果程序只能从头到尾顺序执行，那么计算机只不过是一个高级计算器。软件的强大威力在于其能够根据不同的条件执行不同的代码路径，这就是<strong>控制流 (Control Flow)</strong>。<code>if-else</code>、<code>while</code>、<code>for</code>、<code>switch</code> 等结构都是控制流的体现。</p>
+<p>硬件上，控制流是通过<strong>分支 (Branch)</strong> 和 <strong>跳转 (Jump)</strong> 指令实现的。</p>
+<h4 id="71-%E6%9D%A1%E4%BB%B6%E5%88%86%E6%94%AFif-%E8%AF%AD%E5%8F%A5%E7%9A%84%E5%9F%BA%E7%9F%B3"><strong>7.1 条件分支：<code>if</code> 语句的基石</strong></h4>
+<p>RISC-V提供了多条条件分支指令，它们根据两个寄存器的比较结果来决定是否改变程序的执行顺序。</p>
+<ul>
+<li><code>beq rs1, rs2, Label</code> (Branch on Equal): 如果 <code>rs1 == rs2</code>，则跳转到 <code>Label</code> 标记的指令处执行。</li>
+<li><code>bne rs1, rs2, Label</code> (Branch on Not Equal): 如果 <code>rs1 != rs2</code>，则跳转到 <code>Label</code> 标记的指令处执行。</li>
+</ul>
+<p><strong>示例1：编译 <code>if (i == j) f = g + h;</code></strong>
                 假设 <code>f,g,h,i,j</code> 分别在 <code>x19, x20, x21, x22, x23</code>。</p>
-                <p><strong>逻辑</strong>：如果 <code>i</code> 和 <code>j</code> <strong>不相等</strong>，就跳过 <code>add</code> 指令。</p>
-                <pre class="hljs"><code><div>    # if (i != j) goto Next;
+<p><strong>逻辑</strong>：如果 <code>i</code> 和 <code>j</code> <strong>不相等</strong>，就跳过 <code>add</code> 指令。</p>
+<pre class="hljs"><code><div>    # if (i != j) goto Next;
                     bne  x22, x23, Next
                     # f = g + h;
                     add  x19, x20, x21
                 Next:
                     # ... 后续代码
                 </div></code></pre>
-                <p><strong>示例2：编译 <code>if (i == j) f = g + h; else f = g - h;</code></strong></p>
-                <p><strong>逻辑</strong>：如果 <code>i</code> 和 <code>j</code> <strong>不相等</strong>，就跳转到 <code>else</code> 部分的代码。如果相等，则顺序执行 <code>then</code> 部分，并在其后用一条<strong>无条件跳转</strong>跳过 <code>else</code> 部分。</p>
-                <pre class="hljs"><code><div>    # if (i != j) goto Else;
+<p><strong>示例2：编译 <code>if (i == j) f = g + h; else f = g - h;</code></strong></p>
+<p><strong>逻辑</strong>：如果 <code>i</code> 和 <code>j</code> <strong>不相等</strong>，就跳转到 <code>else</code> 部分的代码。如果相等，则顺序执行 <code>then</code> 部分，并在其后用一条<strong>无条件跳转</strong>跳过 <code>else</code> 部分。</p>
+<pre class="hljs"><code><div>    # if (i != j) goto Else;
                     bne  x22, x23, Else
                     # "then" part: f = g + h;
                     add  x19, x20, x21
@@ -228,18 +226,18 @@
                 Exit:
                     # ... 后续代码
                 </div></code></pre>
-                <p><strong>控制流图：</strong></p>
-                <div class="mermaid">graph TD
-                    A[i == j?] -- Yes --> B[f = g + h]
-                    A -- No --> C[f = g - h]
-                    B --> D[Exit]
-                    C --> D
+<p><strong>控制流图：</strong></p>
+<div class="mermaid">graph TD
+                    A[i == j?] -- Yes --&gt; B[f = g + h]
+                    A -- No --&gt; C[f = g - h]
+                    B --&gt; D[Exit]
+                    C --&gt; D
                 </div>
-                <h4 id="72-%E7%94%A8%E5%88%86%E6%94%AF%E6%9E%84%E5%BB%BA%E5%BE%AA%E7%8E%AF"><strong>7.2 用分支构建循环</strong></h4>
-                <p>循环的本质就是在一个代码块的末尾，有一个条件分支决定是跳回代码块的开头继续执行，还是跳出循环。</p>
-                <p><strong>示例：编译 <code>while (save[i] == k) i = i + 1;</code></strong>
+<h4 id="72-%E7%94%A8%E5%88%86%E6%94%AF%E6%9E%84%E5%BB%BA%E5%BE%AA%E7%8E%AF"><strong>7.2 用分支构建循环</strong></h4>
+<p>循环的本质就是在一个代码块的末尾，有一个条件分支决定是跳回代码块的开头继续执行，还是跳出循环。</p>
+<p><strong>示例：编译 <code>while (save[i] == k) i = i + 1;</code></strong>
                 假设 <code>save</code> 基地址在 <code>x25</code>，<code>i</code> 在 <code>x22</code>，<code>k</code> 在 <code>x24</code>。</p>
-                <pre class="hljs"><code><div>Loop:
+<pre class="hljs"><code><div>Loop:
                     # 计算 save[i] 的地址
                     slli x10, x22, 3        # temp x10 = i * 8
                     add  x10, x10, x25      # x10 = address of save[i]
@@ -254,70 +252,70 @@
                 Exit:
                     # ... 循环结束后的代码
                 </div></code></pre>
-                <h4 id="73-%E6%9B%B4%E5%A4%9A%E6%AF%94%E8%BE%83%E5%B0%8F%E4%BA%8E%E5%A4%A7%E4%BA%8E"><strong>7.3 更多比较：小于、大于</strong></h4>
-                <p><code>beq</code> 和 <code>bne</code> 只能处理相等性判断。如何实现 <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code> 呢？RISC-V提供了两种方式：</p>
-                <p><strong>方式一：先比较，后分支</strong></p>
-                <p>使用 <code>slt</code> (Set on Less Than) 指令系列。</p>
-                <ul>
-                <li><code>slt rd, rs1, rs2</code>: 如果 <code>rs1 &lt; rs2</code> (有符号比较)，则 <code>rd = 1</code>，否则 <code>rd = 0</code>。</li>
-                <li><code>sltu rd, rs1, rs2</code>: 功能同上，但进行的是<strong>无符号比较</strong>。</li>
-                <li><code>slti</code>, <code>sltiu</code> 是立即数版本。</li>
-                </ul>
-                <p><strong>示例：编译 <code>if (a &lt; b) goto Less;</code></strong>
+<h4 id="73-%E6%9B%B4%E5%A4%9A%E6%AF%94%E8%BE%83%E5%B0%8F%E4%BA%8E%E5%A4%A7%E4%BA%8E"><strong>7.3 更多比较：小于、大于</strong></h4>
+<p><code>beq</code> 和 <code>bne</code> 只能处理相等性判断。如何实现 <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code> 呢？RISC-V提供了两种方式：</p>
+<p><strong>方式一：先比较，后分支</strong></p>
+<p>使用 <code>slt</code> (Set on Less Than) 指令系列。</p>
+<ul>
+<li><code>slt rd, rs1, rs2</code>: 如果 <code>rs1 &lt; rs2</code> (有符号比较)，则 <code>rd = 1</code>，否则 <code>rd = 0</code>。</li>
+<li><code>sltu rd, rs1, rs2</code>: 功能同上，但进行的是<strong>无符号比较</strong>。</li>
+<li><code>slti</code>, <code>sltiu</code> 是立即数版本。</li>
+</ul>
+<p><strong>示例：编译 <code>if (a &lt; b) goto Less;</code></strong>
                 假设 <code>a</code> 在 <code>x8</code>，<code>b</code> 在 <code>x9</code>。</p>
-                <pre class="hljs"><code><div>    slt  x5, x8, x9     # x5 = (a &lt; b) ? 1 : 0
+<pre class="hljs"><code><div>    slt  x5, x8, x9     # x5 = (a &lt; b) ? 1 : 0
                     # if (x5 != 0) goto Less
                     bne  x5, x0, Less
                 </div></code></pre>
-                <p>通过 <code>slt</code> 和 <code>bne</code> 的组合，我们可以实现“小于则跳转”。其他比较（<code>&gt;</code>、<code>&gt;=</code>、<code>&lt;=</code>）也可以通过颠倒操作数或判断 <code>slt</code> 结果是否为0来实现。</p>
-                <p><strong>方式二：一步到位</strong></p>
-                <p>RISC-V也提供了直接进行大小比较并分支的指令，这更高效：</p>
-                <ul>
-                <li><code>blt rs1, rs2, Label</code> (Branch on Less Than, signed)</li>
-                <li><code>bge rs1, rs2, Label</code> (Branch on Greater Than or Equal, signed)</li>
-                <li><code>bltu rs1, rs2, Label</code> (Branch on Less Than, unsigned)</li>
-                <li><code>bgeu rs1, rs2, Label</code> (Branch on Greater Than or Equal, unsigned)</li>
-                </ul>
-                <p><strong>示例：编译 <code>if (a &gt; b) a = a + 1;</code></strong>
+<p>通过 <code>slt</code> 和 <code>bne</code> 的组合，我们可以实现“小于则跳转”。其他比较（<code>&gt;</code>、<code>&gt;=</code>、<code>&lt;=</code>）也可以通过颠倒操作数或判断 <code>slt</code> 结果是否为0来实现。</p>
+<p><strong>方式二：一步到位</strong></p>
+<p>RISC-V也提供了直接进行大小比较并分支的指令，这更高效：</p>
+<ul>
+<li><code>blt rs1, rs2, Label</code> (Branch on Less Than, signed)</li>
+<li><code>bge rs1, rs2, Label</code> (Branch on Greater Than or Equal, signed)</li>
+<li><code>bltu rs1, rs2, Label</code> (Branch on Less Than, unsigned)</li>
+<li><code>bgeu rs1, rs2, Label</code> (Branch on Greater Than or Equal, unsigned)</li>
+</ul>
+<p><strong>示例：编译 <code>if (a &gt; b) a = a + 1;</code></strong>
                 假设 <code>a</code> 在 <code>x22</code>，<code>b</code> 在 <code>x23</code>。
                 逻辑：如果 <code>b &gt;= a</code>，则跳过加法。</p>
-                <pre class="hljs"><code><div>    bge  x23, x22, Exit    # Branch if b &gt;= a
+<pre class="hljs"><code><div>    bge  x23, x22, Exit    # Branch if b &gt;= a
                     addi x22, x22, 1      # a = a + 1
                 Exit:
                     # ...
                 </div></code></pre>
-                <p><strong>有符号 vs. 无符号：一个致命的陷阱！</strong>
+<p><strong>有符号 vs. 无符号：一个致命的陷阱！</strong>
                 选择错误的比较指令是C语言中一类非常隐蔽且危险的bug的根源。
                 考虑两个32位寄存器：</p>
-                <ul>
-                <li>
-                <p><code>x22 = 1111 ... 1111</code></p>
-                </li>
-                <li>
-                <p><code>x23 = 0000 ... 0001</code></p>
-                </li>
-                <li>
-                <p><strong>有符号比较 (<code>blt</code>)</strong>: 编译器会解释 <code>x22</code> 为 <code>-1</code>，<code>x23</code> 为 <code>+1</code>。因为 <code>-1 &lt; +1</code>，所以 <code>blt x22, x23, ...</code> 会发生跳转。</p>
-                </li>
-                <li>
-                <p><strong>无符号比较 (<code>bltu</code>)</strong>: 编译器会解释 <code>x22</code> 为 $2^{32}-1$（一个巨大的正数），<code>x23</code> 为 <code>+1</code>。因为 $2^{32}-1 &gt; +1$，所以 <code>bltu x22, x23, ...</code> <strong>不会</strong>发生跳转。</p>
-                </li>
-                </ul>
-                <p><strong>结论</strong>：对同样的一串0和1，采用不同的解释（约定），会得到截然相反的比较结果！</p>
-                <h4 id="74-switch-%E8%AF%AD%E5%8F%A5%E9%AB%98%E6%95%88%E7%9A%84%E5%A4%9A%E8%B7%AF%E5%88%86%E6%94%AF"><strong>7.4 <code>switch</code> 语句：高效的多路分支</strong></h4>
-                <p>如果用一长串的 <code>if-else-if</code> 来实现 <code>switch</code> 语句，当 <code>case</code> 很多时，程序需要进行多次比较和分支，效率低下。</p>
-                <p><strong>优化方案：跳转地址表 (Jump Address Table)</strong>
+<ul>
+<li>
+<p><code>x22 = 1111 ... 1111</code></p>
+</li>
+<li>
+<p><code>x23 = 0000 ... 0001</code></p>
+</li>
+<li>
+<p><strong>有符号比较 (<code>blt</code>)</strong>: 编译器会解释 <code>x22</code> 为 <code>-1</code>，<code>x23</code> 为 <code>+1</code>。因为 <code>-1 &lt; +1</code>，所以 <code>blt x22, x23, ...</code> 会发生跳转。</p>
+</li>
+<li>
+<p><strong>无符号比较 (<code>bltu</code>)</strong>: 编译器会解释 <code>x22</code> 为 $2^{32}-1$（一个巨大的正数），<code>x23</code> 为 <code>+1</code>。因为 $2^{32}-1 &gt; +1$，所以 <code>bltu x22, x23, ...</code> <strong>不会</strong>发生跳转。</p>
+</li>
+</ul>
+<p><strong>结论</strong>：对同样的一串0和1，采用不同的解释（约定），会得到截然相反的比较结果！</p>
+<h4 id="74-switch-%E8%AF%AD%E5%8F%A5%E9%AB%98%E6%95%88%E7%9A%84%E5%A4%9A%E8%B7%AF%E5%88%86%E6%94%AF"><strong>7.4 <code>switch</code> 语句：高效的多路分支</strong></h4>
+<p>如果用一长串的 <code>if-else-if</code> 来实现 <code>switch</code> 语句，当 <code>case</code> 很多时，程序需要进行多次比较和分支，效率低下。</p>
+<p><strong>优化方案：跳转地址表 (Jump Address Table)</strong>
                 这是一种利用内存和间接跳转来实现高效多路分支的经典技巧。</p>
-                <p><strong>原理：</strong></p>
-                <ol>
-                <li><strong>创建表</strong>：编译器在内存中创建一个表（数组），表的每个元素都是一个地址，对应一个 <code>case</code> 代码块的入口。</li>
-                <li><strong>索引</strong>：将 <code>switch</code> 的变量 <code>k</code> 作为索引。</li>
-                <li><strong>计算地址</strong>：计算 <code>k</code> 对应的表项在内存中的地址 ( <code>表基地址 + k * 8</code>，因为每个地址是64位的，占8字节)。</li>
-                <li><strong>加载目标</strong>：从内存中加载这个地址到寄存器中。</li>
-                <li><strong>间接跳转</strong>：使用 <code>jalr</code> (Jump and Link Register) 指令，跳转到该寄存器中保存的地址。</li>
-                </ol>
-                <p><strong>RISC-V 代码片段 (示意)</strong>:</p>
-                <pre class="hljs"><code><div>    # 假设 switch 变量 k 在 x25, 跳转表基地址在 x6
+<p><strong>原理：</strong></p>
+<ol>
+<li><strong>创建表</strong>：编译器在内存中创建一个表（数组），表的每个元素都是一个地址，对应一个 <code>case</code> 代码块的入口。</li>
+<li><strong>索引</strong>：将 <code>switch</code> 的变量 <code>k</code> 作为索引。</li>
+<li><strong>计算地址</strong>：计算 <code>k</code> 对应的表项在内存中的地址 ( <code>表基地址 + k * 8</code>，因为每个地址是64位的，占8字节)。</li>
+<li><strong>加载目标</strong>：从内存中加载这个地址到寄存器中。</li>
+<li><strong>间接跳转</strong>：使用 <code>jalr</code> (Jump and Link Register) 指令，跳转到该寄存器中保存的地址。</li>
+</ol>
+<p><strong>RISC-V 代码片段 (示意)</strong>:</p>
+<pre class="hljs"><code><div>    # 假设 switch 变量 k 在 x25, 跳转表基地址在 x6
                     # 边界检查 (e.g., if k &lt; 0 or k &gt; 3, goto default_case)
                     blt  x25, x0, default_case
                     addi x5, x0, 3          # 假设有 4 个 case (0, 1, 2, 3)
@@ -333,41 +331,66 @@
                     # 跳转
                     jalr x0, 0(x7)          # Jump to address in x7
                 </div></code></pre>
-                <p>这种方法无论有多少个 <code>case</code>，都只需要一次内存访问和一次跳转，效率极高。</p>
-                <p><strong>本讲小结</strong></p>
-                <p>在这一部分，我们为我们的计算机模型装上了“逻辑大脑”和“决策神经系统”。</p>
-                <ol>
-                <li><strong>逻辑运算</strong>：我们学习了 <code>and</code>, <code>or</code>, <code>xor</code> 和移位指令，它们是底层位操作的利器，是实现高效掩码、数据打包和快速乘除法的基础。</li>
-                <li><strong>决策指令</strong>：我们掌握了 <code>beq</code>, <code>bne</code>, <code>blt</code>, <code>slt</code> 等条件分支指令，它们是实现 <code>if-else</code>, 循环等所有高级语言控制流结构的硬件基础。我们还通过 <code>switch</code> 语句的例子，学习了跳转表这种优雅而高效的编程技巧。</li>
-                </ol>
-            </article>
-        </main>
-    </div>
-    
-    <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
-    <script>
+<p>这种方法无论有多少个 <code>case</code>，都只需要一次内存访问和一次跳转，效率极高。</p>
+<p><strong>本讲小结</strong></p>
+<p>在这一部分，我们为我们的计算机模型装上了“逻辑大脑”和“决策神经系统”。</p>
+<ol>
+<li><strong>逻辑运算</strong>：我们学习了 <code>and</code>, <code>or</code>, <code>xor</code> 和移位指令，它们是底层位操作的利器，是实现高效掩码、数据打包和快速乘除法的基础。</li>
+<li><strong>决策指令</strong>：我们掌握了 <code>beq</code>, <code>bne</code>, <code>blt</code>, <code>slt</code> 等条件分支指令，它们是实现 <code>if-else</code>, 循环等所有高级语言控制流结构的硬件基础。我们还通过 <code>switch</code> 语句的例子，学习了跳转表这种优雅而高效的编程技巧。</li>
+</ol>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
       mermaid.initialize({
         startOnLoad: true
       });
     </script>
-    <script src="../script.js"></script>
-    <!-- The Modal -->
-    <div id="about-me-modal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>About Me</h2>
-        <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-        <p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
-        <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-        <p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
-        <p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
-        <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
-        <hr>
-        <h3>订阅我的博客</h3>
-        <p>订阅功能正在建设中，敬请期待！</p>
-      </div>
-    </div>
-    <script src="../modal.js"></script>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
 </body>
 </html>
