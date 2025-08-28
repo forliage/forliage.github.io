@@ -47,7 +47,7 @@ GISCUS_HTML = """
           data-reactions-enabled="1"
           data-emit-metadata="0"
           data-input-position="bottom"
-          data-theme="../giscus.css"
+          data-theme="https://forliage.github.io/giscus.css"
           data-lang="zh-CN"
           crossorigin="anonymous"
           async>
@@ -102,11 +102,20 @@ def process_html_file(filepath, share_buttons_html):
             print(f"  - Added Highlight.js JS to <body>.")
             modified = True
 
-        # --- 2. Add Giscus Comment Section ---
+        # --- 2. Add/Update Giscus Comment Section ---
+        # Remove existing giscus container to ensure the script is always up-to-date
+        giscus_container = soup.find('div', class_='giscus-container')
+        if giscus_container:
+            giscus_container.decompose()
+            print(f"  - Removed old Giscus container to update.")
+            modified = True
+
         share_buttons_div = soup.find('div', class_='share-buttons')
-        if share_buttons_div and not soup.find('div', class_='giscus-container'):
+        # We find share_buttons_div to insert after, and we check that we are in a post page (which should have an article tag)
+        if share_buttons_div and soup.find('article'):
             share_buttons_div.insert_after(BeautifulSoup(GISCUS_HTML, 'html.parser'))
-            print(f"  - Added Giscus comment section.")
+            print(f"  - Added/Updated Giscus comment section.")
+            # If we added Giscus, we must have intended a modification.
             modified = True
         
         # --- Legacy: Add Dark Mode Toggle Button (for older posts if needed) ---

@@ -17,19 +17,21 @@
 }
 
 /* --- Dark Mode Colors --- */
-body.dark-mode {
-  --giscus-background: #a01ab4; /* A dark purple/charcoal from Rosé Pine Moon */
-  --giscus-input-background: #cb1695;
-  --giscus-border: #b013b0;
-  --giscus-text: #e0def4; /* Soft lavender text */
-  --giscus-text-light: #908caa;
-  --giscus-primary: #c4a7e7; /* A brighter, vibrant lavender */
-  --giscus-primary-text: #232136;
-  --giscus-success: #9ccfd8;
-  --giscus-success-text: #232136;
-  --giscus-error: #ebbcba;
-  --giscus-error-text: #232136;
-  --giscus-link: #c4a7e7;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --giscus-background: #232136; /* A dark purple/charcoal from Rosé Pine Moon */
+    --giscus-input-background: #2a273f;
+    --giscus-border: #403d52;
+    --giscus-text: #e0def4; /* Soft lavender text */
+    --giscus-text-light: #908caa;
+    --giscus-primary: #c4a7e7; /* A brighter, vibrant lavender */
+    --giscus-primary-text: #232136;
+    --giscus-success: #9ccfd8;
+    --giscus-success-text: #232136;
+    --giscus-error: #ebbcba;
+    --giscus-error-text: #232136;
+    --giscus-link: #c4a7e7;
+  }
 }
 
 /* General Giscus Styles */
