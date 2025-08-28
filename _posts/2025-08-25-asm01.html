@@ -114,7 +114,7 @@
 <h3 id="3-%E7%AC%AC%E4%B8%80%E4%B8%AA%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80%E7%A8%8B%E5%BA%8F"><strong>3. 第一个汇编语言程序</strong></h3>
 <p>让我们来看一个在64位Linux系统下，使用系统调用（syscall）在屏幕上打印 "Hello, World!" 的例子。这是最纯粹的汇编程序，不依赖任何C库。</p>
 <p><strong>hello.asm</strong></p>
-<pre><code class="language-x86asm">; --- 数据段 (Data Segment) ---
+<pre class="hljs"><code><div>; --- 数据段 (Data Segment) ---
                 ; 定义程序中需要用到的静态数据
                 section .data
                     msg db 'Hello, World!', 0x0A  ; 'db' stands for 'define byte'. 0x0A is the newline character.
@@ -149,7 +149,7 @@
                     xor rdi, rdi                ; A fast way to set rdi to 0. (mov rdi, 0)
                     
                     syscall                     ; Execute the system call to exit the program.
-                </code></pre>
+                </div></code></pre>
 <p><strong>代码剖析：</strong></p>
 <ol>
 <li><strong>段（Sections）</strong>: 汇编程序通常分为 <code>.data</code> 段（存放初始化的数据）和 <code>.text</code> 段（存放代码）。这是一种逻辑划分，有助于操作系统管理内存。</li>
