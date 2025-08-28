@@ -2,89 +2,88 @@
 
 /* --- Light Mode Colors --- */
 :root {
-    --giscus-background: #fffafc; /* A very light, slightly pinkish white */
-    --giscus-input-background: #fdeef7;
-    --giscus-border: #e8d8e2;
-    --giscus-text: #575279;
-    --giscus-text-light: #797593;
-    --giscus-primary: #c574dd; /* A vibrant purplish-pink */
-    --giscus-primary-text: #ffffff;
-    --giscus-success: #56949f; /* A muted teal, from Rosé Pine */
-    --giscus-success-text: #ffffff;
-    --giscus-error: #eb6f92; /* A soft red/pink, from Rosé Pine */
-    --giscus-error-text: #ffffff;
-    --giscus-link: #c574dd;
-  }
-  
-  /* --- Dark Mode Colors --- */
-  body.dark-mode {
-    --giscus-background: #232136; /* A dark purple/charcoal from Rosé Pine Moon */
-    --giscus-input-background: #2a273f;
-    --giscus-border: #403d52;
-    --giscus-text: #e0def4; /* Soft lavender text */
-    --giscus-text-light: #908caa;
-    --giscus-primary: #c4a7e7; /* A brighter, vibrant lavender */
-    --giscus-primary-text: #232136;
-    --giscus-success: #9ccfd8;
-    --giscus-success-text: #232136;
-    --giscus-error: #ebbcba;
-    --giscus-error-text: #232136;
-    --giscus-link: #c4a7e7;
-  }
-  
-  /* General Giscus Styles */
-  .giscus, .giscus-frame {
-    background-color: var(--giscus-background);
-    border-radius: 12px;
-    padding: 1rem;
-    transition: background-color 0.3s ease;
-  }
-  
-  /* Input box styling */
-  .giscus-input {
+  --giscus-background: #fffafc; /* A very light, slightly pinkish white */
+  --giscus-input-background: #fdeef7;
+  --giscus-border: #e8d8e2;
+  --giscus-text: #575279;
+  --giscus-text-light: #797593;
+  --giscus-primary: #c574dd; /* A vibrant purplish-pink */
+  --giscus-primary-text: #ffffff;
+  --giscus-success: #56949f; /* A muted teal, from Rosé Pine */
+  --giscus-success-text: #ffffff;
+  --giscus-error: #eb6f92; /* A soft red/pink, from Rosé Pine */
+  --giscus-error-text: #ffffff;
+  --giscus-link: #c574dd;
+}
+
+/* --- Dark Mode Colors --- */
+body.dark-mode {
+  --giscus-background: #232136; /* A dark purple/charcoal from Rosé Pine Moon */
+  --giscus-input-background: #2a273f;
+  --giscus-border: #403d52;
+  --giscus-text: #e0def4; /* Soft lavender text */
+  --giscus-text-light: #908caa;
+  --giscus-primary: #c4a7e7; /* A brighter, vibrant lavender */
+  --giscus-primary-text: #232136;
+  --giscus-success: #9ccfd8;
+  --giscus-success-text: #232136;
+  --giscus-error: #ebbcba;
+  --giscus-error-text: #232136;
+  --giscus-link: #c4a7e7;
+}
+
+/* General Giscus Styles */
+.giscus, .giscus-frame {
+  background-color: var(--giscus-background);
+  border-radius: 12px;
+  padding: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+/* Input box styling */
+.giscus-input {
+  background-color: var(--giscus-input-background) !important;
+  border-color: var(--giscus-border) !important;
+  color: var(--giscus-text) !important;
+  border-radius: 8px !important;
+}
+
+/* Button styling */
+.giscus-button {
+  background-color: var(--giscus-primary) !important;
+  color: var(--giscus-primary-text) !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.giscus-button:hover {
+  background-color: var(--giscus-link) !important;
+  opacity: 0.9;
+}
+
+/* Link styling */
+a.giscus-link {
+  color: var(--giscus-link) !important;
+}
+
+/* Header/Tab styling */
+.giscus-tabs .giscus-tab {
+  color: var(--giscus-text-light) !important;
+}
+.giscus-tabs .giscus-tab[aria-selected="true"] {
+  color: var(--giscus-text) !important;
+  border-bottom-color: var(--giscus-primary) !important;
+}
+
+/* Comment box styling */
+.giscus-comment {
     background-color: var(--giscus-input-background) !important;
-    border-color: var(--giscus-border) !important;
-    color: var(--giscus-text) !important;
-    border-radius: 8px !important;
-  }
-  
-  /* Button styling */
-  .giscus-button {
-    background-color: var(--giscus-primary) !important;
-    color: var(--giscus-primary-text) !important;
-    border-radius: 8px !important;
-    font-weight: 600 !important;
-    transition: background-color 0.2s ease-in-out;
-  }
-  
-  .giscus-button:hover {
-    background-color: var(--giscus-link) !important;
-    opacity: 0.9;
-  }
-  
-  /* Link styling */
-  a.giscus-link {
-    color: var(--giscus-link) !important;
-  }
-  
-  /* Header/Tab styling */
-  .giscus-tabs .giscus-tab {
-    color: var(--giscus-text-light) !important;
-  }
-  .giscus-tabs .giscus-tab[aria-selected="true"] {
-    color: var(--giscus-text) !important;
-    border-bottom-color: var(--giscus-primary) !important;
-  }
-  
-  /* Comment box styling */
-  .giscus-comment {
-      background-color: var(--giscus-input-background) !important;
-      border: 1px solid var(--giscus-border) !important;
-      border-radius: 12px !important;
-      margin-bottom: 1rem !important;
-  }
-  
-  .giscus-comment-header {
-      background-color: transparent !important;
-  }
-  
+    border: 1px solid var(--giscus-border) !important;
+    border-radius: 12px !important;
+    margin-bottom: 1rem !important;
+}
+
+.giscus-comment-header {
+    background-color: transparent !important;
+}
