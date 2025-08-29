@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>线性代数01:向量空间</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FPDBQB4LZD');
+    </script>
+<link href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-dawn.min.css" id="highlight-theme-link" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.css" rel="stylesheet"/>
+</head>
+<body>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B001%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4">线性代数01:向量空间</h1>
+<p>线性代数的核心研究对象是“有限维向量空间上的线性映射”。为了透彻地理解这个核心概念，我们必须首先对“向量空间”本身有一个清晰、准确的认识。本章的目的就是建立起向量空间的基本概念和理论。</p>
+<h3 id="1-mathbfrn-%E4%B8%8E-mathbfcn"><strong>1. $\mathbf{R}^n$ 与 $\mathbf{C}^n$</strong></h3>
+<p>在正式给出向量空间的抽象定义之前，我们先从一些熟悉的例子入手，这些例子将为我们后续的抽象化提供坚实的直观基础。我们首先需要回顾一下实数和复数。</p>
+<h4 id="%E5%A4%8D%E6%95%B0"><strong>复数</strong></h4>
+<p>我们已经很熟悉实数集 $\mathbf{R}$ 的基本性质。复数的发明使得我们可以对负数取平方根。</p>
+<p><strong>定义 1.1：复数 (complex number)</strong></p>
+<ul>
+<li>一个<strong>复数</strong>是一个有序对 $(a, b)$，其中 $a, b \in \mathbf{R}$。但我们通常将其写作 $a + bi$。</li>
+<li>所有复数构成的集合记为 $\mathbf{C}$，即：
+$$
+\mathbf{C} = {a + bi : a, b \in \mathbf{R}}
+$$</li>
+<li>$\mathbf{C}$ 上的<strong>加法</strong>和<strong>乘法</strong>定义如下：
+对于 $a, b, c, d \in \mathbf{R}$：
+<ul>
+<li>加法：$(a + bi) + (c + di) = (a + c) + (b + d)i$</li>
+<li>乘法：$(a + bi)(c + di) = (ac - bd) + (ad + bc)i$</li>
+</ul>
+</li>
+</ul>
+<p><strong>例子 1.2：复数乘法</strong></p>
+<p>计算 $(2+3i)(4+5i)$。</p>
+<p><strong>解：</strong>
+根据乘法定义：
+$$
+\begin{aligned}
+(2+3i)(4+5i) &amp;= 2 \cdot 4 - 3 \cdot 5 + (2 \cdot 5 + 3 \cdot 4)i \\
+&amp;= 8 - 15 + (10 + 12)i \\
+&amp;= -7 + 22i
+\end{aligned}
+$$</p>
+<p><strong>定义 1.3：复数的算术性质</strong></p>
+<p>复数具有以下重要的算术性质，对于任意 $\alpha, \beta, \lambda \in \mathbf{C}$：</p>
+<ul>
+<li><strong>交换性 (commutativity):</strong> $\alpha + \beta = \beta + \alpha$, $\alpha\beta = \beta\alpha$</li>
+<li><strong>结合性 (associativity):</strong> $(\alpha + \beta) + \lambda = \alpha + (\beta + \lambda)$, $(\alpha\beta)\lambda = \alpha(\beta\lambda)$</li>
+<li><strong>单位元 (identities):</strong> 存在 $0, 1 \in \mathbf{C}$ 使得 $\lambda + 0 = \lambda$, $\lambda \cdot 1 = \lambda$</li>
+<li><strong>加法逆元 (additive inverse):</strong> 对每个 $\alpha \in \mathbf{C}$，都存在唯一的 $-\alpha \in \mathbf{C}$ 使得 $\alpha + (-\alpha) = 0$</li>
+<li><strong>乘法逆元 (multiplicative inverse):</strong> 对每个 $\alpha \in \mathbf{C}, \alpha \neq 0$，都存在唯一的 $\alpha^{-1} \in \mathbf{C}$ 使得 $\alpha\alpha^{-1} = 1$</li>
+<li><strong>分配性质 (distributive property):</strong> $\lambda(\alpha + \beta) = \lambda\alpha + \lambda\beta$</li>
+</ul>
+<p><strong>记号 1.6：$\mathbf{F}$</strong>
+为了方便叙述，我们用符号 $\mathbf{F}$ 来表示 $\mathbf{R}$ 或 $\mathbf{C}$。$\mathbf{F}$ 中的元素称为<strong>标量 (scalar)</strong>。</p>
+<h4 id="mathbffn"><strong>$\mathbf{F}^n$</strong></h4>
+<p>我们最熟悉的向量空间例子是 $\mathbf{R}^2$（平面）和 $\mathbf{R}^3$（三维空间）。现在我们将这个概念推广到由 $\mathbf{F}$ 中元素构成的 n 元组。</p>
+<p><strong>定义 1.8：组 (list) 与 n元组 (n-tuple)</strong>
+长度为 $n$ 的<strong>组</strong>是 $n$ 个有顺序的元素。长度为 $n$ 的组也称为 <strong>n元组</strong>。其形式如下：
+$$
+(x_1, x_2, \ldots, x_n)
+$$</p>
+<p><strong>定义 1.10：$\mathbf{F}^n$</strong>
+$\mathbf{F}^n$ 是由 $\mathbf{F}$ 中元素构成的所有长度为 $n$ 的组的集合：
+$$
+\mathbf{F}^n = {(x_1, \ldots, x_n) : x_j \in \mathbf{F} \text{ for } j=1, \ldots, n}
+$$
+$\mathbf{F}^n$ 中的一个元素 $(x_1, \ldots, x_n)$ 的第 $j$ 个坐标是 $x_j$。</p>
+<p><strong>定义 1.12：$\mathbf{F}^n$ 中的加法 (addition in $\mathbf{F}^n$)</strong>
+$\mathbf{F}^n$ 中的加法是按坐标位相加的：
+$$
+(x_1, \ldots, x_n) + (y_1, \ldots, y_n) = (x_1+y_1, \ldots, x_n+y_n)
+$$</p>
+<p><strong>定义 1.17：$\mathbf{F}^n$ 中的标量乘法 (scalar multiplication in $\mathbf{F}^n$)</strong>
+$\mathbf{F}^n$ 中的标量乘法定义为标量与每个坐标相乘：
+对于 $\lambda \in \mathbf{F}$ 和 $(x_1, \ldots, x_n) \in \mathbf{F}^n$：
+$$
+\lambda(x_1, \ldots, x_n) = (\lambda x_1, \ldots, \lambda x_n)
+$$</p>
+<p><strong>例子：$\mathbf{R}^3$ 中的运算</strong></p>
+<p>在 $\mathbf{R}^3$ 中，设向量 $v = (1, -2, 4)$ 和 $w = (5, 0, -3)$，标量 $\lambda = 2$。</p>
+<p><strong>解：</strong></p>
+<ul>
+<li><strong>向量加法：</strong>
+$$
+v + w = (1, -2, 4) + (5, 0, -3) = (1+5, -2+0, 4-3) = (6, -2, 1)
+$$</li>
+<li><strong>标量乘法：</strong>
+$$
+\lambda v = 2(1, -2, 4) = (2 \cdot 1, 2 \cdot (-2), 2 \cdot 4) = (2, -4, 8)
+$$</li>
+</ul>
+<p>$\mathbf{F}^n$ 以及在其上定义的加法和标量乘法，是我们学习向量空间的出发点。接下来，我们将把这些观察到的性质抽象出来，形成向量空间的一般定义。</p>
+<h3 id="1b-%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4%E7%9A%84%E5%AE%9A%E4%B9%89"><strong>1.B 向量空间的定义</strong></h3>
+<p>现在，我们准备给出一个数学上更普适的定义。一个向量空间是一个集合，连同一个“加法”和一个“标量乘法”，并且这些运算满足一些合理的性质（公理）。</p>
+<p><strong>定义 1.19：向量空间 (vector space)</strong>
+一个<strong>向量空间</strong>是集合 $V$ 以及其上的两种运算——<strong>加法</strong>（$V$ 中任意两个元素之和仍在 $V$ 中）和<strong>标量乘法</strong>（$\mathbf{F}$ 中任意标量与 $V$ 中任意元素之积仍在 $V$ 中），并满足以下所有性质：
+对所有 $u, v, w \in V$ 和 $a, b \in \mathbf{F}$：</p>
+<ol>
+<li><strong>加法交换性 (commutativity):</strong> $u+v = v+u$</li>
+<li><strong>加法结合性 (associativity):</strong> $(u+v)+w = u+(v+w)$</li>
+<li><strong>加法单位元 (additive identity):</strong> 存在一个元素 $0 \in V$ 使得对所有 $v \in V$ 都有 $v+0=v$</li>
+<li><strong>加法逆元 (additive inverse):</strong> 对每个 $v \in V$，都存在一个 $w \in V$ 使得 $v+w=0$</li>
+<li><strong>乘法单位元 (multiplicative identity):</strong> 对所有 $v \in V$ 都有 $1v = v$</li>
+<li><strong>标量乘法结合性 (associativity of scalar multiplication):</strong> $(ab)v = a(bv)$</li>
+<li><strong>分配性质 (distributive properties):</strong>
+<ul>
+<li>$a(u+v) = au+av$</li>
+<li>$(a+b)v = av+bv$</li>
+</ul>
+</li>
+</ol>
+<p><strong>定义 1.21：实向量空间与复向量空间</strong></p>
+<ul>
+<li>定义在标量域 $\mathbf{R}$ 上的向量空间称为<strong>实向量空间 (real vector space)</strong>。</li>
+<li>定义在标量域 $\mathbf{C}$ 上的向量空间称为<strong>复向量空间 (complex vector space)</strong>。</li>
+</ul>
+<p>向量空间中的元素称为<strong>向量 (vector)</strong> 或<strong>点 (point)</strong>。</p>
+<p><strong>向量空间的例子</strong></p>
+<p>除了我们已经熟悉的 $\mathbf{F}^n$，还有很多其他重要的向量空间。</p>
+<p><strong>例子 1.23：函数空间 $\mathbf{F}^S$</strong>
+设 $S$ 是一个非空集合。$\mathbf{F}^S$ 表示从集合 $S$ 到 $\mathbf{F}$ 的所有函数的集合。</p>
+<ul>
+<li><strong>加法：</strong> 对于 $f, g \in \mathbf{F}^S$，函数 $f+g$ 定义为：
+$$
+(f+g)(x) = f(x) + g(x) \quad \text{对所有 } x \in S
+$$</li>
+<li><strong>标量乘法：</strong> 对于 $\lambda \in \mathbf{F}$ 和 $f \in \mathbf{F}^S$，函数 $\lambda f$ 定义为：
+$$
+(\lambda f)(x) = \lambda f(x) \quad \text{对所有 } x \in S
+$$
+在这些运算下，$\mathbf{F}^S$ 是一个向量空间。</li>
+</ul>
+<p><strong>例子：验证一个具体函数空间</strong></p>
+<p>考虑所有从区间 $[0, 1]$ 到 $\mathbf{R}$ 的连续函数构成的集合，记作 $C([0, 1])$。验证它是否是一个实向量空间。</p>
+<p><strong>解：</strong>
+我们需要验证 $C([0, 1])$ 在上述函数加法和标量乘法下满足向量空间的所有公理。</p>
+<ul>
+<li><strong>加法单位元：</strong> 零函数 $f_0(x) = 0$ 对所有 $x \in [0, 1]$ 都是连续的。对于任意 $g \in C([0, 1])$，有 $(g+f_0)(x) = g(x) + 0 = g(x)$，所以 $f_0$ 是加法单位元。</li>
+<li><strong>加法封闭性：</strong> 如果 $f$ 和 $g$ 都是连续函数，那么它们的和 $f+g$ 也是一个连续函数。所以 $f+g \in C([0, 1])$。</li>
+<li><strong>标量乘法封闭性：</strong> 如果 $f$ 是连续函数，$\lambda \in \mathbf{R}$，那么 $\lambda f$ 也是一个连续函数。所以 $\lambda f \in C([0, 1])$。</li>
+<li>其他的性质（交换性、结合性、分配性等）都继承自实数 $\mathbf{R}$ 的相应性质。例如，加法交换性成立是因为对任意 $x \in [0, 1]$，$(f+g)(x) = f(x)+g(x) = g(x)+f(x) = (g+f)(x)$。</li>
+</ul>
+<p>因此，$C([0, 1])$ 是一个实向量空间。</p>
+<p><strong>向量空间的基本性质</strong></p>
+<p>从向量空间的公理可以推导出一些基本但非常重要的性质。</p>
+<p><strong>命题 1.25：加法单位元唯一</strong>
+在一个向量空间中，加法单位元是唯一的。</p>
+<p><strong>证明：</strong>
+假设 $0$ 和 $0'$ 都是 $V$ 中的加法单位元。那么：
+$$
+0' = 0' + 0 \quad (\text{因为 } 0 \text{ 是加法单位元})
+$$
+$$
+0' + 0 = 0 + 0' \quad (\text{根据加法交换性})
+$$
+$$
+0 + 0' = 0 \quad (\text{因为 } 0' \text{ 是加法单位元})
+$$
+因此，我们有 $0' = 0$。证毕。</p>
+<p><strong>命题 1.26：加法逆元唯一</strong>
+向量空间中的每个元素都有唯一的加法逆元。</p>
+<p><strong>证明：</strong>
+设 $v \in V$，并假设 $w$ 和 $w'$ 都是 $v$ 的加法逆元。则 $v+w=0$ 且 $v+w'=0$。我们有：
+$$
+\begin{aligned}
+w &amp;= w + 0 \\
+&amp;= w + (v + w') \\
+&amp;= (w + v) + w' \\
+&amp;= (v + w) + w' \\
+&amp;= 0 + w' \\
+&amp;= w'
+\end{aligned}
+$$
+因此 $w = w'$。证毕。我们将 $v$ 的加法逆元记为 $-v$。</p>
+<p><strong>命题 1.29：数0乘向量</strong>
+对任意 $v \in V$，有 $0v = 0$。</p>
+<p><strong>证明：</strong>
+$$
+\begin{aligned}
+0v &amp;= (0+0)v \\
+&amp;= 0v + 0v \quad (\text{分配性质})
+\end{aligned}
+$$
+在等式两边同时加上 $0v$ 的加法逆元 $-(0v)$，我们得到：
+$$
+0v + (-(0v)) = (0v + 0v) + (-(0v))
+$$
+$$
+0 = 0v + (0v + (-(0v)))
+$$
+$$
+0 = 0v + 0
+$$
+$$
+0 = 0v
+$$
+证毕。</p>
+<h3 id="1c-%E5%AD%90%E7%A9%BA%E9%97%B4"><strong>1.C 子空间</strong></h3>
+<p>在研究一个向量空间时，我们常常会对它的一些满足特定条件的子集感兴趣。如果这些子集本身也构成向量空间，我们就称之为<strong>子空间</strong>。</p>
+<p><strong>定义 1.32：子空间 (subspace)</strong>
+设 $V$ 是一个向量空间。$V$ 的一个子集 $U$ 如果在使用与 $V$ 相同的加法和标量乘法下也构成一个向量空间，则称 $U$ 是 $V$ 的一个<strong>子空间</strong>。</p>
+<p>要判断一个子集 $U$ 是否为子空间，我们不必去验证所有的向量空间公理。因为很多公理（如交换性、结合性）都是自动继承的。我们只需要验证以下三个关键条件。</p>
+<p><strong>命题 1.34：子空间的条件</strong>
+一个向量空间 $V$ 的子集 $U$ 是 $V$ 的子空间，当且仅当 $U$ 满足以下三个条件：</p>
+<ol>
+<li><strong>加法单位元 (additive identity):</strong> $0 \in U$</li>
+<li><strong>加法封闭性 (closed under addition):</strong> 如果 $u, w \in U$，则 $u+w \in U$</li>
+<li><strong>标量乘法封闭性 (closed under scalar multiplication):</strong> 如果 $a \in \mathbf{F}$ 且 $u \in U$，则 $au \in U$</li>
+</ol>
+<p><strong>例子 1.35：子空间的判定</strong></p>
+<p>判断以下集合是否为 $\mathbf{F}^3$ 的子空间：
+(a) $U_1 = {(x_1, x_2, x_3) \in \mathbf{F}^3 : x_1 + 2x_2 + 3x_3 = 0}$
+(b) $U_2 = {(x_1, x_2, x_3) \in \mathbf{F}^3 : x_1 + 2x_2 + 3x_3 = 4}$</p>
+<p><strong>解：</strong>
+(a) 对于 $U_1$:</p>
+<ol>
+<li><strong>加法单位元:</strong> 取 $(x_1, x_2, x_3) = (0, 0, 0)$，则 $0 + 2(0) + 3(0) = 0$。所以 $0 = (0, 0, 0) \in U_1$。</li>
+<li><strong>加法封闭性:</strong> 设 $u=(x_1, x_2, x_3)$ 和 $v=(y_1, y_2, y_3)$ 都是 $U_1$ 中的元素。则 $x_1 + 2x_2 + 3x_3 = 0$ 且 $y_1 + 2y_2 + 3y_3 = 0$。它们的和是 $u+v = (x_1+y_1, x_2+y_2, x_3+y_3)$。我们检验其分量是否满足条件：
+$$
+(x_1+y_1) + 2(x_2+y_2) + 3(x_3+y_3) = (x_1+2x_2+3x_3) + (y_1+2y_2+3y_3) = 0 + 0 = 0
+$$
+所以 $u+v \in U_1$。</li>
+<li><strong>标量乘法封闭性:</strong> 设 $a \in \mathbf{F}$ 且 $u=(x_1, x_2, x_3) \in U_1$。则 $au = (ax_1, ax_2, ax_3)$。我们检验其分量：
+$$
+(ax_1) + 2(ax_2) + 3(ax_3) = a(x_1+2x_2+3x_3) = a(0) = 0
+$$
+所以 $au \in U_1$。
+因此，$U_1$ 是 $\mathbf{F}^3$ 的一个子空间。</li>
+</ol>
+<p>(b) 对于 $U_2$:</p>
+<ol>
+<li><strong>加法单位元:</strong> 取 $(x_1, x_2, x_3) = (0, 0, 0)$，则 $0 + 2(0) + 3(0) = 0 \neq 4$。所以 $0 \notin U_2$。
+由于条件1不满足，$U_2$ 不是 $\mathbf{F}^3$ 的子空间。</li>
+</ol>
+<h4 id="%E5%AD%90%E7%A9%BA%E9%97%B4%E7%9A%84%E5%92%8C%E4%B8%8E%E7%9B%B4%E5%92%8C"><strong>子空间的和与直和</strong></h4>
+<p>我们可以通过已有的子空间来构造新的子空间。</p>
+<p><strong>定义 1.36：子集的和 (sum of subsets)</strong>
+设 $U_1, \ldots, U_m$ 是 $V$ 的子集。这些子集的<strong>和</strong>，记作 $U_1 + \cdots + U_m$，定义为所有可能元素之和构成的集合：
+$$
+U_1 + \cdots + U_m = {u_1 + \cdots + u_m : u_1 \in U_1, \ldots, u_m \in U_m}
+$$
+如果 $U_1, \ldots, U_m$ 都是 $V$ 的子空间，那么它们的和也是 $V$ 的一个子空间。</p>
+<p>有时候，我们不仅关心一个向量能否表示成子空间中向量的和，更关心这种表示是否<strong>唯一</strong>。这就引出了<strong>直和</strong>的概念。</p>
+<p><strong>定义 1.40：直和 (direct sum)</strong>
+设 $U_1, \ldots, U_m$ 是 $V$ 的子空间。</p>
+<ul>
+<li>和 $U_1 + \cdots + U_m$ 称为<strong>直和</strong>，如果 $U_1 + \cdots + U_m$ 中的每个元素都能<strong>唯一地</strong>写成 $u_1 + \cdots + u_m$（其中每个 $u_j \in U_j$）的形式。</li>
+<li>我们使用符号 $U_1 \oplus \cdots \oplus U_m$ 来表示直和。</li>
+</ul>
+<p>如何判断一个和是不是直和呢？有一个等价的、更易于检验的条件。</p>
+<p><strong>命题 1.44：直和的条件</strong>
+设 $U_1, \ldots, U_m$ 是 $V$ 的子空间。和 $U_1 + \cdots + U_m$ 是直和的当且仅当，将 $0$ 写成和 $u_1 + \cdots + u_m$（其中 $u_j \in U_j$）的唯一方式是令所有 $u_j$ 都等于 $0$。</p>
+<p>对于两个子空间的情形，这个条件可以被进一步简化。</p>
+<p><strong>命题 1.45：两个子空间的直和</strong>
+设 $U$ 和 $W$ 是 $V$ 的子空间。则 $U+W$ 是直和当且仅当 $U \cap W = {0}$。</p>
+<p><strong>例子：直和的判定</strong></p>
+<p>在 $\mathbf{R}^3$ 中，设
+$U = {(x, y, 0) : x, y \in \mathbf{R}}$ (xy-平面)
+$W = {(0, 0, z) : z \in \mathbf{R}}$ (z-轴)
+$X = {(0, y, y) : y \in \mathbf{R}}$ (在 yz-平面上的一条直线)</p>
+<p>判断 $U+W$ 和 $U+X$ 是否为直和。</p>
+<p><strong>解：</strong></p>
+<ul>
+<li>
+<p><strong>对于 $U+W$:</strong>
+我们需要计算它们的交集 $U \cap W$。
+如果一个向量 $v=(a, b, c)$ 同时在 $U$ 和 $W$ 中，那么：</p>
+<ul>
+<li>因为它在 $U$ 中，所以 $c=0$。</li>
+<li>因为它在 $W$ 中，所以 $a=0, b=0$。
+因此，唯一满足条件的向量是 $(0, 0, 0)$，即 $U \cap W = {0}$。
+根据命题 1.45，$U+W$ 是直和，我们可以写作 $U \oplus W$。（实际上，$\mathbf{R}^3 = U \oplus W$）</li>
+</ul>
+</li>
+<li>
+<p><strong>对于 $U+X$:</strong>
+我们需要计算它们的交集 $U \cap X$。
+如果一个向量 $v=(a, b, c)$ 同时在 $U$ 和 $X$ 中，那么：</p>
+<ul>
+<li>因为它在 $U$ 中，所以 $c=0$。</li>
+<li>因为它在 $X$ 中，所以 $a=0$ 且 $c=b$。
+结合这两个条件，我们得到 $a=0, c=0, b=c=0$。所以交集仍然是 $U \cap X = {0}$。
+因此，$U+X$ 也是直和，我们可以写作 $U \oplus X$。</li>
+</ul>
+</li>
+</ul>
+<p><strong>第一讲小结</strong></p>
+<p>今天我们学习了线性代数中最基本的概念——向量空间。</p>
+<ol>
+<li>我们从具体的例子 $\mathbf{R}^n$ 和 $\mathbf{C}^n$ 出发，了解了向量加法和标量乘法的基本运算法则。</li>
+<li>然后，我们将这些性质抽象出来，给出了向量空间普适的公理化定义，并看到了一些更广泛的例子，如函数空间。</li>
+<li>最后，我们引入了子空间的概念，它是研究向量空间结构的重要工具，并学习了如何通过子空间的和与直和来构造和分解向量空间。</li>
+</ol>
+</article>
+<div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+<div class="giscus-container" style="margin-top: 50px;">
+<script async="" crossorigin="anonymous" data-category="Announcements" data-emit-metadata="0" data-input-position="bottom" data-lang="zh-CN" data-mapping="pathname" data-reactions-enabled="1" data-repo="forliage/forliage.github.io" data-repo-id="R_kgDONjzd4w" data-strict="0" data-theme="https://forliage.github.io/giscus.css" src="https://giscus.app/client.js">
+</script>
+</div>
+
+
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+<script src="../script.js"></script>
+<div class="modal" id="about-me-modal">
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.js"></script>
+<script>
+  hljs.highlightAll();
+  hljs.addPlugin(new CopyButtonPlugin());
+</script>
+</body>
+</html>

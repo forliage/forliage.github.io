@@ -943,5 +943,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-27-cg15.html",
       "abstract": "计算机图形学15:实体建模"
+    },
+    {
+      "title": "线性代数01:向量空间",
+      "date": "2025-08-29",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-29-linear01.html",
+      "abstract": "线性代数01:向量空间"
     }
   ];
