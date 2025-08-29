@@ -999,5 +999,12 @@
     "category": "学习笔记",
     "path": "_posts/2025-08-29-linear08.html",
     "abstract": "线性代数08:复向量空间上的算子"
+  },
+  {
+    "title": "线性代数09:实向量空间上的算子",
+    "date": "2025-08-29",
+    "category": "学习笔记",
+    "path": "_posts/2025-08-29-linear09.html",
+    "abstract": "线性代数09:实向量空间上的算子"
   }
 ]
