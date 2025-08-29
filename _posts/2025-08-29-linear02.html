@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>线性代数02:有限维向量空间</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FPDBQB4LZD');
+    </script>
+<link href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-dawn.min.css" id="highlight-theme-link" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.css" rel="stylesheet"/>
+</head>
+<body>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B002%E6%9C%89%E9%99%90%E7%BB%B4%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4">线性代数02:有限维向量空间</h1>
+<p>在本章中，我们将始终采用以下假定：</p>
+<ul>
+<li>$\mathbf{F}$ 表示 $\mathbf{R}$ 或 $\mathbf{C}$。</li>
+<li>$V$ 表示 $\mathbf{F}$ 上的向量空间。</li>
+</ul>
+<h3 id="2a-%E5%BC%A0%E6%88%90%E7%A9%BA%E9%97%B4%E4%B8%8E%E7%BA%BF%E6%80%A7%E6%97%A0%E5%85%B3"><strong>2.A 张成空间与线性无关</strong></h3>
+<h4 id="%E7%BA%BF%E6%80%A7%E7%BB%84%E5%90%88%E4%B8%8E%E5%BC%A0%E6%88%90%E7%A9%BA%E9%97%B4"><strong>线性组合与张成空间</strong></h4>
+<p>我们首先来定义如何用一组给定的向量来“生成”其他向量。</p>
+<p><strong>记号 2.2：向量组 (list of vectors)</strong>
+我们用 $(v_1, \ldots, v_m)$ 来表示 $V$ 中的一组向量。</p>
+<p><strong>定义 2.3：线性组合 (linear combination)</strong>
+$V$ 中一组向量 $(v_1, \ldots, v_m)$ 的<strong>线性组合</strong>是指形如
+$$
+a_1v_1 + \cdots + a_m v_m
+$$
+的向量，其中 $a_1, \ldots, a_m \in \mathbf{F}$。</p>
+<p><strong>例子 2.4：$\mathbf{F}^3$ 中的线性组合</strong></p>
+<p>在 $\mathbf{F}^3$ 中，</p>
+<ul>
+<li>向量 $(17, -4, 2)$ 是向量组 $((2, 1, -3), (1, -2, 4))$ 的线性组合，因为：
+$$
+(17, -4, 2) = 6(2, 1, -3) + 5(1, -2, 4)
+$$</li>
+<li>向量 $(17, -4, 5)$ 不是向量组 $((2, 1, -3), (1, -2, 4))$ 的线性组合。要证明这一点，我们需要说明不存在标量 $a_1, a_2 \in \mathbf{F}$ 使得：
+$$
+(17, -4, 5) = a_1(2, 1, -3) + a_2(1, -2, 4)
+$$
+这等价于求解下面的方程组：
+$$
+\begin{cases}
+17 = 2a_1 + a_2 \\
+-4 = a_1 - 2a_2 \\
+5 = -3a_1 + 4a_2
+\end{cases}
+$$
+从前两个方程可以解得 $a_1=6, a_2=5$。但将这两个值代入第三个方程，得到 $-3(6) + 4(5) = -18 + 20 = 2$，而 $2 \neq 5$。因此，这个方程组无解，说明 $(17, -4, 5)$ 无法表示为给定向量组的线性组合。</li>
+</ul>
+<p><strong>定义 2.5：张成空间 (span)</strong>
+$V$ 中一组向量 $(v_1, \ldots, v_m)$ 的所有线性组合构成的集合称为 $(v_1, \ldots, v_m)$ 的<strong>张成空间</strong>，记为 $\text{span}(v_1, \ldots, v_m)$。即：
+$$
+\text{span}(v_1, \ldots, v_m) = {a_1v_1 + \cdots + a_m v_m : a_1, \ldots, a_m \in \mathbf{F}}
+$$
+我们规定，空向量组的张成空间为 ${0}$。</p>
+<p><strong>命题 2.7：张成空间是包含这些向量的最小子空间</strong>
+$V$ 中一组向量的张成空间是包含这组向量的最小子空间。</p>
+<p><strong>证明：</strong>
+设 $(v_1, \ldots, v_m)$ 是 $V$ 中的一组向量。
+首先，我们需要证明 $\text{span}(v_1, \ldots, v_m)$ 是 $V$ 的一个子空间。根据子空间的三个条件：</p>
+<ol>
+<li><strong>加法单位元：</strong> $0 = 0v_1 + \cdots + 0v_m$，所以 $0 \in \text{span}(v_1, \ldots, v_m)$。</li>
+<li><strong>加法封闭性：</strong> 考虑两个在张成空间中的任意向量 $u = a_1v_1 + \cdots + a_m v_m$ 和 $w = c_1v_1 + \cdots + c_m v_m$。它们的和为：
+$$
+u+w = (a_1+c_1)v_1 + \cdots + (a_m+c_m)v_m
+$$
+这仍然是 $(v_1, \ldots, v_m)$ 的一个线性组合，所以 $u+w \in \text{span}(v_1, \ldots, v_m)$。</li>
+<li><strong>标量乘法封闭性：</strong> 对于 $\lambda \in \mathbf{F}$，有：
+$$
+\lambda u = \lambda(a_1v_1 + \cdots + a_m v_m) = (\lambda a_1)v_1 + \cdots + (\lambda a_m)v_m
+$$
+这也属于张成空间。
+因此，$\text{span}(v_1, \ldots, v_m)$ 是 $V$ 的一个子空间。</li>
+</ol>
+<p>其次，对于每个 $j=1, \ldots, m$，我们可以通过令 $a_j=1$ 且其他标量为 $0$ 来得到 $v_j$。所以，每个 $v_j$ 都属于 $\text{span}(v_1, \ldots, v_m)$。
+最后，任何包含 $(v_1, \ldots, v_m)$ 的子空间，根据其加法封闭性和标量乘法封闭性，必然包含它们的所有线性组合。这意味着任何包含这组向量的子空间也必然包含 $\text{span}(v_1, \ldots, v_m)$。
+综上所述，$\text{span}(v_1, \ldots, v_m)$ 是包含 $(v_1, \ldots, v_m)$ 的最小子空间。证毕。</p>
+<p><strong>定义 2.10：有限维向量空间 (finite-dimensional vector space)</strong>
+如果一个向量空间可以由其内的一组有限多个向量张成，则称这个向量空间是<strong>有限维的</strong>。</p>
+<p><strong>定义 2.15：无限维向量空间 (infinite-dimensional vector space)</strong>
+不能被有限多个向量张成的向量空间称为<strong>无限维的</strong>。</p>
+<p><strong>例子 2.16：P(F) 是无限维的</strong>
+$\mathbf{P}(\mathbf{F})$ 表示由 $\mathbf{F}$ 上所有多项式构成的向量空间。
+<strong>证明：</strong>
+假设 $\mathbf{P}(\mathbf{F})$ 是有限维的，那么它可由一组有限的多项式 $(p_1, \ldots, p_m)$ 张成。设 $d$ 是这些多项式中次数的最大值。那么，任何这些多项式的线性组合，其次数都不可能超过 $d$。
+然而，多项式 $z^{d+1}$ 属于 $\mathbf{P}(\mathbf{F})$，但它的次数是 $d+1$，所以它不可能写成 $(p_1, \ldots, p_m)$ 的线性组合。
+这与我们的假设相矛盾。因此，$\mathbf{P}(\mathbf{F})$ 是无限维的。证毕。</p>
+<h4 id="%E7%BA%BF%E6%80%A7%E6%97%A0%E5%85%B3"><strong>线性无关</strong></h4>
+<p>张成的概念告诉我们如何从一组向量生成一个空间。现在我们来关注生成这个空间的“效率”。我们希望用尽可能少的向量来张成一个空间，这就引出了线性无关的概念。</p>
+<p><strong>定义 2.17：线性无关 (linearly independent)</strong>
+$V$ 中一组向量 $(v_1, \ldots, v_m)$ 称为<strong>线性无关的</strong>，如果使得
+$$
+a_1v_1 + \cdots + a_m v_m = 0
+$$
+成立的唯一一组标量是 $a_1 = \cdots = a_m = 0$。</p>
+<p><strong>定义 2.19：线性相关 (linearly dependent)</strong>
+$V$ 中一组向量 $(v_1, \ldots, v_m)$ 如果不是线性无关的，就称为<strong>线性相关的</strong>。也就是说，存在不全为零的标量 $a_1, \ldots, a_m \in \mathbf{F}$ 使得 $a_1v_1 + \cdots + a_m v_m = 0$。</p>
+<p><strong>例子 2.20：线性相关</strong></p>
+<ul>
+<li>在 $\mathbf{F}^3$ 中，向量组 $((2, 3, 1), (1, -1, 2), (7, 3, 8))$ 是线性相关的，因为
+$$
+2(2, 3, 1) + 3(1, -1, 2) - 1(7, 3, 8) = (4+3-7, 6-3-3, 2+6-8) = (0, 0, 0)
+$$
+这里我们找到了不全为零的系数 $(2, 3, -1)$。</li>
+<li>任何包含零向量的向量组都是线性相关的。</li>
+</ul>
+<p>线性相关性有一个非常直观的解释：一个向量组是线性相关的，当且仅当其中至少有一个向量可以被其他向量表示出来。下面这个引理精确地描述了这一点。</p>
+<p><strong>命题 2.21：线性相关引理</strong>
+如果 $(v_1, \ldots, v_m)$ 是 $V$ 中的一个线性相关组，并且 $v_1 \neq 0$，那么存在 $j \in {2, \ldots, m}$ 使得：
+(a) $v_j \in \text{span}(v_1, \ldots, v_{j-1})$
+(b) 如果从 $(v_1, \ldots, v_m)$ 中去掉第 $j$ 项，则剩下向量组的张成空间与原向量组的张成空间相同。</p>
+<p><strong>证明：</strong>
+(a) 因为向量组是线性相关的，所以存在不全为零的标量 $a_1, \ldots, a_m$ 使得 $a_1v_1 + \cdots + a_m v_m = 0$。
+让 $j$ 是使得 $a_j \neq 0$ 的最大下标。因为 $v_1 \neq 0$，所以 $j$ 必须大于1。于是我们可以把 $v_j$ 解出来：
+$$
+v_j = -\frac{a_1}{a_j}v_1 - \cdots - \frac{a_{j-1}}{a_j}v_{j-1}
+$$
+这表明 $v_j$ 是前面向量 $(v_1, \ldots, v_{j-1})$ 的线性组合，即 $v_j \in \text{span}(v_1, \ldots, v_{j-1})$。</p>
+<p>(b) 设 $U = \text{span}(v_1, \ldots, v_{j-1}, v_{j+1}, \ldots, v_m)$。显然 $U \subseteq \text{span}(v_1, \ldots, v_m)$。
+为了证明反向包含，我们任取一个原张成空间中的向量 $v = c_1v_1 + \cdots + c_m v_m$。我们可以用(a)中的表达式替换 $v_j$：
+$$
+v = \sum_{k=1}^{j-1} c_k v_k + c_j(-\frac{a_1}{a_j}v_1 - \cdots - \frac{a_{j-1}}{a_j}v_{j-1}) + \sum_{k=j+1}^{m} c_k v_k
+$$
+整理后， $v$ 可以表示为除 $v_j$ 之外的其他向量的线性组合。因此 $v \in U$。
+所以两个张成空间相等。证毕。</p>
+<p>现在我们来证明本节最重要的一个结果，它联系了线性无关组和张成组的长度。</p>
+<p><strong>定理 2.23：线性无关组的长度 $\le$ 张成组的长度</strong>
+在有限维向量空间中，任意线性无关向量组的长度都小于或等于任意张成向量组的长度。</p>
+<p><strong>证明：</strong>
+设 $V$ 是有限维的，$(u_1, \ldots, u_m)$ 是 $V$ 中一个线性无关组，$(w_1, \ldots, w_n)$ 是 $V$ 的一个张成组。我们要证明 $m \le n$。</p>
+<p><strong>第1步：</strong>
+因为 $(w_1, \ldots, w_n)$ 张成 $V$，所以向量 $u_1$ 可以写成它们的线性组合。因此，向量组 $(u_1, w_1, \ldots, w_n)$ 是线性相关的。
+根据线性相关引理，我们可以从这个组中去掉一个 $w_j$，使得剩下的向量组仍然张成 $V$。为方便起见（可以重新排序），我们假设去掉的是 $w_1$。现在我们有了一个新的张成组 $(u_1, w_2, \ldots, w_n)$，长度仍为 $n$。</p>
+<p><strong>第j步：</strong>
+假设我们已经进行了 $j-1$ 步，得到了一个张成组 $B_{j-1}$，它的前 $j-1$ 个向量是 $(u_1, \ldots, u_{j-1})$，后面是 $n-(j-1)$ 个来自 $w$ 组的向量。
+现在我们将 $u_j$ 加入这个张成组 $B_{j-1}$。因为 $B_{j-1}$ 张成 $V$，所以 $u_j$ 是 $B_{j-1}$ 中向量的线性组合。因此，新组 $(u_1, \ldots, u_j, \ldots)$ 是线性相关的。
+根据线性相关引理，其中有一个向量是它前面向量的线性组合。这个向量不可能是 $u_k$（其中 $k \le j$），因为 $(u_1, \ldots, u_m)$ 是线性无关的。所以，这个向量必定是某个 $w$ 向量。我们可以把这个 $w$ 向量去掉，剩下的向量组仍然张成 $V$。
+我们就得到了一个新的长度为 $n$ 的张成组 $B_j$，它以 $(u_1, \ldots, u_j)$ 开头。</p>
+<p>这个过程可以一直进行下去。每一步，我们添加一个 $u$ 向量，并去掉一个 $w$ 向量。这个过程能进行多少步呢？最多只能进行 $m$ 步（因为我们只有 $m$ 个 $u$ 向量）。每一步都会用掉一个 $w$ 向量。如果我们有 $m &gt; n$，那么在第 $n$ 步之后，所有的 $w$ 向量都已经被替换掉了，我们会得到一个张成组 $(u_1, \ldots, u_n)$。但这意味着 $u_{n+1}$ (如果 $m&gt;n$) 是 $(u_1, \ldots, u_n)$ 的线性组合，这与 $(u_1, \ldots, u_m)$ 线性无关的假设相矛盾。
+因此，我们的假设 $m&gt;n$ 必定是错误的。所以必须有 $m \le n$。证毕。</p>
+<h3 id="2b-%E5%9F%BA"><strong>2.B 基</strong></h3>
+<p>我们现在将张成和线性无关这两个概念结合起来，得到线性代数中最核心的概念之一：<strong>基</strong>。</p>
+<p><strong>定义 2.27：基 (basis)</strong>
+$V$ 中的一个向量组 $(v_1, \ldots, v_n)$ 如果既是线性无关的，又张成 $V$，则称它为 $V$ 的一个<strong>基</strong>。</p>
+<p><strong>例子 2.28：基的例子</strong>
+(a) $((1,0,\ldots,0), (0,1,0,\ldots,0), \ldots, (0,\ldots,0,1))$ 是 $\mathbf{F}^n$ 的一个基，称为<strong>标准基</strong>。
+(b) $((1,2), (3,5))$ 是 $\mathbf{F}^2$ 的一个基。它是线性无关的，并且张成 $\mathbf{F}^2$（验证留作练习）。
+(g) $(1, z, z^2, \ldots, z^m)$ 是 $\mathbf{P}_m(\mathbf{F})$ 的一个基。</p>
+<p>基的一个美妙特性是，它为向量空间中的每一个向量提供了唯一的“地址”或“坐标”。</p>
+<p><strong>命题 2.29：基的判定准则</strong>
+$V$ 中的一个向量组 $(v_1, \ldots, v_n)$ 是 $V$ 的一个基，当且仅当 $V$ 中的每个向量 $v$ 都可以被<strong>唯一地</strong>写成如下线性组合的形式：
+$$
+v = a_1v_1 + \cdots + a_n v_n
+$$</p>
+<p><strong>证明：</strong>
+$(\Rightarrow)$ 假设 $(v_1, \ldots, v_n)$ 是一个基。任取 $v \in V$。因为基张成 $V$，所以 $v$ 至少有一种表示方法。假设有两种表示方法：
+$$
+v = a_1v_1 + \cdots + a_n v_n
+$$
+$$
+v = c_1v_1 + \cdots + c_n v_n
+$$
+两式相减得到：
+$$
+0 = (a_1-c_1)v_1 + \cdots + (a_n-c_n)v_n
+$$
+因为 $(v_1, \ldots, v_n)$ 是线性无关的，所以所有系数必须为零，即 $a_j - c_j = 0$ for all $j$。因此 $a_j = c_j$，表示方法是唯一的。</p>
+<p>$(\Leftarrow)$ 假设每个 $v \in V$ 都有唯一的表示。</p>
+<ul>
+<li><strong>张成性：</strong> 定义已经说明了每个向量都能被表示，所以 $(v_1, \ldots, v_n)$ 张成 $V$。</li>
+<li><strong>线性无关性：</strong> 考虑 $0$ 的表示。一种显然的表示是 $0 = 0v_1 + \cdots + 0v_n$。根据唯一性假设，这是唯一的表示方法。因此，任何形如 $a_1v_1 + \cdots + a_n v_n = 0$ 的表达式都必须有 $a_1 = \cdots = a_n = 0$。所以 $(v_1, \ldots, v_n)$ 是线性无关的。
+证毕。</li>
+</ul>
+<p>现在我们知道什么是基了，但基一定存在吗？下面的命题回答了这个问题。</p>
+<p><strong>命题 2.31：张成组可以缩减为基</strong>
+如果一个向量组张成 $V$，那么它可以被缩减为 $V$ 的一个基。</p>
+<p><strong>证明：</strong>
+设 $(v_1, \ldots, v_m)$ 张成 $V$。我们按以下步骤构建一个基：
+<strong>第1步：</strong> 如果 $v_1=0$，就去掉它。如果 $v_1 \neq 0$，就保留它。
+<strong>第j步：</strong> 假设我们已经处理了前 $j-1$ 个向量。考察 $v_j$。如果 $v_j \in \text{span}(v_1, \ldots, v_{j-1})$（这里指的是保留下来的向量），我们就去掉 $v_j$。否则，我们保留 $v_j$。
+我们对所有向量重复这个过程。最终剩下的向量组记为 $B$。</p>
+<ul>
+<li><strong>张成性：</strong> 每当我们去掉一个向量 $v_j$ 时，是因为它已经在前面向量的张成空间里。根据线性相关引理，去掉它不会改变张成空间。所以，最终的组 $B$ 仍然张成 $V$。</li>
+<li><strong>线性无关性：</strong> 根据我们的构建方法，任何被保留的向量都不在它前面向量的张成空间里。再次利用线性相关引理的逆否命题，这保证了组 $B$ 是线性无关的。
+因此，$B$ 是 $V$ 的一个基。证毕。</li>
+</ul>
+<p><strong>推论 2.32：每个有限维向量空间都有基</strong>
+这直接由命题 2.31 得出，因为有限维向量空间根据定义就有一个有限的张成组。</p>
+<p><strong>命题 2.33：线性无关组可以扩充为基</strong>
+在有限维向量空间中，任意线性无关的向量组都可以扩充为 $V$ 的一个基。</p>
+<p><strong>证明：</strong>
+设 $(u_1, \ldots, u_m)$ 是 $V$ 中的一个线性无关组。因为 $V$ 是有限维的，所以存在一个张成组 $(w_1, \ldots, w_n)$。
+考虑向量组 $(u_1, \ldots, u_m, w_1, \ldots, w_n)$。这个组显然张成 $V$（因为它包含了原来的张成组）。
+现在，我们应用命题 2.31 的缩减过程来从这个新组中得到一个基。在这个过程中，任何 $u_j$ 都不会被去掉，因为 $(u_1, \ldots, u_m)$ 是线性无关的，所以没有一个 $u_j$ 会在它前面的 $u$ 向量的张成空间里。
+因此，我们得到的基会包含所有的 $u_j$，从而完成了对原线性无关组的扩充。证毕。</p>
+<h3 id="2c-%E7%BB%B4%E6%95%B0"><strong>2.C 维数</strong></h3>
+<p>我们已经知道每个有限维向量空间都有基。那么，一个向量空间的不同基，它们的长度是否相同呢？</p>
+<p><strong>定理 2.35：任意两个基的长度相同</strong>
+在有限维向量空间中，任意两个基都有相同的长度。</p>
+<p><strong>证明：</strong>
+设 $B_1 = (v_1, \ldots, v_m)$ 和 $B_2 = (w_1, \ldots, w_n)$ 是 $V$ 的两个基。</p>
+<ul>
+<li>因为 $B_1$ 是线性无关的，且 $B_2$ 张成 $V$，根据定理 2.23，我们有 $m \le n$。</li>
+<li>因为 $B_2$ 是线性无关的，且 $B_1$ 张成 $V$，根据定理 2.23，我们有 $n \le m$。
+结合这两个不等式，我们必然得到 $m = n$。证毕。</li>
+</ul>
+<p>这个定理非常重要，因为它保证了下面这个定义是合理的。</p>
+<p><strong>定义 2.36：维数 (dimension)</strong></p>
+<ul>
+<li>一个有限维向量空间 $V$ 的<strong>维数</strong>，记为 $\dim V$，是它任意一个基的长度。</li>
+<li>如果 $V$ 是无限维的，我们记 $\dim V = \infty$。</li>
+</ul>
+<p><strong>例子 2.37：维数的例子</strong></p>
+<ul>
+<li>$\dim \mathbf{F}^n = n$ (因为标准基有 $n$ 个向量)。</li>
+<li>$\dim \mathbf{P}_m(\mathbf{F}) = m+1$ (因为基 $(1, z, \ldots, z^m)$ 有 $m+1$ 个向量)。</li>
+</ul>
+<p>维数这个概念非常强大，它可以帮助我们简化很多判断。</p>
+<p><strong>命题 2.39：长度等于维数的线性无关组是基</strong>
+若 $V$ 是有限维的，且 $(v_1, \ldots, v_n)$ 是 $V$ 中一个长度为 $\dim V$ 的线性无关组，则它是一个基。</p>
+<p><strong>证明：</strong>
+设 $(v_1, \ldots, v_n)$ 是 $V$ 中的一个线性无关组，且 $n = \dim V$。
+根据命题 2.33，我们可以将这个组扩充为 $V$ 的一个基。但是，这个基的长度必须是 $\dim V = n$。所以我们不能再添加任何向量。
+因此，$(v_1, \ldots, v_n)$ 本身就是一个基。证毕。</p>
+<h4 id="%E5%AD%90%E7%A9%BA%E9%97%B4%E7%9A%84%E7%BB%B4%E6%95%B0"><strong>子空间的维数</strong></h4>
+<p><strong>命题 2.43：子空间和的维数公式</strong>
+如果 $U_1$ 和 $U_2$ 是 $V$ 的两个有限维子空间，那么
+$$
+\dim(U_1 + U_2) = \dim U_1 + \dim U_2 - \dim(U_1 \cap U_2)
+$$</p>
+<p><strong>证明：</strong>
+设 $\dim(U_1 \cap U_2) = m$，并设 $(u_1, \ldots, u_m)$ 是 $U_1 \cap U_2$ 的一个基。
+因为 $(u_1, \ldots, u_m)$ 是 $U_1$ 中的一个线性无关组，我们可以将其扩充为 $U_1$ 的一个基：$(u_1, \ldots, u_m, v_1, \ldots, v_j)$。所以 $\dim U_1 = m+j$。
+同样，我们可以将其扩充为 $U_2$ 的一个基：$(u_1, \ldots, u_m, w_1, \ldots, w_k)$。所以 $\dim U_2 = m+k$。
+现在我们来证明向量组 $B = (u_1, \ldots, u_m, v_1, \ldots, v_j, w_1, \ldots, w_k)$ 是 $U_1+U_2$ 的一个基。</p>
+<ul>
+<li><strong>张成性：</strong> $U_1+U_2$ 中的任意向量可以写成 $u+w$ 的形式，其中 $u \in U_1, w \in U_2$。而 $u$ 和 $w$ 都可以用它们各自基的线性组合表示，所以 $u+w$ 可以用组 $B$ 中向量的线性组合表示。因此 $B$ 张成 $U_1+U_2$。</li>
+<li><strong>线性无关性：</strong> 假设
+$$
+\sum a_i u_i + \sum b_i v_i + \sum c_i w_i = 0
+$$
+移项得：
+$$
+\sum c_i w_i = -(\sum a_i u_i + \sum b_i v_i)
+$$
+等式左边在 $U_2$ 中，右边在 $U_1$ 中。所以这个向量在 $U_1 \cap U_2$ 中。因此，它可以表示为 $(u_1, \ldots, u_m)$ 的线性组合: $\sum c_i w_i = \sum d_i u_i$。
+这导致 $\sum c_i w_i - \sum d_i u_i = 0$。因为 $(u_1, \ldots, u_m, w_1, \ldots, w_k)$ 是 $U_2$ 的基（线性无关），所以所有的 $c_i$ 和 $d_i$ 都必须是0。
+现在回到最初的等式，我们有 $\sum a_i u_i + \sum b_i v_i = 0$。因为 $(u_1, \ldots, u_m, v_1, \ldots, v_j)$ 是 $U_1$ 的基（线性无关），所以所有的 $a_i$ 和 $b_i$ 也必须是0。
+因此，组 $B$ 是线性无关的。</li>
+</ul>
+<p>既然 $B$ 是 $U_1+U_2$ 的基，那么
+$$
+\begin{aligned}
+\dim(U_1 + U_2) &amp;= m + j + k \\
+&amp;= (m+j) + (m+k) - m \\
+&amp;= \dim U_1 + \dim U_2 - \dim(U_1 \cap U_2)
+\end{aligned}
+$$
+证毕。</p>
+<p><strong>例子：维数公式的应用</strong></p>
+<p>在 $\mathbf{R}^3$ 中，设 $U_1$ 是 xy-平面， $U_2$ 是 yz-平面。
+$U_1 = {(x, y, 0) : x, y \in \mathbf{R}}$，一个基是 $((1,0,0), (0,1,0))$，所以 $\dim U_1 = 2$。
+$U_2 = {(0, y, z) : y, z \in \mathbf{R}}$，一个基是 $((0,1,0), (0,0,1))$，所以 $\dim U_2 = 2$。
+它们的交集 $U_1 \cap U_2$ 是 y-轴: ${(0, y, 0) : y \in \mathbf{R}}$。一个基是 $((0,1,0))$，所以 $\dim(U_1 \cap U_2) = 1$。
+它们的和 $U_1+U_2$ 包含所有形如 $(x, y_1, 0) + (0, y_2, z) = (x, y_1+y_2, z)$ 的向量，这显然是整个 $\mathbf{R}^3$。所以 $\dim(U_1+U_2) = 3$。
+我们来验证公式：
+$$
+\dim U_1 + \dim U_2 - \dim(U_1 \cap U_2) = 2 + 2 - 1 = 3
+$$
+这与 $\dim(U_1+U_2)$ 相符。</p>
+<p><strong>第二讲小结</strong></p>
+<p>今天我们深入探讨了有限维向量空间的结构。</p>
+<ol>
+<li>我们定义了<strong>线性组合</strong>和<strong>张成空间</strong>，这是从少数向量生成整个空间的方法。</li>
+<li>我们引入了<strong>线性无关</strong>的概念，它刻画了生成空间的向量组的“效率”。</li>
+<li>结合这两个概念，我们得到了<strong>基</strong>的定义——一个张成空间的线性无关组。基为空间中的每个向量提供了唯一的坐标。</li>
+<li>我们证明了任何有限维向量空间都有基，并且任意两个基的长度都相同，这使得<strong>维数</strong>的定义成为可能。</li>
+<li>最后，我们推导了关于子空间维数的重要公式，特别是子空间和的维数公式。</li>
+</ol>
+</article>
+<div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.259.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+<div class="giscus-container" style="margin-top: 50px;">
+<script async="" crossorigin="anonymous" data-category="Announcements" data-emit-metadata="0" data-input-position="bottom" data-lang="zh-CN" data-mapping="pathname" data-reactions-enabled="1" data-repo="forliage/forliage.github.io" data-repo-id="R_kgDONjzd4w" data-strict="0" data-theme="https://forliage.github.io/giscus.css" src="https://giscus.app/client.js">
+</script>
+</div>
+
+
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+<script src="../script.js"></script>
+<div class="modal" id="about-me-modal">
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.js"></script>
+<script>
+  hljs.highlightAll();
+  hljs.addPlugin(new CopyButtonPlugin());
+</script>
+</body>
+</html>
