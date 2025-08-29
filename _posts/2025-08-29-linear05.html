@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>线性代数05:本征值、本征向量、不变子空间</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FPDBQB4LZD');
+    </script>
+<link href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-dawn.min.css" id="highlight-theme-link" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.css" rel="stylesheet"/>
+</head>
+<body>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B005%E6%9C%AC%E5%BE%81%E5%80%BC%E6%9C%AC%E5%BE%81%E5%90%91%E9%87%8F%E4%B8%8D%E5%8F%98%E5%AD%90%E7%A9%BA%E9%97%B4">线性代数05:本征值、本征向量、不变子空间</h1>
+<p>在本章中，我们将始终采用以下假定：</p>
+<ul>
+<li>$\mathbf{F}$ 表示 $\mathbf{R}$ 或 $\mathbf{C}$。</li>
+<li>$V$ 表示 $\mathbf{F}$ 上的有限维非零向量空间。</li>
+</ul>
+<h3 id="5a-%E4%B8%8D%E5%8F%98%E5%AD%90%E7%A9%BA%E9%97%B4"><strong>5.A 不变子空间</strong></h3>
+<p>我们首先引入一个概念，它能帮助我们将对算子的研究分解到更小的子空间上。</p>
+<p><strong>定义 5.2：不变子空间 (invariant subspace)</strong>
+设 $T \in \mathcal{L}(V)$。$V$ 的一个子空间 $U$ 称为在 $T$ 下是<strong>不变的</strong>，如果对每个 $u \in U$ 都有 $Tu \in U$。
+也就是说，$T$ 将 $U$ 映到 $U$ 自身内部。在这种情况下，$T$ 在 $U$ 上的限制 $T|_U$ 是一个从 $U$ 到 $U$ 的算子。</p>
+<p><strong>例子 5.3：不变子空间的例子</strong>
+设 $T \in \mathcal{L}(V)$。以下子空间在 $T$ 下都是不变的：
+(a) ${0}$
+(b) $V$
+(c) $\text{null } T$
+(d) $\text{range } T$</p>
+<p><strong>证明：</strong>
+(a) 若 $u \in {0}$，则 $u=0$。$Tu=T0=0 \in {0}$。
+(b) $T$ 的定义域是 $V$，所以对任意 $v \in V$，$Tv$ 也在 $V$ 中。
+(c) 若 $u \in \text{null } T$，则 $Tu=0$。而 $0 \in \text{null } T$，所以 $Tu \in \text{null } T$。
+(d) 若 $u \in \text{range } T$，则 $u=Tv$ 对某个 $v \in V$ 成立。那么 $Tu = T(Tv)$。$T(Tv)$ 显然也是 $T$ 作用在某个向量（即$Tv$）上的结果，所以 $Tu$ 也在 $\text{range } T$ 中。
+证毕。</p>
+<p>不变子空间的存在性是研究算子结构的关键。一个自然的问题是：任何算子是否都存在非平凡的（即非${0}$和$V$）不变子空间？答案是肯定的，我们稍后会证明。</p>
+<h4 id="%E6%9C%AC%E5%BE%81%E5%80%BC%E4%B8%8E%E6%9C%AC%E5%BE%81%E5%90%91%E9%87%8F"><strong>本征值与本征向量</strong></h4>
+<p>研究算子最简单的不变子空间是一维不变子空间。</p>
+<p>一个一维子空间 $U$ 在 $T$ 下不变意味着什么？一个一维子空间 $U$ 是由某个非零向量 $v$ 张成的，即 $U = \text{span}(v) = {\lambda v : \lambda \in \mathbf{F}}$。
+如果 $U$ 在 $T$ 下不变，那么 $Tv$ 必须也在 $U$ 中。这意味着 $Tv$ 必须是 $v$ 的一个标量倍，即存在 $\lambda \in \mathbf{F}$ 使得
+$$
+Tv = \lambda v
+$$
+这个简单的方程是整个线性代数的核心。</p>
+<p><strong>定义 5.5：本征值 (eigenvalue)</strong>
+设 $T \in \mathcal{L}(V)$。标量 $\lambda \in \mathbf{F}$ 称为 $T$ 的<strong>本征值</strong>，如果存在非零向量 $v \in V$ 使得 $Tv = \lambda v$。</p>
+<p><strong>定义 5.7：本征向量 (eigenvector)</strong>
+设 $T \in \mathcal{L}(V)$ 且 $\lambda$ 是 $T$ 的一个本征值。一个非零向量 $v \in V$ 如果满足 $Tv = \lambda v$，则称为 $T$ 的对应于 $\lambda$ 的<strong>本征向量</strong>。</p>
+<p><strong>命题 5.6：本征值的等价条件</strong>
+设 $T \in \mathcal{L}(V)$ 且 $\lambda \in \mathbf{F}$。以下条件等价：
+(a) $\lambda$ 是 $T$ 的一个本征值。
+(b) $T - \lambda I$ 不是单射的。
+(c) $T - \lambda I$ 不是满射的。
+(d) $T - \lambda I$ 不是可逆的。</p>
+<p><strong>证明：</strong>
+$T - \lambda I$ 是一个从 $V$ 到 $V$ 的算子。对于有限维空间 $V$ 上的算子，单射、满射和可逆是等价的（我们在第3讲证明过）。所以 (b), (c), (d) 是等价的。我们只需证明 (a) 与 (b) 等价。
+$\lambda$ 是 $T$ 的一个本征值 $\iff$ 存在 $v \neq 0$ 使得 $Tv=\lambda v$
+$\iff$ 存在 $v \neq 0$ 使得 $Tv - \lambda Iv = 0$
+$\iff$ 存在 $v \neq 0$ 使得 $(T-\lambda I)v = 0$
+$\iff$ $\text{null}(T-\lambda I) \neq {0}$
+$\iff$ $T-\lambda I$ 不是单射的。
+证毕。</p>
+<p><strong>例子 5.8：求本征值和本征向量</strong>
+定义 $T \in \mathcal{L}(\mathbf{F}^2)$ 为 $T(w,z) = (-z, w)$。
+(a) 若 $\mathbf{F} = \mathbf{R}$，求 $T$ 的本征值和本征向量。
+(b) 若 $\mathbf{F} = \mathbf{C}$，求 $T$ 的本征值和本征向量。</p>
+<p><strong>解：</strong>
+(a) 几何上看，这个变换是将平面上的向量逆时针旋转 $90^{\circ}$。一个非零向量经过旋转后，方向一定会改变，不可能还是自身的标量倍（除非标量为0，但这要求向量为0，不符合本征向量的定义）。因此，在实数域 $\mathbf{R}$ 上，$T$ 没有本征值，从而也没有本征向量。</p>
+<p>(b) 在复数域 $\mathbf{C}$ 上，我们求解方程 $T(w,z) = \lambda(w,z)$：
+$(-z, w) = (\lambda w, \lambda z)$
+这得到方程组：
+$$
+\begin{cases}
+-z = \lambda w \\
+w = \lambda z
+\end{cases}
+$$
+将第二式代入第一式，得 $-z = \lambda(\lambda z) = \lambda^2 z$。
+即 $(\lambda^2+1)z = 0$。
+因为我们寻找非零本征向量 $(w,z)$，所以 $z$ 和 $w$ 不能都为0。
+如果 $z=0$，则由第二式知 $w=0$，这是平凡解，舍去。
+所以必有 $z \neq 0$。因此，必须有 $\lambda^2+1=0$，解得 $\lambda = i$ 或 $\lambda = -i$。
+这两个就是 $T$ 的本征值。</p>
+<ul>
+<li>当 $\lambda = i$ 时，方程组变为 $-z=iw, w=iz$。这两个方程是等价的。取 $z=1$，则 $w=i$。所以 $(i, 1)$ 是对应于本征值 $i$ 的一个本征向量。</li>
+<li>当 $\lambda = -i$ 时，方程组变为 $-z=-iw, w=-iz$。取 $z=1$，则 $w=-i$。所以 $(-i, 1)$ 是对应于本征值 $-i$ 的一个本征向量。</li>
+</ul>
+<p><strong>命题 5.10：不同本征值对应的本征向量线性无关</strong>
+设 $T \in \mathcal{L}(V)$。如果 $\lambda_1, \ldots, \lambda_m$ 是 $T$ 的互不相同的本征值，而 $v_1, \ldots, v_m$ 是对应的本征向量，则 $(v_1, \ldots, v_m)$ 是线性无关的。</p>
+<p><strong>证明：</strong>
+我们用反证法。假设该组向量是线性相关的。
+令 $k$ 是使得 $(v_1, \ldots, v_k)$ 线性无关，但 $(v_1, \ldots, v_{k+1})$ 线性相关的最小正整数。
+则 $v_{k+1}$ 可以表示为前面向量的线性组合：
+$$
+v_{k+1} = a_1 v_1 + \cdots + a_k v_k \quad (* )
+$$
+用 $T$ 作用于上式两端：
+$$
+\begin{aligned}
+T v_{k+1} &amp;= T(a_1 v_1 + \cdots + a_k v_k) \\
+\lambda_{k+1} v_{k+1} &amp;= a_1 T v_1 + \cdots + a_k T v_k \\
+&amp;= a_1 \lambda_1 v_1 + \cdots + a_k \lambda_k v_k \quad (**)
+\end{aligned}
+$$
+将 $(*)$ 式乘以 $\lambda_{k+1}$：
+$$
+\lambda_{k+1} v_{k+1} = a_1 \lambda_{k+1} v_1 + \cdots + a_k \lambda_{k+1} v_k \quad (***)
+$$
+用 $(***)$ 式减去 $(**)$ 式：
+$$
+0 = a_1(\lambda_{k+1} - \lambda_1)v_1 + \cdots + a_k(\lambda_{k+1} - \lambda_k)v_k
+$$
+因为 $(v_1, \ldots, v_k)$ 是线性无关的，所以所有系数必须为0。
+即 $a_j(\lambda_{k+1} - \lambda_j) = 0$ for $j=1, \ldots, k$。
+因为所有本征值互不相同，所以 $\lambda_{k+1} - \lambda_j \neq 0$。
+因此，必有 $a_j = 0$ for all $j$。
+但这导致 $(*)$ 式变为 $v_{k+1} = 0$，与本征向量非零的定义矛盾。
+所以我们的初始假设（线性相关）是错误的。证毕。</p>
+<p><strong>推论 5.13：算子本征值的个数</strong>
+一个算子至多有 $\dim V$ 个互不相同的本征值。
+<strong>证明：</strong>
+这直接由命题 5.10 得出，因为在一个 $\dim V$ 维空间中，线性无关向量组的长度不能超过 $\dim V$。</p>
+<h3 id="5b-%E5%A4%9A%E9%A1%B9%E5%BC%8F%E4%BD%9C%E7%94%A8%E4%BA%8E%E7%AE%97%E5%AD%90"><strong>5.B 多项式作用于算子</strong></h3>
+<p>在复向量空间上，任何算子都至少有一个本征值。这是本节要证明的核心结果。为此，我们需要引入多项式作用于算子的概念。</p>
+<p><strong>定义 5.16</strong>
+设 $T \in \mathcal{L}(V)$，$m$ 是非负整数。</p>
+<ul>
+<li>$T^m$ 定义为 $T$ 与自身的 $m$ 次复合。$T^0=I$。</li>
+<li>若 $T$ 可逆，则 $T^{-m} = (T^{-1})^m$。</li>
+</ul>
+<p><strong>定义 5.17：$p(T)$</strong>
+设 $T \in \mathcal{L}(V)$，多项式 $p(z) = a_0 + a_1z + \cdots + a_m z^m$。
+$p(T)$ 是一个算子，定义为
+$$
+p(T) = a_0 I + a_1 T + \cdots + a_m T^m
+$$</p>
+<p><strong>例子 5.18</strong>
+设 $D \in \mathcal{L}(\mathbf{P}(\mathbf{R}))$ 是微分算子。设 $p(z) = 7 - 3z + 5z^2$。则 $p(D) = 7I - 3D + 5D^2$。
+对于任意多项式 $q \in \mathbf{P}(\mathbf{R})$，有
+$$
+(p(D))q = (7I - 3D + 5D^2)q = 7q - 3q' + 5q''
+$$</p>
+<p><strong>定理 5.21：复向量空间上的算子都有本征值</strong>
+在复向量空间上，每个算子都至少有一个本征值。</p>
+<p><strong>证明：</strong>
+设 $V$ 是一个 $n$ 维复向量空间 ($n>0$)， $T \in \mathcal{L}(V)$。
+任取一个非零向量 $v \in V$。
+考虑向量组 $(v, Tv, T^2v, \ldots, T^nv)$。这个组有 $n+1$ 个向量，而空间的维数是 $n$。因此，这个组必然是线性相关的。
+所以，存在不全为零的复数 $a_0, a_1, \ldots, a_n$ 使得
+$$
+a_0 v + a_1 Tv + \cdots + a_n T^n v = 0
+$$
+这可以写成 $(a_0 I + a_1 T + \cdots + a_n T^n)v = 0$。
+令 $p(z) = a_0 + a_1 z + \cdots + a_n z^n$。这是一个次数在1到n之间的复系数多项式。
+根据代数学基本定理， $p(z)$ 可以被完全分解：
+$$
+p(z) = c(z-\lambda_1)\cdots(z-\lambda_m)
+$$
+其中 $c \neq 0$ 且 $\lambda_j \in \mathbf{C}$。
+于是，我们有
+$$
+\begin{aligned}
+0 &amp;= (a_0 I + a_1 T + \cdots + a_n T^n)v \\
+&amp;= p(T)v \\
+&amp;= c(T-\lambda_1 I)\cdots(T-\lambda_m I)v
+\end{aligned}
+$$
+我们从右到左考察这个算子链。由于 $v \neq 0$，所以这个链中至少有一个算子不是单射的。
+也就是说，至少存在一个 $j$ 使得 $T-\lambda_j I$ 不是单射的。
+根据命题 5.6，这意味着 $\lambda_j$ 是 $T$ 的一个本征值。证毕。</p>
+<h4 id="%E4%B8%8A%E4%B8%89%E8%A7%92%E7%9F%A9%E9%98%B5"><strong>上三角矩阵</strong></h4>
+<p>本征值的存在性引出了一个非常重要的结论：任何复向量空间上的算子，都可以选择一个合适的基，使其矩阵变为一个简单的形式——<strong>上三角矩阵</strong>。</p>
+<p><strong>定义 5.25：上三角矩阵 (upper-triangular matrix)</strong>
+一个方阵称为<strong>上三角的</strong>，如果其对角线下方所有元素都为0。</p>
+<p><strong>命题 5.26：上三角矩阵的条件</strong>
+设 $T \in \mathcal{L}(V)$，$(v_1, \ldots, v_n)$ 是 $V$ 的一个基。以下条件等价：
+(a) $T$ 关于该基的矩阵是上三角的。
+(b) 对每个 $j=1, \ldots, n$，有 $Tv_j \in \text{span}(v_1, \ldots, v_j)$。
+(c) 对每个 $j=1, \ldots, n$，子空间 $\text{span}(v_1, \ldots, v_j)$ 在 $T$ 下是不变的。</p>
+<p><strong>定理 5.27：在 $\mathbf{C}$ 上，每个算子都有上三角矩阵</strong>
+设 $V$ 是一个复向量空间，$T \in \mathcal{L}(V)$。则存在 $V$ 的一个基使得 $T$ 关于该基的矩阵是上三角的。</p>
+<p><strong>证明：</strong>
+我们对 $V$ 的维数 $n$ 进行归纳。
+<strong>基础情形：</strong> $n=1$ 时，结论显然成立。
+<strong>归纳假设：</strong> 假设对所有维数小于 $n$ 的复向量空间，结论都成立。
+设 $\dim V = n$。根据定理 5.21，$T$ 至少有一个本征值 $\lambda$。
+令 $U = \text{range}(T-\lambda I)$。
+因为 $T-\lambda I$ 不是满射的，所以 $\dim U &lt; n$。
+并且 $U$ 在 $T$ 下是不变的。
+因此，我们可以考虑 $T$ 在 $U$ 上的限制算子 $T|_U \in \mathcal{L}(U)$。
+根据归纳假设，存在 $U$ 的一个基 $(u_1, \ldots, u_m)$ 使得 $T|_U$ 关于该基的矩阵是上三角的。
+这意味着，对每个 $j=1, \ldots, m$，有 $Tu_j = T|_{U} u_j \in \text{span}(u_1, \ldots, u_j)$。
+我们将 $(u_1, \ldots, u_m)$ 扩充为 $V$ 的一个基 $(u_1, \ldots, u_m, v_1, \ldots, v_k)$。
+对任意 $j=1, \ldots, k$，我们有
+$$
+T v_j = (T-\lambda I)v_j + \lambda v_j
+$$
+因为 $v_j \in V$，所以 $(T-\lambda I)v_j \in \text{range}(T-\lambda I) = U = \text{span}(u_1, \ldots, u_m)$。
+因此，$T v_j$ 是 $\text{span}(u_1, \ldots, u_m, v_j)$ 中的一个向量。
+综合以上，我们找到了一个基 $(u_1, \ldots, u_m, v_1, \ldots, v_k)$，在这个基下， $T$ 的矩阵是上三角的。证毕。</p>
+<h3 id="5c-%E6%9C%AC%E5%BE%81%E7%A9%BA%E9%97%B4%E4%B8%8E%E5%AF%B9%E8%A7%92%E7%9F%A9%E9%98%B5"><strong>5.C 本征空间与对角矩阵</strong></h3>
+<p>对于某些特别“好”的算子，我们甚至可以找到一个基，使其矩阵成为<strong>对角矩阵</strong>（即非对角线元素全为0）。</p>
+<p><strong>定义 5.36：本征空间 (eigenspace)</strong>
+设 $T \in \mathcal{L}(V)$，$\lambda \in \mathbf{F}$。$T$ 相应于 $\lambda$ 的<strong>本征空间</strong>，记为 $E(\lambda, T)$，定义为
+$$
+E(\lambda, T) = \text{null}(T - \lambda I)
+$$
+即，$E(\lambda, T)$ 是由 $T$ 相应于 $\lambda$ 的所有本征向量再加上零向量构成的集合。它是一个子空间。</p>
+<p><strong>定义 5.39：可对角化的 (diagonalizable)</strong>
+一个算子 $T \in \mathcal{L}(V)$ 称为<strong>可对角化的</strong>，如果该算子关于 $V$ 的某个基有对角矩阵。</p>
+<p><strong>命题 5.41：可对角化的等价条件</strong>
+设 $T \in \mathcal{L}(V)$。令 $\lambda_1, \ldots, \lambda_m$ 是 $T$ 的所有互异的本征值。以下条件等价：
+(a) $T$ 是可对角化的。
+(b) $V$ 有一个由 $T$ 的本征向量构成的基。
+(c) $V = E(\lambda_1, T) \oplus \cdots \oplus E(\lambda_m, T)$。
+(d) $\dim V = \dim E(\lambda_1, T) + \cdots + \dim E(\lambda_m, T)$。</p>
+<p><strong>证明思路：</strong>
+(a) $\iff$ (b) 是可对角化定义的直接推论。
+(b) $\implies$ (c) $\implies$ (d) $\implies$ (b) 的证明链条构成了这个命题的核心。关键在于证明来自不同本征空间的向量之和是直和，并且当这些空间的维数之和等于整个空间的维数时，它们就构成了整个空间。</p>
+<p><strong>例子：判断是否可对角化</strong>
+定义 $T \in \mathcal{L}(\mathbf{F}^3)$，其关于标准基的矩阵为
+$$
+\begin{pmatrix} 2 &amp; 1 &amp; 0 \\ 0 &amp; 5 &amp; 3 \\ 0 &amp; 0 &amp; 8 \end{pmatrix}
+$$
+由于这是个上三角矩阵，其本征值为对角线元素 2, 5, 8。
+因为 $T$ 有 3 个（$\dim \mathbf{F}^3 = 3$）互不相同的本征值，根据<strong>推论 5.44</strong>（若 $T$ 有 $\dim V$ 个互异的本征值，则 $T$ 可对角化），我们知道 $T$ 是可对角化的。
+我们可以通过求解 $(T-\lambda I)v=0$ 来找到每个本征值对应的本征向量，这些本征向量将构成一个基。</p>
+<p><strong>第五讲小结</strong></p>
+<p>今天我们开启了算子理论的大门，学习了其中最核心的概念。</p>
+<ol>
+<li>我们引入了<strong>不变子空间</strong>，它是将复杂算子分解研究的基础。</li>
+<li>我们定义了<strong>本征值</strong>和<strong>本征向量</strong>，它们描述了算子作用下方向保持不变的向量。这是理解算子行为的关键。</li>
+<li>我们证明了一个深刻的定理：任何复向量空间上的算子都<strong>至少有一个本征值</strong>。</li>
+<li>利用本征值的存在性，我们证明了任何复向量空间上的算子都可以通过选取合适的基，使其矩阵表示为<strong>上三角矩阵</strong>。</li>
+<li>最后，我们讨论了最理想的情况——<strong>可对角化</strong>的算子，即存在一个由本征向量组成的基，使得算子的矩阵为对角矩阵。</li>
+</ol>
+</article>
+<div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+<div class="giscus-container" style="margin-top: 50px;">
+<script async="" crossorigin="anonymous" data-category="Announcements" data-emit-metadata="0" data-input-position="bottom" data-lang="zh-CN" data-mapping="pathname" data-reactions-enabled="1" data-repo="forliage/forliage.github.io" data-repo-id="R_kgDONjzd4w" data-strict="0" data-theme="https://forliage.github.io/giscus.css" src="https://giscus.app/client.js">
+</script>
+</div>
+
+
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+<script src="../script.js"></script>
+<div class="modal" id="about-me-modal">
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.js"></script>
+<script>
+  hljs.highlightAll();
+  hljs.addPlugin(new CopyButtonPlugin());
+</script>
+</body>
+</html>

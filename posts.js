@@ -971,5 +971,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-29-linear04.html",
       "abstract": "线性代数04:多项式"
+    },
+    {
+      "title": "线性代数05:本征值、本征向量、不变子空间",
+      "date": "2025-08-29",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-29-linear05.html",
+      "abstract": "线性代数05:本征值、本征向量、不变子空间"
     }
   ];
