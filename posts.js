@@ -964,5 +964,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-08-29-linear03.html",
       "abstract": "线性代数03:线性映射"
+    },
+    {
+      "title": "线性代数04:多项式",
+      "date": "2025-08-29",
+      "category": "学习笔记",
+      "path": "_posts/2025-08-29-linear04.html",
+      "abstract": "线性代数04:多项式"
     }
   ];
