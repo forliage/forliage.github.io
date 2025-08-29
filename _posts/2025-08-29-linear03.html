@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>线性代数03:线性映射</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FPDBQB4LZD');
+    </script>
+<link href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-dawn.min.css" id="highlight-theme-link" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.css" rel="stylesheet"/>
+</head>
+<body>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B003%E7%BA%BF%E6%80%A7%E6%98%A0%E5%B0%84">线性代数03:线性映射</h1>
+<p>迄今为止我们所关注的都是向量空间，这并不怎么让人兴奋。线性代数真正让人感兴趣的部分是对要讨论的主题——线性映射的研究。</p>
+<p>在本章中，我们将始终采用以下假定：</p>
+<ul>
+<li>$\mathbf{F}$ 表示 $\mathbf{R}$ 或 $\mathbf{C}$。</li>
+<li>$V$ 和 $W$ 表示 $\mathbf{F}$ 上的向量空间。</li>
+</ul>
+<h3 id="3a-%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4%E7%9A%84%E7%BA%BF%E6%80%A7%E6%98%A0%E5%B0%84"><strong>3.A 向量空间的线性映射</strong></h3>
+<h4 id="%E7%BA%BF%E6%80%A7%E6%98%A0%E5%B0%84%E7%9A%84%E5%AE%9A%E4%B9%89%E5%92%8C%E4%BE%8B%E5%AD%90"><strong>线性映射的定义和例子</strong></h4>
+<p>我们首先来定义线性代数中最重要的概念。</p>
+<p><strong>定义 3.2：线性映射 (linear map)</strong>
+从 $V$ 到 $W$ 的一个<strong>线性映射</strong>是具有下列性质的函数 $T: V \to W$：</p>
+<ol>
+<li><strong>加性 (additivity):</strong> 对所有 $u, v \in V$ 都有 $T(u+v) = Tu + Tv$。</li>
+<li><strong>齐性 (homogeneity):</strong> 对所有 $\lambda \in \mathbf{F}$ 和 $v \in V$ 都有 $T(\lambda v) = \lambda(Tv)$。</li>
+</ol>
+<p>有些数学家使用“线性变换”(linear transformation) 这个术语，意思与线性映射相同。</p>
+<p><strong>记号 3.3：$\mathcal{L}(V, W)$</strong>
+从 $V$ 到 $W$ 的所有线性映射构成的集合记为 $\mathcal{L}(V, W)$。</p>
+<p><strong>例子 3.4：线性映射的例子</strong></p>
+<ul>
+<li><strong>零映射 (zero):</strong> 定义 $0: V \to W$ 为对所有 $v \in V$ 都有 $0v = 0$。这是一个线性映射，即 $0 \in \mathcal{L}(V, W)$。</li>
+<li><strong>恒等映射 (identity):</strong> 定义 $I: V \to V$ 为对所有 $v \in V$ 都有 $Iv=v$。这是一个线性映射，即 $I \in \mathcal{L}(V, V)$。</li>
+<li><strong>微分 (differentiation):</strong> 定义 $D: \mathbf{P}(\mathbf{R}) \to \mathbf{P}(\mathbf{R})$ 为 $Dp = p'$。这是一个线性映射。因为 $(p+q)' = p'+q'$ 和 $(\lambda p)' = \lambda p'$。</li>
+<li><strong>积分 (integration):</strong> 定义 $T: \mathbf{P}(\mathbf{R}) \to \mathbf{R}$ 为 $Tp = \int_0^1 p(x)dx$。这是一个线性映射。因为积分具有可加性和齐性。</li>
+<li><strong>从 $\mathbf{F}^n$ 到 $\mathbf{F}^m$ 的映射:</strong> 设 $A_{j,k} \in \mathbf{F}$ 是一些常数。定义 $T: \mathbf{F}^n \to \mathbf{F}^m$ 为：
+$$
+T(x_1, \ldots, x_n) = \left( \sum_{k=1}^n A_{1,k}x_k, \ldots, \sum_{k=1}^n A_{m,k}x_k \right)
+$$
+这也是一个线性映射。</li>
+</ul>
+<p><strong>例子：一个具体的线性映射</strong>
+判断函数 $T: \mathbf{R}^3 \to \mathbf{R}^2$，$T(x,y,z) = (2x-y+3z, 7x+5y-6z)$ 是否为线性映射。</p>
+<p><strong>解：</strong>
+我们需要验证加性和齐性。</p>
+<ol>
+<li><strong>加性:</strong>
+设 $u = (x_1, y_1, z_1)$ 和 $v = (x_2, y_2, z_2)$ 是 $\mathbf{R}^3$ 中的任意两个向量。
+$$
+\begin{aligned}
+T(u+v) &amp;= T(x_1+x_2, y_1+y_2, z_1+z_2) \\
+&amp;= (2(x_1+x_2) - (y_1+y_2) + 3(z_1+z_2), 7(x_1+x_2) + 5(y_1+y_2) - 6(z_1+z_2)) \\
+&amp;= ((2x_1-y_1+3z_1)+(2x_2-y_2+3z_2), (7x_1+5y_1-6z_1)+(7x_2+5y_2-6z_2)) \\
+&amp;= (2x_1-y_1+3z_1, 7x_1+5y_1-6z_1) + (2x_2-y_2+3z_2, 7x_2+5y_2-6z_2) \\
+&amp;= Tu + Tv
+\end{aligned}
+$$
+加性成立。</li>
+<li><strong>齐性:</strong>
+设 $\lambda \in \mathbf{R}$ 和 $u=(x,y,z) \in \mathbf{R}^3$。
+$$
+\begin{aligned}
+T(\lambda u) &amp;= T(\lambda x, \lambda y, \lambda z) \\
+&amp;= (2(\lambda x) - (\lambda y) + 3(\lambda z), 7(\lambda x) + 5(\lambda y) - 6(\lambda z)) \\
+&amp;= (\lambda(2x-y+3z), \lambda(7x+5y-6z)) \\
+&amp;= \lambda(2x-y+3z, 7x+5y-6z) \\
+&amp;= \lambda(Tu)
+\end{aligned}
+$$
+齐性成立。
+因此，$T$ 是一个线性映射。</li>
+</ol>
+<p>线性映射有一个非常重要的性质：只要我们知道了它在一个基上的取值，我们就能确定它在整个空间上的取值。</p>
+<p><strong>命题 3.5：线性映射由其在基上的值确定</strong>
+设 $(v_1, \ldots, v_n)$ 是 $V$ 的一个基，$(w_1, \ldots, w_n)$ 是 $W$ 中的任意一组向量。则存在唯一的线性映射 $T: V \to W$ 使得对每个 $j=1, \ldots, n$ 都有 $Tv_j = w_j$。</p>
+<p><strong>证明：</strong>
+<strong>存在性：</strong>
+我们来定义一个函数 $T: V \to W$。因为 $(v_1, \ldots, v_n)$ 是 $V$ 的基，所以 $V$ 中任意向量 $v$ 都可以唯一地表示为 $v = c_1v_1 + \cdots + c_n v_n$。我们定义 $T$ 为：
+$$
+Tv = c_1w_1 + \cdots + c_n w_n
+$$
+显然，对于这个定义，有 $Tv_j = w_j$。现在我们证明 $T$ 是线性的。
+设 $u = a_1v_1 + \cdots + a_n v_n$，则 $u+v = (a_1+c_1)v_1 + \cdots + (a_n+c_n)v_n$。根据 $T$ 的定义：
+$$
+T(u+v) = (a_1+c_1)w_1 + \cdots + (a_n+c_n)w_n = (a_1w_1+\cdots+a_nw_n) + (c_1w_1+\cdots+c_nw_n) = Tu+Tv
+$$
+类似地，对于 $\lambda \in \mathbf{F}$，有 $\lambda v = (\lambda c_1)v_1 + \cdots + (\lambda c_n)v_n$。
+$$
+T(\lambda v) = (\lambda c_1)w_1 + \cdots + (\lambda c_n)w_n = \lambda(c_1w_1 + \cdots + c_n w_n) = \lambda(Tv)
+$$
+所以 $T$ 是线性的。存在性得证。</p>
+<p><strong>唯一性：</strong>
+假设 $S: V \to W$ 是另一个满足 $Sv_j = w_j$ 的线性映射。对于任意 $v = c_1v_1 + \cdots + c_n v_n \in V$，我们有：
+$$
+Sv = S(c_1v_1 + \cdots + c_n v_n) = c_1Sv_1 + \cdots + c_n Sv_n = c_1w_1 + \cdots + c_n w_n = Tv
+$$
+因为 $S$ 和 $T$ 对 $V$ 中任意向量的作用都相同，所以 $S=T$。唯一性得证。</p>
+<h4 id="mathcallv-w-%E4%B8%8A%E7%9A%84%E4%BB%A3%E6%95%B0%E8%BF%90%E7%AE%97"><strong>$\mathcal{L}(V, W)$ 上的代数运算</strong></h4>
+<p>$\mathcal{L}(V, W)$ 本身也是一个向量空间。</p>
+<p><strong>定义 3.6：$\mathcal{L}(V, W)$ 上的加法和标量乘法</strong>
+设 $S, T \in \mathcal{L}(V, W)$ 和 $\lambda \in \mathbf{F}$。</p>
+<ul>
+<li><strong>和 $S+T$</strong> 定义为：$(S+T)v = Sv + Tv$</li>
+<li><strong>积 $\lambda T$</strong> 定义为：$(\lambda T)v = \lambda(Tv)$</li>
+</ul>
+<p>可以验证，在这些运算下，$\mathcal{L}(V, W)$ 是一个向量空间。</p>
+<p><strong>定义 3.8：线性映射的乘积 (product of linear maps)</strong>
+设 $T \in \mathcal{L}(U, V)$ และ $S \in \mathcal{L}(V, W)$。乘积 $ST$ 定义为函数 $(ST)(u) = S(Tu)$，其中 $u \in U$。
+这个乘积就是函数的复合。可以证明 $ST \in \mathcal{L}(U, W)$。</p>
+<h3 id="3b-%E9%9B%B6%E7%A9%BA%E9%97%B4%E4%B8%8E%E5%80%BC%E5%9F%9F"><strong>3.B 零空间与值域</strong></h3>
+<p>对于每个线性映射，都有两个与之关联的非常重要的子空间。</p>
+<p><strong>定义 3.12：零空间 (null space)</strong>
+一个线性映射 $T: V \to W$ 的<strong>零空间</strong>，记为 $\text{null } T$，是指 $V$ 中被 $T$ 映为 $0$ 的向量构成的子集：
+$$
+\text{null } T = {v \in V : Tv = 0}
+$$
+零空间有时也称为<strong>核 (kernel)</strong>。</p>
+<p><strong>例子 3.13：零空间的例子</strong></p>
+<ul>
+<li>考虑微分映射 $D \in \mathcal{L}(\mathbf{P}(\mathbf{R}), \mathbf{P}(\mathbf{R}))$。$Dp=0$ 当且仅当 $p$ 是常数函数。所以 $\text{null } D$ 是所有常数函数构成的集合。</li>
+<li>考虑映射 $T: \mathbf{F}^3 \to \mathbf{F}$，$T(z_1, z_2, z_3) = z_1+2z_2+3z_3$。则 $\text{null } T = {(z_1, z_2, z_3) \in \mathbf{F}^3 : z_1+2z_2+3z_3 = 0}$。这是 $\mathbf{F}^3$ 中过原点的一个平面。</li>
+</ul>
+<p><strong>命题 3.14：零空间是子空间</strong>
+设 $T \in \mathcal{L}(V, W)$。则 $\text{null } T$ 是 $V$ 的一个子空间。</p>
+<p><strong>证明：</strong>
+我们需要验证三个条件：</p>
+<ol>
+<li><strong>加法单位元:</strong> $T(0)=0$ (由 $T(0)=T(0+0)=T(0)+T(0)$ 可得)，所以 $0 \in \text{null } T$。</li>
+<li><strong>加法封闭性:</strong> 设 $u, v \in \text{null } T$。则 $Tu=0, Tv=0$。于是 $T(u+v) = Tu + Tv = 0+0 = 0$。所以 $u+v \in \text{null } T$。</li>
+<li><strong>标量乘法封闭性:</strong> 设 $\lambda \in \mathbf{F}$ 且 $u \in \text{null } T$。则 $Tu=0$。于是 $T(\lambda u) = \lambda (Tu) = \lambda(0) = 0$。所以 $\lambda u \in \text{null } T$。
+因此，$\text{null } T$ 是 $V$ 的一个子空间。证毕。</li>
+</ol>
+<p>零空间可以用来判断一个线性映射是否为单射。</p>
+<p><strong>定义 3.15：单射 (injective)</strong>
+一个函数 $T: V \to W$ 称为<strong>单射</strong>，如果当 $u, v \in V$ 且 $u \neq v$ 时，有 $Tu \neq Tv$。</p>
+<p><strong>命题 3.16：单射性等价于零空间为${0}$</strong>
+设 $T \in \mathcal{L}(V, W)$。则 $T$ 是单射的当且仅当 $\text{null } T = {0}$。</p>
+<p><strong>证明：</strong>
+$(\Rightarrow)$ 假设 $T$ 是单射的。我们知道 $T(0)=0$，所以 ${0} \subseteq \text{null } T$。为了证明反向包含，设 $v \in \text{null } T$。则 $Tv = 0 = T(0)$。因为 $T$ 是单射的，所以必有 $v=0$。因此 $\text{null } T \subseteq {0}$。所以 $\text{null } T = {0}$。</p>
+<p>$(\Leftarrow)$ 假设 $\text{null } T = {0}$。设 $u, v \in V$ 且 $Tu=Tv$。则 $T(u-v) = Tu-Tv = 0$。所以 $u-v \in \text{null } T$。因为 $\text{null } T = {0}$，所以 $u-v=0$，即 $u=v$。因此 $T$ 是单射的。证毕。</p>
+<p><strong>定义 3.17：值域 (range)</strong>
+一个函数 $T: V \to W$ 的<strong>值域</strong>，记为 $\text{range } T$，是 $W$ 中形如 $Tv$（其中 $v \in V$）的向量构成的子集：
+$$
+\text{range } T = {Tv : v \in V}
+$$</p>
+<p><strong>命题 3.19：值域是子空间</strong>
+设 $T \in \mathcal{L}(V, W)$。则 $\text{range } T$ 是 $W$ 的一个子空间。</p>
+<p><strong>证明：</strong></p>
+<ol>
+<li><strong>加法单位元:</strong> $T(0)=0$，所以 $0 \in \text{range } T$。</li>
+<li><strong>加法封闭性:</strong> 设 $w_1, w_2 \in \text{range } T$。则存在 $v_1, v_2 \in V$ 使得 $Tv_1=w_1, Tv_2=w_2$。于是 $w_1+w_2 = Tv_1+Tv_2 = T(v_1+v_2)$。因为 $v_1+v_2 \in V$，所以 $w_1+w_2 \in \text{range } T$。</li>
+<li><strong>标量乘法封闭性:</strong> 设 $\lambda \in \mathbf{F}$ 且 $w \in \text{range } T$。则存在 $v \in V$ 使得 $Tv=w$。于是 $\lambda w = \lambda(Tv) = T(\lambda v)$。因为 $\lambda v \in V$，所以 $\lambda w \in \text{range } T$。
+因此，$\text{range } T$ 是 $W$ 的一个子空间。证毕。</li>
+</ol>
+<p><strong>定义 3.20：满射 (surjective)</strong>
+一个函数 $T: V \to W$ 称为<strong>满射</strong>，如果它的值域等于 $W$，即 $\text{range } T = W$。</p>
+<p>现在我们来到本章的核心定理，它揭示了零空间和值域维数之间的深刻联系。</p>
+<p><strong>定理 3.22：线性映射基本定理 (Fundamental Theorem of Linear Maps)</strong>
+设 $V$ 是有限维的，且 $T \in \mathcal{L}(V, W)$。则 $\text{range } T$ 是有限维的，并且
+$$
+\dim V = \dim(\text{null } T) + \dim(\text{range } T)
+$$
+这个定理也常被称为<strong>秩-零化度定理 (Rank-Nullity Theorem)</strong>。</p>
+<p><strong>证明：</strong>
+设 $(u_1, \ldots, u_m)$ 是 $\text{null } T$ 的一个基。则 $\dim(\text{null } T) = m$。这是一个在 $V$ 中的线性无关组，我们可以将其扩充为 $V$ 的一个基：$(u_1, \ldots, u_m, v_1, \ldots, v_n)$。于是 $\dim V = m+n$。
+为了完成证明，我们只需证明 $(Tv_1, \ldots, Tv_n)$ 是 $\text{range } T$ 的一个基。这样就有 $\dim(\text{range } T) = n$，定理即得证。</p>
+<p><strong>证明 $(Tv_1, \ldots, Tv_n)$ 张成 $\text{range } T$:</strong>
+任取 $v \in V$。因为 $(u_1, \ldots, u_m, v_1, \ldots, v_n)$ 是 $V$ 的基，所以
+$$
+v = a_1u_1 + \cdots + a_m u_m + b_1v_1 + \cdots + b_n v_n
+$$
+对上式两边作用 $T$ 得：
+$$
+\begin{aligned}
+Tv &amp;= T(a_1u_1 + \cdots + a_m u_m + b_1v_1 + \cdots + b_n v_n) \\
+&amp;= a_1Tu_1 + \cdots + a_m Tu_m + b_1Tv_1 + \cdots + b_n Tv_n \\
+&amp;= b_1Tv_1 + \cdots + b_n Tv_n
+\end{aligned}
+$$
+(因为 $u_j \in \text{null } T$，所以 $Tu_j = 0$)
+这表明 $\text{range } T$ 中的任意向量都可以写成 $(Tv_1, \ldots, Tv_n)$ 的线性组合。所以它们张成 $\text{range } T$。</p>
+<p><strong>证明 $(Tv_1, \ldots, Tv_n)$ 线性无关:</strong>
+假设
+$$
+c_1Tv_1 + \cdots + c_n Tv_n = 0
+$$
+利用 $T$ 的线性性，我们得到
+$$
+T(c_1v_1 + \cdots + c_n v_n) = 0
+$$
+这说明向量 $c_1v_1 + \cdots + c_n v_n$ 属于 $\text{null } T$。因为 $(u_1, \ldots, u_m)$ 是 $\text{null } T$ 的基，所以存在标量 $d_1, \ldots, d_m$ 使得
+$$
+c_1v_1 + \cdots + c_n v_n = d_1u_1 + \cdots + d_m u_m
+$$
+移项得：
+$$
+c_1v_1 + \cdots + c_n v_n - d_1u_1 - \cdots - d_m u_m = 0
+$$
+但是 $(u_1, \ldots, u_m, v_1, \ldots, v_n)$ 是 $V$ 的基，是线性无关的。因此，所有的系数都必须为0。特别地，$c_1=\cdots=c_n=0$。
+所以 $(Tv_1, \ldots, Tv_n)$ 是线性无关的。
+证毕。</p>
+<h3 id="3c-%E7%9F%A9%E9%98%B5"><strong>3.C 矩阵</strong></h3>
+<p>我们现在将线性映射与矩阵联系起来。矩阵为线性映射提供了一种具体的计算工具。</p>
+<p><strong>定义 3.32：线性映射的矩阵 (matrix of a linear map)</strong>
+设 $T \in \mathcal{L}(V, W)$，$(v_1, \ldots, v_n)$ 是 $V$ 的基，$(w_1, \ldots, w_m)$ 是 $W$ 的基。$T$ 关于这些基的<strong>矩阵</strong>，记为 $\mathcal{M}(T)$，是一个 $m \times n$ 矩阵，其第 $k$ 列的元素由 $Tv_k$ 在基 $(w_1, \ldots, w_m)$下的坐标确定。
+也就是说，如果
+$$
+Tv_k = A_{1,k}w_1 + \cdots + A_{m,k}w_m
+$$
+则 $\mathcal{M}(T)$ 的第 $j$ 行第 $k$ 列的元素是 $A_{j,k}$。</p>
+<p><strong>例子 3.33：矩阵的计算</strong>
+设 $T \in \mathcal{L}(\mathbf{F}^2, \mathbf{F}^3)$ 定义为 $T(x,y) = (x+3y, 2x+5y, 7x+9y)$。
+求 $T$ 关于 $\mathbf{F}^2$ 和 $\mathbf{F}^3$ 的标准基的矩阵。</p>
+<p><strong>解：</strong>
+$\mathbf{F}^2$ 的标准基是 $((1,0), (0,1))$。
+$\mathbf{F}^3$ 的标准基是 $((1,0,0), (0,1,0), (0,0,1))$。</p>
+<p>我们需要计算 $T$ 作用在 $\mathbf{F}^2$ 基向量上的结果，并用 $\mathbf{F}^3$ 的基来表示：
+$$
+T(1,0) = (1, 2, 7) = 1(1,0,0) + 2(0,1,0) + 7(0,0,1)
+$$
+所以矩阵的第一列是 $\begin{pmatrix} 1 \\ 2 \\ 7 \end{pmatrix}$。</p>
+<p>$$
+T(0,1) = (3, 5, 9) = 3(1,0,0) + 5(0,1,0) + 9(0,0,1)
+$$
+所以矩阵的第二列是 $\begin{pmatrix} 3 \\ 5 \\ 9 \end{pmatrix}$。</p>
+<p>因此，$T$ 的矩阵是：
+$$
+\mathcal{M}(T) = \begin{pmatrix} 1 &amp; 3 \\ 2 &amp; 5 \\ 7 &amp; 9 \end{pmatrix}
+$$</p>
+<p>线性映射的加法和标量乘法，对应着矩阵的加法和标量乘法。更重要的是，线性映射的复合对应着矩阵的乘法。</p>
+<p><strong>定义 3.41：矩阵乘法 (matrix multiplication)</strong>
+设 $A$ 是一个 $m \times n$ 矩阵，$C$ 是一个 $n \times p$ 矩阵。乘积 $AC$ 是一个 $m \times p$ 矩阵，其第 $j$ 行第 $k$ 列的元素为：
+$$
+(AC)_{j,k} = \sum_{r=1}^n A_{j,r}C_{r,k}
+$$</p>
+<p><strong>命题 3.43：线性映射乘积的矩阵</strong>
+设 $T \in \mathcal{L}(U, V)$ 和 $S \in \mathcal{L}(V, W)$。则
+$$
+\mathcal{M}(ST) = \mathcal{M}(S)\mathcal{M}(T)
+$$</p>
+<h3 id="3d-%E5%8F%AF%E9%80%86%E6%80%A7%E4%B8%8E%E5%90%8C%E6%9E%84%E7%9A%84%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4"><strong>3.D 可逆性与同构的向量空间</strong></h3>
+<p><strong>定义 3.53：可逆的 (invertible)</strong>
+一个线性映射 $T \in \mathcal{L}(V, W)$ 称为<strong>可逆的</strong>，如果存在一个线性映射 $S \in \mathcal{L}(W, V)$ 使得 $ST = I_V$ 且 $TS = I_W$。
+这个 $S$ 称为 $T$ 的<strong>逆 (inverse)</strong>，记为 $T^{-1}$。</p>
+<p><strong>命题 3.56：可逆性等价于单射且满射</strong>
+一个线性映射是可逆的，当且仅当它既是单射的又是满射的。</p>
+<p><strong>证明：</strong>
+$(\Rightarrow)$ 假设 $T$ 可逆，逆为 $T^{-1}$。</p>
+<ul>
+<li><strong>单射性：</strong> 若 $Tu=Tv$，则 $T^{-1}(Tu) = T^{-1}(Tv)$，即 $(T^{-1}T)u = (T^{-1}T)v$，所以 $u=v$。故 $T$ 是单射的。</li>
+<li><strong>满射性：</strong> 对任意 $w \in W$，我们有 $w = I_W w = (TT^{-1})w = T(T^{-1}w)$。这说明 $w$ 在 $T$ 的值域中。故 $T$ 是满射的。</li>
+</ul>
+<p>$(\Leftarrow)$ 假设 $T$ 是单射且满射的。
+对每个 $w \in W$，因为 $T$ 满射，所以存在 $v \in V$ 使得 $Tv=w$。因为 $T$ 单射，这个 $v$ 是唯一的。我们定义一个函数 $S: W \to V$ 为 $Sw = v$。
+可以验证 $S$ 是线性的，并且满足 $ST=I_V, TS=I_W$。证毕。</p>
+<p><strong>定义 3.58：同构 (isomorphism)</strong></p>
+<ul>
+<li>一个可逆的线性映射称为<strong>同构</strong>。</li>
+<li>如果存在从 $V$ 到 $W$ 的同构，则称向量空间 $V$ 与 $W$ 是<strong>同构的</strong>。</li>
+</ul>
+<p>同构的向量空间在所有线性代数的性质上都是完全一样的，只是元素的“名字”不同。</p>
+<p><strong>定理 3.59：维数完全刻画了同构</strong>
+两个有限维向量空间是同构的，当且仅当它们有相同的维数。</p>
+<p><strong>证明：</strong>
+$(\Rightarrow)$ 设 $T \in \mathcal{L}(V, W)$ 是一个同构。因为 $T$ 是单射的，所以 $\text{null } T = {0}$，即 $\dim(\text{null } T)=0$。因为 $T$ 是满射的，所以 $\text{range } T = W$，即 $\dim(\text{range } T) = \dim W$。
+根据线性映射基本定理：
+$$
+\dim V = \dim(\text{null } T) + \dim(\text{range } T) = 0 + \dim W = \dim W
+$$</p>
+<p>$(\Leftarrow)$ 假设 $\dim V = \dim W = n$。
+设 $(v_1, \ldots, v_n)$ 是 $V$ 的一个基，$(w_1, \ldots, w_n)$ 是 $W$ 的一个基。
+根据命题 3.5，存在唯一的线性映射 $T: V \to W$ 使得 $Tv_j = w_j$。</p>
+<ul>
+<li><strong>满射性：</strong> $\text{range } T$ 包含 $(w_1, \ldots, w_n)$，而后者张成 $W$，所以 $\text{range } T = W$。$T$ 是满射的。</li>
+<li><strong>单射性：</strong> 因为 $T$ 满射，$\dim(\text{range } T) = n$。根据基本定理，$\dim(\text{null } T) = \dim V - \dim(\text{range } T) = n - n = 0$。所以 $\text{null } T = {0}$。$T$ 是单射的。
+因为 $T$ 既是单射又是满射，所以它是同构。证毕。</li>
+</ul>
+<h3 id="3e-%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4%E7%9A%84%E7%A7%AF%E4%B8%8E%E5%95%86"><strong>3.E 向量空间的积与商</strong></h3>
+<h4 id="%E5%90%91%E9%87%8F%E7%A9%BA%E9%97%B4%E7%9A%84%E7%A7%AF"><strong>向量空间的积</strong></h4>
+<p><strong>定义 3.71: 向量空间的积 (product of vector spaces)</strong>
+设 $V_1, \ldots, V_m$ 是向量空间。它们的<strong>积</strong> $V_1 \times \cdots \times V_m$ 定义为集合 ${(v_1, \ldots, v_m) : v_j \in V_j}$，其上的运算为：</p>
+<ul>
+<li><strong>加法:</strong> $(u_1, \ldots, u_m) + (v_1, \ldots, v_m) = (u_1+v_1, \ldots, u_m+v_m)$</li>
+<li><strong>标量乘法:</strong> $\lambda(v_1, \ldots, v_m) = (\lambda v_1, \ldots, \lambda v_m)$</li>
+</ul>
+<p><strong>命题 3.76：积的维数等于维数的和</strong>
+如果 $V_1, \ldots, V_m$ 都是有限维的，则
+$$
+\dim(V_1 \times \cdots \times V_m) = \dim V_1 + \cdots + \dim V_m
+$$
+<strong>证明:</strong> 通过为每个 $V_j$ 取一个基，然后将它们以自然的方式组合成积空间的基即可证明。</p>
+<h4 id="%E5%95%86%E7%A9%BA%E9%97%B4"><strong>商空间</strong></h4>
+<p><strong>定义 3.83: 商空间 (quotient space)</strong>
+设 $U$ 是 $V$ 的子空间。商空间 $V/U$ 是 $V$ 中所有 $U$ 的仿射子集（平行于 $U$）的集合，即
+$$
+V/U = {v+U : v \in V}
+$$
+其上的运算定义为：</p>
+<ul>
+<li><strong>加法:</strong> $(v+U) + (w+U) = (v+w)+U$</li>
+<li><strong>标量乘法:</strong> $\lambda(v+U) = (\lambda v)+U$</li>
+</ul>
+<p><strong>例子 3.84: 商空间的例子</strong>
+若 $V=\mathbf{R}^2$，$U={(x, 2x) : x \in \mathbf{R}}$ (过原点斜率为2的直线)，则 $V/U$ 是 $\mathbf{R}^2$ 中所有斜率为2的直线的集合。</p>
+<p><strong>命题 3.89: 商空间的维数</strong>
+如果 $V$ 是有限维的，U 是 $V$ 的子空间，则
+$$
+\dim(V/U) = \dim V - \dim U
+$$
+<strong>证明:</strong>
+考虑商映射 $\pi: V \to V/U$，定义为 $\pi(v) = v+U$。
+$\pi$ 是一个线性映射。
+$\text{null } \pi = {v \in V : v+U = 0+U} = {v \in V : v \in U} = U$。
+$\text{range } \pi = {v+U : v \in V} = V/U$。
+根据线性映射基本定理：
+$$
+\dim V = \dim(\text{null } \pi) + \dim(\text{range } \pi) = \dim U + \dim(V/U)
+$$
+移项即得证。</p>
+<h3 id="3f-%E5%AF%B9%E5%81%B6"><strong>3.F 对偶</strong></h3>
+<h4 id="%E5%AF%B9%E5%81%B6%E7%A9%BA%E9%97%B4%E4%B8%8E%E5%AF%B9%E5%81%B6%E5%9F%BA"><strong>对偶空间与对偶基</strong></h4>
+<p><strong>定义 3.92: 线性泛函 (linear functional)</strong>
+$V$ 上的一个<strong>线性泛函</strong>是从 $V$ 到 $\mathbf{F}$ 的线性映射。即 $\mathcal{L}(V, \mathbf{F})$ 中的元素。</p>
+<p><strong>定义 3.94: 对偶空间 (dual space)</strong>
+$V$ 的<strong>对偶空间</strong>，记为 $V'$，是 $V$ 上所有线性泛函构成的向量空间，即 $V' = \mathcal{L}(V, \mathbf{F})$。</p>
+<p><strong>命题 3.95: $\dim V' = \dim V$</strong>
+如果 $V$ 是有限维的，则 $V'$ 也是有限维的，且 $\dim V' = \dim V$。</p>
+<p><strong>定义 3.96: 对偶基 (dual basis)</strong>
+设 $(v_1, \ldots, v_n)$ 是 $V$ 的一个基。其<strong>对偶基</strong>是 $V'$ 中的一组向量 $(\varphi_1, \ldots, \varphi_n)$，定义为：
+$$
+\varphi_j(v_k) = \begin{cases} 1 &amp; \text{若 } k=j \\ 0 &amp; \text{若 } k \neq j \end{cases}
+$$</p>
+<p><strong>命题 3.98：对偶基是基</strong></p>
+<p>如果 $V$ 是有限维的，那么一个基的对偶基是其对偶空间的基。</p>
+<p><strong>第三讲小结</strong></p>
+<p>今天我们学习了线性代数的核心概念——线性映射。</p>
+<ol>
+<li>我们定义了什么是线性映射，并看了很多例子，理解了线性映射由其在基上的作用完全确定。</li>
+<li>我们研究了与每个线性映射关联的两个重要子空间：零空间和值域，并证明了它们的维数满足线性映射基本定理。</li>
+<li>我们学习了如何用矩阵来表示和计算线性映射，以及矩阵乘法如何对应于映射的复合。</li>
+<li>我们探讨了可逆性和同构的概念，并得到了一个深刻的结论：在有限维情况下，两个向量空间同构的充要条件是它们维数相同。</li>
+<li>最后，我们介绍了积空间、商空间和对偶空间这些更高级的构造，它们为我们提供了更强大的工具来分析向量空间的结构。</li>
+</ol>
+</article>
+<div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+<div class="giscus-container" style="margin-top: 50px;">
+<script async="" crossorigin="anonymous" data-category="Announcements" data-emit-metadata="0" data-input-position="bottom" data-lang="zh-CN" data-mapping="pathname" data-reactions-enabled="1" data-repo="forliage/forliage.github.io" data-repo-id="R_kgDONjzd4w" data-strict="0" data-theme="https://forliage.github.io/giscus.css" src="https://giscus.app/client.js">
+</script>
+</div>
+
+
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+<script src="../script.js"></script>
+<div class="modal" id="about-me-modal">
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.js"></script>
+<script>
+  hljs.highlightAll();
+  hljs.addPlugin(new CopyButtonPlugin());
+</script>
+</body>
+</html>
