@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>线性代数06:内积空间</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FPDBQB4LZD');
+    </script>
+<link href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-dawn.min.css" id="highlight-theme-link" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.css" rel="stylesheet"/>
+</head>
+<body>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B006%E5%86%85%E7%A7%AF%E7%A9%BA%E9%97%B4">线性代数06:内积空间</h1>
+<p>在本章中，我们将始终采用以下假定：</p>
+<ul>
+<li>$\mathbf{F}$ 表示 $\mathbf{R}$ 或 $\mathbf{C}$。</li>
+<li>$V$ 表示 $\mathbf{F}$ 上的有限维非零向量空间。</li>
+</ul>
+<h3 id="6a-%E5%86%85%E7%A7%AF%E4%B8%8E%E8%8C%83%E6%95%B0"><strong>6.A 内积与范数</strong></h3>
+<h4 id="%E5%86%85%E7%A7%AF"><strong>内积</strong></h4>
+<p>我们从 $\mathbf{R}^n$ 中熟悉的点积概念开始。对于 $x = (x_1, \ldots, x_n)$ 和 $y = (y_1, \ldots, y_n)$，它们的点积定义为 $x \cdot y = x_1y_1 + \cdots + x_ny_n$。向量 $x$ 的长度（范数）$|x|$ 可以通过点积定义为 $|x| = \sqrt{x \cdot x}$。</p>
+<p>当我们把这个概念推广到复向量空间 $\mathbf{C}^n$ 时，会遇到一个问题。如果我们简单地定义 $|z|^2 = z_1^2 + \cdots + z_n^2$，那么对于 $z=(1, i)$，我们得到 $|z|^2 = 1^2 + i^2 = 1 - 1 = 0$，但 $z$ 并不是零向量。这不符合我们对长度的直观要求（只有零向量的长度才是零）。</p>
+<p>为了解决这个问题，我们需要引入复共轭。对于 $z \in \mathbf{C}$，我们知道 $|z|^2 = z\bar{z}$ 是非负的。因此，在 $\mathbf{C}^n$ 中，我们应该定义 $|z|^2 = |z_1|^2 + \cdots + |z_n|^2 = z_1\bar{z_1} + \cdots + z_n\bar{z_n}$。这就启发我们将 $\mathbf{C}^n$ 中的内积定义为 $\langle w, z \rangle = w_1\bar{z_1} + \cdots + w_n\bar{z_n}$。注意，交换 $w$ 和 $z$ 的位置，结果会变为原来的共轭。</p>
+<p>基于这些观察，我们给出内积的一般定义。</p>
+<p><strong>定义 6.3：内积 (inner product)</strong>
+$V$ 上的一个<strong>内积</strong>是一个函数，它将 $V$ 中的每对有序向量 $(u,v)$ 都映成一个数 $\langle u,v \rangle \in \mathbf{F}$，并且满足以下性质：</p>
+<ol>
+<li><strong>正性 (positivity):</strong> 对所有 $v \in V$ 都有 $\langle v,v \rangle \ge 0$。</li>
+<li><strong>定性 (definiteness):</strong> $\langle v,v \rangle = 0$ 当且仅当 $v=0$。</li>
+<li><strong>第一个位置的加性 (additivity in first slot):</strong> 对所有 $u,v,w \in V$ 都有 $\langle u+v, w \rangle = \langle u,w \rangle + \langle v,w \rangle$。</li>
+<li><strong>第一个位置的齐性 (homogeneity in first slot):</strong> 对所有 $\lambda \in \mathbf{F}$ 和 $u,v \in V$ 都有 $\langle \lambda u, v \rangle = \lambda \langle u,v \rangle$。</li>
+<li><strong>共轭对称性 (conjugate symmetry):</strong> 对所有 $u,v \in V$ 都有 $\langle u,v \rangle = \overline{\langle v,u \rangle}$。</li>
+</ol>
+<p><strong>定义 6.5：内积空间 (inner product space)</strong>
+一个<strong>内积空间</strong>是带有一个内积的向量空间。</p>
+<p><strong>例子 6.4：内积的例子</strong>
+(a) <strong>欧几里得内积 (Euclidean inner product):</strong> 在 $\mathbf{F}^n$ 上，对 $w=(w_1, \ldots, w_n)$ 和 $z=(z_1, \ldots, z_n)$，定义
+$$
+\langle w, z \rangle = w_1\bar{z_1} + \cdots + w_n\bar{z_n}
+$$
+这是最常见的内积。
+(c) 在 $[-1, 1]$ 上的实值连续函数空间 $C([-1,1], \mathbf{R})$ 上，可以定义内积
+$$
+\langle f, g \rangle = \int_{-1}^1 f(x)g(x)dx
+$$</p>
+<p><strong>内积的基本性质</strong></p>
+<p>从定义出发，我们可以推导出一些有用的性质。例如，内积在第二个位置是“共轭线性”的。
+对于 $u,v,w \in V$:
+$\langle u, v+w \rangle = \overline{\langle v+w, u \rangle} = \overline{\langle v,u \rangle + \langle w,u \rangle} = \overline{\langle v,u \rangle} + \overline{\langle w,u \rangle} = \langle u,v \rangle + \langle u,w \rangle$。
+对于 $\lambda \in \mathbf{F}$:
+$\langle u, \lambda v \rangle = \overline{\langle \lambda v, u \rangle} = \overline{\lambda \langle v,u \rangle} = \bar{\lambda} \overline{\langle v,u \rangle} = \bar{\lambda} \langle u,v \rangle$。</p>
+<h4 id="%E8%8C%83%E6%95%B0"><strong>范数</strong></h4>
+<p>有了内积，我们就可以自然地定义向量的长度。</p>
+<p><strong>定义 6.8：范数 (norm)</strong>
+设 $v \in V$，它的<strong>范数</strong>，记为 $|v|$，定义为
+$$
+|v| = \sqrt{\langle v,v \rangle}
+$$</p>
+<p><strong>例子 6.9：范数的例子</strong>
+在 $\mathbf{F}^n$ 上使用欧几里得内积，向量 $z=(z_1, \ldots, z_n)$ 的范数是
+$$
+|z| = \sqrt{|z_1|^2 + \cdots + |z_n|^2}
+$$</p>
+<p><strong>命题 6.10：范数的基本性质</strong>
+设 $v \in V, \lambda \in \mathbf{F}$。
+(a) $|v|=0$ 当且仅当 $v=0$。
+(b) $|\lambda v| = |\lambda| |v|$。</p>
+<p><strong>证明：</strong>
+(a) $|v|=0 \iff \sqrt{\langle v,v \rangle} = 0 \iff \langle v,v \rangle = 0$。根据内积的定性，这当且仅当 $v=0$。
+(b) $|\lambda v|^2 = \langle \lambda v, \lambda v \rangle = \lambda \langle v, \lambda v \rangle = \lambda \bar{\lambda} \langle v, v \rangle = |\lambda|^2 |v|^2$。两边开方即得证。</p>
+<h4 id="%E6%AD%A3%E4%BA%A4"><strong>正交</strong></h4>
+<p><strong>定义 6.11：正交 (orthogonal)</strong>
+称两个向量 $u,v \in V$ 是<strong>正交的</strong>，如果 $\langle u,v \rangle = 0$。</p>
+<p><strong>命题 6.13：勾股定理 (Pythagorean Theorem)</strong>
+设 $u,v \in V$ 是正交的。则
+$$
+|u+v|^2 = |u|^2 + |v|^2
+$$</p>
+<p><strong>证明：</strong>
+$$
+\begin{aligned}
+|u+v|^2 &amp;= \langle u+v, u+v \rangle \\
+&amp;= \langle u,u \rangle + \langle v,u \rangle + \langle u,v \rangle + \langle v,v \rangle \\
+&amp;= |u|^2 + \langle v,u \rangle + \langle u,v \rangle + |v|^2
+\end{aligned}
+$$
+因为 $u,v$ 正交，所以 $\langle u,v \rangle = 0$。根据共轭对称性，$\langle v,u \rangle = \overline{\langle u,v \rangle} = \overline{0} = 0$。
+因此，$|u+v|^2 = |u|^2 + |v|^2$。证毕。</p>
+<p>现在我们来证明内积空间中最重要的不等式之一。</p>
+<p><strong>命题 6.15：柯西-施瓦茨不等式 (Cauchy-Schwarz Inequality)</strong>
+对所有 $u,v \in V$，都有
+$$
+|\langle u,v \rangle| \le |u| |v|
+$$
+等号成立当且仅当 $u,v$ 之一是另一个的标量倍。</p>
+<p><strong>证明：</strong>
+若 $v=0$，则两边都为0，不等式成立。
+假设 $v \neq 0$。对任意 $\lambda \in \mathbf{F}$，我们有
+$$
+\begin{aligned}
+0 &amp;\le |u - \lambda v|^2 \\
+&amp;= \langle u - \lambda v, u - \lambda v \rangle \\
+&amp;= \langle u, u \rangle - \lambda \langle v, u \rangle - \bar{\lambda} \langle u, v \rangle + \lambda \bar{\lambda} \langle v, v \rangle \\
+&amp;= |u|^2 - \lambda \overline{\langle u, v \rangle} - \bar{\lambda} \langle u, v \rangle + |\lambda|^2 |v|^2
+\end{aligned}
+$$
+这是一个关键的不等式。我们现在取一个特殊的 $\lambda$ 值来简化它。令
+$$
+\lambda = \frac{\langle u, v \rangle}{|v|^2}
+$$
+代入不等式，得到：
+$$
+\begin{aligned}
+0 &amp;\le |u|^2 - \frac{\langle u, v \rangle}{|v|^2} \overline{\langle u, v \rangle} - \frac{\overline{\langle u, v \rangle}}{|v|^2} \langle u, v \rangle + \frac{|\langle u, v \rangle|^2}{|v|^4} |v|^2 \\
+&amp;= |u|^2 - \frac{|\langle u, v \rangle|^2}{|v|^2} - \frac{|\langle u, v \rangle|^2}{|v|^2} + \frac{|\langle u, v \rangle|^2}{|v|^2} \\
+&amp;= |u|^2 - \frac{|\langle u, v \rangle|^2}{|v|^2}
+\end{aligned}
+$$
+移项并乘以 $|v|^2$ (非负)，得到 $|\langle u, v \rangle|^2 \le |u|^2 |v|^2$。两边开方即得柯西-施瓦茨不等式。
+等号成立的条件是 $|u - \lambda v|^2 = 0$，即 $u = \lambda v$，说明 $u$ 是 $v$ 的标量倍。证毕。</p>
+<p><strong>命题 6.18：三角不等式 (Triangle Inequality)</strong>
+对所有 $u,v \in V$，都有
+$$
+|u+v| \le |u| + |v|
+$$</p>
+<p><strong>证明：</strong>
+$$
+\begin{aligned}
+|u+v|^2 &amp;= \langle u+v, u+v \rangle \\
+&amp;= |u|^2 + \langle v,u \rangle + \langle u,v \rangle + |v|^2 \\
+&amp;= |u|^2 + 2\text{Re}(\langle u,v \rangle) + |v|^2 \\
+&amp;\le |u|^2 + 2|\langle u,v \rangle| + |v|^2 \quad (\text{因为 } \text{Re}(z) \le |z|) \\
+&amp;\le |u|^2 + 2|u||v| + |v|^2 \quad (\text{柯西-施瓦茨不等式}) \\
+&amp;= (|u| + |v|)^2
+\end{aligned}
+$$
+两边开方即得证。</p>
+<p><strong>命题 6.22：平行四边形恒等式 (Parallelogram Equality)</strong>
+对所有 $u,v \in V$，都有
+$$
+|u+v|^2 + |u-v|^2 = 2(|u|^2 + |v|^2)
+$$</p>
+<p><strong>证明：</strong>
+$$
+\begin{aligned}
+|u+v|^2 + |u-v|^2 &amp;= \langle u+v, u+v \rangle + \langle u-v, u-v \rangle \\
+&amp;= (|u|^2 + \langle v,u \rangle + \langle u,v \rangle + |v|^2) + (|u|^2 - \langle v,u \rangle - \langle u,v \rangle + |v|^2) \\
+&amp;= 2(|u|^2 + |v|^2)
+\end{aligned}
+$$
+证毕。</p>
+<h3 id="6b-%E8%A7%84%E8%8C%83%E6%AD%A3%E4%BA%A4%E5%9F%BA"><strong>6.B 规范正交基</strong></h3>
+<h4 id="%E8%A7%84%E8%8C%83%E6%AD%A3%E4%BA%A4%E7%BB%84%E4%B8%8E%E8%A7%84%E8%8C%83%E6%AD%A3%E4%BA%A4%E5%9F%BA"><strong>规范正交组与规范正交基</strong></h4>
+<p><strong>定义 6.23：规范正交 (orthonormal)</strong>
+$V$ 中的一个向量组 $(e_1, \ldots, e_m)$ 称为<strong>规范正交的</strong>，如果
+$$
+\langle e_j, e_k \rangle = \delta_{jk} = \begin{cases} 1 &amp; \text{若 } j=k \\ 0 &amp; \text{若 } j \neq k \end{cases}
+$$
+即组中每个向量的范数都是1，且任意两个不同的向量都正交。</p>
+<p><strong>例子 6.24：规范正交组</strong>
+$\mathbf{F}^n$ 中的标准基是规范正交的。</p>
+<p><strong>命题 6.25：规范正交组中范数的计算</strong>
+若 $(e_1, \ldots, e_m)$ 是 $V$ 中的一个规范正交组，则对任意 $a_1, \ldots, a_m \in \mathbf{F}$，都有
+$$
+|a_1 e_1 + \cdots + a_m e_m|^2 = |a_1|^2 + \cdots + |a_m|^2
+$$</p>
+<p><strong>证明：</strong>
+这是勾股定理的推广。
+$$
+\begin{aligned}
+|a_1 e_1 + \cdots + a_m e_m|^2 &amp;= \left\langle \sum_{j=1}^m a_j e_j, \sum_{k=1}^m a_k e_k \right\rangle \\
+&amp;= \sum_{j=1}^m \sum_{k=1}^m \langle a_j e_j, a_k e_k \rangle \\
+&amp;= \sum_{j=1}^m \sum_{k=1}^m a_j \overline{a_k} \langle e_j, e_k \rangle \\
+&amp;= \sum_{j=1}^m a_j \overline{a_j} \langle e_j, e_j \rangle \quad (\text{因为当 } j \neq k \text{ 时，} \langle e_j, e_k \rangle = 0) \\
+&amp;= \sum_{j=1}^m |a_j|^2
+\end{aligned}
+$$
+证毕。</p>
+<p><strong>推论 6.26：规范正交组是线性无关的</strong>
+任何规范正交组都是线性无关的。
+<strong>证明：</strong>
+设 $(e_1, \ldots, e_m)$ 是规范正交组，且 $a_1 e_1 + \cdots + a_m e_m = 0$。
+根据命题 6.25，有 $|a_1|^2 + \cdots + |a_m|^2 = |0|^2 = 0$。
+这意味着每个 $|a_j|^2$ 都必须是0，所以每个 $a_j$ 都必须是0。因此该组是线性无关的。</p>
+<p><strong>定义 6.27：规范正交基 (orthonormal basis)</strong>
+$V$ 的一个<strong>规范正交基</strong>是由规范正交向量构成的基。</p>
+<p><strong>命题 6.30：用规范正交基写向量</strong>
+设 $(e_1, \ldots, e_n)$ 是 $V$ 的一个规范正交基。则对任意 $v \in V$，都有
+$$
+v = \langle v, e_1 \rangle e_1 + \cdots + \langle v, e_n \rangle e_n
+$$
+且
+$$
+|v|^2 = |\langle v, e_1 \rangle|^2 + \cdots + |\langle v, e_n \rangle|^2
+$$</p>
+<p><strong>证明：</strong>
+因为 $(e_1, \ldots, e_n)$ 是基，所以存在标量 $a_1, \ldots, a_n$ 使得 $v = a_1 e_1 + \cdots + a_n e_n$。
+对任意 $j=1, \ldots, n$，我们计算内积：
+$$
+\langle v, e_j \rangle = \langle a_1 e_1 + \cdots + a_n e_n, e_j \rangle = a_j \langle e_j, e_j \rangle = a_j
+$$
+所以系数 $a_j$ 就是 $\langle v, e_j \rangle$。第一个等式得证。
+第二个等式直接由命题 6.25 和第一个等式得到。证毕。</p>
+<h4 id="%E6%A0%BC%E6%8B%89%E5%A7%86-%E6%96%BD%E5%AF%86%E7%89%B9%E8%BF%87%E7%A8%8B"><strong>格拉姆-施密特过程</strong></h4>
+<p>我们已经看到规范正交基非常好用，但它们是否存在呢？答案是肯定的，我们可以通过一个称为<strong>格拉姆-施密特 (Gram-Schmidt)</strong> 的过程，从任意一个基构造出一个规范正交基。</p>
+<p><strong>命题 6.31：格拉姆-施密特过程</strong>
+设 $(v_1, \ldots, v_m)$ 是 $V$ 中的一个线性无关组。定义向量组 $(e_1, \ldots, e_m)$ 如下：
+令 $e_1 = v_1 / |v_1|$。
+对 $j=2, \ldots, m$，令
+$$
+e_j = \frac{v_j - \langle v_j, e_1 \rangle e_1 - \cdots - \langle v_j, e_{j-1} \rangle e_{j-1}}{|v_j - \langle v_j, e_1 \rangle e_1 - \cdots - \langle v_j, e_{j-1} \rangle e_{j-1}|}
+$$
+则 $(e_1, \ldots, e_m)$ 是一个规范正交组，并且对每个 $j=1, \ldots, m$ 都有
+$\text{span}(v_1, \ldots, v_j) = \text{span}(e_1, \ldots, e_j)$。</p>
+<p><strong>证明：</strong>
+我们用数学归纳法证明 $(e_1, \ldots, e_m)$ 是规范正交的且张成空间不变。
+<strong>基础情形：</strong> $j=1$。$e_1$ 是 $v_1$ 的正标量倍，所以 $|e_1|=1$ 且 $\text{span}(v_1) = \text{span}(e_1)$。
+<strong>归纳假设：</strong> 假设对 $j-1$ 结论成立，即 $(e_1, \ldots, e_{j-1})$ 是规范正交的且 $\text{span}(v_1, \ldots, v_{j-1}) = \text{span}(e_1, \ldots, e_{j-1})$。
+令 $u_j = v_j - \sum_{k=1}^{j-1} \langle v_j, e_k \rangle e_k$。分母不为0因为 $v_j \notin \text{span}(v_1, \ldots, v_{j-1}) = \text{span}(e_1, \ldots, e_{j-1})$。
+$e_j$ 的定义使其范数为1。
+对任意 $i &lt; j$，我们计算内积：
+$$
+\begin{aligned}
+\langle u_j, e_i \rangle &amp;= \left\langle v_j - \sum_{k=1}^{j-1} \langle v_j, e_k \rangle e_k, e_i \right\rangle \\
+&amp;= \langle v_j, e_i \rangle - \sum_{k=1}^{j-1} \langle v_j, e_k \rangle \langle e_k, e_i \rangle \\
+&amp;= \langle v_j, e_i \rangle - \langle v_j, e_i \rangle \langle e_i, e_i \rangle \quad (\text{因为 } e_k \text{ 规范正交})\\
+&amp;= \langle v_j, e_i \rangle - \langle v_j, e_i \rangle = 0
+\end{aligned}
+$$
+所以 $u_j$ 与所有的 $e_1, \ldots, e_{j-1}$ 正交。因此 $e_j = u_j/|u_j|$ 也与它们正交。
+所以 $(e_1, \ldots, e_j)$ 是规范正交的。
+从 $e_j$ 的定义可以看出，$v_j \in \text{span}(e_1, \ldots, e_j)$，反之 $e_j \in \text{span}(v_1, \ldots, v_{j-1}, v_j) = \text{span}(e_1, \ldots, e_{j-1}, v_j)$。
+所以 $\text{span}(v_1, \ldots, v_j) = \text{span}(e_1, \ldots, e_j)$。
+归纳完成。证毕。</p>
+<p><strong>推论 6.34：每个有限维内积空间都有规范正交基</strong>
+这直接由格拉姆-施密特过程得出：先为空间找一个任意的基，然后对其应用该过程。</p>
+<h3 id="6c-%E6%AD%A3%E4%BA%A4%E8%A1%A5%E4%B8%8E%E6%9E%81%E5%B0%8F%E5%8C%96%E9%97%AE%E9%A2%98"><strong>6.C 正交补与极小化问题</strong></h3>
+<h4 id="%E6%AD%A3%E4%BA%A4%E8%A1%A5"><strong>正交补</strong></h4>
+<p><strong>定义 6.45：正交补 (orthogonal complement)</strong>
+设 $U$ 是 $V$ 的子集。$U$ 的<strong>正交补</strong>，记为 $U^\perp$，是 $V$ 中与 $U$ 中每个向量都正交的向量的集合：
+$$
+U^\perp = {v \in V : \langle v,u \rangle=0 \text{ for all } u \in U}
+$$</p>
+<p><strong>命题 6.46：正交补的基本性质</strong>
+(a) $U^\perp$ 是 $V$ 的一个子空间。
+(b) ${0}^\perp = V$。
+(c) $V^\perp = {0}$。
+(d) $U \cap U^\perp \subseteq {0}$。
+(e) 若 $U \subseteq W$，则 $W^\perp \subseteq U^\perp$。</p>
+<p><strong>证明 (a)：</strong></p>
+<ol>
+<li>$\langle 0, u \rangle = 0$ for all $u \in U$，所以 $0 \in U^\perp$。</li>
+<li>若 $v,w \in U^\perp$，则 $\langle v+w, u \rangle = \langle v,u \rangle + \langle w,u \rangle = 0+0=0$ for all $u \in U$。所以 $v+w \in U^\perp$。</li>
+<li>若 $v \in U^\perp, \lambda \in \mathbf{F}$，则 $\langle \lambda v, u \rangle = \lambda \langle v,u \rangle = \lambda \cdot 0=0$ for all $u \in U$。所以 $\lambda v \in U^\perp$。
+因此 $U^\perp$ 是一个子空间。</li>
+</ol>
+<p><strong>定理 6.47：子空间与其正交补的直和</strong>
+设 $U$ 是 $V$ 的一个有限维子空间。则
+$$
+V = U \oplus U^\perp
+$$</p>
+<p><strong>证明：</strong>
+我们要证明 $V = U+U^\perp$ 且 $U \cap U^\perp = {0}$。
+后者由命题6.46(d)直接得到。
+现在证明前者。任取 $v \in V$。设 $(e_1, \ldots, e_m)$ 是 $U$ 的一个规范正交基。
+令 $u = \langle v, e_1 \rangle e_1 + \cdots + \langle v, e_m \rangle e_m$。显然 $u \in U$。
+令 $w = v - u$。我们要证明 $w \in U^\perp$。
+对任意 $j=1, \ldots, m$，
+$$
+\begin{aligned}
+\langle w, e_j \rangle &amp;= \langle v-u, e_j \rangle = \langle v, e_j \rangle - \langle u, e_j \rangle \\
+&amp;= \langle v, e_j \rangle - \left\langle \sum_{k=1}^m \langle v, e_k \rangle e_k, e_j \right\rangle \\
+&amp;= \langle v, e_j \rangle - \langle v, e_j \rangle \langle e_j, e_j \rangle = \langle v, e_j \rangle - \langle v, e_j \rangle = 0
+\end{aligned}
+$$
+所以 $w$ 与 $U$ 的所有基向量正交，因此与 $U$ 中所有向量都正交。即 $w \in U^\perp$。
+我们已经将 $v$ 写成了 $v=u+w$，其中 $u \in U, w \in U^\perp$。
+所以 $V = U + U^\perp$。证毕。</p>
+<h4 id="%E6%9E%81%E5%B0%8F%E5%8C%96%E9%97%AE%E9%A2%98"><strong>极小化问题</strong></h4>
+<p>内积空间的一个重要应用是找到一个向量到一个子空间的“最佳近似”，即距离最近的点。</p>
+<p><strong>定义 6.53：正交投影 (orthogonal projection)</strong>
+设 $U$ 是 $V$ 的有限维子空间。$V$ 到 $U$ 上的<strong>正交投影</strong> $P_U \in \mathcal{L}(V)$ 定义为：
+对 $v \in V$，将其分解为 $v = u+w$（其中 $u \in U, w \in U^\perp$），则 $P_U v = u$。</p>
+<p><strong>定理 6.56：到子空间的最短距离</strong>
+设 $U$ 是 $V$ 的有限维子空间，$v \in V$。则
+$$
+|v - P_U v| \le |v - u|
+$$
+对所有 $u \in U$ 都成立。等号成立当且仅当 $u = P_U v$。</p>
+<p><strong>证明：</strong>
+设 $u \in U$。我们有
+$$
+\begin{aligned}
+|v-u|^2 &amp;= | (v - P_U v) + (P_U v - u) |^2 \\
+&amp;= |v - P_U v|^2 + |P_U v - u|^2 \quad (\text{勾股定理})
+\end{aligned}
+$$
+这里可以使用勾股定理是因为 $v - P_U v \in U^\perp$ 且 $P_U v - u \in U$。
+因为 $|P_U v - u|^2 \ge 0$，所以 $|v - u|^2 \ge |v - P_U v|^2$。
+等号成立当且仅当 $|P_U v - u|^2 = 0$，即 $u = P_U v$。证毕。</p>
+<p><strong>第六讲小结</strong></p>
+<p>今天我们为抽象的向量空间赋予了丰富的几何结构。</p>
+<ol>
+<li>我们引入了<strong>内积</strong>的概念，它推广了点积，并满足正性、定性、第一个位置的线性和共轭对称性。</li>
+<li>基于内积，我们定义了<strong>范数</strong>（长度）和<strong>正交</strong>（垂直），并证明了包括柯西-施瓦茨不等式、三角不等式和勾股定理在内的一系列重要几何性质。</li>
+<li>我们学习了<strong>规范正交基</strong>的优越性，并掌握了通过<strong>格拉姆-施密特过程</strong>将任意基转换为规范正交基的方法。这保证了任何有限维内积空间都存在规范正交基。</li>
+<li>最后，我们研究了<strong>正交补</strong>，证明了任何子空间都可以和其正交补直和分解整个空间，并利用<strong>正交投影</strong>解决了向量到子空间的最近点（最佳近似）问题。</li>
+</ol>
+</article>
+<div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.c259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+<div class="giscus-container" style="margin-top: 50px;">
+<script async="" crossorigin="anonymous" data-category="Announcements" data-emit-metadata="0" data-input-position="bottom" data-lang="zh-CN" data-mapping="pathname" data-reactions-enabled="1" data-repo="forliage/forliage.github.io" data-repo-id="R_kgDONjzd4w" data-strict="0" data-theme="https://forliage.github.io/giscus.css" src="https://giscus.app/client.js">
+</script>
+</div>
+
+
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+<script src="../script.js"></script>
+<div class="modal" id="about-me-modal">
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.js"></script>
+<script>
+  hljs.highlightAll();
+  hljs.addPlugin(new CopyButtonPlugin());
+</script>
+</body>
+</html>
