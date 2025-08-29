@@ -1006,5 +1006,12 @@
     "category": "学习笔记",
     "path": "_posts/2025-08-29-linear09.html",
     "abstract": "线性代数09:实向量空间上的算子"
+  },
+  {
+    "title": "线性代数10:迹与行列式",
+    "date": "2025-08-29",
+    "category": "学习笔记",
+    "path": "_posts/2025-08-29-linear10.html",
+    "abstract": "线性代数10:迹与行列式"
   }
 ]
