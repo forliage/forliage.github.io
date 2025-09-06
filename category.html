@@ -49,6 +49,15 @@
                     <!-- Course cards will be generated here -->
                 </div>
             </div>
+            <!-- New container for technical articles, hidden by default -->
+            <div id="technical-articles-content" style="display: none;">
+                <div id="search-container-tech">
+                    <input type="search" id="search-input-tech" placeholder="在技术文章中搜索标题...">
+                </div>
+                <div id="technical-cards-container">
+                    <!-- Technical article cards will be generated here -->
+                </div>
+            </div>
         </main>
     </div>
     <footer>
@@ -76,6 +85,9 @@
             const learningNotesContainer = document.getElementById('learning-notes-content');
             const courseCardsContainer = document.getElementById('course-cards-container');
             const searchInput = document.getElementById('search-input');
+            const technicalArticlesContainer = document.getElementById('technical-articles-content');
+            const technicalCardsContainer = document.getElementById('technical-cards-container');
+            const searchInputTech = document.getElementById('search-input-tech');
 
             let allPosts;
             try {
@@ -95,10 +107,19 @@
             const postsForCategory = allPosts.filter(p => p.category === category);
 
             if (postsForCategory.length === 0) {
-                const container = category === '学习笔记' ? courseCardsContainer : articleListElement;
+                let container;
                 if (category === '学习笔记') {
+                    container = courseCardsContainer;
                     learningNotesContainer.style.display = 'block';
                     articleListElement.style.display = 'none';
+                    technicalArticlesContainer.style.display = 'none';
+                } else if (category === '技术文章') {
+                    container = technicalCardsContainer;
+                    technicalArticlesContainer.style.display = 'block';
+                    articleListElement.style.display = 'none';
+                    learningNotesContainer.style.display = 'none';
+                } else {
+                    container = articleListElement;
                 }
                 container.innerHTML = `<p>“${category}”分类下暂无文章。</p>`;
                 return;
@@ -107,6 +128,7 @@
             if (category === '学习笔记') {
                 learningNotesContainer.style.display = 'block';
                 articleListElement.style.display = 'none';
+                technicalArticlesContainer.style.display = 'none';
                 renderLearningNotes(postsForCategory, courseCardsContainer);
 
                 searchInput.addEventListener('input', (e) => {
@@ -115,6 +137,20 @@
                         post.title.toLowerCase().includes(searchTerm)
                     );
                     renderLearningNotes(filteredPosts, courseCardsContainer);
+                });
+            } else if (category === '技术文章') {
+                technicalArticlesContainer.style.display = 'block';
+                articleListElement.style.display = 'none';
+                learningNotesContainer.style.display = 'none';
+                // Call to renderTechnicalArticles will be added in the next step
+                renderTechnicalArticles(postsForCategory, technicalCardsContainer);
+
+                searchInputTech.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const filteredPosts = postsForCategory.filter(post =>
+                        post.title.toLowerCase().includes(searchTerm)
+                    );
+                    renderTechnicalArticles(filteredPosts, technicalCardsContainer);
                 });
             } else {
                 articleListElement.innerHTML = '';
@@ -204,6 +240,77 @@
                     <div class="card-body" style="display: none;">
                         <ul>
                             ${coursePosts.sort((a,b) => a.title.localeCompare(b.title)).map(post => `<li><a href="${post.path}">${post.title}</a></li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+                
+                const header = card.querySelector('.card-header');
+                header.addEventListener('click', () => {
+                    const body = card.querySelector('.card-body');
+                    card.classList.toggle('expanded');
+                    body.style.display = card.classList.contains('expanded') ? 'block' : 'none';
+                });
+                
+                isPink = !isPink;
+            }
+        }
+
+        function renderTechnicalArticles(posts, container) {
+            const technicalIntroductions = {
+                '技术拓展': '一些技术方面的思考',
+                '数学': '偶尔学习一下数学',
+                '算法': '学习算法',
+                '论文解析': '读论文,写一些想法和解释',
+                '其他': '一些尚未分类的技术文章。'
+            };
+
+            const groupedBySubCategory = posts.reduce((acc, post) => {
+                let subCategoryName = '其他';
+                const lowerTitle = post.title.toLowerCase();
+                if (lowerTitle.startsWith('技术拓展')) {
+                    subCategoryName = '技术拓展';
+                } else if (lowerTitle.startsWith('数学')) {
+                    subCategoryName = '数学';
+                } else if (lowerTitle.startsWith('算法')) {
+                    subCategoryName = '算法';
+                } else if (lowerTitle.startsWith('论文解析')) {
+                    subCategoryName = '论文解析';
+                }
+                
+                if (!acc[subCategoryName]) {
+                    acc[subCategoryName] = [];
+                }
+                acc[subCategoryName].push(post);
+                return acc;
+            }, {});
+
+            container.innerHTML = '';
+            
+            if (posts.length === 0) {
+                container.innerHTML = '<p style="text-align: center;">没有找到匹配的文章。</p>';
+                return;
+            }
+
+            let isPink = true;
+            const subCategoryNames = Object.keys(groupedBySubCategory).sort();
+
+            for (const subCategoryName of subCategoryNames) {
+                const subCategoryPosts = groupedBySubCategory[subCategoryName];
+                
+                const card = document.createElement('div');
+                card.className = `course-card ${isPink ? 'course-card-pink' : 'course-card-white'}`;
+                
+                const introText = technicalIntroductions[subCategoryName] || '暂无简介。';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h3>${subCategoryName}</h3>
+                        <p class="card-intro">${introText}</p>
+                    </div>
+                    <div class="card-body" style="display: none;">
+                        <ul>
+                            ${subCategoryPosts.sort((a,b) => a.title.localeCompare(b.title)).map(post => `<li><a href="${post.path}">${post.title}</a></li>`).join('')}
                         </ul>
                     </div>
                 `;
