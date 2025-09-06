@@ -14,7 +14,7 @@
     "abstract": "记录一段喜欢的“对话”"
   },
   {
-    "title":"基于代价的优化器（Cost-Based Optimizer, CBO）",
+    "title":"技术拓展:基于代价的优化器（Cost-Based Optimizer, CBO）",
     "date": "2025-06-20",
     "category": "技术文章",
     "path": "_posts/2025-06-20-CBO.html",
@@ -28,21 +28,21 @@
     "abstract":"要相信,爱永远在"
   },
   {
-    "title": "Webarena介绍",
+    "title": "技术拓展:Webarena介绍",
     "date":"2025-07-15",
     "category":"技术文章",
     "path":"_posts/2025-07-15-webarena.html",
     "abstract":"见过彩虹，见过云朵，你见过webarena吗？"
   },
   {
-    "title": "2025IMOP3解答",
+    "title": "数学:2025IMOP3解答",
     "date":"2025-07-15",
     "category":"技术文章",
     "path":"_posts/2025-07-15-IMO3.html",
     "abstract":"2025 IMO Problem 3的解答"
   },
   {
-    "title": "并行退火算法(PSA)",
+    "title": "算法:并行退火算法(PSA)",
     "date":"2025-08-20",
     "category":"技术文章",
     "path":"_posts/2025-08-20-PSA.html",

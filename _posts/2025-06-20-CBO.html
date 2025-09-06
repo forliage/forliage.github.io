@@ -3,7 +3,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"/>
-<title>基于代价的优化器（Cost-Based Optimizer, CBO）</title>
+<title>技术拓展:基于代价的优化器（Cost-Based Optimizer, CBO）</title>
 <link href="../style.css" rel="stylesheet"/>
 <link href="../modal.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" rel="stylesheet"/>
@@ -43,7 +43,7 @@
 <div id="sidebar-container"></div>
 <main>
 <article>
-<h2>基于代价的优化器（Cost-Based Optimizer, CBO）</h2>
+<h2>技术拓展:基于代价的优化器（Cost-Based Optimizer, CBO）</h2>
 <p> <strong>在正文开始之前,说一说为什么会想到CBO</strong>.在我们学习&lt;数据库系统与设计&gt;这门课程的时候,我们的大程作业是minisql,也即实现一个自己的迷你数据库,一个不得不考虑的问题就是对我们的数据库进行优化.我在完成了基本基本框架之后发现操作对select,insert等的速度影响是极大的(其实有很多的原因),为了提升数据库的质量,查询资料学习了CBO.(在课程作业中直接加入CBO且可以看到完整效果的代码是不公开的,若有需要请私信我,我的email在<strong>关于</strong>板块中).</p>
 <p> 接下来我们进入正题,我们的目的就是理解"为什么我的SQL有时候快如闪电，有时候慢如蜗牛".</p>
 <h3 id="第一章：问题的提出-——-为何需要“优化”？">第一章：问题的提出 —— 为何需要“优化”？</h3>
