@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>论文解析:(OpenAI)《Why Language Models Hallucinate》</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FPDBQB4LZD');
+    </script>
+<link href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-dawn.min.css" id="highlight-theme-link" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.css" rel="stylesheet"/>
+</head>
+<body>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="%E8%AE%BA%E6%96%87%E8%A7%A3%E6%9E%90openaiwhy-language-models-hallucinate">论文解析:(OpenAI)《Why Language Models Hallucinate》</h1>
+<p><a href="https://cdn.openai.com/pdf/d04913be-3f6f-4d2b-b283-ff432ef4aaa5/why-language-models-hallucinate.pdf">阅读原文，参考链接</a></p>
+<p>分为两大核心部分：</p>
+<ul>
+<li><strong>第一部分：幻觉的统计力学基础</strong>。此部分将建立论文的核心数学框架，形式化地证明幻觉现象在标准预训练范式下的统计必然性。我们将逐一展开并证明所有关键定理。</li>
+<li><strong>第二部分：幻觉的社会动力学分析</strong>。此部分将分析现行评估体系如何从博弈论角度激励并强化了幻觉行为，并对论文提出的改革方案进行形式化阐述。</li>
+</ul>
+<h3 id="%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86%E5%B9%BB%E8%A7%89%E7%9A%84%E7%BB%9F%E8%AE%A1%E5%8A%9B%E5%9F%BA%E7%A1%80">第一部分：幻觉的统计力基础</h3>
+<p>本部分旨在从第一性原理出发，推导出幻觉现象的产生是统计学习过程的内在属性。</p>
+<h4 id="11-%E5%BD%A2%E5%BC%8F%E5%8C%96%E6%A1%86%E6%9E%B6%E5%AE%9A%E4%B9%89%E4%B8%8E%E5%85%AC%E7%90%86"><strong>1.1. 形式化框架：定义与公理</strong></h4>
+<p>我们首先建立分析所需的基础数学结构。</p>
+<ul>
+<li>
+<p><strong>定义 1.1.1 (样本空间 $\mathcal{X}$)</strong>: 令 $\mathcal{X}$ 为一个离散的、有限的字符串集合，该集合包含了所有在句法上有效且在语义上貌似合理的字符串。此定义旨在将分析从语法层面提升至事实层面。</p>
+</li>
+<li>
+<p><strong>公理 1.1.2 (真伪二分公理)</strong>: 集合 $\mathcal{X}$ 存在一个唯一的划分（Partition），将其分为两个不相交的子集：</p>
+<ul>
+<li><strong>有效集 $\mathcal{V}$ (Valid Set)</strong>: $\mathcal{V} \subset \mathcal{X}$，其中所有字符串均为事实准确的。</li>
+<li><strong>错误集 $\mathcal{E}$ (Error Set)</strong>: $\mathcal{E} \subset \mathcal{X}$，其中所有字符串均为事实错误的。
+此划分满足 $\mathcal{X} = \mathcal{V} \cup \mathcal{E}$ 且 $\mathcal{V} \cap \mathcal{E} = \emptyset$。</li>
+</ul>
+</li>
+<li>
+<p><strong>定义 1.1.3 (真实分布 $p$)</strong>: 令 $p: \mathcal{X} \to [0, 1]$ 为一个理想的概率分布，称为真实分布。其支撑集 $\text{supp}(p)$ 完全包含于 $\mathcal{V}$ 中。形式化地，$\forall x \in \mathcal{E}, p(x) = 0$。因此，$\sum_{x \in \mathcal{V}} p(x) = 1$。</p>
+</li>
+<li>
+<p><strong>定义 1.1.4 (语言模型 $\hat{p}$)</strong>: 令 $\hat{p}: \mathcal{X} \to [0, 1]$ 为一个通过在真实世界语料上训练得到的语言模型，它是一个旨在近似 $p$ 的概率分布。与 $p$ 不同，$\hat{p}$ 的支撑集可能包含 $\mathcal{E}$。</p>
+</li>
+<li>
+<p><strong>定义 1.1.5 (生成错误率 $\text{err}$)</strong>: 语言模型 $\hat{p}$ 的生成错误率 $\text{err}$ 定义为 $\hat{p}$ 分配给错误集 $\mathcal{E}$ 的总概率质量：
+$$ \text{err} := \hat{p}(\mathcal{E}) = \sum_{x \in \mathcal{E}} \hat{p}(x) $$
+这是我们最终希望分析和建立下界的核心量。</p>
+</li>
+</ul>
+<h4 id="12-%E6%A0%B8%E5%BF%83%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7is-it-valid-iiv-%E4%BA%8C%E5%85%83%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98"><strong>1.2. 核心分析工具：Is-It-Valid (IIV) 二元分类问题</strong></h4>
+<p>为了分析 $\text{err}$，我们构造一个辅助的、更易于处理的监督学习问题。</p>
+<ul>
+<li>
+<p><strong>定义 1.2.1 (IIV 任务)</strong>: IIV 任务是一个二元分类问题，其目标是学习一个函数 $f: \mathcal{X} \to {+, -}$，其中：
+$$ f(x) = \begin{cases} + &amp; \text{if } x \in \mathcal{V} \ - &amp; \text{if } x \in \mathcal{E} \end{cases} $$</p>
+</li>
+<li>
+<p><strong>定义 1.2.2 (IIV 测试分布 $\mathcal{D}$)</strong>: 为了理论分析，我们定义一个在 $\mathcal{X}$ 上的混合分布 $\mathcal{D}$。从 $\mathcal{D}$ 中采样一个样本 $x$ 的过程如下：首先进行一次伯努利试验 $b \sim \text{Bernoulli}(0.5)$。若 $b=1$，则从 $p$ 中抽取一个样本 $x$；若 $b=0$，则从 $\mathcal{E}$ 上的均匀分布 $\text{Uniform}(\mathcal{E})$ 中抽取一个样本 $x$。
+因此，$\mathcal{D}$ 的概率质量函数为：
+$$ D(x) = \frac{1}{2} p(x) \cdot \mathbb{I}(x \in \mathcal{V}) + \frac{1}{2 |\mathcal{E}|} \cdot \mathbb{I}(x \in \mathcal{E}) $$
+其中 $\mathbb{I}(\cdot)$ 是指示函数。</p>
+</li>
+<li>
+<p><strong>定义 1.2.3 (基于 $\hat{p}$ 的贝叶斯最优分类器 $\hat{f}$)</strong>: 任何生成模型 $\hat{p}$ 都可以被用作一个IIV分类器。在给定模型 $\hat{p}$ 的情况下，我们可以构造一个近似的贝叶斯最优分类器 $\hat{f}$。该分类器通过比较后验概率 $\Pr(f(x)=+ | x)$ 和 $\Pr(f(x)=- | x)$ 来决策。在我们的IIV设定下，这等价于比较 $p(x)/2$ 和 $1/(2|\mathcal{E}|)$。由于我们无法直接使用 $p(x)$，我们用其近似 $\hat{p}(x)$ 来构造分类器。分类规则为：
+$$ \hat{f}(x) = \begin{cases} + &amp; \text{if } \hat{p}(x) &gt; 1/|\mathcal{E}| \ - &amp; \text{if } \hat{p}(x) \le 1/|\mathcal{E}| \end{cases} $$
+这个分类器的决策边界是 $\hat{p}(x) = 1/|\mathcal{E}|$。</p>
+</li>
+<li>
+<p><strong>定义 1.2.4 (IIV 误分类率 $\text{err}_{\text{iiv}}$)</strong>: 分类器 $\hat{f}$ 在分布 $\mathcal{D}$ 上的总错误概率：
+$$ \text{err}_{\text{iiv}} := \Pr_{x \sim \mathcal{D}}[\hat{f}(x) \neq f(x)] = \sum_{x \in \mathcal{X}} D(x) \cdot \mathbb{I}(\hat{f}(x) \neq f(x)) $$</p>
+</li>
+</ul>
+<h4 id="13-%E6%A0%B8%E5%BF%83%E5%AE%9A%E7%90%86%E7%94%9F%E6%88%90%E9%94%99%E8%AF%AF%E7%8E%87%E7%9A%84%E4%B8%8B%E7%95%8C"><strong>1.3. 核心定理：生成错误率的下界</strong></h4>
+<p>现在我们陈述并证明连接 $\text{err}$ 和 $\text{err}_{\text{iiv}}$ 的核心定理。为保持通用性，我们直接进入包含提示（prompt）的场景。</p>
+<ul>
+<li>
+<p><strong>扩展定义 (带提示场景)</strong>:</p>
+<ul>
+<li>样本 $x$ 现在是一个二元组 $(c, r)$，其中 $c \in \mathcal{C}$ 是提示， $r \in \mathcal{R}$ 是回复。</li>
+<li>真实分布 $p$ 现在是条件分布 $p(r|c)$，语言模型是 $\hat{p}(r|c)$。</li>
+<li>$\mathcal{V}_c, \mathcal{E}_c$ 分别是给定提示 $c$ 时的有效和错误回复集。</li>
+<li>$\text{err} := \sum_c \mu(c) \sum_{r \in \mathcal{E}_c} \hat{p}(r|c)$，其中 $\mu(c)$ 是提示的分布。</li>
+</ul>
+</li>
+<li>
+<p><strong>定理 1.3.1 (Theorem 1)</strong>: 对于任何真实分布 $p$ 和语言模型 $\hat{p}$，以下不等式成立：
+$$ \text{err} \ge 2 \cdot \text{err}_{\text{iiv}} \frac{\max_c |\mathcal{V}_c|}{\min_c |\mathcal{E}_c|} - \delta $$
+其中，$$\delta := |\sum_c \mu(c) (\sum_{r \in A_c} \hat{p}(r|c) - \sum_{r \in A_c} p(r|c))|$$ 是校准误差 $$A_c = {r \mid \hat{p}(r|c) &gt; 1/K}$$ 且 $$K = \min_c |\mathcal{E}_c|$$</p>
+</li>
+</ul>
+<p><strong>证明</strong>:</p>
+<p>令 $$K := \min_c |\mathcal{E}_c|$$ $$k := \max_c |\mathcal{V}_c|$$分类阈值为 $$T=1/K$$
+对于每个提示 $c$，定义 $$A_c := {r \mid \hat{p}(r|c) &gt; 1/K}$$ 和 $$B_c := {r \mid \hat{p}(r|c) \le 1/K}$$</p>
+<p><strong>生成错误率分解</strong>:
+$$ \text{err} = \sum_c \mu(c) \left( \sum_{r \in A_c \cap \mathcal{E}_c} \hat{p}(r|c) + \sum_{r \in B_c \cap \mathcal{E}_c} \hat{p}(r|c) \right) $$</p>
+<p><strong>IIV 误分类率分解</strong>:
+$$ \text{err}_{\text{iiv}} = \sum_c \mu(c) \left( \sum_{r \in A_c \cap \mathcal{E}_c} \frac{1}{2|\mathcal{E}_c|} + \sum_{r \in B_c \cap \mathcal{V}_c} \frac{p(r|c)}{2} \right) $$</p>
+<p><strong>目标</strong>: 建立 $\sum_c \mu(c) \sum_{r \in A_c \cap \mathcal{E}_c} \hat{p}(r|c)$ 和 $\sum_c \mu(c) \sum_{r \in A_c \cap \mathcal{E}_c} \frac{1}{2|\mathcal{E}_c|}$ 的关系。
+对于任何 $c$ 和 $r \in A_c \cap \mathcal{E}_c$：
+* 我们有 $\hat{p}(r|c) &gt; 1/K$。
+* 由 $K$ 的定义，$K \le |\mathcal{E}_c|$，因此 $1/K \ge 1/|\mathcal{E}_c|$。
+* 所以，$$\hat{p}(r|c) &gt; 1/K \ge 1/|\mathcal{E}_c| = 2 \cdot \frac{1}{2|\mathcal{E}_c|}$$
+将上式两边乘以 $\mu(c)$ 并对所有 $c$ 和 $r \in A_c \cap \mathcal{E}_c$ 求和，得到：
+$$ \sum_c \mu(c) \sum_{r \in A_c \cap \mathcal{E}_c} \hat{p}(r|c) &gt; 2 \sum_c \mu(c) \sum_{r \in A_c \cap \mathcal{E}_c} \frac{1}{2|\mathcal{E}_c|} \quad \cdots (1) $$</p>
+<p><strong>目标</strong>: 建立 $\sum_c \mu(c) \sum_{r \in B_c \cap \mathcal{E}_c} \hat{p}(r|c)$ 和 $\sum_c \mu(c) \sum_{r \in B_c \cap \mathcal{V}_c} \frac{p(r|c)}{2}$ 的关系。
+首先，令 $$\text{err}_{\text{iiv}, B} = \sum_c \mu(c) \sum_{r \in B_c \cap \mathcal{V}_c} \frac{p(r|c)}{2}$$
+$$2 \cdot \text{err}_{\text{iiv}, B} = \sum_c \mu(c) \sum_{r \in B_c \cap \mathcal{V}_c} p(r|c)$$
+由于 $p(r|c)=0$ 对于 $r \in \mathcal{E}_c$，我们有 $$\sum_{r \in B_c} p(r|c) = \sum_{r \in B_c \cap \mathcal{V}_c} p(r|c)$$
+因此，$$2 \cdot \text{err}_{\text{iiv}, B} = \sum_c \mu(c) \sum_{r \in B_c} p(r|c)$$
+引入校准误差 $\delta$。设 $$\hat{P}(B) = \sum_c \mu(c) \sum_{r \in B_c} \hat{p}(r|c)$$ 和 $$P(B) = \sum_c \mu(c) \sum_{r \in B_c} p(r|c)$$那么 $$\delta \ge P(B) - \hat{P}(B)$$
+所以 $$P(B) \le \hat{P}(B) + \delta$$
+代入得到：$$2 \cdot \text{err}_{\text{iiv}, B} \le \hat{P}(B) + \delta = \sum_c \mu(c) \left( \sum_{r \in B_c \cap \mathcal{V}_c} \hat{p}(r|c) + \sum_{r \in B_c \cap \mathcal{E}_c} \hat{p}(r|c) \right) + \delta$$
+移项：$$\sum_c \mu(c) \sum_{r \in B_c \cap \mathcal{E}_c} \hat{p}(r|c) \ge 2 \cdot \text{err}_{\text{iiv}, B} - \sum_c \mu(c) \sum_{r \in B_c \cap \mathcal{V}_c} \hat{p}(r|c) - \delta$$
+<strong>对负项进行上界放缩</strong>: 对于 $r \in B_c \cap \mathcal{V}_c$，我们有 $\hat{p}(r|c) \le 1/K$。每个 $c$ 最多有 $k$ 个这样的有效回复。
+$$\sum_c \mu(c) \sum_{r \in B_c \cap \mathcal{V}_c} \hat{p}(r|c) \le \sum_c \mu(c) \cdot k \cdot (1/K) = k/K$$
+代入得到第二个关键不等式：
+$$ \sum_c \mu(c) \sum_{r \in B_c \cap \mathcal{E}_c} \hat{p}(r|c) \ge 2 \cdot \text{err}_{\text{iiv}, B} - \frac{k}{K} - \delta \quad \cdots (2) $$</p>
+<p>将不等式 (1) 和 (2) 相加，并令 $\text{err}_{\text{iiv}, A} = \sum_c \mu(c) \sum_{r \in A_c \cap \mathcal{E}_c} \frac{1}{2|\mathcal{E}_c|}$。
+$$ \text{err} \ge 2 \cdot \text{err}_{\text{iiv}, A} + 2 \cdot \text{err}_{\text{iiv}, B} - \frac{k}{K} - \delta $$
+由于 $\text{err}_{\text{iiv}} = \text{err}_{\text{iiv}, A} + \text{err}_{\text{iiv}, B}$，我们得到：
+$$ \text{err} \ge 2 \cdot \text{err}_{\text{iiv}} - \frac{k}{K} - \delta $$
+将 $k, K$ 的定义代回，即完成证明。</p>
+<h4 id="14-iiv-%E5%9B%B0%E9%9A%BE%E6%80%A7%E7%9A%84%E6%9D%A5%E6%BA%90%E5%88%86%E6%9E%90"><strong>1.4. IIV 困难性的来源分析</strong></h4>
+<p><strong>1.4.1. 任意事实与统计复杂性 (Theorem 2)</strong></p>
+<ul>
+<li><strong>场景</strong>: 事实之间无模式可循，学习等同于记忆。</li>
+<li><strong>核心结论</strong>: $\text{err} \gtrsim \text{sr}$ (独有样本率)。</li>
+<li><strong>详细证明逻辑 (附录 B)</strong>:
+<ol>
+<li><strong>引理 1 (古德-图灵估计的扩展)</strong>: 定义 Missing Mass (MM) 为模型遇到训练中未回答过的问题时，给出非IDK回答的总概率。证明独有样本率 sr 是 MM 的一个高概率的良好估计，即 $|\text{MM} - \text{sr}| \le \epsilon$ with high prob。</li>
+<li><strong>核心论证 (独立性)</strong>: 对于训练集中未见的查询 $c \in \mathcal{U}$，算法输出的 $\hat{p}(\cdot|c)$ 与真实答案 $a_c$ 在统计上是独立的。</li>
+<li><strong>计算期望IIV错误率</strong>:
+<ul>
+<li>令 $\gamma_c$ 为在查询 $c$ 上的IIV错误率贡献。</li>
+<li>$E[\gamma_c] = E \left[ \frac{1}{2} \mathbb{I}(\hat{f}(c,a_c)=-) + \frac{1}{2|\mathcal{E}_c|} \sum_{r \in \mathcal{E}_c} \mathbb{I}(\hat{f}(c,r)=+) \right]$。</li>
+<li>由于 $a_c$ 是从 $\mathcal{R}_c$ 中均匀选取的，且与 $\hat{f}$ 独立，可以证明 $E[\gamma_c] = 1/2$。</li>
+</ul>
+</li>
+<li><strong>集中性论证</strong>: 在未见查询集上的总IIV错误率 $\text{err}_{\text{iiv, unseen}} = \sum_{c \in \mathcal{U}} \mu'(c) \gamma_c$。这是一个独立随机变量的和，其期望为 $E[\text{err}_{\text{iiv, unseen}}] = \text{MM}/2$。根据霍夫丁不等式，$\text{err}_{\text{iiv, unseen}}$ 以高概率集中在其期望附近。</li>
+<li><strong>整合</strong>: $\text{err} \ge 2 \text{err}_{\text{iiv}} - \dots \approx 2 \text{err}_{\text{iiv, unseen}} \approx 2 (\text{MM}/2) = \text{MM} \approx \text{sr}$。</li>
+</ol>
+</li>
+</ul>
+<h3 id="%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86%E5%B9%BB%E8%A7%89%E7%9A%84%E7%A4%BE%E4%BC%9A%E5%8A%A8%E5%8A%9B%E5%AD%A6%E5%88%86%E6%9E%90">第二部分：幻觉的社会动力学分析</h3>
+<h4 id="21-%E8%AF%84%E4%BC%B0%E8%8C%83%E5%BC%8F%E7%9A%84%E6%BF%80%E5%8A%B1%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90"><strong>2.1. 评估范式的激励结构分析</strong></h4>
+<ul>
+<li>
+<p><strong>定义 2.1.1 (二元评分机制)</strong>: 一个评分函数 $g_c: \mathcal{R}_c \to {0, 1}$，其中存在一个唯一的正确答案 $a_c$ 使得 $g_c(a_c)=1$，对于所有其他回答 $r \neq a_c$（包括错误和IDK），$g_c(r)=0$。</p>
+</li>
+<li>
+<p><strong>博弈论模型 (Observation 1)</strong>:</p>
+<ul>
+<li><strong>代理人</strong>: 语言模型，其目标是最大化期望得分。</li>
+<li><strong>信念</strong>: 模型对哪个答案是正确答案 $a_c$ 持有一个主观概率分布 $p_c(r) := \Pr(\text{r is the correct answer } a_c)$。</li>
+<li><strong>策略与期望收益</strong>:
+<ul>
+<li><strong>策略 S1 (回答 $r'$，其中 $r'$ 不是IDK)</strong>:
+$$ E[\text{Score}(r')] = \sum_{r \in \mathcal{R}_c} p_c(r) \cdot g_r(r') = p_c(r') \cdot 1 + (1-p_c(r')) \cdot 0 = p_c(r') $$</li>
+<li><strong>策略 S2 (回答 $r_{IDK}$)</strong>:
+$$ E[\text{Score}(r_{IDK})] = p_c(r_{IDK}) = 0 $$
+(假设IDK永远不是正确答案)。</li>
+</ul>
+</li>
+<li><strong>理性决策</strong>: 只要存在任何一个非IDK回答 $r'$ 使得模型的主观信念 $p_c(r') &gt; 0$，那么选择 $r'$ 的期望收益就严格大于选择IDK。</li>
+<li><strong>结论</strong>: 在二元评分机制下，任何一个非完全无知的理性代理人，其最优策略集合中都不包含弃权选项。</li>
+</ul>
+</li>
+</ul>
+<h4 id="22-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E5%BC%95%E5%85%A5%E6%98%BE%E5%BC%8F%E7%BD%AE%E4%BF%A1%E5%BA%A6%E7%9B%AE%E6%A0%87%E7%9A%84%E5%BD%A2%E5%BC%8F%E5%8C%96%E6%8F%8F%E8%BF%B0"><strong>2.2. 解决方案：引入显式置信度目标的形式化描述</strong></h4>
+<ul>
+<li>
+<p><strong>定义 2.2.1 (带惩罚的评分机制)</strong>: 令 $t \in (0,1)$ 为一个置信度阈值。定义一个新的评分函数 $g'_c$:
+$$ g'_c(r) = \begin{cases} 1 &amp; \text{if } r = a_c \ 0 &amp; \text{if } r = r_{IDK} \ -t/(1-t) &amp; \text{otherwise} \end{cases} $$</p>
+</li>
+<li>
+<p><strong>新规则下的博弈论分析</strong>:</p>
+<ul>
+<li><strong>策略 S1 (回答 $r' \neq r_{IDK}$)</strong>:
+$\begin{aligned} E[\text{Score}(r')] &amp;= p_c(r') \cdot g'_{r'}(r') + (1-p_c(r')) \cdot g'_{\neg r'}(r') \ &amp;= p_c(r') \cdot 1 + (1-p_c(r')) \cdot \left(-\frac{t}{1-t}\right) \end{aligned}$</li>
+<li><strong>策略 S2 (回答 $r_{IDK}$)</strong>: $E[\text{Score}(r_{IDK})] = 0$。</li>
+</ul>
+</li>
+<li>
+<p><strong>新的理性决策边界</strong>: 代理人选择回答 $r'$ 当且仅当 $E[\text{Score}(r')] &gt; 0$。
+$$ p_c(r') \cdot 1 + (1-p_c(r')) \cdot \left(-\frac{t}{1-t}\right) &gt; 0 $$
+$$ p_c(r') &gt; (1-p_c(r')) \frac{t}{1-t} $$
+$$ p_c(r')(1-t) &gt; (1-p_c(r'))t $$
+$$ p_c(r') - p_c(r')t &gt; t - p_c(r')t $$
+$$ p_c(r') &gt; t $$</p>
+</li>
+<li>
+<p><strong>结论</strong>: 在带惩罚的新评分机制下，理性代理人的最优策略是：仅当其对某个答案的内在置信度 $p_c(r')$ 超过了外部设定的风险阈值 $t$ 时，才给出该答案。这从根本上改变了激励结构，使诚实表达不确定性成为一种理性行为。</p>
+</li>
+</ul>
+<p><strong>总结</strong></p>
+<p>论文首先通过一个创新的理论框架，证明了幻觉是统计学习在面对知识内在复杂性时的必然产物，其错误率下界可由分类问题的难度和训练数据的统计特性（如独有样本率）来量化。随后，论文通过博弈论分析和社会实证考察，揭示了现行评估范式在激励层面如何系统性地加剧了这一问题。最终，论文提出的“显式置信度目标”方案，通过重塑评分规则，为引导AI走向更诚实、更可信赖的未来，提供了一个清晰、可行的、基于社会技术协同的路径图。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+<div class="giscus-container" style="margin-top: 50px;">
+<script async="" crossorigin="anonymous" data-category="Announcements" data-emit-metadata="0" data-input-position="bottom" data-lang="zh-CN" data-mapping="pathname" data-reactions-enabled="1" data-repo="forliage/forliage.github.io" data-repo-id="R_kgDONjzd4w" data-strict="0" data-theme="https://forliage.github.io/giscus.css" src="https://giscus.app/client.js">
+</script>
+</div>
+
+
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+<script src="../script.js"></script>
+<div class="modal" id="about-me-modal">
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.js"></script>
+<script>
+  hljs.highlightAll();
+  hljs.addPlugin(new CopyButtonPlugin());
+</script>
+</body>
+</html>
