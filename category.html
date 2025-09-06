@@ -114,10 +114,10 @@
                     articleListElement.style.display = 'none';
                     technicalArticlesContainer.style.display = 'none';
                 } else if (category === '技术文章') {
-                    container = technicalCardsContainer;
-                    technicalArticlesContainer.style.display = 'block';
+                    container = courseCardsContainer;
+                    learningNotesContainer.style.display = 'block';
                     articleListElement.style.display = 'none';
-                    learningNotesContainer.style.display = 'none';
+                    technicalArticlesContainer.style.display = 'none';
                 } else {
                     container = articleListElement;
                 }
@@ -139,18 +139,17 @@
                     renderLearningNotes(filteredPosts, courseCardsContainer);
                 });
             } else if (category === '技术文章') {
-                technicalArticlesContainer.style.display = 'block';
+                learningNotesContainer.style.display = 'block';
                 articleListElement.style.display = 'none';
-                learningNotesContainer.style.display = 'none';
-                // Call to renderTechnicalArticles will be added in the next step
-                renderTechnicalArticles(postsForCategory, technicalCardsContainer);
+                technicalArticlesContainer.style.display = 'none';
+                renderTechnicalArticles(postsForCategory, courseCardsContainer);
 
-                searchInputTech.addEventListener('input', (e) => {
+                searchInput.addEventListener('input', (e) => {
                     const searchTerm = e.target.value.toLowerCase();
                     const filteredPosts = postsForCategory.filter(post =>
                         post.title.toLowerCase().includes(searchTerm)
                     );
-                    renderTechnicalArticles(filteredPosts, technicalCardsContainer);
+                    renderTechnicalArticles(filteredPosts, courseCardsContainer);
                 });
             } else {
                 articleListElement.innerHTML = '';
