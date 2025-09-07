@@ -1015,10 +1015,10 @@ var postsData = [
       "abstract": "线性代数10:迹与行列式"
     },
     {
-      "title": "论文解析:(OpenAI)《Why Language Models Hallucinate》",
+      "title": "论文解析:(OpenAI,2509)《Why Language Models Hallucinate》",
       "date": "2025-09-06",
       "category": "技术文章",
       "path": "_posts/2025-09-06-Hallucinate.html",
-      "abstract": "论文解析:(OpenAI)《Why Language Models Hallucinate》"
+      "abstract": "OpenAI论文《Why Language Models Hallucinate》解析"
     }
   ];
