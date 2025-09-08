@@ -583,6 +583,42 @@ function generateTOC() {
             }
         }, 550); // Duration of opacity transition (500ms) + buffer
     });
+
+    // Glass Effect Toggle
+    const glassEffectToggle = document.getElementById('glass-effect-toggle');
+    const blurSlider = document.getElementById('blur-slider');
+
+    if (glassEffectToggle && blurSlider) {
+        // Restore state from localStorage
+        if (localStorage.getItem('glassEffectEnabled') === 'true') {
+            document.body.classList.add('glass-effect-enabled');
+            glassEffectToggle.textContent = 'Close';
+            blurSlider.style.display = 'block';
+        }
+
+        const initialBlur = localStorage.getItem('blurIntensity') || '10';
+        blurSlider.value = initialBlur;
+        document.documentElement.style.setProperty('--blur-intensity', initialBlur + 'px');
+
+        glassEffectToggle.addEventListener('click', () => {
+            const isEnabled = document.body.classList.toggle('glass-effect-enabled');
+            localStorage.setItem('glassEffectEnabled', isEnabled);
+
+            if (isEnabled) {
+                glassEffectToggle.textContent = 'Close';
+                blurSlider.style.display = 'block';
+            } else {
+                glassEffectToggle.textContent = 'Blur';
+                blurSlider.style.display = 'none';
+            }
+        });
+
+        blurSlider.addEventListener('input', (e) => {
+            const blurValue = e.target.value;
+            document.documentElement.style.setProperty('--blur-intensity', blurValue + 'px');
+            localStorage.setItem('blurIntensity', blurValue);
+        });
+    }
 };
 
 function recordVisit() {

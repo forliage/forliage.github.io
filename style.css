@@ -410,6 +410,104 @@ footer {
     to { transform: translateY(-15px); }
 }
 
+/* Glass Effect Styles */
+:root {
+    --blur-intensity: 10px;
+}
+
+.glass-control {
+    position: fixed;
+    right: 20px;
+    bottom: 140px; /* Below dark mode button */
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #FF69B4;
+    color: #fff;
+    font-size: 14px; /* Smaller font for text */
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    border: none;
+    z-index: 1000;
+    padding-top: 5px; /* Adjust to center text */
+    box-sizing: border-box;
+    line-height: 1.2;
+}
+
+body.dark-mode .glass-control {
+    background-color: #ff8acb;
+    color: #2c1f2b;
+}
+
+.blur-control {
+    position: fixed;
+    right: 80px; /* Next to the button */
+    bottom: 154px;
+    z-index: 1000;
+    width: 120px;
+}
+
+/* When glass effect is enabled */
+body.glass-effect-enabled {
+    background-image: url('assets/img/dust.svg') !important;
+    background-attachment: fixed !important;
+}
+
+.glass-effect-enabled header,
+.glass-effect-enabled footer,
+.glass-effect-enabled aside,
+.glass-effect-enabled .hero,
+.glass-effect-enabled .posts-list .category-block,
+.glass-effect-enabled .about-content,
+.glass-effect-enabled .course-card {
+    backdrop-filter: blur(var(--blur-intensity));
+    -webkit-backdrop-filter: blur(var(--blur-intensity)); /* For Safari */
+}
+
+/* Using !important to ensure override */
+.glass-effect-enabled header,
+.glass-effect-enabled footer {
+    background-color: rgba(255, 182, 193, 0.5) !important;
+}
+
+.glass-effect-enabled aside {
+    background-color: rgba(255, 240, 245, 0.5) !important;
+}
+
+.glass-effect-enabled .hero {
+    background-color: transparent !important; /* Hero is special, should be transparent */
+}
+
+.glass-effect-enabled .posts-list .category-block,
+.glass-effect-enabled .about-content,
+.glass-effect-enabled .course-card-pink {
+    background-color: rgba(255, 250, 250, 0.7) !important;
+}
+.glass-effect-enabled .course-card-white {
+    background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Dark mode transparent backgrounds */
+.glass-effect-enabled.dark-mode header,
+.glass-effect-enabled.dark-mode footer {
+    background-color: rgba(74, 49, 68, 0.5) !important;
+}
+
+.glass-effect-enabled.dark-mode aside {
+    background-color: rgba(62, 42, 57, 0.5) !important;
+}
+
+.glass-effect-enabled.dark-mode .posts-list .category-block,
+.glass-effect-enabled.dark-mode .about-content,
+.glass-effect-enabled.dark-mode .course-card-pink {
+    background-color: rgba(62, 42, 57, 0.7) !important;
+}
+
+.glass-effect-enabled.dark-mode .course-card-white {
+    background-color: rgba(74, 49, 68, 0.7) !important;
+}
+
 /* Dark Mode Styles */
 body, header, footer, aside, .course-card-pink, #search-input {
     transition: background-color 0.5s ease, color 0.5s ease;
