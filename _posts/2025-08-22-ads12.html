@@ -33,7 +33,7 @@
 <!-- Highlight.js Copy Plugin CSS -->
 <link href="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.css" rel="stylesheet"/>
 </head>
-<body>
+<body data-barba="wrapper">
 <audio id="bg-music" loop="" src="../music.mp3"></audio>
 <button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
 <header>
@@ -51,7 +51,7 @@
 </ul>
 </nav>
 </header>
-<div class="container">
+<div class="container" data-barba="container" data-barba-namespace="2025-08-22-ads12">
 <div id="sidebar-container"></div>
 <main>
 <article>
@@ -753,5 +753,12 @@
   hljs.highlightAll();
   hljs.addPlugin(new CopyButtonPlugin());
 </script>
+
+<!-- Transition Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/@barba/core@2.9.7/dist/barba.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- Custom Transition Logic -->
+<script src="../transition.js"></script>
 </body>
 </html>
