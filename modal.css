@@ -8,8 +8,8 @@
     width: 100%; /* Full width */
     height: 100%; /* Full height */
     overflow: auto; /* Enable scroll if needed */
-    /* background-color: rgb(0,0,0); */ /* Fallback color - REMOVED FOR GLASS EFFECT */
-    /* background-color: rgba(0,0,0,0.6); */ /* Black w/ opacity - REMOVED FOR GLASS EFFECT */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
     -webkit-animation-name: fadeIn; /* Fade in the background */
     -webkit-animation-duration: 0.4s;
     animation-name: fadeIn;
@@ -22,11 +22,9 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: rgba(255, 255, 255, 0.6); /* Semi-transparent white for glass effect */
-    -webkit-backdrop-filter: blur(10px); /* Safari */
-    backdrop-filter: blur(10px); /* Standard */
+    background-color: #fefefe;
     padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2); /* Lighter border for glass effect */
+    border: 1px solid #888;
     width: 80%;
     max-width: 500px;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);

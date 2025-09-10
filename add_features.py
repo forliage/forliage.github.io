@@ -132,36 +132,6 @@ def process_html_file(filepath, share_buttons_html):
             print(f"  - Added share buttons.")
             modified = True
 
-        # --- 3. Add Barba.js and transition scripts ---
-        if body and not body.find('script', src=lambda s: s and 'barba.umd.min.js' in s):
-            transition_scripts_html = """
-<!-- Transition Libraries -->
-<script src="https://cdn.jsdelivr.net/npm/@barba/core@2.9.7/dist/barba.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<!-- Custom Transition Logic -->
-<script src="../transition.js"></script>
-"""
-            body.append(BeautifulSoup(transition_scripts_html, 'html.parser'))
-            print("  - Added transition libraries scripts.")
-            modified = True
-        
-        # --- 4. Add Barba.js data attributes ---
-        if body and 'data-barba' not in body.attrs:
-            body['data-barba'] = 'wrapper'
-            print("  - Added data-barba='wrapper' to body.")
-            modified = True
-            
-        container_div = soup.find('div', class_='container')
-        if container_div and 'data-barba' not in container_div.attrs:
-            container_div['data-barba'] = 'container'
-            # Also add a namespace, which is good practice for Barba.js
-            # We can derive it from the filename
-            namespace = os.path.splitext(os.path.basename(filepath))[0]
-            container_div['data-barba-namespace'] = namespace
-            print(f"  - Added data-barba='container' and namespace='{namespace}' to div.container.")
-            modified = True
-
         # --- Save the modified HTML ---
         if modified:
             with open(filepath, 'w', encoding='utf-8') as f:
