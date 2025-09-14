@@ -6,8 +6,12 @@
     </section>
     <section class="widget reading-progress-widget">
         <h3>阅读进度</h3>
-        <div class="progress-bar-container-placeholder">
-            <div class="progress-bar-placeholder" style="width: 0%;"></div>
+        <div class="progress-ring" id="reading-ring">
+            <svg viewBox="0 0 36 36">
+                <circle class="ring-bg" cx="18" cy="18" r="16"></circle>
+                <circle class="ring-progress" cx="18" cy="18" r="16"></circle>
+            </svg>
+            <span class="progress-ring-text">0%</span>
         </div>
     </section>
     <section class="widget toc-widget">

@@ -271,22 +271,43 @@ aside section.widget h3 {
     color: #555;
 }
 
-/* Reading Progress Widget */
-.progress-bar-container {
-    background-color: #e0e0e0; /* Light grey background for the bar container */
-    border-radius: 10px; /* Rounder progress bar container */
-    height: 20px;
-    border: 1px solid #ccc;
-    overflow: hidden; /* Ensure inner bar stays within rounded corners */
+/* Activity Ring Style */
+.progress-ring {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
 }
 
-.progress-bar {
-    background-color: #FF69B4; /* Hot pink for progress fill */
+.progress-ring svg {
+    width: 100%;
     height: 100%;
-    display: block;
-    border-radius: 10px; /* Rounder progress fill. If container is 10px, this should be 10px or slightly less. */
-    /* If only filled part is rounded: border-radius: 10px 0 0 10px; */
-    transition: width 0.3s ease-in-out; 
+    transform: rotate(-90deg);
+}
+
+.ring-bg {
+    fill: none;
+    stroke: #e6e6e6;
+    stroke-width: 4;
+}
+
+.ring-progress {
+    fill: none;
+    stroke: #ff3b30;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    transition: stroke-dashoffset 0.3s ease;
+}
+
+.progress-ring-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.8em;
+    color: #333;
 }
 
 /* Bookmark Widget */
@@ -1101,4 +1122,110 @@ body.dark-mode .share-buttons p {
 @keyframes floatNotes {
     from { transform: translateY(0); }
     to { transform: translateY(-15px); }
+}
+
+/* Mini Player */
+#mini-player {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.3);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    font-size: 0.9em;
+    z-index: 1000;
+}
+
+#mini-player .mp-info {
+    margin-right: 8px;
+}
+
+#mini-player .mp-title {
+    display: block;
+    font-weight: bold;
+}
+
+#mini-player .mp-bar {
+    width: 100px;
+    height: 4px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+#mini-player .mp-bar-progress {
+    height: 100%;
+    width: 0%;
+    background: #ff2d55;
+}
+
+#mini-player .mp-toggle {
+    border: none;
+    background: transparent;
+    font-size: 1.2em;
+    cursor: pointer;
+}
+
+/* Cover Flow */
+.coverflow-section {
+    perspective: 1000px;
+    margin: 40px auto;
+    max-width: 600px;
+    text-align: center;
+}
+
+.coverflow {
+    position: relative;
+    height: 200px;
+}
+
+.coverflow-item {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 160px;
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.5s;
+    transform-origin: center bottom;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* Taptic Pulse */
+button, .btn, .dock a {
+    transition: transform 0.1s;
+}
+
+/* VisionOS Hover */
+.tilt-card {
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.tilt-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,0.4), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+
+.tilt-card:hover {
+    transform: translateY(-4px);
+}
+
+.tilt-card:hover::after {
+    opacity: 1;
 }

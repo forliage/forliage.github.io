@@ -1,7 +1,25 @@
 window.onload = function() {
     const music = document.getElementById('bg-music');
-    const musicBtn = document.getElementById('music-toggle');
+    let musicBtn = document.getElementById('music-toggle');
     const darkModeToggle = document.getElementById('dark-mode-toggle');
+
+    // Apple Music 风格迷你播放器
+    const miniPlayer = document.createElement('div');
+    miniPlayer.id = 'mini-player';
+    miniPlayer.innerHTML = `
+        <div class="mp-info">
+            <span class="mp-title">${music ? (music.dataset.title || '背景音乐') : '背景音乐'}</span>
+            <div class="mp-bar"><div class="mp-bar-progress"></div></div>
+        </div>
+    `;
+    const miniToggle = document.createElement('button');
+    miniToggle.className = 'mp-toggle';
+    miniToggle.textContent = '▶︎';
+    miniPlayer.appendChild(miniToggle);
+    document.body.appendChild(miniPlayer);
+    if (musicBtn) musicBtn.remove();
+    musicBtn = miniToggle;
+    const mpProgress = miniPlayer.querySelector('.mp-bar-progress');
 
     // Function to update highlight.js theme
     function updateHighlightTheme(isDarkMode) {
@@ -48,13 +66,13 @@ window.onload = function() {
             const playPromise = music.play();
             if (playPromise) {
                 playPromise.then(() => {
-                    musicBtn.classList.remove('paused');
+                    musicBtn.textContent = '⏸';
                 }).catch(() => {
-                    musicBtn.classList.add('paused');
+                    musicBtn.textContent = '▶︎';
                 });
             }
         } else {
-            musicBtn.classList.add('paused');
+            musicBtn.textContent = '▶︎';
         }
     }
 
@@ -67,16 +85,19 @@ window.onload = function() {
     musicBtn.addEventListener('click', () => {
         if (music.paused) {
             music.play();
-            musicBtn.classList.remove('paused');
+            musicBtn.textContent = '⏸';
         } else {
             music.pause();
-            musicBtn.classList.add('paused');
+            musicBtn.textContent = '▶︎';
         }
         localStorage.setItem('music-paused', music.paused);
     });
 
     music.addEventListener('timeupdate', () => {
         localStorage.setItem('music-current-time', music.currentTime);
+        if (music.duration) {
+            mpProgress.style.width = (music.currentTime / music.duration * 100) + '%';
+        }
     });
 
     window.addEventListener('beforeunload', () => {
@@ -216,14 +237,6 @@ window.onload = function() {
     function initSidebarFeatures() {
         updateArticleTitle();
         generateTOC(); // Add this call
-        const progressContainer = document.querySelector('.progress-bar-container-placeholder');
-        if (progressContainer) {
-            progressContainer.className = 'progress-bar-container';
-        }
-        const progressBar = document.querySelector('.progress-bar-placeholder');
-        if (progressBar) {
-            progressBar.className = 'progress-bar';
-        }
         window.addEventListener('scroll', updateReadingProgress);
         updateReadingProgress();
     }
@@ -244,23 +257,26 @@ function updateArticleTitle() {
 }
 
 function updateReadingProgress() {
-    const progressBarElement = document.querySelector('.progress-bar');
+    const ring = document.querySelector('.ring-progress');
+    const text = document.querySelector('.progress-ring-text');
 
-    if (!progressBarElement) {
-        console.log("Could not find progress bar element.");
+    if (!ring || !text) {
+        console.log("Could not find progress ring element.");
         return;
     }
 
     const doc = document.documentElement;
     const scrollableHeight = doc.scrollHeight - doc.clientHeight;
     if (scrollableHeight <= 0) {
-        progressBarElement.style.width = '0%';
+        ring.style.strokeDashoffset = 100;
+        text.textContent = '0%';
         return;
     }
 
     const scrollTop = doc.scrollTop || document.body.scrollTop;
     const progressPercentage = (scrollTop / scrollableHeight) * 100;
-    progressBarElement.style.width = progressPercentage + '%';
+    ring.style.strokeDashoffset = 100 - progressPercentage;
+    text.textContent = Math.round(progressPercentage) + '%';
 }
 
 function generateTOC() {
@@ -386,6 +402,76 @@ function generateTOC() {
             localStorage.setItem('blurIntensity', blurValue);
         });
     }
+
+    // Cover Flow 初始化
+    async function initCoverFlow() {
+        const container = document.getElementById('coverflow');
+        if (!container) return;
+        let posts;
+        try {
+            const res = await fetch('posts.json');
+            posts = await res.json();
+        } catch (e) {
+            posts = window.postsData || [];
+        }
+        const featured = posts.slice(0, 5);
+        featured.forEach((post, i) => {
+            const item = document.createElement('div');
+            item.className = 'coverflow-item';
+            item.style.backgroundImage = `url('images/image${String(i+1).padStart(3,'0')}.png')`;
+            item.title = post.title;
+            container.appendChild(item);
+        });
+        const items = Array.from(container.children);
+        let index = 0;
+        function update() {
+            items.forEach((el, i) => {
+                const offset = i - index;
+                el.style.transform = `translateX(${offset * 60}%) translateZ(${ -Math.abs(offset) * 100 }px) rotateY(${offset * -45}deg)`;
+                el.style.zIndex = 100 - Math.abs(offset);
+            });
+        }
+        update();
+        setInterval(() => {
+            index = (index + 1) % items.length;
+            update();
+        }, 3000);
+    }
+    initCoverFlow();
+
+    // VisionOS 漂浮卡片光斑
+    document.querySelectorAll('.tilt-card').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            card.style.setProperty('--mx', x + 'px');
+            card.style.setProperty('--my', y + 'px');
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.removeProperty('--mx');
+            card.style.removeProperty('--my');
+        });
+    });
+
+    // Taptic Pulse 触感反馈
+    function tapticFeedback(e) {
+        const el = e.currentTarget;
+        el.style.transform = 'scale(0.95)';
+        setTimeout(() => { el.style.transform = ''; }, 100);
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.value = 180;
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.1);
+    }
+    document.querySelectorAll('button, .btn, .dock a').forEach(el => {
+        el.addEventListener('click', tapticFeedback);
+    });
 };
 
 function recordVisit() {
