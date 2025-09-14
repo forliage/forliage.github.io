@@ -9,115 +9,101 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.style.width = '100%';
     canvas.style.height = '100%';
     canvas.style.pointerEvents = 'none';
-    canvas.style.zIndex = '9999'; // Ensure it's on top
+    canvas.style.zIndex = '9999';
 
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
-
     window.addEventListener('resize', () => {
         width = canvas.width = window.innerWidth;
         height = canvas.height = window.innerHeight;
     });
 
-    // Data structures for trail and particles
-    const trail = [];
-    const particles = [];
-    const trailMaxAge = 40;
-    const particleMaxAge = 50;
-    const particleSpeed = 2;
+    const points = [];
+    const stars = [];
+    const maxAge = 60;
+    const starColors = ['#FFD6FF', '#FFF59D', '#FFFFFF'];
 
-    // Color palette inspired by the image
-    const colors = ['#A044FF', '#FF44CC', '#FFD700', '#FFFFFF'];
+    document.addEventListener('mousemove', e=> {
+        points.push({ x: e.clientX, y: e.clientY, age: 0});
+        if (points.length > 60) points.shift();
 
-    document.addEventListener('mousemove', (e) => {
-        trail.push({ x: e.clientX, y: e.clientY, age: 0 });
-
-        // Create a burst of particles
-        for (let i = 0; i < 5; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * particleSpeed;
-            particles.push({
-                x: e.clientX,
-                y: e.clientY,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                age: 0,
-                size: Math.random() * 3 + 1,
-                color: colors[Math.floor(Math.random() * colors.length)]
-            });
-        }
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 1 + 0.5;
+        stars.push({
+            x: e.clientX,
+            y: e.clientY,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            age: 0,
+            life: 80,
+            size: Math.random() * 3 + 2,
+            color: starColors[Math.floor(Math.random() * starColors.length)]
+        });
     });
 
-    function updateAndDraw() {
+    function draw() {
         ctx.clearRect(0, 0, width, height);
 
-        // --- Update and draw trail ---
-        if (trail.length > 1) {
-            for (let i = trail.length - 1; i > 0; i--) {
-                const point = trail[i];
-                const prevPoint = trail[i - 1];
-
-                point.age++;
-                
-                const opacity = Math.max(0, 1 - (point.age / trailMaxAge));
-                const lineWidth = Math.max(1, 10 * (1 - (point.age / trailMaxAge)));
-
-                const gradient = ctx.createLinearGradient(prevPoint.x, prevPoint.y, point.x, point.y);
-                const startColor = hexToRgba(colors[i % colors.length], opacity);
-                const endColor = hexToRgba(colors[(i - 1) % colors.length], opacity);
-                gradient.addColorStop(0, startColor);
-                gradient.addColorStop(1, endColor);
-
-                ctx.beginPath();
-                ctx.moveTo(prevPoint.x, prevPoint.y);
-                ctx.lineTo(point.x, point.y);
-                ctx.strokeStyle = gradient;
-                ctx.lineWidth = lineWidth;
-                ctx.lineCap = 'round';
-                ctx.stroke();
-            }
+        for (const p of points) {
+            p.age++;
         }
         
-        // Remove old trail points
-        while (trail.length > 0 && trail[0].age > trailMaxAge) {
-            trail.shift();
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = 'rgba(170,85,255,0.5)';
+
+        for (let i = 1; i < points.length; i++) {
+            const p = points[i];
+            const prev = points[i - 1];
+            const t = i / points.length;
+            const r = Math.round(168 + (255 - 168) * t);
+            const g = Math.round(75 + (182 - 75) * t);
+            const b = 255;
+            const alpha = t * 0.8;
+            ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
+            ctx.lineWidth = 8 * t;
+            ctx.beginPath();
+            ctx.moveTo(prev.x, prev.y);
+            ctx.lineTo(p.x, p.y);
+            ctx.stroke();
         }
 
-        // --- Update and draw particles ---
-        for (let i = particles.length - 1; i >= 0; i--) {
-            const p = particles[i];
-            p.age++;
-            p.x += p.vx;
-            p.y += p.vy;
+        while (points.length && points[0].age > maxAge) {
+            points.shift();
+        }
 
-            if (p.age > particleMaxAge) {
-                particles.splice(i, 1);
-            } else {
-                const opacity = Math.max(0, 1 - (p.age / particleMaxAge));
-                ctx.beginPath();
-                ctx.fillStyle = hexToRgba(p.color, opacity);
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
+        for (let i = stars.length - 1; i >= 0; i--) {
+            const s = stars[i];
+            s.age++;
+            s.x += s.vx;
+            s.y += s.vy;
+            if (s.age > s.life) {
+                stars.splice(i, 1);
+                continue;
             }
+            const opacity = 1 - s.age / s.life;
+            drawStar(s.x, s.y, s.size, s.color, opacity);
         }
 
-        requestAnimationFrame(updateAndDraw);
+        requestAnimationFrame(draw);
     }
 
-    // Helper function to convert hex color to rgba for opacity
-    function hexToRgba(hex, alpha) {
-        let r = 0, g = 0, b = 0;
-        if (hex.length == 4) { // #RGB
-            r = parseInt(hex[1] + hex[1], 16);
-            g = parseInt(hex[2] + hex[2], 16);
-            b = parseInt(hex[3] + hex[3], 16);
-        } else if (hex.length == 7) { // #RRGGBB
-            r = parseInt(hex.substring(1, 3), 16);
-            g = parseInt(hex.substring(3, 5), 16);
-            b = parseInt(hex.substring(5, 7), 16);
+    function drawStar(x, y, radius, color, alpha) {
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+            const outer = (18 + i * 72) * Math.PI / 180;
+            const inner = (54 + i * 72) * Math.PI / 180;
+            ctx.lineTo(x + Math.cos(outer) * radius, y + Math.sin(outer) * radius);
+            ctx.lineTo(x + Math.cos(inner) * radius / 2, y + Math.sin(inner) * radius / 2);
         }
-        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
     }
 
-    updateAndDraw();
+    draw();
 });
