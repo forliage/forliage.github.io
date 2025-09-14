@@ -3,6 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.appendChild(canvas);
     const ctx = canvas.getContext('2d');
 
+    const style = document.createElement('style');
+    style.textContent = 'body, a, button { cursor: none; }';
+    document.head.appendChild(style);
+
     canvas.style.position = 'fixed';
     canvas.style.top = '0';
     canvas.style.left = '0';
@@ -17,14 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
         width = canvas.width = window.innerWidth;
         height = canvas.height = window.innerHeight;
     });
-
     const points = [];
     const stars = [];
-    const maxAge = 60;
+    const maxAge = 60; // 帧数
     const starColors = ['#FFD6FF', '#FFF59D', '#FFFFFF'];
+    const cursor = { x: -100, y: -100 };
 
-    document.addEventListener('mousemove', e=> {
-        points.push({ x: e.clientX, y: e.clientY, age: 0});
+    document.addEventListener('mousemove', e => {
+        cursor.x = e.clientX;
+        cursor.y = e.clientY;
+        points.push({ x: e.clientX, y: e.clientY, age: 0 });
         if (points.length > 60) points.shift();
 
         const angle = Math.random() * Math.PI * 2;
@@ -40,14 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
             color: starColors[Math.floor(Math.random() * starColors.length)]
         });
     });
-
     function draw() {
         ctx.clearRect(0, 0, width, height);
-
         for (const p of points) {
             p.age++;
         }
-        
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         ctx.shadowBlur = 8;
@@ -68,7 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.lineTo(p.x, p.y);
             ctx.stroke();
         }
-
         while (points.length && points[0].age > maxAge) {
             points.shift();
         }
@@ -85,10 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const opacity = 1 - s.age / s.life;
             drawStar(s.x, s.y, s.size, s.color, opacity);
         }
+        drawStar(cursor.x, cursor.y, 8, '#FFD700', 1);
 
         requestAnimationFrame(draw);
     }
-
     function drawStar(x, y, radius, color, alpha) {
         ctx.save();
         ctx.globalAlpha = alpha;
@@ -104,6 +106,5 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fill();
         ctx.restore();
     }
-
     draw();
 });
