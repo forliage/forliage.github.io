@@ -6,10 +6,15 @@ body {
 }
 
 header {
-    background-color: #FFB6C1; /* Slightly darker pink */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
     color: white;
     padding: 1em 0;
     text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 header h1 {
@@ -39,9 +44,52 @@ header nav ul li a {
 }
 
 header nav ul li a:hover {
-    text-decoration: underline; 
+    text-decoration: underline;
     text-decoration-color: #FFC0CB; /* Lighter pink for underline */
     /* background-color: rgba(255, 255, 255, 0.1); Example hover background */
+}
+
+.dock {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    z-index: 1000;
+}
+
+.dock a {
+    font-size: 24px;
+    transition: transform 0.2s;
+    text-decoration: none;
+    color: inherit;
+}
+
+.dock a:hover {
+    transform: scale(1.2);
+}
+
+body.dark-mode .dock {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.tilt-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transform-style: preserve-3d;
+}
+
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 1s forwards;
+}
+
+@keyframes fadeIn {
+    to { opacity: 1; }
 }
 
 /* General link styling */
@@ -216,14 +264,6 @@ footer {
     position: relative; /* Keep footer at the very bottom */
     bottom: 0;
     width: 100%;
-}
-
-#petalsCanvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: -1;
-    pointer-events: none;
 }
 
 .music-control {
@@ -522,7 +562,12 @@ body.dark-mode {
     color: #f0f0f0;
 }
 
-body.dark-mode header,
+body.dark-mode header {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    color: #f0f0f0;
+}
+
 body.dark-mode footer {
     background-color: #4a3144; /* A bit lighter than body background */
     color: #f0f0f0;
