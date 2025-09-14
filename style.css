@@ -2,7 +2,7 @@ body {
     background-color: #FFC0CB; /* Softer pink background */
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
     margin: 0;
-    padding: 80px 0 0 0; /* reserve space for fixed header */
+    padding: 125px 0 0 0; /* reserve space for fixed header */
 }
 
 header {
