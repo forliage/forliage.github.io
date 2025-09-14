@@ -125,27 +125,49 @@ window.onload = function() {
         }
     }
     typeLoop();
+
+    // Parallax effect for elements with class 'parallax'
+    const parallaxEls = document.querySelectorAll('.parallax');
+    window.addEventListener('scroll', () => {
+        const sy = window.scrollY;
+        parallaxEls.forEach(el => {
+            const speed = parseFloat(el.dataset.speed || '0.3');
+            el.style.transform = `translateY(${sy * speed}px)`;
+        });
+    });
     
     // Dock 图标放大效果
     const dock = document.querySelector('.dock');
     if (dock) {
-        const icons = dock.querySelectorAll('a');
+        const icons = Array.from(dock.querySelectorAll('a'));
+        const current = icons.map(() => 1);
+        let targets = icons.map(() => 1);
+
         dock.addEventListener('mousemove', (e) => {
-            icons.forEach(icon => {
+            targets = icons.map(icon => {
                 const rect = icon.getBoundingClientRect();
                 const distance = Math.abs(e.clientX - (rect.left + rect.width / 2));
-                const scale = Math.max(1, 2 - distance / 100);
-                icon.style.transform = `scale(${scale})`;
+                return Math.max(1, 2 - distance / 100);
             });
         });
         dock.addEventListener('mouseleave', () => {
-            icons.forEach(icon => icon.style.transform = 'scale(1)');
+            targets = icons.map(() => 1);
         });
+
+        function animateDock() {
+            icons.forEach((icon, i) => {
+                current[i] += (targets[i] - current[i]) * 0.2;
+                icon.style.transform = `scale(${current[i]})`;
+            });
+            requestAnimationFrame(animateDock);
+        }
+        animateDock();
     }
 
-    // 3D 卡片倾斜效果
+    // 3D 卡片倾斜与光斑效果
     const tiltCards = document.querySelectorAll('.tilt-card');
     tiltCards.forEach(card => {
+        const layers = card.querySelectorAll('[data-depth]');
         card.addEventListener('mousemove', (e) => {
             const rect = card.getBoundingClientRect();
             const x = e.clientX - rect.left;
@@ -156,14 +178,40 @@ window.onload = function() {
             const rotateY = ((x - centerX) / centerX) * 10;
             card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
             card.style.boxShadow = `${-rotateY}px ${rotateX}px 20px rgba(0,0,0,0.2)`;
+            card.style.setProperty('--lx', x + 'px');
+            card.style.setProperty('--ly', y + 'px');
+            layers.forEach(layer => {
+                const depth = parseFloat(layer.dataset.depth || '0');
+                const moveX = ((x - centerX) / centerX) * -depth;
+                const moveY = ((y - centerY) / centerY) * -depth;
+                layer.style.transform = `translate(${moveX}px, ${moveY}px)`;
+            });
         });
 
         card.addEventListener('mouseleave', () => {
             card.style.transform = 'rotateX(0deg) rotateY(0deg)';
             card.style.boxShadow = 'none';
+            layers.forEach(layer => {
+                layer.style.transform = 'translate(0, 0)';
+            });
         });
     });
 
+    // 顶栏与 Dock 随滚动隐藏/显示
+    const header = document.querySelector('header');
+    let lastY = window.scrollY;
+    window.addEventListener('scroll', () => {
+        const cur = window.scrollY;
+        if (cur > lastY) {
+            header && header.classList.add('hidden');
+            dock && dock.classList.add('hidden');
+        } else {
+            header && header.classList.remove('hidden');
+            dock && dock.classList.remove('hidden');
+        }
+        lastY = cur;
+    });
+    
     // 初始化侧栏功能（在 loadSidebar 完成后调用）
     function initSidebarFeatures() {
         updateArticleTitle();

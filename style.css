@@ -1,13 +1,15 @@
 body {
     background-color: #FFC0CB; /* Softer pink background */
-    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
     margin: 0;
-    padding: 0;
+    padding: 80px 0 0 0; /* reserve space for fixed header */
 }
 
 header {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    width: 100%;
     z-index: 1000;
     background: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(10px);
@@ -15,6 +17,25 @@ header {
     padding: 1em 0;
     text-align: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+}
+
+header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.05;
+    pointer-events: none;
+}
+
+.hidden {
+    transform: translateY(-100%);
+}
+
+.parallax {
+    will-change: transform;
 }
 
 header h1 {
@@ -61,17 +82,43 @@ header nav ul li a:hover {
     backdrop-filter: blur(10px);
     border-radius: 20px;
     z-index: 1000;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    overflow: hidden;
+}
+
+.dock::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.05;
+    pointer-events: none;
+}
+
+.dock.hidden {
+    transform: translate(-50%, 100px);
+    opacity: 0;
 }
 
 .dock a {
     font-size: 24px;
-    transition: transform 0.2s;
     text-decoration: none;
     color: inherit;
+    position: relative;
+    display: block;
 }
 
-.dock a:hover {
-    transform: scale(1.2);
+.dock a::after {
+    content: attr(data-icon);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    opacity: 0.3;
+    transform: scaleY(-1);
+    filter: blur(2px);
+    transform-origin: top;
+    pointer-events: none;
 }
 
 body.dark-mode .dock {
@@ -81,6 +128,23 @@ body.dark-mode .dock {
 .tilt-card {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     transform-style: preserve-3d;
+    position: relative;
+    perspective: 1000px;
+    overflow: hidden;
+}
+
+.tilt-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at var(--lx,50%) var(--ly,50%), rgba(255,255,255,0.4), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.tilt-card:hover::after {
+    opacity: 1;
 }
 
 .fade-in {
@@ -101,6 +165,15 @@ a {
 a:hover {
     text-decoration: underline;
     color: #AD1457; /* Darken on hover */
+}
+
+button, a.btn, header nav ul li a, .dock a {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:active, a.btn:active, header nav ul li a:active, .dock a:active {
+    transform: scale(0.95);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Sidebar specific link styling */
@@ -132,7 +205,7 @@ main {
 main article p {
     text-indent: 2em;
     line-height: 1.6;
-    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
     color: #333;
 }
 
@@ -416,12 +489,12 @@ footer {
 .about-content p {
     text-indent: 2em;
     line-height: 1.6;
-    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
     color: #333;
 }
 .about-content h2 {
     color: #D81B60;
-    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 @keyframes fadeIn {
@@ -448,6 +521,27 @@ footer {
 @keyframes floatHearts {
     from { transform: translateY(0); }
     to { transform: translateY(-15px); }
+}
+
+/* Cursor bubble highlight */
+.cursor-bubble {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    margin-left: -10px;
+    margin-top: -10px;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(255,255,255,0.6), rgba(255,255,255,0));
+    mix-blend-mode: screen;
+    animation: bubbleFade 0.6s ease-out forwards;
+}
+
+@keyframes bubbleFade {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(2); }
 }
 
 /* Glass Effect Styles */
