@@ -473,6 +473,7 @@ function generateTOC() {
     }
     initSiriWave();
     initPeekPop();
+    initHelloAnimation();
 
     // VisionOS 漂浮卡片光斑
     document.querySelectorAll('.tilt-card').forEach(card => {
@@ -512,15 +513,33 @@ function generateTOC() {
 function showAirpodsCard() {
     const card = document.createElement('div');
     card.id = 'airpods-card';
-    card.innerHTML = `<h3>把原本的暗色模式按钮替换为液态金属风格开关,呈现银灰质感</h3><button id="airpods-close">知道了</button>`;
+    card.innerHTML = `
+        <button class="close" aria-label="关闭">×</button>
+        <h3>更新了About界面的签名</h3>
+    `;
     document.body.appendChild(card);
     requestAnimationFrame(() => card.classList.add('show'));
     const remove = () => {
         card.classList.remove('show');
         card.addEventListener('transitionend', () => card.remove(), { once: true });
     };
-    document.getElementById('airpods-close').addEventListener('click', remove);
+    card.querySelector('.close').addEventListener('click', remove);
     setTimeout(remove, 5000);
+}
+
+function initHelloAnimation() {
+    const container = document.getElementById('hello-container');
+    if (!container) return;
+    const text = container.querySelector('text');
+    if (text) {
+        text.addEventListener('animationend', () => {
+            container.classList.add('fade-out');
+            setTimeout(() => {
+                container.remove();
+                document.body.classList.add('hello-done');
+            }, 500);
+        }, { once: true });
+    }
 }
 
 function initSiriWave() {

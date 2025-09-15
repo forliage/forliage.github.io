@@ -1,8 +1,17 @@
 body {
-    background-color: #FFC0CB; /* Softer pink background */
+    --bg-gradient: linear-gradient(120deg, #ffe5ec, #ffc0cb, #ffe5ec);
+    background: var(--bg-gradient);
+    background-size: 200% 200%;
+    animation: gradientMove 15s ease infinite;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
     margin: 0;
     padding: 125px 0 0 0; /* reserve space for fixed header */
+}
+
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 header {
@@ -147,6 +156,39 @@ body.dark-mode .dock {
     opacity: 1;
 }
 
+#hello-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2000;
+    color: #000;
+}
+body.dark-mode #hello-container {
+    color: #fff;
+}
+#hello-container.fade-out {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+#hello-container svg {
+    width: 800px;
+    height: 150px;
+}
+#hello-container text {
+    font-family: "Snell Roundhand", "Brush Script MT", cursive;
+    font-size: 96px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: drawHello 3s forwards;
+}
+@keyframes drawHello {
+    to { stroke-dashoffset: 0; }
+}
+
 /* AirPods 欢迎卡片 */
 #airpods-card {
     position: fixed;
@@ -154,19 +196,35 @@ body.dark-mode .dock {
     left: 50%;
     transform: translate(-50%, 100%);
     width: 260px;
-    padding: 16px;
-    background: rgba(255,255,255,0.8);
-    backdrop-filter: blur(20px);
+    padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.3));
+    backdrop-filter: blur(24px);
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
     text-align: center;
     opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transition: transform 0.4s ease, opacity 0.4s ease;
     z-index: 1000;
+    color: #000;
 }
 #airpods-card.show {
     transform: translate(-50%, 0);
     opacity: 1;
+}
+#airpods-card .close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: inherit;
+    cursor: pointer;
+}
+body.dark-mode #airpods-card {
+    background: linear-gradient(135deg, rgba(40,40,40,0.8), rgba(20,20,20,0.6));
+    color: #fff;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
 }
 
 /* Siri 波形 */
@@ -619,7 +677,11 @@ footer {
 .about-content {
     width: 80%;
     margin: 40px auto;
-    animation: fadeIn 1s ease;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+body.hello-done .about-content {
+    opacity: 1;
 }
 .about-content p {
     text-indent: 2em;
@@ -719,8 +781,9 @@ body.dark-mode .glass-control {
 
 /* When glass effect is enabled */
 body.glass-effect-enabled {
-    background-image: url('assets/img/dust.svg') !important;
-    background-attachment: fixed !important;
+    background-image: url('assets/img/dust.svg'), var(--bg-gradient) !important;
+    background-attachment: fixed, fixed !important;
+    background-size: auto, 200% 200% !important;
 }
 
 .glass-effect-enabled header,
@@ -787,7 +850,7 @@ main article p, aside h2, .about-content p, .about-content h2, a, .hero h2, .her
 }
 
 body.dark-mode {
-    background-color: #2c1f2b; /* Dark deep pink */
+    --bg-gradient: linear-gradient(120deg, #2b1055, #ad1457, #2b1055);
     color: #f0f0f0;
 }
 
