@@ -73,8 +73,12 @@ window.onload = function() {
                 themeVariables: isDarkMode ? {
                     primaryColor: '#d6c4f0',
                     primaryTextColor: '#000000',
+                    nodeTextColor: '#000000',
                     lineColor: '#7a4a93'
-                } : {}
+                } : {
+                    primaryTextColor: '#000000',
+                    nodeTextColor: '#000000'
+                }
             });
             mermaid.init(undefined, document.querySelectorAll('.mermaid'));
         }

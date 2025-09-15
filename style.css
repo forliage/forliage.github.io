@@ -1029,7 +1029,9 @@ body.dark-mode #search-input-tech:focus {
 .mermaid text,
 .mermaid tspan,
 .mermaid .label,
-.mermaid .label > * {
+.mermaid .label > *,
+.mermaid .nodeLabel,
+.mermaid .nodeLabel > * {
     fill: #000 !important;
     color: #000 !important;
     stroke: none;
@@ -1043,7 +1045,9 @@ body.dark-mode .mermaid .node rect {
 body.dark-mode .mermaid text,
 body.dark-mode .mermaid tspan,
 body.dark-mode .mermaid .label,
-body.dark-mode .mermaid .label > * {
+body.dark-mode .mermaid .label > *,
+body.dark-mode .mermaid .nodeLabel,
+body.dark-mode .mermaid .nodeLabel > * {
     fill: #000 !important;
     color: #000 !important;
     stroke: none;
