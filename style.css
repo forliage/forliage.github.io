@@ -383,13 +383,15 @@ main article p {
 
 aside { /* This is now the LEFT sidebar */
     flex: 0 0 25%; /* Fixed width for left sidebar, e.g., 25% */
-    background-color: #FFF0F5; /* Lavender blush - same bg as old sidebar for now */
+    background: linear-gradient(145deg, #FFF0F5, #F8DDE5); /* Soft gradient for depth */
     padding: 15px; /* General padding */
     padding-right: 20px; /* Specifically ensure padding on the right for separation */
     border-right: 1px solid #FFC0CB; /* Optional: add a border */
     position: sticky;
     top: 20px;
     align-self: flex-start;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 /* Removing old widget styles as they are no longer in use in the new left sidebar structure */
@@ -884,9 +886,11 @@ body.dark-mode a:hover {
 }
 
 body.dark-mode aside {
-    background-color: #4b2a5e;
+    background: linear-gradient(145deg, #4b2a5e, #3d1f4c);
     border-right-color: #7a4a93;
     color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
 }
 
 body.dark-mode aside h2,
@@ -1021,13 +1025,19 @@ body.dark-mode #search-input-tech:focus {
     background-color: #5b3470;
 }
 
+/* Mermaid diagram text color */
+.mermaid .node text {
+    fill: #000 !important;
+    stroke: none;
+}
+
 /* Mermaid diagram tuning for dark mode */
 body.dark-mode .mermaid .node rect {
     fill: #d6c4f0;
     stroke: #7a4a93;
 }
 body.dark-mode .mermaid .node text {
-    fill: #000;
+    fill: #000 !important;
     stroke: none;
 }
 
@@ -1204,6 +1214,14 @@ body.dark-mode .share-buttons p {
 .toc-widget .toc-list li a:hover {
     color: #D81B60;
     background-color: #FFFAFA;
+}
+
+body.dark-mode .toc-widget .toc-list li a {
+    color: #fff;
+}
+
+body.dark-mode .toc-widget .toc-level-h1 {
+    color: #fff;
 }
 
 /* Indentation for different levels */
