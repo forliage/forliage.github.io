@@ -880,8 +880,8 @@ body.dark-mode a:hover {
 }
 
 body.dark-mode aside {
-    background-color: #3e2a39;
-    border-right-color: #5D3A4B;
+    background-color: #4b2a5e;
+    border-right-color: #7a4a93;
 }
 
 body.dark-mode main article p,
@@ -896,19 +896,19 @@ body.dark-mode .category-block h3 {
 }
 
 body.dark-mode aside section.widget {
-    background-color: #4a3144;
-    border-color: #5D3A4B;
+    background-color: #5b3470;
+    border-color: #7a4a93;
     box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
 body.dark-mode aside section.widget h3 {
-    color: #ff8acb;
-    border-bottom-color: #5D3A4B;
+    color: #ffb3da;
+    border-bottom-color: #7a4a93;
 }
 
 body.dark-mode .progress-bar-container {
-    background-color: #5D3A4B;
-    border-color: #7c5a6d;
+    background-color: #7a4a93;
+    border-color: #9963b6;
 }
 
 body.dark-mode #add-bookmark-button {
@@ -989,26 +989,50 @@ body.dark-mode .hero .btn:hover {
 }
 
 body.dark-mode .category-block {
-    background-color: #3e2a39;
+    background-color: #4b2a5e;
     box-shadow: 0 4px 8px rgba(0,0,0,0.25);
 }
 
 body.dark-mode .category-block p {
-    color: #d0d0d0;
+    color: #e0d0e8;
 }
 
 body.dark-mode #search-input,
 body.dark-mode #search-input-tech {
-    background-color: #3e2a39;
-    border-color: #5D3A4B;
+    background-color: #4b2a5e;
+    border-color: #7a4a93;
     color: #f0f0f0;
 }
 
 body.dark-mode #search-input:focus,
 body.dark-mode #search-input-tech:focus {
-    border-color: #ff8acb;
-    box-shadow: 0 0 8px rgba(255, 138, 203, 0.5);
-    background-color: #4a3144;
+    border-color: #ffb3da;
+    box-shadow: 0 0 8px rgba(255, 179, 218, 0.5);
+    background-color: #5b3470;
+}
+
+/* Mermaid diagram tuning for dark mode */
+body.dark-mode .mermaid .node rect {
+    fill: #d6c4f0;
+    stroke: #7a4a93;
+}
+body.dark-mode .mermaid .node text {
+    fill: #2d143c;
+    stroke: none;
+}
+
+/* Code block base styling */
+pre code {
+    display: block;
+    padding: 1em;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+body:not(.dark-mode) pre code {
+    background: #f6f6f6;
+}
+body.dark-mode pre code {
+    background: #2e2336;
 }
 
 body.dark-mode .course-card {

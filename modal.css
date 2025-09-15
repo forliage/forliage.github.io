@@ -24,9 +24,9 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: #fefefe;
+    background-color: #f3e8ff;
     padding: 20px;
-    border: 1px solid #888;
+    border: 1px solid #bda4e6;
     width: 80%;
     max-width: 500px;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
@@ -35,7 +35,19 @@
     animation-name: slideIn;
     animation-duration: 0.4s;
     border-radius: 8px;
-    color: #333; /* Set text color for content inside modal */
+    color: #2d143c; /* Set text color for content inside modal */
+    transition: transform 0.2s ease;
+}
+
+/* Micro shake on hover */
+.modal-content:hover {
+    animation: card-wiggle 0.3s ease;
+}
+
+@keyframes card-wiggle {
+    0%,100% { transform: translate(-50%, -50%) rotate(0deg); }
+    25% { transform: translate(calc(-50% - 2px), calc(-50% - 2px)) rotate(-1deg); }
+    75% { transform: translate(calc(-50% + 2px), calc(-50% + 2px)) rotate(1deg); }  
 }
 
 /* The Close Button */

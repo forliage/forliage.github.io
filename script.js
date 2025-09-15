@@ -52,11 +52,56 @@ window.onload = function() {
 
     // Function to update highlight.js theme
     function updateHighlightTheme(isDarkMode) {
-        const themeLink = document.getElementById('highlight-theme-link');
-        if (themeLink) {
-            const lightTheme = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-dawn.min.css';
-            const darkTheme = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-moon.min.css';
-            themeLink.href = isDarkMode ? darkTheme : lightTheme;
+        let themeLink = document.getElementById('highlight-theme-link');
+        if (!themeLink) {
+            themeLink = document.createElement('link');
+            themeLink.id = 'highlight-theme-link';
+            themeLink.rel = 'stylesheet';
+            document.head.appendChild(themeLink);
+        }
+        const lightTheme = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-dawn.min.css';
+        const darkTheme = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-moon.min.css';
+        themeLink.href = isDarkMode ? darkTheme : lightTheme;
+    }
+
+    // Function to update mermaid theme
+    function updateMermaidTheme(isDarkMode) {
+        if (window.mermaid) {
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: isDarkMode ? 'dark' : 'default',
+                themeVariables: isDarkMode ? {
+                    primaryColor: '#d6c4f0',
+                    primaryTextColor: '#2d143c',
+                    lineColor: '#7a4a93'
+                } : {}
+            });
+            mermaid.init(undefined, document.querySelectorAll('.mermaid'));
+        }
+    }
+
+    // Initialize highlight.js if present
+    function initHighlight() {
+        function run() {
+            document.querySelectorAll('pre code').forEach(block => {
+                hljs.highlightElement(block);
+            });
+            if (window.CopyButtonPlugin && hljs.addPlugin) {
+                hljs.addPlugin(new CopyButtonPlugin());
+            }
+        }
+        if (window.hljs) {
+            run();
+        } else {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js';
+            script.onload = () => {
+                const plugin = document.createElement('script');
+                plugin.src = 'https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.js';
+                plugin.onload = run;
+                document.head.appendChild(plugin);
+            };
+            document.head.appendChild(script);
         }
     }
 
@@ -66,6 +111,8 @@ window.onload = function() {
         document.body.classList.toggle('dark-mode', isDarkMode);
         if (darkModeToggle) darkModeToggle.checked = isDarkMode;
         updateHighlightTheme(isDarkMode);
+        updateMermaidTheme(isDarkMode);
+        initHighlight();
     }
 
     // Toggle dark mode
@@ -75,6 +122,8 @@ window.onload = function() {
             document.body.classList.toggle('dark-mode', isDarkMode);
             localStorage.setItem('darkMode', isDarkMode);
             updateHighlightTheme(isDarkMode);
+            updateMermaidTheme(isDarkMode);
+            initHighlight();
             if (darkToggleLabel) {
                 darkToggleLabel.classList.add('active');
                 setTimeout(() => darkToggleLabel.classList.remove('active'), 300);
