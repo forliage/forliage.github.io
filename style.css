@@ -147,6 +147,120 @@ body.dark-mode .dock {
     opacity: 1;
 }
 
+/* AirPods 欢迎卡片 */
+#airpods-card {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translate(-50%, 100%);
+    width: 260px;
+    padding: 16px;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    text-align: center;
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    z-index: 1000;
+}
+#airpods-card.show {
+    transform: translate(-50%, 0);
+    opacity: 1;
+}
+
+/* Siri 波形 */
+.siri-wave {
+    display: none;
+    width: 60px;
+    height: 20px;
+    margin-left: 10px;
+}
+.siri-wave canvas {
+    width: 100%;
+    height: 100%;
+}
+
+/* 充电条加载提示 */
+#charging-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #4cd964, #5efc82, #4cd964);
+    background-size: 200% 100%;
+    animation: charging 2s linear infinite;
+    z-index: 2000;
+}
+@keyframes charging {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+}
+
+/* Peek & Pop 预览卡片 */
+.peek-card {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+    padding: 20px;
+    width: 80%;
+    max-width: 300px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.3);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    z-index: 1500;
+}
+.peek-card.show {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}
+.peek-card.pop {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0;
+}
+
+/* 截图式反馈 */
+body.flash::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: #fff;
+    opacity: 0;
+    animation: flashWhite 0.3s forwards;
+    pointer-events: none;
+    z-index: 2000;
+}
+@keyframes flashWhite {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+.screenshot-thumb {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 120px;
+    height: 80px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 1500;
+}
+.screenshot-thumb.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+.screenshot-thumb.hide {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
 .fade-in {
     opacity: 0;
     animation: fadeIn 1s forwards;
@@ -664,7 +778,7 @@ body.glass-effect-enabled {
 }
 
 /* Dark Mode Styles */
-body, header, footer, aside, .course-card-pink, #search-input {
+body, header, footer, aside, .course-card-pink, #search-input, #search-input-tech {
     transition: background-color 0.5s ease, color 0.5s ease;
 }
 
@@ -759,25 +873,40 @@ body.dark-mode .music-control.paused {
 .dark-mode-control {
     position: fixed;
     right: 20px;
-    bottom: 80px; /* Positioned below the music button */
-    width: 48px;
-    height: 48px;
-    line-height: 48px;
-    border-radius: 50%;
-    background-color: #FF69B4;
-    color: #fff;
-    font-size: 24px;
-    text-align: center;
+    bottom: 80px;
+    width: 60px;
+    height: 30px;
+    border-radius: 30px;
+    background: radial-gradient(circle at 30% 30%, #e6e6e6, #a9a9a9);
+    box-shadow: inset 2px 2px 4px rgba(255,255,255,0.6), inset -2px -2px 4px rgba(0,0,0,0.2);
     cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    border: none;
     z-index: 1000;
-    transition: background-color 0.5s ease, color 0.5s ease;
+    transition: background 0.5s ease;
 }
-
+.dark-mode-control input {
+    display: none;
+}
+.dark-mode-control .knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff, #bbb);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    transition: left 0.4s ease, background 0.4s ease;
+}
+.dark-mode-control input:checked + .knob {
+    left: 32px;
+    background: radial-gradient(circle at 70% 70%, #eee, #999);
+}
+.dark-mode-control.active .knob {
+    transition: left 0.4s ease, background 0.4s ease, transform 0.4s;
+    transform: scale(1.1);
+}
 body.dark-mode .dark-mode-control {
-    background-color: #ff8acb;
-    color: #2c1f2b;
+    background: radial-gradient(circle at 70% 70%, #666, #888);
 }
 
 body.dark-mode .hero h2,
@@ -805,13 +934,15 @@ body.dark-mode .category-block p {
     color: #d0d0d0;
 }
 
-body.dark-mode #search-input {
+body.dark-mode #search-input,
+body.dark-mode #search-input-tech {
     background-color: #3e2a39;
     border-color: #5D3A4B;
     color: #f0f0f0;
 }
 
-body.dark-mode #search-input:focus {
+body.dark-mode #search-input:focus,
+body.dark-mode #search-input-tech:focus {
     border-color: #ff8acb;
     box-shadow: 0 0 8px rgba(255, 138, 203, 0.5);
     background-color: #4a3144;
@@ -962,12 +1093,15 @@ body.dark-mode .share-buttons p {
 }
 
 /* Search Bar Styles */
-#search-container {
+#search-container, #search-container-tech {
     margin-bottom: 30px;
     text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-#search-input {
+#search-input, #search-input-tech {
     width: 60%;
     padding: 12px 20px;
     border-radius: 25px;
@@ -978,7 +1112,7 @@ body.dark-mode .share-buttons p {
     transition: all 0.3s ease;
 }
 
-#search-input:focus {
+#search-input:focus, #search-input-tech:focus {
     outline: none;
     border-color: #FF69B4;
     box-shadow: 0 0 8px rgba(255, 105, 180, 0.5);

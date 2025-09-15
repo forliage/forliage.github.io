@@ -18,7 +18,10 @@
 <body>
     <audio id="bg-music" src="music.mp3" loop></audio>
     <button id="music-toggle" class="music-control">♪</button>
-    <button id="dark-mode-toggle" class="dark-mode-control">🌙</button>
+    <label class="dark-mode-control liquid-toggle">
+        <input type="checkbox" id="dark-mode-toggle">
+        <span class="knob"></span>
+    </label>
     <header>
         <h1><span id="category-name"></span>下的文章</h1>
         <nav>
@@ -44,6 +47,7 @@
             <div id="learning-notes-content" style="display: none;">
                 <div id="search-container">
                     <input type="search" id="search-input" placeholder="在学习笔记中搜索标题...">
+                    <div class="siri-wave"></div>
                 </div>
                 <div id="course-cards-container">
                     <!-- Course cards will be generated here -->
@@ -53,6 +57,7 @@
             <div id="technical-articles-content" style="display: none;">
                 <div id="search-container-tech">
                     <input type="search" id="search-input-tech" placeholder="在技术文章中搜索标题...">
+                    <div class="siri-wave"></div>
                 </div>
                 <div id="technical-cards-container">
                     <!-- Technical article cards will be generated here -->
@@ -156,7 +161,7 @@
                 postsForCategory.forEach(post => {
                     const article = document.createElement('article');
                     article.innerHTML = `
-                        <h3><a href="${post.path}">${post.title}</a></h3>
+                        <h3><a class="post-link" href="${post.path}">${post.title}</a></h3>
                         <p>${post.abstract}</p>
                     `;
                     articleListElement.appendChild(article);
@@ -247,7 +252,7 @@
                     </div>
                     <div class="card-body" style="display: none;">
                         <ul>
-                            ${coursePosts.sort((a,b) => a.title.localeCompare(b.title)).map(post => `<li><a href="${post.path}">${post.title}</a></li>`).join('')}
+                            ${coursePosts.sort((a,b) => a.title.localeCompare(b.title)).map(post => `<li><a class="post-link" href="${post.path}">${post.title}</a></li>`).join('')}
                         </ul>
                     </div>
                 `;
@@ -318,7 +323,7 @@
                     </div>
                     <div class="card-body" style="display: none;">
                         <ul>
-                            ${subCategoryPosts.sort((a,b) => a.title.localeCompare(b.title)).map(post => `<li><a href="${post.path}">${post.title}</a></li>`).join('')}
+                            ${subCategoryPosts.sort((a,b) => a.title.localeCompare(b.title)).map(post => `<li><a class="post-link" href="${post.path}">${post.title}</a></li>`).join('')}
                         </ul>
                     </div>
                 `;

@@ -1,7 +1,36 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const bar = document.createElement('div');
+    bar.id = 'charging-bar';
+    document.body.appendChild(bar);
+    window.addEventListener('load', () => bar.remove());
+});
+
 window.onload = function() {
     const music = document.getElementById('bg-music');
     let musicBtn = document.getElementById('music-toggle');
-    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    let darkModeToggle = document.getElementById('dark-mode-toggle');
+
+    if (darkModeToggle && darkModeToggle.tagName !== 'INPUT') {
+        const wrapper = document.createElement('label');
+        wrapper.className = 'dark-mode-control liquid-toggle';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = 'dark-mode-toggle';
+        const knob = document.createElement('span');
+        knob.className = 'knob';
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(knob);
+        darkModeToggle.replaceWith(wrapper);
+        darkModeToggle = checkbox;
+    } else if (darkModeToggle) {
+        const parent = darkModeToggle.closest('label');
+        if (parent && !parent.querySelector('.knob')) {
+            const knob = document.createElement('span');
+            knob.className = 'knob';
+            darkModeToggle.after(knob);
+        }
+    }
+    const darkToggleLabel = darkModeToggle ? darkModeToggle.closest('.dark-mode-control') : null;
 
     // Apple Music 风格迷你播放器
     const miniPlayer = document.createElement('div');
@@ -34,23 +63,22 @@ window.onload = function() {
     // Function to apply the saved theme
     function applyTheme() {
         const isDarkMode = localStorage.getItem('darkMode') === 'true';
-        if (isDarkMode) {
-            document.body.classList.add('dark-mode');
-            if (darkModeToggle) darkModeToggle.textContent = '☀️'; // Sun icon for light mode
-        } else {
-            document.body.classList.remove('dark-mode');
-            if (darkModeToggle) darkModeToggle.textContent = '🌙'; // Moon icon for dark mode
-        }
+        document.body.classList.toggle('dark-mode', isDarkMode);
+        if (darkModeToggle) darkModeToggle.checked = isDarkMode;
         updateHighlightTheme(isDarkMode);
     }
 
     // Toggle dark mode
     if (darkModeToggle) {
-        darkModeToggle.addEventListener('click', () => {
-            const isDarkMode = document.body.classList.toggle('dark-mode');
+        darkModeToggle.addEventListener('change', () => {
+            const isDarkMode = darkModeToggle.checked;
+            document.body.classList.toggle('dark-mode', isDarkMode);
             localStorage.setItem('darkMode', isDarkMode);
-            darkModeToggle.textContent = isDarkMode ? '☀️' : '🌙';
             updateHighlightTheme(isDarkMode);
+            if (darkToggleLabel) {
+                darkToggleLabel.classList.add('active');
+                setTimeout(() => darkToggleLabel.classList.remove('active'), 300);
+            }
         });
     }
 
@@ -439,6 +467,13 @@ function generateTOC() {
     }
     initCoverFlow();
 
+    // AirPods 欢迎卡片和特效初始化
+    if (location.pathname.endsWith('index.html') || location.pathname === '/') {
+        showAirpodsCard();
+    }
+    initSiriWave();
+    initPeekPop();
+
     // VisionOS 漂浮卡片光斑
     document.querySelectorAll('.tilt-card').forEach(card => {
         card.addEventListener('mousemove', e => {
@@ -473,6 +508,123 @@ function generateTOC() {
         el.addEventListener('click', tapticFeedback);
     });
 };
+
+function showAirpodsCard() {
+    const card = document.createElement('div');
+    card.id = 'airpods-card';
+    card.innerHTML = `<h3>把原本的暗色模式按钮替换为液态金属风格开关,呈现银灰质感</h3><button id="airpods-close">知道了</button>`;
+    document.body.appendChild(card);
+    requestAnimationFrame(() => card.classList.add('show'));
+    const remove = () => {
+        card.classList.remove('show');
+        card.addEventListener('transitionend', () => card.remove(), { once: true });
+    };
+    document.getElementById('airpods-close').addEventListener('click', remove);
+    setTimeout(remove, 5000);
+}
+
+function initSiriWave() {
+    document.querySelectorAll('#search-input, #search-input-tech').forEach(input => {
+        const container = input.parentElement.querySelector('.siri-wave');
+        if (!container) return;
+        const canvas = document.createElement('canvas');
+        canvas.width = 60; canvas.height = 20;
+        container.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        let phase = 0, amp = 0, running = false;
+        function draw() {
+            if (!running) return;
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            const colors = ['#007aff','#5856d6','#5ac8fa'];
+            for (let i=0;i<3;i++) {
+                ctx.beginPath();
+                ctx.strokeStyle = colors[i];
+                const offset = i*Math.PI/3;
+                for (let x=0;x<canvas.width;x++) {
+                    const y = canvas.height/2 + Math.sin((x/canvas.width*2*Math.PI)+phase+offset)*amp;
+                    if (x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+                }
+                ctx.stroke();
+            }
+            phase += 0.1;
+            requestAnimationFrame(draw);
+        }
+        function start(){ running = true; container.style.display = 'block'; draw(); }
+        function stop(){ running = false; container.style.display = 'none'; amp = 0; }
+        input.addEventListener('focus', start);
+        input.addEventListener('blur', stop);
+        input.addEventListener('input', e => { amp = Math.min(8, 2 + e.target.value.length/2); });
+    });
+}
+
+async function initPeekPop() {
+    const links = document.querySelectorAll('a.post-link');
+    if (!links.length) return;
+    let posts;
+    try {
+        const res = await fetch('posts.json');
+        posts = await res.json();
+    } catch (e) {
+        posts = window.postsData || [];
+    }
+    let timer, card;
+    links.forEach(link => {
+        link.addEventListener('mousedown', start);
+        link.addEventListener('touchstart', start);
+        ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev => link.addEventListener(ev, end));
+
+        function start(e) {
+            timer = setTimeout(() => {
+                const href = link.getAttribute('href');
+                const post = posts.find(p => href.endsWith(p.path));
+                card = document.createElement('div');
+                card.className = 'peek-card';
+                card.innerHTML = `<h4>${post ? post.title : ''}</h4><p>${post ? post.abstract : ''}</p>`;
+                document.body.appendChild(card);
+                requestAnimationFrame(() => card.classList.add('show'));
+            }, 300);
+        }
+
+        function end(e) {
+            clearTimeout(timer);
+            if (card) {
+                e.preventDefault();
+                const href = link.getAttribute('href');
+                card.classList.add('pop');
+                card.addEventListener('transitionend', () => { window.location.href = href; }, { once:true });
+            }
+        }
+    });
+}
+
+function showScreenshotFeedback() {
+    document.body.classList.add('flash');
+    setTimeout(() => document.body.classList.remove('flash'), 300);
+    const img = document.createElement('img');
+    img.className = 'screenshot-thumb';
+    document.body.appendChild(img);
+    const svgData = new XMLSerializer().serializeToString(document.documentElement);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${window.innerWidth}" height="${window.innerHeight}"><foreignObject width="100%" height="100%">${svgData}</foreignObject></svg>`;
+    const blob = new Blob([svg], {type:'image/svg+xml;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const image = new Image();
+    image.onload = () => {
+        const canvas = document.createElement('canvas');
+        const w = 120, h = 80;
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(image, 0, 0, w, h);
+        img.src = canvas.toDataURL();
+        URL.revokeObjectURL(url);
+        requestAnimationFrame(() => img.classList.add('show'));
+        setTimeout(() => {
+            img.classList.add('hide');
+            img.addEventListener('transitionend', () => img.remove(), {once:true});
+        }, 2000);
+    };
+    image.src = url;
+}
+document.addEventListener('copy', showScreenshotFeedback);
 
 function recordVisit() {
     try {
