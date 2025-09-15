@@ -29,7 +29,7 @@
     border: 1px solid #bda4e6;
     width: 80%;
     max-width: 500px;
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.25), 0 4px 6px rgba(0,0,0,0.15);
     -webkit-animation-name: slideIn;
     -webkit-animation-duration: 0.4s;
     animation-name: slideIn;
@@ -37,6 +37,16 @@
     border-radius: 8px;
     color: #2d143c; /* Set text color for content inside modal */
     transition: transform 0.2s ease;
+    transform-style: preserve-3d;
+}
+
+.modal-content::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(145deg, rgba(255,255,255,0.6), rgba(255,255,255,0));
+    pointer-events: none;
 }
 
 /* Micro shake on hover */

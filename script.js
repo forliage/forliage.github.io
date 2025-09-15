@@ -59,8 +59,8 @@ window.onload = function() {
             themeLink.rel = 'stylesheet';
             document.head.appendChild(themeLink);
         }
-        const lightTheme = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-dawn.min.css';
-        const darkTheme = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-moon.min.css';
+        const lightTheme = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+        const darkTheme = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css';
         themeLink.href = isDarkMode ? darkTheme : lightTheme;
     }
 
@@ -72,7 +72,7 @@ window.onload = function() {
                 theme: isDarkMode ? 'dark' : 'default',
                 themeVariables: isDarkMode ? {
                     primaryColor: '#d6c4f0',
-                    primaryTextColor: '#2d143c',
+                    primaryTextColor: '#000000',
                     lineColor: '#7a4a93'
                 } : {}
             });
@@ -564,7 +564,7 @@ function showAirpodsCard() {
     card.id = 'airpods-card';
     card.innerHTML = `
         <button class="close" aria-label="关闭">×</button>
-        <h3>更新了About界面的签名</h3>
+        <h3>修复了代码高亮的效果</h3>
     `;
     document.body.appendChild(card);
     requestAnimationFrame(() => card.classList.add('show'));

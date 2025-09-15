@@ -482,6 +482,10 @@ aside section.widget h3 {
     color: #333;
 }
 
+body.dark-mode .progress-ring-text {
+    color: #fff;
+}
+
 /* Bookmark Widget */
 #add-bookmark-button {
     background-color: #FFB6C1; /* Light pink button */
@@ -882,10 +886,16 @@ body.dark-mode a:hover {
 body.dark-mode aside {
     background-color: #4b2a5e;
     border-right-color: #7a4a93;
+    color: #fff;
+}
+
+body.dark-mode aside h2,
+body.dark-mode aside p,
+body.dark-mode aside li {
+    color: #fff;
 }
 
 body.dark-mode main article p,
-body.dark-mode aside h2,
 body.dark-mode .about-content p {
     color: #e0e0e0;
 }
@@ -1017,22 +1027,60 @@ body.dark-mode .mermaid .node rect {
     stroke: #7a4a93;
 }
 body.dark-mode .mermaid .node text {
-    fill: #2d143c;
+    fill: #000;
     stroke: none;
 }
 
 /* Code block base styling */
+pre {
+    position: relative;
+    padding: 1em;
+    padding-top: 2.5em;
+    border-radius: 8px;
+    overflow: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
 pre code {
     display: block;
-    padding: 1em;
-    border-radius: 8px;
-    overflow-x: auto;
+    background: transparent;
 }
-body:not(.dark-mode) pre code {
-    background: #f6f6f6;
+
+body:not(.dark-mode) pre {
+    background: #f5f5f5;
 }
-body.dark-mode pre code {
-    background: #2e2336;
+
+body.dark-mode pre {
+    background: #2d2d2d;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+}
+
+pre::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2em;
+    background: #e0e0e0;
+    border-bottom: 1px solid #d1d5db;
+}
+
+pre::after {
+    content: '';
+    position: absolute;
+    top: 0.55em;
+    left: 0.8em;
+    width: 0.75em;
+    height: 0.75em;
+    border-radius: 50%;
+    background: #ff5f56;
+    box-shadow: 1.2em 0 0 #ffbd2e, 2.4em 0 0 #27c93f;
+}
+
+body.dark-mode pre::before {
+    background: #3b3b3b;
+    border-bottom: 1px solid #555;
 }
 
 body.dark-mode .course-card {
