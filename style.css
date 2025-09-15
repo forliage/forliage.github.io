@@ -1026,8 +1026,12 @@ body.dark-mode #search-input-tech:focus {
 }
 
 /* Mermaid diagram text color */
-.mermaid .node text {
+.mermaid text,
+.mermaid tspan,
+.mermaid .label,
+.mermaid .label > * {
     fill: #000 !important;
+    color: #000 !important;
     stroke: none;
 }
 
@@ -1036,8 +1040,12 @@ body.dark-mode .mermaid .node rect {
     fill: #d6c4f0;
     stroke: #7a4a93;
 }
-body.dark-mode .mermaid .node text {
+body.dark-mode .mermaid text,
+body.dark-mode .mermaid tspan,
+body.dark-mode .mermaid .label,
+body.dark-mode .mermaid .label > * {
     fill: #000 !important;
+    color: #000 !important;
     stroke: none;
 }
 
@@ -1212,12 +1220,17 @@ body.dark-mode .share-buttons p {
 }
 
 .toc-widget .toc-list li a:hover {
-    color: #D81B60;
+    color: #FF00FF;
     background-color: #FFFAFA;
 }
 
 body.dark-mode .toc-widget .toc-list li a {
     color: #fff;
+}
+
+body.dark-mode .toc-widget .toc-list li a:hover {
+    color: #FF00FF;
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 body.dark-mode .toc-widget .toc-level-h1 {
