@@ -695,9 +695,9 @@ public:
                 $$\hat{c_i} = c_i + \Phi(D_i) - \Phi(D_{i-1})$$
                 其中 $c_i$是实际成本，$D_{i-1}$ 和 $D_i$ 分别是操作前后的数据结构状态。$\Phi(D_i)-\Phi(D_{i-1})$是势能的变化量。</p>
 <p>对一个包含 $n$ 次操作的序列，总摊还成本为：
-                $$\sum_{i=1}^{n} \hat{c}<em>i = \sum</em>{i=1}^{n} (c_i + \Phi(D_i) - \Phi(D_{i-1}))$$
+                $$\sum_{i=1}^{n} \hat{c}_i = \sum_{i=1}^{n} (c_i + \Phi(D_i) - \Phi(D_{i-1}))$$
                 这是一个<strong>伸缩和 (telescoping sum)</strong>：
-                $$\sum \hat{c}<em>i = (\sum c_i) + (\Phi(D_1) - \Phi(D_0)) + (\Phi(D_2) - \Phi(D_1)) + ... + (\Phi(D_n) - \Phi(D</em>{n-1}))$$
+                $$\sum \hat{c}_i = (\sum c_i) + (\Phi(D_1) - \Phi(D_0)) + (\Phi(D_2) - \Phi(D_1)) + ... + (\Phi(D_n) - \Phi(D_{n-1}))$$
                 $$\sum \hat{c}_i = (\sum c_i) + \Phi(D_n) - \Phi(D_0)$$</p>
 <p>因为我们要求 $\Phi(D_n)\geq \Phi(D_0)$（通常是 $\Phi(D_n)\geq 0$且 $\Phi(D_0)=0$），所以我们有：
                 $$\sum \hat{c}_i \ge \sum c_i$$
@@ -760,8 +760,8 @@ public:
 <p><strong>求和：</strong> 我们将一次完整的Splay操作（包含 $k$ 个小步骤）的摊还成本加起来。
                 <code>Total Amortized Cost = (k 次旋转的实际成本) + (总的势能变化)</code></p>
 <p>幸运的是，当我们把所有步骤的摊还成本加起来时，中间项会相互抵消（伸缩和）：
-                $$\sum_{i=1}^{k} \hat{c}<em>i \le O(k) + 3 \sum (R</em>{i}(X) - R_{i-1}(X))$$
-                $$\sum \hat{c}<em>i \le O(k) + 3(R</em>{final}(X) - R_{initial}(X))$$</p>
+                $$\sum_{i=1}^{k} \hat{c}_i \le O(k) + 3 \sum (R_{i}(X) - R_{i-1}(X))$$
+                $$\sum \hat{c}_i \le O(k) + 3(R_{final}(X) - R_{initial}(X))$$</p>
 <p>其中$R_{\text{initial}}(X)$ 是Splay操作开始时 <code>X</code> 的秩，$R_{\text{final}}(X)$ 是Splay结束后 <code>X</code> 的秩。</p>
 <ul>
 <li>Splay结束后，<code>X</code> 成为根节点，所以 $S_{\text{final}}(X)=N$（树的总节点数）。因此 $R_{\text{final}}(X)=\log N$。</li>
