@@ -1,7 +1,38 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const pageWrapper = document.createElement('div');
+    pageWrapper.className = 'page-wrapper';
+
+    // Select only the elements that should be part of the page content transition
+    const elementsToWrap = document.querySelectorAll('.hero, .posts-list, footer, .container, .about-content');
+    
+    if (elementsToWrap.length > 0) {
+        // Insert the wrapper before the first element to be wrapped
+        const firstElement = elementsToWrap[0];
+        firstElement.parentNode.insertBefore(pageWrapper, firstElement);
+
+        // Move the selected elements inside the wrapper
+        elementsToWrap.forEach(el => {
+            pageWrapper.appendChild(el);
+        });
+    } else {
+        // Fallback for pages without specific content containers, wrap everything except known fixed elements
+        const elementsToMove = [];
+        for (const child of document.body.children) {
+            if (!child.matches('header, .dock, #mini-player, .dark-mode-control, .modal, script')) {
+                elementsToMove.push(child);
+            }
+        }
+        if(elementsToMove.length > 0) {
+            elementsToMove[0].parentNode.insertBefore(pageWrapper, elementsToMove[0]);
+            elementsToMove.forEach(el => pageWrapper.appendChild(el));
+        } else {
+             document.body.appendChild(pageWrapper); // Append empty wrapper if nothing else
+        }
+    }
+
     const bar = document.createElement('div');
     bar.id = 'charging-bar';
-    document.body.appendChild(bar);
+    document.body.appendChild(bar); // Append to body to stay fixed
     window.addEventListener('load', () => bar.remove());
 });
 
@@ -50,7 +81,6 @@ window.onload = function() {
     musicBtn = miniToggle;
     const mpProgress = miniPlayer.querySelector('.mp-bar-progress');
 
-    // Function to update highlight.js theme
     function updateHighlightTheme(isDarkMode) {
         let themeLink = document.getElementById('highlight-theme-link');
         if (!themeLink) {
@@ -64,7 +94,6 @@ window.onload = function() {
         themeLink.href = isDarkMode ? darkTheme : lightTheme;
     }
 
-    // Function to update mermaid theme
     function updateMermaidTheme(isDarkMode) {
         if (window.mermaid) {
             mermaid.initialize({
@@ -84,7 +113,6 @@ window.onload = function() {
         }
     }
 
-    // Initialize highlight.js if present
     function initHighlight() {
         function run() {
             document.querySelectorAll('pre code').forEach(block => {
@@ -109,7 +137,6 @@ window.onload = function() {
         }
     }
 
-    // Function to apply the saved theme
     function applyTheme() {
         const isDarkMode = localStorage.getItem('darkMode') === 'true';
         document.body.classList.toggle('dark-mode', isDarkMode);
@@ -119,7 +146,6 @@ window.onload = function() {
         initHighlight();
     }
 
-    // Toggle dark mode
     if (darkModeToggle) {
         darkModeToggle.addEventListener('change', () => {
             const isDarkMode = darkModeToggle.checked;
@@ -135,13 +161,13 @@ window.onload = function() {
         });
     }
 
-    // Apply theme on initial load
     applyTheme();
 
     const savedTime = parseFloat(localStorage.getItem('music-current-time') || '0');
     const shouldPlay = localStorage.getItem('music-paused') !== 'true';
 
     function restoreMusic() {
+        if (!music) return;
         music.currentTime = savedTime;
         if (shouldPlay) {
             const playPromise = music.play();
@@ -157,37 +183,41 @@ window.onload = function() {
         }
     }
 
-    if (music.readyState >= 2) {
-        restoreMusic();
-    } else {
-        music.addEventListener('canplay', restoreMusic);
+    if (music) {
+        if (music.readyState >= 2) {
+            restoreMusic();
+        } else {
+            music.addEventListener('canplay', restoreMusic);
+        }
+
+        musicBtn.addEventListener('click', () => {
+            if (music.paused) {
+                music.play();
+                musicBtn.textContent = '⏸';
+            } else {
+                music.pause();
+                musicBtn.textContent = '▶︎';
+            }
+            localStorage.setItem('music-paused', music.paused);
+        });
+
+        music.addEventListener('timeupdate', () => {
+            localStorage.setItem('music-current-time', music.currentTime);
+            if (music.duration) {
+                mpProgress.style.width = (music.currentTime / music.duration * 100) + '%';
+            }
+        });
     }
 
-    musicBtn.addEventListener('click', () => {
-        if (music.paused) {
-            music.play();
-            musicBtn.textContent = '⏸';
-        } else {
-            music.pause();
-            musicBtn.textContent = '▶︎';
-        }
-        localStorage.setItem('music-paused', music.paused);
-    });
-
-    music.addEventListener('timeupdate', () => {
-        localStorage.setItem('music-current-time', music.currentTime);
-        if (music.duration) {
-            mpProgress.style.width = (music.currentTime / music.duration * 100) + '%';
-        }
-    });
-
     window.addEventListener('beforeunload', () => {
-        localStorage.setItem('music-current-time', music.currentTime);
-        localStorage.setItem('music-paused', music.paused);
+        if(music) {
+            localStorage.setItem('music-current-time', music.currentTime);
+            localStorage.setItem('music-paused', music.paused);
+        }
     });
 
     document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') {
+        if (document.visibilityState === 'hidden' && music) {
             localStorage.setItem('music-current-time', music.currentTime);
             localStorage.setItem('music-paused', music.paused);
         }
@@ -203,32 +233,33 @@ window.onload = function() {
     }
 
     const taglineEl = document.getElementById('tagline');
-    const phrases = ['这里有forliage的学习笔记', '分享科研和学习中的idea', '书写自己的精彩的生活', '分享绚丽的爱'];
-    let phraseIndex = 0;
-    let charIndex = 0;
-    let deleting = false;
+    if (taglineEl) {
+        const phrases = ['这里有forliage的学习笔记', '分享科研和学习中的idea', '书写自己的精彩的生活', '分享绚丽的爱'];
+        let phraseIndex = 0;
+        let charIndex = 0;
+        let deleting = false;
 
-    function typeLoop() {
-        if (!taglineEl) return;
-        taglineEl.textContent = phrases[phraseIndex].substring(0, charIndex);
-        if (!deleting && charIndex < phrases[phraseIndex].length) {
-            charIndex++;
-            setTimeout(typeLoop, 150);
-        } else if (!deleting) {
-            deleting = true;
-            setTimeout(typeLoop, 1000);
-        } else if (deleting && charIndex > 0) {
-            charIndex--;
-            setTimeout(typeLoop, 80);
-        } else {
-            deleting = false;
-            phraseIndex = (phraseIndex + 1) % phrases.length;
-            setTimeout(typeLoop, 500);
+        function typeLoop() {
+            if (!taglineEl) return;
+            taglineEl.textContent = phrases[phraseIndex].substring(0, charIndex);
+            if (!deleting && charIndex < phrases[phraseIndex].length) {
+                charIndex++;
+                setTimeout(typeLoop, 150);
+            } else if (!deleting) {
+                deleting = true;
+                setTimeout(typeLoop, 1000);
+            } else if (deleting && charIndex > 0) {
+                charIndex--;
+                setTimeout(typeLoop, 80);
+            } else {
+                deleting = false;
+                phraseIndex = (phraseIndex + 1) % phrases.length;
+                setTimeout(typeLoop, 500);
+            }
         }
+        typeLoop();
     }
-    typeLoop();
 
-    // Parallax effect for elements with class 'parallax'
     const parallaxEls = document.querySelectorAll('.parallax');
     window.addEventListener('scroll', () => {
         const sy = window.scrollY;
@@ -238,7 +269,6 @@ window.onload = function() {
         });
     });
     
-    // Dock 图标放大效果
     const dock = document.querySelector('.dock');
     if (dock) {
         const icons = Array.from(dock.querySelectorAll('a'));
@@ -266,45 +296,11 @@ window.onload = function() {
         animateDock();
     }
 
-    // 3D 卡片倾斜与光斑效果
-    const tiltCards = document.querySelectorAll('.tilt-card');
-    tiltCards.forEach(card => {
-        const layers = card.querySelectorAll('[data-depth]');
-        card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            const rotateX = ((y - centerY) / centerY) * -10;
-            const rotateY = ((x - centerX) / centerX) * 10;
-            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-            card.style.boxShadow = `${-rotateY}px ${rotateX}px 20px rgba(0,0,0,0.2)`;
-            card.style.setProperty('--lx', x + 'px');
-            card.style.setProperty('--ly', y + 'px');
-            layers.forEach(layer => {
-                const depth = parseFloat(layer.dataset.depth || '0');
-                const moveX = ((x - centerX) / centerX) * -depth;
-                const moveY = ((y - centerY) / centerY) * -depth;
-                layer.style.transform = `translate(${moveX}px, ${moveY}px)`;
-            });
-        });
-
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = 'rotateX(0deg) rotateY(0deg)';
-            card.style.boxShadow = 'none';
-            layers.forEach(layer => {
-                layer.style.transform = 'translate(0, 0)';
-            });
-        });
-    });
-
-    // 顶栏与 Dock 随滚动隐藏/显示
     const header = document.querySelector('header');
     let lastY = window.scrollY;
     window.addEventListener('scroll', () => {
         const cur = window.scrollY;
-        if (cur > lastY) {
+        if (cur > lastY && cur > 100) { // Add a threshold
             header && header.classList.add('hidden');
             dock && dock.classList.add('hidden');
         } else {
@@ -314,113 +310,86 @@ window.onload = function() {
         lastY = cur;
     });
     
-    // 初始化侧栏功能（在 loadSidebar 完成后调用）
     function initSidebarFeatures() {
         updateArticleTitle();
-        generateTOC(); // Add this call
+        generateTOC();
         window.addEventListener('scroll', updateReadingProgress);
         updateReadingProgress();
     }
 
-function updateArticleTitle() {
-    const titlePlaceholder = document.getElementById('current-article-title-placeholder');
-    let title = '';
-    const mainArticle = document.querySelector('main article');
-    if (mainArticle) {
-        const heading = mainArticle.querySelector('h1, h2, h3, h4, h5, h6');
-        if (heading) {
-            title = heading.textContent;
+    function updateArticleTitle() {
+        const titlePlaceholder = document.getElementById('current-article-title-placeholder');
+        if (!titlePlaceholder) return;
+        let title = document.title;
+        const mainArticle = document.querySelector('main article');
+        if (mainArticle) {
+            const heading = mainArticle.querySelector('h1, h2, h3, h4, h5, h6');
+            if (heading) {
+                title = heading.textContent;
+            }
         }
-    }
-    if (titlePlaceholder) {
         titlePlaceholder.textContent = title || '[无法获取标题]';
     }
-}
 
-function updateReadingProgress() {
-    const ring = document.querySelector('.ring-progress');
-    const text = document.querySelector('.progress-ring-text');
+    function updateReadingProgress() {
+        const ring = document.querySelector('.ring-progress');
+        const text = document.querySelector('.progress-ring-text');
+        if (!ring || !text) return;
 
-    if (!ring || !text) {
-        console.log("Could not find progress ring element.");
-        return;
-    }
-
-    const doc = document.documentElement;
-    const scrollableHeight = doc.scrollHeight - doc.clientHeight;
-    if (scrollableHeight <= 0) {
-        ring.style.strokeDashoffset = 100;
-        text.textContent = '0%';
-        return;
-    }
-
-    const scrollTop = doc.scrollTop || document.body.scrollTop;
-    const progressPercentage = (scrollTop / scrollableHeight) * 100;
-    ring.style.strokeDashoffset = 100 - progressPercentage;
-    text.textContent = Math.round(progressPercentage) + '%';
-}
-
-function generateTOC() {
-    const tocContainer = document.getElementById('toc-container');
-    const mainArticle = document.querySelector('main article');
-
-    if (!tocContainer || !mainArticle) {
-        return; // No container or article found, so no TOC needed.
-    }
-
-    const headings = mainArticle.querySelectorAll('h1, h2, h3, h4');
-    
-    if (headings.length === 0) {
-        tocContainer.innerHTML = '<p style="font-size: 0.9em; color: #666;">本文无目录。</p>';
-        return;
-    }
-
-    const tocList = document.createElement('ul');
-    tocList.className = 'toc-list';
-
-    headings.forEach(heading => {
-        if (!heading.id) {
-            return; 
-        }
-
-        const listItem = document.createElement('li');
-        const link = document.createElement('a');
-
-        listItem.className = `toc-level-${heading.tagName.toLowerCase()}`;
-        link.href = `#${heading.id}`;
-        link.textContent = heading.textContent;
-
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetElement = document.getElementById(heading.id);
-            if(targetElement) {
-                targetElement.scrollIntoView({
-                    behavior: 'smooth'
-                });
-            }
-        });
-        
-        listItem.appendChild(link);
-        tocList.appendChild(listItem);
-    });
-
-    tocContainer.appendChild(tocList);
-}
-
-    // Mouse click effect to show "鑫"
-    document.addEventListener('mousedown', function showXinOnClick(event) {
-        if (event.button !== 0) { // Only react to left mouse button
+        const doc = document.documentElement;
+        const scrollableHeight = doc.scrollHeight - doc.clientHeight;
+        if (scrollableHeight <= 0) {
+            ring.style.strokeDashoffset = 100;
+            text.textContent = '0%';
             return;
         }
 
+        const scrollTop = doc.scrollTop || document.body.scrollTop;
+        const progressPercentage = (scrollTop / scrollableHeight) * 100;
+        ring.style.strokeDashoffset = 100 - progressPercentage;
+        text.textContent = Math.round(progressPercentage) + '%';
+    }
+
+    function generateTOC() {
+        const tocContainer = document.getElementById('toc-container');
+        const mainArticle = document.querySelector('main article');
+        if (!tocContainer || !mainArticle) return;
+
+        const headings = mainArticle.querySelectorAll('h1, h2, h3, h4');
+        if (headings.length === 0) {
+            tocContainer.innerHTML = '<p style="font-size: 0.9em; color: #666;">本文无目录。</p>';
+            return;
+        }
+
+        const tocList = document.createElement('ul');
+        tocList.className = 'toc-list';
+        headings.forEach(heading => {
+            if (!heading.id) return;
+            const listItem = document.createElement('li');
+            const link = document.createElement('a');
+            listItem.className = `toc-level-${heading.tagName.toLowerCase()}`;
+            link.href = `#${heading.id}`;
+            link.textContent = heading.textContent;
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetElement = document.getElementById(heading.id);
+                if(targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+            listItem.appendChild(link);
+            tocList.appendChild(listItem);
+        });
+        tocContainer.appendChild(tocList);
+    }
+
+    document.addEventListener('mousedown', function showXinOnClick(event) {
+        if (event.button !== 0) return;
         const xinElement = document.createElement('span');
         xinElement.textContent = '♥';
-
-        // Adjust for centering (rough estimate, depends on font size)
-        const fontSize = 24; // px
+        const fontSize = 24;
         const offsetX = fontSize / 2; 
         const offsetY = fontSize / 2; 
-
         xinElement.style.position = 'fixed';
         xinElement.style.left = (event.clientX - offsetX) + 'px';
         xinElement.style.top = (event.clientY - offsetY) + 'px';
@@ -428,55 +397,38 @@ function generateTOC() {
         xinElement.style.fontSize = fontSize + 'px';
         xinElement.style.pointerEvents = 'none';
         xinElement.style.userSelect = 'none';
-        xinElement.style.transition = 'opacity 0.5s ease-out, transform 0.4s ease-out'; // Added transform for movement
+        xinElement.style.transition = 'opacity 0.5s ease-out, transform 0.4s ease-out';
         xinElement.style.opacity = '1';
-        xinElement.style.transform = 'translateY(0)'; // Initial position for transform
-
+        xinElement.style.transform = 'translateY(0)';
         document.body.appendChild(xinElement);
-
-        // Trigger fade out and upward movement
         setTimeout(() => {
             xinElement.style.opacity = '0';
-            xinElement.style.transform = 'translateY(-20px)'; // Move upwards by 20px
-        }, 50); // Start fade out and movement shortly after creation
-
-        // Remove element after animation
+            xinElement.style.transform = 'translateY(-20px)';
+        }, 50);
         setTimeout(() => {
             if (xinElement.parentNode) {
                 xinElement.parentNode.removeChild(xinElement);
             }
-        }, 550); // Duration of opacity transition (500ms) + buffer
+        }, 550);
     });
 
-    // Glass Effect Toggle
     const glassEffectToggle = document.getElementById('glass-effect-toggle');
     const blurSlider = document.getElementById('blur-slider');
-
     if (glassEffectToggle && blurSlider) {
-        // Restore state from localStorage
         if (localStorage.getItem('glassEffectEnabled') === 'true') {
             document.body.classList.add('glass-effect-enabled');
             glassEffectToggle.textContent = 'Close';
             blurSlider.style.display = 'block';
         }
-
         const initialBlur = localStorage.getItem('blurIntensity') || '10';
         blurSlider.value = initialBlur;
         document.documentElement.style.setProperty('--blur-intensity', initialBlur + 'px');
-
         glassEffectToggle.addEventListener('click', () => {
             const isEnabled = document.body.classList.toggle('glass-effect-enabled');
             localStorage.setItem('glassEffectEnabled', isEnabled);
-
-            if (isEnabled) {
-                glassEffectToggle.textContent = 'Close';
-                blurSlider.style.display = 'block';
-            } else {
-                glassEffectToggle.textContent = 'Blur';
-                blurSlider.style.display = 'none';
-            }
+            glassEffectToggle.textContent = isEnabled ? 'Close' : 'Blur';
+            blurSlider.style.display = isEnabled ? 'block' : 'none';
         });
-
         blurSlider.addEventListener('input', (e) => {
             const blurValue = e.target.value;
             document.documentElement.style.setProperty('--blur-intensity', blurValue + 'px');
@@ -484,7 +436,6 @@ function generateTOC() {
         });
     }
 
-    // Cover Flow 初始化
     async function initCoverFlow() {
         const container = document.getElementById('coverflow');
         if (!container) return;
@@ -518,17 +469,21 @@ function generateTOC() {
             update();
         }, 3000);
     }
-    initCoverFlow();
-
-    // AirPods 欢迎卡片和特效初始化
+    
     if (location.pathname.endsWith('index.html') || location.pathname === '/') {
         showAirpodsCard();
     }
+    
+    // --- NEW FEATURES INITIALIZATION ---
     initSiriWave();
+    initFloatingCards();
+    initGestureNavigation();
+    initContinueReading();
+    // --- END NEW FEATURES INITIALIZATION ---
+
     initPeekPop();
     initHelloAnimation();
 
-    // VisionOS 漂浮卡片光斑
     document.querySelectorAll('.tilt-card').forEach(card => {
         card.addEventListener('mousemove', e => {
             const rect = card.getBoundingClientRect();
@@ -543,7 +498,6 @@ function generateTOC() {
         });
     });
 
-    // Taptic Pulse 触感反馈
     function tapticFeedback(e) {
         const el = e.currentTarget;
         el.style.transform = 'scale(0.95)';
@@ -568,7 +522,8 @@ function showAirpodsCard() {
     card.id = 'airpods-card';
     card.innerHTML = `
         <button class="close" aria-label="关闭">×</button>
-        <h3>修复了代码高亮的效果</h3>
+        <h3>多项功能已更新</h3>
+        <p style="font-size: 0.8em; margin: 5px 0 0;">体验全新的手势、动效和交互。</p>
     `;
     document.body.appendChild(card);
     requestAnimationFrame(() => card.classList.add('show'));
@@ -595,39 +550,254 @@ function initHelloAnimation() {
     }
 }
 
+// --- TASK 3: Siri Wave ---
 function initSiriWave() {
     document.querySelectorAll('#search-input, #search-input-tech').forEach(input => {
         const container = input.parentElement.querySelector('.siri-wave');
         if (!container) return;
+        container.innerHTML = ''; // Clear previous canvas if any
         const canvas = document.createElement('canvas');
-        canvas.width = 60; canvas.height = 20;
+        canvas.width = 120; // Increased width for better look
+        canvas.height = 40;
+        canvas.style.width = '60px';
+        canvas.style.height = '20px';
         container.appendChild(canvas);
+        
         const ctx = canvas.getContext('2d');
-        let phase = 0, amp = 0, running = false;
+        let phase = 0, targetAmp = 0, currentAmp = 0, animationFrame;
+        let typingTimeout;
+
         function draw() {
-            if (!running) return;
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            const colors = ['#007aff','#5856d6','#5ac8fa'];
-            for (let i=0;i<3;i++) {
+            currentAmp += (targetAmp - currentAmp) * 0.1;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (currentAmp === 0) {
+                cancelAnimationFrame(animationFrame);
+                return;
+            }
+
+            const colors = ['#ff8acb', '#AD1457', '#C2185B'];
+            for (let i = 0; i < 3; i++) {
                 ctx.beginPath();
                 ctx.strokeStyle = colors[i];
-                const offset = i*Math.PI/3;
-                for (let x=0;x<canvas.width;x++) {
-                    const y = canvas.height/2 + Math.sin((x/canvas.width*2*Math.PI)+phase+offset)*amp;
-                    if (x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+                ctx.lineWidth = 1.5;
+                const offset = i * Math.PI / 3;
+                for (let x = 0; x < canvas.width; x++) {
+                    const y = canvas.height / 2 + Math.sin((x / canvas.width * 2 * Math.PI) + phase + offset) * currentAmp;
+                    if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
                 }
                 ctx.stroke();
             }
             phase += 0.1;
-            requestAnimationFrame(draw);
+            animationFrame = requestAnimationFrame(draw);
         }
-        function start(){ running = true; container.style.display = 'block'; draw(); }
-        function stop(){ running = false; container.style.display = 'none'; amp = 0; }
-        input.addEventListener('focus', start);
-        input.addEventListener('blur', stop);
-        input.addEventListener('input', e => { amp = Math.min(8, 2 + e.target.value.length/2); });
+
+        function startWave() {
+            if (!animationFrame) {
+                animationFrame = requestAnimationFrame(draw);
+            }
+        }
+
+        input.addEventListener('focus', () => {
+            container.style.display = 'block';
+            targetAmp = 0.5; // Show a flat line
+            startWave();
+        });
+
+        input.addEventListener('blur', () => {
+            targetAmp = 0;
+            setTimeout(() => { 
+                if(targetAmp === 0) container.style.display = 'none';
+            }, 200);
+        });
+
+        input.addEventListener('input', () => {
+            clearTimeout(typingTimeout);
+            targetAmp = Math.min(15, 2 + input.value.length);
+            startWave();
+            typingTimeout = setTimeout(() => {
+                targetAmp = 0.5; // Return to flat line
+            }, 500);
+        });
     });
 }
+
+// --- TASK 2: Floating Cards ---
+function initFloatingCards() {
+    const cards = document.querySelectorAll('.course-card');
+    if (!cards.length) return;
+
+    // Desktop hover fallback
+    cards.forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const rotateX = (y / rect.height - 0.5) * -10; // Subtle rotation
+            const rotateY = (x / rect.width - 0.5) * 10;
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+            card.style.transition = 'transform 0.1s';
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+            card.style.transition = 'transform 0.5s';
+        });
+    });
+
+    // Mobile device orientation
+    if (window.DeviceOrientationEvent) {
+        window.addEventListener('deviceorientation', e => {
+            if (e.gamma === null || e.beta === null) return;
+            const beta = Math.max(-30, Math.min(30, e.beta)); // Front-back tilt
+            const gamma = Math.max(-30, Math.min(30, e.gamma)); // Left-right tilt
+            
+            cards.forEach(card => {
+                const rotateX = beta * -0.2; // Subtle effect
+                const rotateY = gamma * 0.2;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                card.style.transition = 'transform 0.2s';
+            });
+        });
+    }
+}
+
+// --- TASK 1: Gesture Navigation ---
+function initGestureNavigation() {
+    const applicablePages = ['/index.html', '/about.html', '/category.html', '/'];
+    if (!applicablePages.includes(location.pathname)) return;
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+    const swipeThreshold = window.innerWidth * 0.4; // 40% of screen width
+
+    document.body.addEventListener('touchstart', e => {
+        if (e.touches.length === 2) {
+            touchStartX = e.touches[0].screenX;
+            touchStartY = e.touches[0].screenY;
+        }
+    }, { passive: true });
+
+    document.body.addEventListener('touchmove', e => {
+        if (e.touches.length === 2) {
+            touchEndX = e.touches[0].screenX;
+            touchEndY = e.touches[0].screenY;
+        }
+    }, { passive: true });
+
+    document.body.addEventListener('touchend', e => {
+        if (e.touches.length === 0 && touchStartX !== 0) {
+            const dx = touchEndX - touchStartX;
+            const dy = touchEndY - touchStartY;
+
+            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > swipeThreshold) {
+                // It's a horizontal swipe
+                const action = dx > 0 ? 'back' : 'forward';
+                document.body.classList.add(dx > 0 ? 'is-exiting-back' : 'is-exiting');
+                setTimeout(() => {
+                    if (action === 'back') history.back();
+                    else history.forward();
+                }, 500); // Match CSS animation duration
+            }
+            
+            // Reset coordinates
+            touchStartX = 0;
+            touchStartY = 0;
+            touchEndX = 0;
+            touchEndY = 0;
+        }
+    }, { passive: true });
+}
+
+// --- TASK 4: Continue Reading ---
+function initContinueReading() {
+    const isPostPage = location.pathname.includes('/_posts/');
+    const isHomePage = location.pathname.endsWith('/index.html') || location.pathname === '/';
+
+    if (isPostPage) {
+        // On a post page, track scroll position
+        let lastKnownScrollPosition = 0;
+        let ticking = false;
+
+        window.addEventListener('scroll', () => {
+            lastKnownScrollPosition = window.scrollY;
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+                    const scrollPercent = (lastKnownScrollPosition / scrollableHeight) * 100;
+                    
+                    if (scrollPercent < 95) {
+                        const articleTitle = document.title;
+                        localStorage.setItem('continueReading', JSON.stringify({
+                            url: location.href,
+                            title: articleTitle,
+                            scrollPos: lastKnownScrollPosition
+                        }));
+                    } else {
+                        // If they finished, remove the prompt for this article
+                        const lastRead = JSON.parse(localStorage.getItem('continueReading') || '{}');
+                        if (lastRead.url === location.href) {
+                            localStorage.removeItem('continueReading');
+                        }
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+    }
+
+    if (isHomePage) {
+        // On the home page, show the banner if needed
+        const lastReadData = localStorage.getItem('continueReading');
+        if (lastReadData) {
+            const { url, title, scrollPos } = JSON.parse(lastReadData);
+            
+            const banner = document.createElement('div');
+            banner.id = 'continue-reading-banner';
+            
+            const text = document.createElement('p');
+            text.innerHTML = `上次您读到：<strong>${title.split(' - ')[0]}</strong>`;
+
+            const link = document.createElement('a');
+            link.className = 'continue-link';
+            link.textContent = '继续阅读';
+            link.href = '#'; // Prevent page reload
+            link.onclick = (e) => {
+                e.preventDefault();
+                localStorage.setItem('scrollToPos', scrollPos);
+                window.location.href = url;
+            };
+
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'close-btn';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = () => {
+                banner.classList.remove('show');
+                // Don't permanently delete, just hide for this session
+                sessionStorage.setItem('continueReadingDismissed', 'true');
+            };
+
+            banner.appendChild(text);
+            banner.appendChild(link);
+            banner.appendChild(closeBtn);
+            document.body.appendChild(banner);
+
+            if (sessionStorage.getItem('continueReadingDismissed') !== 'true') {
+                 setTimeout(() => banner.classList.add('show'), 500);
+            }
+        }
+    }
+    
+    // On page load, check if we need to scroll
+    const scrollToPos = localStorage.getItem('scrollToPos');
+    if (scrollToPos) {
+        window.scrollTo(0, parseInt(scrollToPos, 10));
+        localStorage.removeItem('scrollToPos');
+    }
+}
+
 
 async function initPeekPop() {
     const links = document.querySelectorAll('a.post-link');

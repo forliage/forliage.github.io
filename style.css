@@ -1,3 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+/* Page transition animations */
+.page-wrapper {
+    animation: slideInRight 0.5s forwards;
+    will-change: transform, opacity;
+}
+
+body.is-exiting .page-wrapper {
+    animation: slideOutLeft 0.5s forwards;
+}
+
+body.is-exiting-back .page-wrapper {
+    animation: slideOutRight 0.5s forwards;
+}
+
+
+@keyframes slideInRight {
+    from { transform: translateX(50px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutLeft {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(-50px); opacity: 0; }
+}
+
+@keyframes slideInLeft {
+    from { transform: translateX(-50px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(50px); opacity: 0; }
+}
+
 body {
     --bg-gradient: linear-gradient(120deg, #ffe5ec, #ffc0cb, #ffe5ec);
     background: var(--bg-gradient);
@@ -154,6 +191,69 @@ body.dark-mode .dock {
 
 .tilt-card:hover::after {
     opacity: 1;
+}
+
+/* Continue Reading Banner */
+#continue-reading-banner {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translate(-50%, 200%);
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 25px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 1001;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    color: #333;
+    opacity: 0;
+}
+
+#continue-reading-banner.show {
+    transform: translate(-50%, 0);
+    opacity: 1;
+}
+
+body.dark-mode #continue-reading-banner {
+    background: rgba(40, 40, 40, 0.7);
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+#continue-reading-banner p {
+    margin: 0;
+    font-size: 0.9em;
+}
+
+#continue-reading-banner .continue-link {
+    text-decoration: none;
+    color: #D81B60;
+    font-weight: bold;
+    font-size: 0.9em;
+    cursor: pointer;
+}
+
+body.dark-mode #continue-reading-banner .continue-link {
+    color: #ff8acb;
+}
+
+#continue-reading-banner .close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    color: #888;
+    padding: 0 5px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+body.dark-mode #continue-reading-banner .close-btn {
+    color: #bbb;
 }
 
 #hello-container {
@@ -392,6 +492,31 @@ aside { /* This is now the LEFT sidebar */
     align-self: flex-start;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    max-height: calc(100vh - 40px); /* Set a max-height */
+    overflow-y: auto; /* Add vertical scrollbar when content overflows */
+}
+
+/* Custom Scrollbar for Sidebar */
+aside::-webkit-scrollbar {
+    width: 6px;
+}
+
+aside::-webkit-scrollbar-track {
+    background: rgba(255, 240, 245, 0.5); /* A lighter track */
+    border-radius: 10px;
+}
+
+aside::-webkit-scrollbar-thumb {
+    background-color: #FFC0CB;
+    border-radius: 10px;
+}
+
+body.dark-mode aside::-webkit-scrollbar-track {
+    background: #4b2a5e;
+}
+
+body.dark-mode aside::-webkit-scrollbar-thumb {
+    background-color: #7a4a93;
 }
 
 /* Removing old widget styles as they are no longer in use in the new left sidebar structure */
@@ -1054,6 +1179,10 @@ body.dark-mode .mermaid .nodeLabel > * {
 }
 
 /* Code block base styling */
+pre, code {
+    font-family: 'JetBrains Mono', monospace;
+}
+
 pre {
     position: relative;
     padding: 1em;
@@ -1105,29 +1234,28 @@ body.dark-mode pre::before {
     border-bottom: 1px solid #555;
 }
 
+/* --- New Dark Mode Card Colors --- */
 body.dark-mode .course-card {
-     box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+     box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-body.dark-mode .course-card-pink {
-    background-color: #3e2a39;
-}
-
+body.dark-mode .course-card-pink,
 body.dark-mode .course-card-white {
-    background-color: #4a3144;
+    background-color: #1C1C1E; /* iOS Dark Mode Grey */
 }
 
 body.dark-mode .course-card h3 {
-    color: #ff8acb;
-    border-bottom-color: #5D3A4B;
+    color: #ff8acb; /* Vibrant Pink */
+    border-bottom-color: rgba(255, 255, 255, 0.2);
 }
 
 body.dark-mode .course-card ul li {
-    border-bottom-color: #5D3A4B;
+    border-bottom-color: rgba(255, 255, 255, 0.15);
 }
 
 body.dark-mode .course-card ul li a {
-    color: #ffb3da;
+    color: #ffb3da; /* Lighter Pink */
 }
 
 body.dark-mode .course-card ul li a:hover {
@@ -1139,7 +1267,7 @@ body.dark-mode .card-header::before {
 }
 
 body.dark-mode .card-intro {
-    color: #d0d0d0;
+    color: #aeadb2; /* Softer grey text */
 }
 
 /* Share Buttons */
