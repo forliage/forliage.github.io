@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>操作系统01:Introduction</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FPDBQB4LZD');
+    </script>
+<!-- Highlight.js Themes -->
+<link href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-dawn.min.css" id="highlight-theme-link" rel="stylesheet"/>
+<!-- Highlight.js Copy Plugin CSS -->
+<link href="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.css" rel="stylesheet"/>
+</head>
+<body>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="操作系统01introduction">操作系统01:Introduction </h1>
+<h4 id="i-究竟什么是操作系统"><strong>I 究竟什么是操作系统？</strong> </h4>
+<p>我们先来看一个最根本的问题：操作系统是什么？</p>
+<p><strong>操作系统的角色</strong></p>
+<p>想象一下，你是一位公司的CEO，你的手下有各种各enta（员工，比如CPU、内存、硬盘），还有各种各样的项目（应用程序）。你作为CEO，并不会亲自去执行每一个具体的任务，但你需要：</p>
+<ul>
+<li><strong>管理和分配资源</strong>：决定哪个项目组（程序）可以使用会议室（内存），使用多久。</li>
+<li><strong>制定规则和流程</strong>：确保各个项目组之间不会互相干扰，能够有序地工作。</li>
+<li><strong>提供公共服务</strong>：比如提供打印、网络等基础服务，让项目组可以方便地使用。</li>
+</ul>
+<p>在这个比喻里，<strong>你（CEO）就是操作系统</strong>。</p>
+<p>所以，我们可以从两个视角来定义操作系统：</p>
+<ol>
+<li>
+<p><strong>用户视角：一个中介</strong><br>
+操作系统是用户与计算机硬件之间的<strong>中介程序</strong>。它为我们提供了一个方便、易用的界面，让我们不必去关心底层硬件那些复杂的细节。我们只需要点击鼠标、敲击键盘，操作系统就会将我们的意图翻译成硬件能够理解的指令去执行。</p>
+<div class="mermaid">graph TD
+    A[用户 User] --&gt; B{操作系统 OS};
+    B --&gt; C[计算机硬件 Hardware];
+</div></li>
+<li>
+<p><strong>系统视角：一个管理者</strong><br>
+操作系统是计算机系统资源的<strong>管理者</strong>。它负责管理和分配计算机的所有硬件和软件资源，如CPU时间、内存空间、文件存储、I/O设备等。</p>
+</li>
+</ol>
+<p><strong>操作系统的目标</strong></p>
+<p>综合来看，一个好的操作系统需要实现以下三个核心目标：</p>
+<ul>
+<li><strong>方便性 (Convenience)</strong>：让用户使用计算机更加方便。图形化界面、即插即用，都是为了这个目标。</li>
+<li><strong>高效性 (Efficiency)</strong>：高效地管理和利用计算机硬件资源，确保系统资源不被浪费。</li>
+<li><strong>执行用户程序 (Execute Programs)</strong>：为用户程序提供一个可以运行的环境，并帮助用户程序解决问题。</li>
+</ul>
+<p><strong>操作系统的形态万千</strong></p>
+<p>操作系统并非只有我们熟知的Windows或macOS。它无处不在，形态各异：</p>
+<ul>
+<li><strong>桌面系统</strong>：Windows, macOS, Linux (Ubuntu, etc.)</li>
+<li><strong>服务器系统</strong>：Linux (CentOS, RedHat), Windows Server</li>
+<li><strong>移动设备系统</strong>：Android, iOS</li>
+<li><strong>嵌入式系统</strong>：智能手表、路由器、汽车中控里的实时操作系统（RTOS）</li>
+<li><strong>新兴形态</strong>：云操作系统 (Cloud OS)、元宇宙操作系统 (Metaverse OS)，甚至大模型驱动的AI操作系统 (AIOS)，它们正在重新定义人机交互和资源管理的方式。</li>
+</ul>
+<p>从过去需要手动操作开关和插拔线缆的庞大机器，到今天我们口袋里的智能手机，操作系统一直随着硬件和应用需求的发展而不断进化。</p>
+<h4 id="ii-计算机系统的整体结构"><strong>II 计算机系统的整体结构</strong> </h4>
+<p>为了理解操作系统是如何工作的，我们必须先了解它所运行的平台——计算机系统的结构。一个计算机系统可以被划分为四个层次，自底向上分别是：</p>
+<ol>
+<li><strong>硬件 (Hardware)</strong>：提供最基本的计算资源，包括CPU、内存、I/O设备（键盘、鼠标、硬盘、显示器等）。</li>
+<li><strong>操作系统 (Operating System)</strong>：控制和协调各个用户在运行不同应用程序时对硬件资源的使用。它是连接硬件和应用软件的桥梁。</li>
+<li><strong>应用程序 (Application Programs)</strong>：定义了如何使用系统资源来解决用户的计算问题。例如：编译器、浏览器、游戏、文本编辑器等。</li>
+<li><strong>用户 (Users)</strong>：可以是人，也可以是其他计算机或机器。</li>
+</ol>
+<p>我们可以用一个层次图来清晰地展示它们之间的关系：</p>
+<div class="mermaid">graph TD
+    subgraph 计算机系统
+        U1[用户1] --&gt; C[编译器]
+        U2[用户2] --&gt; A[汇编器]
+        U3[用户3] --&gt; T[文本编辑器]
+        U4[...] --&gt; D[数据库系统]
+
+        subgraph "系统与应用软件"
+            C --&gt; OS
+            A --&gt; OS
+            T --&gt; OS
+            D --&gt; OS
+        end
+
+        subgraph "操作系统"
+            OS
+        end
+
+        subgraph "计算机硬件"
+            OS --&gt; HW[Computer Hardware]
+        end
+    end
+
+    style OS fill:#cde4ff
+</div><p>这个结构告诉我们，用户通过应用程序与操作系统交互，而操作系统则负责管理底层的硬件。每一层都建立在下一层的基础之上。</p>
+<h4 id="iii-计算机是如何启动和运行的"><strong>III 计算机是如何启动和运行的？</strong> </h4>
+<p>我们按下电源键后，发生了什么？操作系统是如何被唤醒并开始工作的？</p>
+<p><strong>1. 计算机启动 (Computer Startup)</strong></p>
+<p>这个过程被称为<strong>引导 (Bootstrapping)</strong>。</p>
+<ul>
+<li>当我们按下电源键，一个被称为<strong>引导程序 (bootstrap program)</strong> 的小程序会被加载并执行。</li>
+<li>这个程序通常存储在一种只读存储器（ROM）或电可擦除可编程只读存储器（EPROM）中，我们通常称之为<strong>固件 (Firmware)</strong>，比如计算机主板上的BIOS或UEFI。</li>
+<li>引导程序会执行一系列<strong>加电自检 (POST)</strong>，初始化CPU、内存、设备控制器等系统各个方面。</li>
+<li>最后，它会从硬盘等存储设备中找到<strong>操作系统内核 (Kernel)</strong>，将其加载到内存中，并将控制权交给内核。</li>
+<li>至此，操作系统正式开始运行，接管整个计算机。</li>
+</ul>
+<p><strong>2. 计算机系统操作 (Computer-System Operation)</strong></p>
+<p>操作系统一旦运行起来，就需要处理来自CPU和各种I/O设备的请求。现代计算机系统的核心架构是<strong>总线 (Bus)</strong> 结构。</p>
+<div class="mermaid">graph TD
+    subgraph " "
+        CPU &lt;--&gt; B((总线 Bus))
+        MEM[内存 Memory] &lt;--&gt; B
+    end
+    
+    subgraph " "
+        D_CTRL[磁盘控制器] &lt;--&gt; B
+        U_CTRL[USB控制器] &lt;--&gt; B
+        G_CTRL[显卡适配器] &lt;--&gt; B
+    end
+
+    subgraph "I/O 设备"
+        DISK[磁盘 Disks] &lt;--&gt; D_CTRL
+        MOUSE[鼠标] --&gt; U_CTRL
+        KEYBOARD[键盘] --&gt; U_CTRL
+        PRINTER[打印机] --&gt; U_CTRL
+        MONITOR[显示器] &lt;--&gt; G_CTRL
+    end
+
+    style B fill:#f9f,stroke:#333,stroke-width:2px
+</div><ul>
+<li>一个或多个CPU和多个设备控制器通过公共<strong>总线</strong>连接，共享对主内存的访问。</li>
+<li>CPU和I/O设备可以<strong>并发执行</strong>。例如，CPU在执行计算任务的同时，硬盘可以进行数据读取。</li>
+<li>每个设备控制器负责管理一类特定的设备（如USB控制器管理所有USB设备），并且它有自己的<strong>本地缓冲区 (local buffer)</strong>。</li>
+<li>当I/O操作发生时（例如，从硬盘读数据），数据先从设备传输到控制器的本地缓冲区，然后再由CPU（或DMA）将其从缓冲区移到主内存。</li>
+</ul>
+<p><strong>3. 中断 (Interrupts)</strong></p>
+<p>这里有一个关键问题：当一个缓慢的I/O设备（比如打印机）完成了它的任务，它如何通知CPU呢？总不能让CPU一直傻等吧？</p>
+<p>答案是<strong>中断</strong>。</p>
+<ul>
+<li><strong>中断是现代操作系统的核心驱动机制</strong>。</li>
+<li>当一个设备完成了操作，设备控制器会通过系统总线向CPU发送一个<strong>中断信号</strong>。</li>
+<li>CPU接收到中断信号后，会<strong>暂停</strong>当前正在执行的任务，保存好现场（即当前的寄存器状态和程序计数器），然后跳转到内存中一个特定的地址去执行一段代码，这段代码被称为<strong>中断服务程序 (Interrupt Service Routine)</strong>。</li>
+<li>中断服务程序处理完该事件后（比如，告诉操作系统打印任务已完成），CPU会恢复之前保存的现场，继续执行被打断的任务。</li>
+</ul>
+<p>整个过程可以用一个时间线图来表示：</p>
+<div class="mermaid">gantt
+    title CPU 与 I/O 设备的中断时间线
+    dateFormat  X
+    axisFormat  %s
+    
+    section CPU
+    用户进程执行     : 0, 4
+    I/O中断处理      : 4, 5
+    用户进程执行     : 5, 8
+    I/O中断处理      : 8, 9
+    用户进程执行     : 9, 12
+
+    section I/O设备
+    空闲(Idle)      : 0, 2
+    数据传输(Transferring) : 2, 4
+    空闲(Idle)      : 4, 6
+    数据传输(Transferring) : 6, 8
+    空闲(Idle)      : 8, 12
+
+    %% 描述事件
+    %% 在时间点2，用户进程发起I/O请求
+    %% 在时间点4，I/O完成，发出中断
+    %% 在时间点6，用户进程再次发起I/O请求
+    %% 在时间点8，I/O完成，发出中断
+</div><p>从图中可以看到，当I/O设备在进行数据传输时，CPU并没有闲着，而是在执行用户进程。只有当I/O完成并产生中断时，CPU才需要花一小部分时间去处理中断。这就是并发的精髓。</p>
+<p>除了硬件产生的中断，还有一种由软件产生的中断，称为<strong>陷阱 (Trap)</strong> 或 <strong>异常 (Exception)</strong>。比如，当你的程序试图除以零，或者需要请求操作系统服务（如读文件）时，就会产生一个陷阱。我们之后会学到，用户程序通过这种方式（称为<strong>系统调用 System Call</strong>）来请求内核的服务。</p>
+<p><strong>4. I/O 结构与 DMA</strong></p>
+<ul>
+<li><strong>同步I/O (Synchronous I/O)</strong>：用户进程发起I/O请求后，会一直<strong>阻塞</strong>，直到I/O操作完成。简单，但CPU效率低。</li>
+<li><strong>异步I/O (Asynchronous I/O)</strong>：用户进程发起I/O请求后，会<strong>立即返回</strong>，继续执行其他代码。当I/O操作完成时，操作系统会通过某种方式（如中断或回调）通知该进程。效率高，但编程复杂。</li>
+</ul>
+<div class="mermaid">graph TD
+    subgraph 同步I/O
+        A[请求进程] -- 发起请求 --&gt; B[设备驱动];
+        B -- I/O操作 --&gt; C[硬件];
+        A -. 等待 .-&gt; A;
+        C -- 中断 --&gt; D[中断处理];
+        D -- 返回 --&gt; B;
+        B -- 完成 --&gt; A;
+    end
+    
+    subgraph 异步I/O
+        X[请求进程] -- 发起请求，立即返回 --&gt; Y[设备驱动];
+        Y -- I/O操作 --&gt; Z[硬件];
+        X -- 继续执行其他任务 --&gt; X;
+        Z -- 中断 --&gt; W[中断处理];
+        W -- 通知 --&gt; X;
+    end
+</div><p>为了进一步解放CPU，现代计算机系统引入了<strong>直接内存访问 (Direct Memory Access, DMA)</strong>。</p>
+<ul>
+<li>对于高速I/O设备（如硬盘、网卡），如果没有DMA，CPU需要一个字节一个字节地把数据从设备控制器的缓冲区搬到内存，这会消耗大量的CPU周期。</li>
+<li>有了DMA，CPU只需告诉DMA控制器：“请把xxx字节的数据从源地址搬到目标地址”。然后CPU就可以去做别的事了。DMA控制器会自己完成数据传输，并在传输结束后，<strong>只产生一次中断</strong>来通知CPU，而不是每个字节都中断一次。这极大地提高了系统性能。</li>
+</ul>
+<h4 id="iv-存储结构与层次"><strong>IV 存储结构与层次</strong> </h4>
+<p>计算机的存储器不是单一的，而是一个<strong>分层的体系结构 (Storage Hierarchy)</strong>。分层的依据是三个特性：</p>
+<ul>
+<li><strong>速度 (Speed)</strong>：越往上越快。</li>
+<li><strong>成本 (Cost)</strong>：越往上每字节成本越高。</li>
+<li><strong>易失性 (Volatility)</strong>：越往上越容易断电丢失数据。</li>
+</ul>
+<div class="mermaid">graph TD
+    direction TB
+    R[寄存器 Registers]
+    C[缓存 Cache]
+    M[主内存 Main Memory]
+    D[电子磁盘/固态硬盘 SSD]
+    HD[磁盘 Magnetic Disk]
+    O[光盘 Optical Disk]
+    T[磁带 Magnetic Tapes]
+
+    R -- 快/贵/小 --&gt; C
+    C --&gt; M
+    M --&gt; D
+    D --&gt; HD
+    HD --&gt; O
+    O -- 慢/便宜/大 --&gt; T
+
+    style R fill:#ffadad
+    style C fill:#ffd6a5
+    style M fill:#fdffb6
+    style D fill:#caffbf
+    style HD fill:#9bf6ff
+    style O fill:#a0c4ff
+    style T fill:#bdb2ff
+</div><ul>
+<li><strong>主内存 (Main Memory)</strong>：通常指DRAM，是CPU能直接访问的大容量存储。它是易失的。</li>
+<li><strong>二级存储 (Secondary Storage)</strong>：如硬盘、SSD，用于永久保存数据，是非易失的。</li>
+</ul>
+<p><strong>缓存 (Caching)</strong> 是这个层次结构中最重要的原则。</p>
+<ul>
+<li>核心思想：将低速存储中常用的数据<strong>复制</strong>一份到高速存储中，以弥合它们之间的速度差异。</li>
+<li>当CPU需要数据时，它会<strong>首先检查缓存</strong>。
+<ul>
+<li><strong>命中 (Cache Hit)</strong>：如果在缓存中找到了，就直接从缓存中快速读取。</li>
+<li><strong>未命中 (Cache Miss)</strong>：如果没找到，就去下一级存储（如主存）中读取，并<strong>同时将这份数据加载到缓存中</strong>，以便下次快速访问。</li>
+</ul>
+</li>
+<li>主内存可以看作是硬盘的缓存；L2缓存是主内存的缓存；L1缓存是L2的缓存。</li>
+</ul>
+<h4 id="v-操作系统的核心结构与运行"><strong>V 操作系统的核心结构与运行</strong> </h4>
+<p><strong>1. 多道程序设计 (Multiprogramming)</strong></p>
+<p>早期计算机一次只能运行一个程序，当程序需要等待I/O时，CPU就处于空闲状态，造成了极大的浪费。</p>
+<p><strong>多道程序设计</strong>的思想是：在内存中同时存放多个作业（程序和数据）。当一个作业需要等待时（例如等待I/O），操作系统就立即切换到另一个已准备好的作业去执行。这样，CPU就总有事可做，大大提高了<strong>CPU利用率</strong>。</p>
+<div class="mermaid">graph TD
+    subgraph 内存布局
+        OS[操作系统]
+        J1[任务1]
+        J2[任务2]
+        J3[任务3]
+        J4[任务4]
+    end
+</div><p><strong>2. 分时系统 (Timesharing / Multitasking)</strong></p>
+<p>多道程序设计虽然提高了效率，但用户无法与程序进行实时交互。分时是多道程序设计的自然扩展，它的目标是<strong>提供交互性</strong>。</p>
+<p>系统将CPU时间分割成非常短的<strong>时间片 (time slice)</strong>，轮流分配给内存中的各个作业。由于切换速度非常快（通常是几十到几百毫秒），每个用户都感觉自己独占了整个计算机，可以实时地与自己的程序进行交互。</p>
+<ul>
+<li>一个在内存中准备运行的程序，我们称之为<strong>进程 (Process)</strong>。</li>
+<li>如果内存空间不足以容纳所有待运行的进程，操作系统会使用<strong>交换 (Swapping)</strong> 技术，将暂时不运行的进程换出到硬盘，等需要时再换入内存。</li>
+<li><strong>虚拟内存 (Virtual Memory)</strong> 技术则允许我们运行比物理内存还要大的程序。</li>
+</ul>
+<p><strong>3. 双重模式操作与保护 (Dual-Mode Operation)</strong></p>
+<p>操作系统是系统的管理者，如果一个普通的用户程序可以随意修改操作系统的核心代码，那整个系统很快就会崩溃。因此，必须要有保护机制。</p>
+<p>现代CPU提供了硬件级别的支持，即<strong>双重模式</strong>：</p>
+<ul>
+<li><strong>内核模式 (Kernel Mode)</strong>：也叫系统模式、特权模式。操作系统内核运行在此模式下，可以执行<strong>所有</strong>指令，访问<strong>所有</strong>内存和硬件。</li>
+<li><strong>用户模式 (User Mode)</strong>：用户应用程序运行在此模式下，只能执行<strong>一部分</strong>安全的指令，访问受限的内存区域。像修改时钟、访问硬件等<strong>特权指令 (privileged instructions)</strong> 在此模式下是禁止的。</li>
+</ul>
+<p>CPU中有一个<strong>模式位 (mode bit)</strong> 来标识当前处于哪种模式（例如，0代表内核模式，1代表用户模式）。</p>
+<p>那么，用户程序如何请求内核的服务呢？答案就是前面提到的<strong>系统调用 (System Call)</strong>。</p>
+<div class="mermaid">graph TD
+    subgraph "用户空间 (用户模式, mode bit = 1)"
+        A[用户进程执行] --&gt; B{发起系统调用};
+        E[从系统调用返回] --&gt; F[继续执行];
+    end
+
+    subgraph "内核空间 (内核模式, mode bit = 0)"
+        C(陷阱, 切换到内核模式&lt;br/&gt;mode bit = 0) --&gt; D[执行系统调用代码];
+        D --&gt; R(返回, 切换回用户模式&lt;br/&gt;mode bit = 1);
+    end
+
+    B -- trap --&gt; C;
+    R -- return --&gt; E;
+
+    style A fill:#lightblue
+    style B fill:#lightblue
+    style E fill:#lightblue
+    style F fill:#lightblue
+    style C fill:#lightgreen
+    style D fill:#lightgreen
+    style R fill:#lightgreen
+</div><p>当用户进程需要执行特权操作（如读文件）时，它会执行一个特殊的“陷阱”指令，发起系统调用。这会导致CPU硬件自动：</p>
+<ol>
+<li>将模式位从1切换到0（进入内核模式）。</li>
+<li>跳转到内核中预设好的代码地址开始执行。</li>
+</ol>
+<p>内核代表该进程执行完请求的服务后，在返回前，再将模式位从0切换回1，将控制权交还给用户进程。</p>
+<p>此外，为了防止用户程序陷入死循环而独占CPU，操作系统会设置一个<strong>定时器 (Timer)</strong>。定时器每隔一段时间就会产生一次<strong>中断</strong>，强制将控制权从用户程序夺回给操作系统，让操作系统可以重新进行调度。</p>
+<p><strong>双重模式</strong>和<strong>定时器中断</strong>是操作系统实现自我保护和控制权掌控的两大基石。</p>
+<h4 id="vi-操作系统核心功能概览-a-grand-tour"><strong>VI 操作系统核心功能概览 (A Grand Tour)</strong> </h4>
+<p>作为一次“宏观旅行”，我们最后来快速浏览一下操作系统需要管理的核心模块，这些也是我们后续课程将要深入学习的内容：</p>
+<ul>
+<li><strong>进程管理 (Process Management)</strong>：负责进程的创建、销毁、暂停、恢复，以及处理进程间的同步、通信和死锁问题。</li>
+<li><strong>内存管理 (Memory Management)</strong>：管理内存的分配与回收，记录哪些内存正在被谁使用，以及在进程和内存之间移动数据。</li>
+<li><strong>存储管理 (Storage Management)</strong>：
+<ul>
+<li><strong>文件系统管理</strong>：提供统一的、逻辑的视角（文件和目录）来管理信息存储，并控制对文件的访问。</li>
+<li><strong>大容量存储管理</strong>：管理硬盘等二级存储设备，包括磁盘调度、空闲空间管理等。</li>
+</ul>
+</li>
+<li><strong>I/O子系统管理 (I/O Subsystem)</strong>：隐藏不同硬件设备的复杂性，为上层提供统一的接口，并负责设备驱动、缓冲、缓存等。</li>
+<li><strong>保护与安全 (Protection and Security)</strong>：
+<ul>
+<li><strong>保护</strong>：控制进程或用户对系统资源的访问权限。</li>
+<li><strong>安全</strong>：抵御来自内部和外部的攻击，如病毒、蠕虫等。</li>
+</ul>
+</li>
+</ul>
+</article>
+<div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+<div class="giscus-container" style="margin-top: 50px;">
+<script async="" crossorigin="anonymous" data-category="Announcements" data-emit-metadata="0" data-input-position="bottom" data-lang="zh-CN" data-mapping="pathname" data-reactions-enabled="1" data-repo="forliage/forliage.github.io" data-repo-id="R_kgDONjzd4w" data-strict="0" data-theme="https://forliage.github.io/giscus.css" src="https://giscus.app/client.js">
+</script>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default'
+      });
+</script>
+<div class="dock">
+  <a href="https://forliage.github.io/index.html">🏠</a>
+  <a href="https://forliage.github.io/posts.html">📚</a>
+  <a href="https://forliage.github.io/about.html">👤</a>
+</div>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script><script src="../trail.js"></script>
+<!-- Highlight.js Core -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<!-- Highlight.js Copy Plugin -->
+<script src="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.js"></script>
+<!-- Initialize Highlight.js and Copy Plugin -->
+<script>
+  hljs.highlightAll();
+  hljs.addPlugin(new CopyButtonPlugin());
+</script>
+</body>
+</html>
