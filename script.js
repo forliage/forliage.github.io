@@ -161,6 +161,102 @@ window.onload = function() {
         });
     }
 
+    // Style toggle for dark mode control
+    const styleToggleBtn = document.getElementById('style-toggle-btn');
+    if (styleToggleBtn && darkToggleLabel) {
+        const applyToggleStyle = () => {
+            const currentStyle = localStorage.getItem('darkToggleStyle') || 'metal';
+            if (currentStyle === 'liquid') {
+                darkToggleLabel.classList.add('liquid-style');
+            } else {
+                darkToggleLabel.classList.remove('liquid-style');
+            }
+        };
+
+        styleToggleBtn.addEventListener('click', () => {
+            const isLiquid = darkToggleLabel.classList.toggle('liquid-style');
+            localStorage.setItem('darkToggleStyle', isLiquid ? 'liquid' : 'metal');
+        });
+
+        applyToggleStyle(); // Apply style on load
+    }
+
+    // Make the mini player draggable
+    function makeDraggable(elmnt) {
+        let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        
+        // Load position from localStorage
+        const savedPos = localStorage.getItem('miniPlayerPosition');
+        if (savedPos) {
+            const { top, left } = JSON.parse(savedPos);
+            elmnt.style.top = top;
+            elmnt.style.left = left;
+            elmnt.style.right = 'auto';
+            elmnt.style.bottom = 'auto';
+        }
+
+        const dragMouseDown = (e) => {
+            e = e || window.event;
+            e.preventDefault();
+            pos3 = e.clientX || e.touches[0].clientX;
+            pos4 = e.clientY || e.touches[0].clientY;
+            document.onmouseup = closeDragElement;
+            document.onmousemove = elementDrag;
+            document.ontouchend = closeDragElement;
+            document.ontouchmove = elementDrag;
+        };
+
+        elmnt.onmousedown = dragMouseDown;
+        elmnt.ontouchstart = dragMouseDown;
+
+        const elementDrag = (e) => {
+            e = e || window.event;
+            const currentX = e.clientX || e.touches[0].clientX;
+            const currentY = e.clientY || e.touches[0].clientY;
+            pos1 = pos3 - currentX;
+            pos2 = pos4 - currentY;
+            pos3 = currentX;
+            pos4 = currentY;
+
+            let newTop = elmnt.offsetTop - pos2;
+            let newLeft = elmnt.offsetLeft - pos1;
+
+            // Boundary check
+            const docWidth = document.documentElement.clientWidth;
+            const docHeight = document.documentElement.clientHeight;
+            const elmntWidth = elmnt.offsetWidth;
+            const elmntHeight = elmnt.offsetHeight;
+
+            if (newLeft < 0) newLeft = 0;
+            if (newTop < 0) newTop = 0;
+            if (newLeft + elmntWidth > docWidth) newLeft = docWidth - elmntWidth;
+            if (newTop + elmntHeight > docHeight) newTop = docHeight - elmntHeight;
+
+            elmnt.style.top = newTop + "px";
+            elmnt.style.left = newLeft + "px";
+            // Important: unset right and bottom when dragging
+            elmnt.style.right = 'auto';
+            elmnt.style.bottom = 'auto';
+        };
+
+        const closeDragElement = () => {
+            document.onmouseup = null;
+            document.onmousemove = null;
+            document.ontouchend = null;
+            document.ontouchmove = null;
+            
+            // Save position to localStorage
+            localStorage.setItem('miniPlayerPosition', JSON.stringify({
+                top: elmnt.style.top,
+                left: elmnt.style.left
+            }));
+        };
+    }
+
+    if (miniPlayer) {
+        makeDraggable(miniPlayer);
+    }
+
     applyTheme();
 
     const savedTime = parseFloat(localStorage.getItem('music-current-time') || '0');

@@ -193,6 +193,126 @@ body.dark-mode .dock {
     opacity: 1;
 }
 
+/* Style for the theme toggle button */
+#style-toggle-btn {
+    position: fixed;
+    right: 85px; /* Position it next to the dark mode control */
+    bottom: 80px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    cursor: pointer;
+    z-index: 1000;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: transform 0.2s;
+}
+
+#style-toggle-btn:hover {
+    transform: scale(1.1);
+}
+
+body.dark-mode #style-toggle-btn {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Liquid Glass style for dark mode toggle */
+.dark-mode-control.liquid-style {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+}
+
+body.dark-mode .dark-mode-control.liquid-style {
+    background: rgba(30, 30, 30, 0.2);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.dark-mode-control.liquid-style .knob {
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+body.dark-mode .dark-mode-control.liquid-style .knob {
+    background: rgba(230, 230, 230, 0.8);
+}
+
+/* Shine effect for liquid style */
+.dark-mode-control.liquid-style::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 80%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: skewX(-30deg);
+    transition: left 0.6s ease;
+}
+
+.dark-mode-control.liquid-style:hover::before {
+    left: 150%;
+}
+
+/* Liquid Glass style for "Begin Reading" button */
+.btn.btn-liquid {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    color: #fff; /* Ensure text is visible */
+}
+
+.btn.btn-liquid:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    background-color: rgba(255, 255, 255, 0.3); /* Slightly lighten on hover */
+    color: #fff;
+}
+
+.btn.btn-liquid::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 80%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    transform: skewX(-30deg);
+    transition: left 0.7s ease-in-out;
+}
+
+.btn.btn-liquid:hover::before {
+    left: 150%;
+}
+
+/* Dark mode adjustments for the liquid button */
+body.dark-mode .btn.btn-liquid {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+body.dark-mode .btn.btn-liquid:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+    color: #fff;
+}
+
 /* Continue Reading Banner */
 #continue-reading-banner {
     position: fixed;
