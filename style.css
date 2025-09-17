@@ -1559,8 +1559,8 @@ body.dark-mode .toc-widget .toc-level-h1 {
 /* Mini Player */
 #mini-player {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
+    bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+    right: calc(20px + env(safe-area-inset-right, 0px));
     display: flex;
     align-items: center;
     padding: 8px 12px;
@@ -1570,6 +1570,13 @@ body.dark-mode .toc-widget .toc-level-h1 {
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     font-size: 0.9em;
     z-index: 1000;
+}
+
+@media (max-width: 768px) {
+    #mini-player {
+        bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+        right: calc(16px + env(safe-area-inset-right, 0px));
+    }
 }
 
 #mini-player .mp-info {
