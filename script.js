@@ -76,6 +76,20 @@ window.onload = function() {
     miniToggle.className = 'mp-toggle';
     miniToggle.textContent = '▶︎';
     miniPlayer.appendChild(miniToggle);
+
+    // Task 4: Mini Player Liquid Ripple
+    miniPlayer.addEventListener('mousemove', e => {
+        const rect = miniPlayer.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        miniPlayer.style.setProperty('--mx', `${x}px`);
+        miniPlayer.style.setProperty('--my', `${y}px`);
+    });
+    miniPlayer.addEventListener('mouseleave', () => {
+        miniPlayer.style.setProperty('--mx', `-50%`);
+        miniPlayer.style.setProperty('--my', `-50%`);
+    });
+
     document.body.appendChild(miniPlayer);
     if (musicBtn) musicBtn.remove();
     musicBtn = miniToggle;
@@ -364,6 +378,20 @@ window.onload = function() {
             el.style.transform = `translateY(${sy * speed}px)`;
         });
     });
+
+    // Task 1: Hero Prism Effect
+    const heroElement = document.querySelector('.hero');
+    if (heroElement) {
+        heroElement.addEventListener('mousemove', e => {
+            const rect = heroElement.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const xPercent = (x / rect.width) * 100;
+            const yPercent = (y / rect.height) * 100;
+            heroElement.style.setProperty('--mx', `${xPercent}%`);
+            heroElement.style.setProperty('--my', `${yPercent}%`);
+        });
+    }
     
     const dock = document.querySelector('.dock');
     if (dock) {

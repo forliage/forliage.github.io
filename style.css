@@ -116,6 +116,7 @@ header nav ul li a:hover {
     /* background-color: rgba(255, 255, 255, 0.1); Example hover background */
 }
 
+/* 3. Dock Crystal Reflection Bar */
 .dock {
     position: fixed;
     bottom: 20px;
@@ -124,12 +125,27 @@ header nav ul li a:hover {
     display: flex;
     gap: 20px;
     padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.3);
+    
+    /* MODIFIED: Add gradient for shine effect */
+    background:
+        linear-gradient(
+            100deg,
+            transparent 20%,
+            rgba(255, 255, 255, 0.4) 50%,
+            transparent 80%
+        ) no-repeat -200% 0 / 200% 100%,
+        rgba(255, 255, 255, 0.3);
+
     backdrop-filter: blur(10px);
     border-radius: 20px;
     z-index: 1000;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    /* MODIFIED: Add background-position to transition */
+    transition: background-position 0.8s ease, transform 0.3s ease, opacity 0.3s ease;
     overflow: hidden;
+}
+
+.dock:hover {
+    background-position: 150% 0, 0 0;
 }
 
 .dock::before {
@@ -138,6 +154,18 @@ header nav ul li a:hover {
     inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E");
     opacity: 0.05;
+    pointer-events: none;
+}
+
+/* NEW: Top highlight tangent line */
+.dock::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.5);
     pointer-events: none;
 }
 
@@ -165,10 +193,22 @@ header nav ul li a:hover {
     filter: blur(2px);
     transform-origin: top;
     pointer-events: none;
+    
+    /* NEW: Reflection fade-out effect */
+    -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 80%);
+    mask-image: linear-gradient(to bottom, black 20%, transparent 80%);
 }
 
 body.dark-mode .dock {
-    background: rgba(0, 0, 0, 0.3);
+    /* MODIFIED: Add gradient for shine effect for dark mode */
+    background:
+        linear-gradient(
+            100deg,
+            transparent 20%,
+            rgba(255, 255, 255, 0.2) 50%,
+            transparent 80%
+        ) no-repeat -200% 0 / 200% 100%,
+        rgba(0, 0, 0, 0.3);
 }
 
 .tilt-card {
@@ -191,6 +231,76 @@ body.dark-mode .dock {
 
 .tilt-card:hover::after {
     opacity: 1;
+}
+
+/* --- Task 2: Floating Droplets --- */
+
+/* Keyframes for floating animation */
+@keyframes float-droplet-1 {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
+
+@keyframes float-droplet-2 {
+    0%, 100% { transform: translateY(-18px); }
+}
+
+@keyframes float-droplet-3 {
+    0%, 100% { transform: translateY(-8px); }
+}
+
+/* Applying glass card styles to all three elements */
+.love-notes,
+.side-hearts,
+.side-quotes {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    z-index: 10;
+    opacity: 1; /* Override old opacity */
+}
+
+/* Shared floating shadow */
+.love-notes::after,
+.side-hearts::after,
+.side-quotes::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 10px;
+    background: radial-gradient(ellipse, rgba(0,0,0,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: -1;
+    filter: blur(2px);
+}
+
+/* Applying new animations and specific tweaks */
+.love-notes {
+    animation: float-droplet-1 8s ease-in-out infinite;
+    padding: 15px 20px;
+}
+
+.side-hearts {
+    animation: float-droplet-2 10s ease-in-out infinite 1s;
+    gap: 15px; /* Tweak gap */
+}
+
+.side-quotes {
+    animation: float-droplet-3 9s ease-in-out infinite 0.5s;
+    top: 55vh; /* Move to avoid overlap with love-notes */
+    padding: 15px 20px;
+}
+
+/* Remove animation from inner heart spans */
+.side-hearts span {
+    animation: none;
 }
 
 /* Style for the theme toggle button */
@@ -237,6 +347,9 @@ body.dark-mode .dark-mode-control.liquid-style {
     background: rgba(30, 30, 30, 0.2);
     border-color: rgba(255, 255, 255, 0.1);
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    /* NEW: Add drop-shadow for refraction effect */
+    filter: drop-shadow(0 0 5px rgba(180, 220, 255, 0.3));
+    transition: background-color 0.5s ease, color 0.5s ease, filter 0.5s ease;
 }
 
 .dark-mode-control.liquid-style .knob {
@@ -248,7 +361,12 @@ body.dark-mode .dark-mode-control.liquid-style .knob {
     background: rgba(230, 230, 230, 0.8);
 }
 
-/* Shine effect for liquid style */
+/* 5. Dark Mode Switch Shine Effect (on click) */
+@keyframes liquid-charge {
+    from { left: -150%; }
+    to { left: 150%; }
+}
+
 .dark-mode-control.liquid-style::before {
     content: '';
     position: absolute;
@@ -256,13 +374,13 @@ body.dark-mode .dark-mode-control.liquid-style .knob {
     left: -150%;
     width: 80%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); /* Made it brighter */
     transform: skewX(-30deg);
-    transition: left 0.6s ease;
 }
 
-.dark-mode-control.liquid-style:hover::before {
-    left: 150%;
+/* Trigger animation when the 'active' class is added on click */
+.dark-mode-control.liquid-style.active::before {
+    animation: liquid-charge 0.4s ease-in-out forwards;
 }
 
 /* Liquid Glass style for "Begin Reading" button */
@@ -809,6 +927,33 @@ footer {
     text-align: center;
     margin-top: 20vh;
     color: #fff;
+    position: relative; /* For pseudo-element positioning */
+    overflow: hidden; /* Keep pseudo-element contained */
+}
+
+/* 1. Hero Prism Effect */
+.hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        /* Cold color dispersion gradient */
+        linear-gradient(160deg, rgba(180, 210, 255, 0.2), rgba(220, 200, 255, 0.2)),
+        /* Refraction bright spot, follows mouse */
+        radial-gradient(
+            circle at var(--mx, 50%) var(--my, 50%),
+            rgba(255, 255, 255, 0.8) 0%,
+            rgba(255, 255, 255, 0.4) 10%,
+            transparent 40%
+        );
+    mix-blend-mode: screen;
+    opacity: 0; /* Initially hidden */
+    transition: opacity 0.5s ease-in-out;
+}
+
+.hero:hover::after {
+    opacity: 1;
 }
 
 .hero h2 {
@@ -1676,7 +1821,7 @@ body.dark-mode .toc-widget .toc-level-h1 {
     to { transform: translateY(-15px); }
 }
 
-/* Mini Player */
+/* 4. Mini Player Liquid Ripple */
 #mini-player {
     position: fixed;
     bottom: calc(120px + env(safe-area-inset-bottom, 0px));
@@ -1685,11 +1830,22 @@ body.dark-mode .toc-widget .toc-level-h1 {
     align-items: center;
     padding: 8px 12px;
     border-radius: 12px;
-    background: rgba(255,255,255,0.3);
+    
+    /* MODIFIED: Add liquid ripple background */
+    background:
+        radial-gradient(
+            circle at var(--mx, -50%) var(--my, -50%), /* Initially off-screen */
+            rgba(255, 255, 255, 0.35) 0%,
+            transparent 60%
+        ),
+        rgba(255, 255, 255, 0.2); /* Base color */
+
     backdrop-filter: blur(10px);
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     font-size: 0.9em;
     z-index: 1000;
+    overflow: hidden; /* Contain the ripple */
+    transition: background 0.2s;
 }
 
 @media (max-width: 768px) {
@@ -1711,7 +1867,8 @@ body.dark-mode .toc-widget .toc-level-h1 {
 #mini-player .mp-bar {
     width: 100px;
     height: 4px;
-    background: rgba(255,255,255,0.5);
+    /* MODIFIED: Add conic-gradient for layered look */
+    background: conic-gradient(from 90deg, #ff8acb, #ff2d55, #AD1457, #ff2d55, #ff8acb);
     border-radius: 2px;
     overflow: hidden;
     margin-top: 4px;
