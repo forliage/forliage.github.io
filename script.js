@@ -646,8 +646,8 @@ function showAirpodsCard() {
     card.id = 'airpods-card';
     card.innerHTML = `
         <button class="close" aria-label="关闭">×</button>
-        <h3>增加了亮暗切换按钮的液态玻璃效果选项</h3>
-        <p style="font-size: 0.8em; margin: 5px 0 0;">大家可以根据自己的喜欢在金属效果与液态玻璃效果间进行切换</p>
+        <h3>增设多项液态玻璃效果</h3>
+        <p style="font-size: 0.8em; margin: 5px 0 0;">欢迎大家进行体验！</p>
     `;
     document.body.appendChild(card);
     requestAnimationFrame(() => card.classList.add('show'));
