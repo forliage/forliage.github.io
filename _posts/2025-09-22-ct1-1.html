@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>计算理论01:集合、关系和语言(I)</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FPDBQB4LZD');
+    </script>
+<!-- Highlight.js Themes -->
+<link href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-dawn.min.css" id="highlight-theme-link" rel="stylesheet"/>
+<!-- Highlight.js Copy Plugin CSS -->
+<link href="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.css" rel="stylesheet"/>
+</head>
+<body>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<button id="style-toggle-btn" title="切换控件样式">🎨</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="计算理论1-1集合-关系和语言i">计算理论1-1:集合、关系和语言(I) </h1>
+<h3 id="1集合">1.集合 </h3>
+<h4 id="11集合">1.1.集合 </h4>
+<p>定义：An unordered collection of elements</p>
+<p>特殊定义：$\varPhi$空集</p>
+<h4 id="12子集和真子集">1.2.子集和真子集 </h4>
+<p>子集符号：$\subseteq$<br>
+$$S\subseteq T \Leftrightarrow (\forall x \in S \Rightarrow x \in T)$$<br>
+真子集符号：$\subset$</p>
+<p>两个集合相等当且仅当它们包含相同的元素<br>
+$$S=T\Leftrightarrow (S\subseteq T)\land (T\subseteq S)$$</p>
+<h4 id="13集合操作">1.3.集合操作 </h4>
+<ul>
+<li>并集</li>
+<li>交集</li>
+<li>补集</li>
+<li>差集</li>
+<li>对称差</li>
+</ul>
+<h4 id="14集合性质">1.4.集合性质 </h4>
+<ul>
+<li><strong>幂等律</strong> $$A\cap A=A,\quad A\cup A=A$$</li>
+<li><strong>交换律</strong> $$A\cup B=B\cup A,\quad A\cap B = B\cap A$$</li>
+<li><strong>结合律</strong> $$A\cup (B\cup C) = (A\cup B)\cup C$$ $$A\cap (B\cap C) = (A\cap B)\cap C$$</li>
+<li><strong>分配律</strong> $$A\cup (B\cap C) = (A\cup B)\cap (A\cup C)$$ $$A\cap(B\cup C)=(A\cap B)\cup (A\cap C)$$</li>
+<li><strong>吸收律</strong> $$A\cup(A\cap B)=A,\quad A\cap(A\cup B)=A$$</li>
+<li><strong>De Morgan定律</strong> $$A-(B\cup C)=(A-B)\cap(A-C)$$ $$A-(B\cap C)=(A-B)\cup(A-C)$$</li>
+</ul>
+<h4 id="15幂集">1.5.幂集 </h4>
+<p>$2^A$=$A$的所有子集的集合<br>
+$$2^A=\{T|T\subseteq A\}$$</p>
+<p>一个例子：如果$S=\{x,y,z\}$，那么$S$的所有子集为：<br>
+$$\varPhi,\{x\},\{y\},\{z\},\{x,y\},\{x,z\},\{y,z\},\{x,y,z\}$$<br>
+因此<br>
+$$2^S=\{\varPhi,\{x\},\{y\},\{z\},\{x,y\},\{x,z\},\{y,z\},\{x,y,z\}\}$$</p>
+<details>
+<summary><strong>思考题:若A是可数集合，那么A的幂集是否是可数集合？</strong></summary>
+<p><strong>解答:</strong> 先说结论：</p>
+<ul>
+<li>若$A$有限（例如$|A|=n$），则$\mathcal{P}(A)$有$2^n$个子集，有限可数。</li>
+<li>若$A$可数无穷（与$\mathbb{N}$等势），则$\mathcal{P}(A)$不可数；更强的，有$|\mathcal{P}(A)|=2^{\aleph_0}$(连续统基数)。</li>
+</ul>
+<p><strong>证明</strong>：<br>
+设$A$可数无穷，取一个枚举$A=\{a_1,a_2,a_3,...\}$。为求反证，设$\mathcal{P}(A)$可数，即存在列举<br>
+$$S_1,S_2,...$$<br>
+枚举了$A$的全部子集。</p>
+<p>构造对角集合<br>
+$$D=\{a_n \in A: a_n \notin S_n\}$$<br>
+也就是说，对第$n$个子集$S_n$，我们在第$n$个元素$a_n$处“翻转归属”。</p>
+<p>现在对任意$n$，比较$D$与$S_n$在元素$a_n$处的关系：</p>
+<ul>
+<li>若$a_n\in S_n$，则按定义$a_n \notin D$;</li>
+<li>若$a_n\notin S_n$，则按定义$a_n\in D$<br>
+于是对每个$n$，集合$D$与$S_n$至少在元素$a_n$处不同，故$D\neq S_n$。这意味着$D$不在我们假定的“完全枚举”序列中，矛盾。</li>
+</ul>
+<p>证完！</p>
+<blockquote>
+<p>备注：此证明本质上是康托尔（Cantor）的“对角线论证”的子集版本。</p>
+</blockquote>
+</details>
+<h4 id="16划分">1.6.划分 </h4>
+<p>一个非空集合$A$的划分是其幂集$2^A$的满足下列条件的子集$\Pi$</p>
+<ul>
+<li>$\Pi \neq \varPhi$</li>
+<li>$\forall S,T \in \Pi,S\neq T, S\cap T=\varPhi$</li>
+<li>$\bigcup\Pi=A$</li>
+</ul>
+<p>一个例子：集合$\{1,2,3\}$有五种划分：</p>
+<ul>
+<li>$\{\{1\},\{2\},\{3\}\}$</li>
+<li>$\{\{1,2\},\{3\}\}$</li>
+<li>$\{\{1,3\},\{2\}\}$</li>
+<li>$\{\{2,3\},\{1\}\}$</li>
+<li>$\{\{1,2,3\}\}$</li>
+</ul>
+<details>
+<summary><strong>思考题：n元集合A有多少种划分方式？如果集合A是可数集，A的划分方式可数吗？</strong></summary>
+<p>结论概要：</p>
+<ul>
+<li>若 $|A|=n&lt;\infty$，则 $A$ 的划分（即<strong>集合分划</strong>、set partitions）数目是第 $n$ 个<strong>贝尔数</strong> $B_n$。</li>
+<li>若 $A$ <strong>可数无穷</strong>（与 $\mathbb N$ 等势），则 $A$ 的所有划分的集合<strong>不可数</strong>，其基数恰为 $2^{\aleph_0}$（连续统基数）。</li>
+</ul>
+<p>下面给出严谨的定义与证明。</p>
+<p>有限情形：$|A|=n$ 时的划分个数</p>
+<p><strong>定义（集合分划）</strong>：把 $A$ 划分为若干个两两不交且并为 $A$ 的非空子集族 $\{B_1,\dots,B_k\}$（块或类），块的次序不计、块内元素无序。</p>
+<p>用第二类斯特林数计数</p>
+<p>记 $\left\{\,{n\atop k}\,\right\}$ 为<strong>第二类斯特林数</strong>：把一个 $n$ 元集合划分为 <strong>恰好 $k$ 个</strong>非空块的方式数。则</p>
+$$B_n=\sum_{k=0}^n \left\{\,{n\atop k}\,\right\}.$$
+<p><strong>递推证明</strong>：对 $n\ge1$ 与 $1\le k\le n$ 有</p>
+$$\left\{\,{n\atop k}\,\right\}=\left\{\,{n-1\atop k-1}\,\right\}+k\left\{\,{n-1\atop k}\,\right\},$$
+<p>理由：固定元素 $n$。要么它独自成一个新块（于是其余 $n-1$ 个元素需划成 $k-1$ 块）；要么它加入到已有 $k$ 个块中的某一个（于是其余 $n-1$ 个元素先划成 $k$ 块，再为 $n$ 选择其中一个块加入，共 $k$ 倍）。配合边界 $\left\{\,{0\atop 0}\,\right\}=1,\ \left\{\,{n\atop 0}\,\right\}=0 (n\ge1)$ 即可递推求得 $B_n$。</p>
+<p>还有闭式：</p>
+$$\left\{\,{n\atop k}\,\right\}=\frac1{k!}\sum_{j=0}^k(-1)^j\binom{k}{j}(k-j)^n,$$
+<p>从而 $B_n=\sum\limits_{k=0}^n \left\{\,{n\atop k}\,\right\}$ 明确给出了计数。</p>
+<p>直接给出贝尔数递推（双射证明）</p>
+<p>还可证明</p>
+$$B_{n+1}=\sum_{j=0}^{n}\binom{n}{j}B_{n-j}=\sum_{k=0}^n\binom{n}{k}B_k,\quad B_0=1.$$
+<p><strong>证明思路</strong>：考虑 $[n+1]=\{1,\dots,n,n+1\}$ 的任一分划。看包含元素 $n+1$ 的那个块，去掉 $n+1$ 后记为子集 $S\subseteq[n]$。其余 $n-|S|$ 个元素任意分划，共 $B_{\,n-|S|}$ 种。对所有 $S\subseteq[n]$ 求和即得上式。构造是双射的，因此无重计。</p>
+<blockquote>
+<p>备注：贝尔数的指数型生成函数为<br>
+$\displaystyle \sum_{n\ge0}B_n\,\frac{x^n}{n!}=\exp\!\big(e^x-1\big)$；<br>
+亦有多宾斯基公式 $\displaystyle B_n=\frac1e\sum_{m=0}^\infty \frac{m^n}{m!}$。</p>
+</blockquote>
+<p>可数无穷情形：$|A|=\aleph_0$ 时的划分个数</p>
+<p>把分划等同于一个<strong>等价关系</strong>（同块即等价）。记 $\Pi(A)$ 为 $A$ 上所有分划的集合。</p>
+<p>上界：$|\Pi(A)|\le 2^{\aleph_0}$</p>
+<p>因为等价关系是 $A\times A$ 的子集，而 $A$ 可数 $\Rightarrow A\times A$ 亦可数，所以</p>
+$$|\Pi(A)|=\big|\{\text{等价关系}\}\big|\ \le\ \big|\mathcal P(A\times A)\big|\ =\ 2^{\aleph_0}.$$
+<p>下界：$|\Pi(A)|\ge 2^{\aleph_0}$</p>
+<p>构造一个从 $\mathcal P(A\setminus\{a_0\})$（去掉固定元素 $a_0$ 后的幂集）到 $\Pi(A)$ 的<strong>单射</strong>。取 $A=\mathbb N$，固定 $0\in\mathbb N$。对任意子集 $S\subseteq \mathbb N\setminus\{0\}$，定义两块分划</p>
+$$\pi_S\ :=\ \big\{\, \{0\}\cup S,\ \ (\mathbb N\setminus\{0\})\setminus S \,\big\}.$$
+<p>显然 $\pi_S$ 是 $\mathbb N$ 的分划，且由块中含 $0$ 的那一块可以<strong>唯一</strong>恢复 $S=\big(\text{含 }0\text{ 的块}\big)\setminus\{0\}$。因此 $S\mapsto \pi_S$ 为单射。于是</p>
+$$|\Pi(\mathbb N)|\ \ge\ \big|\mathcal P(\mathbb N\setminus\{0\})\big|\ =\ 2^{\aleph_0}.$$
+<p>综合上下界：</p>
+$$|\Pi(A)|\ =\ 2^{\aleph_0}\qquad(\text{当 }|A|=\aleph_0).$$
+<p>因此，可数集的<strong>分划方式不可数</strong>，其基数与实数集相同。</p>
+<blockquote>
+<p>补充：虽然分划的<strong>块数</strong>至多可数（每块至少含一个不同元素），但“所有分划的集合”的规模仍是连续统大，这不矛盾——对象空间很大。</p>
+</blockquote>
+</details>
+<h3 id="2关系和函数">2.关系和函数 </h3>
+<h4 id="21有序对">2.1.有序对 </h4>
+<p>对$(a,b)$是有序对<br>
+$$(a,b)=(c,d)\Leftrightarrow (a=c)\land (b=d)$$</p>
+<h4 id="22二元关系">2.2.二元关系 </h4>
+<p>笛卡尔积$A\times B$<br>
+$$A\times B=\{(a,b)|a\in A\land b\in B\}$$<br>
+二元关系<br>
+$$R\subseteq A\times B$$</p>
+<h4 id="23关系上的操作">2.3.关系上的操作 </h4>
+<ul>
+<li>Inverse<br>
+$$R\subseteq A\times B \Leftrightarrow R^{-1}\subseteq B\times A$$</li>
+<li>Composition
+<ul>
+<li>令$A,B$和$C$都是集合</li>
+<li>令$R$是$A$到$B$的关系，$S$是$B$到$C$的关系 $$(R\subseteq A\times B)\land (S\subseteq B\times C)$$</li>
+<li>因此$R$和$S$通过$R\circ S$给出了从$A$到$C$的复合映射 $$R\circ S=\{(a,c)|\exists b\in B,(a,b)\in R \text{ and } (b,c)\in S\}$$</li>
+</ul>
+</li>
+</ul>
+<h4 id="24定义域和值域">2.4.定义域和值域 </h4>
+<ul>
+<li>关系的定义域是关系的输入集合</li>
+<li>关系的值域是关系的输出集合</li>
+</ul>
+<h4 id="25函数">2.5.函数 </h4>
+<p>定义：函数$f:A\to B$满足：</p>
+<ul>
+<li>$f\subseteq A\times B$</li>
+<li>$\forall a$，$\exists$ exactly one $b\in B$ with $(a,b)\in f$</li>
+</ul>
+<p>我们记$(a,b)\in f$为$f(a)=b$</p>
+<ul>
+<li>单射(One-to-one function) $$\forall a,b\in A\land a\neq b \Rightarrow f(a)\neq f(b)$$</li>
+<li>满射(Onto function) $$\forall b\in B,\exists a \in A \text{ such that } f(a)=b$$</li>
+<li>双射(One-to-one correspondence):one-to-one+onto</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th><strong>S.No</strong></th>
+<th><strong>Injective Function</strong></th>
+<th><strong>Surjective Function</strong></th>
+<th><strong>Bijective Function</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>A function that always maps the distinct element of its domain to the distinct element of its codomain</td>
+<td>A function that maps one or more elements of A to the all element of B</td>
+<td>A function that is both injective and surjective</td>
+</tr>
+<tr>
+<td>2</td>
+<td>It is also known as one-to-one function</td>
+<td>It is also known as onto function</td>
+<td>It is also known as one-to one correspondence</td>
+</tr>
+</tbody>
+</table>
+<h3 id="3特殊类型的二元关系">3.特殊类型的二元关系 </h3>
+<h4 id="31有向图">3.1.有向图 </h4>
+<p>对于任何一个集合$A$，关系$R\subseteq A\times A$可以被表示为一个有向图</p>
+<ul>
+<li>A node: represented by a small circle, represent each element of $A$</li>
+<li>An arrow: is the edge of the graph, drawn from $a$ to $b$ iff $(a,b)\in R$</li>
+<li>From a node to another, there is either no edge or one edge.</li>
+</ul>
+<p>一个例子：$R=\{(a,b),(b,a),(a,d),(d,c),(c,c),(c,a)\}$</p>
+<div class="mermaid">flowchart LR
+%% --- 把节点分两列，固定大致位置 ---
+subgraph L[ ]
+  direction TB
+  A((a))
+  D((d))
+end
+subgraph R[ ]
+  direction TB
+  B((b))
+  C((c))
+end
+
+%% --- 关系边（按题目给出的有序对） ---
+A --&gt; B
+B --&gt; A
+A --&gt; D
+D --&gt; C
+C --&gt; C
+C --&gt; A
+
+%% --- 样式（可选） ---
+classDef node fill:#fff,stroke:#000,color:#000,stroke-width:1.5px;
+class A,B,C,D node;
+linkStyle default stroke:#000,stroke-width:1.5px,curve:basis
+</div><h4 id="32矩阵">3.2.矩阵 </h4>
+<ul>
+<li>如果$R$是集合$X$和$Y$之间的二元关系，$R\subseteq X\times Y$</li>
+<li>$R$可以被表示为分别用$X$和$Y$表示行和列的逻辑矩阵$M$</li>
+<li>$M$的元素可以定义为 $$m_{i,j}=\begin{cases}1\quad (x_i,y_i)\in R\\ 0\quad (x_i,y_i)\notin R\end{cases}$$</li>
+</ul>
+<h4 id="33关系的性质">3.3.关系的性质 </h4>
+<ul>
+<li>Reflexive:$\forall a \in A\Rightarrow (a,a)\in R$
+<ul>
+<li>Consider all $a\in A$</li>
+</ul>
+</li>
+<li>Symmetric: $(a,b)\in R \land a\neq b \Rightarrow (b,a)\in R$
+<ul>
+<li>Reflexive is alternative</li>
+<li>Not necessarily consider all pairs</li>
+<li>Represented by undirected graph</li>
+</ul>
+</li>
+<li>Antisymmetric:$(a,b)\in R\land a\neq b\Rightarrow (b,a)\notin R$
+<ul>
+<li>Reflexive is alternative</li>
+<li>Consider all pairs $(a,b)$ with $a\neq b$</li>
+</ul>
+</li>
+<li>Transitive:$(a,b)\in R,(b,c)\in R\Rightarrow (a,c)\in R$
+<ul>
+<li>Reflexive is alternative</li>
+<li>Not necessaryily consider all pairs</li>
+</ul>
+</li>
+</ul>
+<h4 id="34等价关系">3.4.等价关系 </h4>
+<p>定义:反身性、对称性和传递性。</p>
+<p>等价关系$R\subseteq A\times A$的无向图表示由若干簇构成，簇内每对元素间以线连接。</p>
+<p><strong>等价类</strong>：$[a]=\{b|(a,b)\in R\}$<br>
+簇内的点的集合是一个等价类。</p>
+<h4 id="35划分">3.5.划分 </h4>
+<p>定理：令$R$是非空集合$A$上的一个等价关系，则$R$的所有等价类构成了$A$的一个划分。</p>
+<h4 id="36偏序">3.6.偏序 </h4>
+<p>定义：给定一个集合$A$，一个$A$的偏序是一个二元关系$\leq$ 满足以下的性质：</p>
+<ul>
+<li>反身性：对于任意的$a\in A$，我们有$a\leq a$</li>
+<li>传递性：如果$a\leq b$以及$b\leq c$，则$a\leq c$</li>
+<li>反对称性：如果$a\leq b$且$b\leq a$，则$a=b$</li>
+</ul>
+<p>例子：</p>
+<ul>
+<li>令$A$是实数集。定义$a\leq b$，如果$b-a$是非负的。那么$\leq$是$A$上的偏序</li>
+<li>令$S$是一个集合，$P(S)$表示$S$的所有子集的集合。对$T,T'\in P(S)$，如果$T'\subseteq T$，记$T\leq T'$。这种关系使得$P(S)$成为一个偏序集。</li>
+</ul>
+<p><strong>定义</strong><br>
+给定一个偏序集 $A$，如果对所有 $b\in A$ 都有 $a \le b$，则称元素 $a\in A$ 是 $A$ 的 <strong>最小元（least element）</strong>。<br>
+如果对所有 $b\in A$，若 $b \le a$ 就推出 $a=b$，则称 $a$ 是 $A$ 的 <strong>极小元（minimal element）</strong>。</p>
+<p><strong>定义</strong><br>
+给定一个偏序集 $A$，如果对所有 $b\in A$ 都有 $b \le a$，则称元素 $a\in A$ 是 $A$ 的 <strong>最大元（greatest element）</strong>。<br>
+如果对所有 $b\in A$，若 $a \le b$ 就推出 $a=b$，则称 $a$ 是 $A$ 的 <strong>极大元（maximal element）</strong>。</p>
+<h4 id="37全序">3.7.全序 </h4>
+<p><strong>定义</strong><br>
+设 $(A, \le)$ 是一个偏序集。如果对 $A$ 中任意一对元素 $a,b$，总有 $a \le b$ 或 $b \le a$。<br>
+则称 $\le$ 是 $A$ 上的<strong>线性序（linear ordering）</strong>，也称<strong>全序（total ordering）</strong>。</p>
+<p>偏序（partially ordered）的条件</p>
+<ul>
+<li><strong>自反性（reflexive）</strong>：对所有 $a\in A$，都有 $a \le a$。</li>
+<li><strong>传递性（transitive）</strong>：若 $a \le b$，且 $b \le c$，则 $a \le c$。</li>
+<li><strong>反对称性（antisymmetric）</strong>：若 $a \le b$，且 $b \le a$，则 $a=b$。</li>
+</ul>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+<div class="giscus-container" style="margin-top: 50px;">
+  <script src="https://giscus.app/client.js"
+  data-repo="forliage/forliage.github.io"
+  data-repo-id="R_kgDONjzd4w"
+  data-category="Announcements"
+  data-category-id="DIC_kwDONjzd484Cus1G"
+  data-mapping="pathname"
+  data-strict="0"
+  data-reactions-enabled="1"
+  data-emit-metadata="0"
+  data-input-position="bottom"
+  data-theme="https://forliage.github.io/giscus.css"
+  data-lang="zh-CN"
+  crossorigin="anonymous"
+  async>
+</script>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+<div class="dock">
+  <a href="https://forliage.github.io/index.html">🏠</a>
+  <a href="https://forliage.github.io/posts.html">📚</a>
+  <a href="https://forliage.github.io/about.html">👤</a>
+</div>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script><script src="../trail.js"></script>
+<!-- Highlight.js Core -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<!-- Highlight.js Copy Plugin -->
+<script src="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.js"></script>
+<!-- Initialize Highlight.js and Copy Plugin -->
+<script>
+  hljs.highlightAll();
+  hljs.addPlugin(new CopyButtonPlugin());
+</script>
+</body>
+</html>

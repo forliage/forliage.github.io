@@ -646,8 +646,8 @@ function showAirpodsCard() {
     card.id = 'airpods-card';
     card.innerHTML = `
         <button class="close" aria-label="关闭">×</button>
-        <h3>增设多项液态玻璃效果</h3>
-        <p style="font-size: 0.8em; margin: 5px 0 0;">欢迎大家进行体验！</p>
+        <h3>更新了计算理论01:集合、关系和语言(I)笔记</h3>
+        <p style="font-size: 0.8em; margin: 5px 0 0;">欢迎大家进行阅读！</p>
     `;
     document.body.appendChild(card);
     requestAnimationFrame(() => card.classList.add('show'));
