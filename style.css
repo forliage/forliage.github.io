@@ -233,108 +233,6 @@ body.dark-mode .dock {
     opacity: 1;
 }
 
-/* Sidebar Collapse Functionality */
-#sidebar-container {
-    /* This container will hold the aside and allow us to collapse it */
-    position: relative;
-    transition: flex-basis 0.4s ease-in-out;
-    display: flex; /* Ensures it behaves like a flex item */
-    flex-basis: 25%; /* Same as original aside */
-}
-
-#sidebar-container.sidebar-collapsed {
-    flex-basis: 0 !important;
-}
-
-#sidebar-container > aside {
-    width: 100%; /* Make aside fill the container */
-    transition: opacity 0.3s ease-in-out, padding 0.4s ease-in-out;
-}
-
-#sidebar-container.sidebar-collapsed > aside {
-    opacity: 0;
-    padding: 0;
-    overflow: hidden;
-}
-
-/* New Sidebar Toggle/Collapse Buttons */
-.sidebar-toggle-btn {
-    background: #ff8acb;
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    width: 30px;
-    height: 30px;
-    font-size: 18px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    transition: background-color 0.3s;
-}
-.sidebar-toggle-btn:hover {
-    background-color: #D81B60;
-}
-
-#sidebar-collapse-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    border-radius: 50%;
-    z-index: 10;
-}
-
-#sidebar-expand-btn {
-    position: fixed;
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-    border-radius: 0 8px 8px 0;
-    border-left: none;
-    z-index: 1001;
-}
-
-/* Trail Effect Toggle Button */
-#trail-toggle-btn {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1002; /* High z-index */
-    padding: 8px 12px;
-    background-color: #888; /* Default 'off' state: gray */
-    color: white;
-    border: 1px solid rgba(0,0,0,0.2);
-    border-radius: 10px;
-    font-size: 14px;
-    cursor: grab;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    transition: background-color 0.3s ease;
-}
-
-#trail-toggle-btn:active {
-    cursor: grabbing;
-}
-
-#trail-toggle-btn.active {
-    background-color: #C3B1E1; /* 'on' state: light purple */
-    border-color: rgba(255,255,255,0.3);
-}
-
-/* Sidebar Resizer Handle */
-.sidebar-resizer {
-    flex: 0 0 5px; /* It's a flex item now */
-    cursor: col-resize;
-    background: rgba(0, 0, 0, 0.05);
-    transition: background-color 0.3s ease;
-    align-self: stretch; /* Stretch to full height of the container */
-    margin: 0 5px;
-    border-radius: 5px;
-}
-
-.sidebar-resizer:hover {
-    background: rgba(0, 0, 0, 0.2);
-}
-
 /* --- Task 2: Floating Droplets --- */
 
 /* Keyframes for floating animation */
@@ -1957,25 +1855,17 @@ body.dark-mode .toc-widget .toc-level-h1 {
     }
 }
 
-#mini-player {
-    gap: 12px; /* Add gap for spacing between elements */
-}
-
 #mini-player .mp-info {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+    margin-right: 8px;
 }
 
-.mp-bar-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+#mini-player .mp-title {
+    display: block;
+    font-weight: bold;
 }
 
 #mini-player .mp-bar {
-    flex-grow: 1;
+    width: 100px;
     height: 4px;
     /* MODIFIED: Add conic-gradient for layered look */
     background: conic-gradient(from 90deg, #ff8acb, #ff2d55, #AD1457, #ff2d55, #ff8acb);
