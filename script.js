@@ -69,7 +69,10 @@ window.onload = function() {
     miniPlayer.innerHTML = `
         <div class="mp-info">
             <span class="mp-title">${music ? (music.dataset.title || '背景音乐') : '背景音乐'}</span>
-            <div class="mp-bar"><div class="mp-bar-progress"></div></div>
+            <div class="mp-bar-container">
+                <div class="mp-bar"><div class="mp-bar-progress"></div></div>
+                <span class="mp-time">00:00 / 00:00</span>
+            </div>
         </div>
     `;
     const miniToggle = document.createElement('button');
@@ -195,18 +198,20 @@ window.onload = function() {
         applyToggleStyle(); // Apply style on load
     }
 
-    // Make the mini player draggable
-    function makeDraggable(elmnt) {
+    // Make an element draggable
+    function makeDraggable(elmnt, storageKey) {
         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
         
         // Load position from localStorage
-        const savedPos = localStorage.getItem('miniPlayerPosition');
-        if (savedPos) {
-            const { top, left } = JSON.parse(savedPos);
-            elmnt.style.top = top;
-            elmnt.style.left = left;
-            elmnt.style.right = 'auto';
-            elmnt.style.bottom = 'auto';
+        if (storageKey) {
+            const savedPos = localStorage.getItem(storageKey);
+            if (savedPos) {
+                const { top, left } = JSON.parse(savedPos);
+                elmnt.style.top = top;
+                elmnt.style.left = left;
+                elmnt.style.right = 'auto';
+                elmnt.style.bottom = 'auto';
+            }
         }
 
         const dragMouseDown = (e) => {
@@ -260,16 +265,51 @@ window.onload = function() {
             document.ontouchmove = null;
             
             // Save position to localStorage
-            localStorage.setItem('miniPlayerPosition', JSON.stringify({
-                top: elmnt.style.top,
-                left: elmnt.style.left
-            }));
+            if (storageKey) {
+                localStorage.setItem(storageKey, JSON.stringify({
+                    top: elmnt.style.top,
+                    left: elmnt.style.left
+                }));
+            }
         };
     }
 
     if (miniPlayer) {
-        makeDraggable(miniPlayer);
+        makeDraggable(miniPlayer, 'miniPlayerPosition');
     }
+
+    function initTrailEffectToggle() {
+        const toggleBtn = document.createElement('button');
+        toggleBtn.id = 'trail-toggle-btn';
+        toggleBtn.textContent = '鼠标拖尾';
+        document.body.appendChild(toggleBtn);
+
+        const trailStyle = document.getElementById('trail-cursor-style');
+
+        function applyState(isEnabled) {
+            if (isEnabled) {
+                window.mouseTrailEffect.start();
+            } else {
+                window.mouseTrailEffect.stop();
+            }
+            toggleBtn.classList.toggle('active', isEnabled);
+            localStorage.setItem('trailEffectEnabled', isEnabled);
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            applyState(!window.mouseTrailEffect.isRunning);
+        });
+
+        // Load initial state
+        const savedState = localStorage.getItem('trailEffectEnabled');
+        // Default to true if no setting is saved
+        const initialState = savedState === null ? true : savedState === 'true';
+        applyState(initialState);
+
+        makeDraggable(toggleBtn, 'trailTogglePosition');
+    }
+
+    initTrailEffectToggle();
 
     applyTheme();
 
@@ -311,11 +351,47 @@ window.onload = function() {
             localStorage.setItem('music-paused', music.paused);
         });
 
+        const mpTime = miniPlayer.querySelector('.mp-time');
+        const mpBarContainer = miniPlayer.querySelector('.mp-bar-container');
+        const mpBar = mpBarContainer.querySelector('.mp-bar');
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
         music.addEventListener('timeupdate', () => {
             localStorage.setItem('music-current-time', music.currentTime);
             if (music.duration) {
-                mpProgress.style.width = (music.currentTime / music.duration * 100) + '%';
+                const progress = music.currentTime / music.duration;
+                mpProgress.style.width = (progress * 100) + '%';
+                mpTime.textContent = `${formatTime(music.currentTime)} / ${formatTime(music.duration)}`;
             }
+        });
+
+        music.addEventListener('loadedmetadata', () => {
+            if (music.duration) {
+                mpTime.textContent = `${formatTime(music.currentTime)} / ${formatTime(music.duration)}`;
+            }
+        });
+
+        function seek(e) {
+            if (!music.duration) return;
+            const barRect = mpBar.getBoundingClientRect();
+            const clickX = e.clientX - barRect.left;
+            const percentage = Math.max(0, Math.min(1, clickX / barRect.width));
+            music.currentTime = percentage * music.duration;
+        }
+
+        mpBarContainer.addEventListener('click', seek);
+
+        mpBarContainer.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Prevent text selection
+            document.addEventListener('mousemove', seek);
+            document.addEventListener('mouseup', () => {
+                document.removeEventListener('mousemove', seek);
+            }, { once: true });
         });
     }
 
@@ -337,7 +413,11 @@ window.onload = function() {
 
     const sidebarContainer = document.getElementById('sidebar-container');
     if (sidebarContainer) {
-        loadSidebar().then(initSidebarFeatures);
+        loadSidebar().then(() => {
+            initSidebarFeatures();
+            initSidebarCollapse();
+            initSidebarResize();
+        });
     } else {
         initSidebarFeatures();
     }
@@ -963,6 +1043,66 @@ async function initPeekPop() {
     });
 }
 
+function initSidebarResize() {
+    const sidebarContainer = document.getElementById('sidebar-container');
+    if (!sidebarContainer) return;
+
+    // Apply saved width on load
+    const savedWidth = localStorage.getItem('sidebarWidth');
+    if (savedWidth) {
+        sidebarContainer.style.flexBasis = savedWidth;
+    }
+
+    const resizer = document.createElement('div');
+    resizer.className = 'sidebar-resizer';
+    // Insert resizer after the sidebar container, in the parent flexbox
+    if (sidebarContainer.parentElement) {
+        sidebarContainer.parentElement.insertBefore(resizer, sidebarContainer.nextSibling);
+    }
+
+    let isResizing = false;
+    let startX = 0;
+    let startWidth = 0;
+
+    resizer.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        startX = e.clientX;
+        startWidth = sidebarContainer.offsetWidth;
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    });
+
+    function handleMouseMove(e) {
+        if (!isResizing) return;
+        const deltaX = e.clientX - startX;
+        let newWidth = startWidth + deltaX;
+
+        // Add constraints for min and max width
+        const minWidth = 200; // pixels
+        const maxWidth = window.innerWidth * 0.5; // 50% of viewport
+        if (newWidth < minWidth) newWidth = minWidth;
+        if (newWidth > maxWidth) newWidth = maxWidth;
+
+        sidebarContainer.style.flexBasis = `${newWidth}px`;
+    }
+
+    function handleMouseUp() {
+        if (!isResizing) return;
+        isResizing = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+
+        // Save the new width to localStorage
+        localStorage.setItem('sidebarWidth', sidebarContainer.style.flexBasis);
+    }
+}
+
 function showScreenshotFeedback() {
     document.body.classList.add('flash');
     setTimeout(() => document.body.classList.remove('flash'), 300);
@@ -1043,5 +1183,37 @@ function sharePost(event, platform) {
 
     if (shareUrl) {
         window.open(shareUrl, '_blank', 'noopener,noreferrer,width=600,height=400');
+    }
+}
+
+function initSidebarCollapse() {
+    const sidebarContainer = document.getElementById('sidebar-container');
+    const resizer = document.querySelector('.sidebar-resizer');
+    if (!sidebarContainer) return;
+
+    const collapseBtn = document.getElementById('sidebar-collapse-btn');
+    if (!collapseBtn) return;
+
+    const expandBtn = document.createElement('button');
+    expandBtn.id = 'sidebar-expand-btn';
+    expandBtn.className = 'sidebar-toggle-btn';
+    expandBtn.innerHTML = '»';
+    expandBtn.style.display = 'none';
+    document.body.appendChild(expandBtn);
+
+    function setCollapsedState(isCollapsed) {
+        sidebarContainer.classList.toggle('sidebar-collapsed', isCollapsed);
+        if (resizer) resizer.style.display = isCollapsed ? 'none' : 'flex';
+        expandBtn.style.display = isCollapsed ? 'flex' : 'none';
+        localStorage.setItem('sidebarCollapsed', isCollapsed);
+    }
+
+    collapseBtn.addEventListener('click', () => setCollapsedState(true));
+    expandBtn.addEventListener('click', () => setCollapsedState(false));
+
+    // Apply saved state on load
+    const isSavedCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    if (isSavedCollapsed) {
+        setCollapsedState(true);
     }
 }
