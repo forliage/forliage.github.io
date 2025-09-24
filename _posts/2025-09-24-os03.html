@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>操作系统03:进程</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          macros: {
+            // Define Stirling numbers of the second kind macro for better display
+            stirlingii: ['\\begin{Bmatrix} #1 \\\\ #2 \\end{Bmatrix}', 2]
+          }
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FPDBQB4LZD');
+    </script>
+<!-- Highlight.js Themes -->
+<link href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-dawn.min.css" id="highlight-theme-link" rel="stylesheet"/>
+<!-- Highlight.js Copy Plugin CSS -->
+<link href="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.css" rel="stylesheet"/>
+</head>
+<body>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<button id="style-toggle-btn" title="切换控件样式">🎨</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="操作系统03进程">操作系统03:进程 </h1>
+<h3 id="1进程的概念">1.进程的概念 </h3>
+<h5 id="11进程的概念">1.1.进程的概念 </h5>
+<p>操作系统执行各种程序：</p>
+<ul>
+<li>批处理系统 – job</li>
+<li>分时系统——用户程序或任务<br>
+（教科书上,job=process）</li>
+</ul>
+<p>进程——以顺序方式执行的程序</p>
+<p>一个进程包括：</p>
+<ul>
+<li>text section (code)</li>
+<li>program counter</li>
+<li>stack (function parameters, local vars, return addresses)</li>
+<li>data section (global vars)</li>
+<li>heap (dynamically allocated memory)</li>
+</ul>
+<details>
+<summary><strong>Data Structure:Heap</strong></summary>
+<ul>
+<li>Heap is a "complete" binary tree
+<ul>
+<li>Except the leaf level, all levels are full. The leaf level is filled from left to right</li>
+<li>The node's value should be larger/smaller than its children</li>
+</ul>
+</li>
+<li>(a) is a heap</li>
+<li>(b) is not for it is not complete</li>
+<li>(c) is not bacause 6 &lt; 8</li>
+</ul>
+<div class="mermaid">flowchart LR
+
+  %% (a)
+  subgraph A["(a)"]
+    direction TB
+    A9((9))
+    A8((8))
+    A4((4))
+    A6((6))
+    A2((2))
+    A3((3))
+    A9 --&gt; A8
+    A9 --&gt; A4
+    A8 --&gt; A6
+    A8 --&gt; A2
+    A4 --&gt; A3
+  end
+
+  %% (b)
+  subgraph B["(b)"]
+    direction TB
+    B9((9))
+    B8((8))
+    B4((4))
+    B6((6))
+    B2((2))
+    B3((3))
+    B9 --&gt; B8
+    B9 --&gt; B4
+    B8 --&gt; B6
+    B4 --&gt; B2
+    B4 --&gt; B3
+  end
+
+  %% (c)
+  subgraph C["(c)"]
+    direction TB
+    C9((9))
+    C6((6))
+    C4((4))
+    C8((8))
+    C2((2))
+    C3((3))
+    C9 --&gt; C6
+    C9 --&gt; C4
+    C6 --&gt; C8
+    C6 --&gt; C2
+    C4 --&gt; C3
+  end
+
+</div></details>
+<details>
+<summary><strong>Data Structure: Stack</strong></summary>
+<ul>
+<li>典型的栈是计算机内存中具有固定起始点和可变大小的区域</li>
+<li>初始时栈的大小为零</li>
+<li>栈指针通常以硬件寄存器形式存在，指向栈中最近被引用的位置</li>
+<li>压栈操作：将数据项放置于栈指针所指位置，并根据数据项大小调整栈指针地址</li>
+<li>弹出操作：移除栈指针当前指向位置的数据项，并将栈指针地址按该数据项大小进行回调。</li>
+</ul>
+</details>
+<h5 id="12进程的状态">1.2.进程的状态 </h5>
+<p>随着进程的执行，其状态会发生变化</p>
+<ul>
+<li><strong>new</strong>: 该流程正在创建中</li>
+<li><strong>running</strong>:指令正在执行</li>
+<li><strong>waiting</strong>:该进程正在等待/阻塞某个事件发生</li>
+<li><strong>ready</strong>: 该进程正在等待分配给处理器</li>
+<li><strong>terminated</strong>:该进程已完成执行</li>
+</ul>
+<div class="mermaid">flowchart LR
+    new((new)) --&gt;|admitted| ready((ready))
+    ready --&gt;|scheduler dispatch| running((running))
+    running --&gt;|exit| terminated((terminated))
+    running --&gt;|I/O or event wait| waiting((waiting))
+    waiting --&gt;|I/O or event completion| ready
+    running --&gt;|interrupt| ready
+</div><h5 id="13进程控制块pcb">1.3.进程控制块（PCB） </h5>
+<p>与每个进程相关的信息</p>
+<ul>
+<li>进程状态（新建、就绪等）</li>
+<li>程序计数器（下条指令的地址）</li>
+<li>CPU寄存器内容</li>
+<li>CPU调度信息（优先级）</li>
+<li>内存管理信息</li>
+<li>计费信息（CPU使用时间、时间限制、进程编号）</li>
+<li>I/O状态信息（已分配设备和已打开文件）</li>
+</ul>
+<h3 id="2进程调度">2.进程调度 </h3>
+<h5 id="21进程调度队列">2.1.进程调度队列 </h5>
+<ul>
+<li>Job queue——系统中所有进程的集合</li>
+<li>Ready queue——驻留于主内存中、处于就绪状态并等待执行的所有进程集合</li>
+<li>Device queue——等待I/O设备的进程集合</li>
+<li>进程在不同队列间迁移</li>
+</ul>
+<h5 id="22进程调度表示法">2.2.进程调度表示法 </h5>
+<p><strong>A queueing-diagram</strong>:</p>
+<div class="mermaid">flowchart LR
+  RQ[ready queue] --&gt; CPU((CPU))
+
+  CPU --&gt;|I/O request| IOREQ[I/O request]
+  IOREQ --&gt; IOQ[I/O queue]
+  IOQ --&gt; IO((I/O))
+  IO --&gt;|completion| RQ
+
+  CPU --&gt;|time slice expired| TSE[time slice expired]
+  TSE --&gt; RQ
+
+  CPU --&gt;|fork a child| F[fork a child]
+  F --&gt; CHILD((child executes))
+  CHILD --&gt; RQ
+
+  CPU --&gt;|wait for an interrupt| WAIT[wait for an interrupt]
+  WAIT --&gt; INT((interrupt occurs))
+  INT --&gt; RQ
+</div><p><strong>Schedulers</strong>:</p>
+<ul>
+<li>什么是调度程序？一段程序代码</li>
+<li>长期调度程序（或作业调度程序）——选择哪些进程应被加载到内存中（就绪队列）</li>
+<li>短期调度程序（或CPU调度程序）——选择下一个应执行的进程并分配CPU时间</li>
+<li>短期调度程序调用频率极高（毫秒级）（必须快速）</li>
+<li>长期调度程序调用频率极低（秒级、分钟级）（可容忍较慢）</li>
+<li>长期调度程序控制多任务处理程度</li>
+<li>进程可分为：
+<ul>
+<li>I/O 密集型进程——耗费更多时间进行 I/O 操作而非计算，呈现多次短暂的 CPU 突发</li>
+<li>CPU 密集型进程——耗费更多时间进行计算，呈现少数极长的 CPU 突发</li>
+</ul>
+</li>
+</ul>
+<h5 id="23上下文切换">2.3.上下文切换 </h5>
+<ul>
+<li>当CPU切换到另一个进程时，系统必须保存旧进程的状态并为新进程加载保存的状态。</li>
+<li>上下文切换时间属于开销；切换期间系统不会执行有效工作——通常耗时数毫秒。</li>
+<li>该时间取决于硬件支持。在SPARC架构中，系统提供了寄存器组。</li>
+</ul>
+<h3 id="3进程的操作">3.进程的操作 </h3>
+<h5 id="31进程创建">3.1.进程创建 </h5>
+<ul>
+<li>
+<p>父进程创建子进程，子进程再创建其他进程，形成进程树结构</p>
+</li>
+<li>
+<p>资源共享</p>
+<ul>
+<li>父子进程共享全部资源</li>
+<li>子进程共享父进程部分资源</li>
+<li>父子进程不共享资源</li>
+</ul>
+</li>
+<li>
+<p>执行方式</p>
+<ul>
+<li>父子进程并行执行</li>
+<li>父进程等待子进程终止</li>
+</ul>
+</li>
+<li>
+<p>Chrome示例</p>
+</li>
+<li>
+<p>地址空间</p>
+<ul>
+<li>子进程是父进程的副本</li>
+<li>子进程加载有程序</li>
+</ul>
+</li>
+<li>
+<p>UNIX示例</p>
+<ul>
+<li><strong>fork</strong>系统调用创建新进程</li>
+<li><strong>fork</strong>后使用<strong>exec</strong>系统调用替换进程内存空间为新程序</li>
+</ul>
+</li>
+</ul>
+<p>存在多种“exec”API。例如：<code>execve() execv() execle() execvp() execlp()</code>等。</p>
+<div class="mermaid">flowchart LR
+  F((fork))
+  W((wait))
+  E((exec))
+  X((exit))
+  R[resumes]
+
+  F --&gt;|parent| W
+  F --&gt;|child| E
+  E --&gt; X
+  X --&gt; W
+  W --&gt;|resumes| R
+</div><h5 id="32c语言程序分叉独立进程">3.2.C语言程序分叉独立进程 </h5>
+<pre class="hljs"><code><span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{</span>
+    <span class="token class-name">pid_t</span> pid<span class="token punctuation">;</span>
+    <span class="token comment">/*fork another process*/</span>
+    pid <span class="token operator">=</span> <span class="token function">fork</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>pid <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">/*error occurred*/</span>
+        <span class="token function">fprintf</span><span class="token punctuation">(</span><span class="token constant">stderr</span><span class="token punctuation">,</span> <span class="token string">"Fork Failed"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">exit</span><span class="token punctuation">(</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>pid <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">/*child process*/</span>
+        <span class="token function">exexlp</span><span class="token punctuation">(</span><span class="token string">"/bin/ls"</span><span class="token punctuation">,</span> <span class="token string">"ls"</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">else</span><span class="token punctuation">{</span> <span class="token comment">/*parent process*/</span>
+        <span class="token comment">/*parent will wait for the child to complete*/</span>
+        <span class="token function">wait</span><span class="token punctuation">(</span><span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"Child Complete"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">exit</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre><h5 id="33进程终止">3.3.进程终止 </h5>
+<ul>
+<li>进程执行最后一条语句并请求操作系统删除自身（退出）
+<ul>
+<li>子进程向父进程输出数据（通过wait）</li>
+<li>操作系统释放进程资源</li>
+</ul>
+</li>
+<li>父进程可终止子进程执行（中止）
+<ul>
+<li>子进程超出分配资源</li>
+<li>子进程任务不再需要执行</li>
+<li>若父进程正在退出
+<ul>
+<li>部分操作系统禁止父进程终止时子进程继续运行
+<ul>
+<li>所有子进程终止 - 级联终止</li>
+</ul>
+</li>
+<li>在其他操作系统中，子进程可能成为孤儿进程</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="4协作进程">4.协作进程 </h3>
+<h5 id="41概念">4.1.概念 </h5>
+<ul>
+<li>独立进程不能影响或受其他进程执行的影响</li>
+<li>协作进程可以影响或受其他进程执行的影响</li>
+<li>进程协作的优势
+<ul>
+<li>信息共享</li>
+<li>计算加速（多CPU环境）</li>
+<li>模块化</li>
+<li>便捷性</li>
+</ul>
+</li>
+</ul>
+<h5 id="42生产者-消费者问题">4.2.生产者-消费者问题 </h5>
+<p>生产者-消费者模式：生产者进程生成信息，消费者进程进行消费。</p>
+<ul>
+<li>无界缓冲区模式：对缓冲区大小不设实际限制。若无新项，消费者需等待。</li>
+<li>有界缓冲区模式：假设存在固定缓冲区大小。若缓冲区已满，生产者必须等待。</li>
+</ul>
+<p><strong>有界缓冲区-共享内存解决方案</strong></p>
+<p>Shared data</p>
+<pre class="hljs"><code><span class="token macro property">#<span class="token directive keyword">define</span> <span class="token macro-name">BUFFER_SIZE</span> <span class="token expression">10</span></span>
+<span class="token keyword">typedef</span> <span class="token keyword">struct</span> <span class="token punctuation">{</span>
+  <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token punctuation">}</span> item<span class="token punctuation">;</span>
+
+item buffer<span class="token punctuation">[</span>BUFFER_SIZE<span class="token punctuation">]</span>
+<span class="token keyword">int</span> in <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> out <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+</code></pre><p><strong>有界缓冲区 – 插入方法</strong></p>
+<pre class="hljs"><code><span class="token keyword">while</span> <span class="token punctuation">(</span>true<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token comment">/*Produce an item*/</span>
+  <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>in <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">%</span> BUFFER_SIZE <span class="token operator">==</span> out<span class="token punctuation">)</span>
+    <span class="token punctuation">;</span> <span class="token comment">/*do nothing -- no free buffers*/</span>
+  buffer<span class="token punctuation">[</span>in<span class="token punctuation">]</span> <span class="token operator">=</span> item<span class="token punctuation">;</span>
+  in <span class="token operator">=</span> <span class="token punctuation">(</span>in <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">%</span> BUFFER_SIZE<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre><p><strong>有界缓冲区 – 删除方法</strong></p>
+<pre class="hljs"><code><span class="token keyword">while</span> <span class="token punctuation">(</span>true<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">while</span> <span class="token punctuation">(</span>in <span class="token operator">==</span> out<span class="token punctuation">)</span>
+     <span class="token punctuation">;</span> <span class="token comment">// do nothing -- nothing to consume</span>
+
+  <span class="token comment">// remove an item from the buffer</span>
+  item <span class="token operator">=</span> buffer<span class="token punctuation">[</span>out<span class="token punctuation">]</span><span class="token punctuation">;</span>
+  out <span class="token operator">=</span> <span class="token punctuation">(</span>out <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">%</span> BUFFER_SIZE<span class="token punctuation">;</span>
+<span class="token keyword">return</span> item<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre><h3 id="5进程间通信">5.进程间通信 </h3>
+<ul>
+<li>进程间通信与同步机制</li>
+<li>进程间通信模型：消息传递与共享内存</li>
+<li>消息系统——进程间通信无需依赖共享变量</li>
+<li>进程间通信机制提供两种操作：
+<ul>
+<li>send(消息)——消息大小固定或可变</li>
+<li>receive(消息)</li>
+</ul>
+</li>
+<li>若进程P与Q需通信，须：
+<ul>
+<li>建立通信链路</li>
+<li>通过发送/接收交换消息</li>
+</ul>
+</li>
+<li>通信链路实现方式：
+<ul>
+<li>物理链路（如共享内存、硬件总线）</li>
+<li>逻辑链路（如逻辑属性）</li>
+</ul>
+</li>
+</ul>
+<h5 id="51direct-communication">5.1.Direct Communication </h5>
+<ul>
+<li>进程必须显式命名彼此：
+<ul>
+<li>send(P, message) –向进程P发送消息</li>
+<li>receive(Q, message) –从进程Q接收消息</li>
+</ul>
+</li>
+<li>通信链路的特性：
+<ul>
+<li>链路自动建立</li>
+<li>每个链路仅关联一对通信进程</li>
+<li>每对进程间仅存在一条链路</li>
+<li>链路可能为单向，但通常为双向</li>
+</ul>
+</li>
+</ul>
+<h5 id="52indirect-communication">5.2.Indirect Communication </h5>
+<ul>
+<li>消息通过邮箱（也称为端口）进行发送和接收
+<ul>
+<li>每个邮箱都有唯一的标识符</li>
+<li>进程只有共享同一个邮箱才能通信</li>
+</ul>
+</li>
+<li>通信链路的特性
+<ul>
+<li>仅当进程共享共同邮箱时建立链路</li>
+<li>一条链路可关联多个进程</li>
+<li>每对进程可共享多个通信链路</li>
+<li>链路可为单向或双向</li>
+</ul>
+</li>
+<li>操作：
+<ul>
+<li>创建新邮箱</li>
+<li>通过邮箱收发消息</li>
+<li>销毁邮箱</li>
+</ul>
+</li>
+<li>基本操作定义如下：
+<ul>
+<li>send(A, message) – 向邮箱 A 发送消息</li>
+<li>receive(A, message) – 从邮箱 A 接收消息</li>
+</ul>
+</li>
+<li>邮箱共享
+<ul>
+<li>$P_1$、$P_2$和$P_3$共享邮箱A</li>
+<li>$P_1$发送；$P_2$和$P_3$接收</li>
+<li>谁收到消息？</li>
+</ul>
+</li>
+<li>解决方案
+<ul>
+<li>允许链接最多关联两个进程</li>
+<li>每次仅允许一个进程执行接收操作</li>
+<li>允许系统任意选择接收者。发送方将获知接收者身份。</li>
+</ul>
+</li>
+</ul>
+<h5 id="53synchronization">5.3.Synchronization </h5>
+<ul>
+<li>消息传递可分为阻塞式与非阻塞式</li>
+<li>阻塞式被视为同步模式
+<ul>
+<li>阻塞式发送会使发送方阻塞直至消息被接收</li>
+<li>阻塞式接收会使接收方阻塞直至有可用消息</li>
+</ul>
+</li>
+<li>非阻塞式被视为异步模式
+<ul>
+<li>非阻塞式发送会使发送方发送消息后继续执行</li>
+<li>非阻塞式接收会使接收方接收有效消息或空值</li>
+</ul>
+</li>
+</ul>
+<h5 id="54buffering">5.4.Buffering </h5>
+<ul>
+<li>链接关联的消息队列；通过三种方式实现：</li>
+</ul>
+<ol>
+<li>零容量——0条消息 发送方必须等待接收方（会合）</li>
+<li>有界容量——有限长度的n条消息 链接满时发送方必须等待</li>
+<li>无界容量——无限长度 发送方永不等待</li>
+</ol>
+<ul>
+<li>缓冲控制</li>
+</ul>
+<h3 id="6客户端-服务器系统中的通信">6.客户端-服务器系统中的通信 </h3>
+<h5 id="61sockets">6.1.Sockets </h5>
+<p>套接字被定义为通信的端点</p>
+<p>IP地址与端口的组合</p>
+<p>套接字161.25.19.8:1625指代主机161.25.19.8上的1625端口</p>
+<p>通信发生于一对套接字之间</p>
+<h5 id="62远程过程调用">6.2.远程过程调用 </h5>
+<p>远程过程调用（RPC）在联网系统中抽象化进程间的过程调用。</p>
+<p>存根——客户端对服务器端实际过程的代理。</p>
+<p>客户端存根定位服务器并序列化参数。</p>
+<p>服务器端存根接收该消息，解包序列化参数，并在服务器上执行过程。</p>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+<div class="giscus-container" style="margin-top: 50px;">
+  <script src="https://giscus.app/client.js"
+  data-repo="forliage/forliage.github.io"
+  data-repo-id="R_kgDONjzd4w"
+  data-category="Announcements"
+  data-category-id="DIC_kwDONjzd484Cus1G"
+  data-mapping="pathname"
+  data-strict="0"
+  data-reactions-enabled="1"
+  data-emit-metadata="0"
+  data-input-position="bottom"
+  data-theme="https://forliage.github.io/giscus.css"
+  data-lang="zh-CN"
+  crossorigin="anonymous"
+  async>
+</script>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+<div class="dock">
+  <a href="https://forliage.github.io/index.html">🏠</a>
+  <a href="https://forliage.github.io/posts.html">📚</a>
+  <a href="https://forliage.github.io/about.html">👤</a>
+</div>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script><script src="../trail.js"></script>
+<!-- Highlight.js Core -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<!-- Highlight.js Copy Plugin -->
+<script src="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.js"></script>
+<!-- Initialize Highlight.js and Copy Plugin -->
+<script>
+  hljs.highlightAll();
+  hljs.addPlugin(new CopyButtonPlugin());
+</script>
+</body>
+</html>
