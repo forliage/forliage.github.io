@@ -1,5 +1,7 @@
-document.addEventListener('DOMContentLoaded', () => {
+function startTrailEffect() {
     const canvas = document.createElement('canvas');
+    // Add an ID to the canvas so we can remove it if needed
+    canvas.id = 'trail-canvas'; 
     document.body.appendChild(canvas);
     const ctx = canvas.getContext('2d');
 
@@ -107,4 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.restore();
     }
     draw();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('trailEffectEnabled') !== 'false') {
+        startTrailEffect();
+    }
 });

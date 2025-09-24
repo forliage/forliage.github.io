@@ -720,18 +720,88 @@ main article p {
 }
 
 aside { /* This is now the LEFT sidebar */
-    flex: 0 0 25%; /* Fixed width for left sidebar, e.g., 25% */
+    flex: 0 0 300px; /* Unify width to a fixed value */
+    width: 300px;
+    min-width: 240px; /* Min width for resizing */
+    max-width: 600px; /* Max width for resizing */
     background: linear-gradient(145deg, #FFF0F5, #F8DDE5); /* Soft gradient for depth */
     padding: 15px; /* General padding */
-    padding-right: 20px; /* Specifically ensure padding on the right for separation */
     border-right: 1px solid #FFC0CB; /* Optional: add a border */
-    position: sticky;
+    position: relative; /* Needed for resizer and toggle button positioning */
     top: 20px;
     align-self: flex-start;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     max-height: calc(100vh - 40px); /* Set a max-height */
     overflow-y: auto; /* Add vertical scrollbar when content overflows */
+    transition: width 0.3s ease, min-width 0.3s ease, padding-left 0.3s ease, padding-right 0.3s ease;
+    will-change: width, min-width;
+}
+
+#sidebar-resizer {
+    position: absolute;
+    top: 0;
+    right: -5px; /* Position it slightly outside the border */
+    width: 10px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 20; 
+}
+
+#sidebar-toggle-btn {
+    position: absolute;
+    top: 50%;
+    right: -15px; /* Position outside the sidebar */
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #FF69B4;
+    color: white;
+    border: 1px solid white;
+    cursor: pointer;
+    z-index: 21;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    line-height: 1;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease, right 0.3s ease, background-color 0.3s ease;
+}
+
+#sidebar-toggle-btn:hover {
+    background-color: #D81B60;
+}
+
+aside.sidebar-collapsed {
+    width: 0;
+    min-width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    overflow: hidden;
+}
+
+aside.sidebar-collapsed > *:not(#sidebar-toggle-btn) {
+    display: none;
+}
+
+aside.sidebar-collapsed #sidebar-toggle-btn {
+    right: -45px; /* Move button out when collapsed */
+    transform: translateY(-50%) rotate(180deg);
+}
+
+body.dark-mode aside {
+    background: linear-gradient(145deg, #4b2a5e, #3d1f4c);
+    border-right-color: #7a4a93;
+    color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+}
+
+body.dark-mode #sidebar-toggle-btn {
+    background: #ff8acb;
+    color: #2c1f2b;
 }
 
 /* Custom Scrollbar for Sidebar */
@@ -1443,6 +1513,141 @@ body.dark-mode .mermaid .nodeLabel > * {
     stroke: none;
 }
 
+/* --- Glassmorphism UI --- */
+
+.glass-pane,
+pre,
+.mermaid,
+.glass-media {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+body.dark-mode .glass-pane,
+body.dark-mode pre,
+body.dark-mode .mermaid,
+body.dark-mode .glass-media {
+    background: rgba(30, 30, 30, 0.35);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.glass-media {
+    padding: 1rem;
+    margin: 1.5rem 0;
+    overflow: hidden; /* For rounded corners on image */
+}
+
+.glass-media img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 8px; /* Inner radius for the image */
+}
+
+.glass-media figcaption {
+    margin-top: 0.75rem;
+    text-align: center;
+    font-size: 0.9em;
+    color: #555;
+}
+
+body.dark-mode .glass-media figcaption {
+    color: #ccc;
+}
+
+.mermaid {
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.glass-table {
+    position: relative;
+    margin: 1.5rem 0;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1rem;
+    overflow-x: auto;
+}
+
+.glass-table::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px; /* Height of the highlight */
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), transparent);
+    pointer-events: none;
+    border-radius: 12px 12px 0 0;
+}
+
+body.dark-mode .glass-table {
+    background: rgba(30, 30, 30, 0.35);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .glass-table::before {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.glass-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.glass-table th, .glass-table td {
+    border: 1px solid rgba(128, 128, 128, 0.2);
+    padding: 0.75rem;
+    text-align: left;
+}
+
+body.dark-mode .glass-table th, body.dark-mode .glass-table td {
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.glass-panel {
+    padding: 1.5rem;
+    margin-top: 2rem;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1), inset 0 1px 2px rgba(255,255,255,0.5); /* Outer shadow + inner highlight */
+    position: relative;
+}
+
+.glass-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), transparent);
+    pointer-events: none;
+    border-radius: 16px 16px 0 0;
+}
+
+body.dark-mode .glass-panel {
+    background: rgba(30, 30, 30, 0.35);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.1);
+}
+
+body.dark-mode .glass-panel::before {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.08), transparent);
+}
+
+
 /* Code block base styling */
 pre, code {
     font-family: 'JetBrains Mono', monospace;
@@ -1821,11 +2026,49 @@ body.dark-mode .toc-widget .toc-level-h1 {
     to { transform: translateY(-15px); }
 }
 
+#floating-controls-container {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.floating-btn {
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    color: black;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    font-size: 14px;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.floating-btn.enabled {
+    background: rgba(255, 105, 180, 0.5);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+body.dark-mode .floating-btn {
+     background: rgba(30, 30, 30, 0.5);
+     border-color: rgba(255, 255, 255, 0.2);
+     color: white;
+}
+
+body.dark-mode .floating-btn.enabled {
+    background: rgba(255, 138, 203, 0.6);
+    color: #000;
+}
+
 /* 4. Mini Player Liquid Ripple */
 #mini-player {
-    position: fixed;
-    bottom: calc(120px + env(safe-area-inset-bottom, 0px));
-    right: calc(20px + env(safe-area-inset-right, 0px));
+    position: relative; /* No longer fixed, part of the container */
     display: flex;
     align-items: center;
     padding: 8px 12px;
@@ -1864,9 +2107,34 @@ body.dark-mode .toc-widget .toc-level-h1 {
     font-weight: bold;
 }
 
+#mini-player .mp-title {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.mp-progress-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mp-time {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+    color: #000;
+}
+
+body.dark-mode .mp-time {
+    color: #fff;
+}
+
 #mini-player .mp-bar {
     width: 100px;
     height: 4px;
+    flex-grow: 1;
+    cursor: pointer;
     /* MODIFIED: Add conic-gradient for layered look */
     background: conic-gradient(from 90deg, #ff8acb, #ff2d55, #AD1457, #ff2d55, #ff8acb);
     border-radius: 2px;

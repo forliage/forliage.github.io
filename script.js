@@ -69,7 +69,10 @@ window.onload = function() {
     miniPlayer.innerHTML = `
         <div class="mp-info">
             <span class="mp-title">${music ? (music.dataset.title || '背景音乐') : '背景音乐'}</span>
-            <div class="mp-bar"><div class="mp-bar-progress"></div></div>
+            <div class="mp-progress-container">
+                <div class="mp-bar"><div class="mp-bar-progress"></div></div>
+                <span class="mp-time">00:00 / 00:00</span>
+            </div>
         </div>
     `;
     const miniToggle = document.createElement('button');
@@ -94,6 +97,24 @@ window.onload = function() {
     if (musicBtn) musicBtn.remove();
     musicBtn = miniToggle;
     const mpProgress = miniPlayer.querySelector('.mp-bar-progress');
+    const mpBar = miniPlayer.querySelector('.mp-bar');
+    const mpTime = miniPlayer.querySelector('.mp-time');
+
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    if (mpBar) {
+        mpBar.addEventListener('click', function(e) {
+            if (!music || !music.duration) return;
+            const rect = this.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const percentage = clickX / rect.width;
+            music.currentTime = music.duration * percentage;
+        });
+    }
 
     function updateHighlightTheme(isDarkMode) {
         let themeLink = document.getElementById('highlight-theme-link');
@@ -195,12 +216,36 @@ window.onload = function() {
         applyToggleStyle(); // Apply style on load
     }
 
-    // Make the mini player draggable
+    // --- Floating Controls (Music, Trail, etc.) ---
+
+    const controlsContainer = document.createElement('div');
+    controlsContainer.id = 'floating-controls-container';
+    
+    // Add Trail Effect Toggle
+    const trailToggleBtn = document.createElement('button');
+    trailToggleBtn.id = 'trail-toggle-btn';
+    trailToggleBtn.className = 'floating-btn';
+    trailToggleBtn.textContent = '鼠标拖尾';
+
+    const isTrailEnabled = localStorage.getItem('trailEffectEnabled') !== 'false';
+    trailToggleBtn.classList.toggle('enabled', isTrailEnabled);
+
+    trailToggleBtn.addEventListener('click', () => {
+        const currentIsEnabled = localStorage.getItem('trailEffectEnabled') !== 'false';
+        localStorage.setItem('trailEffectEnabled', !currentIsEnabled);
+        location.reload();
+    });
+    
+    controlsContainer.appendChild(miniPlayer); // Add existing mini player
+    controlsContainer.appendChild(trailToggleBtn); // Add new trail toggle
+    document.body.appendChild(controlsContainer);
+
+    // Make the controls container draggable
     function makeDraggable(elmnt) {
         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
         
         // Load position from localStorage
-        const savedPos = localStorage.getItem('miniPlayerPosition');
+        const savedPos = localStorage.getItem('floatingControlsPosition');
         if (savedPos) {
             const { top, left } = JSON.parse(savedPos);
             elmnt.style.top = top;
@@ -260,15 +305,15 @@ window.onload = function() {
             document.ontouchmove = null;
             
             // Save position to localStorage
-            localStorage.setItem('miniPlayerPosition', JSON.stringify({
+            localStorage.setItem('floatingControlsPosition', JSON.stringify({
                 top: elmnt.style.top,
                 left: elmnt.style.left
             }));
         };
     }
 
-    if (miniPlayer) {
-        makeDraggable(miniPlayer);
+    if (controlsContainer) {
+        makeDraggable(controlsContainer);
     }
 
     applyTheme();
@@ -315,6 +360,15 @@ window.onload = function() {
             localStorage.setItem('music-current-time', music.currentTime);
             if (music.duration) {
                 mpProgress.style.width = (music.currentTime / music.duration * 100) + '%';
+                if (mpTime) {
+                    mpTime.textContent = `${formatTime(music.currentTime)} / ${formatTime(music.duration)}`;
+                }
+            }
+        });
+
+        music.addEventListener('loadedmetadata', () => {
+            if (music.duration && mpTime) {
+                 mpTime.textContent = `${formatTime(music.currentTime)} / ${formatTime(music.duration)}`;
             }
         });
     }
@@ -622,6 +676,9 @@ window.onload = function() {
         });
     });
 
+    initSidebar();
+    initGlassElements();
+
     function tapticFeedback(e) {
         const el = e.currentTarget;
         el.style.transform = 'scale(0.95)';
@@ -640,6 +697,130 @@ window.onload = function() {
         el.addEventListener('click', tapticFeedback);
     });
 };
+
+function initSidebar() {
+    const sidebar = document.querySelector('aside');
+    if (!sidebar) return;
+
+    const resizer = document.getElementById('sidebar-resizer');
+    const toggleBtn = document.getElementById('sidebar-toggle-btn');
+
+    if (!resizer || !toggleBtn) return;
+
+    // Restore sidebar state from localStorage
+    const savedWidth = localStorage.getItem('sidebarWidth');
+    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+
+    if (isCollapsed) {
+        sidebar.classList.add('sidebar-collapsed');
+    } else if (savedWidth) {
+        sidebar.style.width = savedWidth;
+        sidebar.style.flexBasis = savedWidth;
+    }
+
+    // Toggle functionality
+    toggleBtn.addEventListener('click', () => {
+        const collapsed = sidebar.classList.toggle('sidebar-collapsed');
+        localStorage.setItem('sidebarCollapsed', collapsed);
+        if (!collapsed) {
+             const restoredWidth = localStorage.getItem('sidebarWidth') || '300px';
+             sidebar.style.width = restoredWidth;
+             sidebar.style.flexBasis = restoredWidth;
+        } else {
+            // When collapsing, remove inline width to rely on CSS class
+            sidebar.style.width = '';
+            sidebar.style.flexBasis = '';
+        }
+    });
+
+    // Resizer functionality
+    let isResizing = false;
+    resizer.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        isResizing = true;
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'col-resize';
+
+        const startX = e.clientX;
+        const startWidth = sidebar.offsetWidth;
+
+        const doDrag = (e) => {
+            if (!isResizing) return;
+            const newWidth = startWidth + (e.clientX - startX);
+            const minWidth = parseInt(getComputedStyle(sidebar).minWidth, 10);
+            const maxWidth = parseInt(getComputedStyle(sidebar).maxWidth, 10);
+            
+            if (newWidth >= minWidth && newWidth <= maxWidth) {
+                 sidebar.style.width = `${newWidth}px`;
+                 sidebar.style.flexBasis = `${newWidth}px`;
+            }
+        };
+
+        const stopDrag = () => {
+            if (!isResizing) return;
+            isResizing = false;
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
+            if(!sidebar.classList.contains('sidebar-collapsed')) {
+                localStorage.setItem('sidebarWidth', sidebar.style.width);
+            }
+            document.removeEventListener('mousemove', doDrag);
+            document.removeEventListener('mouseup', stopDrag);
+            window.removeEventListener('blur', stopDrag);
+        };
+
+        document.addEventListener('mousemove', doDrag);
+        document.addEventListener('mouseup', stopDrag);
+        window.addEventListener('blur', stopDrag);
+    });
+}
+
+function initGlassElements() {
+    const article = document.querySelector('main article');
+    if (!article) return;
+
+    // Wrap images
+    article.querySelectorAll('img').forEach(img => {
+        // Check if the image is already in a figure or a link that is in a figure
+        if (img.parentElement.tagName === 'FIGURE' || (img.parentElement.tagName === 'A' && img.parentElement.parentElement.tagName === 'FIGURE')) {
+            return;
+        }
+
+        const figure = document.createElement('figure');
+        figure.className = 'glass-media';
+
+        // Replace the image with the figure in the DOM
+        img.parentNode.insertBefore(figure, img);
+        figure.appendChild(img);
+
+        // Add caption if alt text exists
+        if (img.alt) {
+            const figcaption = document.createElement('figcaption');
+            figcaption.textContent = img.alt;
+            figure.appendChild(figcaption);
+        }
+    });
+
+    // Wrap tables
+    article.querySelectorAll('table').forEach(table => {
+        if (table.parentElement.classList.contains('glass-table')) {
+            return;
+        }
+        const wrapper = document.createElement('div');
+        wrapper.className = 'glass-table';
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+    });
+
+    // Wrap Giscus container
+    const giscusContainer = document.querySelector('.giscus-container');
+    if (giscusContainer && !giscusContainer.parentElement.classList.contains('glass-panel')) {
+        const panel = document.createElement('div');
+        panel.className = 'glass-panel';
+        giscusContainer.parentNode.insertBefore(panel, giscusContainer);
+        panel.appendChild(giscusContainer);
+    }
+}
 
 function showAirpodsCard() {
     const card = document.createElement('div');
