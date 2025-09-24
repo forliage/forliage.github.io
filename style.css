@@ -779,7 +779,6 @@ aside.sidebar-collapsed {
     min-width: 0;
     padding-left: 0;
     padding-right: 0;
-    overflow: hidden;
 }
 
 aside.sidebar-collapsed > *:not(#sidebar-toggle-btn) {
