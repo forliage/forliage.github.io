@@ -105,7 +105,7 @@
 <h6><a name="22222-报文交换" class="md-header-anchor"></a><span>2.2.2.2.2 报文交换</span></h6>
 <p><span>	</span><span>报文交换传输</span><strong><span>完整的报文</span></strong><span>。报文在交换节点上</span><strong><span>存储转发</span></strong><span>，</span><strong><span>逐段</span></strong><span>传输到目的地。路由器需要接收到完整的整个数据报文后，才能开始向下一跳发送。</span></p>
 <p><span>	</span><span>报文交换不需要建立专用通路，链路利用率高，但是</span><strong><span>报文较大时，存储和转发的时延高</span></strong><span>。</span></p>
-<p><span>2.2.2.2.3 分组交换</span></p>
+<h6><a name="22223-分组交换" class="md-header-anchor"></a><span>2.2.2.2.3 分组交换</span></h6>
 <p><span>	</span><span>分组交换是目前</span><strong><span>最常用</span></strong><span>的交换方式。它通过将报文分割成</span><strong><span>更小的分组</span></strong><span>，逐个分组独立传输，目的端再组装成完整报文。</span></p>
 <p><span>	</span><span>分组交换资源利用率高、传输效率好、支持多用户共享链路、鲁棒性强。但是每个分组都有首部，且存在排队、转发延迟，不适合严格实时的业务。</span></p>
 <p><img src="..\images\ComputerNetwork\分组交换.png" referrerpolicy="no-referrer"></p>
@@ -148,7 +148,7 @@
 <h3><a name="42-tcpip参考模型" class="md-header-anchor"></a><span>4.2 TCP/IP参考模型</span></h3>
 <p><span>	</span><span>TCP/IP参考模型总共有</span><strong><span>4层</span></strong><span>，从上到下依次是</span><strong><span>应用层、传输层、网际层、网络接口层</span></strong><span>。它被ARPANET所采用。</span></p>
 <h3><a name="43-教学采用的参考模型" class="md-header-anchor"></a><span>4.3 教学采用的参考模型</span></h3>
-<p><span>	</span><span>由于OSI参考模型过于复杂，学习计算机网络过程中，我们综合OSI与TCP/IP参考模型有点，设计出一种易于理解与讲授的5层参考模型。从上到下依次是</span><strong><span>应用层、传输层、网路层、数据链路层、物理层</span></strong><span>。</span></p>
+<p><span>	</span><span>由于OSI参考模型过于复杂，学习计算机网络过程中，我们综合OSI与TCP/IP参考模型优点，设计出一种易于理解与讲授的5层参考模型。从上到下依次是</span><strong><span>应用层、传输层、网路层、数据链路层、物理层</span></strong><span>。</span></p>
 <h3><a name="44-三种模型总结" class="md-header-anchor"></a><span>4.4 三种模型总结</span></h3>
 <p><img src="..\images\ComputerNetwork\参考模型.png" referrerpolicy="no-referrer"></p>
 <h2><a name="5-计算机网络度量单位" class="md-header-anchor"></a><span>5. 计算机网络度量单位</span></h2>
