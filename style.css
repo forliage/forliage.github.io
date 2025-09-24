@@ -748,10 +748,10 @@ aside { /* This is now the LEFT sidebar */
     z-index: 20; 
 }
 
-#sidebar-toggle-btn {
+#sidebar-collapse-btn {
     position: absolute;
     top: 50%;
-    right: -15px; /* Position outside the sidebar */
+    right: -15px;
     transform: translateY(-50%);
     width: 30px;
     height: 30px;
@@ -767,28 +767,61 @@ aside { /* This is now the LEFT sidebar */
     font-size: 20px;
     line-height: 1;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    transition: transform 0.3s ease, right 0.3s ease, background-color 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-#sidebar-toggle-btn:hover {
+#sidebar-collapse-btn:hover {
     background-color: #D81B60;
 }
 
-aside.sidebar-collapsed {
+#sidebar-open-btn {
+    position: fixed;
+    top: 50%;
+    left: 15px;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #FF69B4;
+    color: white;
+    border: 1px solid white;
+    cursor: pointer;
+    z-index: 1001; /* Above other content */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%) scale(0.8);
+}
+#sidebar-open-btn:hover {
+    background-color: #D81B60;
+}
+
+
+/* New Body-class based system */
+body.sidebar-collapsed aside {
     width: 0;
     min-width: 0;
-    padding-left: 0;
-    padding-right: 0;
+    margin-left: -15px; /* Hide padding area */
+    opacity: 0;
+    pointer-events: none;
 }
 
-aside.sidebar-collapsed > *:not(#sidebar-toggle-btn) {
-    display: none;
+body.sidebar-collapsed #sidebar-collapse-btn {
+    opacity: 0;
+    pointer-events: none;
 }
 
-aside.sidebar-collapsed #sidebar-toggle-btn {
-    right: -45px; /* Move button out when collapsed */
-    transform: translateY(-50%) rotate(180deg);
+body.sidebar-collapsed #sidebar-open-btn {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%) scale(1);
 }
+
 
 body.dark-mode aside {
     background: linear-gradient(145deg, #4b2a5e, #3d1f4c);
@@ -798,7 +831,8 @@ body.dark-mode aside {
     box-shadow: 0 2px 10px rgba(0,0,0,0.4);
 }
 
-body.dark-mode #sidebar-toggle-btn {
+body.dark-mode #sidebar-collapse-btn,
+body.dark-mode #sidebar-open-btn {
     background: #ff8acb;
     color: #2c1f2b;
 }

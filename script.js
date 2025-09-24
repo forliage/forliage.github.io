@@ -703,50 +703,59 @@ function initSidebar() {
     if (!sidebar) return;
 
     const resizer = document.getElementById('sidebar-resizer');
-    const toggleBtn = document.getElementById('sidebar-toggle-btn');
+    const collapseBtn = document.getElementById('sidebar-collapse-btn');
 
-    if (!resizer || !toggleBtn) return;
+    // 1. Create and append the new "open" button
+    const openBtn = document.createElement('button');
+    openBtn.id = 'sidebar-open-btn';
+    openBtn.setAttribute('aria-label', 'Open Sidebar');
+    openBtn.innerHTML = '›';
+    document.body.appendChild(openBtn);
 
-    // Restore sidebar state from localStorage
-    const savedWidth = localStorage.getItem('sidebarWidth');
+    if (!resizer || !collapseBtn) return;
+
+    const body = document.body;
+
+    // 2. Restore state from localStorage
     const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-
     if (isCollapsed) {
-        sidebar.classList.add('sidebar-collapsed');
-    } else if (savedWidth) {
+        body.classList.add('sidebar-collapsed');
+    }
+
+    const savedWidth = localStorage.getItem('sidebarWidth');
+    if (savedWidth && !isCollapsed) {
         sidebar.style.width = savedWidth;
         sidebar.style.flexBasis = savedWidth;
     }
 
-    // Toggle functionality
-    toggleBtn.addEventListener('click', () => {
-        const collapsed = sidebar.classList.toggle('sidebar-collapsed');
-        localStorage.setItem('sidebarCollapsed', collapsed);
-        if (!collapsed) {
-             const restoredWidth = localStorage.getItem('sidebarWidth') || '300px';
-             sidebar.style.width = restoredWidth;
-             sidebar.style.flexBasis = restoredWidth;
-        } else {
-            // When collapsing, remove inline width to rely on CSS class
-            sidebar.style.width = '';
-            sidebar.style.flexBasis = '';
-        }
+    // 3. Event Listeners
+    collapseBtn.addEventListener('click', () => {
+        body.classList.add('sidebar-collapsed');
+        localStorage.setItem('sidebarCollapsed', 'true');
     });
 
-    // Resizer functionality
+    openBtn.addEventListener('click', () => {
+        body.classList.remove('sidebar-collapsed');
+        localStorage.setItem('sidebarCollapsed', 'false');
+    });
+
+    // 4. Resizer functionality
     let isResizing = false;
     resizer.addEventListener('mousedown', (e) => {
+        // Prevent resizing when collapsed
+        if (body.classList.contains('sidebar-collapsed')) return;
+
         e.preventDefault();
         isResizing = true;
-        document.body.style.userSelect = 'none';
-        document.body.style.cursor = 'col-resize';
+        body.style.userSelect = 'none';
+        body.style.cursor = 'col-resize';
 
         const startX = e.clientX;
         const startWidth = sidebar.offsetWidth;
 
-        const doDrag = (e) => {
+        const doDrag = (dragEvent) => {
             if (!isResizing) return;
-            const newWidth = startWidth + (e.clientX - startX);
+            const newWidth = startWidth + (dragEvent.clientX - startX);
             const minWidth = parseInt(getComputedStyle(sidebar).minWidth, 10);
             const maxWidth = parseInt(getComputedStyle(sidebar).maxWidth, 10);
             
@@ -759,11 +768,11 @@ function initSidebar() {
         const stopDrag = () => {
             if (!isResizing) return;
             isResizing = false;
-            document.body.style.userSelect = '';
-            document.body.style.cursor = '';
-            if(!sidebar.classList.contains('sidebar-collapsed')) {
-                localStorage.setItem('sidebarWidth', sidebar.style.width);
-            }
+            body.style.userSelect = '';
+            body.style.cursor = '';
+            
+            localStorage.setItem('sidebarWidth', sidebar.style.width);
+            
             document.removeEventListener('mousemove', doDrag);
             document.removeEventListener('mouseup', stopDrag);
             window.removeEventListener('blur', stopDrag);
