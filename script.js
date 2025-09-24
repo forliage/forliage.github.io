@@ -493,6 +493,7 @@ window.onload = function() {
         generateTOC();
         window.addEventListener('scroll', updateReadingProgress);
         updateReadingProgress();
+        initSidebar(); // Initialize sidebar functionality here
     }
 
     function updateArticleTitle() {
@@ -676,7 +677,6 @@ window.onload = function() {
         });
     });
 
-    initSidebar();
     initGlassElements();
 
     function tapticFeedback(e) {

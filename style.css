@@ -727,7 +727,7 @@ aside { /* This is now the LEFT sidebar */
     background: linear-gradient(145deg, #FFF0F5, #F8DDE5); /* Soft gradient for depth */
     padding: 15px; /* General padding */
     border-right: 1px solid #FFC0CB; /* Optional: add a border */
-    position: relative; /* Needed for resizer and toggle button positioning */
+    position: sticky;
     top: 20px;
     align-self: flex-start;
     border-radius: 12px;
