@@ -1034,5 +1034,12 @@
     "category": "学习笔记",
     "path": "_posts/2025-09-22-ct1-1.html",
     "abstract": "计算理论01:集合、关系和语言(I)"
+  },
+  {
+    "title": "计算机网络01:引言",
+    "date": "2025-09-24",
+    "category": "学习笔记",
+    "path": "_posts/2025-09-24-CN01.html",
+    "abstract": "计算机网络01:引言"
   }
 ]
