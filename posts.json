@@ -1041,5 +1041,12 @@
     "category": "学习笔记",
     "path": "_posts/2025-09-24-CN01.html",
     "abstract": "计算机网络01:引言"
+  },
+  {
+    "title": "操作系统02:操作系统结构",
+    "date": "2025-09-24",
+    "category": "学习笔记",
+    "path": "_posts/2025-09-24-os02.html",
+    "abstract": "操作系统02:操作系统结构"
   }
 ]
