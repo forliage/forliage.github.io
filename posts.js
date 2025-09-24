@@ -1055,5 +1055,12 @@ var postsData = [
       "category": "学习笔记",
       "path": "_posts/2025-09-24-os03.html",
       "abstract": "操作系统03:进程"
+    },
+    {
+      "title": "算法:红黑树 (Red-Black Tree) 深度解析",
+      "date":"2025-09-24",
+      "category":"技术文章",
+      "path":"_posts/2025-09-24-RBT.html",
+      "abstract":"红黑树 (Red-Black Tree) 的深度解析"
     }
   ];
