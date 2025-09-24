@@ -836,8 +836,8 @@ function showAirpodsCard() {
     card.id = 'airpods-card';
     card.innerHTML = `
         <button class="close" aria-label="关闭">×</button>
-        <h3>为图片、表格等增加了玻璃底板效果</h3>
-        <p style="font-size: 0.8em; margin: 5px 0 0;">同时增设了鼠标拖尾的开关、侧栏的开关按键（感谢5db老师的建议）</p>
+        <h3>更新了 操作系统03:进程 的笔记</h3>
+        <p style="font-size: 0.8em; margin: 5px 0 0;">欢迎大家前来阅读！</p>
     `;
     document.body.appendChild(card);
     requestAnimationFrame(() => card.classList.add('show'));
