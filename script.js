@@ -836,8 +836,8 @@ function showAirpodsCard() {
     card.id = 'airpods-card';
     card.innerHTML = `
         <button class="close" aria-label="关闭">×</button>
-        <h3>应小朋友们的要求，更新了 算法:红黑树（Red-Black Tree）深度解析</h3>
-        <p style="font-size: 0.8em; margin: 5px 0 0;">欢迎大家前往 技术文章/算法 板块进行阅读！</p>
+        <h3>公告：节假日8天停更，如有需要请留言或联系我的邮箱。</h3>
+        <p style="font-size: 0.8em; margin: 5px 0 0;">祝大家假期愉快！</p>
     `;
     document.body.appendChild(card);
     requestAnimationFrame(() => card.classList.add('show'));
