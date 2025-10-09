@@ -1067,7 +1067,7 @@ var postsData = [
       "title": "计算理论02:集合、关系和语言(II)",
       "date": "2025-10-09",
       "category": "学习笔记",
-      "path": "_posts/2025-10-09-ct2.html",
+      "path": "_posts/2025-10-09-ct02.html",
       "abstract": "计算理论02:集合、关系和语言(II)"
     }
   ];
