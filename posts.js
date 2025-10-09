@@ -1062,5 +1062,12 @@ var postsData = [
       "category":"技术文章",
       "path":"_posts/2025-09-24-RBT.html",
       "abstract":"红黑树 (Red-Black Tree) 的深度解析"
+    },
+    {
+      "title": "计算理论02:集合、关系和语言(II)",
+      "date": "2025-10-09",
+      "category": "学习笔记",
+      "path": "_posts/2025-10-09-ct2.html",
+      "abstract": "计算理论02:集合、关系和语言(II)"
     }
   ];

@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>计算理论02:集合、关系和语言(II)</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<!-- Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FPDBQB4LZD');
+    </script>
+<!-- Highlight.js Themes -->
+<link href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-dawn.min.css" id="highlight-theme-link" rel="stylesheet"/>
+<!-- Highlight.js Copy Plugin CSS -->
+<link href="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.css" rel="stylesheet"/>
+</head>
+<body>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<button id="style-toggle-btn" title="切换控件样式">🎨</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1 id="计算理论02集合-关系和语言ii">计算理论02:集合、关系和语言(II)</h1>
+<h3 id="1three-fundamental-proof-technique">1.Three Fundamental Proof Technique</h3>
+<p><strong>Cantor定理</strong>：令$f$为从集合$A$到其幂集$P(A)$(或者写成$2^A$)的映射。那么，对于任何集合$A$，有$\text{card}(A)&lt;\text{card}\left(P(A)\right)$。</p>
+<p><strong>Proof</strong>:<br>
+第一步：存在单射$A\to P(A)$<br>
+定义映射<br>
+$$i:A\to P(A),\quad i(a)=\{a\}$$
+<br>
+若$a\neq b$，则$\{a\}\neq \{b\}$，故$i$为单射。于是<br>
+$$|A|\le |P(A)|$$
+<br>
+第二步：不存在满射$A\to P(A)$<br>
+令$f:A\to P(A)$为任意一个函数（随便取）。定义集合<br>
+$$B=\{a\in A:a \notin f(a)\}$$
+<br>
+显然$B\subseteq A$，故$B\in P(A)$。<br>
+我们证明：对任意$a\in A$，都有$f(a)\neq B$。<br>
+反设存在$a_0\in A$使得$f(a_0)=B$。则由$B$的定义，<br>
+$$a_0\in B\Longleftrightarrow a_0\notin f(a_0)=B$$
+<br>
+这给出矛盾：$a_0\in B\Longleftrightarrow a_0\notin B$。<br>
+故不存在这样的$a_0$。于是$B$没有被$f$命中，即$B\in \text{Im}(f)$。所以任何从$A$到$P(A)$的函数都不是满射。</p>
+<p>因此，从来不存在$A$到$P(A)$的双射，由此得到<br>
+$$|A|&lt;|P(A)|$$
+<br>
+证毕。</p>
+<p><strong>Example</strong>:考虑集合 $T$，其中包含所有由二进制数字组成的无限序列（即每个数字为零或一）。集合 $T$ 可数吗？若序列为有限序列呢？</p>
+<p><strong>Solution</strong>:<br>
+1)<strong>不可数。</strong></p>
+<ul>
+<li>
+<p><strong>对角线证明（康托法）：</strong> 假设 $T$ 可数，能列成 $s^{(1)},s^{(2)},\dots$。构造新序列 $t$ 使得第 $n$ 位 $t_n=1-s^{(n)}_n$。则 $t$ 与第 $n$ 个列出的序列在第 $n$ 位不同，因而不等于任何 $s^{(n)}$。这与“已列出全部元素”矛盾，故 $T$ 不可数。</p>
+</li>
+<li>
+<p><strong>等势于幂集的证明：</strong> 把每个无限序列 $x=(x_1,x_2,\dots)$ 对应到子集 $S_x=\{n\in\mathbb N:x_n=1\}$。这是 $T\leftrightarrow\mathcal P(\mathbb N)$ 的双射。由康托定理 $|\mathcal P(\mathbb N)|&gt;|\mathbb N|$，故 $T$ 不可数。</p>
+</li>
+</ul>
+<ol start="2">
+<li><strong>可数</strong></li>
+</ol>
+<p>记长度为 $n$ 的二进制串集合为 $\{0,1\}^n$，其大小 $2^n$（有限）。全体有限串是<br>
+$$\bigcup_{n=0}^\infty {0,1}^n,$$
+<br>
+是<strong>可数个有限集</strong>的并，因此是可数的。</p>
+<h3 id="2closure">2.Closure</h3>
+<h5 id="21-直觉性构想">2.1. 直觉性构想</h5>
+<ul>
+<li>自然数$\mathbb{N}$在$+$下是闭的，比如，对于两个给定的自然数$n,m$，我们总有$n+m \in \mathbb{N}$</li>
+<li>自然数$\mathbb{N}$在$-$下不是闭的，比如，存在两个自然数$n,m$使得$n-m\notin \mathbb{N}$</li>
+<li>整数集$\mathbb{Z}$在$-$下是闭的</li>
+<li>$\mathbb{Z}$是最小的包含$\mathbb{N}$的在$-$下闭的集合</li>
+</ul>
+<h5 id="22关系闭集">2.2.关系闭集</h5>
+<p>对于任意二元关系$R$，均可根据其性质的任意组合构造闭包。</p>
+<p>Note：$R$的反身性、传递性闭包经常记作$R^*$。</p>
+<p><strong>定义</strong>：令$R\subseteq A\times A$是一个有向图。$R$的反身性、传递性闭包是关系<br>
+$$R^*=\{(a,b)|a,b\in A\text{ and there is path from } a\text{ to }b\text{ in }R\}$$
+</p>
+<p>一个例子如下图：<br>
+<img src="../images/imagect001.png" alt="image01"></p>
+<p>考虑两个有向图。观察得到：</p>
+<ul>
+<li>$R^*=R\cup \{(a_i,a_i)|(i=1,2,3,4)\cup\{a_2,a_4\}\}$</li>
+<li>$R\subseteq R^*$</li>
+<li>$R^*$是反身的和传递的</li>
+<li>$R^*$是最小的包含$R$的反身的和传递的集合</li>
+</ul>
+<details><summary><strong>
+若R由矩阵A表示，则对应的R*的A*是什么？</strong></summary>
+<p>设基集 $X={x_1,\dots,x_n}$。二元关系 $R\subseteq X\times X$ 的<strong>邻接矩阵</strong> $A=(a_{ij})\in{0,1}^{n\times n}$ 规定<br>
+$$a_{ij}=1 \iff (x_i,x_j)\in R,\qquad a_{ij}=0\ \text{否则}.$$
+</p>
+<p>在 <strong>布尔半环</strong> 上进行矩阵运算（“加法”为 $\vee$；“乘法”为 $\wedge$；矩阵乘法用 $\vee/\wedge$ 代替 $+/\times$）：<br>
+$$(C=A\odot B)_{ij}=\bigvee_{k=1}^n \big(a_{ik}\wedge b_{kj}\big).$$
+</p>
+<p>这样定义的 $A^k$（布尔幂）满足：<br>
+$$(A^k)_{ij}=1 \iff \text{存在一条从 }x_i\text{ 到 }x_j\text{ 的长度恰为 }k\text{ 的 }R\text{-路径}.$$
+</p>
+<blockquote>
+<p><strong>定理（矩阵形式的闭包）</strong><br>
+$R^{*}$ 的邻接矩阵为<br>
+$$\boxed{A^{*} = I \vee A \vee A^2 \vee \cdots \vee; A^{n-1}}$$
+<br>
+（其中 $I$ 是单位矩阵，$\vee$ 是按元“或”）。<br>
+换言之，$(A^{*})_{ij}=1$ 当且仅当从 $x_i$ 到 $x_j$ 存在<strong>任意长度 $\ge 0$</strong> 的路径。<br>
+若基集无限，则仍有 $A^{*}=I\vee A\vee A^2\vee\cdots$ 的无穷并（在有限情形下截到 $n-1$ 即可，因为最短简单路长 $\le n-1$）。</p>
+</blockquote>
+<ol>
+<li><strong>包含 $R$ 且反身</strong>：显然 $A\le A^{*}$，且 $I\le A^{*}$（$\Rightarrow$ 反身）。</li>
+<li><strong>传递</strong>：由布尔乘法的分配性与幂的定义，<br>
+$$A^{*}\odot A^{*}=\bigvee_{p\ge0}\bigvee_{q\ge0} A^{p+q}
+\le\bigvee_{r\ge0} A^{r}
+=A^{*},$$
+<br>
+故 $A^{*}$ 对应的关系传递。</li>
+<li><strong>极小性</strong>：若 $B$ 是任意满足 $A\le B$ 且反身、传递的矩阵，则由单调性归纳得 $A^k\le B$（因为 $B$ 传递 $\Rightarrow B\odot B\le B$）。于是<br>
+$$A^{*}= \bigvee_{k\ge0} A^k \le B.$$
+<br>
+故 $A^{*}$ 是所有这类 $B$ 的最小者。</li>
+</ol>
+<p>取基集顺序 $(a_1,a_2,a_3,a_4)$，关系 $R$ 为图 $a$ 中的箭头：<br>
+$$a_1\to a_3,\ a_1\to a_4,\ a_2\to a_1,\ a_2\to a_3.$$
+<br>
+其邻接矩阵<br>
+$$A=
+\begin{pmatrix}
+0&amp;0&amp;1&amp;1\\
+1&amp;0&amp;1&amp;0\\
+0&amp;0&amp;0&amp;0\\
+0&amp;0&amp;0&amp;0
+\end{pmatrix}.$$
+</p>
+<p>计算布尔幂：<br>
+$$A^2=
+\begin{pmatrix}
+0&amp;0&amp;0&amp;0\\
+0&amp;0&amp;1&amp;1\\
+0&amp;0&amp;0&amp;0\\
+0&amp;0&amp;0&amp;0
+\end{pmatrix},\qquad
+A^3=O.$$
+<br>
+于是<br>
+$$A^{*}=I\vee A\vee A^2=
+\begin{pmatrix}
+1&amp;0&amp;1&amp;1\\
+1&amp;1&amp;1&amp;1\\
+0&amp;0&amp;1&amp;0\\
+0&amp;0&amp;0&amp;1
+\end{pmatrix}.$$
+</p>
+<p><strong>读矩阵得 $R^{*}$ 的边</strong>：</p>
+<ul>
+<li>反身：$a_i\to a_i$（对所有 $i$）。</li>
+<li>原有边保持：$a_1\to a_3, a_1\to a_4, a_2\to a_1, a_2\to a_3$。</li>
+<li>新增的传递边：$a_2\to a_4$（因为 $a_2\to a_1\to a_4$）。</li>
+<li>其他边不存在（例如从 $a_3$ 或 $a_4$ 出发没有可达别点）。</li>
+</ul>
+<p>这正是“最小的包含 $R$ 的反身且传递的关系”。</p>
+<ul>
+<li><strong>Warshall/Floyd–Warshall</strong>：从 $T=A\vee I$ 出发，依次对每个中间点 $k$ 执行<br>
+$$T_{ij}\gets T_{ij}\vee (T_{ik}\wedge T_{kj}),\quad \forall i,j,$$
+<br>
+最终 $T=A^{*}$。</li>
+</ul>
+</details>
+<p><strong>例子：传递性闭包</strong></p>
+<p>定义：包含$R$的并具有传递性的最小的关系（通常称作$R^+$）<br>
+更一般的，$R^+$是满足以下的关系：</p>
+<ul>
+<li>$R\subseteq R^+$</li>
+<li>$R^+$是传递的</li>
+<li>$\forall R'$，如果$R\subseteq R'$且$R'$是传递的$\Rightarrow R^+\subseteq R'$</li>
+</ul>
+<details><summary><strong>
+Q:Can you define the relation of "parent-of"? What is symmetric, transitive closure of "parent-of" is?
+</strong></summary>
+1. 定义“parent-of”关系
+<p>在集合 (P)（所有人）上，定义二元关系：<br>
+$$\text{parent-of} = {(x,y)\in P\times P : x \text{ 是 } y \text{ 的父母}}.$$
+</p>
+<p>例如，若 Alice 是 Bob 的母亲，则 $(\text{Alice},\text{Bob}) \in \text{parent-of}$。</p>
+<ol start="2">
+<li>传递闭包（transitive closure）</li>
+</ol>
+<p><strong>定义</strong>：传递闭包 $R^{+}$ 是包含 $R$ 的最小传递关系。</p>
+<p>对于 $\text{parent-of}$，它的传递闭包是 <strong>ancestor-of（祖先关系）</strong>：<br>
+$$\text{ancestor-of} = {(x,y): x \text{ 是 } y \text{ 的父母，或父母的父母，或更上代}}.$$
+<br>
+即：</p>
+<ul>
+<li>若 $x$ 是 $y$ 的父母，则 $x$ 是 $y$ 的祖先。</li>
+<li>若 $x$ 是 $z$ 的祖先且 $z$ 是 $y$ 的父母，则 $x$ 是 $y$ 的祖先。</li>
+<li>这是“父母关系”的不断传递扩展。</li>
+</ul>
+<ol start="3">
+<li>对称闭包（symmetric closure）</li>
+</ol>
+<p><strong>定义</strong>：对称闭包 $R^{\text{sym}}$ 是包含 $R$ 的最小对称关系。</p>
+<p>对于 $\text{parent-of}$，对称闭包是 <strong>parent-child 关系</strong>：<br>
+$$\text{parent-child} = {(x,y): x \text{ 是 } y \text{ 的父母，或 } y \text{ 是 } x \text{ 的父母}}.$$
+<br>
+即在“父母”关系上加上反向的“子女”关系。</p>
+<ol start="4">
+<li>对称传递闭包（symmetric, transitive closure）</li>
+</ol>
+<p>先取对称闭包，再取传递闭包。结果是“同一个家族谱系中所有直系祖先和直系后代之间的连通关系”。</p>
+<p>换句话说，它就是 <strong>kinship-of（血缘直系关系）</strong>：<br>
+$${(x,y): x,y \text{ 在族谱上相连，不论祖先或后代}}.$$
+</p>
+<p>例如：</p>
+<ul>
+<li>Alice 是 Bob 的母亲 $\Rightarrow (\text{Alice},\text{Bob})$ 与 $(\text{Bob},\text{Alice})$ 都在闭包中；</li>
+<li>再加上传递性，Alice 也与 Bob 的孩子（孙子辈）相连，反之亦然；</li>
+<li>最终得到：所有直系祖先/后代之间都成对相连。</li>
+</ul>
+</details>
+<h3 id="3alphabet-and-language">3.Alphabet and Language</h3>
+<p>数据在计算机内存中以位串或其他适于操作的符号形式编码。</p>
+<p>计算理论的数学研究始于对符号串操作数学原理的理解。</p>
+<h5 id="31alphabet">3.1.Alphabet</h5>
+<p>定义：任何一个有限集被称作一个alphabet。Alphabet的元素被称为symbols of alphabet。</p>
+<p>符号：我们使用符号$\Sigma$来表示alphabet。</p>
+<p>例子：</p>
+<ul>
+<li>$\Sigma = \{\leftarrow, \varPhi, \exists,\sqrt{} \}$</li>
+<li>$\Sigma = \{a,b,c\}$</li>
+<li>$\Sigma = \{n\in \mathbb{N}:n\le 10^5\}$</li>
+<li>$\Sigma = \{0,1\}$ is called a binary alphabet.</li>
+</ul>
+<h5 id="32strings">3.2.Strings</h5>
+<p>我们称alphabet $\Sigma$的有限序列为words或$\Sigma$上的strings.</p>
+<p>我们用$e$代表$\Sigma$上的空字符。</p>
+<p>我们用$\Sigma^*$表示$\Sigma$上所有字符串的集合。</p>
+<p>$\Sigma^*$的元素被称为$\Sigma$上的字符串。</p>
+<p>我们写$w\in \Sigma^*$来表示$w$是$\Sigma$中的字符串。</p>
+<p>举例：令$\Sigma=\{a,b\}$，我们将用简写符号在$\Sigma$上写出一些字符串，表示为：$$aaa,bbb,ab,abab$$</p>
+<p><strong>Operation of Strings</strong>:</p>
+<ul>
+<li>连接：$x\circ y$或$xy$
+<ul>
+<li>Substring, suffix, prefix</li>
+<li>例子，$\forall w, we=ew=w$</li>
+</ul>
+</li>
+<li>字符串指数
+<ul>
+<li>$w^0=e$</li>
+<li>$w^{i+1}=w^i\circ w$，对任意的$i\ge 0$</li>
+</ul>
+</li>
+<li>逆
+<ul>
+<li>如果$w$的字符串长度为0，那么$w^R=w=e$</li>
+<li>如果$w$的字符串长度是$n+1&gt;0$，那么对$a\in \Sigma$，$w=ua$，有$w^R=au^R$</li>
+</ul>
+</li>
+</ul>
+<h5 id="33languages">3.3.Languages</h5>
+<p>语言：字符串的集合。</p>
+<p>设Alphabet:$\Sigma$。全体字符串的集合为$\Sigma^* (e\in \Sigma)$。定义语言$L\subseteq \Sigma^*$。</p>
+<p>$\varPhi,\Sigma$和$\Sigma^*$都是语言。</p>
+<p>有限语言：列举所有的字符串<br>
+无限语言：通过下列范式来确定<br>
+$$L=\{w\in \Sigma^*:w\text{ has property } P\}$$
+</p>
+<p>例子：$L=\{ab,aabb,aaabbb,\cdots\}=\{a^nb^n|n\ge 1\}$</p>
+<p><strong>定理</strong>：若$\Sigma$是一个有限的alphabet，那么$\Sigma^*$是一个无限可数的集合。</p>
+<p>下面给出一个有趣的证明（本质是基于哥德尔素数编码）：</p>
+<p>将alphabet固定编号：$\Sigma=\{\sigma_1,\sigma_2,\cdots,\sigma_k\}$。记$\{p_j\}$是素数列。根据唯一分解定理（算术基本定理），每个$N\in\mathbb{N}_{\ge 1}$，都能且只能以一种方式写成素数幂的乘积<br>
+$$N=\prod_{j=1}^{\infty}p_j^{e_j},\quad e_j\in\mathbb{N}_{\ge 0},\text{且除有限个外}e_j=0$$
+</p>
+<p>定义映射$f:\Sigma^*\to\mathbb{N}_{\ge 1}$</p>
+<ul>
+<li>空串编码为$f(e)=1$(空乘积)。</li>
+<li>对非空串$w=\sigma_{i_1}\sigma_{i_2}\cdots\sigma_{i_n}$(其中每个$i_t\in\{1,\cdots,k\}$)，定义$$f(w)=\prod_{t=1}^{n}p_t^{i_t}$$<br>
+也就是说，第$t$个字符用“第$t$个素数”的指数来记录它是$\sigma_{i_t}$中的哪一个。</li>
+</ul>
+<p>下面证明$f$是单射：若$f(u)=f(v)$，则$u=v$。</p>
+<p>设$u = \sigma_{i_1}\cdots\sigma_{i_m},\quad v=\sigma_{j_1}\cdots\sigma_{j_n}$<br>
+由定义<br>
+$$f(u)=\prod_{t=1}^m p_t^{i_t},\quad f(v)=\prod_{t=1}^n p_t^{j_t}$$
+<br>
+若$f(u)=f(v)$，按唯一分解定理，每一素数$p_s$的指数都相同。</p>
+<p>设$r=\max\{t:p_t\text{整除}f(u)\}$，则$r=m$(因为只有到$p_m$有正指数)；同理，$r=n$。故$m=n$。</p>
+<p>再逐位比较指数：对每个$t=1,\cdots,m$，有$i_t=j_t$。</p>
+<p>因此$u$与$v$的每个对应位置字母编号相同，故$u=v$。</p>
+<p>于是得到$f$为单射，从而<br>
+$$|\Sigma^*|\le |\mathbb{N}|$$
+<br>
+因此，至多可数。</p>
+<p>为证明是“可数无穷”，还需证明$|\mathbb{N}|\le |\Sigma^*|$。</p>
+<p>取任意固定字母$\sigma_1\in\Sigma$，定义<br>
+$$g:\mathbb{N}\to\Sigma^*,\quad g(n)=\sigma_1^{n}$$
+<br>
+显然$g$是单射（不同$n$产生不同长度的串），于是<br>
+$$|\mathbb{N}|\le |\Sigma^*|$$
+</p>
+<p>因此$|\Sigma^*|=|\mathbb{N}|$。证完。</p>
+<p><strong>问题</strong>：</p>
+<ol>
+<li>How many strings over a non-empty alphabet?</li>
+</ol>
+<p>情形A：$\Sigma$有限或可数（通常情况）<br>
+$$|\Sigma^*|=|\bigcup_{n\ge 0}\Sigma^n|\le \sum_{n\ge 0} |\Sigma^n|$$
+</p>
+<ul>
+<li>若$|\Sigma|=k&lt;\infty$，则$|\Sigma^n|=k^n&lt;\infty$，故$\Sigma^*$是可数个有限集的并$\Longrightarrow$无限可数。</li>
+<li>若$|\Sigma|=\aleph_0$，则$|\Sigma^n|=\aleph_0$，可数个可数集的并仍为$\aleph_0$。</li>
+</ul>
+<p>情形B：$\Sigma$不可数<br>
+由此得到<br>
+$$|\Sigma^*|=|\bigcup_{n\ge 0}\Sigma^n|=\max\{\aleph_0,|\Sigma|\}=|\Sigma|$$
+<br>
+因此，$\Sigma$不可数时，$\Sigma^*$的基数就是$|\Sigma|$（不可数。）</p>
+<ol start="2">
+<li>Is a language countable over a non-empty alphabet?</li>
+</ol>
+<p>“语言”是$\Sigma^*$的子集$L\subseteq \Sigma^*$。</p>
+<ul>
+<li>当$\Sigma$有限或可数时，$\Sigma^*$可数$\Rightarrow$任何$L\subseteq \Sigma^*$都是至多可数的。</li>
+<li>当$\Sigma$不可数时，语言可以不可数。</li>
+</ul>
+<ol start="3">
+<li>How many languages over a non-empty alphabet?</li>
+</ol>
+<p>“所有语言”的集合是幂集$P(\Sigma^*)$<br>
+当$\Sigma$有限或可数时，$|\Sigma^*|=\aleph_0$，由康托定理：$$|\{\text{all languages}\}|=|P(\Sigma^*)|=2^{\aleph_0}=|\mathbb{R}|$$
+<br>
+即不可数，且与实数集等势（连续统势）。</p>
+<p><strong>Operations of Languages</strong>:</p>
+<ul>
+<li>Union, Intersection, Difference, Complement ($\overline{L}=\Sigma^*-L$)</li>
+<li>指数：
+<ul>
+<li>$L^0= \{e\}$</li>
+<li>$L^{i+1} = LL^i$，对任何的$i\ge 0$</li>
+</ul>
+</li>
+<li>连接 $$L_1L_2=\{w_1w_2|w_1\in L_1\land w_2\in L_2\}$$
+<ul>
+<li>例子</li>
+</ul>
+</li>
+<li>Kleene Star<br>
+$$L^*=\{w\in \Sigma^*:w=w_1\cdots w_k,k\ge 0,w_1,\cdots,w_k\in L\} = L^0 \cup L^1\cup L^2 \cup \cdots$$
+</li>
+<li>用$L^+$表示语言$LL^*$。同等地，$L^+$是语言<br>
+$$L^+=\{w\in \Sigma^*:w=w_1\cdots w_k,k\ge 1,w_1,\cdots,w_k\in L\} = L^1\cup L^2\cup L^3 \cup \cdots$$
+</li>
+<li>请注意，$L^+$ 可视为 $L$ 在字符串连接运算下的闭包。即 $L^+$ 是包含 $L$ 以及 $L$ 中所有字符串的连接形式的最小语言。</li>
+</ul>
+<h3 id="4finite-representations-of-languages">4.Finite Representations of Languages</h3>
+<p>我们可以使用有限手段表示有限语言，例如列举其所有元素。</p>
+<p>语言往往具有无限性，因此自然会产生这样的疑问：当语言是无限的时，是否存在有限的表示法？又在何种情况下这种表示法是可能的？</p>
+<p>用有限规格表示语言是计算理论的核心问题。</p>
+<p>当然，我们首先必须正式定义所谓有限规格表示的含义，或者更精确地说，有限表示的含义。</p>
+<h5 id="41finite-representations">4.1.Finite Representations</h5>
+<p>例子：令$L=\{w\in\{0,1\}^*:w\text{ has two or three occurrences of 1, the first and second of which are not consecutive}\}$</p>
+<ul>
+<li>The language can be described using only singleton sets and the symbols $\cup,\circ$ and $*$ as<br>
+$$\{0\}^*\circ \{1\}\circ \{0\}^*\circ\{0\}\circ\{1\}\circ\{0\}^*\left((\{1\}\circ\{0\}^*)\cup \varPhi^*\right)$$
+</li>
+<li>The language can be written simply as<br>
+$$0^* 10^*010^*(10^*\cup \varPhi^*)$$
+</li>
+</ul>
+<h5 id="42regular-expressions--languages">4.2.Regular expressions &amp; languages</h5>
+<p><strong>定义</strong>：正则表达式(Regular Expressions)是描述正规语言的一种方式。形式上，它们是从字母表$\Sigma$出发，加上一些运算发$\{(\cup,(),*\}$，通过以下规则构造出来的字符串：</p>
+<ol>
+<li>基本元素
+<ul>
+<li>空集符号$\varPhi$是一个正则表达式，表示空语言</li>
+<li>对于字母表$\Sigma$中的任意符号$a$，单个符号$\{a\}$是正则表达式，表示只包含这个单字符串的语言。</li>
+</ul>
+</li>
+<li>复合构造<br>
+如果$\alpha$和$\beta$是正则表达式，则
+<ul>
+<li>$(\alpha\beta)$也是正则表达式，表示语言的连接 (concatenation)</li>
+<li>$(\alpha\cup\beta)$也是正则表达式，表示语言的并 (union)</li>
+<li>$\alpha^*$也是正则表达式，表示语言的 Kleene 星闭包 (Kleene star)，即可以重复零次或多次</li>
+</ul>
+</li>
+<li>除了1)和2)这些规则推导出来的东西，其余都不是正则表达式。</li>
+</ol>
+<p><strong>Example</strong>：给定字母表$\Sigma=\{a,b\}$，语言<br>
+$$L=\{ab,aabb,aaabbb,\cdots\}=\{a^nb^n|n\ge 1\}$$
+</p>
+<p>我们使用集合$\mathcal{R}$中的正则表达式作为语言的表示形式。</p>
+<p>由正则表达式表示的语言称为正则语言。</p>
+<p><strong>定义</strong>：正则表达式和语言之间的对应关系由函数$\mathcal{L}$给出。若$a$是一个正则表达式，则$\mathcal{L}(a)$表示它所对应的语言。</p>
+<p><strong>形式化定义（递归定义）</strong>：$$\mathcal{L}:R\to 2^{\Sigma^*}$$
+<br>
+其中$R$是所有正则表达式的集合，$2^{\Sigma^*}$是所有语言的集合。<br>
+基础：</p>
+<ul>
+<li>$\mathcal{L}(\varPhi)=\varPhi$</li>
+<li>$\mathcal{L}(a)=\{a\},\forall a \in \Sigma$<br>
+构造规则：若$\alpha,\beta$是正则表达式，则</li>
+<li>$\mathcal{L}(\alpha\beta)=\mathcal{L}(\alpha)\circ\mathcal{L}(\beta)$（连接）</li>
+<li>$\mathcal{L}(\alpha\cup\beta)=\mathcal{L}(\alpha)\cup\mathcal{L}(\beta)$（并）</li>
+<li>$\mathcal{L}(\alpha^*)=(\mathcal{L}(\alpha))^*$(Kleene Star 闭包)</li>
+</ul>
+<p><strong>Example</strong>：<br>
+$$\mathcal{L}\left(\left((a\cup b)^*a\right)\right)=\mathcal{L}\left((a\cup b)^*\right)\mathcal{L}(a)=\{a,b\}^*\{a\}$$
+<br>
+即所有以$a$结尾的字符串：<br>
+$$\{w\in\{a,b\}^*:w\text{以}a\text{结尾}\}$$
+</p>
+<p><strong>正则表达式恒等式</strong>：</p>
+<ul>
+<li>$SR\neq RS$(连接一般不交换)</li>
+<li>$S\cup R=R\cup S$（并交换）</li>
+<li>结合律：$(RS)T=R(ST),(R\cup S)T=RT\cup ST$</li>
+<li>$e^* = \{e\}$</li>
+<li>$(R^*)^*=R^*$</li>
+<li>$(R^*S^*)^*=(R\cup S)^*$</li>
+<li>$(\{e\}\cup R)^*=R^*$</li>
+</ul>
+<p><strong>一个重要引理</strong>：令$A=(R\cup S)^*$。若$U\subseteq A$且$T\subseteq A$，则<br>
+$$UT\subseteq A\text{ 且 }TU\subseteq A$$
+</p>
+<p>我们只证前者，后者同理。</p>
+<ol>
+<li>$A=(R\cup S)^*=\bigcup_{n\ge 0} (R\cup S)^n$</li>
+<li>因为$U\subseteq A, T\subseteq A$，有$$A\cdot A$$</li>
+<li>由(1)得到:</li>
+</ol>
+<p>$$\begin{aligned}
+A\cdot A&amp;=\left(\bigcup_{m\ge 0}(R\cup S)^m\right)\cdot \left(\bigcup_{n\ge 0}(R\cup S)^n\right)=\bigcup_{m,n\ge 0} (R\cup S)^m (R\cup S)^n \\
+&amp;=\bigcup_{m,n\ge 0} (R\cup S)^{m+n} \subseteq \bigcup_{k\ge 0}(R\cup S)^k=A
+\end{aligned}$$
+<br>
+引理证完！</p>
+<p><strong>Example</strong>：<br>
+$$\begin{aligned}
+(x+y)^* &amp;= (x^*+y)^* = x^*(x+y)^*=(x+yx^*)^* \\
+&amp;=(x^*y^*)^*=x^*(yx^*)^* = (x^*y)x^*
+\end{aligned}$$
+</p>
+<details>
+<summary><strong>解答</strong></summary>
+<p><strong>(a)$(x+y)^*$</strong><br>
+这是标准形本身，表示所有由$x,y$组成的有限串。</p>
+<p><strong>(b)$(x^+y)^*\equiv (x^*+y)^*$</strong><br>
+块的单位要是若干个$x''(x^*)$，要么是一个$y$。<br>
+把一个由$x,y$组成的任意串按“连续$x$的极大段+单个$y$”切分，反向拼接也能得到任意串。<br>
+因而恰好得到所有$x,y$串：$(x^*+y)^*=(x+y)^*$</p>
+<p><strong>(c)$x^*(x+y)^*$</strong><br>
+$(x+y)^*\subseteq x^*(x+y)^*$因为$e\in x^*$<br>
+$x^* (x+y)^* \subseteq (x+y)^*$因为连接仍是$x,y$串。</p>
+<p><strong>(d)$(x+yx^*)^*$</strong><br>
+块要么是单个$x$，要么是$y$后跟若干个$x$。<br>
+任何$x,y$串可在每个$y$处与其后紧跟的一串$x$合并为一个块，反过来再分解也可得到任意串。</p>
+<p><strong>(e)$(x^*y^*)^*$</strong><br>
+每个块是若干个$x$接若干个$y$。把任意$x,y$串按“最长的$x$段+最长的$y$段”交替切分即可覆盖所有串；反之显然仍是$x,y$串。</p>
+<p><strong>(f)$x^*(yx^*)^*$</strong><br>
+先若干个$x$，然后重复“一个$y$加若干个$x$”的块。<br>
+任意$x,y$串都可以用这种“以所有$y$为分隔点，每个$y$携带右侧尽可能多的$x$”的方式切分；反向拼接得到同样的集合。</p>
+<p><strong>(g)$(x^*y)^*x^*$</strong><br>
+与(f)对称。</p>
+</details>
+<p><strong>Example</strong>：<br>
+$$\mathcal{L}\left(c^*(a\cup (bc^*)^*)^*\right)=\{w\in\{a,b,c\}^*:w\text{不含字串}ac\}$$
+</p>
+<details>
+<summary><strong>解答</strong></summary>
+<p>记$B:=(bc^*)^*$</p>
+<p><strong>引理1(按$a$唯一分解)</strong><br>
+对任意串$w\in\{a,b,c\}^*$，存在唯一的$k\ge 0$与$y_0,\cdots,y_k \in \{b,c\}^*$，使得<br>
+$$w=y_0ay_1a\cdots ay_k$$
+<br>
+其中每个$y_i$都不含字母$a$。<br>
+若$k=0$则$w=y_0$（无$a$）</p>
+<p><strong>引理2(对$B$的语义刻画)</strong><br>
+$$B=(bc^*)^*=\{u\in\{b,c\}^*\mid u\text{不以}c\text{开头}\}$$
+<br>
+（允许$u=e$）<br>
+证明：</p>
+<ul>
+<li>$bc^*$的每个块以$b$开头，若干块连接或空串都不会以$c$开头。</li>
+<li>对不以$c$开头的$u$做分解：若$u=e$归入$B$。若非空，第一字符为$b$。令$r\ge 0$为其后紧跟的最大个数的$c$，写成$u=bc^ru'$，则$u'\in\{b,c\}^*$仍然不以$c$开头（因为$c^r$已取尽连续的$c$）。对$u'$递归处理即可，把$u$切成若干个$bc^{r_i}$的乘积，故$u\in (bc^*)^*$。</li>
+</ul>
+<p><strong>方向1</strong><br>
+取$w\in L$。由正则结构<br>
+$$w=u_0v_1v_2\cdots v_m,\quad u_0\in c^*,v_j\in \{a\}\cup B$$
+<br>
+注意：凡出现字母$a$的地方必是某个$v_j=a$；其后一个块若存在，只可能是$a$或$B$中的串。而$B$中的任何串都不会以$c$开头，并且前缀$c^*$只出现在最开头，不会紧跟在某个$a$的后面。<br>
+因此$w$中每个$a$的后面不可能出现$c$，故$w$不含子串$ac$。</p>
+<p><strong>方向2</strong><br>
+设$w\in\{a,b,c\}^*$且不含子串$ac$。由引理1写作<br>
+$$w=y_0ay_1a\cdots ay_k,\quad y_i\in\{b,c\}^*$$
+<br>
+由“不含$ac$”可知，对所有$i&lt;k,y_i$不能以$c$开头（否则$ay_i$的首两字母就是$ac$）</p>
+<ul>
+<li>因此由引理2：$y_i\in B(i=1,\cdots ,k)$</li>
+<li>对于开头那段$y_0$，允许以若干个$c$开头。写$y_0=c^rz$，其中$r\ge 0$，且$z$或为空，或不以$c$开头。由引理2，$z\in B$。于是<br>
+$$y_0\in c^*B$$
+<br>
+把这些块重新组合可得<br>
+$$w\in c^*(B\cup \{a\})^* = \mathcal{L}\left(c^* \left(a\cup (bc^*)^*\right)^*\right)=L$$
+</li>
+</ul>
+</details>
+<p><strong>表示语言的两种重要且有用的手段</strong>：</p>
+<ul>
+<li>语言识别装置：用于回答形式为“字符串𝑤是否属于𝐿？”的问题</li>
+<li>语言生成器：正则表达式</li>
+</ul>
+</article><div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+<div class="giscus-container" style="margin-top: 50px;">
+  <script src="https://giscus.app/client.js"
+  data-repo="forliage/forliage.github.io"
+  data-repo-id="R_kgDONjzd4w"
+  data-category="Announcements"
+  data-category-id="DIC_kwDONjzd484Cus1G"
+  data-mapping="pathname"
+  data-strict="0"
+  data-reactions-enabled="1"
+  data-emit-metadata="0"
+  data-input-position="bottom"
+  data-theme="https://forliage.github.io/giscus.css"
+  data-lang="zh-CN"
+  crossorigin="anonymous"
+  async>
+</script>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+<div class="dock">
+  <a href="https://forliage.github.io/index.html">🏠</a>
+  <a href="https://forliage.github.io/posts.html">📚</a>
+  <a href="https://forliage.github.io/about.html">👤</a>
+</div>
+<script src="../script.js"></script>
+<!-- The Modal -->
+<div class="modal" id="about-me-modal">
+<!-- Modal content -->
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script><script src="../trail.js"></script>
+<!-- Highlight.js Core -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<!-- Highlight.js Copy Plugin -->
+<script src="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.js"></script>
+<!-- Initialize Highlight.js and Copy Plugin -->
+<script>
+  hljs.highlightAll();
+  hljs.addPlugin(new CopyButtonPlugin());
+</script>
+</body>
+</html>
