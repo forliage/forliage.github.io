@@ -836,8 +836,8 @@ function showAirpodsCard() {
     card.id = 'airpods-card';
     card.innerHTML = `
         <button class="close" aria-label="关闭">×</button>
-        <h3>公告：节假日8天停更，如有需要请留言或联系我的邮箱。</h3>
-        <p style="font-size: 0.8em; margin: 5px 0 0;">祝大家假期愉快！</p>
+        <h3>复工（不）快乐</h3>
+        <p style="font-size: 0.8em; margin: 5px 0 0;">开始工作</p>
     `;
     document.body.appendChild(card);
     requestAnimationFrame(() => card.classList.add('show'));
