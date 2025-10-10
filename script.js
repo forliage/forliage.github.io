@@ -836,7 +836,7 @@ function showAirpodsCard() {
     card.id = 'airpods-card';
     card.innerHTML = `
         <button class="close" aria-label="关闭">×</button>
-        <h3>更新了 操作系统03:进程 的笔记</h3>
+        <h3>更新了 计算理论02：语言 笔记</h3>
         <p style="font-size: 0.8em; margin: 5px 0 0;">欢迎大家前来阅读！</p>
     `;
     document.body.appendChild(card);
