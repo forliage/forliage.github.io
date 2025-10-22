@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>计算机网络03：数据链路层</title>
+<link href="../style.css" rel="stylesheet"/>
+<link href="../modal.css" rel="stylesheet"/>
+<style>
+  /* 添加此样式以确保图片自适应 */
+  img {
+    max-width: 100%; /* 图片最大宽度为父容器的100% */
+    height: auto;   /* 高度自动调整以保持原始宽高比 */
+    display: block; /* 将图片设置为块级元素以便设置外边距 */
+    margin-left: auto; /* 自动计算左外边距 */
+    margin-right: auto;/* 自动计算右外边距，实现居中 */
+  }
+</style>
+<script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        },
+        svg: {
+          fontCache: 'global'
+        }
+      };
+    </script>
+<script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" type="text/javascript">
+</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-FPDBQB4LZD"></script>
+<script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-FPDBQB4LZD');
+    </script>
+<link href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/rose-pine-dawn.min.css" id="highlight-theme-link" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.css" rel="stylesheet"/>
+</head>
+<body>
+<audio id="bg-music" loop="" src="../music.mp3"></audio>
+<button class="music-control" id="music-toggle">♪</button><button class="dark-mode-control" id="dark-mode-toggle">🌙</button>
+<button id="style-toggle-btn" title="切换控件样式">🎨</button>
+<header>
+<h1>forliage的blog</h1>
+<nav>
+<ul>
+<li><a href="../index.html">首页</a></li>
+<li><a href="../posts.html">文章</a></li>
+<li><a href="../about.html">关于</a></li>
+<li><a href="../category.html?category=技术文章">技术文章</a></li>
+<li><a href="../category.html?category=生活随笔">生活随笔</a></li>
+<li><a href="../category.html?category=学习笔记">学习笔记</a></li>
+<li><a href="../category.html?category=心情日记">心情日记</a></li>
+<li><a href="#" id="about-me-btn">ABOUT ME</a></li>
+</ul>
+</nav>
+</header>
+<div class="container">
+<div id="sidebar-container"></div>
+<main>
+<article>
+<h1><a name="计算机网络03数据链路层" class="md-header-anchor"></a><span>计算机网络03：数据链路层</span></h1>
+<h2><a name="本章重点" class="md-header-anchor"></a><span>本章重点</span></h2>
+<ol>
+<li><span>帧的标识方式</span></li>
+<li><span>差错检测与纠正</span></li>
+<li><span>数据链路层协议</span></li>
+</ol>
+<h2><a name="1-数据链路层的设计" class="md-header-anchor"></a><span>1. 数据链路层的设计</span></h2>
+<p><span>	</span><span>数据链路层位于物理层之上，利用其提供的位流服务，向<strong>网络层</strong>提供明确的服务接口。它提供下面三种服务：<strong>无确认无连接、有确认无连接、有确认有连接</strong>。它具有<strong>成帧、差错控制、流量控制的功能</strong>。</span></p>
+<h3><a name="11-成帧framing" class="md-header-anchor"></a><span>1.1 成帧（Framing）</span></h3>
+<p><span>	</span><span>成帧是指将上层传输的数据分割成适合在物理链路上传输的帧格式的过程。</span></p>
+<h4><a name="111-帧结构" class="md-header-anchor"></a><span>1.1.1 帧结构</span></h4>
+<p><span>	</span><span>数据链路层将网络层传输的数据（例如IP数据包）分段，并加上头部和尾部来形成一个“帧”。<strong>帧头</strong>通常包含目的地址、源地址、类型、控制信息等，用于帮助接收方正确处理数据。<strong>帧尾</strong>常包含校验和（如CRC，循环冗余校验），用于检测数据传输过程中是否发生了错误。</span></p>
+<h4><a name="112-帧的标识方法" class="md-header-anchor"></a><span>1.1.2 帧的标识方法</span></h4>
+<p><span>	</span><span>如何标识一个帧是数据链路层需要解决的关键问题，常见方式有下面几种。</span></p>
+<h5><a name="1121-字节计数法byte-count" class="md-header-anchor"></a><span>1.1.2.1 字节计数法（Byte Count）</span></h5>
+<p><span>	</span><span>用数字表示一个帧长度，如下图所示。该方法的弊端是，当出现一个字节错误，容易产生一连串错误。</span></p>
+<p><img src="..\images\ComputerNetwork\字节计数法.png" referrerpolicy="no-referrer"></p>
+<h5><a name="1122-带字节填充的定界符法" class="md-header-anchor"></a><span>1.1.2.2 带字节填充的定界符法</span></h5>
+<p><span>	</span><span><strong>定界符（FLAG）</strong>是一个特殊的字节，用于区分前后两个不同的帧。为解决有效载荷部分出现与定界符相同字节的情况，发送方会检查有效载荷并使用<strong>转义字符</strong>进行字节填充，如下图所示。</span></p>
+<p><img src="..\images\ComputerNetwork\字节填充.png" referrerpolicy="no-referrer"></p>
+<p><span>	</span><span>接收方收到帧后，会逐个检查收到的每一个字节。收到<strong>ESC</strong>后，认为后一个字节无条件成为有效载荷；收到<strong>FLAG</strong>后，认为是帧的边界。过程如下所示。</span></p>
+<p><img src="..\images\ComputerNetwork\字节填充处理.png" referrerpolicy="no-referrer"></p>
+<h5><a name="1123-带比特填充的定界符法" class="md-header-anchor"></a><span>1.1.2.3 带比特填充的定界符法</span></h5>
+<p><span>	</span><span>使用定界符<strong>01111110</strong>，即0x7E。发送方会先检查有效载荷，当发现有连续5个1时，插入一个0。</span></p>
+<p><img src="..\images\ComputerNetwork\带比特1.png" referrerpolicy="no-referrer"></p>
+<p><span>	</span><span>接收方收到比特流后，若发现连续5个1时：</span></p>
+<ul>
+<li><span>下一比特为0：则为有效载荷，直接丢弃0。</span></li>
+<li><span>下一比特为1：连同后一比特的0，构成定界符。</span></li>
+</ul>
+<p><img src="..\images\ComputerNetwork\带比特2.png" referrerpolicy="no-referrer"></p>
+<h5><a name="1124-物理层编码" class="md-header-anchor"></a><span>1.1.2.4 物理层编码</span></h5>
+<p><span>	</span><span>像4B/5B中剩下的16个码字可作为定界符、前导码、曼彻斯特编码中的跳变等等。</span></p>
+<h3><a name="12-差错检测" class="md-header-anchor"></a><span>1.2 差错检测</span></h3>
+<p><span>	</span><span>数据传输过程中，因为信道噪声的干扰，难免会出现数据传输的问题。因此，我们需要进行差错检测。差错检测与纠正的部分将在下一节进行详细介绍。</span></p>
+<h3><a name="13-流量控制" class="md-header-anchor"></a><span>1.3 流量控制</span></h3>
+<p><span>	</span><span>数据链路层还存在另一个问题，即接收方的处理速率满导致缓冲区溢出。我们可以通过基于反馈调整发送方发送速率和发送方内部自行限速方式来解决这个问题。详细内容将在后续部分进行介绍。</span></p>
+<h2><a name="2-差错检测与纠正" class="md-header-anchor"></a><span>2. 差错检测与纠正</span></h2>
+<p><span>	</span><span>为解决信道传输出现差错的问题，我们通常采用增加冗余信息（校验信息）的策略。如何在保证一定差错检测和纠错能力的前提下减少冗余信息，是需要解决的问题。通常而言，我们采用<strong>检错码</strong>和<strong>纠错码</strong>的策略。</span></p>
+<ul>
+<li><span>检错码：通过在数据中添加冗余信息，使接收方能够检测到数据是否发生错误。当接收方发现问题时，可以请求发送方进行重传。</span></li>
+<li><span>纠错码：通过冗余信息不仅能够检测到数据错误，还能自动修正错误。使用纠错码的技术通常称为前向纠错（FEC）。</span></li>
+<li><span>码字：一个包含m个数据位和r个校验位的n位单元。描述为$ (n, m)$码，$n=m+r$。</span></li>
+<li><span>码率：码字中不含冗余部分所占的比例，可以用$\frac{m}{n}$表示。</span></li>
+<li><span>海明距离 （Hamming distance）：两个码字之间<strong>不同对应比特</strong>的数目。为了<strong>检查</strong>出d个错（比特错），可以使用海明距离为<strong>d+1</strong>的编码；为了<strong>纠正</strong>d个错，可以使用海明距离为<strong>2d+1</strong>的编码。</span></li>
+</ul>
+<h3><a name="21-检错码" class="md-header-anchor"></a><span>2.1 检错码</span></h3>
+<h4><a name="211-奇偶校验码" class="md-header-anchor"></a><span>2.1.1 奇偶校验码</span></h4>
+<p><span>	</span><span>偶校验保证1个数为偶数，奇校验保证1个数为奇数，根据需要校验位为0或1。</span></p>
+<h4><a name="212-校验和" class="md-header-anchor"></a><span>2.1.2 校验和</span></h4>
+<p><span>	</span><span>TCP/IP体系中主要采用的校验方法。</span></p>
+<ul>
+<li><span>发送方：进行 16 位二进制补码求和运算，计算结果取反，随数据一同发送。</span></li>
+</ul>
+<p><img src="..\images\ComputerNetwork\校验和1.png" referrerpolicy="no-referrer"></p>
+<ul>
+<li><span>接收方：进行 16 位二进制补码求和运算（包含校验和），结果非全1，则检测到错误。</span></li>
+</ul>
+<p><img src="..\images\ComputerNetwork\校验和2.png" referrerpolicy="no-referrer"></p>
+<p><span>	</span><span>说明未检测到错误。</span></p>
+<h4><a name="213-循环冗余校验crc" class="md-header-anchor"></a><span>2.1.3 循环冗余校验（CRC）</span></h4>
+<p><span>	</span><span>计算方法如下：</span></p>
+<ul>
+<li><span>设原始数据D为k位二进制位模式。</span></li>
+<li><span>如果要产生n位CRC校验码，事先选定一个n+1位二进制位模式G (称为生成多项式，收发双方提前商定)，G的最高位为1。</span></li>
+<li><span>将原始数据D乘以2n （相当于在D后面添加 n 个 0），产生k+n位二进制位模式，用G对该位模式做模2除，得到余数R（n位，不足n位前面用0补齐）即为CRC校验码。</span></li>
+<li><span>接收方收到后，重新进行除法运算，如果余数为0，则数据正确；否则，说明数据在传输过程中发生了错误。</span></li>
+</ul>
+<p><img src="..\images\ComputerNetwork\CRC.png" referrerpolicy="no-referrer"></p>
+<p><span>	</span><span>四个国际标准生成多项式：</span></p>
+<ul>
+<li><span>$CRC-12 = x^{12}+x^{11}+x^3+x^2+x+1$</span></li>
+<li><span>$CRC-16 = x^{16}+x^{15}+x^2+1$</span></li>
+<li><span>$CRC-CCITT = x^{16}+x^{12}+x^5+1$</span></li>
+<li><span>$CRC-32 = x^{32}+x^{26}+x^{23}+x^{22}+x^{16}+x^{12}+x^{11}+x^{10}+x^8+x^7+x^5+x^4+x^2+x+1$</span></li>
+</ul>
+<p><span>    </span><span>以太网、无线局域网使用CRC-32生成多项式。</span></p>
+<h3><a name="22-纠错码" class="md-header-anchor"></a><span>2.2 纠错码</span></h3>
+<p><span>	</span><span>设计纠错码时，需要满足下面的条件：假设有m个信息位，r个校验位，纠正单比特错误，需要满足：$(m + r + 1) \le 2^r$。（证明略）</span></p>
+<p><span>	</span><span>下面，我们将通过<strong>海明码</strong>来介绍纠错码的概念。目标是，以奇偶校验为基础，找到出错位置，并提供1位纠错能力。我们以（15,11）海明码和11比特数据01011001101为例，按顺序放入数据位。这里我们采用偶校验。</span></p>
+<p><img src="..\images\ComputerNetwork\海明码1.png" referrerpolicy="no-referrer"></p>
+<p><span>	</span><span>之后填入校验位，规则是将对应位序号转换成2进制，若第i位为1，则需要接受$p_{2^i}$校验位的校验。如位序号为15的数据需要接受$p_1,p_2,p_4,p_8$的校验。</span></p>
+<p><img src="..\images\ComputerNetwork\海明码2.png" referrerpolicy="no-referrer"></p>
+<p><span>	</span><span>比如位序号为7的数据出现问题（1变成0），我们可以通过$p_1$和$p_2$确定出错列为4，通过$p_2$和$p_3$确定出错行为2，因此可以发现是第7位出现的问题。</span></p>
+<p><span>	</span><span>除去海明码外，RS码（Reed-Solomon code）也是常被使用的纠错码，相关内容请读者自行了解。</span></p>
+<h2><a name="3-基本的数据链路层协议" class="md-header-anchor"></a><span>3. 基本的数据链路层协议</span></h2>
+<p><span>	</span><span>物理层进程和某些数据链路层进程运行在专用硬件上（网络接口卡）。数据链路层进程的其他部分和网络层进程作为操作系统的一部分运行在CPU上，数据链路层进程的软件通常以设备驱动的形式存在。</span></p>
+<h3><a name="31-乌托邦式单工协议" class="md-header-anchor"></a><span>3.1 乌托邦式单工协议</span></h3>
+<p><span>	</span><span>该协议核心思想是仅支持单向通信，发送方无需等待确认，接收方也不反馈任何信息。但是它过于完美，因而无法实现。这里不做过多解释。</span></p>
+<h3><a name="32-无错信道上的停等式协议" class="md-header-anchor"></a><span>3.2 无错信道上的停等式协议</span></h3>
+<p><span>	</span><span>这个协议中，除去乌托邦式单工协议的接收方能够处理以无限高速进来的数据以及发送方以高于接收方能处理到达帧的速度发送帧的假设，但保留通信信道不会出错（Error-Free）以及数据传输保持单向（但需要双向传输链路，及半双工物理信道）的假设。</span></p>
+<p><span>	</span><span>该协议的核心思想便是<strong>停止等待（stop-and-wait）</strong>。即发送方发送一帧后暂停，等待确认到达后再发送下一帧。接收方完成接收后，回复确认接收。</span></p>
+<p><img src="..\images\ComputerNetwork\无错saw.png" referrerpolicy="no-referrer"></p>
+<h3><a name="33-有错信道上的单工停等式协议" class="md-header-anchor"></a><span>3.3 有错信道上的单工停等式协议</span></h3>
+<p><span>	</span><span>假设通信信道可能会出错，导致：</span></p>
+<ul>
+<li><span>帧在传输过程中可能会被损坏，接收方能够检测出来。</span></li>
+<li><span>帧在传输过程中可能会丢失 ，永远不可能到达接收方。</span></li>
+</ul>
+<p><span>    </span><span>一个简单的解决方式便是发送方增加一个计时器(timer)，如果经过一段时间没有收到确认，发送方将超时，于是再次发送该帧，如下图所示。</span></p>
+<p><img src="..\images\ComputerNetwork\有错saw.png" referrerpolicy="no-referrer"></p>
+<p><span>	</span><span>我们考虑两个个特殊场景。</span></p>
+<ul>
+<li><span>发送方发送A，接收方成功接收A之后发送ACK，但是ACK在传输过程中丢失，导致发送方没能获得确认导致再次发送A，接收方因此收到了另一个A。</span></li>
+<li><span>网络延时过大，计时器超时前，未能收到确认，导致重传。</span></li>
+</ul>
+<p><span>    </span><span>为解决这两个问题，在计时器之外，加上序列号，用以识别前后两个不同的帧。如下图所示：</span></p>
+<p><img src="..\images\ComputerNetwork\有错saw1.png" referrerpolicy="no-referrer"></p>
+<h4><a name="评估" class="md-header-anchor"></a><span>评估</span></h4>
+<p><span>	</span><span>定义：帧长F，帧数w，带宽 B，每帧发送时间 $t_{frame}$，每帧处理时间 $t_{proc}$，传输时延D，时延带宽积 2BD，则信道利用率为：</span></p>
+<p>
+$$
+Utilization=\frac{t_{frame}}{2t_{proc}+t_{frame}}=\frac{1}{2\alpha+1}\le \frac{1}{w+BD}(\alpha=\frac{t_{proc}}{t_{frame}})
+$$</p>
+<h2><a name="4-滑动窗口协议" class="md-header-anchor"></a><span>4. 滑动窗口协议</span></h2>
+<p><span>	</span><span>停止-等待机制降低了信道利用率。为解决这个问题，探究者提出了<strong>流水线协议</strong>或<strong>管道协议</strong>(pipelining)，允许发送方在没收到确认前连续发送多个帧。这便是滑动窗口协议的主要机制。</span></p>
+<h3><a name="41-滑动窗口协议的基本思想" class="md-header-anchor"></a><span>4.1 滑动窗口协议的基本思想</span></h3>
+<p><span>	</span><span>发送方和接收方都具有一定容量的缓冲区（即窗口），发送端在收到确认之前可以发送多个帧。需要解决的问题是：一次发送多少个帧？某个帧出错或丢失怎么处理？</span></p>
+<p><span>	</span><span>我们设定循环重复使用有限的帧<strong>序列号</strong>。通常对于k比特序列号，窗口最大为$2^k-1（ W_T ）$。</span></p>
+<ul>
+<li><span>发送窗口：其大小记作$W_T$，表示在收到对方确认的信息之前，可以连续发出的最多数据帧数。</span></li>
+<li><span>接收窗口：其大小记作$W_R$ ，为可以连续接收的最多数据帧数。</span></li>
+</ul>
+<p><span>    </span><span>同时，采用<strong>累计确认</strong>方式，即不必对收到的分组逐个发送确认，而是对按序到达的<strong>最后一个分组</strong>发送确认。</span></p>
+<p><img src="..\images\ComputerNetwork\滑动窗口实例.png" referrerpolicy="no-referrer"></p>
+<h4><a name="411-捎带确认" class="md-header-anchor"></a><span>4.1.1 捎带确认</span></h4>
+<p><span>	</span><span>在滑动窗口协议中，接收端可以发送“接收未就绪（RNR）”报文以暂时阻止对方发送帧；当接收端准备好后，通过发送确认帧重新启动滑窗。在双向通信中，为提高效率，可采用<strong>捎带确认（piggybacking）</strong>方式，即在发送数据帧时附带上一帧的确认信息；若暂时没有数据要发送，则需单独发送确认帧；若有数据要发送但没有新的确认，则可重复发送上一次的确认。</span></p>
+<h4><a name="412-滑动窗口流量控制时链路利用率" class="md-header-anchor"></a><span>4.1.2 滑动窗口流量控制时链路利用率</span></h4>
+<p><span>	</span><span>设窗口大小为W，忽略$t_{ACK}$</span></p>
+<ul>
+<li><span>$Wt_f\ge t_f+t_{ACK}+2t_p,W\ge 1+2\alpha$ : 发送端在等待ACK的同时仍可连续发送帧，不会停顿。此时$U=1$。</span></li>
+<li><span>$Wt_f< t_f+t_{ACK}+2t_p,W< 1+2\alpha$ : 发送端在发送完窗口内的帧后，必须等待ACK返回才能继续发送。此时$U=\frac{W}{1+2\alpha}$。</span></li>
+</ul>
+<h3><a name="42-回退n-go-back-n协议" class="md-header-anchor"></a><span>4.2 回退N（Go Back N）协议</span></h3>
+<p><span>	</span><span>在滑动窗口协议的基础上，将接受窗口的大小设置为1，并将出错的帧全部重发。详细来讲，当发送方发送了N个帧后，若发现该N帧前面一个帧在计时器超时后仍未返回其确认信息，则该帧被判为出错或丢失，此时发送方就<strong>发送端必须重传有差错的帧和差错帧后所有已经传输过的帧</strong>。接收端丢弃该帧和所有后来收到的帧，直到错误帧被正确接收。</span></p>
+<ul>
+<li><span>发送窗口：发送方维持一组连续允许发送的帧序列号。</span></li>
+<li><span>接收窗口：接收方维持一组连续的允许接收帧序列号。</span></li>
+</ul>
+<h3><a name="43-选择重传协议" class="md-header-anchor"></a><span>4.3 选择重传协议</span></h3>
+<p><span>	</span><span>当某个数据帧的计时器超时，发送端认为该帧丢失或出错，只重传该帧。接收端在发现出错帧时会丢弃它并发送NAK，而对后续正确的帧则先暂存于<strong>缓存</strong>中；当缺失的帧成功重传并接收后，接收端再将缓存中按序排列的帧依次交付给网络层。由于接收端可能乱序接收帧，因此每个数据帧都必须携带序列号，以便接收端进行排序和重组。</span></p>
+<h3><a name="44-各类arq协议链路效率" class="md-header-anchor"></a><span>4.4 各类ARQ协议链路效率</span></h3>
+<p><span>	</span><span>设任何一帧有差错的概率为p。</span></p>
+<h4><a name="441-stop-and-wait" class="md-header-anchor"></a><span>4.4.1 Stop-and-Wait</span></h4>
+<p>
+$$
+U = \frac{1 - p}{1 + 2a}
+$$</p>
+<h4><a name="442-go-back-n" class="md-header-anchor"></a><span>4.4.2 Go-Back-N</span></h4>
+<p>
+$$
+U =
+\begin{cases}
+\dfrac{(1 - p)}{1 + 2ap}, & W \ge 1 + 2a \\[8pt]
+\dfrac{W(1 - p)}{(1 + 2a)(1 - p + Wp)}, & W < 1 + 2a
+\end{cases}
+$$</p>
+<h4><a name="443-selective-reject-selective-repeat" class="md-header-anchor"></a><span>4.4.3 Selective Reject (Selective Repeat)</span></h4>
+<p>
+$$
+U =
+\begin{cases}
+1 - p, & W \ge 1 + 2a \\[8pt]
+\dfrac{W(1 - p)}{1 + 2a}, & W < 1 + 2a
+\end{cases}
+$$
+</p>
+<h2><a name="5-数据链路协议实例" class="md-header-anchor"></a><span>5. 数据链路协议实例</span></h2>
+<h3><a name="51-ppp-point-to-point-protocol点对点协议" class="md-header-anchor"></a><span>5.1 PPP (Point-to-Point Protocol)点对点协议</span></h3>
+<p><span>	</span><span><strong>PPP（点对点协议）</strong>是一种用于两个节点间通信的链路层协议，支持多种网络层协议，具备封装、认证、差错检测和链路控制等功能，结构简单、可靠且可扩展，是目前使用最多的数据链路层协议之一。</span></p>
+<p><span>	</span><span>PPP的主要功能是通过帧定界封装数据、填充技术实现透明传输、进行差错检测、实时监测链路状态，并支持MTU设置、网络层地址及数据压缩协商。需要注意的是，它未实现帧数据纠错、流量控制和可靠传输功能，不使用帧序列号，也不支持多点连接，仅支持点对点的全双工通信。</span></p>
+<p><span>	</span><span>下面展示了PPP协议帧的构成。PPP协议采用了<strong>零比特填充</strong>的方式。</span></p>
+<p><img src="..\images\ComputerNetwork\PPP格式.png" referrerpolicy="no-referrer"></p>
+<p><span>	</span><span>下面是PPP协议的转态转换图：</span></p>
+<p><img src="..\images\ComputerNetwork\PPP状态.png" referrerpolicy="no-referrer"></p>
+<h3><a name="52-pppoe" class="md-header-anchor"></a><span>5.2 PPPoE</span></h3>
+<p><span>	</span><span><strong>PPPoE（Point-to-Point Protocol over Ethernet，以太网上的点对点协议）</strong>是一种将PPP协议封装在以太网帧中的网络接入方式，常用于宽带上网。它结合了PPP的身份认证、IP地址分配和链路管理功能，以及以太网的广播与多用户接入特性。下面是报文格式：</span></p>
+<p><img src="..\images\ComputerNetwork\PPPoE格式.png" referrerpolicy="no-referrer"></p>
+<p><span>	</span><span>PPPoE工作分为三个阶段：<strong>发现阶段（Discovery）</strong>用于建立会话并获取会话ID，<strong>会话阶段（Session）</strong>则进行PPP数据传输，<strong>终止阶段（Terminate）</strong>发送报文结束会话。</span></p>
+</article>
+<div class="share-buttons">
+<p>分享到：</p>
+<a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sina Weibo</title><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"></path></svg>
+<span>微博</span>
+</a>
+<a class="share-btn twitter" href="#" onclick="sharePost(event, 'twitter')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M21.543 7.104c.015.211.015.423.015.636 0 6.507-4.954 14.01-14.01 14.01v-.003A13.94 13.94 0 0 1 0 19.539a9.88 9.88 0 0 0 7.287-2.041 4.93 4.93 0 0 1-4.6-3.42 4.916 4.916 0 0 0 2.223-.084A4.926 4.926 0 0 1 .96 9.167v-.062a4.887 4.887 0 0 0 2.235.616A4.928 4.928 0 0 1 1.67 3.148 13.98 13.98 0 0 0 11.82 8.292a4.929 4.929 0 0 1 8.39-4.49 9.868 9.868 0 0 0 3.128-1.196 4.941 4.941 0 0 1-2.165 2.724A9.828 9.828 0 0 0 24 4.555a10.019 10.019 0 0 1-2.457 2.549z"></path></svg>
+<span>Twitter</span>
+</a>
+<a class="share-btn linkedin" href="#" onclick="sharePost(event, 'linkedin')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg>
+<span>LinkedIn</span>
+</a>
+<a class="share-btn wechat" href="#" onclick="sharePost(event, 'wechat')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WeChat</title><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"></path></svg>
+<span>微信</span>
+</a>
+<a class="share-btn qq" href="#" onclick="sharePost(event, 'qq')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Tencent QQ</title><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"></path></svg>
+<span>QQ</span>
+</a>
+<a class="share-btn facebook" href="#" onclick="sharePost(event, 'facebook')">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Facebook</title><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"></path></svg>
+<span>Facebook</span>
+</a>
+</div>
+<div class="giscus-container" style="margin-top: 50px;">
+  <script src="https://giscus.app/client.js"
+  data-repo="forliage/forliage.github.io"
+  data-repo-id="R_kgDONjzd4w"
+  data-category="Announcements"
+  data-category-id="DIC_kwDONjzd484Cus1G"
+  data-mapping="pathname"
+  data-strict="0"
+  data-reactions-enabled="1"
+  data-emit-metadata="0"
+  data-input-position="bottom"
+  data-theme="https://forliage.github.io/giscus.css"
+  data-lang="zh-CN"
+  crossorigin="anonymous"
+  async>
+</script>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+<script>
+      mermaid.initialize({
+        startOnLoad: true
+      });
+    </script>
+<div class="dock">
+  <a href="https://forliage.github.io/index.html">🏠</a>
+  <a href="https://forliage.github.io/posts.html">📚</a>
+  <a href="https://forliage.github.io/about.html">👤</a>
+</div>
+<script src="../script.js"></script>
+<div class="modal" id="about-me-modal">
+<div class="modal-content">
+<span class="close-button">×</span>
+<h2>About Me</h2>
+<p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
+<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<hr/>
+<h3>订阅我的博客</h3>
+<p>订阅功能正在建设中，敬请期待！</p>
+</div>
+</div>
+<script src="../modal.js"></script><script src="../trail.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlightjs-copy@1.0.6/dist/highlightjs-copy.min.js"></script>
+<script>
+  hljs.highlightAll();
+  hljs.addPlugin(new CopyButtonPlugin());
+</script>
+</body>
+</html>
