@@ -68,6 +68,7 @@
 <li><span>帧的标识方式</span></li>
 <li><span>差错检测与纠正</span></li>
 <li><span>数据链路层协议</span></li>
+<li><span>MAC子层</span></li>
 </ol>
 <h2><a name="1-数据链路层的设计" class="md-header-anchor"></a><span>1. 数据链路层的设计</span></h2>
 <p><span>	</span><span>数据链路层位于物理层之上，利用其提供的位流服务，向<strong>网络层</strong>提供明确的服务接口。它提供下面三种服务：<strong>无确认无连接、有确认无连接、有确认有连接</strong>。它具有<strong>成帧、差错控制、流量控制的功能</strong>。</span></p>
@@ -242,6 +243,244 @@ $$
 <p><span>	</span><span><strong>PPPoE（Point-to-Point Protocol over Ethernet，以太网上的点对点协议）</strong>是一种将PPP协议封装在以太网帧中的网络接入方式，常用于宽带上网。它结合了PPP的身份认证、IP地址分配和链路管理功能，以及以太网的广播与多用户接入特性。下面是报文格式：</span></p>
 <p><img src="..\images\ComputerNetwork\PPPoE格式.png" referrerpolicy="no-referrer"></p>
 <p><span>	</span><span>PPPoE工作分为三个阶段：<strong>发现阶段（Discovery）</strong>用于建立会话并获取会话ID，<strong>会话阶段（Session）</strong>则进行PPP数据传输，<strong>终止阶段（Terminate）</strong>发送报文结束会话。</span></p>
+<h2><a name="6-mac子层" class="md-header-anchor"></a><span>6. MAC子层</span></h2>
+<p><span>	</span><span>数据链路层分为两个子层，分别为MAC子层（介质访问）和LLC子层，具体位置如下所示。MAC子层用来<strong>决定广播信道中的信道分配</strong>。常见的介质访问控制方式有<strong>信道划分介质访问控制、随机介质访问控制和轮询访问介质访问控制</strong>，前者是<strong>静态划分信道</strong>的方法，后者是<strong>动态分配信道</strong>的方法。</span></p>
+<p><img src="..\images\ComputerNetwork\mac示例.png" referrerpolicy="no-referrer"></p>
+<h3><a name="61-信道划分介质访问控制" class="md-header-anchor"></a><span>6.1 信道划分介质访问控制</span></h3>
+<p><span>	</span><span>信道划分介质访问控制将使用同一传输介质的多个设备的通信隔离开来，把时域和频域资源合理地分配给这些设备，常通过复用技术实现。常见的方式有TDM、FDM、WDM、CDM，相关内容在第二章。</span></p>
+<h3><a name="62-随机访问介质访问控制" class="md-header-anchor"></a><span>6.2 随机访问介质访问控制</span></h3>
+<p><span>	</span><span>随机访问协议中，各节点在发送数据前先监听信道，发现空闲即可随机竞争发送，冲突后再随机重传，具有竞争性和不确定性。实际上，这是一种将广播信道转换为点到点信道的机制。</span></p>
+<p><span>	</span><span>首先需要知道一些基本概念：</span></p>
+<ul>
+<li><span>吞吐量S：在发送时间T内发送成功的平均帧数。$S=G\times P_0$</span></li>
+<li><span>运载负载(网络负载) G：时间T内所有通信站总共发送的帧平均值(包括原发和重发的分组)。</span></li>
+<li><span>$P_0$：一帧发送成功(即未发生冲突)的概率。$P_0$的含义是在连续两个T的时间内都没有其它帧生成的概率，即连续两个T的时间内都生成0帧的概率(P[0])之乘积。</span></li>
+</ul>
+<h4><a name="621-aloha协议" class="md-header-anchor"></a><span>6.2.1 ALOHA协议</span></h4>
+<p><span>	</span><span>ALOHA协议分为纯ALOHA协议和时隙ALOHA协议两种。概率满足泊松分布。</span></p>
+<h5><a name="6211-纯aloha协议" class="md-header-anchor"></a><span>6.2.1.1 纯ALOHA协议</span></h5>
+<p><span>	</span><span>基本思想是，当总线形网络中的任何节点需要发送数据时，可以不进行任何检测就发送数据，也就是<strong>想发就发</strong>。两个或以上的帧可能导致冲突，冲突时，冲突的帧完全破坏且破坏了的帧要重传。</span></p>
+<p><img src="..\images\ComputerNetwork\纯ALOHA.png" referrerpolicy="no-referrer"></p>
+<p><span>	</span><span>纯ALOHA协议的吞吐量很低，$S=Ge^{-2G}$，其最大值只能取到18.4%。</span></p>
+<h5><a name="6212-时隙aloha协议" class="md-header-anchor"></a><span>6.2.1.2 时隙ALOHA协议</span></h5>
+<p><span>	</span><span>时隙ALOHA就是把时间切成一段段固定长度的时隙，每个时隙正好能传一帧，只能在时隙开始时发数据，冲突只会在时隙起点发生。$S=Ge^{-G}$，最大值能取到38.6%。</span></p>
+<p><img src="..\images\ComputerNetwork\时隙ALOHA.png" referrerpolicy="no-referrer"></p>
+<h4><a name="622-csma协议载波侦听多路访问协议" class="md-header-anchor"></a><span>6.2.2 CSMA协议（载波侦听多路访问协议 ）</span></h4>
+<p><span>	</span><span>改进ALOHA协议的侦听/发送策略分类，实现“先听后发”，即不再随意地发送数据，变得“礼貌”。虽然CSMA相较于ALOHA有了很大提升，但是由于传播延迟时间的存在，冲突不可避免。</span></p>
+<table>
+<thead>
+<tr>
+<th>协议类型</th>
+<th>侦听方式</th>
+<th>发送规则</th>
+<th>冲突特性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>非持续式 CSMA</td>
+<td>先侦听信道</td>
+<td>若忙则随机退避一段时间后再侦听；若空闲立即发送</td>
+<td>冲突较少（因退避降低同步冲突），但仍可能有传播延迟引发的冲突</td>
+</tr>
+<tr>
+<td>1-持续式 CSMA</td>
+<td>持续侦听（一直监听）</td>
+<td>一旦侦听到空闲<strong>立刻</strong>发送；若忙则一直等到空闲立即发送</td>
+<td>冲突概率较高（多站点同时等待→空闲瞬间齐发）</td>
+</tr>
+<tr>
+<td>p-持续式 CSMA（时隙）</td>
+<td>持续侦听+按时隙决策</td>
+<td>侦听到空闲后的<strong>时隙起点</strong>以概率 p 发送；以概率 (1−p) 继续等待到下个时隙再决策</td>
+<td>通过概率化降低同步冲突（相对 1-持续更温和）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>注：p-持续式 CSMA 常与<strong>时隙化</strong>配合；选择合适的 p（随站点数/负载自适应）可显著改善吞吐与时延权衡。</p>
+</blockquote>
+<h4><a name="623-csmacd协议载波侦听多路访问冲突检测协议" class="md-header-anchor"></a><span>6.2.3 CSMA/CD协议（载波侦听多路访问/冲突检测协议）</span></h4>
+<p><span>	</span><span>改进CSMA协议，实现“先听后发、边发边听、冲突停发、随机重发”。具体来说，各节点在发送前先侦听信道，若空闲则立即发送；若在发送过程中检测到冲突，便立刻停止发送并发送干扰信号，然后随机等待一段时间后重传，从而通过“载波侦听+冲突检测”机制减少冲突对信道资源的浪费。这是以太网采用的协议。</span></p>
+<ul>
+<li><span>传输周期：一个站点使用信道，其他站点禁止使用。</span></li>
+<li><span>竞争周期：所有站点都有权尝试使用信道，争用时间槽。</span></li>
+<li><span>空闲周期：所有站点都不使用信道。</span></li>
+</ul>
+<p><img src="..\images\ComputerNetwork\CSMA_CD.png" referrerpolicy="no-referrer"></p>
+<h3><a name="63-受控访问无冲突协议" class="md-header-anchor"></a><span>6.3 受控访问（无冲突）协议</span></h3>
+<h4><a name="631-位图协议" class="md-header-anchor"></a><span>6.3.1 位图协议</span></h4>
+<p><span>	</span><span>位图协议是一种基于滑动窗口的确认机制，接收方在发送确认帧时用一串比特（位图）来标识哪些数据帧已成功接收、哪些丢失，从而使发送方只需重传出错或丢失的帧，提高信道利用率并减少不必要的重传。位图协议缺点是<strong>无法考虑优先级</strong>。</span></p>
+<p><span>	</span><span>假设有N个用户，需N个时隙，每帧d比特，则信道利用率为：</span></p>
+<ul>
+<li><span>低负荷条件下：$U=\frac{d}{d+N}$</span></li>
+<li><span>高负荷条件下：$U=\frac{d}{d+1}$</span></li>
+</ul>
+<p><img src="..\images\ComputerNetwork\位图协议.png" referrerpolicy="no-referrer"></p>
+<h4><a name="632-令牌协议" class="md-header-anchor"></a><span>6.3.2 令牌协议</span></h4>
+<p><span>	</span><span>令牌协议是一种无冲突的介质访问控制方式，网络中一个特殊的令牌帧在各站之间按顺序循环传递，只有持有令牌的站点才能发送数据，发送完后再把令牌交给下一个站点，从而实现对信道的有序占用、避免冲突并保证公平访问。</span></p>
+<p><img src="..\images\ComputerNetwork\令牌.png" referrerpolicy="no-referrer"></p>
+<h4><a name="633-二进制倒计数协议" class="md-header-anchor"></a><span>6.3.3 二进制倒计数协议</span></h4>
+<p><span>	</span><span>二进制倒计数协议是一种无冲突的介质访问控制方法，当多个站点同时要发送时，它们按各自的地址或优先级在仲裁阶段逐位发送二进制序列并同时监听信道，最终只有地址或优先级最高的站点保留发送权，从而快速、公平地解决冲突。</span></p>
+<p><span>	</span><span>N个站的二进制编码所需位数是$\log_2N$位，$U=\frac{d}{d+\log_2N}$。</span></p>
+<p><img src="..\images\ComputerNetwork\二进制倒计数.png" referrerpolicy="no-referrer"></p>
+<h3><a name="64-以太网" class="md-header-anchor"></a><span>6.4 以太网</span></h3>
+<h4><a name="641-经典以太网" class="md-header-anchor"></a><span>6.4.1 经典以太网</span></h4>
+<p><span>	</span><span>经典以太网的物理层有以下特点：</span></p>
+<ul>
+<li><span>最高速率10Mbps</span></li>
+<li><span>使用曼彻斯特编码</span></li>
+<li><span>使用同轴电缆和中继器连接</span></li>
+<li><span>任意两个收发器之间距离不得超过2.5km，且任意两个收发器之间经过的中继器不能超过4个</span></li>
+</ul>
+<p><span>    </span><span>它主机运行CSMA/CD协议，常用的MAC帧格式有<strong>DIX Ethernet V2 标准</strong>（常用）和<strong>IEEE 的 802.3 标准</strong>，如下图所示：</span></p>
+<p><img src="..\images\ComputerNetwork\以太网mac.png" referrerpolicy="no-referrer"></p>
+<ul>
+<li><span><strong>数据字段</strong>：最小帧长 = 46+18 = 64B，凡长度小于 64 字节的帧都是由于冲突而异常中止的无效帧；最大帧长 = 1500+18 = 1518B。同时，数据字段不足46字节，需要填充整数字节（Padding）至46字节，以保证以太网MAC帧不小于64字节。</span></li>
+<li><span><strong>校验和</strong>：使用CRC32计算除了校验和以外的其他字段。对于检查出的无效 MAC 帧就简单地丢弃，以太网不负责重传丢弃的帧。</span></li>
+</ul>
+<p><span>	</span><span>在使用CSMA/CD的经典以太网中，站点一旦检测到冲突会立即停止发送，并发出短暂的冲突强化信号，随后进入<strong>二进制指数退避</strong>过程：以往返传播时间（2τ，对应512比特时间）为基本退避单位，记录重传次数k（不超过10），从$[0,1,…,(2^k−1)]$中随机选择一个整数r，等待r个时间槽后重传；若连续重传16次仍失败，则放弃该帧并向上层报告错误，从而在保证公平性的同时减少重复冲突。</span></p>
+<p><span>	</span><span>假设传送一帧平均需要P秒，在某slot某一个站点获得信道的概率为A，F为帧长，B为带宽，L为电缆长度，c为信号传播速度，每帧e个竞争时间槽,则信道效率为：$\frac{P}{P+\frac{2τ}{A}}=\frac{\frac{F}{B}}{\frac{F}{B}+\frac{2L}{c}\times e}=\frac{1}{1+\frac{2BLe}{cF}}$。</span></p>
+<h4><a name="642-交换式以太网" class="md-header-anchor"></a><span>6.4.2 交换式以太网</span></h4>
+<p><span>	</span><span>交换式以太网的核心是<strong>交换机</strong>。检查MAC 帧的目的地址对收到的帧进行转发，交换机通过高速背板把帧传送到目标端口。</span></p>
+<p><img src="..\images\ComputerNetwork\交换式以太网.png" referrerpolicy="no-referrer"></p>
+<h4><a name="643-高速以太网" class="md-header-anchor"></a><span>6.4.3 高速以太网</span></h4>
+<table>
+<thead>
+<tr>
+<th>以太网类型</th>
+<th>传输速率</th>
+<th>传输介质</th>
+<th>通信方式</th>
+<th>介质访问控制协议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>快速以太网 ( 100Base-T)</strong></td>
+<td>100 Mbps</td>
+<td>双绞线（Cat5）、光纤</td>
+<td>全双工 / 半双工</td>
+<td>CSMA/CD（半双工时）</td>
+</tr>
+<tr>
+<td><strong>千兆以太网 (1000Base-X/T)</strong></td>
+<td>1 Gbps</td>
+<td>光纤、双绞线（Cat5e/Cat6）</td>
+<td>全双工为主</td>
+<td>CSMA/CD（兼容支持）</td>
+</tr>
+<tr>
+<td><strong>万兆以太网 ( 10GBase)</strong></td>
+<td>10 Gbps</td>
+<td>光纤（多模/单模）、高品质双绞线（Cat6a以上）</td>
+<td>全双工通信</td>
+<td>无CSMA/CD（仅全双工）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>注：随着速率提高，以太网逐渐从共享式半双工转向交换式全双工，CSMA/CD协议在千兆及以上以太网中已基本被弃用。</p>
+</blockquote>
+<h3><a name="65-数据链路层交换" class="md-header-anchor"></a><span>6.5 数据链路层交换</span></h3>
+<h4><a name="651-网桥" class="md-header-anchor"></a><span>6.5.1 网桥</span></h4>
+<h5><a name="6511-基本概念" class="md-header-anchor"></a><span>6.5.1.1 基本概念</span></h5>
+<p><span>	</span><span>使用集线器在物理层扩展以太网会形成更大的冲突域（相关内容在后续网络层一节介绍）。为避免这个问题，可以使用网桥在数据链路层扩展以太网，而原来的每个以太网成为一个网段。</span></p>
+<p><span>	</span><span>网桥通过识别和学习每个端口的MAC地址，建立地址映射表，只转发目的地址不在本地网段的数据，从而减少冲突、隔离通信量、提高网络效率，实现不同网络之间的数据互通。</span></p>
+<h5><a name="6512-工作原理" class="md-header-anchor"></a><span>6.5.1.2 工作原理</span></h5>
+<p><span>	</span><span>网桥通过逆向学习帧的源地址，获知主机所处的位置并构建MAC地址表。</span></p>
+<ul>
+<li><span>增加表项：帧的源地址对应的项不在表中</span></li>
+<li><span>删除表项：老化时间到期</span></li>
+<li><span>更新表项：帧的源地址在表中，更新时间戳</span></li>
+</ul>
+<p><img src="..\images\ComputerNetwork\mac构建.png" referrerpolicy="no-referrer"></p>
+<p><span>    </span><span>对入境帧的转发过程，查帧的目的地址是否在MAC地址表中：</span></p>
+<ul>
+<li><span>有，且入境端口≠出境端口，则从对应的出境端口转发帧</span></li>
+<li><span>有，且入境端口=出境端口，则丢弃帧（即过滤帧）</span></li>
+<li><span>没有，则向除入境端口以外的其它所有端口<strong>泛洪帧</strong>（广播帧也会导致泛洪）</span></li>
+</ul>
+<p><img src="..\images\ComputerNetwork\mac转发.png" referrerpolicy="no-referrer"></p>
+<h4><a name="652-交换机" class="md-header-anchor"></a><span>6.5.2 交换机</span></h4>
+<p><span>	</span><span>传统的LAN分段中交换机端口通常与集线器连接，而现代的LAN分段中交换机直连PC。</span></p>
+<p><img src="..\images\ComputerNetwork\现代交换机.png" referrerpolicy="no-referrer"></p>
+<h5><a name="6521-交换方式" class="md-header-anchor"></a><span>6.5.2.1 交换方式</span></h5>
+<p><span>	</span><span>从带宽的角度，根据出和入的带宽是否一致，可分为对称交换和非对称交换。</span></p>
+<p><span>	</span><span>从转发时机的角度，可分为存储转发模式、直通交换和无碎片交换。</span></p>
+<ul>
+<li><span>存储转发模式：转发前必须接收整个帧、执行CRC校验。这种方式不转发出错帧、支持非对称交换但是延迟大。</span></li>
+<li><span>直通交换：一旦接收到帧的目的地址，就开始转发。这种方式延迟非常小，可以边入边出；但是可能转发错误帧且不支持非对称交换。</span></li>
+<li><span>无碎片交换：接收到帧的前64字节，即开始转发。这种方式过滤了冲突碎片，延迟和转发错帧介于存储转发和直通交换之间；但是仍可能转发错误帧，不支持非对称交换。</span></li>
+</ul>
+<h5><a name="6522-生成树协议" class="md-header-anchor"></a><span>6.5.2.2 生成树协议</span></h5>
+<p><span>	</span><span>物理环路可能导致广播风暴（无休止地泛洪广播流量）、重复帧、MAC地址表不稳定（不断修改同一MAC地址对应的端口）的问题。为解决这些问题，Radia Perlman提出了生成树协议（STP）。该协议打破了物理环，维护一个<strong>逻辑无环树</strong>。具体流程如下：</span></p>
+<ul>
+<li><span>选举根桥(Root Bridge) ：选取桥ID最小的交换机（网桥）成为生成树的根。</span></li>
+</ul>
+<p><img src="..\images\ComputerNetwork\选取根桥.png" referrerpolicy="no-referrer"></p>
+<ul>
+<li><span>为每个非根桥选出一个根端口（Root Port）：每个非根桥选择到根桥路径开销最小的端口作为唯一根端口，若开销相同则取端口ID最小者，根端口负责转发数据。</span></li>
+</ul>
+<p><img src="..\images\ComputerNetwork\选取根端口.png" referrerpolicy="no-referrer"></p>
+<ul>
+<li><span>为每个网段确定一个指定端口（Designated Port）：每个网段选择根路径开销最小的端口为指定端口负责转发，其余既非根端口又非指定端口的端口则处于阻塞状态。</span></li>
+</ul>
+<p><img src="..\images\ComputerNetwork\指定端口.png" referrerpolicy="no-referrer"></p>
+<p><span>    </span><span>当由交换机（网桥）或链路故障导致网络拓扑改变时，重新构造生成树。</span></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">端口角色变化</th>
+<th style="text-align: center;">STP行为</th>
+<th style="text-align: center;">RSTP行为</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">端口被选为根端口</td>
+<td style="text-align: center;">默认情况下，2倍的Forwarding  Delay的时间延迟。</td>
+<td style="text-align: center;">存在阻塞的备份根端口情况下，仅有数毫秒延迟。</td>
+</tr>
+<tr>
+<td style="text-align: center;">端口被选为指定端口</td>
+<td style="text-align: center;">默认情况下，2倍的Forwarding  Delay的时间延迟。</td>
+<td style="text-align: center;">在指定端口是非边缘端口的情况下，延迟取决因素较多。 <br/>  在指定端口是边缘端口的情况下，指定端口可以直接进入转发状态，没有延迟。</td>
+</tr>
+<tr>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+<h4><a name="653-虚拟局域网vlan" class="md-header-anchor"></a><span>6.5.3 虚拟局域网（VLAN）</span></h4>
+<p><span>	</span><span>VLAN是一个在物理网络上根据用途，工作组、应用等来逻辑划分的局域网络，与用户的物理位置没有关系。它通过路由器或三层交换机进行VLAN间路由，实现VLAN间通信。它通过划分广播域、隔离不同用户，实现广播控制与安全增强；同时可灵活组建虚拟工作组，将不同业务分区管理，提升网络灵活性与可控性。</span></p>
+<p><span>	</span><span>VLAN主要有以下四种类型：基于端口（最常见）、基于MAC地址、基于协议、基于子网。</span></p>
+<p><span>	</span><span>VLAN的帧标记标准为IEEE802.1Q。其中带VLAN标记的帧称为标记帧，不携带VLAN标记的普通以太网帧称为无标记帧。</span></p>
+<p><img src="..\images\ComputerNetwork\vlan帧.png" referrerpolicy="no-referrer"></p>
+<h4><a name="654-无线局域网wlan" class="md-header-anchor"></a><span>6.5.4 无线局域网（WLAN）</span></h4>
+<p><span>	</span><span>WLAN指以无线信道作为传输介质的计算机局域网。它以Wi-Fi为主要实现形式，通过无线接入点（AP）连接各终端设备，无需布线即可实现网络通信。WLAN工作在2.4 GHz和5 GHz等频段，具备部署灵活、扩展方便、移动性强等优点，广泛应用于家庭、校园、企业及公共场所，为用户提供便捷的无线网络接入服务。</span></p>
+<h4><a name="655-ieee-80211帧格式" class="md-header-anchor"></a><span>6.5.5 IEEE 802.11帧格式</span></h4>
+<p><img src="..\images\ComputerNetwork\802.11帧.png" referrerpolicy="no-referrer"></p>
+<h5><a name="6551-主要结构" class="md-header-anchor"></a><span>6.5.5.1 主要结构</span></h5>
+<ul>
+<li><span>帧控制：具有多种用途</span></li>
+<li><span>持续时间：下一个要发送帧可能持续的时间（NAV）或关联ID（AID）</span></li>
+<li><span>地址1~地址4：每个地址的含义基于“去往DS”和“来自DS”域段确定</span></li>
+<li><span>顺序控制：过滤掉重复帧，或用于分片组合</span></li>
+<li><span>QoS控制域段：存放数据流的QoS信息（802.11e中扩展）</span></li>
+<li><span>数据：包含任意长度的数据（0-2312字节）</span></li>
+<li><span>CRC校验：802.11采用4个字节的校验码</span></li>
+</ul>
+<h5><a name="6552-地址域段的使用" class="md-header-anchor"></a><span>6.5.5.2 地址域段的使用</span></h5>
+<p><img src="..\images\ComputerNetwork\地域使用.png" referrerpolicy="no-referrer"></p>
+<h5><a name="6553-主要管理帧" class="md-header-anchor"></a><span>6.5.5.3 主要管理帧</span></h5>
+<p><img src="..\images\ComputerNetwork\管理帧.png" referrerpolicy="no-referrer"></p>
+<h5><a name="6554-主要控制帧" class="md-header-anchor"></a><span>6.5.5.4 主要控制帧</span></h5>
+<p><img src="..\images\ComputerNetwork\控制帧.png" referrerpolicy="no-referrer"></p>
+<h5><a name="6555-主要数据帧" class="md-header-anchor"></a><span>6.5.5.5 主要数据帧</span></h5>
+<p><img src="..\images\ComputerNetwork\数据帧.png" referrerpolicy="no-referrer"></p>
 </article>
 <div class="share-buttons">
 <p>分享到：</p>
