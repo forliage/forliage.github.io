@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"/>
-<title>计算机网络05：传输层</title>
+<title>计算机网络04：网络层</title>
 <link href="../style.css" rel="stylesheet"/>
 <link href="../modal.css" rel="stylesheet"/>
 <style>
@@ -62,100 +62,83 @@
 <div id="sidebar-container"></div>
 <main>
 <article>
-<h1><a name="计算机网络05传输层" class="md-header-anchor"></a><span>计算机网络05：传输层</span></h1>
-<h2><a name="本节重点" class="md-header-anchor"></a><span>本节重点</span></h2>
+<h1><a name="计算机网络04网络层" class="md-header-anchor"></a><span>计算机网络04：网络层</span></h1>
+<h2><a name="本章重点" class="md-header-anchor"></a><span>本章重点：</span></h2>
 <ol start="">
- <li><span>传输层提供的服务</span></li>
- <li><span>UDP 协议特性</span></li>
- <li><span>TCP 协议特性（可靠传输、流量控制、拥塞控制等）</span></li>
+ <li><span>网络层的功能</span></li>
+ <li><span>Internet网际协议&amp;路由协议</span></li>
+ <li><span>路由算法</span></li>
 </ol>
 
-<h2><a name="1-传输层的服务" class="md-header-anchor"></a><span>1. 传输层的服务</span></h2>
-<p><span>传输层位于应用层和网络层之间，基于网络层提供的服务，向分布式应用程序提供通信服务。</span></p>
-
-<h3><a name="11-进程之间的通信" class="md-header-anchor"></a><span>1.1 进程之间的通信</span></h3>
-<p><span>每个进程需要一个标识，以便其它进程能够找到它。进程标识包括：</span></p>
+<h2><a name="1-网络层的功能" class="md-header-anchor"></a><span>1. 网络层的功能</span></h2>
+<h3><a name="11-功能概述" class="md-header-anchor"></a><span>1.1 功能概述</span></h3>
+<p><span>网络层的核心功能是</span><strong><span>路由</span></strong><span>和</span><strong><span>转发</span></strong><span>。</span></p>
 <ul>
-  <li><span>主机地址</span></li>
-  <li><span>主机上与该进程关联的端口号（端口号被用来区分同一个主机上的不同进程）</span></li>
+  <li><strong><span>路由</span></strong><span>：选择数据报从源端到目的端的路径</span></li>
+  <li><strong><span>转发</span></strong><span>：将数据报从路由器的输入接口传送到正确的输出接口</span></li>
+</ul>
+<p><span>在互联网采用的TCP/IP体系结构中，网络层向上只提供</span><strong><span>简单灵活的、无连接的、尽最大努力交付</span></strong><span>的数据报服务。也就是说，所传送的分组可能出错、丢失、重复、失序或超时。</span></p>
+
+<h3><a name="12-网络层提供的两种服务" class="md-header-anchor"></a><span>1.2 网络层提供的两种服务</span></h3>
+<h4><a name="121-虚电路" class="md-header-anchor"></a><span>1.2.1 虚电路</span></h4>
+<p><span>虚电路是一种</span><strong><span>面向连接的分组交换方式</span></strong><span>，在通信前先在源主机与目的主机之间</span><strong><span>建立一条逻辑连接</span></strong><span>（即虚电路），所有分组都沿着这条路径传输，并按顺序到达。</span></p>
+<p><img src="../images/ComputerNetwork/虚电路.png" referrerpolicy="no-referrer"></p>
+
+<h4><a name="122-数据报" class="md-header-anchor"></a><span>1.2.2 数据报</span></h4>
+<p><span>数据报是一种</span><strong><span>无连接的分组交换方式</span></strong><span>，每个分组（称为数据报）都</span><strong><span>独立地选择传输路径</span></strong><span>。同一报文的不同分组可能通过不同的路径到达目的主机，甚至出现失序、丢失或重复现象。</span></p>
+<p><img src="../images/ComputerNetwork/数据报.png" referrerpolicy="no-referrer"></p>
+
+<h2><a name="2-internet网际协议" class="md-header-anchor"></a><span>2. Internet网际协议</span></h2>
+<h3><a name="21-ipv4" class="md-header-anchor"></a><span>2.1 IPv4</span></h3>
+<p><span>IPv4（Internet Protocol version 4）是目前应用最广泛的网络层协议。</span></p>
+<h4><a name="211-ipv4分组格式" class="md-header-anchor"></a><span>2.1.1 IPv4分组格式</span></h4>
+<p><img src="../images/ComputerNetwork/IPv4分组格式.png" referrerpolicy="no-referrer"></p>
+<ul>
+  <li><strong><span>版本</span></strong><span>：4位，标识IP协议版本。</span></li>
+  <li><strong><span>生存时间（TTL）</span></strong><span>：防止分组在网络中无限循环。</span></li>
+  <li><strong><span>协议</span></strong><span>：标识上层使用的协议（如TCP、UDP）。</span></li>
 </ul>
 
-<h3><a name="12-套接字编程" class="md-header-anchor"></a><span>1.2 套接字编程</span></h3>
-<p><strong><span>套接字（socket）</span></strong><span>：应用层和传输层的接口，也是应用程序和网络之间的API。</span></p>
-<p><img src="../images/ComputerNetwork/socket.png" referrerpolicy="no-referrer"></p>
-<p><span>套接字编程（Socket Programming）是网络应用程序之间进行通信的基础方式，它为应用进程提供了一个在网络中收发数据的接口。套接字相当于通信端点，客户端和服务器分别创建套接字，通过 IP 地址 + 端口号建立连接并传输数据。</span></p>
-<p><span>常见流程是：</span></p>
+<h4><a name="212-ipv4地址与子网划分" class="md-header-anchor"></a><span>2.1.2 IPv4地址与子网划分</span></h4>
+<p><span>IP地址由</span><strong><span>网络号</span></strong><span>和</span><strong><span>主机号</span></strong><span>组成。</span></p>
 <ul>
-  <li><span>服务器创建套接字、绑定端口、监听连接</span></li>
-  <li><span>客户端创建套接字并发起连接</span></li>
-  <li><span>连接建立后双方读写数据，最后关闭套接字</span></li>
-</ul>
-<p><span>Socket 编程支持 TCP（面向连接、可靠传输）和 UDP（无连接、简单快速）两种方式，是网络应用开发的核心机制。</span></p>
-
-<h3><a name="13-复用和分用" class="md-header-anchor"></a><span>1.3 复用和分用</span></h3>
-<ul>
-  <li><strong><span>复用（发送方）</span></strong><span>：传输层从多个套接字收集数据，交给网络层发送。</span></li>
-  <li><strong><span>分用（接收方）</span></strong><span>：传输层将从网络层收到的数据，交付给正确的套接字。</span></li>
+  <li><strong><span>子网掩码</span></strong><span>：用于区分IP地址中的网络号和主机号。</span></li>
+  <li><strong><span>CIDR（无分类域间路由选择）</span></strong><span>：使用“网络前缀”代替子网概念，写法如 192.168.1.0/24。</span></li>
 </ul>
 
-<h2><a name="2-udp" class="md-header-anchor"></a><span>2. UDP</span></h2>
-<p><span>UDP是一种</span><strong><span>无连接传输</span></strong><span>服务，它仅在IP层的数据报服务之上增加了复用、分用和差错检测的功能。UDP无建立连接的延迟且不限制发送速率（不进行拥塞控制和流量控制）。</span></p>
-<p><span>UDP主要提供下面两种服务：</span></p>
+<h3><a name="22-icmp" class="md-header-anchor"></a><span>2.2 ICMP</span></h3>
+<p><span>ICMP（Internet Control Message Protocol）用于主机或路由器报告差错情况和提供有关异常情况的报告。常见应用包括 </span><code>ping</code><span> 和 </span><code>tracert</code><span>。</span></p>
+
+<h3><a name="23-ipv6" class="md-header-anchor"></a><span>2.3 IPv6</span></h3>
+<p><span>由于IPv4地址枯竭，IPv6被设计出来。主要特点：</span></p>
 <ul>
-  <li><span>进程到进程之间的报文交付</span></li>
-  <li><span>报文完整性检查（可选）：检测并丢弃出错的报文</span></li>
+  <li><span>地址长度增加到 128 位。</span></li>
+  <li><span>首部格式简化，提高了处理效率。</span></li>
+  <li><span>支持即插即用（自动配置）。</span></li>
 </ul>
 
-<h3><a name="21-udp的报文段" class="md-header-anchor"></a><span>2.1 UDP的报文段</span></h3>
-<p><span>UDP报文由</span><strong><span>报头</span></strong><span>和</span><strong><span>载荷（payload）</span></strong><span>组成：报头携带协议处理必需的信息，载荷承载上层数据。用于复用与分用的字段包括源端口号和目的端口号；用于差错检测的字段包括报文总长度和校验和。</span></p>
-<p><img src="../images/ComputerNetwork/UDP报文格式.png" referrerpolicy="no-referrer"></p>
+<h2><a name="3-路由算法" class="md-header-anchor"></a><span>3. 路由算法</span></h2>
+<h3><a name="31-链路状态路由算法ls" class="md-header-anchor"></a><span>3.1 链路状态路由算法（LS）</span></h3>
+<p><span>基于 </span><strong><span>Dijkstra 算法</span></strong><span>，每个节点拥有完整的网络拓扑信息。</span></p>
+<h3><a name="32-距离向量路由算法dv" class="md-header-anchor"></a><span>3.2 距离向量路由算法（DV）</span></h3>
+<p><span>基于 </span><strong><span>Bellman-Ford 方程</span></strong><span>，节点仅与邻居交换信息，逐步收敛。</span></p>
 
-<h3><a name="22-校验和checksum" class="md-header-anchor"></a><span>2.2 校验和（checksum）</span></h3>
-<p><span>UDP校验和用于检测数据在传输过程中是否发生错误。计算时，UDP会将</span><strong><span>伪首部、UDP报头和数据部分</span></strong><span>一起参与校验。接收方对UDP报文及伪头求和，若结果为</span><strong><span>0xFFFF</span></strong><span>，则认为没有错误。</span></p>
-<p><img src="../images/ComputerNetwork/checksum.png" referrerpolicy="no-referrer"></p>
+<h2><a name="4-路由协议" class="md-header-anchor"></a><span>4. 路由协议</span></h2>
+<h3><a name="41-rip" class="md-header-anchor"></a><span>4.1 RIP</span></h3>
+<p><span>基于DV算法，使用“跳数”作为度量标准，最大跳数为15，适用于小型网络。</span></p>
+<h3><a name="42-ospf" class="md-header-anchor"></a><span>4.2 OSPF</span></h3>
+<p><span>基于LS算法，支持多区域划分，收敛速度快，适用于大型自治系统。</span></p>
+<h3><a name="43-bgp" class="md-header-anchor"></a><span>4.3 BGP</span></h3>
+<p><span>边界网关协议，用于在不同自治系统（AS）之间交换路由信息。</span></p>
 
-<h2><a name="3-tcp" class="md-header-anchor"></a><span>3. TCP</span></h2>
-<p><span>TCP是在不可靠的IP层之上实现的可靠数据传输协议，主要解决传输的可靠、有序、无丢失和不重复问题。其特点包括：面向连接、可靠传输、有序传输、流量控制、拥塞控制以及面向字节流。</span></p>
-
-<h3><a name="31-tcp的报文段" class="md-header-anchor"></a><span>3.1 TCP的报文段</span></h3>
-<p><img src="../images/ComputerNetwork/TCP报文段.png" referrerpolicy="no-referrer"></p>
+<h2><a name="5-网络层设备" class="md-header-anchor"></a><span>5. 网络层设备</span></h2>
+<h3><a name="51-路由器" class="md-header-anchor"></a><span>5.1 路由器</span></h3>
+<p><span>路由器是互联网最主要的网络设备，包含2个核心功能：</span></p>
 <ul>
-  <li><strong><span>源/目的端口号</span></strong><span>：用于复用与分用。</span></li>
-  <li><strong><span>序号、确认号</span></strong><span>：保证可靠、有序传输。</span></li>
-  <li><strong><span>标志位（SYN/ACK/FIN等）</span></strong><span>：用于连接管理。</span></li>
-  <li><strong><span>窗口大小</span></strong><span>：实现流量控制。</span></li>
+  <li><strong><span>控制层</span></strong><span>：运行路由协议（BGP, OSPF等），学习并维护路由表。</span></li>
+  <li><strong><span>数据层</span></strong><span>：根据路由表/转发表，将收到的分组转发到正确的输出接口。</span></li>
 </ul>
-
-<h3><a name="32-可靠传输" class="md-header-anchor"></a><span>3.2 可靠传输</span></h3>
-<h4><a name="321-发送端" class="md-header-anchor"></a><span>3.2.1 发送端</span></h4>
-<p><span>发送方收到数据后创建报文段，若无定时器运行则启动；超时则重传序号最小的报文段。收到ACK后推进窗口。</span></p>
-<p><img src="../images/ComputerNetwork/TCP发送端.png" referrerpolicy="no-referrer"></p>
-
-<h4><a name="323-超时重传" class="md-header-anchor"></a><span>3.2.3 超时重传</span></h4>
-<p><span>TCP只为最早未确认的报文段设置一个定时器。为了解决重传二义性，TCP采用Karn算法：重传时不更新RTT估计。</span></p>
-<p>
-<script type="math/tex">SRTT=\alpha \times SRTT+(1-\alpha)\times SampleRTT, \alpha=\frac{7}{8}</script>
-</p>
-
-<h4><a name="324-快速重传" class="md-header-anchor"></a><span>3.2.4 快速重传</span></h4>
-<p><span>如果在定时器到期前收到</span><strong><span>3次重复确认</span></strong><span>，立即重发报文段，无需等待超时。</span></p>
-<p><img src="../images/ComputerNetwork/快速重传.png" referrerpolicy="no-referrer"></p>
-
-<h3><a name="33-流量控制" class="md-header-anchor"></a><span>3.3 流量控制</span></h3>
-<p><span>通过</span><strong><span>显式窗口通告</span></strong><span>告知对方可用缓存。发送端使用</span><strong><span>Nagle算法</span></strong><span>减少小包发送，提高效率。</span></p>
-
-<h3><a name="34-连接管理" class="md-header-anchor"></a><span>3.4 连接管理</span></h3>
-<h4><a name="341-三次握手" class="md-header-anchor"></a><span>3.4.1 三次握手</span></h4>
-<p><span>用于初始化序号和确认双方收发能力。过程：SYN -> SYN+ACK -> ACK。</span></p>
-<p><img src="../images/ComputerNetwork/三次握手.png" referrerpolicy="no-referrer"></p>
-
-<h4><a name="342-四次挥手" class="md-header-anchor"></a><span>3.4.2 四次挥手</span></h4>
-<p><span>用于安全关闭连接。过程：FIN -> ACK -> FIN -> ACK。主动关闭方需进入 TIME-WAIT 状态。</span></p>
-<p><img src="../images/ComputerNetwork/四次挥手.png" referrerpolicy="no-referrer"></p>
-
-<h3><a name="35-拥塞控制" class="md-header-anchor"></a><span>3.5 拥塞控制</span></h3>
-<p><span>发送方通过拥塞窗口（cwnd）限制速率。核心策略为</span><strong><span>AIMD（加性增、乘性减）</span></strong><span>和</span><strong><span>慢启动</span></strong><span>。</span></p>
-<p><img src="../images/ComputerNetwork/TCP慢启动.png" referrerpolicy="no-referrer"></p>
+<p><img src="../images/ComputerNetwork/路由器.png" referrerpolicy="no-referrer"></p>
 </article>
 
 <div class="share-buttons">
@@ -223,9 +206,9 @@
 <span class="close-button">×</span>
 <h2>About Me</h2>
 <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain.</p>
-<p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
-<p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doesn't heal the pain, it just makes us get used to pain.</p>
+<p><strong>Interests:</strong> Computer Graphics, Computer Vision, Computer Animation, HPC, AIGC</p>
+<p><strong>Contact Information:</strong> masterforliage@gmail.com</p>
 <hr/>
 <h3>订阅我的博客</h3>
 <p>订阅功能正在建设中，敬请期待！</p>
