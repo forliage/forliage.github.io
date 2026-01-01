@@ -1083,5 +1083,19 @@
     "category": "学习笔记",
     "path": "_posts/2025-10-15-CN03.html",
     "abstract": "计算机网络03:数据链路层"
+  },
+  {
+    "title": "计算机网络04:网络层",
+    "date": "2025-11-23",
+    "category": "学习笔记",
+    "path": "_posts/2025-11-23-CN04.html",
+    "abstract": "计算机网络04:网络层"
+  },
+  {
+    "title": "计算机网络05:传输层",
+    "date": "2026-01-01",
+    "category": "学习笔记",
+    "path": "_posts/2026-01-01-CN05.html",
+    "abstract": "计算机网络05:传输层"
   }
 ]
