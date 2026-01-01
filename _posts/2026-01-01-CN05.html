@@ -6,13 +6,13 @@
 <link href="../style.css" rel="stylesheet"/>
 <link href="../modal.css" rel="stylesheet"/>
 <style>
-  /* 确保图片自适应 */
+  /* 添加此样式以确保图片自适应 */
   img {
-    max-width: 100%; 
-    height: auto;   
-    display: block; 
-    margin-left: auto; 
-    margin-right: auto;
+    max-width: 100%; /* 图片最大宽度为父容器的100% */
+    height: auto;   /* 高度自动调整以保持原始宽高比 */
+    display: block; /* 将图片设置为块级元素以便设置外边距 */
+    margin-left: auto; /* 自动计算左外边距 */
+    margin-right: auto;/* 自动计算右外边距，实现居中 */
   }
 </style>
 <script>
@@ -66,98 +66,143 @@
 <h2><a name="本节重点" class="md-header-anchor"></a><span>本节重点</span></h2>
 <ol start="">
  <li><span>传输层提供的服务</span></li>
- <li><span>UDP 协议特性</span></li>
- <li><span>TCP 协议特性（可靠传输、流量控制、拥塞控制等）</span></li>
+ <li><span>UDP</span></li>
+ <li><span>TCP</span></li>
 </ol>
-
 <h2><a name="1-传输层的服务" class="md-header-anchor"></a><span>1. 传输层的服务</span></h2>
-<p><span>传输层位于应用层和网络层之间，基于网络层提供的服务，向分布式应用程序提供通信服务。</span></p>
-
+<p>​	传输层位于应用层和网络层之间，基于网络层提供的服务，向分布式应用程序提供通信服务。</p>
 <h3><a name="11-进程之间的通信" class="md-header-anchor"></a><span>1.1 进程之间的通信</span></h3>
-<p><span>每个进程需要一个标识，以便其它进程能够找到它。进程标识包括：</span></p>
+<p>​	每个进程需要一个标识，以便其它进程能够找到它。进程标识包括：</p>
 <ul>
-  <li><span>主机地址</span></li>
-  <li><span>主机上与该进程关联的端口号（端口号被用来区分同一个主机上的不同进程）</span></li>
+<li>主机地址</li>
+<li>主机上与该进程关联的端口号（端口号被用来区分同一个主机上的不同进程）</li>
 </ul>
-
 <h3><a name="12-套接字编程" class="md-header-anchor"></a><span>1.2 套接字编程</span></h3>
-<p><strong><span>套接字（socket）</span></strong><span>：应用层和传输层的接口，也是应用程序和网络之间的API。</span></p>
-<p><img src="../images/ComputerNetwork/socket.png" referrerpolicy="no-referrer"></p>
-<p><span>套接字编程（Socket Programming）是网络应用程序之间进行通信的基础方式，它为应用进程提供了一个在网络中收发数据的接口。套接字相当于通信端点，客户端和服务器分别创建套接字，通过 IP 地址 + 端口号建立连接并传输数据。</span></p>
-<p><span>常见流程是：</span></p>
+<p>​	<strong>套接字（socket）</strong>：应用层和传输层的接口，也是应用程序和网络之间的API。</p>
+<p><img src="..\\images\\ComputerNetwork\\socket.png" referrerpolicy="no-referrer" alt=""></p>
+<p>​	套接字编程（Socket Programming）是网络应用程序之间进行通信的基础方式，它为应用进程提供了一个在网络中收发数据的接口。套接字相当于通信端点，客户端和服务器分别创建套接字，通过 IP 地址 + 端口号建立连接并传输数据。</p>
+<p>​	常见流程是：</p>
 <ul>
-  <li><span>服务器创建套接字、绑定端口、监听连接</span></li>
-  <li><span>客户端创建套接字并发起连接</span></li>
-  <li><span>连接建立后双方读写数据，最后关闭套接字</span></li>
+<li>服务器创建套接字、绑定端口、监听连接</li>
+<li>客户端创建套接字并发起连接</li>
+<li>连接建立后双方读写数据，最后关闭套接字</li>
 </ul>
-<p><span>Socket 编程支持 TCP（面向连接、可靠传输）和 UDP（无连接、简单快速）两种方式，是网络应用开发的核心机制。</span></p>
-
+<p>​    Socket 编程支持 TCP（面向连接、可靠传输）和 UDP（无连接、简单快速）两种方式，是网络应用开发的核心机制。</p>
 <h3><a name="13-复用和分用" class="md-header-anchor"></a><span>1.3 复用和分用</span></h3>
 <ul>
-  <li><strong><span>复用（发送方）</span></strong><span>：传输层从多个套接字收集数据，交给网络层发送。</span></li>
-  <li><strong><span>分用（接收方）</span></strong><span>：传输层将从网络层收到的数据，交付给正确的套接字。</span></li>
+<li>复用（发送方）：传输层从多个套接字收集数据，交给网络层发送</li>
+<li>分用（接收方）：传输层将从网络层收到的数据，交付给正确的套接字</li>
 </ul>
-
 <h2><a name="2-udp" class="md-header-anchor"></a><span>2. UDP</span></h2>
-<p><span>UDP是一种</span><strong><span>无连接传输</span></strong><span>服务，它仅在IP层的数据报服务之上增加了复用、分用和差错检测的功能。UDP无建立连接的延迟且不限制发送速率（不进行拥塞控制和流量控制）。</span></p>
-<p><span>UDP主要提供下面两种服务：</span></p>
+<p>​	UDP是一种<strong>无连接传输</strong>服务，它仅在IP层的数据报服务之上增加了复用、分用和差错检测的功能。UDP无建立连接的延迟且不限制发送速率（不进行拥塞控制和流量控制）。</p>
+<p>​	UDP主要提供下面两种服务：</p>
 <ul>
-  <li><span>进程到进程之间的报文交付</span></li>
-  <li><span>报文完整性检查（可选）：检测并丢弃出错的报文</span></li>
+<li>进程到进程之间的报文交付</li>
+<li>报文完整性检查（可选）：检测并丢弃出错的报文</li>
 </ul>
-
 <h3><a name="21-udp的报文段" class="md-header-anchor"></a><span>2.1 UDP的报文段</span></h3>
-<p><span>UDP报文由</span><strong><span>报头</span></strong><span>和</span><strong><span>载荷（payload）</span></strong><span>组成：报头携带协议处理必需的信息，载荷承载上层数据。用于复用与分用的字段包括源端口号和目的端口号；用于差错检测的字段包括报文总长度和校验和。</span></p>
-<p><img src="../images/ComputerNetwork/UDP报文格式.png" referrerpolicy="no-referrer"></p>
-
-<h3><a name="22-校验和checksum" class="md-header-anchor"></a><span>2.2 校验和（checksum）</span></h3>
-<p><span>UDP校验和用于检测数据在传输过程中是否发生错误。计算时，UDP会将</span><strong><span>伪首部、UDP报头和数据部分</span></strong><span>一起参与校验。接收方对UDP报文及伪头求和，若结果为</span><strong><span>0xFFFF</span></strong><span>，则认为没有错误。</span></p>
-<p><img src="../images/ComputerNetwork/checksum.png" referrerpolicy="no-referrer"></p>
-
-<h2><a name="3-tcp" class="md-header-anchor"></a><span>3. TCP</span></h2>
-<p><span>TCP是在不可靠的IP层之上实现的可靠数据传输协议，主要解决传输的可靠、有序、无丢失和不重复问题。其特点包括：面向连接、可靠传输、有序传输、流量控制、拥塞控制以及面向字节流。</span></p>
-
-<h3><a name="31-tcp的报文段" class="md-header-anchor"></a><span>3.1 TCP的报文段</span></h3>
-<p><img src="../images/ComputerNetwork/TCP报文段.png" referrerpolicy="no-referrer"></p>
+<p>​	UDP报文由<strong>报头</strong>和<strong>载荷（payload）</strong>组成：报头携带协议处理必需的信息，载荷承载上层数据。用于复用与分用<strong>的字段包括源端口号和目的端口号；用于</strong>差错检测的字段包括报文总长度和校验和，以发现传输中的错误。</p>
+<p>​	UDP报文：</p>
 <ul>
-  <li><strong><span>源/目的端口号</span></strong><span>：用于复用与分用。</span></li>
-  <li><strong><span>序号、确认号</span></strong><span>：保证可靠、有序传输。</span></li>
-  <li><strong><span>标志位（SYN/ACK/FIN等）</span></strong><span>：用于连接管理。</span></li>
-  <li><strong><span>窗口大小</span></strong><span>：实现流量控制。</span></li>
+<li>报头：携带协议处理需要的信息</li>
+<li>载荷（payload）：携带上层数据</li>
 </ul>
-
+<p>​    用于复用和分用的字段：</p>
+<ul>
+<li>源端口号</li>
+<li>目的端口号</li>
+</ul>
+<p>​    用于检测报文错误的字段：</p>
+<ul>
+<li>报文总长度</li>
+<li>校验和（checksum）</li>
+</ul>
+<p><img src="..\\images\\ComputerNetwork\\UDP报文格式.png" referrerpolicy="no-referrer" alt=""></p>
+<h3><a name="22-校验和checksum" class="md-header-anchor"></a><span>2.2 校验和（checksum）</span></h3>
+<p>​	UDP校验和用于检测数据在传输过程中是否发生错误，是一种<strong>差错检测机制</strong>。计算时，UDP会将<strong>伪首部、UDP报头和数据部分</strong>一起参与校验，通过对这些内容按16位求和取反得到校验值。最后，接收方对UDP报文（包括校验和）及伪头求和，若结果为<strong>0xFFFF</strong>，则认为没有错误。</p>
+<p><img src="..\\images\\ComputerNetwork\\checksum.png" referrerpolicy="no-referrer" alt=""></p>
+<h2><a name="3-tcp" class="md-header-anchor"></a><span>3. TCP</span></h2>
+<p>​	TCP是在不可靠的IP层之上实现的可靠数据传输协议，它主要解决传输的可靠、有序、无丢失和不重复问题。它的主要特点如下：</p>
+<ul>
+<li><strong>面向连接</strong>：通信前需通过三次握手建立连接，结束时四次挥手释放连接。</li>
+<li><strong>可靠传输</strong>：依靠确认应答、超时重传、序号与确认号机制确保数据不丢失、不重复、顺序到达。</li>
+<li><strong>有序传输</strong>：按序号排列数据，保证接收端按发送顺序重组数据。</li>
+<li><strong>流量控制</strong>：通过滑动窗口调节发送速率，防止接收端处理不过来。</li>
+<li><strong>拥塞控制</strong>：拥塞避免、慢开始、拥塞避免、快速重传/恢复等机制减缓网络拥塞。</li>
+<li><strong>面向字节流</strong>：数据以字节流方式传输，不保留报文边界。</li>
+</ul>
+<h3><a name="31-tcp的报文段" class="md-header-anchor"></a><span>3.1 TCP的报文段</span></h3>
+<p><img src="..\\images\\ComputerNetwork\\TCP报文段.png" referrerpolicy="no-referrer" alt=""></p>
+<ul>
+<li>源端口号、目的端口号：标识了连接的本地端点，用于复用与分用</li>
+<li>序号、确认号：保证数据可靠、有序传输</li>
+<li>标志位（SYN/ACK/FIN等）：用于连接建立、维护与释放</li>
+<li>窗口大小：实现流量控制</li>
+<li>校验和：进行差错检测</li>
+<li>选项字段：扩展协议能力</li>
+</ul>
 <h3><a name="32-可靠传输" class="md-header-anchor"></a><span>3.2 可靠传输</span></h3>
+<p>​	TCP在不可靠的IP之上实现可靠传输。发送端采用流水线发送、等待确认并在超时后重传；接收端进行差错检测并使用累积确认。对于乱序报文，协议未强制规定处理方式：不缓存时实现简单但效率低，缓存乱序段效率更高但处理更复杂。</p>
 <h4><a name="321-发送端" class="md-header-anchor"></a><span>3.2.1 发送端</span></h4>
-<p><span>发送方收到数据后创建报文段，若无定时器运行则启动；超时则重传序号最小的报文段。收到ACK后推进窗口。</span></p>
-<p><img src="../images/ComputerNetwork/TCP发送端.png" referrerpolicy="no-referrer"></p>
-
+<p>​	发送方收到应用数据后创建并发送TCP报文段，若无定时器运行则启动定时器；超时则重传未确认中序号最小的报文段并重启定时器。收到ACK且确认序号大于基序号时，推进发送窗口并更新基序号；若仍有未确认报文则继续定时器，否则停止定时器。</p>
+<p><img src="..\\images\\ComputerNetwork\\TCP发送端.png" referrerpolicy="no-referrer" alt=""></p>
+<h4><a name="322-tcp的接收端" class="md-header-anchor"></a><span>3.2.2 TCP的接收端</span></h4>
+<p>​	接收端理论上只需区分两种情况：收到期望的报文段则发送更新后的确认序号，其余情况发送重复确认。为减少开销，TCP允许推迟确认，即接收端在收到多个报文段后再发送一次累积确认，以降低通信量。</p>
 <h4><a name="323-超时重传" class="md-header-anchor"></a><span>3.2.3 超时重传</span></h4>
-<p><span>TCP只为最早未确认的报文段设置一个定时器。为了解决重传二义性，TCP采用Karn算法：重传时不更新RTT估计。</span></p>
-<p>
-<script type="math/tex">SRTT=\alpha \times SRTT+(1-\alpha)\times SampleRTT, \alpha=\frac{7}{8}</script>
-</p>
-
+<p>​	TCP可能出现下面几种重传情况：</p>
+<p><img src="..\\images\\ComputerNetwork\\TCP重传.png" referrerpolicy="no-referrer" alt=""></p>
+<p>​	TCP的差错恢复机制可视为GBN和SR的混合体：在定时器方面类似GBN，只为最早未确认的报文段设置一个定时器；在超时重传方面又类似SR，只重传丢失的数据段而非全部未确认内容，从而兼顾效率与可靠性。</p>
+<p>​	TCP确认存在二义性：重传报文段与原报文使用相同序号，发送端收到ACK后无法判断确认的是原始段还是重传段，导致测量的SampleRTT可能不准确。为解决此问题，TCP只对一次发送成功的报文段测量SampleRTT并更新EstimatedRTT（SRTT）；发生重传时停止RTT测量，从而避免二义性影响。</p>
+<blockquote>
+<p>$SRTT=\alpha \times SRTT+(1-\alpha)\times SRTT,\alpha=\frac{7}{8}$</p>
+</blockquote>
+<p>​	Karn算法解决重传导致的超时设置偏小问题：重传时不更新RTT估计，而是将超时值加倍（连续重传则指数增加）；只有未重传就被确认的报文段才用于更新EstimatedRTT。这样通过“忽略重传RTT + 定时器补偿”来避免确认二义性并合理调整超时。</p>
 <h4><a name="324-快速重传" class="md-header-anchor"></a><span>3.2.4 快速重传</span></h4>
-<p><span>如果在定时器到期前收到</span><strong><span>3次重复确认</span></strong><span>，立即重发报文段，无需等待超时。</span></p>
-<p><img src="../images/ComputerNetwork/快速重传.png" referrerpolicy="no-referrer"></p>
-
+<p>​	仅靠超时重发丢失的报文段，恢复太慢，因此研究者提出了快速重传机制。所谓快速重传，就是在<strong>定时器到期前重发丢失的报文段</strong>。如果收到<strong>3</strong>次重复确认，重发报文段。</p>
+<p><img src="..\\images\\ComputerNetwork\\快速重传.png" referrerpolicy="no-referrer" alt=""></p>
 <h3><a name="33-流量控制" class="md-header-anchor"></a><span>3.3 流量控制</span></h3>
-<p><span>通过</span><strong><span>显式窗口通告</span></strong><span>告知对方可用缓存。发送端使用</span><strong><span>Nagle算法</span></strong><span>减少小包发送，提高效率。</span></p>
-
+<p>​	TCP接收端通过<strong>显式窗口通告</strong>告诉发送方可用缓存空间，在窗口较小时可推迟确认，仅在窗口明显增大时才更新通告；发送端使用<strong>Nagle算法</strong>控制发送时机，并以接收端窗口为上限，保证未确认数据量不超过对方可用空间，从而避免缓存溢出并协调传输速率。</p>
+<h4><a name="331-显式窗口通告" class="md-header-anchor"></a><span>3.3.1 显式窗口通告</span></h4>
+<p>​	TCP接收端通过在报文的“窗口大小”字段中明确告知发送端当前可用的缓存空间大小。发送端根据这个窗口值控制发送量，保证“已发送但未确认的数据”不会超过接收端的承载能力，从而防止接收缓存溢出。</p>
+<p><img src="..\\images\\ComputerNetwork\\显式窗口通告.png" referrerpolicy="no-referrer" alt=""></p>
+<h4><a name="332-nagle算法" class="md-header-anchor"></a><span>3.3.2 <strong>Nagle算法</strong></span></h4>
+<p>​	Nagle算法用于减少小数据包频繁发送造成的网络开销。规则是：当发送端还有未确认的数据时，暂缓发送新的小包，等待前一个包被确认或积累到足够大的数据再一次性发送，从而降低网络负载、提高传输效率。适用于存在大量细碎小数据的应用场景（如交互式程序）。</p>
 <h3><a name="34-连接管理" class="md-header-anchor"></a><span>3.4 连接管理</span></h3>
+<p>​	建立一条TCP连接需要确定两件事：</p>
+<ul>
+<li>双方都同意建立连接（知晓另一方想建立连接）</li>
+<li>初始化连接参数（序号，MSS等）</li>
+</ul>
 <h4><a name="341-三次握手" class="md-header-anchor"></a><span>3.4.1 三次握手</span></h4>
-<p><span>用于初始化序号和确认双方收发能力。过程：SYN -> SYN+ACK -> ACK。</span></p>
-<p><img src="../images/ComputerNetwork/三次握手.png" referrerpolicy="no-referrer"></p>
-
+<p>​    TCP使用“三次握手”在通信双方之间可靠地建立连接，确保双方的发送与接收能力都已正常就绪，过程如下：</p>
+<ol start="">
+ <li><span><strong>客户端 → 服务器（SYN）</strong>：客户端发送带有 <strong>SYN 标志位</strong>的报文段，请求建立连接，进入 <em>SYN-SENT</em> 状态。</span></li>
+ <li><span><strong>服务器 → 客户端（SYN+ACK）</strong>：服务器收到请求后应答一个同时带 <strong>SYN 和 ACK</strong> 的报文段，表示同意建立连接并确认客户端的请求，进入 <em>SYN-RECEIVED</em> 状态。</span></li>
+ <li><span><strong>客户端 → 服务器（ACK）</strong>：客户端收到确认后，再发送一个 <strong>ACK 报文段</strong>作为回应，双方进入 <em>ESTABLISHED</em> 状态，连接正式建立。</span></li>
+</ol>
+<p><img src="..\\images\\ComputerNetwork\\三次握手.png" referrerpolicy="no-referrer" alt=""></p>
 <h4><a name="342-四次挥手" class="md-header-anchor"></a><span>3.4.2 四次挥手</span></h4>
-<p><span>用于安全关闭连接。过程：FIN -> ACK -> FIN -> ACK。主动关闭方需进入 TIME-WAIT 状态。</span></p>
-<p><img src="../images/ComputerNetwork/四次挥手.png" referrerpolicy="no-referrer"></p>
-
+<p>TCP使用“四次挥手”断开连接，确保双方数据都已发送完毕并安全关闭，过程如下：</p>
+<ol start="">
+ <li><span><strong>主动方 → 被动方（FIN）</strong>：主动关闭的一方发送 FIN，表示不再发送数据，进入 <em>FIN-WAIT-1</em> 状态。</span></li>
+ <li><span><strong>被动方 → 主动方（ACK）</strong>：被动方确认收到 FIN，回复 ACK，进入 <em>CLOSE-WAIT</em>；此时仍可继续向主动方发送数据。</span></li>
+ <li><span><strong>被动方 → 主动方（FIN）</strong>：被动方发送自己的 FIN，表示数据发送完毕并准备关闭，进入 <em>LAST-ACK</em>。</span></li>
+ <li><span><strong>主动方 → 被动方（ACK）</strong>：主动方回 ACK，确认后进入 <em>TIME-WAIT</em> 等待一段时间防止报文丢失，然后最终关闭连接。</span></li>
+</ol>
+<p><img src="..\\images\\ComputerNetwork\\四次挥手.png" referrerpolicy="no-referrer" alt=""></p>
+<h4><a name="343-客户服务器经历的tcp状态序列" class="md-header-anchor"></a><span>3.4.3 客户/服务器经历的TCP状态序列</span></h4>
+<p><img src="..\\images\\ComputerNetwork\\TCP状态序列.png" referrerpolicy="no-referrer" alt=""></p>
 <h3><a name="35-拥塞控制" class="md-header-anchor"></a><span>3.5 拥塞控制</span></h3>
-<p><span>发送方通过拥塞窗口（cwnd）限制速率。核心策略为</span><strong><span>AIMD（加性增、乘性减）</span></strong><span>和</span><strong><span>慢启动</span></strong><span>。</span></p>
-<p><img src="../images/ComputerNetwork/TCP慢启动.png" referrerpolicy="no-referrer"></p>
+<p>​	TCP使用<strong>端到端</strong>拥塞控制机制，即发送方根据自己感知的网络拥塞程度，限制其发送速率。</p>
+<p>​	发送方通过<strong>丢包事件</strong>来感知网络拥塞：当网络拥塞导致分组丢失或延迟过大时，发送端会触发重传定时器超时或收到三个重复ACK，这两种情况都被视为丢包，从而判断出现拥塞。为限制发送速率，发送方使用<strong>拥塞窗口cwnd</strong>控制已发送但未确认的数据量（满足 LastByteSent − LastByteAcked ≤ cwnd），并根据拥塞状况动态调整 cwnd 大小。</p>
+<h4><a name="351-aimd" class="md-header-anchor"></a><span>3.5.1 AIMD</span></h4>
+<p>​	AIMD（加性增大、乘性减小）是TCP拥塞控制的核心策略：在网络无拥塞时，发送方每个往返时间对拥塞窗口 <strong>加性增加</strong>（逐步线性增大发送速率）；一旦出现丢包等拥塞信号，则对拥塞窗口 <strong>乘性减小</strong>（通常减半），快速降低发送速率。AIMD在提高吞吐量和避免拥塞之间取得平衡，实现稳定且公平的网络资源共享。</p>
+<p><img src="..\\images\\ComputerNetwork\\AIMD.png" referrerpolicy="no-referrer" alt=""></p>
+<h4><a name="352-慢启动" class="md-header-anchor"></a><span>3.5.2 慢启动</span></h4>
+<p>​	<strong>TCP慢启动（Slow Start）</strong>是拥塞控制初始阶段的机制，用于在连接开始或超时重传后逐步提升发送速率，避免一开始就向网络注入过多数据造成拥塞。慢启动从较小的拥塞窗口（cwnd，通常为1个MSS）起步，每收到一个ACK就增加1个MSS，使得每个RTT内 cwnd 近似<strong>指数增长</strong>（1、2、4、8、16 …）。当 cwnd 增长到阈值 ssthresh 时，算法切换到拥塞避免阶段，以更平缓的方式继续增长，从而在效率与安全之间取得平衡。</p>
+<p><img src="..\\images\\ComputerNetwork\\TCP慢启动.png" referrerpolicy="no-referrer" alt=""></p>
+<p>​	发送方维护ssthresh，其一般设置为$\frac{cwnd}{2}$。</p>
 </article>
-
 <div class="share-buttons">
 <p>分享到：</p>
 <a class="share-btn weibo" href="#" onclick="sharePost(event, 'weibo')">
@@ -185,7 +230,6 @@
 <span>Facebook</span>
 </a>
 </div>
-
 <div class="giscus-container" style="margin-top: 50px;">
   <script src="https://giscus.app/client.js"
   data-repo="forliage/forliage.github.io"
@@ -205,7 +249,6 @@
 </div>
 </main>
 </div>
-
 <script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
 <script>
       mermaid.initialize({
@@ -223,8 +266,10 @@
 <span class="close-button">×</span>
 <h2>About Me</h2>
 <p>This is forliage, an undergraduate student of computer science and technology at Zhejiang University.</p>
-<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain.</p>
+<p><strong>Motto:</strong> People always say that time heals all wounds, but I don't believe that. Time doen't heal the pain, it just makes us get used to pain. When you lose someone, you don't really forget them; you just learn how to live on without them.</p>
 <p><strong>Interests:</strong> Computer Graphics, Computer Version, Computer Animation, HPC, AIGC</p>
+<p><strong>Favorite Movie:</strong> The Shawshank Redemption, Dead Poets Society, Zootopia</p>
+<p><strong>Favorite Music:</strong> Blank Space, Sorega Daiji, Counting Stars, Whataya Want from Me</p>
 <p><strong>Contact Information:</strong>masterforliage@gmail.com</p>
 <hr/>
 <h3>订阅我的博客</h3>
