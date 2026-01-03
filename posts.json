@@ -1097,5 +1097,12 @@
     "category": "学习笔记",
     "path": "_posts/2026-01-01-CN05.html",
     "abstract": "计算机网络05:传输层"
+  },
+  {
+    "title": "计算机网络06:应用层",
+    "date": "2026-01-02",
+    "category": "学习笔记",
+    "path": "_posts/2026-01-02-CN06.html",
+    "abstract": "计算机网络06:应用层"
   }
 ]
