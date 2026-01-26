@@ -1,5 +1,12 @@
 ---
-const publications = [
+interface Publication {
+	title: string;
+	venue?: string;
+	authors?: string[];
+	links?: { text: string; url: string }[];
+}
+
+const publications: Publication[] = [
 	//{
 	//	title: "Lightweight, Edge-Aware, and Temporally Consistent Supersampling for Mobile Real-Time Rendering",
 	//	venue: "ACM Transactions on Graphics (conditionally accepted, 2025)",
@@ -25,23 +32,26 @@ const publications = [
 					</h3>
 					<div class="pub-venue">{pub.venue}</div>
 					<div class="pub-authors">
-						{pub.authors.map((author, index) => (
+						{pub.authors?.map((author, index) => (
 							<span>
 								{author.includes("Liuye Zhao") ? (
 									<strong>{author}</strong>
 								) : (
 									author
 								)}
-								{index < pub.authors.length - 1 ? ", " : ""}
+								{pub.authors && index < pub.authors.length - 1
+									? ", "
+									: ""}
 							</span>
 						))}
 					</div>
 					<div class="pub-links">
-						{pub.links.map((link) => (
-							<a href={link.url} class="link-btn">
-								[{link.text}]
-							</a>
-						))}
+						{pub.links &&
+							pub.links.map((link) => (
+								<a href={link.url} class="link-btn">
+									[{link.text}]
+								</a>
+							))}
 					</div>
 				</div>
 			))
