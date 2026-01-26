@@ -1,0 +1,65 @@
+---
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Academic Homepage" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>
+
+<style is:global>
+	:root {
+		--font-family: 'Inter', system-ui, -apple-system, sans-serif;
+		--color-bg: #f9f9f9;
+		--color-text: #333;
+		--color-text-light: #666;
+		--color-primary: #0066cc;
+		--color-border: #eee;
+		--glass-bg: rgba(255, 255, 255, 0.7);
+		--glass-border: rgba(255, 255, 255, 0.5);
+	}
+	
+	* {
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0;
+	}
+
+	body {
+		font-family: var(--font-family);
+		background-color: var(--color-bg);
+		color: var(--color-text);
+		line-height: 1.6;
+	}
+
+	a {
+		color: var(--color-primary);
+		text-decoration: none;
+	}
+
+	a:hover {
+		text-decoration: underline;
+	}
+
+	h1, h2, h3, h4 {
+		color: #111;
+		margin-bottom: 0.5rem;
+	}
+</style>

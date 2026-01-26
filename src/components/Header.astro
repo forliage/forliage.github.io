@@ -1,0 +1,58 @@
+---
+---
+
+<header class="glass-header">
+	<div class="container">
+		<div class="logo">Sipeng Yang</div>
+		<nav>
+			<a href="#publications">Publications</a>
+			<a href="/blog">Blog</a>
+		</nav>
+	</div>
+</header>
+
+<style>
+	.glass-header {
+		position: sticky;
+		top: 0;
+		width: 100%;
+		z-index: 100;
+		background: rgba(255, 255, 255, 0.7);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+		padding: 1rem 0;
+	}
+
+	.container {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 0 2rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.logo {
+		font-weight: 700;
+		font-size: 1.25rem;
+		color: #000;
+	}
+
+	nav {
+		display: flex;
+		gap: 2rem;
+	}
+
+	nav a {
+		color: #333;
+		font-weight: 500;
+		font-size: 1.1rem;
+		transition: color 0.2s;
+	}
+
+	nav a:hover {
+		color: var(--color-primary);
+		text-decoration: none;
+	}
+</style>

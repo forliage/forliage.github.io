@@ -1,0 +1,102 @@
+---
+const publications = [
+	//{
+	//	title: "Lightweight, Edge-Aware, and Temporally Consistent Supersampling for Mobile Real-Time Rendering",
+	//	venue: "ACM Transactions on Graphics (conditionally accepted, 2025)",
+	//	authors: ["Sipeng Yang", "Jiayu Ji", "Junhao Zhuge", "Hezhu Zhang", "Qiang Qiu", "Chen Li", "Yuzhong Yan", "Kerong Wang", "Ling-Qi Yan", "Xiaogang Jin*"],
+	//	links: [
+	//		{ text: "PDF", url: "#" },
+	//		{ text: "Code", url: "#" }
+	//	]
+	//}
+	{ title: "Coming soon" },
+];
+---
+
+<section id="publications" class="publications">
+	<h1 class="section-title">Selected Publications</h1>
+
+	<div class="pub-list">
+		{
+			publications.map((pub) => (
+				<div class="pub-item">
+					<h3 class="pub-title">
+						<a href="#">{pub.title}</a>
+					</h3>
+					<div class="pub-venue">{pub.venue}</div>
+					<div class="pub-authors">
+						{pub.authors.map((author, index) => (
+							<span>
+								{author.includes("Liuye Zhao") ? (
+									<strong>{author}</strong>
+								) : (
+									author
+								)}
+								{index < pub.authors.length - 1 ? ", " : ""}
+							</span>
+						))}
+					</div>
+					<div class="pub-links">
+						{pub.links.map((link) => (
+							<a href={link.url} class="link-btn">
+								[{link.text}]
+							</a>
+						))}
+					</div>
+				</div>
+			))
+		}
+	</div>
+</section>
+
+<style>
+	.publications {
+		background: #fff;
+		padding: 2rem;
+		border-radius: 12px;
+		box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+	}
+
+	.section-title {
+		font-size: 2rem;
+		border-bottom: 2px solid #eee;
+		padding-bottom: 0.5rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.pub-item {
+		margin-bottom: 2rem;
+		padding-bottom: 1.5rem;
+		border-bottom: 1px dashed #eee;
+	}
+
+	.pub-item:last-child {
+		border-bottom: none;
+	}
+
+	.pub-title {
+		font-size: 1.2rem;
+		margin-bottom: 0.25rem;
+	}
+
+	.pub-title a {
+		color: var(--color-primary);
+	}
+
+	.pub-venue {
+		font-style: italic;
+		color: #666;
+		margin-bottom: 0.25rem;
+	}
+
+	.pub-authors {
+		color: #444;
+		margin-bottom: 0.5rem;
+	}
+
+	.link-btn {
+		font-size: 0.9rem;
+		margin-right: 0.5rem;
+		font-weight: 600;
+	}
+</style>
