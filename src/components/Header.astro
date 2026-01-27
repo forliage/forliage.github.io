@@ -1,33 +1,59 @@
 ---
-
+const pathname = new URL(Astro.request.url).pathname;
+const currentPath = pathname.slice(1); // remove the first "/"
 ---
 
 <header class="glass-header">
 	<div class="container">
-		<div class="logo">Liuye Zhao</div>
+		<div class="logo-terminal">
+			<span class="text-green">Liuye Zhao</span><span class="text-pink"
+				>@ZJU</span
+			><span class="text-green">:~$Hi there!</span><span
+				class="cursor-blink"></span>
+		</div>
 		<nav>
-			<a href="#publications">Publications</a>
-			<a href="/blog">Blog</a>
+			<a href="/" class={pathname === "/" ? "active" : ""}>Home</a>
+			<a
+				href="#publications"
+				class={pathname === "/publications" ? "active" : ""}
+				>Publications</a
+			>
+			<a href="/blog" class={pathname.startsWith("/blog") ? "active" : ""}
+				>Blogs</a
+			>
+			<a
+				href="/showcase"
+				class={pathname.startsWith("/showcase") ? "active" : ""}
+				>Showcase</a
+			>
 		</nav>
 	</div>
 </header>
 
 <style>
+	:root {
+		--color-header-bg: rgba(
+			171,
+			218,
+			220,
+			0.65
+		); /* #ABDADC with transparency */
+		--color-green-text: #5dd3b6;
+		--color-pink-text: #f075ae;
+		--color-inactive-text: #a5c89e;
+	}
+
 	.glass-header {
 		position: sticky;
 		top: 0;
 		width: 100%;
 		z-index: 100;
-		background: rgba(
-			255,
-			255,
-			255,
-			0.85
-		); /* Slightly less transp to match "clean" look */
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		/* removed border-bottom to look cleaner like the request implies */
+		background: var(--color-header-bg);
+		backdrop-filter: blur(20px) saturate(180%);
+		-webkit-backdrop-filter: blur(20px) saturate(180%);
+		box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); /* Subtle shadow for liquid feel */
 		padding: 1rem 0;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.3); /* Glassy border */
 	}
 
 	.container {
@@ -35,31 +61,79 @@
 		margin: 0 auto;
 		padding: 0 3rem;
 		display: flex;
-		justify-content: flex-start; /* Align everything to left */
+		justify-content: space-between; /* Space between logo and nav */
 		align-items: center;
-		gap: 3rem; /* Space between Name and Nav */
 	}
 
-	.logo {
+	.logo-terminal {
+		font-family: "Consolas", "Monaco", "Andale Mono", monospace;
 		font-weight: 700;
-		font-size: 1.25rem;
-		color: #333; /* Dark gray */
+		font-size: 1.15rem;
+		letter-spacing: -0.5px;
+		display: flex;
+		align-items: center;
+	}
+
+	.text-green {
+		color: var(--color-green-text);
+	}
+
+	.text-pink {
+		color: var(--color-pink-text);
+	}
+
+	.cursor-blink {
+		display: inline-block;
+		width: 10px;
+		height: 1.2em;
+		background-color: var(--color-pink-text);
+		margin-left: 2px;
+		animation: blink 1s step-end infinite;
+		vertical-align: text-bottom;
+	}
+
+	@keyframes blink {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0;
+		}
 	}
 
 	nav {
 		display: flex;
-		gap: 1.5rem;
+		gap: 2rem;
 	}
 
 	nav a {
-		color: #888; /* Light gray */
-		font-weight: 400; /* Normal weight */
+		color: var(--color-inactive-text);
+		font-weight: 600;
 		font-size: 1rem;
-		transition: color 0.2s;
+		transition: all 0.3s ease;
+		position: relative;
 	}
 
 	nav a:hover {
-		color: #000;
+		color: var(--color-green-text);
 		text-decoration: none;
+	}
+
+	nav a.active {
+		color: var(--color-green-text);
+	}
+
+	/* Optional: Add a subtle glow to active link */
+	nav a.active::after {
+		content: "";
+		position: absolute;
+		bottom: -4px;
+		left: 0;
+		width: 100%;
+		height: 2px;
+		background-color: var(--color-green-text);
+		border-radius: 2px;
+		opacity: 0.6;
 	}
 </style>
