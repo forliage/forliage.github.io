@@ -37,9 +37,14 @@
 
 <style>
 	.sidebar {
+		background: #fff;
+		padding: 2rem; /* Card padding */
+		border-radius: 16px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;
+		height: fit-content; /* Ensure it wraps content */
 	}
 
 	.photo-container {
@@ -48,6 +53,8 @@
 		border-radius: 50%;
 		overflow: hidden;
 		border: 1px solid #eee;
+		align-self: center; /* Center photo in card */
+		max-width: 180px; /* Constraint max width just in case */
 	}
 
 	.photo {
@@ -57,7 +64,6 @@
 	}
 
 	.info-card {
-		/* Removed card style */
 		padding: 0;
 	}
 

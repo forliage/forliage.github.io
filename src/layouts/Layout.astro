@@ -15,9 +15,12 @@ const { title } = Astro.props;
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
 	</head>
 	<body>
 		<slot />
@@ -26,8 +29,8 @@ const { title } = Astro.props;
 
 <style is:global>
 	:root {
-		--font-family: 'Inter', system-ui, -apple-system, sans-serif;
-		--color-bg: #f9f9f9;
+		--font-family: "Inter", system-ui, -apple-system, sans-serif;
+		--color-bg: #ecfae5; /* Updated background color */
 		--color-text: #333;
 		--color-text-light: #666;
 		--color-primary: #0066cc;
@@ -35,7 +38,7 @@ const { title } = Astro.props;
 		--glass-bg: rgba(255, 255, 255, 0.7);
 		--glass-border: rgba(255, 255, 255, 0.5);
 	}
-	
+
 	* {
 		box-sizing: border-box;
 		margin: 0;
@@ -58,7 +61,10 @@ const { title } = Astro.props;
 		text-decoration: underline;
 	}
 
-	h1, h2, h3, h4 {
+	h1,
+	h2,
+	h3,
+	h4 {
 		color: #111;
 		margin-bottom: 0.5rem;
 	}
