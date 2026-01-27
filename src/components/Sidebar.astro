@@ -11,8 +11,8 @@
 		<h1>Liuye Zhao</h1>
 		<p class="role">Undergraduate student</p>
 		<p class="affiliation">
+			@ Zhejiang University
 			<img src="/zju.png" alt="ZJU Logo" class="mini-logo" />
-			Zhejiang University
 		</p>
 		<a href="mailto:masterforliage@gmail.com" class="email-link"
 			>masterforliage@gmail.com</a
@@ -21,10 +21,10 @@
 		<div class="social-icons">
 			<!-- Google Scholar -->
 			<a href="#" aria-label="Google Scholar" class="icon-link scholar">
-				<svg viewBox="0 0 24 24" class="icon">
+				<svg viewBox="0 0 512 512" class="icon">
 					<path
 						fill="currentColor"
-						d="M12 24a7 7 0 1 1 0-14 7 7 0 0 1 0 14zm0-24L0 9.5l4.838 3.94A8 8 0 0 1 12 9a8 8 0 0 1 7.162 4.44L24 9.5z"
+						d="M497.9 142.1l-46.1 21.5c5.6 17.2 8.3 35.8 8.3 54.8 0 71.7-43.1 133.4-106.9 157.9L352 468.9c3.9 13.9-3.7 28.5-17.1 33.7l-42 16.3c-15.3 5.9-32.3-1.6-38.2-16.9l-13.6-35c-37.1-12-70.8-31.5-96.2-57.9-24.6 15.6-54.8 24.3-86.9 24.3-19.1 0-37.6-3.1-55.2-8.3l-2.2-1C5.9 417.4-2.8 406.4 1 395c3.8-11.4 16.2-17.6 27.8-14.8l2 .7c14.2 4.3 29.3 6.6 44.8 6.6 52 0 97.4-26.6 123.6-67.6 1.4-2.3 2.8-4.5 4-6.8l-197.8-91c-4.4-2-5.4-8.1-.9-10.3l251.4-118c3-1.4 6.7-1.4 9.7 0l225.6 106.1c5.1 2.3 4.2 9.6-1.1 12.2zm-155.6 63.8c44.7-16.1 79.9-52.2 91.7-93.5L421.3 106l-165.3 77.7 20.3 4.2c2.1-4 4.5-7.7 7.1-11.2l-1.4 29.2zm-73.6 23.9c-23 20.7-54.6 33.3-88.7 33.3-33.6 0-64.8-12.2-87.7-32.4l14.8-16.6c19.3 17 44.9 27.2 72.9 27.2 28.3 0 54-10.4 73.2-27.7l15.5 16.2z"
 					></path>
 				</svg>
 			</a>
@@ -107,7 +107,9 @@
 	}
 
 	.role {
-		font-size: 1rem;
+		font-family: "Source Serif 4", serif;
+		font-size: 1rem; /* Smaller */
+		font-weight: 400;
 		color: #555;
 		margin: 0;
 	}
@@ -117,19 +119,23 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
-		font-size: 0.95rem;
+		font-family: "Source Serif 4", serif;
+		font-size: 0.95rem; /* Smaller */
+		font-weight: 400;
 		color: #444;
 		margin: 0.25rem 0;
 	}
 
 	.mini-logo {
-		height: 20px;
+		height: 20px; /* Adjusted icon size */
 		width: auto;
 	}
 
 	.email-link {
+		font-family: "Source Serif 4", serif;
 		color: #0066cc;
-		font-size: 0.9rem;
+		font-size: 0.9rem; /* Smaller */
+		font-weight: 400;
 		text-decoration: none;
 		margin-bottom: 1rem;
 	}
@@ -155,8 +161,8 @@
 	}
 
 	.icon {
-		width: 28px;
-		height: 28px;
+		width: 24px; /* Slightly smaller icons */
+		height: 24px;
 	}
 
 	.icon-link:hover {

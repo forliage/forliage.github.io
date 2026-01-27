@@ -81,13 +81,13 @@
     }
 
     .timeline-marker {
-        width: 12px;
-        height: 12px;
+        width: 14px; /* Slightly larger */
+        height: 14px;
         border: 2px solid #5dd3b6;
         border-radius: 50%;
-        background: #fff;
+        background: #fff; /* Hollow center */
         position: relative;
-        margin-top: 0.4rem;
+        margin-top: 0.35rem; /* Adjusted alignment */
         justify-self: center; /* Center in the 20px column */
         z-index: 1;
     }
@@ -96,7 +96,7 @@
     .timeline-marker::after {
         content: "";
         position: absolute;
-        top: 10px;
+        top: 14px;
         left: 50%;
         transform: translateX(-50%);
         width: 2px;
@@ -116,11 +116,15 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        color: #333; /* Darker title */
+        font-weight: 600;
+        font-family: "Source Serif 4", serif;
     }
 
     .role {
         color: #555;
         font-size: 0.95rem;
+        font-family: "Source Serif 4", serif;
     }
 
     .edu-logo {
