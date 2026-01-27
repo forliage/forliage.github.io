@@ -1,0 +1,118 @@
+---
+
+---
+
+<section id="experience" class="experience">
+    <h1 class="section-title">Experience 👩‍💻</h1>
+    <div class="timeline">
+        <!-- 
+		<div class="timeline-item">
+			<div class="timeline-date">Jun. 2025 - Dec. 2025</div>
+			<div class="timeline-marker"></div>
+			<div class="timeline-content">
+				<h3>Codec Avatars Lab, Meta <span class="logo-placeholder">♾️</span></h3>
+				<p class="role">Research Scientist Intern</p>
+			</div>
+		</div>
+		
+		<div class="timeline-item">
+			<div class="timeline-date">May. 2024 - April. 2025</div>
+			<div class="timeline-marker"></div>
+			<div class="timeline-content">
+				<h3>ETH Zürich <span class="logo-placeholder">🇨🇭</span></h3>
+				<p class="role">Academic Guest, Computer Vision and Learning Group</p>
+			</div>
+		</div>
+		-->
+        <div class="empty-placeholder">More coming soon...</div>
+    </div>
+</section>
+
+<style>
+    .experience {
+        background: #fff;
+        padding: 2.5rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-bottom: 3rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 0.5rem;
+    }
+
+    .timeline-item {
+        display: grid;
+        grid-template-columns: 160px 20px 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        align-items: start;
+    }
+
+    .timeline-date {
+        text-align: right;
+        color: #888;
+        font-size: 0.9rem;
+        padding-top: 0.2rem;
+    }
+
+    .timeline-marker {
+        width: 12px;
+        height: 12px;
+        border: 2px solid #5dd3b6;
+        border-radius: 50%;
+        background: #fff;
+        position: relative;
+        margin-top: 0.4rem;
+        justify-self: center;
+        z-index: 1;
+    }
+
+    /* Line connecting markers */
+    .timeline-marker::after {
+        content: "";
+        position: absolute;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 2px;
+        height: calc(100% + 2rem + 10px); /* Adjust based on item height/gap */
+        background: #eee;
+        z-index: -1;
+    }
+
+    .timeline-item:last-child .timeline-marker::after {
+        display: none;
+    }
+
+    .timeline-content h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .role {
+        color: #555;
+        font-size: 0.95rem;
+    }
+
+    .empty-placeholder {
+        color: #999;
+        font-style: italic;
+        padding: 1rem;
+        text-align: center;
+    }
+</style>

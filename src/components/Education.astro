@@ -1,0 +1,128 @@
+---
+
+---
+
+<section id="education" class="education">
+    <h1 class="section-title">Education 🎓</h1>
+    <div class="timeline">
+        <div class="timeline-item">
+            <div class="timeline-date">Sep. 2023 - Present</div>
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <h3>
+                    Zhejiang University <img
+                        src="https://www.zju.edu.cn/_upload/tpl/05/e9/1513/template1513/images/logo.png"
+                        alt="ZJU Logo"
+                        class="edu-logo"
+                        style="height: 24px;"
+                    />
+                </h3>
+                <p class="role">B.S. in Computer Science</p>
+            </div>
+        </div>
+
+        <!-- 
+		<div class="timeline-item">
+			<div class="timeline-date">Sep. 2017 - Jun. 2021</div>
+			<div class="timeline-marker"></div>
+			<div class="timeline-content">
+				<h3>Zhejiang University <span class="logo-placeholder">🏫</span></h3>
+				<p class="role">B.S. in Computer Science (Chu Kochen Honors College)</p>
+			</div>
+		</div>
+		-->
+    </div>
+</section>
+
+<style>
+    .education {
+        background: #fff;
+        padding: 2.5rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-bottom: 3rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 0.5rem;
+    }
+
+    .timeline-item {
+        display: grid;
+        grid-template-columns: 160px 20px 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        align-items: start;
+    }
+
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .timeline-date {
+        text-align: right;
+        color: #888;
+        font-size: 0.9rem;
+        padding-top: 0.2rem;
+        font-family: "Consolas", monospace; /* Monospace for alignment */
+    }
+
+    .timeline-marker {
+        width: 12px;
+        height: 12px;
+        border: 2px solid #5dd3b6;
+        border-radius: 50%;
+        background: #fff;
+        position: relative;
+        margin-top: 0.4rem;
+        justify-self: center; /* Center in the 20px column */
+        z-index: 1;
+    }
+
+    /* Line connecting markers */
+    .timeline-marker::after {
+        content: "";
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 2px;
+        height: 100%; /* Just enough to hint connection, since we might hide it on last child */
+        height: calc(100% + 2rem);
+        background: #eee;
+        z-index: -1;
+    }
+
+    .timeline-item:last-child .timeline-marker::after {
+        display: none;
+    }
+
+    .timeline-content h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .role {
+        color: #555;
+        font-size: 0.95rem;
+    }
+
+    .edu-logo {
+        vertical-align: middle;
+        object-fit: contain;
+    }
+</style>
