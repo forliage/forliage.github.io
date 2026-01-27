@@ -33,11 +33,11 @@ const currentPath = pathname.slice(1); // remove the first "/"
 <style>
 	:root {
 		--color-header-bg: rgba(
-			171,
-			218,
-			220,
-			0.65
-		); /* #ABDADC with transparency */
+			232,
+			249,
+			255,
+			0.85
+		); /* #E8F9FF with transparency */
 		--color-green-text: #5dd3b6;
 		--color-pink-text: #f075ae;
 		--color-inactive-text: #a5c89e;
@@ -67,7 +67,7 @@ const currentPath = pathname.slice(1); // remove the first "/"
 
 	.logo-terminal {
 		font-family: "Consolas", "Monaco", "Andale Mono", monospace;
-		font-weight: 700;
+		font-weight: 400; /* Removed bold */
 		font-size: 1.15rem;
 		letter-spacing: -0.5px;
 		display: flex;
@@ -84,7 +84,7 @@ const currentPath = pathname.slice(1); // remove the first "/"
 
 	.cursor-blink {
 		display: inline-block;
-		width: 10px;
+		width: 2px; /* Thinner cursor */
 		height: 1.2em;
 		background-color: var(--color-pink-text);
 		margin-left: 2px;
@@ -109,7 +109,7 @@ const currentPath = pathname.slice(1); // remove the first "/"
 
 	nav a {
 		color: var(--color-inactive-text);
-		font-weight: 600;
+		font-weight: 400; /* Removed bold */
 		font-size: 1rem;
 		transition: all 0.3s ease;
 		position: relative;
