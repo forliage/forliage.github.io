@@ -127,8 +127,8 @@ const getCourseImage = (id: string) => {
     <Header />
 
     <main class="zju-page">
-        <!-- Background Stars Container -->
-        <div id="stars-container"></div>
+        <!-- Background Meteors Container -->
+        <div id="meteors-container"></div>
 
         <div class="page-header">
             <h1 class="page-title">ZJU Lecture Notes</h1>
@@ -221,29 +221,42 @@ const getCourseImage = (id: string) => {
             "course-search",
         ) as HTMLInputElement;
 
-        // --- Star Generation ---
-        const starsContainer = document.getElementById("stars-container");
-        if (starsContainer) {
-            const starCount = 60; // Moderate number
-            for (let i = 0; i < starCount; i++) {
-                const star = document.createElement("div");
-                star.classList.add("star");
-                // Random position
-                const x = Math.random() * 100;
-                const y = Math.random() * 100;
-                // Random size (small)
-                const size = 2 + Math.random() * 3;
-                // Random delay
-                const delay = Math.random() * 3;
+        // --- Meteor Shower Generation ---
+        const meteorsContainer = document.getElementById("meteors-container");
+        if (meteorsContainer) {
+            const createMeteor = () => {
+                const meteor = document.createElement("div");
+                meteor.classList.add("meteor");
 
-                star.style.left = `${x}%`;
-                star.style.top = `${y}%`;
-                star.style.width = `${size}px`;
-                star.style.height = `${size}px`;
-                star.style.animationDelay = `${delay}s`;
+                // Random position starting from top or right
+                // We want them to feel like they come from top-right
+                // Start X: 20% to 120% (off screen right)
+                // Start Y: -20% to 80%
+                const startX = Math.random() * 100 + 20;
+                const startY = Math.random() * 100 - 50;
 
-                starsContainer.appendChild(star);
-            }
+                // Random Size/Length
+                const width = Math.random() * 100 + 50; // trail length
+
+                meteor.style.left = `${startX}%`;
+                meteor.style.top = `${startY}%`;
+                meteor.style.width = `${width}px`;
+
+                // Random Duration
+                const duration = Math.random() * 1 + 1; // 1s to 2s
+                meteor.style.animationDuration = `${duration}s`;
+
+                meteorsContainer.appendChild(meteor);
+
+                // Cleanup
+                setTimeout(() => {
+                    meteor.remove();
+                }, duration * 1000);
+            };
+
+            // Create meteors periodically
+            setInterval(createMeteor, 600); // Every 600ms new meteor
+            createMeteor(); // Start immediately
         }
 
         if (grid) {
@@ -305,15 +318,16 @@ const getCourseImage = (id: string) => {
         overflow-x: hidden;
     }
 
-    /* --- Background Stars --- */
-    #stars-container {
+    /* --- Background Meteors --- */
+    #meteors-container {
         position: fixed; /* Fixed to background */
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
         pointer-events: none;
-        z-index: 0; /* Changed from -1 to 0 to ensure it sits on top of body bg but below content */
+        z-index: 0;
+        overflow: hidden;
     }
 
     /* Ensure main content sits above stars */
@@ -323,37 +337,46 @@ const getCourseImage = (id: string) => {
         z-index: 10;
     }
 
-    :global(.star) {
+    :global(.meteor) {
         position: absolute;
-        /* Changed to Pink/Purple for visibility on light background */
-        background: radial-gradient(
-            circle,
-            rgba(240, 117, 174, 0.6) 0%,
-            rgba(240, 117, 174, 0) 70%
-        );
-        border-radius: 50%;
+        height: 2px;
+        background: linear-gradient(
+            90deg,
+            rgba(161, 140, 209, 0),
+            rgba(161, 140, 209, 1)
+        ); /* Purple fade */
         opacity: 0;
-        animation: twinkle 3s infinite ease-in-out;
+        transform: rotate(-45deg); /* Top-Right to Bottom-Left direction */
+        filter: drop-shadow(0 0 6px rgba(161, 140, 209, 0.8));
+        animation-name: shower;
+        animation-timing-function: linear;
     }
 
-    /* Mix of colors */
-    :global(.star:nth-child(even)) {
-        background: radial-gradient(
-            circle,
-            rgba(161, 140, 209, 0.6) 0%,
-            rgba(161, 140, 209, 0) 70%
-        ); /* Light Purple */
+    /* Meteor Head (optional, makes it look more real) */
+    :global(.meteor::after) {
+        content: "";
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: rgba(161, 140, 209, 1);
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        box-shadow: 0 0 10px 2px rgba(161, 140, 209, 0.5);
     }
 
-    @keyframes twinkle {
-        0%,
+    @keyframes shower {
+        0% {
+            opacity: 0;
+            transform: rotate(-45deg) translateX(0);
+        }
+        10% {
+            opacity: 0.7; /* Visible quickly */
+        }
         100% {
             opacity: 0;
-            transform: scale(0.5);
-        }
-        50% {
-            opacity: 0.8;
-            transform: scale(1.2);
+            transform: rotate(-45deg) translateX(-1000px); /* Move far left-down */
         }
     }
 
