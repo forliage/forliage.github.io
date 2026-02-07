@@ -7,8 +7,9 @@ import Header from "../../components/Header.astro";
     <Header />
     <main class="blog-hub">
         <div class="center-content">
+            <!-- Container for the typing effect -->
             <h1 class="welcome-text">
-                Welcome to <span class="highlight">forliage's</span> life
+                <span id="typewriter"></span><span class="cursor">|</span>
             </h1>
         </div>
 
@@ -25,13 +26,68 @@ import Header from "../../components/Header.astro";
     </main>
 </Layout>
 
+<script>
+    const textToType = "Welcome to forliage's life";
+    const typeSpeed = 100; // ms per char
+    const deleteSpeed = 50; // ms per char
+    const pauseBeforeDelete = 2000; // ms
+    const pauseBeforeRestart = 500; // ms
+
+    const typewriterElement = document.getElementById("typewriter");
+
+    // Make sure element exists
+    if (typewriterElement) {
+        let charIndex = 0;
+        let isDeleting = false;
+
+        function type() {
+            const currentString = textToType;
+
+            if (isDeleting) {
+                // Deleting
+                typewriterElement.textContent = currentString.substring(
+                    0,
+                    charIndex - 1,
+                );
+                charIndex--;
+            } else {
+                // Typing
+                typewriterElement.textContent = currentString.substring(
+                    0,
+                    charIndex + 1,
+                );
+                charIndex++;
+            }
+
+            let delta = isDeleting ? deleteSpeed : typeSpeed;
+
+            if (!isDeleting && charIndex === currentString.length) {
+                // Finished typing, pause before delete
+                delta = pauseBeforeDelete;
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                // Finished deleting, pause before restart
+                delta = pauseBeforeRestart;
+                isDeleting = false;
+            }
+
+            setTimeout(type, delta);
+        }
+
+        // Start the typing loop
+        setTimeout(type, 500);
+    }
+</script>
+
 <style>
     /* Use global variables for colors if available, or define locally for glass effect */
     :root {
-        --glass-bg: rgba(255, 255, 255, 0.2);
-        --glass-border: rgba(255, 255, 255, 0.3);
         --text-color: #333;
         --highlight-color: #f075ae; /* Pink from header */
+        /* Apple system font stack */
+        --apple-font:
+            -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+            Roboto, Helvetica, Arial, sans-serif;
     }
 
     .blog-hub {
@@ -42,6 +98,7 @@ import Header from "../../components/Header.astro";
         position: relative;
         overflow: hidden;
         padding: 2rem;
+        font-family: var(--apple-font);
     }
 
     .center-content {
@@ -50,34 +107,36 @@ import Header from "../../components/Header.astro";
         justify-content: center;
         align-items: center;
         z-index: 10;
+        min-height: 100px; /* Ensure space for text */
     }
 
     .welcome-text {
         font-size: 3.5rem;
         font-weight: 300;
-        color: var(--text-color);
-        letter-spacing: 2px;
-        animation: fadeIn 1.5s ease-out;
-        text-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        color: var(--highlight-color); /* Pink color */
+        letter-spacing: 1px;
+        text-shadow: 0 4px 10px rgba(240, 117, 174, 0.2);
+        display: flex;
+        align-items: center;
+        margin: 0;
     }
 
-    .highlight {
-        color: var(--highlight-color);
-        font-weight: 600;
-        position: relative;
+    .cursor {
         display: inline-block;
+        color: var(--highlight-color);
+        font-weight: 100;
+        animation: blink 1s step-end infinite;
+        margin-left: 5px;
     }
 
-    .highlight::after {
-        content: "";
-        position: absolute;
-        bottom: 5px;
-        left: 0;
-        width: 100%;
-        height: 8px;
-        background: rgba(240, 117, 174, 0.2);
-        z-index: -1;
-        transform: skewX(-15deg);
+    @keyframes blink {
+        0%,
+        100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0;
+        }
     }
 
     .sidebar-nav {
@@ -96,6 +155,7 @@ import Header from "../../components/Header.astro";
         );
         mask-image: linear-gradient(to right, transparent, black 40%);
         -webkit-mask-image: linear-gradient(to right, transparent, black 40%);
+        font-family: var(--apple-font);
     }
 
     .sidebar-nav nav ul {
@@ -131,42 +191,16 @@ import Header from "../../components/Header.astro";
         color: #555;
         text-decoration: none;
         padding: 0.5rem 1rem;
-        border-bottom: 2px solid transparent; /* Animated border */
         transition: all 0.3s ease;
         display: inline-block;
         position: relative;
+        font-weight: 400; /* Regular weight for Apple font looks elegant */
     }
 
     .sidebar-nav nav a:hover {
         color: var(--highlight-color);
         transform: translateX(-10px);
         text-shadow: 0 0 8px rgba(240, 117, 174, 0.4);
-    }
-
-    .sidebar-nav nav a::before {
-        content: "";
-        position: absolute;
-        width: 0;
-        height: 2px;
-        bottom: 0;
-        left: 0;
-        background-color: var(--highlight-color);
-        transition: width 0.3s ease;
-    }
-
-    .sidebar-nav nav a:hover::before {
-        width: 100%;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
     }
 
     @keyframes slideIn {
@@ -188,9 +222,11 @@ import Header from "../../components/Header.astro";
         }
 
         .welcome-text {
-            font-size: 2.5rem;
+            font-size: 2rem;
             text-align: center;
             margin-bottom: 3rem;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .sidebar-nav {
@@ -208,7 +244,7 @@ import Header from "../../components/Header.astro";
         }
 
         .sidebar-nav nav li {
-            transform: translateY(20px); /* Slide up on mobile */
+            transform: translateY(20px);
             animation-name: fadeInUp;
         }
 
@@ -221,10 +257,6 @@ import Header from "../../components/Header.astro";
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-        .sidebar-nav nav a:hover {
-            transform: scale(1.05); /* Just scale on mobile */
         }
     }
 </style>
