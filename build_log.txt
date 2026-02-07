@@ -1,0 +1,95 @@
+
+> academic-homepage@0.0.1 build
+> astro build
+
+[2m11:35:42[22m [34m[content][39m Syncing content
+[2m11:35:43[22m [34m[content][39m Synced content
+[2m11:35:43[22m [34m[types][39m Generated [2m941ms[22m
+[2m11:35:43[22m [34m[build][39m output: [34m"static"[39m
+[2m11:35:43[22m [34m[build][39m mode: [34m"static"[39m
+[2m11:35:43[22m [34m[build][39m directory: [34mD:\forliage.github.io\dist\[39m
+[2m11:35:43[22m [34m[build][39m Collecting build info...
+[2m11:35:43[22m [34m[build][39m [32m✓ Completed in 964ms.[39m
+[2m11:35:43[22m [34m[build][39m Building static entrypoints...
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\虚电路.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+[31m[1m11:35:44[22m [ERROR] [vite][39m [31m✗[39m Build failed in 1.44s
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\NAT.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\数据报分片.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\虚电路例子.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\IP地址分类.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\ICMP.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\ARP.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\IPv4数据报.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\子网.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\IPv6地址.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\数据报.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\CIDR.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\DCHP.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\距离向量路由.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\OSPF.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\IPv6头部.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\路由区别.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\三层交换机.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\UDP报文格式.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\socket.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\BGP.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\路由器.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\TCP报文段.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\RIP.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\TCP发送端.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\checksum.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\快速重传.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\TCP重传.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\显式窗口通告.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\TCP慢启动.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\四次挥手.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\TCP状态序列.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\三次握手.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+FAILED TO RESOLVE IMAGE: ..\images\ComputerNetwork\AIMD.png
+IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs
+[31m[ImageNotFound][39m [commonjs--resolver] Could not find requested image `..\images\ComputerNetwork\虚电路.png`. Does it exist? [IMPORTER: D:\forliage.github.io\.astro\content-assets.mjs]
+  [1mHint:[22m
+[33m    This is often caused by a typo in the image path. Please make sure the file exists, and is spelled correctly.[39m
+  [1mError reference:[22m
+    [36m[4mhttps://docs.astro.build/en/reference/errors/image-not-found/[24m[39m
+  [1mLocation:[22m
+    [4mD:\forliage.github.io\node_modules\astro\dist\content\vite-plugin-content-assets.js:33:17[24m
+  [1mStack trace:[22m
+[2m    at Object.resolveId (file:///D:/forliage.github.io/node_modules/astro/dist/content/vite-plugin-content-assets.js:33:17)
+    at async resolveId (file:///D:/forliage.github.io/node_modules/rollup/dist/es/shared/node-entry.js:20885:26)
+    at async Object.resolveId (file:///D:/forliage.github.io/node_modules/vite/dist/node/chunks/dep-D4NMHUTW.js:2835:10)
+    at async resolveId (file:///D:/forliage.github.io/node_modules/rollup/dist/es/shared/node-entry.js:20885:26)
+    at async file:///D:/forliage.github.io/node_modules/rollup/dist/es/shared/node-entry.js:21626:50[22m
