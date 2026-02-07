@@ -1,87 +1,230 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
-import { getCollection } from "astro:content";
-
-const posts = (await getCollection("blog")).sort(
-    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
 ---
 
 <Layout title="Blog - Liuye Zhao">
     <Header />
-    <main>
-        <section>
-            <ul>
-                {
-                    posts.map((post) => (
-                        <li>
-                            <a href={`/blog/${post.slug}/`}>
-                                <h4 class="title">{post.data.title}</h4>
-                                <p class="date">
-                                    {post.data.pubDate.toLocaleDateString(
-                                        "zh-CN",
-                                        {
-                                            year: "numeric",
-                                            month: "short",
-                                            day: "numeric",
-                                        },
-                                    )}
-                                </p>
-                            </a>
-                        </li>
-                    ))
-                }
-            </ul>
-        </section>
+    <main class="blog-hub">
+        <div class="center-content">
+            <h1 class="welcome-text">
+                Welcome to <span class="highlight">forliage's</span> life
+            </h1>
+        </div>
+
+        <aside class="sidebar-nav">
+            <nav>
+                <ul>
+                    <li><a href="/blog/tech">Technical Articles</a></li>
+                    <li><a href="/blog/zju">ZJU Lecture Notes</a></li>
+                    <li><a href="/blog/others">Other Lecture Notes</a></li>
+                    <li><a href="/blog/life">Reflections and Life</a></li>
+                </ul>
+            </nav>
+        </aside>
     </main>
 </Layout>
 
 <style>
-    main {
-        width: 960px;
-        max-width: calc(100% - 2em);
-        margin: auto;
-        padding: 3rem 1rem;
-    }
-    ul {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 2rem;
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-    }
-    li {
-        width: 100%; /* List view */
-        background: rgba(255, 255, 255, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 8px;
-        padding: 1.5rem;
-        transition: all 0.3s ease;
-    }
-    li:hover {
-        background: rgba(255, 255, 255, 0.8);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    }
-    li * {
-        text-decoration: none;
-        transition: 0.2s ease;
+    /* Use global variables for colors if available, or define locally for glass effect */
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.2);
+        --glass-border: rgba(255, 255, 255, 0.3);
+        --text-color: #333;
+        --highlight-color: #f075ae; /* Pink from header */
     }
 
-    .title {
-        margin: 0;
-        color: rgb(var(--black));
-        line-height: 1;
-        font-size: 1.5rem;
+    .blog-hub {
+        display: flex;
+        min-height: 80vh;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        padding: 2rem;
     }
-    .date {
-        margin: 0;
-        color: rgb(var(--gray));
-        margin-top: 0.5rem;
+
+    .center-content {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
     }
-    li:hover .date {
-        color: rgb(var(--accent));
+
+    .welcome-text {
+        font-size: 3.5rem;
+        font-weight: 300;
+        color: var(--text-color);
+        letter-spacing: 2px;
+        animation: fadeIn 1.5s ease-out;
+        text-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .highlight {
+        color: var(--highlight-color);
+        font-weight: 600;
+        position: relative;
+        display: inline-block;
+    }
+
+    .highlight::after {
+        content: "";
+        position: absolute;
+        bottom: 5px;
+        left: 0;
+        width: 100%;
+        height: 8px;
+        background: rgba(240, 117, 174, 0.2);
+        z-index: -1;
+        transform: skewX(-15deg);
+    }
+
+    .sidebar-nav {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 300px;
+        display: flex;
+        align-items: center;
+        padding-left: 40px;
+        background: linear-gradient(
+            to left,
+            rgba(255, 255, 255, 0.8),
+            rgba(255, 255, 255, 0)
+        );
+        mask-image: linear-gradient(to right, transparent, black 40%);
+        -webkit-mask-image: linear-gradient(to right, transparent, black 40%);
+    }
+
+    .sidebar-nav nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .sidebar-nav nav li {
+        transform: translateX(50px);
+        opacity: 0;
+        animation: slideIn 0.5s ease-out forwards;
+    }
+
+    .sidebar-nav nav li:nth-child(1) {
+        animation-delay: 0.2s;
+    }
+    .sidebar-nav nav li:nth-child(2) {
+        animation-delay: 0.3s;
+    }
+    .sidebar-nav nav li:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+    .sidebar-nav nav li:nth-child(4) {
+        animation-delay: 0.5s;
+    }
+
+    .sidebar-nav nav a {
+        font-size: 1.25rem;
+        color: #555;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-bottom: 2px solid transparent; /* Animated border */
+        transition: all 0.3s ease;
+        display: inline-block;
+        position: relative;
+    }
+
+    .sidebar-nav nav a:hover {
+        color: var(--highlight-color);
+        transform: translateX(-10px);
+        text-shadow: 0 0 8px rgba(240, 117, 174, 0.4);
+    }
+
+    .sidebar-nav nav a::before {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        background-color: var(--highlight-color);
+        transition: width 0.3s ease;
+    }
+
+    .sidebar-nav nav a:hover::before {
+        width: 100%;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .blog-hub {
+            flex-direction: column;
+            padding-top: 4rem;
+        }
+
+        .welcome-text {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .sidebar-nav {
+            position: relative;
+            width: 100%;
+            padding: 0;
+            background: none;
+            mask-image: none;
+            -webkit-mask-image: none;
+            justify-content: center;
+        }
+
+        .sidebar-nav nav ul {
+            align-items: center;
+        }
+
+        .sidebar-nav nav li {
+            transform: translateY(20px); /* Slide up on mobile */
+            animation-name: fadeInUp;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .sidebar-nav nav a:hover {
+            transform: scale(1.05); /* Just scale on mobile */
+        }
     }
 </style>
