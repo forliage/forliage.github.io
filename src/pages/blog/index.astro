@@ -9,8 +9,8 @@ import Header from "../../components/Header.astro";
         <!-- Blur Overlay for Signature Mode -->
         <div id="signature-overlay" class="signature-overlay">
             <div class="signature-container">
-                <!-- SVG Signature will be drawn here -->
-                <svg viewBox="0 0 500 150" class="signature-svg">
+                <!-- SVG Signature -->
+                <svg viewBox="0 0 600 200" class="signature-svg">
                     <defs>
                         <linearGradient
                             id="gradient"
@@ -29,15 +29,50 @@ import Header from "../../components/Header.astro";
                             ></stop>
                         </linearGradient>
                     </defs>
-                    <!-- A path that looks somewhat like "forliage" in cursive -->
+                    <!-- Approximate cursive "forliage" path -->
+                    <!-- 
+                        f: loop up, down, loop mid
+                        o: circle loop
+                        r: up, down
+                        l: sharp loop up
+                        i: up down
+                        a: curcle down
+                        g: circle down loop
+                        e: small loop
+                    -->
                     <path
                         id="sig-path"
-                        d="M30,70 Q50,20 60,60 Q70,90 80,50 Q90,30 100,50 Q95,70 110,60 Q125,50 120,70 Q115,90 130,80 Q145,70 140,50 M150,60 L150,90 Q150,110 140,100 Q130,90 150,60 M160,70 Q170,50 180,50 Q190,50 185,70 Q180,90 200,80 M210,50 L210,100 M210,70 Q230,50 240,70 M250,70 Q250,50 260,50 M260,50 L260,80 M270,70 Q280,50 300,50 Q310,50 305,70 Q300,90 320,80 Q340,70 330,50 Q325,80 350,70 Q370,60 400,60"
+                        d="
+                        M 50 100 
+                        C 60 50, 70 20, 80 50 
+                        C 90 80, 50 150, 60 120 
+                        C 70 80, 80 90, 90 100 
+                        C 95 90, 105 90, 110 100 
+                        C 115 100, 120 100, 130 90
+                        C 130 90, 140 90, 145 100
+                        C 150 50, 150 20, 160 50
+                        C 170 120, 165 100, 175 100
+                        C 180 90, 185 90, 190 100
+                        L 190 100
+                        C 200 90, 215 90, 215 100
+                        L 215 100
+                        C 225 90, 235 90, 235 100
+                        C 240 140, 200 140, 230 110
+                        C 240 90, 250 90, 260 100
+                        "
                         fill="none"
                         stroke="url(#gradient)"
-                        stroke-width="4"
+                        stroke-width="5"
                         stroke-linecap="round"
                         stroke-linejoin="round"></path>
+                    <!-- Dot for 'i' -->
+                    <circle
+                        id="sig-dot"
+                        cx="190"
+                        cy="80"
+                        r="3"
+                        fill="url(#gradient)"
+                        opacity="0"></circle>
                 </svg>
             </div>
         </div>
@@ -48,8 +83,6 @@ import Header from "../../components/Header.astro";
                 <h1 class="welcome-text">
                     <span id="typewriter"></span><span class="cursor">|</span>
                 </h1>
-                <!-- Reflection pseudo-element handled in CSS is complex for dynamic text, 
-                     so strict css box-reflect is best or we duplicate content for reflection -->
                 <h1 class="welcome-text reflection" aria-hidden="true">
                     <span id="typewriter-reflection"></span><span class="cursor"
                         >|</span
@@ -111,7 +144,7 @@ import Header from "../../components/Header.astro";
 
             // Update both main text and reflection
             typewriterElement.textContent = currentText;
-            typewriterReflection.textContent = currentText; // Sync reflection manually for browser compatibility
+            typewriterReflection.textContent = currentText;
 
             let delta = isDeleting ? deleteSpeed : typeSpeed;
 
@@ -133,42 +166,64 @@ import Header from "../../components/Header.astro";
     const signatureBtn = document.getElementById("signature-btn");
     const overlay = document.getElementById("signature-overlay");
     const sigPath = document.getElementById("sig-path") as SVGPathElement;
+    const sigDot = document.getElementById("sig-dot");
+
+    // Better "forliage" path (manual approximation attempt 2)
+    // f: M50,100 C70,30 60,150 90,100 (loop f)
+    // o: C100,90 90,90 100,100 C110,90 120,90
+    // r: 120,100 L120,90 L130,100
+    // l: C140,50 140,50 150,100
+    // i: 160,100
+    // a: C170,90 160,100 170,100 L170,90 L170,110
+    // g: C180,90 170,100 180,100 L180,140 C160,140 190,110
+    // e: C200,90 190,100 200,100
+    const refinedPath =
+        "M60,100 C80,40 50,160 90,100 C100,90 90,90 100,100 C110,90 130,90 125,100 C130,60 135,10 140,100 C150,90 150,110 150,100 C160,90 150,100 160,100 L160,100 L160,110 C170,90 160,100 170,100 L170,140 C150,150 190,120 180,110 C190,100 180,100 190,100";
+
+    // Setting the path d attribute directly in JS if we want to change it dynamically,
+    // but easier to set in HTML. Let's just use what's in HTML but making sure it's valid.
 
     if (signatureBtn && overlay && sigPath) {
-        // Calculate path length for stroke animation
+        // Set a better path via JS to ensure it's the one we want
+        // This is a very rough cursive approximation
+        sigPath.setAttribute(
+            "d",
+            "M50,80 C70,20 60,140 90,80 C100,70 80,70 100,70 C110,60 120,70 130,80 C135,50 135,20 140,80 Q145,100 150,80 L150,90 Q160,70 170,80 Q160,90 170,90 L170,130 Q160,120 180,90 Q190,70 180,80 L200,90",
+        );
+
         const pathLength = sigPath.getTotalLength();
 
-        // Reset stroke styles initially
         sigPath.style.strokeDasharray = pathLength.toString();
         sigPath.style.strokeDashoffset = pathLength.toString();
 
+        if (sigDot) sigDot.style.opacity = "0";
+
         signatureBtn.addEventListener("click", () => {
-            // 1. Show overlay (fade in blur)
             overlay.classList.add("active");
 
-            // 2. Start animation after a short delay for overlay transition
             setTimeout(() => {
                 sigPath.style.transition = "stroke-dashoffset 2.5s ease-in-out";
                 sigPath.style.strokeDashoffset = "0";
+
+                // Show dot for 'i' near end of animation
+                setTimeout(() => {
+                    if (sigDot) sigDot.style.opacity = "1";
+                }, 1500);
             }, 500);
 
-            // 3. Keep displayed, then hide
             setTimeout(() => {
-                // Fade out overlay
                 overlay.classList.remove("active");
-
-                // Reset animation after it's hidden to be ready for next click
+                if (sigDot) sigDot.style.opacity = "0";
                 setTimeout(() => {
                     sigPath.style.transition = "none";
                     sigPath.style.strokeDashoffset = pathLength.toString();
-                }, 1000); // wait for overlay fade out
-            }, 4000); // 0.5s delay + 2.5s draw + 1s hold
+                }, 1000);
+            }, 4500);
         });
     }
 </script>
 
 <style>
-    /* Use global variables for colors if available, or define locally for glass effect */
     :root {
         --text-color: #333;
         --highlight-color: #f075ae;
@@ -189,7 +244,6 @@ import Header from "../../components/Header.astro";
         font-family: var(--apple-font);
     }
 
-    /* --- Center Content & Welcome Text --- */
     .center-content {
         flex: 1;
         display: flex;
@@ -206,8 +260,8 @@ import Header from "../../components/Header.astro";
     }
 
     .welcome-text {
-        font-size: 4rem; /* Larger */
-        font-weight: 700; /* Bold as requested */
+        font-size: 4rem;
+        font-weight: 700;
         color: var(--highlight-color);
         letter-spacing: 1px;
         text-shadow: 0 4px 15px rgba(240, 117, 174, 0.3);
@@ -217,25 +271,24 @@ import Header from "../../components/Header.astro";
         line-height: 1.2;
     }
 
-    /* Reflection Effect */
     .welcome-text.reflection {
         position: absolute;
         top: 100%;
         left: 0;
         right: 0;
-        transform: scaleY(-0.6) translateY(-10px); /* Flip and squeeze slightly */
+        transform: scaleY(-0.6) translateY(-10px);
         opacity: 0.3;
         mask-image: linear-gradient(
             to bottom,
             transparent,
             transparent 20%,
             black
-        ); /* Fade out further away */
+        );
         -webkit-mask-image: linear-gradient(
             to top,
             rgba(0, 0, 0, 0.5),
             transparent
-        ); /* Standard mask logic usually top to bottom */
+        );
         pointer-events: none;
         filter: blur(2px);
     }
@@ -268,19 +321,23 @@ import Header from "../../components/Header.astro";
         position: relative;
         padding: 12px 36px;
         font-size: 1.1rem;
-        font-weight: 500;
-        color: white;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.4);
+        font-weight: 600; /* Bold font for button */
+        color: var(--highlight-color); /* Pink text for visibility */
+        background: rgba(
+            255,
+            255,
+            255,
+            0.8
+        ); /* Less transparent for visibility */
+        border: 1px solid rgba(240, 117, 174, 0.3); /* Pinkish border */
         border-radius: 50px;
         cursor: pointer;
         outline: none;
         overflow: hidden;
         backdrop-filter: blur(10px);
         box-shadow:
-            0 10px 20px rgba(0, 0, 0, 0.1),
-            inset 0 0 15px rgba(255, 255, 255, 0.2),
-            inset 0 0 5px rgba(255, 255, 255, 0.5); /* Glass edge highlight */
+            0 5px 15px rgba(0, 0, 0, 0.05),
+            inset 0 0 15px rgba(255, 255, 255, 0.5);
         transition: all 0.4s ease;
         font-family: var(--apple-font);
     }
@@ -288,18 +345,19 @@ import Header from "../../components/Header.astro";
     .liquid-button:hover {
         transform: translateY(-3px);
         box-shadow:
-            0 15px 30px rgba(240, 117, 174, 0.3),
-            /* Pinkish glow */ inset 0 0 20px rgba(255, 255, 255, 0.4);
-        border-color: rgba(240, 117, 174, 0.6);
+            0 15px 30px rgba(240, 117, 174, 0.2),
+            inset 0 0 20px rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.95);
     }
 
     .liquid-button span {
         position: relative;
         z-index: 1;
         letter-spacing: 1px;
+        text-transform: uppercase; /* Styled label */
+        font-size: 0.9rem;
     }
 
-    /* Simulate "liquid" movement inside */
     .liquid-button::before {
         content: "";
         position: absolute;
@@ -310,7 +368,7 @@ import Header from "../../components/Header.astro";
         background: linear-gradient(
             90deg,
             transparent,
-            rgba(255, 255, 255, 0.4),
+            rgba(240, 117, 174, 0.1),
             transparent
         );
         transition: left 0.5s;
@@ -337,7 +395,7 @@ import Header from "../../components/Header.astro";
         );
         mask-image: linear-gradient(to right, transparent, black 40%);
         -webkit-mask-image: linear-gradient(to right, transparent, black 40%);
-        font-family: var(--sidebar-font); /* Improved font */
+        font-family: var(--sidebar-font);
     }
 
     .sidebar-nav nav ul {
@@ -369,14 +427,14 @@ import Header from "../../components/Header.astro";
     }
 
     .sidebar-nav nav a {
-        font-size: 1.35rem; /* Slightly bigger */
+        font-size: 1.35rem;
         color: #444;
         text-decoration: none;
         padding: 0.5rem 1rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth springy feel */
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         display: inline-block;
         position: relative;
-        font-weight: 500; /* Medium weight for Outfit look */
+        font-weight: 500;
     }
 
     .sidebar-nav nav a:hover {
@@ -403,8 +461,8 @@ import Header from "../../components/Header.astro";
         left: 0;
         width: 100vw;
         height: 100vh;
-        z-index: 999; /* Highest z-index */
-        pointer-events: none; /* Interact through if hidden */
+        z-index: 999;
+        pointer-events: none;
         opacity: 0;
         backdrop-filter: blur(0px);
         background: rgba(255, 255, 255, 0.2);
@@ -418,7 +476,7 @@ import Header from "../../components/Header.astro";
 
     .signature-overlay.active {
         opacity: 1;
-        backdrop-filter: blur(25px); /* Strong blur like iOS */
+        backdrop-filter: blur(25px);
         pointer-events: auto;
     }
 
@@ -434,6 +492,11 @@ import Header from "../../components/Header.astro";
         filter: drop-shadow(0 0 5px rgba(240, 117, 174, 0.5));
     }
 
+    /* Dot animation */
+    #sig-dot {
+        transition: opacity 0.3s ease;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .blog-hub {
@@ -447,7 +510,6 @@ import Header from "../../components/Header.astro";
             justify-content: center;
         }
 
-        /* Disable reflection on mobile to save space/performance */
         .welcome-text.reflection {
             display: none;
         }
