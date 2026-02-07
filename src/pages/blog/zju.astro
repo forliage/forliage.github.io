@@ -313,28 +313,36 @@ const getCourseImage = (id: string) => {
         width: 100%;
         height: 100%;
         pointer-events: none;
-        z-index: -1;
+        z-index: 0; /* Changed from -1 to 0 to ensure it sits on top of body bg but below content */
+    }
+
+    /* Ensure main content sits above stars */
+    .page-header,
+    .course-grid {
+        position: relative;
+        z-index: 10;
     }
 
     :global(.star) {
         position: absolute;
+        /* Changed to Pink/Purple for visibility on light background */
         background: radial-gradient(
             circle,
-            rgba(255, 255, 255, 0.9) 0%,
-            rgba(255, 255, 255, 0) 70%
+            rgba(240, 117, 174, 0.6) 0%,
+            rgba(240, 117, 174, 0) 70%
         );
         border-radius: 50%;
         opacity: 0;
         animation: twinkle 3s infinite ease-in-out;
     }
 
-    /* Some stars can be slightly tinted */
-    :global(.star:nth-child(3n)) {
+    /* Mix of colors */
+    :global(.star:nth-child(even)) {
         background: radial-gradient(
             circle,
-            rgba(255, 240, 245, 0.9) 0%,
-            rgba(255, 240, 245, 0) 70%
-        );
+            rgba(161, 140, 209, 0.6) 0%,
+            rgba(161, 140, 209, 0) 70%
+        ); /* Light Purple */
     }
 
     @keyframes twinkle {
@@ -344,9 +352,9 @@ const getCourseImage = (id: string) => {
             transform: scale(0.5);
         }
         50% {
-            opacity: 0.6;
-            transform: scale(1);
-        } /* Not too bright */
+            opacity: 0.8;
+            transform: scale(1.2);
+        }
     }
 
     /* Header & Search */
