@@ -29,46 +29,49 @@ import Header from "../../components/Header.astro";
                             ></stop>
                         </linearGradient>
                     </defs>
-                    <!-- Approximate cursive "forliage" path -->
+
                     <!-- 
-                        f: loop up, down, loop mid
-                        o: circle loop
-                        r: up, down
-                        l: sharp loop up
-                        i: up down
-                        a: curcle down
-                        g: circle down loop
-                        e: small loop
+                        Refined 'forliage' path
+                        f: loop up, down deep, loop mid
+                        o: small circle
+                        r: flat top
+                        l: tall loop
+                        i: short stick
+                        a: oval + tail
+                        g: oval + descender loop
+                        e: small c loop
                     -->
                     <path
                         id="sig-path"
                         d="
-                        M 50 100 
-                        C 60 50, 70 20, 80 50 
-                        C 90 80, 50 150, 60 120 
-                        C 70 80, 80 90, 90 100 
-                        C 95 90, 105 90, 110 100 
-                        C 115 100, 120 100, 130 90
-                        C 130 90, 140 90, 145 100
-                        C 150 50, 150 20, 160 50
-                        C 170 120, 165 100, 175 100
-                        C 180 90, 185 90, 190 100
-                        L 190 100
-                        C 200 90, 215 90, 215 100
-                        L 215 100
-                        C 225 90, 235 90, 235 100
-                        C 240 140, 200 140, 230 110
-                        C 240 90, 250 90, 260 100
+                        M 100 100 
+                        C 120 40, 110 40, 110 100
+                        C 110 160, 120 140, 130 100
+                        C 135 90, 130 90, 140 90
+                        C 150 90, 150 110, 145 100
+                        C 160 90, 150 90, 160 100
+                        C 165 100, 175 100, 180 100
+                        C 190 100, 185 20, 195 100
+                        C 200 100, 205 90, 205 100
+                        C 210 100, 215 100, 220 90
+                        C 215 110, 230 110, 230 100
+                        C 235 90, 240 90, 245 90
+                        C 235 110, 250 110, 250 100
+                        L 250 140
+                        C 230 150, 260 130, 260 100
+                        C 265 90, 275 80, 265 95
+                        C 260 110, 280 105, 290 95
                         "
                         fill="none"
                         stroke="url(#gradient)"
-                        stroke-width="5"
+                        stroke-width="4"
                         stroke-linecap="round"
                         stroke-linejoin="round"></path>
+
                     <!-- Dot for 'i' -->
                     <circle
                         id="sig-dot"
-                        cx="190"
+                        cx="205"
                         cy="80"
                         r="3"
                         fill="url(#gradient)"
@@ -168,29 +171,9 @@ import Header from "../../components/Header.astro";
     const sigPath = document.getElementById("sig-path") as SVGPathElement;
     const sigDot = document.getElementById("sig-dot");
 
-    // Better "forliage" path (manual approximation attempt 2)
-    // f: M50,100 C70,30 60,150 90,100 (loop f)
-    // o: C100,90 90,90 100,100 C110,90 120,90
-    // r: 120,100 L120,90 L130,100
-    // l: C140,50 140,50 150,100
-    // i: 160,100
-    // a: C170,90 160,100 170,100 L170,90 L170,110
-    // g: C180,90 170,100 180,100 L180,140 C160,140 190,110
-    // e: C200,90 190,100 200,100
-    const refinedPath =
-        "M60,100 C80,40 50,160 90,100 C100,90 90,90 100,100 C110,90 130,90 125,100 C130,60 135,10 140,100 C150,90 150,110 150,100 C160,90 150,100 160,100 L160,100 L160,110 C170,90 160,100 170,100 L170,140 C150,150 190,120 180,110 C190,100 180,100 190,100";
-
-    // Setting the path d attribute directly in JS if we want to change it dynamically,
-    // but easier to set in HTML. Let's just use what's in HTML but making sure it's valid.
-
     if (signatureBtn && overlay && sigPath) {
-        // Set a better path via JS to ensure it's the one we want
-        // This is a very rough cursive approximation
-        sigPath.setAttribute(
-            "d",
-            "M50,80 C70,20 60,140 90,80 C100,70 80,70 100,70 C110,60 120,70 130,80 C135,50 135,20 140,80 Q145,100 150,80 L150,90 Q160,70 170,80 Q160,90 170,90 L170,130 Q160,120 180,90 Q190,70 180,80 L200,90",
-        );
-
+        // Slightly simpler path for 'forliage' if the HTML one is still weird
+        // We will stick to the HTML one this time but ensure logic works
         const pathLength = sigPath.getTotalLength();
 
         sigPath.style.strokeDasharray = pathLength.toString();
@@ -202,13 +185,13 @@ import Header from "../../components/Header.astro";
             overlay.classList.add("active");
 
             setTimeout(() => {
-                sigPath.style.transition = "stroke-dashoffset 2.5s ease-in-out";
+                sigPath.style.transition = "stroke-dashoffset 3s ease-in-out";
                 sigPath.style.strokeDashoffset = "0";
 
-                // Show dot for 'i' near end of animation
+                // Show dot for 'i' near middle of animation
                 setTimeout(() => {
                     if (sigDot) sigDot.style.opacity = "1";
-                }, 1500);
+                }, 1800);
             }, 500);
 
             setTimeout(() => {
@@ -218,7 +201,7 @@ import Header from "../../components/Header.astro";
                     sigPath.style.transition = "none";
                     sigPath.style.strokeDashoffset = pathLength.toString();
                 }, 1000);
-            }, 4500);
+            }, 5000);
         });
     }
 </script>
@@ -321,41 +304,39 @@ import Header from "../../components/Header.astro";
         position: relative;
         padding: 12px 36px;
         font-size: 1.1rem;
-        font-weight: 600; /* Bold font for button */
-        color: var(--highlight-color); /* Pink text for visibility */
-        background: rgba(
-            255,
-            255,
-            255,
-            0.8
-        ); /* Less transparent for visibility */
-        border: 1px solid rgba(240, 117, 174, 0.3); /* Pinkish border */
+
+        /* CORRECTED BUTTON STYLE FOR VISIBILITY */
+        font-weight: 700;
+        color: #e65297; /* Darker pink for better contrast */
+        background: rgba(255, 255, 255, 0.85);
+
+        border: 1px solid rgba(240, 117, 174, 0.3);
         border-radius: 50px;
         cursor: pointer;
         outline: none;
         overflow: hidden;
         backdrop-filter: blur(10px);
         box-shadow:
-            0 5px 15px rgba(0, 0, 0, 0.05),
-            inset 0 0 15px rgba(255, 255, 255, 0.5);
+            0 8px 32px 0 rgba(240, 117, 174, 0.15),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.5);
         transition: all 0.4s ease;
         font-family: var(--apple-font);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
     }
 
     .liquid-button:hover {
-        transform: translateY(-3px);
+        transform: translateY(-2px);
         box-shadow:
-            0 15px 30px rgba(240, 117, 174, 0.2),
+            0 15px 30px rgba(240, 117, 174, 0.3),
             inset 0 0 20px rgba(255, 255, 255, 0.8);
         background: rgba(255, 255, 255, 0.95);
+        color: #d13075;
     }
 
     .liquid-button span {
         position: relative;
         z-index: 1;
-        letter-spacing: 1px;
-        text-transform: uppercase; /* Styled label */
-        font-size: 0.9rem;
     }
 
     .liquid-button::before {
@@ -492,7 +473,6 @@ import Header from "../../components/Header.astro";
         filter: drop-shadow(0 0 5px rgba(240, 117, 174, 0.5));
     }
 
-    /* Dot animation */
     #sig-dot {
         transition: opacity 0.3s ease;
     }
