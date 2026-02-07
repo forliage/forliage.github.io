@@ -82,19 +82,23 @@ import Header from "../../components/Header.astro";
                     <!-- Applied liquid-button class-like styles to these links via CSS below -->
                     <li>
                         <a href="/blog/tech" class="sidebar-link"
-                            >Technical Articles</a>
+                            >Technical Articles</a
+                        >
                     </li>
                     <li>
                         <a href="/blog/zju" class="sidebar-link"
-                            >ZJU Lecture Notes</a>
+                            >ZJU Lecture Notes</a
+                        >
                     </li>
                     <li>
                         <a href="/blog/others" class="sidebar-link"
-                            >Other Lecture Notes</a>
+                            >Other Lecture Notes</a
+                        >
                     </li>
                     <li>
                         <a href="/blog/life" class="sidebar-link"
-                            >Reflections and Life</a>
+                            >Reflections and Life</a
+                        >
                     </li>
                 </ul>
             </nav>
@@ -203,53 +207,90 @@ import Header from "../../components/Header.astro";
         interface Petal {
             x: number;
             y: number;
+            z: number; // Depth: 0 (Front) to 1 (Back)
             vx: number;
             vy: number;
             rotation: number;
             rotationSpeed: number;
+            flip: number; // 3D Flip angle
+            flipSpeed: number;
             size: number;
             color: string;
             landed: boolean;
+            landX: number; // Store landing position
+            landY: number; // Store landing position
         }
 
         const petals: Petal[] = [];
         const landedPetals: Petal[] = [];
-        const MAX_PETALS = 150; // Simultaneous falling
-        const MAX_LANDED = 800; // Pile up limit (increased for better pile effect)
 
-        const createPetal = (y = -20): Petal => {
-            const colors = ["#ffc0cb", "#ffb7c5", "#ffc3d0", "#ffd1dc"]; // Various pinks
+        // Configuration
+        const MAX_PETALS = 200;
+        const MAX_LANDED = 800;
+        const GROUND_DEPTH_HEIGHT = 200; // How far up the screen the "back" of the ground is
+
+        const createPetal = (startY?: number): Petal => {
+            const colors = ["#ffc0cb", "#ffb7c5", "#ffc3d0", "#ffd1dc"];
+            const z = Math.random(); // 0 = Close, 1 = Far
+
+            // Perspective scales
+            // Close (z=0) -> Scale 1.2, Fast
+            // Far (z=1) -> Scale 0.4, Slow
+            const scale = 1.2 - z * 0.8;
+
+            // Start above screen
+            const x = Math.random() * width;
+            const y = startY !== undefined ? startY : -20;
+
             return {
-                x: Math.random() * width,
+                x: x,
                 y: y,
-                vx: (Math.random() - 0.5) * 1.5, // Wind
-                vy: 1 + Math.random() * 2, // Gravity
+                z: z,
+                // Speed depends on depth (parallax)
+                vx: (Math.random() - 0.5) * 2 * scale,
+                vy: (1.5 + Math.random() * 2) * scale,
+
                 rotation: Math.random() * 360,
                 rotationSpeed: (Math.random() - 0.5) * 2,
-                size: 5 + Math.random() * 8,
+                flip: Math.random() * Math.PI,
+                flipSpeed: (Math.random() - 0.5) * 0.1,
+
+                size: (8 + Math.random() * 5) * scale,
                 color: colors[Math.floor(Math.random() * colors.length)],
                 landed: false,
+                landX: 0,
+                landY: 0,
             };
         };
 
-        // Pre-fill some petals falling and some already landed for visual impact
-        for (let i = 0; i < 50; i++) {
-            petals.push(createPetal(Math.random() * height * 0.8));
+        // Initialize
+        for (let i = 0; i < 80; i++) {
+            petals.push(createPetal(Math.random() * height));
         }
 
         const drawPetal = (p: Petal) => {
             if (!ctx) return;
             ctx.save();
             ctx.translate(p.x, p.y);
-            ctx.rotate((p.rotation * Math.PI) / 180);
-            ctx.fillStyle = p.color;
-            ctx.globalAlpha = 0.8;
 
-            // Draw a simple petal shape (heart-ish)
+            // 3D Flip calculation
+            // We scale the Y axis of the petal based on sin(flip) to simulate rotation
+            const flipScale = Math.abs(Math.cos(p.flip));
+
+            ctx.rotate((p.rotation * Math.PI) / 180);
+            ctx.scale(1, flipScale); // Apply 3D flip effect
+
+            ctx.fillStyle = p.color;
+            // Far petals are slightly more transparent / blurry logic could go here
+            ctx.globalAlpha = 0.8 - p.z * 0.3; // Fade out far petals
+
+            // Dynamic Shape
             ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.bezierCurveTo(p.size / 2, -p.size / 2, p.size, 0, 0, p.size);
-            ctx.bezierCurveTo(-p.size, 0, -p.size / 2, -p.size / 2, 0, 0);
+            // A slightly more detailed petal shape
+            const s = p.size;
+            ctx.moveTo(0, -s / 2);
+            ctx.bezierCurveTo(s / 2, -s / 2, s, 0, 0, s);
+            ctx.bezierCurveTo(-s, 0, -s / 2, -s / 2, 0, -s / 2);
             ctx.fill();
 
             ctx.restore();
@@ -259,42 +300,57 @@ import Header from "../../components/Header.astro";
             if (!ctx) return;
             ctx.clearRect(0, 0, width, height);
 
-            // Add new petals
-            if (petals.length < MAX_PETALS && Math.random() > 0.95) {
+            // Sort landed petals by depth (Z) so correct ones overwite others?
+            // Actually for "painter's algorithm" we want far (high Z) drawn first.
+            // But here Z is 0..1, 1 is far. So we should draw high Z first.
+            // Landed petals list might change, better not sort every frame if possible.
+            // For simple transparency overlap, sorting helps but maybe overkill for CPU.
+            // Let's just draw.
+
+            // Add new
+            if (petals.length < MAX_PETALS && Math.random() > 0.92) {
                 petals.push(createPetal());
             }
 
-            // Update and draw falling petals
+            // Update state
             for (let i = petals.length - 1; i >= 0; i--) {
                 const p = petals[i];
                 if (!p.landed) {
                     p.x += p.vx;
                     p.y += p.vy;
                     p.rotation += p.rotationSpeed;
+                    p.flip += p.flipSpeed;
 
-                    // Wind variation
-                    p.vx += (Math.random() - 0.5) * 0.1;
-                    if (p.vx > 2) p.vx = 2;
-                    if (p.vx < -2) p.vx = -2;
+                    // Wind sway based on depth
+                    p.x +=
+                        Math.sin(Date.now() * 0.001 + p.z * 10) *
+                        0.5 *
+                        (1 - p.z);
 
                     // Landing Logic
-                    if (p.y >= height - 10) {
-                        // Ground level
+                    // Calculate "Ground Level" for this specific Z depth.
+                    // Far objects (z=1) land higher up. Close objects (z=0) land at bottom.
+                    const groundLevel = height - p.z * GROUND_DEPTH_HEIGHT;
+
+                    if (p.y >= groundLevel) {
                         p.landed = true;
-                        p.y = height - 5 - Math.random() * 10; // Scatter slightly on "ground"
+                        p.y = groundLevel + (Math.random() * 10 - 5); // Small variation
+                        p.landX = p.x;
+                        p.landY = p.y;
                         landedPetals.push(p);
-                        petals.splice(i, 1); // Remove from falling list
+                        petals.splice(i, 1);
                     } else {
                         drawPetal(p);
                     }
                 }
             }
 
-            // Draw landed petals
+            // Management of landed petals
             if (landedPetals.length > MAX_LANDED) {
-                landedPetals.shift(); // Remove oldest to maintain performance
+                landedPetals.shift();
             }
 
+            // Draw landed
             for (const p of landedPetals) {
                 drawPetal(p);
             }
