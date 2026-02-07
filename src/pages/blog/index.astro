@@ -9,8 +9,8 @@ import Header from "../../components/Header.astro";
         <!-- Blur Overlay for Signature Mode -->
         <div id="signature-overlay" class="signature-overlay">
             <div class="signature-container">
-                <!-- SVG Signature using Text instead of Path for better font matching -->
-                <svg viewBox="0 0 800 200" class="signature-svg">
+                <!-- SVG Signature using Text with Legacy Font -->
+                <svg viewBox="0 0 1000 300" class="signature-svg">
                     <defs>
                         <linearGradient
                             id="gradient"
@@ -31,8 +31,8 @@ import Header from "../../components/Header.astro";
                     </defs>
 
                     <!-- 
-                       Using 'Great Vibes' font which matches the cursive style in the reference image.
-                       Stroke animation on text creates the outline drawing effect.
+                       Legacy Font Stack: "Snell Roundhand", "Brush Script MT", cursive
+                       Text: "Hello. This is forliage"
                     -->
                     <text
                         id="sig-text"
@@ -43,7 +43,7 @@ import Header from "../../components/Header.astro";
                         fill="transparent"
                         stroke="url(#gradient)"
                         stroke-width="2"
-                        style="font-family: 'Great Vibes', cursive; and font-size: 120px;"
+                        style="font-family: 'Snell Roundhand', 'Brush Script MT', cursive; font-size: 100px; letter-spacing: 2px;"
                     >
                         Hello. This is forliage
                     </text>
@@ -76,10 +76,23 @@ import Header from "../../components/Header.astro";
         <aside class="sidebar-nav">
             <nav>
                 <ul>
-                    <li><a href="/blog/tech">Technical Articles</a></li>
-                    <li><a href="/blog/zju">ZJU Lecture Notes</a></li>
-                    <li><a href="/blog/others">Other Lecture Notes</a></li>
-                    <li><a href="/blog/life">Reflections and Life</a></li>
+                    <!-- Applied liquid-button class-like styles to these links via CSS below -->
+                    <li>
+                        <a href="/blog/tech" class="sidebar-link"
+                            >Technical Articles</a>
+                    </li>
+                    <li>
+                        <a href="/blog/zju" class="sidebar-link"
+                            >ZJU Lecture Notes</a>
+                    </li>
+                    <li>
+                        <a href="/blog/others" class="sidebar-link"
+                            >Other Lecture Notes</a>
+                    </li>
+                    <li>
+                        <a href="/blog/life" class="sidebar-link"
+                            >Reflections and Life</a>
+                    </li>
                 </ul>
             </nav>
         </aside>
@@ -94,7 +107,6 @@ import Header from "../../components/Header.astro";
     const pauseBeforeDelete = 2000;
     const pauseBeforeRestart = 500;
 
-    // Get both main and reflection elements
     const typewriterElement = document.getElementById("typewriter");
     const typewriterReflection = document.getElementById(
         "typewriter-reflection",
@@ -116,7 +128,6 @@ import Header from "../../components/Header.astro";
                 charIndex++;
             }
 
-            // Fix TS Error: check if elements exist (already checked outside, but good for safety inside closure if needed)
             if (typewriterElement) typewriterElement.textContent = currentText;
             if (typewriterReflection)
                 typewriterReflection.textContent = currentText;
@@ -133,24 +144,19 @@ import Header from "../../components/Header.astro";
 
             setTimeout(type, delta);
         }
-
         setTimeout(type, 500);
     }
 
     // --- Signature Animation Logic ---
     const signatureBtn = document.getElementById("signature-btn");
     const overlay = document.getElementById("signature-overlay");
-    // Fix TS Error: Cast to SVGTextElement instead of Path, or generic SVGElement
     const sigText = document.getElementById(
         "sig-text",
     ) as unknown as SVGTextElement;
 
     if (signatureBtn && overlay && sigText) {
-        // For text elements, getTotalLength() works in most modern browsers for SVGTextElement
-        // IF it's rendered. But standard TS lib might miss it on SVGTextElement.
-        // We use a safe fallback or just huge number if we can't measure.
-
-        const pathLength = 3000; // Approximate max length for text outline
+        // Use a safe large value for text stroke length
+        const pathLength = 3000;
 
         sigText.style.strokeDasharray = pathLength.toString();
         sigText.style.strokeDashoffset = pathLength.toString();
@@ -169,7 +175,7 @@ import Header from "../../components/Header.astro";
                     sigText.style.transition = "none";
                     sigText.style.strokeDashoffset = pathLength.toString();
                 }, 1000);
-            }, 6000); // 0.5s + 4s + 1.5s
+            }, 6000);
         });
     }
 </script>
@@ -262,49 +268,67 @@ import Header from "../../components/Header.astro";
         }
     }
 
-    /* --- Liquid Glass Button --- */
-    .signature-trigger-wrapper {
-        margin-top: 2rem;
-        z-index: 20;
-    }
-
-    .liquid-button {
+    /* --- Liquid Glass Button Styles (Shared) --- */
+    .liquid-button,
+    .sidebar-link {
         position: relative;
-        padding: 12px 36px;
-        font-size: 1.1rem;
         font-weight: 700;
-        color: #e65297;
-        background: rgba(255, 255, 255, 0.85);
+        background: rgba(
+            255,
+            255,
+            255,
+            0.65
+        ); /* More transparent for glass feel */
         border: 1px solid rgba(240, 117, 174, 0.3);
         border-radius: 50px;
         cursor: pointer;
         outline: none;
         overflow: hidden;
-        backdrop-filter: blur(10px);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         box-shadow:
             0 8px 32px 0 rgba(240, 117, 174, 0.15),
             inset 0 0 0 1px rgba(255, 255, 255, 0.5);
         transition: all 0.4s ease;
         font-family: var(--apple-font);
         text-transform: uppercase;
-        letter-spacing: 1.5px;
+        letter-spacing: 1px;
     }
 
-    .liquid-button:hover {
-        transform: translateY(-2px);
+    /* Specifics for main trigger button */
+    .liquid-button {
+        padding: 12px 36px;
+        font-size: 1.1rem;
+        color: #e65297;
+    }
+
+    /* Sidebar Link Specifics */
+    .sidebar-link {
+        display: block;
+        padding: 12px 24px;
+        font-size: 1rem;
+        color: #555; /* Neutral color initially */
+        text-decoration: none;
+        margin-bottom: 0.5rem;
+        text-align: center;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .liquid-button:hover,
+    .sidebar-link:hover {
+        transform: translateY(-3px) scale(1.02);
         box-shadow:
             0 15px 30px rgba(240, 117, 174, 0.3),
             inset 0 0 20px rgba(255, 255, 255, 0.8);
-        background: rgba(255, 255, 255, 0.95);
-        color: #d13075;
+        background: rgba(255, 255, 255, 0.9);
+        color: #d13075; /* Pink on hover for sidebar too */
+        border-color: rgba(240, 117, 174, 0.6);
     }
 
-    .liquid-button span {
-        position: relative;
-        z-index: 1;
-    }
-
-    .liquid-button::before {
+    /* Shine effect for both */
+    .liquid-button::before,
+    .sidebar-link::before {
         content: "";
         position: absolute;
         top: 0;
@@ -314,34 +338,36 @@ import Header from "../../components/Header.astro";
         background: linear-gradient(
             90deg,
             transparent,
-            rgba(240, 117, 174, 0.1),
+            rgba(240, 117, 174, 0.2),
             transparent
         );
         transition: left 0.5s;
     }
 
-    .liquid-button:hover::before {
+    .liquid-button:hover::before,
+    .sidebar-link:hover::before {
         left: 100%;
     }
 
-    /* --- Sidebar Nav --- */
+    /* --- Sidebar Container --- */
     .sidebar-nav {
         position: absolute;
         right: 0;
         top: 0;
         bottom: 0;
-        width: 300px;
+        width: 320px;
         display: flex;
         align-items: center;
-        padding-left: 40px;
-        background: linear-gradient(
-            to left,
-            rgba(255, 255, 255, 0.8),
-            rgba(255, 255, 255, 0)
-        );
-        mask-image: linear-gradient(to right, transparent, black 40%);
-        -webkit-mask-image: linear-gradient(to right, transparent, black 40%);
-        font-family: var(--sidebar-font);
+        padding-left: 20px;
+        padding-right: 40px; /* Add padding for buttons */
+        /* background: linear-gradient(...) removed to let glass buttons pop */
+        z-index: 20; /* Fixed: Higher than center-content */
+        pointer-events: none; /* Let clicks pass through empty areas */
+    }
+
+    .sidebar-nav nav {
+        width: 100%;
+        pointer-events: auto; /* Re-enable clicks on nav */
     }
 
     .sidebar-nav nav ul {
@@ -350,7 +376,7 @@ import Header from "../../components/Header.astro";
         margin: 0;
         display: flex;
         flex-direction: column;
-        gap: 2rem;
+        gap: 1.5rem;
     }
 
     .sidebar-nav nav li {
@@ -370,23 +396,6 @@ import Header from "../../components/Header.astro";
     }
     .sidebar-nav nav li:nth-child(4) {
         animation-delay: 0.5s;
-    }
-
-    .sidebar-nav nav a {
-        font-size: 1.35rem;
-        color: #444;
-        text-decoration: none;
-        padding: 0.5rem 1rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        display: inline-block;
-        position: relative;
-        font-weight: 500;
-    }
-
-    .sidebar-nav nav a:hover {
-        color: var(--highlight-color);
-        transform: translateX(-15px) scale(1.05);
-        text-shadow: 0 0 12px rgba(240, 117, 174, 0.4);
     }
 
     @keyframes slideIn {
@@ -427,8 +436,8 @@ import Header from "../../components/Header.astro";
     }
 
     .signature-container {
-        width: 80%;
-        max-width: 800px;
+        width: 90%;
+        max-width: 1000px;
     }
 
     .signature-svg {
@@ -436,10 +445,6 @@ import Header from "../../components/Header.astro";
         height: auto;
         overflow: visible;
         filter: drop-shadow(0 0 5px rgba(240, 117, 174, 0.5));
-    }
-
-    #sig-text {
-        font-size: 8rem; /* Large font size */
     }
 
     /* Responsive adjustments */
@@ -450,7 +455,7 @@ import Header from "../../components/Header.astro";
         }
 
         .welcome-text {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             text-align: center;
             justify-content: center;
         }
@@ -462,8 +467,15 @@ import Header from "../../components/Header.astro";
         .sidebar-nav {
             position: relative;
             width: 100%;
+            padding: 2rem;
             justify-content: center;
-            padding: 2rem 0;
+            z-index: 20;
+        }
+
+        .sidebar-nav nav ul {
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
         }
 
         .sidebar-nav nav li {
@@ -480,10 +492,6 @@ import Header from "../../components/Header.astro";
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-        #sig-text {
-            font-size: 4rem;
         }
     }
 </style>
