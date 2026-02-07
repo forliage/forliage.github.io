@@ -6,11 +6,64 @@ import Header from "../../components/Header.astro";
 <Layout title="Blog - Liuye Zhao">
     <Header />
     <main class="blog-hub">
+        <!-- Blur Overlay for Signature Mode -->
+        <div id="signature-overlay" class="signature-overlay">
+            <div class="signature-container">
+                <!-- SVG Signature will be drawn here -->
+                <svg viewBox="0 0 500 150" class="signature-svg">
+                    <defs>
+                        <linearGradient
+                            id="gradient"
+                            x1="0%"
+                            y1="0%"
+                            x2="100%"
+                            y2="0%"
+                        >
+                            <stop
+                                offset="0%"
+                                style="stop-color:#f075ae;stop-opacity:1"
+                            ></stop>
+                            <stop
+                                offset="100%"
+                                style="stop-color:#5dd3b6;stop-opacity:1"
+                            ></stop>
+                        </linearGradient>
+                    </defs>
+                    <!-- A path that looks somewhat like "forliage" in cursive -->
+                    <path
+                        id="sig-path"
+                        d="M30,70 Q50,20 60,60 Q70,90 80,50 Q90,30 100,50 Q95,70 110,60 Q125,50 120,70 Q115,90 130,80 Q145,70 140,50 M150,60 L150,90 Q150,110 140,100 Q130,90 150,60 M160,70 Q170,50 180,50 Q190,50 185,70 Q180,90 200,80 M210,50 L210,100 M210,70 Q230,50 240,70 M250,70 Q250,50 260,50 M260,50 L260,80 M270,70 Q280,50 300,50 Q310,50 305,70 Q300,90 320,80 Q340,70 330,50 Q325,80 350,70 Q370,60 400,60"
+                        fill="none"
+                        stroke="url(#gradient)"
+                        stroke-width="4"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"></path>
+                </svg>
+            </div>
+        </div>
+
         <div class="center-content">
-            <!-- Container for the typing effect -->
-            <h1 class="welcome-text">
-                <span id="typewriter"></span><span class="cursor">|</span>
-            </h1>
+            <!-- Container for the typing effect with Reflection -->
+            <div class="welcome-wrapper">
+                <h1 class="welcome-text">
+                    <span id="typewriter"></span><span class="cursor">|</span>
+                </h1>
+                <!-- Reflection pseudo-element handled in CSS is complex for dynamic text, 
+                     so strict css box-reflect is best or we duplicate content for reflection -->
+                <h1 class="welcome-text reflection" aria-hidden="true">
+                    <span id="typewriter-reflection"></span><span class="cursor"
+                        >|</span
+                    >
+                </h1>
+            </div>
+
+            <!-- Liquid Glass Button -->
+            <div class="signature-trigger-wrapper">
+                <button id="signature-btn" class="liquid-button">
+                    <span>Signature</span>
+                    <div class="liquid"></div>
+                </button>
+            </div>
         </div>
 
         <aside class="sidebar-nav">
@@ -27,46 +80,45 @@ import Header from "../../components/Header.astro";
 </Layout>
 
 <script>
+    // --- Typewriter Logic ---
     const textToType = "Welcome to forliage's life";
-    const typeSpeed = 100; // ms per char
-    const deleteSpeed = 50; // ms per char
-    const pauseBeforeDelete = 2000; // ms
-    const pauseBeforeRestart = 500; // ms
+    const typeSpeed = 100;
+    const deleteSpeed = 50;
+    const pauseBeforeDelete = 2000;
+    const pauseBeforeRestart = 500;
 
+    // Get both main and reflection elements
     const typewriterElement = document.getElementById("typewriter");
+    const typewriterReflection = document.getElementById(
+        "typewriter-reflection",
+    );
 
-    // Make sure element exists
-    if (typewriterElement) {
+    if (typewriterElement && typewriterReflection) {
         let charIndex = 0;
         let isDeleting = false;
 
         function type() {
             const currentString = textToType;
+            let currentText = "";
 
             if (isDeleting) {
-                // Deleting
-                typewriterElement.textContent = currentString.substring(
-                    0,
-                    charIndex - 1,
-                );
+                currentText = currentString.substring(0, charIndex - 1);
                 charIndex--;
             } else {
-                // Typing
-                typewriterElement.textContent = currentString.substring(
-                    0,
-                    charIndex + 1,
-                );
+                currentText = currentString.substring(0, charIndex + 1);
                 charIndex++;
             }
+
+            // Update both main text and reflection
+            typewriterElement.textContent = currentText;
+            typewriterReflection.textContent = currentText; // Sync reflection manually for browser compatibility
 
             let delta = isDeleting ? deleteSpeed : typeSpeed;
 
             if (!isDeleting && charIndex === currentString.length) {
-                // Finished typing, pause before delete
                 delta = pauseBeforeDelete;
                 isDeleting = true;
             } else if (isDeleting && charIndex === 0) {
-                // Finished deleting, pause before restart
                 delta = pauseBeforeRestart;
                 isDeleting = false;
             }
@@ -74,8 +126,44 @@ import Header from "../../components/Header.astro";
             setTimeout(type, delta);
         }
 
-        // Start the typing loop
         setTimeout(type, 500);
+    }
+
+    // --- Signature Animation Logic ---
+    const signatureBtn = document.getElementById("signature-btn");
+    const overlay = document.getElementById("signature-overlay");
+    const sigPath = document.getElementById("sig-path") as SVGPathElement;
+
+    if (signatureBtn && overlay && sigPath) {
+        // Calculate path length for stroke animation
+        const pathLength = sigPath.getTotalLength();
+
+        // Reset stroke styles initially
+        sigPath.style.strokeDasharray = pathLength.toString();
+        sigPath.style.strokeDashoffset = pathLength.toString();
+
+        signatureBtn.addEventListener("click", () => {
+            // 1. Show overlay (fade in blur)
+            overlay.classList.add("active");
+
+            // 2. Start animation after a short delay for overlay transition
+            setTimeout(() => {
+                sigPath.style.transition = "stroke-dashoffset 2.5s ease-in-out";
+                sigPath.style.strokeDashoffset = "0";
+            }, 500);
+
+            // 3. Keep displayed, then hide
+            setTimeout(() => {
+                // Fade out overlay
+                overlay.classList.remove("active");
+
+                // Reset animation after it's hidden to be ready for next click
+                setTimeout(() => {
+                    sigPath.style.transition = "none";
+                    sigPath.style.strokeDashoffset = pathLength.toString();
+                }, 1000); // wait for overlay fade out
+            }, 4000); // 0.5s delay + 2.5s draw + 1s hold
+        });
     }
 </script>
 
@@ -83,11 +171,11 @@ import Header from "../../components/Header.astro";
     /* Use global variables for colors if available, or define locally for glass effect */
     :root {
         --text-color: #333;
-        --highlight-color: #f075ae; /* Pink from header */
-        /* Apple system font stack */
+        --highlight-color: #f075ae;
         --apple-font:
             -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
             Roboto, Helvetica, Arial, sans-serif;
+        --sidebar-font: "Outfit", "Montserrat", var(--apple-font);
     }
 
     .blog-hub {
@@ -101,24 +189,55 @@ import Header from "../../components/Header.astro";
         font-family: var(--apple-font);
     }
 
+    /* --- Center Content & Welcome Text --- */
     .center-content {
         flex: 1;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         z-index: 10;
-        min-height: 100px; /* Ensure space for text */
+        min-height: 200px;
+    }
+
+    .welcome-wrapper {
+        position: relative;
+        margin-bottom: 3rem;
     }
 
     .welcome-text {
-        font-size: 3.5rem;
-        font-weight: 300;
-        color: var(--highlight-color); /* Pink color */
+        font-size: 4rem; /* Larger */
+        font-weight: 700; /* Bold as requested */
+        color: var(--highlight-color);
         letter-spacing: 1px;
-        text-shadow: 0 4px 10px rgba(240, 117, 174, 0.2);
+        text-shadow: 0 4px 15px rgba(240, 117, 174, 0.3);
         display: flex;
         align-items: center;
         margin: 0;
+        line-height: 1.2;
+    }
+
+    /* Reflection Effect */
+    .welcome-text.reflection {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        transform: scaleY(-0.6) translateY(-10px); /* Flip and squeeze slightly */
+        opacity: 0.3;
+        mask-image: linear-gradient(
+            to bottom,
+            transparent,
+            transparent 20%,
+            black
+        ); /* Fade out further away */
+        -webkit-mask-image: linear-gradient(
+            to top,
+            rgba(0, 0, 0, 0.5),
+            transparent
+        ); /* Standard mask logic usually top to bottom */
+        pointer-events: none;
+        filter: blur(2px);
     }
 
     .cursor {
@@ -139,6 +258,69 @@ import Header from "../../components/Header.astro";
         }
     }
 
+    /* --- Liquid Glass Button --- */
+    .signature-trigger-wrapper {
+        margin-top: 2rem;
+        z-index: 20;
+    }
+
+    .liquid-button {
+        position: relative;
+        padding: 12px 36px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 50px;
+        cursor: pointer;
+        outline: none;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        box-shadow:
+            0 10px 20px rgba(0, 0, 0, 0.1),
+            inset 0 0 15px rgba(255, 255, 255, 0.2),
+            inset 0 0 5px rgba(255, 255, 255, 0.5); /* Glass edge highlight */
+        transition: all 0.4s ease;
+        font-family: var(--apple-font);
+    }
+
+    .liquid-button:hover {
+        transform: translateY(-3px);
+        box-shadow:
+            0 15px 30px rgba(240, 117, 174, 0.3),
+            /* Pinkish glow */ inset 0 0 20px rgba(255, 255, 255, 0.4);
+        border-color: rgba(240, 117, 174, 0.6);
+    }
+
+    .liquid-button span {
+        position: relative;
+        z-index: 1;
+        letter-spacing: 1px;
+    }
+
+    /* Simulate "liquid" movement inside */
+    .liquid-button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.4),
+            transparent
+        );
+        transition: left 0.5s;
+    }
+
+    .liquid-button:hover::before {
+        left: 100%;
+    }
+
+    /* --- Sidebar Nav --- */
     .sidebar-nav {
         position: absolute;
         right: 0;
@@ -155,7 +337,7 @@ import Header from "../../components/Header.astro";
         );
         mask-image: linear-gradient(to right, transparent, black 40%);
         -webkit-mask-image: linear-gradient(to right, transparent, black 40%);
-        font-family: var(--apple-font);
+        font-family: var(--sidebar-font); /* Improved font */
     }
 
     .sidebar-nav nav ul {
@@ -187,20 +369,20 @@ import Header from "../../components/Header.astro";
     }
 
     .sidebar-nav nav a {
-        font-size: 1.25rem;
-        color: #555;
+        font-size: 1.35rem; /* Slightly bigger */
+        color: #444;
         text-decoration: none;
         padding: 0.5rem 1rem;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth springy feel */
         display: inline-block;
         position: relative;
-        font-weight: 400; /* Regular weight for Apple font looks elegant */
+        font-weight: 500; /* Medium weight for Outfit look */
     }
 
     .sidebar-nav nav a:hover {
         color: var(--highlight-color);
-        transform: translateX(-10px);
-        text-shadow: 0 0 8px rgba(240, 117, 174, 0.4);
+        transform: translateX(-15px) scale(1.05);
+        text-shadow: 0 0 12px rgba(240, 117, 174, 0.4);
     }
 
     @keyframes slideIn {
@@ -214,6 +396,44 @@ import Header from "../../components/Header.astro";
         }
     }
 
+    /* --- Signature Overlay --- */
+    .signature-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 999; /* Highest z-index */
+        pointer-events: none; /* Interact through if hidden */
+        opacity: 0;
+        backdrop-filter: blur(0px);
+        background: rgba(255, 255, 255, 0.2);
+        transition:
+            opacity 0.5s ease,
+            backdrop-filter 0.5s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .signature-overlay.active {
+        opacity: 1;
+        backdrop-filter: blur(25px); /* Strong blur like iOS */
+        pointer-events: auto;
+    }
+
+    .signature-container {
+        width: 80%;
+        max-width: 600px;
+    }
+
+    .signature-svg {
+        width: 100%;
+        height: auto;
+        overflow: visible;
+        filter: drop-shadow(0 0 5px rgba(240, 117, 174, 0.5));
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .blog-hub {
@@ -222,25 +442,21 @@ import Header from "../../components/Header.astro";
         }
 
         .welcome-text {
-            font-size: 2rem;
+            font-size: 2.2rem;
             text-align: center;
-            margin-bottom: 3rem;
-            flex-wrap: wrap;
             justify-content: center;
+        }
+
+        /* Disable reflection on mobile to save space/performance */
+        .welcome-text.reflection {
+            display: none;
         }
 
         .sidebar-nav {
             position: relative;
             width: 100%;
-            padding: 0;
-            background: none;
-            mask-image: none;
-            -webkit-mask-image: none;
             justify-content: center;
-        }
-
-        .sidebar-nav nav ul {
-            align-items: center;
+            padding: 2rem 0;
         }
 
         .sidebar-nav nav li {
