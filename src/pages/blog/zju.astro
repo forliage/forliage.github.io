@@ -255,7 +255,7 @@ const getCourseImage = (id: string) => {
             };
 
             // Create meteors periodically
-            setInterval(createMeteor, 600); // Every 600ms new meteor
+            setInterval(createMeteor, 300); // Increased frequency: Every 300ms (was 600ms)
             createMeteor(); // Start immediately
         }
 
@@ -340,11 +340,13 @@ const getCourseImage = (id: string) => {
     :global(.meteor) {
         position: absolute;
         height: 2px;
+        /* FIXED: Gradient should fade from left (tail) to right (head) */
+        /* Since meteor moves left-down, tail should be toward top-right */
         background: linear-gradient(
             90deg,
-            rgba(161, 140, 209, 0),
-            rgba(161, 140, 209, 1)
-        ); /* Purple fade */
+            rgba(161, 140, 209, 1),
+            rgba(161, 140, 209, 0)
+        ); /* Purple fade from left to right */
         opacity: 0;
         transform: rotate(-45deg); /* Top-Right to Bottom-Left direction */
         filter: drop-shadow(0 0 6px rgba(161, 140, 209, 0.8));
@@ -360,7 +362,7 @@ const getCourseImage = (id: string) => {
         height: 4px;
         border-radius: 50%;
         background: rgba(161, 140, 209, 1);
-        right: 0;
+        left: 0; /* Changed from right to left - head is at the front */
         top: 50%;
         transform: translateY(-50%);
         box-shadow: 0 0 10px 2px rgba(161, 140, 209, 0.5);
