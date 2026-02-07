@@ -6,6 +6,9 @@ import Header from "../../components/Header.astro";
 <Layout title="Blog - Liuye Zhao">
     <Header />
     <main class="blog-hub">
+        <!-- Sakura Canvas -->
+        <canvas id="sakura-canvas"></canvas>
+
         <!-- Blur Overlay for Signature Mode -->
         <div id="signature-overlay" class="signature-overlay">
             <div class="signature-container">
@@ -178,6 +181,129 @@ import Header from "../../components/Header.astro";
             }, 6000);
         });
     }
+
+    // --- Sakura Animation Logic ---
+    const canvas = document.getElementById(
+        "sakura-canvas",
+    ) as HTMLCanvasElement;
+    if (canvas) {
+        const ctx = canvas.getContext("2d");
+
+        let width = 0;
+        let height = 0;
+
+        const resize = () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        };
+
+        window.addEventListener("resize", resize);
+        resize();
+
+        interface Petal {
+            x: number;
+            y: number;
+            vx: number;
+            vy: number;
+            rotation: number;
+            rotationSpeed: number;
+            size: number;
+            color: string;
+            landed: boolean;
+        }
+
+        const petals: Petal[] = [];
+        const landedPetals: Petal[] = [];
+        const MAX_PETALS = 150; // Simultaneous falling
+        const MAX_LANDED = 800; // Pile up limit (increased for better pile effect)
+
+        const createPetal = (y = -20): Petal => {
+            const colors = ["#ffc0cb", "#ffb7c5", "#ffc3d0", "#ffd1dc"]; // Various pinks
+            return {
+                x: Math.random() * width,
+                y: y,
+                vx: (Math.random() - 0.5) * 1.5, // Wind
+                vy: 1 + Math.random() * 2, // Gravity
+                rotation: Math.random() * 360,
+                rotationSpeed: (Math.random() - 0.5) * 2,
+                size: 5 + Math.random() * 8,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                landed: false,
+            };
+        };
+
+        // Pre-fill some petals falling and some already landed for visual impact
+        for (let i = 0; i < 50; i++) {
+            petals.push(createPetal(Math.random() * height * 0.8));
+        }
+
+        const drawPetal = (p: Petal) => {
+            if (!ctx) return;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rotation * Math.PI) / 180);
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = 0.8;
+
+            // Draw a simple petal shape (heart-ish)
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(p.size / 2, -p.size / 2, p.size, 0, 0, p.size);
+            ctx.bezierCurveTo(-p.size, 0, -p.size / 2, -p.size / 2, 0, 0);
+            ctx.fill();
+
+            ctx.restore();
+        };
+
+        const update = () => {
+            if (!ctx) return;
+            ctx.clearRect(0, 0, width, height);
+
+            // Add new petals
+            if (petals.length < MAX_PETALS && Math.random() > 0.95) {
+                petals.push(createPetal());
+            }
+
+            // Update and draw falling petals
+            for (let i = petals.length - 1; i >= 0; i--) {
+                const p = petals[i];
+                if (!p.landed) {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.rotation += p.rotationSpeed;
+
+                    // Wind variation
+                    p.vx += (Math.random() - 0.5) * 0.1;
+                    if (p.vx > 2) p.vx = 2;
+                    if (p.vx < -2) p.vx = -2;
+
+                    // Landing Logic
+                    if (p.y >= height - 10) {
+                        // Ground level
+                        p.landed = true;
+                        p.y = height - 5 - Math.random() * 10; // Scatter slightly on "ground"
+                        landedPetals.push(p);
+                        petals.splice(i, 1); // Remove from falling list
+                    } else {
+                        drawPetal(p);
+                    }
+                }
+            }
+
+            // Draw landed petals
+            if (landedPetals.length > MAX_LANDED) {
+                landedPetals.shift(); // Remove oldest to maintain performance
+            }
+
+            for (const p of landedPetals) {
+                drawPetal(p);
+            }
+
+            requestAnimationFrame(update);
+        };
+
+        update();
+    }
 </script>
 
 <style>
@@ -199,6 +325,17 @@ import Header from "../../components/Header.astro";
         overflow: hidden;
         padding: 2rem;
         font-family: var(--apple-font);
+    }
+
+    /* Sakura Canvas */
+    #sakura-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1; /* Background effect, behind interactive elements but visible */
     }
 
     .center-content {
@@ -360,7 +497,6 @@ import Header from "../../components/Header.astro";
         align-items: center;
         padding-left: 20px;
         padding-right: 40px; /* Add padding for buttons */
-        /* background: linear-gradient(...) removed to let glass buttons pop */
         z-index: 20; /* Fixed: Higher than center-content */
         pointer-events: none; /* Let clicks pass through empty areas */
     }
