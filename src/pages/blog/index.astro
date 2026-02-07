@@ -9,8 +9,8 @@ import Header from "../../components/Header.astro";
         <!-- Blur Overlay for Signature Mode -->
         <div id="signature-overlay" class="signature-overlay">
             <div class="signature-container">
-                <!-- SVG Signature -->
-                <svg viewBox="0 0 600 200" class="signature-svg">
+                <!-- SVG Signature using Text instead of Path for better font matching -->
+                <svg viewBox="0 0 800 200" class="signature-svg">
                     <defs>
                         <linearGradient
                             id="gradient"
@@ -31,51 +31,22 @@ import Header from "../../components/Header.astro";
                     </defs>
 
                     <!-- 
-                        Refined 'forliage' path
-                        f: loop up, down deep, loop mid
-                        o: small circle
-                        r: flat top
-                        l: tall loop
-                        i: short stick
-                        a: oval + tail
-                        g: oval + descender loop
-                        e: small c loop
+                       Using 'Great Vibes' font which matches the cursive style in the reference image.
+                       Stroke animation on text creates the outline drawing effect.
                     -->
-                    <path
-                        id="sig-path"
-                        d="
-                        M 100 100 
-                        C 120 40, 110 40, 110 100
-                        C 110 160, 120 140, 130 100
-                        C 135 90, 130 90, 140 90
-                        C 150 90, 150 110, 145 100
-                        C 160 90, 150 90, 160 100
-                        C 165 100, 175 100, 180 100
-                        C 190 100, 185 20, 195 100
-                        C 200 100, 205 90, 205 100
-                        C 210 100, 215 100, 220 90
-                        C 215 110, 230 110, 230 100
-                        C 235 90, 240 90, 245 90
-                        C 235 110, 250 110, 250 100
-                        L 250 140
-                        C 230 150, 260 130, 260 100
-                        C 265 90, 275 80, 265 95
-                        C 260 110, 280 105, 290 95
-                        "
-                        fill="none"
+                    <text
+                        id="sig-text"
+                        x="50%"
+                        y="50%"
+                        dominant-baseline="middle"
+                        text-anchor="middle"
+                        fill="transparent"
                         stroke="url(#gradient)"
-                        stroke-width="4"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"></path>
-
-                    <!-- Dot for 'i' -->
-                    <circle
-                        id="sig-dot"
-                        cx="205"
-                        cy="80"
-                        r="3"
-                        fill="url(#gradient)"
-                        opacity="0"></circle>
+                        stroke-width="2"
+                        style="font-family: 'Great Vibes', cursive; and font-size: 120px;"
+                    >
+                        Hello. This is forliage
+                    </text>
                 </svg>
             </div>
         </div>
@@ -145,9 +116,10 @@ import Header from "../../components/Header.astro";
                 charIndex++;
             }
 
-            // Update both main text and reflection
-            typewriterElement.textContent = currentText;
-            typewriterReflection.textContent = currentText;
+            // Fix TS Error: check if elements exist (already checked outside, but good for safety inside closure if needed)
+            if (typewriterElement) typewriterElement.textContent = currentText;
+            if (typewriterReflection)
+                typewriterReflection.textContent = currentText;
 
             let delta = isDeleting ? deleteSpeed : typeSpeed;
 
@@ -168,40 +140,36 @@ import Header from "../../components/Header.astro";
     // --- Signature Animation Logic ---
     const signatureBtn = document.getElementById("signature-btn");
     const overlay = document.getElementById("signature-overlay");
-    const sigPath = document.getElementById("sig-path") as SVGPathElement;
-    const sigDot = document.getElementById("sig-dot");
+    // Fix TS Error: Cast to SVGTextElement instead of Path, or generic SVGElement
+    const sigText = document.getElementById(
+        "sig-text",
+    ) as unknown as SVGTextElement;
 
-    if (signatureBtn && overlay && sigPath) {
-        // Slightly simpler path for 'forliage' if the HTML one is still weird
-        // We will stick to the HTML one this time but ensure logic works
-        const pathLength = sigPath.getTotalLength();
+    if (signatureBtn && overlay && sigText) {
+        // For text elements, getTotalLength() works in most modern browsers for SVGTextElement
+        // IF it's rendered. But standard TS lib might miss it on SVGTextElement.
+        // We use a safe fallback or just huge number if we can't measure.
 
-        sigPath.style.strokeDasharray = pathLength.toString();
-        sigPath.style.strokeDashoffset = pathLength.toString();
+        const pathLength = 3000; // Approximate max length for text outline
 
-        if (sigDot) sigDot.style.opacity = "0";
+        sigText.style.strokeDasharray = pathLength.toString();
+        sigText.style.strokeDashoffset = pathLength.toString();
 
         signatureBtn.addEventListener("click", () => {
             overlay.classList.add("active");
 
             setTimeout(() => {
-                sigPath.style.transition = "stroke-dashoffset 3s ease-in-out";
-                sigPath.style.strokeDashoffset = "0";
-
-                // Show dot for 'i' near middle of animation
-                setTimeout(() => {
-                    if (sigDot) sigDot.style.opacity = "1";
-                }, 1800);
+                sigText.style.transition = "stroke-dashoffset 4s ease-in-out";
+                sigText.style.strokeDashoffset = "0";
             }, 500);
 
             setTimeout(() => {
                 overlay.classList.remove("active");
-                if (sigDot) sigDot.style.opacity = "0";
                 setTimeout(() => {
-                    sigPath.style.transition = "none";
-                    sigPath.style.strokeDashoffset = pathLength.toString();
+                    sigText.style.transition = "none";
+                    sigText.style.strokeDashoffset = pathLength.toString();
                 }, 1000);
-            }, 5000);
+            }, 6000); // 0.5s + 4s + 1.5s
         });
     }
 </script>
@@ -304,12 +272,9 @@ import Header from "../../components/Header.astro";
         position: relative;
         padding: 12px 36px;
         font-size: 1.1rem;
-
-        /* CORRECTED BUTTON STYLE FOR VISIBILITY */
         font-weight: 700;
-        color: #e65297; /* Darker pink for better contrast */
+        color: #e65297;
         background: rgba(255, 255, 255, 0.85);
-
         border: 1px solid rgba(240, 117, 174, 0.3);
         border-radius: 50px;
         cursor: pointer;
@@ -463,7 +428,7 @@ import Header from "../../components/Header.astro";
 
     .signature-container {
         width: 80%;
-        max-width: 600px;
+        max-width: 800px;
     }
 
     .signature-svg {
@@ -473,8 +438,8 @@ import Header from "../../components/Header.astro";
         filter: drop-shadow(0 0 5px rgba(240, 117, 174, 0.5));
     }
 
-    #sig-dot {
-        transition: opacity 0.3s ease;
+    #sig-text {
+        font-size: 8rem; /* Large font size */
     }
 
     /* Responsive adjustments */
@@ -515,6 +480,10 @@ import Header from "../../components/Header.astro";
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        #sig-text {
+            font-size: 4rem;
         }
     }
 </style>
