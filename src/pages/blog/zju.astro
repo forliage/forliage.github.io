@@ -97,6 +97,24 @@ const courses: Course[] = [
         color: "#accbee",
     },
 ];
+
+// Load Cover Images
+// Using import.meta.glob to find cover.svg (or png/jpg) in each course folder
+const imageFiles = import.meta.glob<{ default: ImageMetadata }>(
+    "/src/pages/blog/zju/*/cover.{svg,png,jpg,jpeg}",
+    { eager: true },
+);
+
+const getCourseImage = (id: string) => {
+    // Try to find matching image
+    const path = Object.keys(imageFiles).find((p) =>
+        p.includes(`/${id}/cover.`),
+    );
+    if (path) {
+        return imageFiles[path].default.src;
+    }
+    return null; // Fallback or handle below
+};
 ---
 
 <Layout title="ZJU Lecture Notes - Liuye Zhao">
@@ -140,34 +158,47 @@ const courses: Course[] = [
         <!-- Grid Container -->
         <div id="course-grid" class="course-grid">
             {
-                courses.map((course) => (
-                    <a
-                        href={`/blog/zju/${course.id}`}
-                        class="course-card"
-                        data-tags={course.tags.join(",").toLowerCase()}
-                        data-title={course.title.toLowerCase()}
-                    >
-                        <div class="card-content">
-                            <div
-                                class="card-image"
-                                style={`background: linear-gradient(135deg, ${course.color} 0%, #fff 100%)`}
-                            >
-                                <div class="placeholder-icon">
-                                    {course.title.substring(0, 1)}
+                courses.map((course) => {
+                    const imgSrc = getCourseImage(course.id);
+                    return (
+                        <a
+                            href={`/blog/zju/${course.id}`}
+                            class="course-card"
+                            data-tags={course.tags.join(",").toLowerCase()}
+                            data-title={course.title.toLowerCase()}
+                        >
+                            <div class="card-content">
+                                <div class="card-image-wrapper">
+                                    {imgSrc ? (
+                                        <img
+                                            src={imgSrc}
+                                            alt={course.title}
+                                            class="card-cover-image"
+                                        />
+                                    ) : (
+                                        <div
+                                            class="card-image-placeholder"
+                                            style={`background: linear-gradient(135deg, ${course.color} 0%, #fff 100%)`}
+                                        >
+                                            <div class="placeholder-icon">
+                                                {course.title.substring(0, 1)}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div class="card-info">
+                                    <h2>{course.title}</h2>
+                                    <p>{course.intro}</p>
+                                    <div class="tags">
+                                        {course.tags.map((tag) => (
+                                            <span class="tag">{tag}</span>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
-                            <div class="card-info">
-                                <h2>{course.title}</h2>
-                                <p>{course.intro}</p>
-                                <div class="tags">
-                                    {course.tags.map((tag) => (
-                                        <span class="tag">{tag}</span>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                ))
+                        </a>
+                    );
+                })
             }
         </div>
     </main>
@@ -262,36 +293,51 @@ const courses: Course[] = [
 
     .search-container {
         position: relative;
-        max-width: 500px;
+        max-width: 600px;
         margin: 0 auto;
     }
 
+    /* Liquid Glass Search Bar */
     #course-search {
         width: 100%;
-        padding: 15px 50px 15px 25px;
-        font-size: 1.1rem;
-        border: 2px solid rgba(240, 117, 174, 0.3);
+        padding: 18px 60px 18px 30px;
+        font-size: 1.15rem;
+        border: 1px solid rgba(255, 255, 255, 0.5);
         border-radius: 50px;
         outline: none;
-        transition: all 0.3s ease;
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(10px);
-        box-shadow: 0 4px 15px rgba(240, 117, 174, 0.1);
+        transition: all 0.4s ease;
+
+        /* Glass Effect */
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        box-shadow:
+            0 8px 32px 0 rgba(31, 38, 135, 0.07),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+
+        color: #444;
+    }
+
+    #course-search::placeholder {
+        color: #888;
     }
 
     #course-search:focus {
-        border-color: #f075ae;
-        box-shadow: 0 8px 25px rgba(240, 117, 174, 0.25);
-        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.4);
+        box-shadow:
+            0 8px 32px 0 rgba(240, 117, 174, 0.15),
+            0 0 0 2px rgba(240, 117, 174, 0.3);
+        transform: translateY(-2px) scale(1.01);
     }
 
     .search-icon {
         position: absolute;
-        right: 20px;
+        right: 25px;
         top: 50%;
         transform: translateY(-50%);
         color: #f075ae;
         pointer-events: none;
+        opacity: 0.8;
     }
 
     /* Course Grid */
@@ -333,7 +379,7 @@ const courses: Course[] = [
     }
 
     .card-content {
-        background: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.8);
         border-radius: 20px;
         overflow: hidden;
         box-shadow:
@@ -343,8 +389,9 @@ const courses: Course[] = [
         height: 100%;
         display: flex;
         flex-direction: column;
-        border: 1px solid rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.6);
         transform-style: preserve-3d;
+        backdrop-filter: blur(10px);
     }
 
     .course-card:hover .card-content {
@@ -353,29 +400,35 @@ const courses: Course[] = [
             0 20px 40px rgba(240, 117, 174, 0.2),
             /* Pinkish glow */ 0 12px 12px rgba(0, 0, 0, 0.1);
         border-color: rgba(240, 117, 174, 0.4);
+        background: rgba(255, 255, 255, 0.95);
     }
 
-    .card-image {
-        height: 140px;
+    /* New Image Wrapper Style */
+    .card-image-wrapper {
+        height: 160px;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        background: #f5f5f7;
+    }
+
+    .card-cover-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .course-card:hover .card-cover-image {
+        transform: scale(1.05); /* Zoom effect */
+    }
+
+    .card-image-placeholder {
+        width: 100%;
+        height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .card-image::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 40px;
-        background: linear-gradient(
-            to top,
-            rgba(255, 255, 255, 1),
-            transparent
-        );
     }
 
     .placeholder-icon {
