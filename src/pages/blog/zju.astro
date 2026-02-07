@@ -1,21 +1,452 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
+
+interface Course {
+    id: string;
+    title: string;
+    intro: string;
+    tags: string[];
+    color: string; // Gradient start color for placeholder
+}
+
+// Initial Data (User will update content later)
+const courses: Course[] = [
+    {
+        id: "anim",
+        title: "计算机动画",
+        intro: "Exploring the principles of computer animation, including kinematics, deformation, and physics-based simulation.",
+        tags: ["Graphics", "Animation", "Physics"],
+        color: "#ff9a9e",
+    },
+    {
+        id: "cg",
+        title: "计算机图形学",
+        intro: "Fundamentals of rendering, geometry processing, and visual computing.",
+        tags: ["Graphics", "Rendering", "Math"],
+        color: "#a18cd1",
+    },
+    {
+        id: "num",
+        title: "数值分析",
+        intro: "Algorithms for continuous mathematics and numerical approximation.",
+        tags: ["Math", "Algorithms"],
+        color: "#fad0c4",
+    },
+    {
+        id: "img",
+        title: "图像信息处理",
+        intro: "Techniques for image processing, enhancement, and restoration.",
+        tags: ["Vision", "Signal Processing"],
+        color: "#ffecd2",
+    },
+    {
+        id: "co",
+        title: "计算机组成",
+        intro: "Hardware design, instruction sets, and CPU architecture.",
+        tags: ["Hardware", "Architecture"],
+        color: "#fbc2eb",
+    },
+    {
+        id: "x86",
+        title: "x86汇编语言",
+        intro: "Low-level programming and system architecture fundamentals.",
+        tags: ["Assembly", "Low-level"],
+        color: "#8fd3f4",
+    },
+    {
+        id: "arch",
+        title: "计算机体系结构",
+        intro: "Advanced topics in processor design, parallelism, and memory hierarchy.",
+        tags: ["Hardware", "Architecture"],
+        color: "#84fab0",
+    },
+    {
+        id: "db",
+        title: "数据库系统",
+        intro: "Design and implementation of database management systems.",
+        tags: ["Database", "SQL", "Systems"],
+        color: "#a6c0fe",
+    },
+    {
+        id: "la",
+        title: "线性代数",
+        intro: "Vector spaces, matrices, and linear transformations.",
+        tags: ["Math", "Foundations"],
+        color: "#f6d365",
+    },
+    {
+        id: "toc",
+        title: "计算理论",
+        intro: "Automata theory, computability, and complexity.",
+        tags: ["Theory", "Math"],
+        color: "#fda085",
+    },
+    {
+        id: "os",
+        title: "操作系统",
+        intro: "Kernel design, process management, and file systems.",
+        tags: ["Systems", "Kernel"],
+        color: "#d4fc79",
+    },
+    {
+        id: "net",
+        title: "计算机网络",
+        intro: "Network protocols, architecture, and distributed systems.",
+        tags: ["Systems", "Networking"],
+        color: "#accbee",
+    },
+];
 ---
 
 <Layout title="ZJU Lecture Notes - Liuye Zhao">
     <Header />
-    <main>
-        <h1>ZJU Lecture Notes</h1>
-        <p>Coming soon...</p>
+
+    <main class="zju-page">
+        <div class="page-header">
+            <h1 class="page-title">ZJU Lecture Notes</h1>
+            <p class="page-subtitle">
+                A collection of course notes and reflections from my time at
+                Zhejiang University.
+            </p>
+
+            <div class="search-container">
+                <input
+                    type="text"
+                    id="course-search"
+                    placeholder="Search by tags (e.g., Graphics, Math)..."
+                />
+                <div class="search-icon">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        ><circle cx="11" cy="11" r="8"></circle><line
+                            x1="21"
+                            y1="21"
+                            x2="16.65"
+                            y2="16.65"></line></svg
+                    >
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid Container -->
+        <div id="course-grid" class="course-grid">
+            {
+                courses.map((course) => (
+                    <a
+                        href={`/blog/zju/${course.id}`}
+                        class="course-card"
+                        data-tags={course.tags.join(",").toLowerCase()}
+                        data-title={course.title.toLowerCase()}
+                    >
+                        <div class="card-content">
+                            <div
+                                class="card-image"
+                                style={`background: linear-gradient(135deg, ${course.color} 0%, #fff 100%)`}
+                            >
+                                <div class="placeholder-icon">
+                                    {course.title.substring(0, 1)}
+                                </div>
+                            </div>
+                            <div class="card-info">
+                                <h2>{course.title}</h2>
+                                <p>{course.intro}</p>
+                                <div class="tags">
+                                    {course.tags.map((tag) => (
+                                        <span class="tag">{tag}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                ))
+            }
+        </div>
     </main>
 </Layout>
 
+<script>
+    // --- Random Sorting & Search Logic ---
+    document.addEventListener("DOMContentLoaded", () => {
+        const grid = document.getElementById("course-grid");
+        const searchInput = document.getElementById(
+            "course-search",
+        ) as HTMLInputElement;
+
+        if (grid) {
+            // 1. Random Sort on Load
+            const cards = Array.from(grid.children) as HTMLElement[];
+
+            // Fisher-Yates Shuffle
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+
+            // Re-append in new order
+            cards.forEach((card) => grid.appendChild(card));
+
+            // 2. Search Functionality
+            if (searchInput) {
+                searchInput.addEventListener("input", (e) => {
+                    const term = (
+                        e.target as HTMLInputElement
+                    ).value.toLowerCase();
+
+                    cards.forEach((card) => {
+                        const tags = card.dataset.tags || "";
+                        const title = card.dataset.title || "";
+
+                        // Check if term matches tag or title
+                        if (tags.includes(term) || title.includes(term)) {
+                            card.style.display = "block";
+                            // Add a small animation for reappearing?
+                            card.style.opacity = "1";
+                            card.style.transform = "scale(1)";
+                        } else {
+                            card.style.display = "none";
+                        }
+                    });
+                });
+            }
+        }
+    });
+</script>
+
 <style>
-    main {
-        max-width: 960px;
-        margin: auto;
-        padding: 3rem 1rem;
+    :root {
+        --text-color: #333;
+        --highlight-color: #f075ae;
+        --apple-font:
+            -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+            Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .zju-page {
+        min-height: 100vh;
+        padding: 8rem 2rem 4rem; /* Top padding for fixed header */
+        max-width: 1400px;
+        margin: 0 auto;
+        font-family: var(--apple-font);
+    }
+
+    /* Header & Search */
+    .page-header {
         text-align: center;
+        margin-bottom: 4rem;
+        animation: fadeInDown 0.8s ease-out;
+    }
+
+    .page-title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(120deg, #f075ae, #a18cd1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .page-subtitle {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .search-container {
+        position: relative;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    #course-search {
+        width: 100%;
+        padding: 15px 50px 15px 25px;
+        font-size: 1.1rem;
+        border: 2px solid rgba(240, 117, 174, 0.3);
+        border-radius: 50px;
+        outline: none;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 15px rgba(240, 117, 174, 0.1);
+    }
+
+    #course-search:focus {
+        border-color: #f075ae;
+        box-shadow: 0 8px 25px rgba(240, 117, 174, 0.25);
+        transform: translateY(-2px);
+    }
+
+    .search-icon {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #f075ae;
+        pointer-events: none;
+    }
+
+    /* Course Grid */
+    .course-grid {
+        display: grid;
+        grid-template-columns: repeat(
+            auto-fill,
+            minmax(280px, 1fr)
+        ); /* Responsive columns */
+        gap: 30px;
+        padding: 20px;
+    }
+
+    /* 4 columns on large screens as requested */
+    @media (min-width: 1200px) {
+        .course-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    @media (min-width: 900px) and (max-width: 1199px) {
+        .course-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    /* 3D Card Styles */
+    .course-card {
+        text-decoration: none;
+        color: inherit;
+        perspective: 1000px; /* Enable 3D space */
+        display: block;
+        animation: fadeInUp 0.8s ease-out backwards;
+    }
+
+    /* Staggered animation delays handled by JS or just simple CSS children delays if fixed count */
+    .course-card:nth-child(n) {
+        animation-delay: 0.1s;
+    }
+
+    .card-content {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow:
+            0 10px 20px rgba(0, 0, 0, 0.05),
+            /* Soft shadow */ 0 2px 6px rgba(0, 0, 0, 0.05);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy transition */
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        transform-style: preserve-3d;
+    }
+
+    .course-card:hover .card-content {
+        transform: translateY(-10px) rotateX(2deg) rotateY(2deg); /* 3D Lift */
+        box-shadow:
+            0 20px 40px rgba(240, 117, 174, 0.2),
+            /* Pinkish glow */ 0 12px 12px rgba(0, 0, 0, 0.1);
+        border-color: rgba(240, 117, 174, 0.4);
+    }
+
+    .card-image {
+        height: 140px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-image::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: linear-gradient(
+            to top,
+            rgba(255, 255, 255, 1),
+            transparent
+        );
+    }
+
+    .placeholder-icon {
+        font-size: 5rem;
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 700;
+        transform: rotate(-15deg);
+        user-select: none;
+    }
+
+    .card-info {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-info h2 {
+        font-size: 1.4rem;
+        margin: 0 0 0.5rem 0;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .card-info p {
+        font-size: 0.95rem;
+        color: #666;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+        flex: 1; /* Push tags to bottom */
+        display: -webkit-box;
+        -webkit-line-clamp: 3; /* Limit text lines */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .tag {
+        font-size: 0.8rem;
+        padding: 4px 12px;
+        background: rgba(240, 117, 174, 0.1);
+        color: #d13075;
+        border-radius: 20px;
+        font-weight: 500;
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
