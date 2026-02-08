@@ -140,19 +140,6 @@ try {
                 </div>
             </div>
 
-            <nav class="toc">
-                <h3>目录</h3>
-                <ul>
-                    {
-                        headings.map((h) => (
-                            <li class={`toc-item toc-level-${h.depth}`}>
-                                <a href={`#${h.slug}`}>{h.text}</a>
-                            </li>
-                        ))
-                    }
-                </ul>
-            </nav>
-
             <a href={`/blog/zju/${course.id}`} class="back-link">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -168,6 +155,19 @@ try {
                 </svg>
                 返回课程
             </a>
+
+            <nav class="toc">
+                <h3>目录</h3>
+                <ul>
+                    {
+                        headings.map((h) => (
+                            <li class={`toc-item toc-level-${h.depth}`}>
+                                <a href={`#${h.slug}`}>{h.text}</a>
+                            </li>
+                        ))
+                    }
+                </ul>
+            </nav>
         </aside>
 
         <article class="content" id="main-content">
@@ -271,7 +271,7 @@ try {
     :root {
         --highlight-color: #f075ae;
         --sidebar-width: 300px;
-        --content-max-width: 900px;
+        --content-max-width: 1100px;
     }
     .lecture-page {
         display: grid;
@@ -369,7 +369,6 @@ try {
     }
 
     .back-link {
-        margin-top: auto;
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -390,7 +389,7 @@ try {
     /* Content */
     .content {
         grid-column: 2;
-        padding: 4rem 2rem;
+        padding: 4rem 1rem;
         display: flex;
         justify-content: center;
         background: white;
@@ -405,11 +404,11 @@ try {
         text-align: center;
     }
     .lecture-title {
-        font-size: 3.5rem;
+        font-size: 2.8rem;
         font-weight: 900;
-        letter-spacing: -0.03em;
-        line-height: 1.1;
-        margin-bottom: 1.5rem;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+        margin-bottom: 1rem;
         background: linear-gradient(135deg, #f075ae 0%, #a18cd1 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
