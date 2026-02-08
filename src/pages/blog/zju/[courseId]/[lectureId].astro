@@ -270,30 +270,34 @@ try {
 <style>
     :root {
         --highlight-color: #f075ae;
-        --sidebar-width: 280px;
+        --sidebar-width: 300px;
+        --content-max-width: 900px;
     }
     .lecture-page {
-        display: flex;
+        display: grid;
+        grid-template-columns: var(--sidebar-width) 1fr;
         min-height: 100vh;
         padding-top: 80px;
-        font-family:
-            -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #fafafa;
     }
+
+    /* Sidebar */
     .sidebar {
         position: fixed;
         left: 0;
         top: 80px;
         width: var(--sidebar-width);
         height: calc(100vh - 80px);
-        padding: 2rem 1.5rem;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-right: 1px solid rgba(240, 117, 174, 0.1);
-        overflow-y: auto;
+        background: white;
+        border-right: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 2.5rem 1.5rem;
         display: flex;
         flex-direction: column;
-        gap: 2rem;
+        gap: 2.5rem;
+        overflow-y: auto;
+        z-index: 50;
     }
+
     .progress-container {
         position: relative;
         width: 120px;
@@ -316,18 +320,21 @@ try {
     #progress-percent {
         display: block;
         font-size: 1.5rem;
-        font-weight: 700;
+        font-weight: 800;
         color: var(--highlight-color);
     }
     .progress-label {
-        display: block;
-        font-size: 0.875rem;
-        color: #666;
+        font-size: 0.8rem;
+        color: #999;
     }
+
     .toc h3 {
-        font-size: 1rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #aaa;
+        margin-bottom: 1.5rem;
+        padding-left: 0.75rem;
     }
     .toc ul {
         list-style: none;
@@ -336,20 +343,23 @@ try {
     }
     .toc-item a {
         display: block;
-        padding: 0.5rem 0.75rem;
-        color: #666;
+        padding: 0.6rem 0.75rem;
+        color: #555;
         text-decoration: none;
+        font-size: 0.9rem;
         border-radius: 8px;
-        font-size: 0.875rem;
-        transition: all 0.2s ease;
+        transition: all 0.2s;
+        line-height: 1.4;
     }
-    .toc-item a:hover,
-    .toc-item a.active {
-        background: rgba(240, 117, 174, 0.1);
+    .toc-item a:hover {
+        background: #fef2f7;
         color: var(--highlight-color);
     }
     .toc-item a.active {
-        font-weight: 500;
+        background: var(--highlight-color);
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(240, 117, 174, 0.2);
     }
     .toc-level-2 {
         padding-left: 1rem;
@@ -357,128 +367,156 @@ try {
     .toc-level-3 {
         padding-left: 2rem;
     }
+
     .back-link {
+        margin-top: auto;
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.75rem 1rem;
-        background: rgba(240, 117, 174, 0.1);
+        padding: 0.8rem 1rem;
+        background: #f8f8f8;
         border-radius: 12px;
-        color: var(--highlight-color);
+        color: #666;
         text-decoration: none;
-        font-size: 0.875rem;
-        font-weight: 500;
-        transition: all 0.2s ease;
+        font-size: 0.9rem;
+        transition: all 0.2s;
     }
     .back-link:hover {
+        background: #f0f0f0;
+        color: #333;
         transform: translateX(-4px);
-        background: rgba(240, 117, 174, 0.2);
     }
+
+    /* Content */
     .content {
-        margin-left: var(--sidebar-width);
-        flex: 1;
+        grid-column: 2;
         padding: 4rem 2rem;
         display: flex;
         justify-content: center;
+        background: white;
     }
-    .article-container {
+    .article-inner {
         width: 100%;
-        max-width: 900px;
+        max-width: var(--content-max-width);
+    }
+
+    .lecture-header {
+        margin-bottom: 4rem;
+        text-align: center;
     }
     .lecture-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        background: linear-gradient(120deg, #f075ae, #a18cd1);
+        font-size: 3.5rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #f075ae 0%, #a18cd1 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-bottom: 1rem;
     }
-    .course-info {
+    .course-badges {
         display: flex;
-        gap: 1rem;
-        margin-bottom: 3rem;
-        padding-bottom: 1.5rem;
-        border-bottom: 2px solid rgba(240, 117, 174, 0.1);
+        justify-content: center;
+        gap: 0.75rem;
     }
-    .course-name,
-    .lecture-number {
-        padding: 0.5rem 1rem;
-        background: rgba(240, 117, 174, 0.1);
-        border-radius: 20px;
-        font-size: 0.875rem;
+    .badge {
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .badge.course-name {
+        background: #fef2f7;
         color: var(--highlight-color);
-        font-weight: 500;
     }
-    .lecture-navigation {
+    .badge.lecture-num {
+        background: #f0f0f5;
+        color: #666;
+    }
+
+    /* Markdown Styles */
+    .markdown-content {
+        font-size: 1.15rem;
+        line-height: 1.9;
+        color: #333;
+    }
+    .markdown-content :global(h1),
+    .markdown-content :global(h2),
+    .markdown-content :global(h3) {
+        color: #111;
+        margin: 4rem 0 1.5rem;
+        font-weight: 800;
+        scroll-margin-top: 100px;
+    }
+    .markdown-content :global(h1) {
+        font-size: 2.25rem;
+    }
+    .markdown-content :global(h2) {
+        font-size: 1.8rem;
+        border-bottom: 2px solid #fef2f7;
+        padding-bottom: 0.5rem;
+    }
+    .markdown-content :global(h3) {
+        font-size: 1.4rem;
+    }
+
+    .markdown-content :global(p) {
+        margin-bottom: 1.8rem;
+    }
+    .markdown-content :global(img) {
+        width: 100%;
+        border-radius: 16px;
+        margin: 3rem 0;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Navigation */
+    .lecture-nav {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-        margin-top: 5rem;
+        gap: 1.5rem;
+        margin-top: 6rem;
         padding-top: 3rem;
-        border-top: 1px solid rgba(240, 117, 174, 0.1);
+        border-top: 1px solid #f0f0f0;
     }
-    .nav-btn {
-        display: flex;
-        flex-direction: column;
+    .nav-card {
         padding: 1.5rem;
-        background: rgba(255, 255, 255, 0.8);
-        border: 1px solid rgba(240, 117, 174, 0.1);
+        background: #fcfcfc;
+        border: 1px solid #eee;
         border-radius: 16px;
         text-decoration: none;
-        transition: all 0.3s ease;
+        transition: all 0.3s;
     }
-    .nav-btn:hover {
-        background: rgba(255, 255, 255, 0.95);
+    .nav-card:hover {
         border-color: var(--highlight-color);
-        transform: translateY(-4px);
+        background: white;
+        transform: translateY(-5px);
         box-shadow: 0 10px 30px rgba(240, 117, 174, 0.1);
     }
-    .nav-btn.next {
+    .nav-card.next {
         text-align: right;
     }
     .nav-label {
-        font-size: 0.875rem;
+        font-size: 0.8rem;
         color: #999;
+        display: block;
         margin-bottom: 0.5rem;
     }
     .nav-title {
         font-size: 1.1rem;
-        font-weight: 600;
+        font-weight: 700;
         color: #333;
     }
-    .nav-btn:hover .nav-title {
-        color: var(--highlight-color);
-    }
-    .markdown-content {
-        line-height: 1.8;
-        color: #333;
-        font-size: 1.1rem;
-    }
-    .markdown-content h1,
-    .markdown-content h2,
-    .markdown-content h3 {
-        margin-top: 2.5rem;
-        margin-bottom: 1rem;
-        font-weight: 600;
-        color: #222;
-        scroll-margin-top: 100px;
-    }
-    .markdown-content p {
-        margin-bottom: 1.5rem;
-    }
-    .markdown-content img {
-        max-width: 100%;
-        height: auto;
-        border-radius: 12px;
-        margin: 2rem 0;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-    @media (max-width: 1024px) {
+
+    @media (max-width: 1200px) {
         .sidebar {
             display: none;
         }
+        .lecture-page {
+            grid-template-columns: 1fr;
+        }
         .content {
-            margin-left: 0;
+            grid-column: 1;
             padding: 2rem;
         }
     }

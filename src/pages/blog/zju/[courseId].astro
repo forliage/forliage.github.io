@@ -280,11 +280,14 @@ const lectures =
     }
     .carousel-container {
         width: 100%;
-        margin: 0 auto 3rem;
+        margin: 2rem auto 4rem; /* Specific bottom margin */
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 400px;
+        height: 450px; /* Force height to prevent overlap */
+        position: relative;
+        overflow: hidden;
+        z-index: 5;
     }
     .carousel {
         position: relative;
@@ -310,20 +313,22 @@ const lectures =
     }
     .carousel-slide img {
         height: 400px;
+        width: 100%;
         object-fit: contain;
-        max-width: 100%;
+        display: block;
     }
     .course-title {
         text-align: center;
-        font-size: 3rem;
-        margin-bottom: 2rem;
+        font-size: 3.5rem;
+        margin: 0 0 3rem 0; /* Clear margin */
         background: linear-gradient(120deg, #f075ae, #a18cd1);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         position: relative;
         z-index: 10;
-        font-weight: 800;
-        letter-spacing: -0.02em;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.2;
     }
     .lecture-list {
         display: flex;
