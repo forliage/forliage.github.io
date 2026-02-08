@@ -122,8 +122,6 @@ const lectures =
             Back
         </a>
 
-        <h1 class="course-title">{course.title}</h1>
-
         <div class="carousel-container">
             <div id="carousel" class="carousel">
                 {
@@ -135,6 +133,8 @@ const lectures =
                 }
             </div>
         </div>
+
+        <h1 class="course-title">{course.title}</h1>
 
         <div class="lecture-list">
             {
@@ -280,7 +280,7 @@ const lectures =
     }
     .carousel-container {
         width: 100%;
-        margin: 1rem auto 8rem; /* Final attempt to force gap */
+        margin: 0 auto 3rem; /* Spacing before title */
         display: flex;
         justify-content: center;
         align-items: center;
@@ -312,7 +312,7 @@ const lectures =
         z-index: 1;
     }
     .carousel-slide img {
-        height: 450px; /* Adjust image height to container */
+        height: 500px; /* Rigid image height */
         width: 100%;
         object-fit: contain;
         display: block;
@@ -320,7 +320,7 @@ const lectures =
     .course-title {
         text-align: center;
         font-size: 3.5rem;
-        margin: 0 0 3rem 0; /* Clear margin */
+        margin: 0 0 5rem 0; /* Large margin before lecture list */
         background: linear-gradient(120deg, #f075ae, #a18cd1);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
