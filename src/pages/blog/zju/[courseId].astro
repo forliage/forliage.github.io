@@ -186,14 +186,19 @@ const lectures = Array.from({ length: 10 }, (_, i) => {
                 slides[0].classList.add("active");
 
                 const nextSlide = () => {
-                    slides[currentIndex].classList.remove("active");
+                    const nextIndex = (currentIndex + 1) % slides.length;
+
+                    // Start next slide entering immediately
+                    slides[nextIndex].classList.add("active");
+
+                    // Current slide exits
                     slides[currentIndex].classList.add("exit");
 
+                    // Clean up after transition
                     setTimeout(() => {
-                        slides[currentIndex].classList.remove("exit");
-                        currentIndex = (currentIndex + 1) % slides.length;
-                        slides[currentIndex].classList.add("active");
-                    }, 800); // Exit animation duration
+                        slides[currentIndex].classList.remove("active", "exit");
+                        currentIndex = nextIndex;
+                    }, 800); // Match CSS transition duration
                 };
 
                 setInterval(nextSlide, 4000); // Change slide every 4 seconds
@@ -318,38 +323,32 @@ const lectures = Array.from({ length: 10 }, (_, i) => {
     .carousel-container {
         position: relative;
         width: 100%;
-        max-width: 900px;
         margin: 0 auto 3rem;
         overflow: hidden;
-        border-radius: 20px;
-        background: rgba(255, 255, 255, 0.5);
-        backdrop-filter: blur(10px);
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         z-index: 10;
-
-        /* Use aspect ratio instead of fixed height */
-        aspect-ratio: 16 / 9;
-        min-height: 300px;
-        max-height: 500px;
+        /* No background, no border */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 400px;
     }
 
     .carousel {
         position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         width: 100%;
-        height: 100%;
     }
 
     .carousel-slide {
         position: absolute;
-        width: 100%;
-        height: 100%;
         opacity: 0;
         transform: translateX(100%);
         transition: all 0.8s ease-in-out;
         display: flex;
-        align-items: center;
         justify-content: center;
-        padding: 20px; /* Add padding to prevent images from touching edges */
+        align-items: center;
     }
 
     .carousel-slide.active {
@@ -359,18 +358,18 @@ const lectures = Array.from({ length: 10 }, (_, i) => {
     }
 
     .carousel-slide.exit {
-        opacity: 0;
+        opacity: 1;
         transform: translateX(-100%);
         z-index: 1;
     }
 
     .carousel-slide img {
-        max-width: 100%;
-        max-height: 100%;
+        /* Fixed height, auto width - all images same height */
+        height: 400px;
         width: auto;
-        height: auto;
+        max-width: 100%;
         object-fit: contain;
-        border-radius: 8px; /* Slight rounding for aesthetics */
+        display: block;
     }
 
     /* Course Title */
@@ -469,8 +468,11 @@ const lectures = Array.from({ length: 10 }, (_, i) => {
 
     @media (max-width: 768px) {
         .carousel-container {
-            min-height: 200px;
-            max-height: 350px;
+            min-height: 250px;
+        }
+
+        .carousel-slide img {
+            height: 250px; /* Smaller height on mobile */
         }
 
         .lecture-card {
