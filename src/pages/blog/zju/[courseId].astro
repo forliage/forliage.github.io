@@ -125,21 +125,29 @@ const lectures = Array.from({ length: 10 }, (_, i) => {
         <div class="lecture-list">
             {
                 lectures.map((lecture) => (
-                    <div class="lecture-card">
-                        <div class="lecture-image">
-                            {lecture.image ? (
-                                <img src={lecture.image} alt={lecture.title} />
-                            ) : (
-                                <div class="image-placeholder">
-                                    L{lecture.id}
-                                </div>
-                            )}
+                    <a
+                        href={`/blog/zju/${course.id}/lecture-${lecture.id}`}
+                        class="lecture-card-link"
+                    >
+                        <div class="lecture-card">
+                            <div class="lecture-image">
+                                {lecture.image ? (
+                                    <img
+                                        src={lecture.image}
+                                        alt={lecture.title}
+                                    />
+                                ) : (
+                                    <div class="image-placeholder">
+                                        L{lecture.id}
+                                    </div>
+                                )}
+                            </div>
+                            <div class="lecture-info">
+                                <h3>{lecture.title}</h3>
+                                <p>{lecture.intro}</p>
+                            </div>
                         </div>
-                        <div class="lecture-info">
-                            <h3>{lecture.title}</h3>
-                            <p>{lecture.intro}</p>
-                        </div>
-                    </div>
+                    </a>
                 ))
             }
         </div>
@@ -392,6 +400,12 @@ const lectures = Array.from({ length: 10 }, (_, i) => {
         gap: 1.5rem;
         position: relative;
         z-index: 10;
+    }
+
+    .lecture-card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
     }
 
     .lecture-card {
