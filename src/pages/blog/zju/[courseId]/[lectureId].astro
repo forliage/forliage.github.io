@@ -481,20 +481,20 @@ try {
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
     /* Specific scaling for GIFs */
-    .markdown-content :global(img[src$=".gif"]) {
-        max-width: 35% !important;
-        margin: 2rem auto;
+    .markdown-content :global(img[src*=".gif"]) {
+        max-width: 320px !important;
+        width: 100%;
+        margin: 2.5rem auto;
+        border-radius: 8px;
     }
-    /* Fix math "ghosting" / double rendering */
+    /* Matrix and Math layout fixes */
+    .markdown-content :global(.katex-display) {
+        text-align: center;
+        width: 100%;
+    }
     .markdown-content :global(.katex-mathml),
     .markdown-content :global(.katex-html .sr-only) {
         display: none !important;
-        visibility: hidden !important;
-    }
-    .markdown-content :global(.katex-display) {
-        margin: 2rem 0;
-        overflow-x: auto;
-        overflow-y: hidden;
     }
     /* Matrix "squash" fix - Reset line-height and spacing for KaTeX */
     .markdown-content :global(.katex) {
