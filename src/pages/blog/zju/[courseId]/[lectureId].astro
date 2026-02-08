@@ -110,12 +110,6 @@ try {
 ---
 
 <Layout title={`${lecture.title} - ${course.title}`}>
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
-        integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzWq5UM5uuS6Oe619ggIc8iV3RWUXLS9VMPu"
-        crossorigin="anonymous"
-    />
     <Header />
 
     <main class="lecture-page">
@@ -488,16 +482,24 @@ try {
     }
     /* Specific scaling for GIFs */
     .markdown-content :global(img[src$=".gif"]) {
-        max-width: 70%;
+        max-width: 50%;
+        margin: 2rem auto;
     }
     /* Fix math "ghosting" / double rendering */
-    .markdown-content :global(.katex-mathml) {
+    .markdown-content :global(.katex-mathml),
+    .markdown-content :global(.katex-html .sr-only) {
         display: none !important;
+        visibility: hidden !important;
     }
     .markdown-content :global(.katex-display) {
-        margin: 1.5rem 0;
+        margin: 2rem 0;
         overflow-x: auto;
         overflow-y: hidden;
+        line-height: 1; /* Match matrices precisely */
+    }
+    .markdown-content :global(.katex) {
+        font-size: 1.1em;
+        line-height: 1;
     }
 
     /* Navigation */
