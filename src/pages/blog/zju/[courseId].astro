@@ -319,7 +319,6 @@ const lectures = Array.from({ length: 10 }, (_, i) => {
         position: relative;
         width: 100%;
         max-width: 900px;
-        height: 400px;
         margin: 0 auto 3rem;
         overflow: hidden;
         border-radius: 20px;
@@ -327,6 +326,11 @@ const lectures = Array.from({ length: 10 }, (_, i) => {
         backdrop-filter: blur(10px);
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         z-index: 10;
+
+        /* Use aspect ratio instead of fixed height */
+        aspect-ratio: 16 / 9;
+        min-height: 300px;
+        max-height: 500px;
     }
 
     .carousel {
@@ -345,6 +349,7 @@ const lectures = Array.from({ length: 10 }, (_, i) => {
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 20px; /* Add padding to prevent images from touching edges */
     }
 
     .carousel-slide.active {
@@ -364,7 +369,8 @@ const lectures = Array.from({ length: 10 }, (_, i) => {
         max-height: 100%;
         width: auto;
         height: auto;
-        object-fit: contain; /* Changed from cover to contain - shows full image without cropping */
+        object-fit: contain;
+        border-radius: 8px; /* Slight rounding for aesthetics */
     }
 
     /* Course Title */
@@ -463,7 +469,8 @@ const lectures = Array.from({ length: 10 }, (_, i) => {
 
     @media (max-width: 768px) {
         .carousel-container {
-            height: 250px;
+            min-height: 200px;
+            max-height: 350px;
         }
 
         .lecture-card {
