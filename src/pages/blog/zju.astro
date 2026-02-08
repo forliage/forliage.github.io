@@ -130,6 +130,25 @@ const getCourseImage = (id: string) => {
         <!-- Background Meteors Container -->
         <div id="meteors-container"></div>
 
+        <!-- Back Button -->
+        <a href="/blog" class="back-button">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Back
+        </a>
+
         <div class="page-header">
             <h1 class="page-title">ZJU Lecture Notes</h1>
             <p class="page-subtitle">
@@ -379,6 +398,60 @@ const getCourseImage = (id: string) => {
         100% {
             opacity: 0;
             transform: rotate(-45deg) translateX(-1000px); /* Move far left-down */
+        }
+    }
+
+    /* --- Back Button --- */
+    .back-button {
+        position: fixed;
+        top: 100px; /* Below header */
+        left: 2rem;
+        z-index: 100;
+
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+
+        /* Liquid Glass Effect */
+        background: rgba(255, 240, 245, 0.7);
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        border: 1px solid rgba(240, 117, 174, 0.3);
+        border-radius: 50px;
+
+        box-shadow:
+            0 8px 32px 0 rgba(240, 117, 174, 0.1),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+
+        color: #f075ae;
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-decoration: none;
+
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .back-button svg {
+        stroke: currentColor;
+    }
+
+    .back-button:hover {
+        background: rgba(255, 240, 245, 0.9);
+        box-shadow:
+            0 8px 32px 0 rgba(240, 117, 174, 0.2),
+            0 0 0 2px rgba(240, 117, 174, 0.3);
+        transform: translateX(-4px);
+        text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+        .back-button {
+            top: 80px;
+            left: 1rem;
+            padding: 10px 16px;
+            font-size: 0.9rem;
         }
     }
 
