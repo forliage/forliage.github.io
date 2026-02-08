@@ -1,0 +1,54 @@
+{
+    "lectures": [
+        {
+            "id": 1,
+            "title": "Lecture 1: Introduction to Computer Animation",
+            "intro": "Overview of computer animation principles, history, and fundamental concepts."
+        },
+        {
+            "id": 2,
+            "title": "Lecture 2: Kinematics and Motion",
+            "intro": "Forward and inverse kinematics, skeletal animation basics."
+        },
+        {
+            "id": 3,
+            "title": "Lecture 3: Interpolation Techniques",
+            "intro": "Linear, spline, and Bezier interpolation for smooth motion."
+        },
+        {
+            "id": 4,
+            "title": "Lecture 4: Character Rigging",
+            "intro": "Skeleton setup, skinning, and weight painting."
+        },
+        {
+            "id": 5,
+            "title": "Lecture 5: Physics-Based Animation",
+            "intro": "Particle systems, rigid body dynamics, and collision detection."
+        },
+        {
+            "id": 6,
+            "title": "Lecture 6: Deformation and Morphing",
+            "intro": "Mesh deformation techniques and shape interpolation."
+        },
+        {
+            "id": 7,
+            "title": "Lecture 7: Motion Capture",
+            "intro": "Motion capture technology and data processing."
+        },
+        {
+            "id": 8,
+            "title": "Lecture 8: Procedural Animation",
+            "intro": "Algorithmic animation generation and behavioral systems."
+        },
+        {
+            "id": 9,
+            "title": "Lecture 9: Facial Animation",
+            "intro": "Facial rigging, blend shapes, and expression systems."
+        },
+        {
+            "id": 10,
+            "title": "Lecture 10: Advanced Topics",
+            "intro": "Cloth simulation, fluid dynamics, and modern techniques."
+        }
+    ]
+}

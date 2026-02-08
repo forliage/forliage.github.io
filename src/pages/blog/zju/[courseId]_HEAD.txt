@@ -1,0 +1,84 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import Header from "../../../components/Header.astro";
+import type { ImageMetadata } from "astro";
+
+export async function getStaticPaths() {
+    const courses = [
+        { id: "anim", title: "Computer Animation" },
+        { id: "cg", title: "Computer Graphics" },
+        { id: "num", title: "Numerical Analysis" },
+        { id: "img", title: "Digital Image Processing" },
+        { id: "co", title: "Computer Organization" },
+        { id: "x86", title: "x86 Assembly Language" },
+        { id: "arch", title: "Computer Architecture" },
+        { id: "db", title: "Database System" },
+        { id: "la", title: "Linear Algebra" },
+        { id: "toc", title: "Theory of Computation" },
+        { id: "os", title: "Operation System" },
+        { id: "net", title: "Computer Network" },
+    ];
+
+    return courses.map((course) => ({
+        params: { courseId: course.id },
+        props: { course },
+    }));
+}
+
+interface Props {
+    course: {
+        id: string;
+        title: string;
+    };
+}
+
+const { course } = Astro.props;
+
+const allCarouselImages = import.meta.glob<{ default: ImageMetadata }>(
+    `/src/pages/blog/zju/*/carousel/*.{png,jpg,jpeg}`,
+    { eager: true },
+);
+
+const allLectureImages = import.meta.glob<{ default: ImageMetadata }>(
+    `/src/pages/blog/zju/*/lectures/*.{svg,png,jpg,jpeg}`,
+    { eager: true },
+);
+
+const carouselSlides = Object.keys(allCarouselImages)
+    .filter((path) => path.includes(`/zju/${course.id}/carousel/`))
+    .map((path) => allCarouselImages[path].default.src)
+    .sort();
+
+const courseLectureImages = Object.keys(allLectureImages)
+    .filter((path) => path.includes(`/zju/${course.id}/lectures/`))
+    .reduce(
+        (acc, path) => {
+            acc[path] = allLectureImages[path];
+            return acc;
+        },
+        {} as Record<string, { default: ImageMetadata }>,
+    );
+
+const allLecturesJson = import.meta.glob<{lectures: Array<{id: number; title: string; intro: string}>>>(
+    `/src/pages/blog/zju/*/lectures.json`,
+    { eager: true },
+);
+
+const lecturesJsonPath = Object.keys(allLecturesJson).find(path => 
+    path.includes(`/zju/${course.id}/lectures.json`)
+);
+
+const lecturesData = lecturesJsonPath 
+    ? allLecturesJson[lecturesJsonPath].lectures 
+    : [];
+
+const lectures = lecturesData.map((lecture) => {
+    const imagePath = Object.keys(courseLectureImages).find((p) =>
+        p.includes(`lecture${lecture.id}.`),
+    );
+    return {
+        ...lecture,
+        image: imagePath ? courseLectureImages[imagePath].default.src : null,
+    };
+});
+---

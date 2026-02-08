@@ -1,0 +1,541 @@
+---
+import Layout from "../../../../layouts/Layout.astro";
+import Header from "../../../../components/Header.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+    const courses = [
+        { id: "anim", title: "Computer Animation" },
+        { id: "cg", title: "Computer Graphics" },
+        { id: "num", title: "Numerical Analysis" },
+        { id: "img", title: "Digital Image Processing" },
+        { id: "co", title: "Computer Organization" },
+        { id: "x86", title: "x86 Assembly Language" },
+        { id: "arch", title: "Computer Architecture" },
+        { id: "db", title: "Database System" },
+        { id: "la", title: "Linear Algebra" },
+        { id: "toc", title: "Theory of Computation" },
+        { id: "os", title: "Operation System" },
+        { id: "net", title: "Computer Network" },
+    ];
+
+    // Load all lecture JSON files
+    const allLecturesJson = import.meta.glob<{
+        lectures: Array<{ id: number; title: string; intro: string }>;
+    }>(`/src/pages/blog/zju/*/lectures.json`, { eager: true });
+
+    const paths = [];
+
+    for (const course of courses) {
+        const lecturesJsonPath = Object.keys(allLecturesJson).find((path) =>
+            path.includes(`/zju/${course.id}/lectures.json`),
+        );
+
+        const lecturesData = lecturesJsonPath
+            ? allLecturesJson[lecturesJsonPath].lectures
+            : [];
+
+        for (const lecture of lecturesData) {
+            paths.push({
+                params: {
+                    courseId: course.id,
+                    lectureId: `lecture-${lecture.id}`,
+                },
+                props: {
+                    course,
+                    lecture,
+                    lectureNumber: lecture.id,
+                },
+            });
+        }
+    }
+
+    return paths;
+}
+
+interface Props {
+    course: {
+        id: string;
+        title: string;
+    };
+    lecture: {
+        id: number;
+        title: string;
+        intro: string;
+    };
+    lectureNumber: number;
+}
+
+const { course, lecture, lectureNumber } = Astro.props;
+
+// Load markdown content
+let markdownContent = "";
+let headings: Array<{ depth: number; text: string; slug: string }> = [];
+
+try {
+    const mdModule = await import(
+        `./zju/${course.id}/lecture-${lectureNumber}.md`
+    );
+    markdownContent = mdModule.compiledContent
+        ? mdModule.compiledContent()
+        : "";
+
+    // Extract headings for TOC
+    const headingRegex = /<h([1-6])[^>]*id="([^"]*)"[^>]*>(.+?)<\/h\1>/g;
+    let match;
+    while ((match = headingRegex.exec(markdownContent)) !== null) {
+        headings.push({
+            depth: parseInt(match[1]),
+            slug: match[2],
+            text: match[3].replace(/<[^>]+>/g, ""), // Strip HTML tags
+        });
+    }
+} catch (error) {
+    console.warn(
+        `No markdown file found for ${course.id} lecture ${lectureNumber}`,
+    );
+    markdownContent = `<p>Lecture content not yet available. Please add content to <code>lecture-${lectureNumber}.md</code></p>`;
+}
+---
+
+<Layout title={`${lecture.title} - ${course.title}`}>
+    <Header />
+
+    <main class="lecture-page">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Circular Progress Indicator -->
+            <div class="progress-container">
+                <svg class="progress-ring" width="120" height="120">
+                    <circle
+                        class="progress-ring-bg"
+                        stroke="#f0f0f0"
+                        stroke-width="8"
+                        fill="transparent"
+                        r="52"
+                        cx="60"
+                        cy="60"></circle>
+                    <circle
+                        id="progress-circle"
+                        class="progress-ring-circle"
+                        stroke="#f075ae"
+                        stroke-width="8"
+                        fill="transparent"
+                        r="52"
+                        cx="60"
+                        cy="60"></circle>
+                </svg>
+                <div class="progress-text">
+                    <span id="progress-percent">0%</span>
+                    <span class="progress-label">已读</span>
+                </div>
+            </div>
+
+            <!-- Table of Contents -->
+            <nav class="toc">
+                <h3>目录</h3>
+                <ul>
+                    {
+                        headings.map((heading) => (
+                            <li class={`toc-item toc-level-${heading.depth}`}>
+                                <a href={`#${heading.slug}`}>{heading.text}</a>
+                            </li>
+                        ))
+                    }
+                </ul>
+            </nav>
+
+            <!-- Back Button -->
+            <a href={`/blog/zju/${course.id}`} class="back-link">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                >
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                返回课程
+            </a>
+        </aside>
+
+        <!-- Main Content -->
+        <article class="content" id="main-content">
+            <h1 class="lecture-title">{lecture.title}</h1>
+            <div class="course-info">
+                <span class="course-name">{course.title}</span>
+                <span class="lecture-number">第 {lectureNumber} 讲</span>
+            </div>
+
+            <div class="markdown-content" set:html={markdownContent} />
+        </article>
+    </main>
+</Layout>
+
+<script>
+    // Progress tracking
+    const updateProgress = () => {
+        const content = document.getElementById("main-content");
+        if (!content) return;
+
+        const scrollTop = window.scrollY;
+        const docHeight = content.scrollHeight;
+        const winHeight = window.innerHeight;
+        const scrollPercent = scrollTop / (docHeight - winHeight);
+        const scrollPercentRounded = Math.min(
+            Math.round(scrollPercent * 100),
+            100,
+        );
+
+        // Update progress text
+        const progressText = document.getElementById("progress-percent");
+        if (progressText) {
+            progressText.textContent = `${scrollPercentRounded}%`;
+        }
+
+        // Update progress circle
+        const circle = document.getElementById("progress-circle");
+        if (circle) {
+            const radius = 52;
+            const circumference = radius * 2 * Math.PI;
+            const offset =
+                circumference - (scrollPercentRounded / 100) * circumference;
+            circle.style.strokeDasharray = `${circumference} ${circumference}`;
+            circle.style.strokeDashoffset = offset.toString();
+        }
+    };
+
+    // Highlight active TOC item
+    const updateActiveTOC = () => {
+        const headings = document.querySelectorAll(
+            ".markdown-content h1, .markdown-content h2, .markdown-content h3, .markdown-content h4, .markdown-content h5, .markdown-content h6",
+        );
+        const tocLinks = document.querySelectorAll(".toc a");
+
+        let activeId = "";
+        headings.forEach((heading) => {
+            const rect = heading.getBoundingClientRect();
+            if (rect.top <= 100) {
+                activeId = heading.id;
+            }
+        });
+
+        tocLinks.forEach((link) => {
+            const href = link.getAttribute("href");
+            if (href === `#${activeId}`) {
+                link.classList.add("active");
+            } else {
+                link.classList.remove("active");
+            }
+        });
+    };
+
+    // Initialize and listen to scroll
+    window.addEventListener("scroll", () => {
+        updateProgress();
+        updateActiveTOC();
+    });
+
+    // Initial update
+    updateProgress();
+    updateActiveTOC();
+</script>
+
+<style>
+    :root {
+        --text-color: #333;
+        --highlight-color: #f075ae;
+        --sidebar-width: 280px;
+        --apple-font:
+            -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+            Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .lecture-page {
+        display: flex;
+        min-height: 100vh;
+        padding-top: 80px;
+        font-family: var(--apple-font);
+    }
+
+    /* Sidebar */
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 80px;
+        width: var(--sidebar-width);
+        height: calc(100vh - 80px);
+        padding: 2rem 1.5rem;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-right: 1px solid rgba(240, 117, 174, 0.1);
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    /* Progress Indicator */
+    .progress-container {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+    }
+
+    .progress-ring {
+        transform: rotate(-90deg);
+    }
+
+    .progress-ring-circle {
+        transition: stroke-dashoffset 0.3s ease;
+    }
+
+    .progress-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+
+    #progress-percent {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--highlight-color);
+    }
+
+    .progress-label {
+        display: block;
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    /* Table of Contents */
+    .toc {
+        flex: 1;
+    }
+
+    .toc h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    .toc ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .toc-item {
+        margin-bottom: 0.5rem;
+    }
+
+    .toc-item a {
+        display: block;
+        padding: 0.5rem 0.75rem;
+        color: #666;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+
+    .toc-item a:hover {
+        background: rgba(240, 117, 174, 0.1);
+        color: var(--highlight-color);
+    }
+
+    .toc-item a.active {
+        background: rgba(240, 117, 174, 0.15);
+        color: var(--highlight-color);
+        font-weight: 500;
+    }
+
+    .toc-level-1 {
+        padding-left: 0;
+    }
+    .toc-level-2 {
+        padding-left: 1rem;
+    }
+    .toc-level-3 {
+        padding-left: 2rem;
+    }
+    .toc-level-4 {
+        padding-left: 3rem;
+    }
+
+    /* Back Link */
+    .back-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        background: rgba(240, 117, 174, 0.1);
+        border-radius: 12px;
+        color: var(--highlight-color);
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .back-link:hover {
+        background: rgba(240, 117, 174, 0.2);
+        transform: translateX(-4px);
+    }
+
+    /* Main Content */
+    .content {
+        margin-left: var(--sidebar-width);
+        flex: 1;
+        max-width: 800px;
+        padding: 2rem 4rem 4rem 4rem;
+    }
+
+    .lecture-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1rem;
+        background: linear-gradient(120deg, #f075ae, #a18cd1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .course-info {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 3rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px solid rgba(240, 117, 174, 0.1);
+    }
+
+    .course-name,
+    .lecture-number {
+        padding: 0.5rem 1rem;
+        background: rgba(240, 117, 174, 0.1);
+        border-radius: 20px;
+        font-size: 0.875rem;
+        color: var(--highlight-color);
+        font-weight: 500;
+    }
+
+    /* Markdown Content Styling */
+    .markdown-content {
+        line-height: 1.8;
+        color: #333;
+    }
+
+    .markdown-content h1,
+    .markdown-content h2,
+    .markdown-content h3,
+    .markdown-content h4 {
+        margin-top: 2.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        color: #222;
+        scroll-margin-top: 100px;
+    }
+
+    .markdown-content h1 {
+        font-size: 2rem;
+    }
+    .markdown-content h2 {
+        font-size: 1.75rem;
+    }
+    .markdown-content h3 {
+        font-size: 1.5rem;
+    }
+    .markdown-content h4 {
+        font-size: 1.25rem;
+    }
+
+    .markdown-content p {
+        margin-bottom: 1.5rem;
+    }
+
+    .markdown-content ul,
+    .markdown-content ol {
+        margin-bottom: 1.5rem;
+        padding-left: 2rem;
+    }
+
+    .markdown-content li {
+        margin-bottom: 0.5rem;
+    }
+
+    .markdown-content code {
+        background: #f5f5f7;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-size: 0.9em;
+        font-family: "Monaco", "Menlo", monospace;
+    }
+
+    .markdown-content pre {
+        background: #1e1e1e;
+        color: #d4d4d4;
+        padding: 1.5rem;
+        border-radius: 12px;
+        overflow-x: auto;
+        margin-bottom: 1.5rem;
+    }
+
+    .markdown-content pre code {
+        background: none;
+        padding: 0;
+        color: inherit;
+    }
+
+    .markdown-content blockquote {
+        border-left: 4px solid var(--highlight-color);
+        padding-left: 1.5rem;
+        margin: 1.5rem 0;
+        color: #666;
+        font-style: italic;
+    }
+
+    .markdown-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+        margin: 2rem 0;
+    }
+
+    .markdown-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 2rem 0;
+    }
+
+    .markdown-content th,
+    .markdown-content td {
+        padding: 0.75rem;
+        border: 1px solid #e0e0e0;
+        text-align: left;
+    }
+
+    .markdown-content th {
+        background: #f5f5f7;
+        font-weight: 600;
+    }
+
+    @media (max-width: 1024px) {
+        .sidebar {
+            display: none;
+        }
+
+        .content {
+            margin-left: 0;
+            padding: 2rem;
+        }
+    }
+</style>
