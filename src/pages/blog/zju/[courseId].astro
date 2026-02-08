@@ -1,0 +1,477 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import Header from "../../../components/Header.astro";
+import type { ImageMetadata } from "astro";
+
+export async function getStaticPaths() {
+    // Define all courses - expand this list as needed
+    const courses = [
+        { id: "anim", title: "Computer Animation" },
+        { id: "cg", title: "Computer Graphics" },
+        { id: "num", title: "Numerical Analysis" },
+        { id: "img", title: "Digital Image Processing" },
+        { id: "co", title: "Computer Organization" },
+        { id: "x86", title: "x86 Assembly Language" },
+        { id: "arch", title: "Computer Architecture" },
+        { id: "db", title: "Database System" },
+        { id: "la", title: "Linear Algebra" },
+        { id: "toc", title: "Theory of Computation" },
+        { id: "os", title: "Operation System" },
+        { id: "net", title: "Computer Network" },
+    ];
+
+    return courses.map((course) => ({
+        params: { courseId: course.id },
+        props: { course },
+    }));
+}
+
+interface Props {
+    course: {
+        id: string;
+        title: string;
+    };
+}
+
+const { course } = Astro.props;
+
+// Load ALL carousel and lecture images with static glob patterns
+// Then filter by course ID
+const allCarouselImages = import.meta.glob<{ default: ImageMetadata }>(
+    `/src/pages/blog/zju/*/carousel/*.{svg,png,jpg,jpeg}`,
+    { eager: true },
+);
+
+const allLectureImages = import.meta.glob<{ default: ImageMetadata }>(
+    `/src/pages/blog/zju/*/lectures/*.{svg,png,jpg,jpeg}`,
+    { eager: true },
+);
+
+// Filter carousel images for this course
+const carouselSlides = Object.keys(allCarouselImages)
+    .filter((path) => path.includes(`/zju/${course.id}/carousel/`))
+    .map((path) => allCarouselImages[path].default.src)
+    .sort(); // Sort for consistent order
+
+// Filter lecture images for this course
+const courseLectureImages = Object.keys(allLectureImages)
+    .filter((path) => path.includes(`/zju/${course.id}/lectures/`))
+    .reduce(
+        (acc, path) => {
+            acc[path] = allLectureImages[path];
+            return acc;
+        },
+        {} as Record<string, { default: ImageMetadata }>,
+    );
+
+// Placeholder lecture data - user will customize later
+const lectures = Array.from({ length: 10 }, (_, i) => {
+    const lectureNum = i + 1;
+    const imagePath = Object.keys(courseLectureImages).find((p) =>
+        p.includes(`lecture${lectureNum}.`),
+    );
+    return {
+        id: lectureNum,
+        title: `Lecture ${lectureNum}: Topic Title`,
+        intro: "Introduction to this lecture topic.",
+        image: imagePath ? courseLectureImages[imagePath].default.src : null,
+    };
+});
+---
+
+<Layout title={`${course.title} - ZJU Lecture Notes`}>
+    <Header />
+
+    <main class="course-page">
+        <!-- Background Meteors -->
+        <div id="meteors-container"></div>
+
+        <!-- Back Button -->
+        <a href="/blog/zju" class="back-button">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+            >
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Back
+        </a>
+
+        <!-- Image Carousel -->
+        <div class="carousel-container">
+            <div id="carousel" class="carousel">
+                {
+                    carouselSlides.map((slide, index) => (
+                        <div class="carousel-slide" data-index={index}>
+                            <img src={slide} alt={`Slide ${index + 1}`} />
+                        </div>
+                    ))
+                }
+            </div>
+        </div>
+
+        <!-- Course Title -->
+        <h1 class="course-title">{course.title}</h1>
+
+        <!-- Lecture List -->
+        <div class="lecture-list">
+            {
+                lectures.map((lecture) => (
+                    <div class="lecture-card">
+                        <div class="lecture-image">
+                            {lecture.image ? (
+                                <img src={lecture.image} alt={lecture.title} />
+                            ) : (
+                                <div class="image-placeholder">
+                                    L{lecture.id}
+                                </div>
+                            )}
+                        </div>
+                        <div class="lecture-info">
+                            <h3>{lecture.title}</h3>
+                            <p>{lecture.intro}</p>
+                        </div>
+                    </div>
+                ))
+            }
+        </div>
+    </main>
+</Layout>
+
+<script>
+    // Meteor Shower (same as ZJU index)
+    document.addEventListener("DOMContentLoaded", () => {
+        const meteorsContainer = document.getElementById("meteors-container");
+        if (meteorsContainer) {
+            const createMeteor = () => {
+                const meteor = document.createElement("div");
+                meteor.classList.add("meteor");
+
+                const startX = Math.random() * 100 + 20;
+                const startY = Math.random() * 100 - 50;
+                const width = Math.random() * 100 + 50;
+
+                meteor.style.left = `${startX}%`;
+                meteor.style.top = `${startY}%`;
+                meteor.style.width = `${width}px`;
+
+                const duration = Math.random() * 1 + 1;
+                meteor.style.animationDuration = `${duration}s`;
+
+                meteorsContainer.appendChild(meteor);
+
+                setTimeout(() => {
+                    meteor.remove();
+                }, duration * 1000);
+            };
+
+            setInterval(createMeteor, 300);
+            createMeteor();
+        }
+
+        // Carousel Auto-slide
+        const carousel = document.getElementById("carousel");
+        if (carousel) {
+            const slides = Array.from(carousel.children) as HTMLElement[];
+            if (slides.length > 0) {
+                let currentIndex = 0;
+                slides[0].classList.add("active");
+
+                const nextSlide = () => {
+                    slides[currentIndex].classList.remove("active");
+                    slides[currentIndex].classList.add("exit");
+
+                    setTimeout(() => {
+                        slides[currentIndex].classList.remove("exit");
+                        currentIndex = (currentIndex + 1) % slides.length;
+                        slides[currentIndex].classList.add("active");
+                    }, 800); // Exit animation duration
+                };
+
+                setInterval(nextSlide, 4000); // Change slide every 4 seconds
+            }
+        }
+    });
+</script>
+
+<style>
+    :root {
+        --text-color: #333;
+        --highlight-color: #f075ae;
+        --apple-font:
+            -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+            Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .course-page {
+        min-height: 100vh;
+        padding: 8rem 2rem 4rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        font-family: var(--apple-font);
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    /* Meteor Shower Styles (reused) */
+    #meteors-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+    }
+
+    :global(.meteor) {
+        position: absolute;
+        height: 2px;
+        background: linear-gradient(
+            90deg,
+            rgba(161, 140, 209, 1),
+            rgba(161, 140, 209, 0)
+        );
+        opacity: 0;
+        transform: rotate(-45deg);
+        filter: drop-shadow(0 0 6px rgba(161, 140, 209, 0.8));
+        animation-name: shower;
+        animation-timing-function: linear;
+    }
+
+    :global(.meteor::after) {
+        content: "";
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: rgba(161, 140, 209, 1);
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        box-shadow: 0 0 10px 2px rgba(161, 140, 209, 0.5);
+    }
+
+    @keyframes shower {
+        0% {
+            opacity: 0;
+            transform: rotate(-45deg) translateX(0);
+        }
+        10% {
+            opacity: 0.7;
+        }
+        100% {
+            opacity: 0;
+            transform: rotate(-45deg) translateX(-1000px);
+        }
+    }
+
+    /* Back Button */
+    .back-button {
+        position: fixed;
+        top: 100px;
+        left: 2rem;
+        z-index: 100;
+
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+
+        background: rgba(255, 240, 245, 0.7);
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        border: 1px solid rgba(240, 117, 174, 0.3);
+        border-radius: 50px;
+
+        box-shadow:
+            0 8px 32px 0 rgba(240, 117, 174, 0.1),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+
+        color: #f075ae;
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-decoration: none;
+
+        transition: all 0.3s ease;
+    }
+
+    .back-button:hover {
+        background: rgba(255, 240, 245, 0.9);
+        box-shadow:
+            0 8px 32px 0 rgba(240, 117, 174, 0.2),
+            0 0 0 2px rgba(240, 117, 174, 0.3);
+        transform: translateX(-4px);
+        text-decoration: none;
+    }
+
+    /* Carousel */
+    .carousel-container {
+        position: relative;
+        width: 100%;
+        max-width: 900px;
+        height: 400px;
+        margin: 0 auto 3rem;
+        overflow: hidden;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+    }
+
+    .carousel {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .carousel-slide {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.8s ease-in-out;
+    }
+
+    .carousel-slide.active {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .carousel-slide.exit {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+
+    .carousel-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Course Title */
+    .course-title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 3rem;
+        background: linear-gradient(120deg, #f075ae, #a18cd1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Lecture List */
+    .lecture-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        position: relative;
+        z-index: 10;
+    }
+
+    .lecture-card {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        padding: 1.5rem;
+
+        /* Liquid Glass with Pink Glow */
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: 20px;
+
+        box-shadow:
+            0 8px 32px 0 rgba(240, 117, 174, 0.08),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .lecture-card:hover {
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow:
+            0 12px 40px 0 rgba(240, 117, 174, 0.15),
+            0 0 0 2px rgba(240, 117, 174, 0.2);
+        transform: translateY(-4px);
+    }
+
+    .lecture-image {
+        flex-shrink: 0;
+        width: 200px;
+        height: 150px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f5f5f7;
+    }
+
+    .lecture-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .image-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: 700;
+        color: #ccc;
+    }
+
+    .lecture-info {
+        flex: 1;
+    }
+
+    .lecture-info h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .lecture-info p {
+        font-size: 1rem;
+        color: #666;
+        line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+        .carousel-container {
+            height: 250px;
+        }
+
+        .lecture-card {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .lecture-image {
+            width: 100%;
+            height: 200px;
+        }
+
+        .back-button {
+            top: 80px;
+            left: 1rem;
+        }
+    }
+</style>
