@@ -280,11 +280,11 @@ const lectures =
     }
     .carousel-container {
         width: 100%;
-        margin: 1rem auto 3rem; /* Specific bottom margin */
+        margin: 1rem auto 8rem; /* Final attempt to force gap */
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 450px; /* Force height to prevent overlap */
+        height: 500px;
         position: relative;
         overflow: hidden;
         z-index: 5;
@@ -312,7 +312,7 @@ const lectures =
         z-index: 1;
     }
     .carousel-slide img {
-        height: 400px;
+        height: 450px; /* Adjust image height to container */
         width: 100%;
         object-fit: contain;
         display: block;

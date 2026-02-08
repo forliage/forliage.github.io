@@ -171,42 +171,52 @@ try {
         </aside>
 
         <article class="content" id="main-content">
-            <h1 class="lecture-title">{lecture.title}</h1>
-            <div class="course-info">
-                <span class="course-name">{course.title}</span>
-                <span class="lecture-number">第 {lectureNumber} 讲</span>
-            </div>
-
-            <div class="markdown-content" set:html={markdownContent} />
-
-            <div class="lecture-navigation">
-                {
-                    prevLecture ? (
-                        <a
-                            href={`/blog/zju/${course.id}/lecture-${prevLecture.id}`}
-                            class="nav-btn prev"
+            <div class="article-inner">
+                <header class="lecture-header">
+                    <h1 class="lecture-title">{lecture.title}</h1>
+                    <div class="course-badges">
+                        <span class="badge course-badge">{course.title}</span>
+                        <span class="badge lecture-badge"
+                            >第 {lectureNumber} 讲</span
                         >
-                            <span class="nav-label">上一讲</span>
-                            <span class="nav-title">{prevLecture.title}</span>
-                        </a>
-                    ) : (
-                        <div class="nav-placeholder" />
-                    )
-                }
+                    </div>
+                </header>
 
-                {
-                    nextLecture ? (
-                        <a
-                            href={`/blog/zju/${course.id}/lecture-${nextLecture.id}`}
-                            class="nav-btn next"
-                        >
-                            <span class="nav-label">下一讲</span>
-                            <span class="nav-title">{nextLecture.title}</span>
-                        </a>
-                    ) : (
-                        <div class="nav-placeholder" />
-                    )
-                }
+                <div class="markdown-content" set:html={markdownContent} />
+
+                <div class="lecture-navigation">
+                    {
+                        prevLecture ? (
+                            <a
+                                href={`/blog/zju/${course.id}/lecture-${prevLecture.id}`}
+                                class="nav-btn prev"
+                            >
+                                <span class="nav-label">上一讲</span>
+                                <span class="nav-title">
+                                    {prevLecture.title}
+                                </span>
+                            </a>
+                        ) : (
+                            <div class="nav-placeholder" />
+                        )
+                    }
+
+                    {
+                        nextLecture ? (
+                            <a
+                                href={`/blog/zju/${course.id}/lecture-${nextLecture.id}`}
+                                class="nav-btn next"
+                            >
+                                <span class="nav-label">下一讲</span>
+                                <span class="nav-title">
+                                    {nextLecture.title}
+                                </span>
+                            </a>
+                        ) : (
+                            <div class="nav-placeholder" />
+                        )
+                    }
+                </div>
             </div>
         </article>
     </main>
@@ -270,8 +280,8 @@ try {
 <style>
     :root {
         --highlight-color: #f075ae;
-        --sidebar-width: 300px;
-        --content-max-width: 1100px;
+        --sidebar-width: 280px;
+        --content-max-width: 1200px;
     }
     .lecture-page {
         display: grid;
@@ -389,29 +399,28 @@ try {
     /* Content */
     .content {
         grid-column: 2;
-        padding: 4rem 1rem;
-        display: flex;
-        justify-content: center;
+        padding: 4rem 2rem;
         background: white;
+        display: block; /* Remove flex centering, use margin auto on inner */
     }
     .article-inner {
         width: 100%;
         max-width: var(--content-max-width);
+        margin: 0 auto;
     }
 
     .lecture-header {
-        margin-bottom: 4rem;
+        margin-bottom: 3rem;
         text-align: center;
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 2.5rem;
     }
     .lecture-title {
         font-size: 2.8rem;
-        font-weight: 900;
-        letter-spacing: -0.02em;
+        font-weight: 800;
+        color: #111;
+        margin-bottom: 1.2rem;
         line-height: 1.2;
-        margin-bottom: 1rem;
-        background: linear-gradient(135deg, #f075ae 0%, #a18cd1 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
     }
     .course-badges {
         display: flex;
@@ -419,18 +428,19 @@ try {
         gap: 0.75rem;
     }
     .badge {
-        padding: 0.4rem 1rem;
+        padding: 0.5rem 1.25rem;
         border-radius: 50px;
-        font-size: 0.85rem;
-        font-weight: 600;
+        font-size: 0.9rem;
+        font-weight: 500;
+        letter-spacing: 0.02em;
     }
-    .badge.course-name {
-        background: #fef2f7;
-        color: var(--highlight-color);
+    .course-badge {
+        background: #f0f7ff;
+        color: #007aff;
     }
-    .badge.lecture-num {
-        background: #f0f0f5;
-        color: #666;
+    .lecture-badge {
+        background: #fff0f5;
+        color: #f075ae;
     }
 
     /* Markdown Styles */
@@ -470,41 +480,46 @@ try {
     }
 
     /* Navigation */
-    .lecture-nav {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-        margin-top: 6rem;
+    .lecture-navigation {
+        display: flex;
+        justify-content: space-between;
+        gap: 2rem;
+        margin-top: 5rem;
         padding-top: 3rem;
         border-top: 1px solid #f0f0f0;
     }
-    .nav-card {
-        padding: 1.5rem;
+    .nav-btn {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 1.2rem 1.8rem;
         background: #fcfcfc;
         border: 1px solid #eee;
-        border-radius: 16px;
+        border-radius: 12px;
         text-decoration: none;
-        transition: all 0.3s;
+        transition: all 0.2s;
     }
-    .nav-card:hover {
+    .nav-btn:hover {
+        background: #fff;
         border-color: var(--highlight-color);
-        background: white;
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(240, 117, 174, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     }
-    .nav-card.next {
+    .nav-btn.next {
         text-align: right;
     }
     .nav-label {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         color: #999;
-        display: block;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.3rem;
     }
     .nav-title {
-        font-size: 1.1rem;
-        font-weight: 700;
+        font-size: 1rem;
+        font-weight: 600;
         color: #333;
+    }
+    .nav-placeholder {
+        flex: 1;
     }
 
     @media (max-width: 1200px) {
