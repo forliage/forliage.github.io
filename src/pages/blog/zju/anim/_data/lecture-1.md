@@ -15,7 +15,7 @@ We need a set of mathematical tools to describe changes in these properties, and
 ### 1.1.Basic Transformations and Homogeneous Coordinates
 
 The most basic three-dimensional transformations include:
-- Translate: $$\mathbf{p'} = \mathbf{p}+\mathbf{T}$$ 
+- Translate: $$\mathbf{p'} = \mathbf{p}+\mathbf{T}$$
 - Scale: $$\mathbf{p'} = \mathbf{Sp}$$
 - Rotate: $$\mathbf{p'} = \mathbf{Rp}$$
 

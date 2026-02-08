@@ -110,6 +110,12 @@ try {
 ---
 
 <Layout title={`${lecture.title} - ${course.title}`}>
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+        integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzWq5UM5uuS6Oe619ggIc8iV3RWUXLS9VMPu"
+        crossorigin="anonymous"
+    />
     <Header />
 
     <main class="lecture-page">
@@ -473,10 +479,12 @@ try {
         margin-bottom: 1.8rem;
     }
     .markdown-content :global(img) {
-        width: 100%;
-        border-radius: 16px;
-        margin: 3rem 0;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+        margin: 2.5rem auto;
+        display: block;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
 
     /* Navigation */
