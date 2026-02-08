@@ -486,6 +486,19 @@ try {
         display: block;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
+    /* Specific scaling for GIFs */
+    .markdown-content :global(img[src$=".gif"]) {
+        max-width: 70%;
+    }
+    /* Fix math "ghosting" / double rendering */
+    .markdown-content :global(.katex-mathml) {
+        display: none !important;
+    }
+    .markdown-content :global(.katex-display) {
+        margin: 1.5rem 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
 
     /* Navigation */
     .lecture-navigation {
