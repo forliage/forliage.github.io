@@ -85,15 +85,21 @@ try {
             ? mdModule.compiledContent()
             : "";
 
-        // Extract headings for TOC
-        const headingRegex = /<h([1-6])[^>]*id="([^"]*)"[^>]*>(.+?)<\/h\1>/g;
-        let match;
-        while ((match = headingRegex.exec(markdownContent)) !== null) {
-            headings.push({
-                depth: parseInt(match[1]),
-                slug: match[2],
-                text: match[3].replace(/<[^>]+>/g, ""),
-            });
+        // Use getHeadings() for reliable TOC
+        if (mdModule.getHeadings) {
+            headings = mdModule.getHeadings().filter((h: any) => h.depth <= 3);
+        } else {
+            // Fallback to regex if getHeadings is missing
+            const headingRegex =
+                /<h([1-6])[^>]*id="([^"]*)"[^>]*>(.+?)<\/h\1>/g;
+            let match;
+            while ((match = headingRegex.exec(markdownContent)) !== null) {
+                headings.push({
+                    depth: parseInt(match[1]),
+                    slug: match[2],
+                    text: match[3].replace(/<[^>]+>/g, ""),
+                });
+            }
         }
     } else {
         markdownContent = `<p>Coming soon: Content for <code>lecture-${lectureNumber}.md</code></p>`;
@@ -371,8 +377,13 @@ try {
     .content {
         margin-left: var(--sidebar-width);
         flex: 1;
-        max-width: 800px;
-        padding: 2rem 4rem 4rem 4rem;
+        padding: 4rem 2rem;
+        display: flex;
+        justify-content: center;
+    }
+    .article-container {
+        width: 100%;
+        max-width: 900px;
     }
     .lecture-title {
         font-size: 2.5rem;

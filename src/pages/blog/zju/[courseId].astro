@@ -122,6 +122,8 @@ const lectures =
             Back
         </a>
 
+        <h1 class="course-title">{course.title}</h1>
+
         <div class="carousel-container">
             <div id="carousel" class="carousel">
                 {
@@ -133,8 +135,6 @@ const lectures =
                 }
             </div>
         </div>
-
-        <h1 class="course-title">{course.title}</h1>
 
         <div class="lecture-list">
             {
@@ -315,14 +315,15 @@ const lectures =
     }
     .course-title {
         text-align: center;
-        font-size: 2.5rem;
-        margin-bottom: 3rem;
+        font-size: 3rem;
+        margin-bottom: 2rem;
         background: linear-gradient(120deg, #f075ae, #a18cd1);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         position: relative;
         z-index: 10;
-        font-weight: 700;
+        font-weight: 800;
+        letter-spacing: -0.02em;
     }
     .lecture-list {
         display: flex;
