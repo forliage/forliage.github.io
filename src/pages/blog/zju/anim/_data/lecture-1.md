@@ -55,7 +55,10 @@ This is the most intuitive representation. It decomposes any three-dimensional r
 ![alt](./images/img1.png)
 - Advantages: **Compact**: Uses only 3 numbers $(\theta_x, \theta_y, \theta_z)$; **Intuitive**: Easy for humans to understand and edit.
 - Disadvantages: **Non-unique/non-uniform interpolation paths**: Linear interpolation of three angles often results in rotational paths that are not the shortest and have non-uniform angular velocities; **Gimbal Lock**: This is a fatal flaw of Euler angles. When the middle rotation axis (e.g., the Y-axis) rotates $90^\circ$, the first axis (X-axis) and the third axis (Z-axis) coincide. At this point, the system loses a rotational degree of freedom. Regardless of whether we change the angle of the X-axis or Z-axis, only rotation around the same world axis will occur. This leads to sudden, unnatural, rapid flips in animation.As showm below:
-![alt](./images/img3.gif)
+<center>
+<img src="./images/img3.gif" width="60%" alt="">
+</center>
+
 
 **3.Axis-Angle.**
 
