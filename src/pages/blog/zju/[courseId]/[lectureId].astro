@@ -136,7 +136,7 @@ try {
                 </svg>
                 <div class="progress-text">
                     <span id="progress-percent">0%</span>
-                    <span class="progress-label">已读</span>
+                    <span class="progress-label">Read</span>
                 </div>
             </div>
 
@@ -153,11 +153,11 @@ try {
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
-                返回课程
+                Back to Course
             </a>
 
             <nav class="toc">
-                <h3>目录</h3>
+                <h3>Contents</h3>
                 <ul>
                     {
                         headings.map((h) => (
@@ -482,7 +482,7 @@ try {
     }
     /* Specific scaling for GIFs */
     .markdown-content :global(img[src$=".gif"]) {
-        max-width: 50%;
+        max-width: 35% !important;
         margin: 2rem auto;
     }
     /* Fix math "ghosting" / double rendering */
@@ -495,11 +495,22 @@ try {
         margin: 2rem 0;
         overflow-x: auto;
         overflow-y: hidden;
-        line-height: 1; /* Match matrices precisely */
     }
+    /* Matrix "squash" fix - Reset line-height and spacing for KaTeX */
     .markdown-content :global(.katex) {
-        font-size: 1.1em;
-        line-height: 1;
+        font-size: 1.15em;
+        line-height: normal !important;
+        text-indent: 0;
+    }
+    .markdown-content :global(.katex *) {
+        line-height: normal !important;
+        -webkit-font-smoothing: antialiased !important;
+    }
+    .markdown-content :global(.katex .vlist div) {
+        white-space: nowrap;
+    }
+    .markdown-content :global(.katex-display > .katex) {
+        white-space: normal;
     }
 
     /* Navigation */
