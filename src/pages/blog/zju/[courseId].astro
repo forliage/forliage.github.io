@@ -38,7 +38,7 @@ const { course } = Astro.props;
 // Load ALL carousel and lecture images with static glob patterns
 // Then filter by course ID
 const allCarouselImages = import.meta.glob<{ default: ImageMetadata }>(
-    `/src/pages/blog/zju/*/carousel/*.{svg,png,jpg,jpeg}`,
+    `/src/pages/blog/zju/*/carousel/*.{png,jpg,jpeg}`,
     { eager: true },
 );
 
