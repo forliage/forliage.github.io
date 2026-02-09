@@ -2,6 +2,7 @@
 import Layout from "../../../../layouts/Layout.astro";
 import Header from "../../../../components/Header.astro";
 import type { ImageMetadata } from "astro";
+import { renderToString as katexRenderToString } from "katex";
 
 export async function getStaticPaths() {
     const courses = [
@@ -124,11 +125,8 @@ try {
     } else {
         markdownContent = `<p>Coming soon: Content for <code>lecture-${lectureNumber}.md</code></p>`;
     }
-} catch (error: any) {
-    markdownContent = `<div class="error-box">
-        <p>Error loading lecture content: <strong>${error.message}</strong></p>
-        <pre>${error.stack}</pre>
-    </div>`;
+} catch (error) {
+    markdownContent = `<p>Error loading lecture content.</p>`;
 }
 ---
 
