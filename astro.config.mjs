@@ -13,22 +13,16 @@ function remarkMathNormalization() {
     return (tree) => {
         visit(tree, 'text', (node) => {
             if (node.value.includes('$$')) {
-                // Step 1: Use placeholders to prevent double-replacement
-                // Replace $$$$ with ___BLOCK___
-                node.value = node.value.replace(/\$\$\$\$([\s\S]*?)\$\$\$\$/g, (match, content) => {
-                    return `___BLOCK_START___${content}___BLOCK_END___`;
+                // Replace $$$$ with $$ (block) and $$ with $ (inline)
+                // Use a non-greedy regex to match the inner content
+                node.value = node.value.replace(/(\${2,4})([\s\S]*?)\1/g, (match, delimiter, content) => {
+                    if (delimiter.length === 4) {
+                        return `$$${content}$$`;
+                    } else if (delimiter.length === 2) {
+                        return `$${content}$`;
+                    }
+                    return match;
                 });
-
-                // Step 2: Replace remaining $$ with $ (inline marker)
-                node.value = node.value.replace(/\$\$([\s\S]*?)\$\$/g, (match, content) => {
-                    return `$${content}$`;
-                });
-
-                // Step 3: Restore ___BLOCK___ to $$ (display marker)
-                // Add \displaystyle for consistency in display math
-                node.value = node.value
-                    .replace(/___BLOCK_START___/g, '$$\\displaystyle ')
-                    .replace(/___BLOCK_END___/g, '$$');
             }
         });
     };
