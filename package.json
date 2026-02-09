@@ -12,6 +12,7 @@
     "dependencies": {
         "astro": "^5.0.0",
         "cheerio": "^1.2.0",
+        "katex": "^0.16.28",
         "rehype-katex": "^7.0.1",
         "rehype-raw": "^7.0.0",
         "remark-math": "^6.0.0",

@@ -76,20 +76,6 @@ const rawHtmlImageModules = import.meta.glob<{ default: ImageMetadata }>(
     { eager: true },
 );
 
-const renderCustomDisplayMath = (html: string) =>
-    html.replace(
-        /<p>\s*\$\$\$\$([\s\S]*?)\$\$\$\$\s*<\/p>/g,
-        (_match, expression: string) => {
-            const trimmedExpression = expression.trim();
-            if (!trimmedExpression) return _match;
-            const rendered = katexRenderToString(trimmedExpression, {
-                displayMode: true,
-                throwOnError: false,
-            });
-            return `<div class="katex-custom-display">${rendered}</div>`;
-        },
-    );
-
 const rewriteRawHtmlImagePaths = (html: string, courseId: string) =>
     html.replace(
         /(<img\b[^>]*\bsrc\s*=\s*)(["'])\.\/images\/([^"' >]+)\2/gi,
@@ -119,7 +105,6 @@ try {
             ? mdModule.compiledContent()
             : "";
         markdownContent = rewriteRawHtmlImagePaths(markdownContent, course.id);
-        markdownContent = renderCustomDisplayMath(markdownContent);
 
         // Use getHeadings() for reliable TOC
         if (mdModule.getHeadings) {
@@ -484,7 +469,11 @@ try {
         font-size: 1.15rem;
         line-height: 1.9;
         color: #333;
-        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+        font-family:
+            "Segoe UI",
+            system-ui,
+            -apple-system,
+            sans-serif;
         font-weight: 400;
     }
     .markdown-content :global(h1),
@@ -513,6 +502,29 @@ try {
     .markdown-content :global(strong),
     .markdown-content :global(b) {
         font-weight: 700;
+        color: #000;
+    }
+    .markdown-content :global(details) {
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: #fdfdfd;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        transition: all 0.3s;
+    }
+    .markdown-content :global(details[open]) {
+        border-color: var(--highlight-color);
+        box-shadow: 0 5px 15px rgba(240, 117, 174, 0.05);
+    }
+    .markdown-content :global(summary) {
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0.5rem;
+        color: #444;
+        transition: color 0.2s;
+    }
+    .markdown-content :global(summary:hover) {
+        color: var(--highlight-color);
     }
     .markdown-content :global(img) {
         max-width: 100%;
