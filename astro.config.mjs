@@ -3,30 +3,35 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 import { visit } from 'unist-util-visit';
+import katex from 'katex';
 
 /**
- * Custom remark plugin to normalize math delimiters:
- * $$$$ -> $$ (Standard block/display math)
- * $$ -> $ (Standard inline math)
+ * Custom remark plugin to handle:
+ * 1. Delimiter normalization: $$$$ -> $$ (block), $$ -> $ (inline)
+ * 2. Math inside HTML: If math is found inside an 'html' node (e.g., <center>$$$$ formula $$$$</center>),
+ *    we manually render it so rehype-raw/rehype-katex don't miss it.
  */
-function remarkMathNormalization() {
+function remarkMathAndHtmlProcessing() {
     return (tree) => {
-        visit(tree, 'text', (node) => {
-            if (node.value.includes('$$')) {
-                // Step 1: Replace $$$$ with block placeholder
-                node.value = node.value.replace(/\$\$\$\$([\s\S]*?)\$\$\$\$/g, (match, content) => {
-                    return `___BLOCK_START___${content}___BLOCK_END___`;
-                });
+        visit(tree, ['text', 'html'], (node) => {
+            if (!node.value || !node.value.includes('$$')) return;
 
-                // Step 2: Replace remaining $$ with inline marker ($)
-                node.value = node.value.replace(/\$\$([\s\S]*?)\$\$/g, (match, content) => {
-                    return `$${content}$`;
-                });
-
-                // Step 3: Restore ___BLOCK___ to $$ (display marker)
+            // Step 1: Handle $$$$ (Block Math)
+            // We use a regex to find $$$$ ... $$$$ and replace it.
+            // In 'text' nodes, we convert to $$ for remark-math.
+            // In 'html' nodes, we must render it immediately because remark-math will skip html nodes.
+            if (node.type === 'text') {
                 node.value = node.value
-                    .replace(/___BLOCK_START___/g, '$$')
-                    .replace(/___BLOCK_END___/g, '$$');
+                    .replace(/\$\$\$\$([\s\S]*?)\$\$\$\$/g, '$$$1$$') // $$$$ -> $$
+                    .replace(/\$\$([\s\S]*?)\$\$/g, '$$1$'); // Remaining $$ -> $
+            } else if (node.type === 'html') {
+                // Manually render Katex for any math found inside raw HTML tags
+                node.value = node.value.replace(/\$\$\$\$([\s\S]*?)\$\$\$\$/g, (match, content) => {
+                    return katex.renderToString(content.trim(), { displayMode: true, throwOnError: false });
+                });
+                node.value = node.value.replace(/\$\$([\s\S]*?)\$\$/g, (match, content) => {
+                    return katex.renderToString(content.trim(), { displayMode: false, throwOnError: false });
+                });
             }
         });
     };
@@ -38,7 +43,7 @@ export default defineConfig({
     base: '/',
     markdown: {
         remarkPlugins: [
-            remarkMathNormalization,
+            remarkMathAndHtmlProcessing,
             remarkMath
         ],
         rehypePlugins: [
