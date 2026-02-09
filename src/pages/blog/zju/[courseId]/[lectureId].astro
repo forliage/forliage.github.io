@@ -1,6 +1,8 @@
 ---
 import Layout from "../../../../layouts/Layout.astro";
 import Header from "../../../../components/Header.astro";
+import type { ImageMetadata } from "astro";
+import { renderToString as katexRenderToString } from "katex";
 
 export async function getStaticPaths() {
     const courses = [
@@ -69,6 +71,38 @@ interface Props {
 const { course, lecture, lectureNumber, prevLecture, nextLecture } =
     Astro.props;
 
+const rawHtmlImageModules = import.meta.glob<{ default: ImageMetadata }>(
+    "/src/pages/blog/zju/**/_data/images/*.{png,jpg,jpeg,gif,webp,svg}",
+    { eager: true },
+);
+
+const renderCustomDisplayMath = (html: string) =>
+    html.replace(
+        /<p>\s*\$\$\$\$([\s\S]*?)\$\$\$\$\s*<\/p>/g,
+        (_match, expression: string) => {
+            const trimmedExpression = expression.trim();
+            if (!trimmedExpression) return _match;
+            const rendered = katexRenderToString(trimmedExpression, {
+                displayMode: true,
+                throwOnError: false,
+            });
+            return `<div class="katex-custom-display">${rendered}</div>`;
+        },
+    );
+
+const rewriteRawHtmlImagePaths = (html: string, courseId: string) =>
+    html.replace(
+        /(<img\b[^>]*\bsrc\s*=\s*)(["'])\.\/images\/([^"' >]+)\2/gi,
+        (fullMatch, prefix: string, quote: string, fileName: string) => {
+            const imageModule =
+                rawHtmlImageModules[
+                    `/src/pages/blog/zju/${courseId}/_data/images/${fileName}`
+                ];
+            if (!imageModule?.default?.src) return fullMatch;
+            return `${prefix}${quote}${imageModule.default.src}${quote}`;
+        },
+    );
+
 // Load markdown content
 let markdownContent = "";
 let headings: Array<{ depth: number; text: string; slug: string }> = [];
@@ -84,6 +118,8 @@ try {
         markdownContent = mdModule.compiledContent
             ? mdModule.compiledContent()
             : "";
+        markdownContent = rewriteRawHtmlImagePaths(markdownContent, course.id);
+        markdownContent = renderCustomDisplayMath(markdownContent);
 
         // Use getHeadings() for reliable TOC
         if (mdModule.getHeadings) {
@@ -448,6 +484,8 @@ try {
         font-size: 1.15rem;
         line-height: 1.9;
         color: #333;
+        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+        font-weight: 400;
     }
     .markdown-content :global(h1),
     .markdown-content :global(h2),
@@ -471,6 +509,10 @@ try {
 
     .markdown-content :global(p) {
         margin-bottom: 1.8rem;
+    }
+    .markdown-content :global(strong),
+    .markdown-content :global(b) {
+        font-weight: 700;
     }
     .markdown-content :global(img) {
         max-width: 100%;
@@ -521,6 +563,10 @@ try {
     }
     .markdown-content :global(.katex-display > .katex) {
         white-space: normal;
+    }
+    .markdown-content :global(.katex-custom-display) {
+        margin: 1.5rem 0;
+        text-align: center;
     }
 
     /* Navigation */
