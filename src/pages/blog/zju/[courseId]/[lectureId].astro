@@ -480,11 +480,22 @@ try {
         display: block;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
-    /* Specific scaling for GIFs */
-    .markdown-content :global(img[src*=".gif"]) {
-        max-width: 450px; /* Sensible default for standard md */
+    /* GIF and standard image scaling */
+    .markdown-content :global(img) {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
         margin: 2.5rem auto;
+        display: block;
+    }
+    .markdown-content :global(img[src*=".gif"]),
+    .markdown-content :global(picture img[src*=".gif"]),
+    .markdown-content :global(center img) {
+        max-width: 280px !important;
+        width: auto !important;
+        margin: 2rem auto !important;
         border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
     }
     /* Matrix and Math layout fixes */
     .markdown-content :global(.katex-display) {
