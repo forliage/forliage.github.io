@@ -15,16 +15,34 @@ We need a set of mathematical tools to describe changes in these properties, and
 ### 1.1.Basic Transformations and Homogeneous Coordinates
 
 The most basic three-dimensional transformations include:
-- Translate: $\mathbf{p'} = \mathbf{p}+\mathbf{T}$
-- Scale: $\mathbf{p'} = \mathbf{Sp}$
-- Rotate: $\mathbf{p'} = \mathbf{Rp}$
+- Translate: 
+$$
+\mathbf{p'} = \mathbf{p}+\mathbf{T}
+$$
+- Scale:
+$$
+\mathbf{p'} = \mathbf{Sp}
+$$
+- Rotate: 
+$$
+\mathbf{p'} = \mathbf{Rp}
+$$
 
 Here, translation is addition, while scaling and rotation are multiplication, resulting in inconsistent forms. To unify them within the framework of matrix multiplication, we introduce **homogeneous coordinates**. We expand a three-dimensional point $(x,y,z)$ into a four-dimensional vector $[x,y,z,1]^T$.
 
 In this way, all transformations can be represented by a $4\times 4$ matrix:
-- Translation Matrix: $$\begin{bmatrix}1&0&0&t_x \\ 0&1&0&t_y \\ 0&0&1&t_z \\ 0&0&0&1\end{bmatrix}$$
-- Scaling Matrix: $$\begin{bmatrix}s_x&0&0&0\\0&s_y&0&0\\0&0&s_z&0\\0&0&0&1\end{bmatrix}$$
-- Rotating Matrix (Around the Z-axis): $$\begin{bmatrix}\cos\theta&-\sin\theta&0&0\\\sin\theta&\cos\theta&0&0\\0&0&1&0\\0&0&0&1\end{bmatrix}$$
+- Translation Matrix: 
+$$
+\begin{bmatrix}1&0&0&t_x \\ 0&1&0&t_y \\ 0&0&1&t_z \\ 0&0&0&1\end{bmatrix}
+$$
+- Scaling Matrix: 
+$$
+\begin{bmatrix}s_x&0&0&0\\0&s_y&0&0\\0&0&s_z&0\\0&0&0&1\end{bmatrix}
+$$
+- Rotating Matrix (Around the Z-axis): 
+$$
+\begin{bmatrix}\cos\theta&-\sin\theta&0&0\\\sin\theta&\cos\theta&0&0\\0&0&1&0\\0&0&0&1\end{bmatrix}
+$$
 
 The greatest advantage of using homogeneous coordinates in **concatenation of transformations** is that a series of complex transformations (e.g., scaling, rotation, and translation) can be precombined into a single composite transormation matrix:$\mathbf{M}=\mathbf{M}_{\text{translate}}\mathbf{M}_{\text{rotate}}\mathbf{M}_{\text{scale}}$. Then this $\mathbf{M}$ is used to transform all the vertices of the model, greatly improving efficiency.
 
@@ -48,7 +66,9 @@ $$
 $$
 
 Linear interpolation to half (weight 0.5):
-$$\mathbf{R}_{\text{half}}=0.5\mathbf{R}(90^\circ)+0.5\mathbf{R}(-90^\circ)=\begin{bmatrix}0&0&0\\0&0&0\\0&0&1\end{bmatrix}$$
+$$
+\mathbf{R}_{\text{half}}=0.5\mathbf{R}(90^\circ)+0.5\mathbf{R}(-90^\circ)=\begin{bmatrix}0&0&0\\0&0&0\\0&0&1\end{bmatrix}
+$$
 This is a strange matrix that flattens objects onto the Z-axis, which is not the $0^\circ$ rotation (identity matrix) we want!
 
 **2.Euler Angles / Fixed Angles.**
