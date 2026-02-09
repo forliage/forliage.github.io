@@ -87,6 +87,71 @@ According to Euler's rotation theorem, any three-dimensional rotation can be rep
 - Advantages: **Intuitive interpolation**: Rotation axes and rotation angles can be interpolated between two attitudes; **no gimbal lock-up**.
 - Disadvantages: **Difficult to chain together**: Two axis-angle representations of rotation, the axes and angles of the composite rotation do not have simple calculation formulas; **Not unique representation**: $(\mathbf{a},\theta)$ and $(-\mathbf{a},-\theta)$ represent the same rotation.
 
+### 1.3.Ultimate Solution: Quaternions
+
+A quaternion is a mathematical concept created by the Irish mathematician William Nouwen Hamilton in 1843. It is usually denoted by $\mathbb {H}$.
+
+From a definite perspective, a quaternion is a non-commutative extension of complex numbers. If the set of quaternions is considered as a multidimensional real number space, then a quaternion represents a four-dimensional space, while complex numbers represent a two-dimensional space.
+
+As a coordinate representation for describing real space, quaternions were created based on complex numbers and are expressed in the form $a + bi + cj + dk$ to indicate the location of a point in space. $i$, $j$, and $k$ participate in operations as special imaginary units, and follow these operational rules: $i^2 = j^2 = k^2 = -1$.
+
+The geometric meaning of $i$, $j$, and $k$ can be understood as a rotation. The $i$ rotation represents a rotation from the positive X-axis to the positive Y-axis in the plane where the X and Y axes intersect; the $j$ rotation represents a rotation from the positive Z-axis to the positive X-axis in the plane where the Z and X axes intersect; the $k$ rotation represents a rotation from the positive Y-axis to the positive Z-axis in the plane where the Y and Z axes intersect; and $-i$, $-j$, and $-k$ represent the opposite rotations of $i$, $j$, and $k$, respectively.
+
+**Definition**
+
+Quaternions are all composed of real numbers plus three elements $i,j,k$, and they have the following relationship:
+$$
+i^2=j^2=k^2=ijk=-1
+$$
+
+Each quaternion is a linear combination of $1,i,j,k$, and can generally be represented as $a+bi+cj+dk$.
+
+To add two quaternions, simply add their similar coefficients, just like with complex numbers. The multiplication rule follows the multiplication table below:
+
+$$
+\begin{array}{c|cccc}
+\times & 1 & i & j & k \\
+\hline
+1 & 1 & i & j & k \\
+i & i & -1 & k & -j \\
+j & j & -k & -1 & i \\
+k & k & j & -i & -1 \\
+\end{array}
+$$
+
+The multiplication of the identity elements of quaternions forms an 8th-order quaternion group, $Q_8$.
+
+**Property**
+
+Unlike real or complex numbers, quaternions do not obey the anticommutative law of multiplication and are therefore noncommutative, for example:
+$$
+ij=k, ji=-k\\
+jk=i, kj=-i\\
+ki=j, ik=-j
+$$
+
+Quaternions are an example of division rings. Except for the lack of a commutative property for multiplication, division rings are analogous to fields. Specifically, the associative property of multiplication still applies, and each non-zero element has a unique inverse.
+
+Quaternions form a four-dimensional associative algebra (actually a division algebra) over real numbers, including complex numbers, but not forming an associative algebra with complex numbers. Quaternions (as well as real and complex numbers) are simply finite-dimensional associative division algebras of real numbers.
+
+The noncommutativity of quaternions often leads to unexpected results. For example, an n-order polynomial of a quaternion can have more than $n$ distinct roots. For instance, the equation $h^2+1=0$ has infinitely many solutions. If any real number satisfies $b^2+c^2+d^2=1$, then $h = bi + cj + dk$ is a solution.
+
+The conjugate of a quaternion $h = a + bi + cj + dk$ is defined as: 
+$$
+h^*=a-bi-cj-dk
+$$
+
+Its absolute value is a non-negative real number, defined as: 
+$$
+|h|=\sqrt{h\cdot h^*}=\sqrt{a^2+b^2+c^2+d^2}
+$$
+
+Note that $(hk)^*=k^*h^*$ is generally not equal to $h^*k^*$
+
+The multiplicative inverse of a quaternion can be calculated using $h^{-1}=\frac{h^*}{|h|^2}$
+
+By using the distance function $d(h,k)=|h-k|$, quaternions can become a metric space homeomorphic to $\mathbb{R}^4$ and have continuous arithmetic operations. Furthermore, for all quaternions $h$ and $k$, $|hk| = |h||k|$. Modulo the absolute value, quaternions can form a real Banach space.
+
 ## II.Keyframe interpolation and Velocity Control
 
 ## Conclusion
