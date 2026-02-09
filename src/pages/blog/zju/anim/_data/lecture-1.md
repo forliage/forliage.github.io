@@ -15,9 +15,9 @@ We need a set of mathematical tools to describe changes in these properties, and
 ### 1.1.Basic Transformations and Homogeneous Coordinates
 
 The most basic three-dimensional transformations include:
-- Translate: $$\mathbf{p'} = \mathbf{p}+\mathbf{T}$$
-- Scale: $$\mathbf{p'} = \mathbf{Sp}$$
-- Rotate: $$\mathbf{p'} = \mathbf{Rp}$$
+- Translate: $\mathbf{p'} = \mathbf{p}+\mathbf{T}$
+- Scale: $\mathbf{p'} = \mathbf{Sp}$
+- Rotate: $\mathbf{p'} = \mathbf{Rp}$
 
 Here, translation is addition, while scaling and rotation are multiplication, resulting in inconsistent forms. To unify them within the framework of matrix multiplication, we introduce **homogeneous coordinates**. We expand a three-dimensional point $(x,y,z)$ into a four-dimensional vector $[x,y,z,1]^T$.
 
@@ -55,9 +55,7 @@ This is the most intuitive representation. It decomposes any three-dimensional r
 ![alt](./images/img1.png)
 - Advantages: **Compact**: Uses only 3 numbers $(\theta_x, \theta_y, \theta_z)$; **Intuitive**: Easy for humans to understand and edit.
 - Disadvantages: **Non-unique/non-uniform interpolation paths**: Linear interpolation of three angles often results in rotational paths that are not the shortest and have non-uniform angular velocities; **Gimbal Lock**: This is a fatal flaw of Euler angles. When the middle rotation axis (e.g., the Y-axis) rotates $90^\circ$, the first axis (X-axis) and the third axis (Z-axis) coincide. At this point, the system loses a rotational degree of freedom. Regardless of whether we change the angle of the X-axis or Z-axis, only rotation around the same world axis will occur. This leads to sudden, unnatural, rapid flips in animation.As showm below:
-<center>
-<img src="./images/img3.gif" width="60%" alt="">
-</center>
+![Gimbal Lock](./images/img3.gif)
 
 **3.Axis-Angle.**
 
