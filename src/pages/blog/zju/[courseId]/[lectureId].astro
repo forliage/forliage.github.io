@@ -515,6 +515,56 @@ try {
         white-space: normal;
     }
 
+    /* Code blocks - Mac window style */
+    .markdown-content :global(pre.astro-code) {
+        position: relative;
+        padding-top: 2.5rem !important;
+        margin: 2.5rem 0 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+        border: 1px solid rgba(0, 0, 0, 0.05) !important;
+        overflow: hidden !important;
+    }
+
+    /* Top bar for code blocks */
+    .markdown-content :global(pre.astro-code::before) {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2.5rem;
+        background: #f5f5f7; /* Mac header color */
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        z-index: 1;
+    }
+
+    /* Traffic light buttons */
+    .markdown-content :global(pre.astro-code::after) {
+        content: "";
+        position: absolute;
+        top: 0.8rem;
+        left: 1rem;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #ff5f56; /* Red */
+        box-shadow:
+            20px 0 0 #ffbd2e,
+            /* Yellow */ 40px 0 0 #27c93f; /* Green */
+        z-index: 2;
+    }
+
+    .markdown-content :global(pre.astro-code code) {
+        display: block;
+        padding: 0 1.5rem 1.5rem !important;
+        font-family:
+            "JetBrains Mono", "Fira Code", "Menlo", Monaco, "Courier New",
+            monospace;
+        font-size: 0.95rem;
+        line-height: 1.7;
+    }
+
     /* Navigation */
     .lecture-navigation {
         display: flex;
