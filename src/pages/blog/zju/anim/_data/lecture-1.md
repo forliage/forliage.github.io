@@ -323,4 +323,117 @@ The four polynomials in $u$ here are Hermitian mixture functions. They act like 
 
 How to splice them? To create a long, smooth composite Hermitian curve, we simply use the endpoint $\mathbf{P_1}$ and the endpoint tangent vector $\mathbf{P_1'}$ of the previous segment as the starting point $\mathbf{P_0}$ and the starting point tangent vector $\mathbf{P_0'}$ of the next segment. This automatically ensures the continuity of $C^1$.
 
+### 2.3.2.Bézier Curve
+
+* The curve **passes** through the starting point $\mathbf{P}_0$ and the ending point $\mathbf{P}_3$.
+
+* The two intermediate points $\mathbf{P}_1, \mathbf{P}_2$ are not on the curve, but rather act like "magnets," **attracting** the curve and defining its shape.
+
+* The initial tangent vector is determined by $\vec{\mathbf{P}_0 \mathbf{P}_1}$, and the ending tangent vector is determined by $\vec{\mathbf{P}_2 \mathbf{P}_3}$.
+
+**Relationship with Hermitian Curves** A Bézier curve can be viewed as a special form of a Hermitian curve, with the following geometric constraints:
+
+* Starting point: $\mathbf{P}_0$
+* Ending point: $\mathbf{P}_3$
+* Starting tangent vector: $3(\mathbf{P}_1 - \mathbf{P}_0)$
+* Ending tangent vector: $3(\mathbf{P}_3 - \mathbf{P}_2)$
+
+Substituting these into Hermitian matrix form, we can derive the basis matrix $\mathbf{M}\_B$ of the Bézier curve: 
+$$
+\mathbf{P}(u) = \begin{bmatrix} u^3 & u^2 & u & 1 \end{bmatrix} \begin{bmatrix} -1 & 3 & -3 & 1 \\ 3 & -6 & 3 & 0 \\ -3 & 3 & 0 & 0 \\ 1 & 0 & 0 & 0 \end{bmatrix} \begin{bmatrix} \mathbf{P}_0 \\ \mathbf{P}_1 \\ \mathbf{P}_2 \\ \mathbf{P}_3 \end{bmatrix}
+$$
+
+**Bernstein Polynomials** Bézier curves can also be defined in a more classic and geometrically meaningful way, using Bernstein polynomials as mixing functions: 
+$$
+\mathbf{P}(u) = \sum_{k=0}^{n} B_{k,n}(u) \mathbf{P}_k
+$$
+where $B_{k,n}(u) = C(n,k) u^k (1-u)^{n-k}$ are Bernstein basis functions, and $C(n,k) = \frac{n!}{k!(n-k)!}$ are the binomial coefficients. For a cubic Bézier curve ($n=3$), the formula expands to: 
+$$
+\mathbf{P}(u) = (1-u)^3 \mathbf{P}_0 + 3u(1-u)^2 \mathbf{P}_1 + 3u^2(1-u) \mathbf{P}_2 + u^3 \mathbf{P}_3
+$$
+
+**De Casteljau's Algorithm** This is a very elegant method for calculating the geometric construction of any point on a Bézier curve. Its core is **recursive linear interpolation**. To calculate the point $\mathbf{P}(u)$ corresponding to parameter $u$:
+
+1. On each control edge $\mathbf{P}_k \mathbf{P}_{k+1}$, find the point interpolated proportionally to $u$.
+2. Connect these new points to form new line segments.
+3. On these new line segments, interpolate again proportionally to $u$.
+4. Repeat this process until only one point remains, which is $\mathbf{P}(u)$.
+
+**Global Control** A characteristic of Bézier curves is that moving any control point changes the shape of the entire curve. This property is called global control.
+
+#### **2.3.3 Catmull-Rom Spline**
+
+Animators usually want the curve to **pass through** all the key points they specify. Hermite requires specifying tangent vectors, and Bézier only passes through the start and end points. Catmull-Rom spline solves this problem. It is an **interpolation spline** that automatically calculates the tangent vectors of each internal key point, ensuring that the entire curve is C¹ continuous.
+
+*   Given a series of control points $\mathbf{P}_{i-1}, \mathbf{P}_i, \mathbf{P}_{i+1}, \mathbf{P}_{i+2}$.
+*   The curve segment between $\mathbf{P}_i$ and $\mathbf{P}_{i+1}$ is jointly determined by these four points.
+*   The tangent vector at point $\mathbf{P}_i$ is cleverly defined as the vector in the direction of the line connecting its two adjacent points $\mathbf{P}_{i-1}$ and $\mathbf{P}_{i+1}$: $\mathbf{P}'_i = s(\mathbf{P}_{i+1} - \mathbf{P}_{i-1})$, where $s$ is a "tension" parameter, usually taken as $1/2$.
+
+Thus, we have the **position** (from the input) and **tangent vector** (automatically calculated) for each point, and we can directly use the framework of Hermitian splines to construct each curve segment. This provides great convenience for animators.
+
+**Local Control** Unlike Bézier curves, Catmull-Rom splines have local control. Moving a control point $\mathbf{P}_i$ only affects the adjacent curve segments, and the distant curve is not affected.
+
+### **2.4 Speed Control: Arc Length Parameterization**
+
+We have created a smooth motion path $\mathbf{P}(u)$, but there is still a problem: when the parameter $u$ changes **uniformly** (for example, from 0 to 1), the speed of the object moving in space **is not necessarily uniform**. Where the curve bends sharply, the object's speed will slow down; where the curve is gentle, the speed will increase.
+
+To achieve precise speed control, we must decouple the geometric path and the motion speed. This requires introducing the concept of **Arc Length**.
+
+**Arc Length Function $s(u)$** is defined as the path length from the start of the curve to the parameter $u$: 
+$$
+s(u) = \int_0^u | \mathbf{P}'(t) | \,dt
+$$
+where $| \mathbf{P}'(t) |$ is the magnitude of the velocity vector at parameter $t$, i.e., the speed.
+
+The goal of **Arc-Length Reparameterization** is to find a new parameterization function $\mathbf{P}^*(s)$ such that when the new parameter $s$ (arc length) increases at a constant speed, the object moves at a constant speed in space. This process consists of two steps:
+1. Calculate the arc length function $s = S(u)$.
+2. Calculate its inverse function $u = S^{-1}(s) = U(s)$.
+3. Obtain the new curve equation $\mathbf{P}^*(s) = \mathbf{P}(U(s))$.
+
+**Practical Application: Numerical Methods** For complex spline curves, the arc length integral usually does not have an analytical solution. Therefore, we use numerical methods, the most common being **Forward Differencing**:
+
+1. **Pre-computation**: Perform dense sampling (e.g., 1000 points) within the range of the curve parameter $u$ from 0 to 1. 2. **Construct a lookup table**: Calculate the cumulative arc length from each sampling point to the starting point and store it in a lookup table `[u, arc_length]`.
+
+```cpp
+struct ArcLengthTableEntry {
+    float u;
+    float arc_length;
+};
+
+std::vector<ArcLengthTableEntry> build_arc_length_table(const Spline& curve, int num_samples) {
+    std::vector<ArcLengthTableEntry> table;
+    table.push_back({0.0f, 0.0f});
+
+    glm::vec3 prev_point = curve.get_point(0.0f);
+    float accumulated_length = 0.0f;
+
+    for (int i = 1; i <= num_samples; ++i) {
+        float u = (float)i / num_samples;
+        glm::vec3 current_point = curve.get_point(u);
+        accumulated_length += glm::distance(current_point, prev_point);
+        table.push_back({u, accumulated_length});
+        prev_point = current_point;
+    }
+    return table;
+}
+```
+
+With this table, we can perform bidirectional queries:
+
+* **Given u, find s:** Directly search or interpolate in the table.
+* **Given s, find u:** Perform a binary or linear search in the `arc_length` column of the table to find the corresponding $u$.
+
+**Speed ​​Curve** Now, we can introduce the final control tool—the speed control curve. This is a 2D function $s = S_{\text{control}}(t)$, which maps the normalized **time** $t \in [0,1]$ to the normalized **arc length** $s \in [0,1]$.
+
+* **Uniform Motion**: $S_{\text{control}}(t) = t$, which is a straight line.
+* **Ease-in/Ease-out**: $S_{\text{control}}(t)$ is an S-shaped curve. It has a small slope at the beginning and end (slow speed), and a large slope in the middle (fast speed). This produces a very natural and smooth acceleration and deceleration effect.
+
+**Final Animation Generation Process** For any given time $t_{\text{current}}$ (within the total time $T_{\text{total}}$):
+
+1. Calculate the normalized time $t = t_{\text{current}} / T_{\text{total}}$.
+2. Obtain the normalized target arc length $s = S_{\text{control}}(t)$ using the speed control curve.
+3. Multiply $s$ by the total arc length $L_{\text{total}}$ to obtain the actual target arc length $s_{\text{actual}}$.
+4. Look up the curve parameter $u$ corresponding to $s_{\text{actual}}$ in the pre-calculated arc length table.
+5. Use this $u$ to calculate the final position of the object on the space curve $\mathbf{P}(u)$.
+
 # Conclusion
