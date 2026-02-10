@@ -218,4 +218,109 @@ Conclusion: In animation systems, the common practice is as follows: externally,
 
 # II.Keyframe interpolation and Velocity Control
 
+## 2.1.The Philosophy of Motion Control in Animation
+
+The core tasks of computer animation can be summarized into three levels:
+
+- Representation of Motion: How to describe the motion state of an object using mathematical language (functions, parameters).
+- Control and Editing of Motion: How to provide animators with convenient and intuitive tools so they can freely express their creative intentions.
+- Generation of Motion: How to accurately calculate the motion parameters of each frame in the animation sequence based on the animator's settings.
+
+Among these, keyframe animation is the most fundamental and important technique. Animators only need to define the state of a few "key" moments (such as position, direction, color, shape, etc.), and the computer is responsible for automatically "filling in" the intermediate processes. This "filling in" process is what we will discuss today: interpolation.
+
+In modern animation software such as Maya or Blender, animators are not faced with dry numbers, but with an intuitive graph editor. Each curve represents the change of a parameter (such as translation in the X direction) over time. By editing the shape of these curves, animators can precisely control every detail of the movement.
+
+## 2.2.The Core Problems of Keyframe Interpolation
+
+Suppose we have a simple task: to position an object at point $(-5, 0, 0)$ in frame 22 and at point $(5, 0, 0)$ in frame 67. This seems simple, but to create expressive animation, we must answer several key questions:
+
+1.What interpolation function should we use? Simple linear motion or smooth curved motion?
+
+2.How do we parameterize the function? How do we map "time" onto the motion path?
+
+3.How do we control the motion rhythm? For example, we want the object to first be stationary, then accelerate, reach maximum speed midway, then decelerate, and finally stop precisely in frame 67.
+
+A poor interpolation can produce unnatural effects. For example, a bouncing ball, if improperly interpolated, might "pass through" the ground upon landing before bouncing again, instead of forming a smooth bounce.
+
+Our solution consists of two steps:
+
+1.**Generating a Space Curve**: First, define the geometric path of the object's motion using a smooth mathematical curve.
+
+2.**Speed ​​Control**: Then, define a function to describe how fast the object moves along this path.
+
+## 2.3.Spline Curve
+
+To generate smooth motion paths, we use a mathematical tool called a spline. A spline is essentially a piecewise polynomial, formed by splicing together many low-order polynomial curve segments.
+
+**Why choose piecewise cubic polynomials?**
+
+- Below cubic? Quadratic polynomials (parabolas) lack inflection points, have a simple shape, and are difficult to fit complex shapes.
+- Above cubic? While higher-order polynomials are more flexible, they are prone to unwanted fluctuations and oscillations (known as the Runge phenomenon) and are computationally more expensive.
+- Cubic polynomials strike the perfect balance: they are simple enough and computationally efficient; yet flexible enough to have inflection points, satisfying our constraints on position and tangents, thus ensuring the smoothness of connections between curve segments.
+
+**The concept of continuity**
+
+When splicing curve segments together, the smoothness of the connection points is crucial. We describe continuity using different orders:
+
+- **$C^0$ Continuity (Positional Continuity)**: Curve segments connect at the junction without interruption. This is the most basic requirement.
+- **$C^1$ Continuity (Tangential Continuity)**: At the junction, the two curve segments not only have the same position, but their tangent directions and magnitudes are also the same (i.e., the first derivative is the same). This ensures a smooth transition in the direction of motion, without sharp turns. For most animation applications, $C^1$ continuity is sufficient.
+- **$C^2$ Continuity (Curvature Continuity)**: At the junction, the curvature of the curves is also the same (i.e., the second derivative is the same). This ensures a smooth change in acceleration, which is crucial for simulating camera paths in high-speed motion (such as roller coasters).
+
+Next, we will delve into some of the most important and classic cubic spline curves.
+
+### 2.3.1.Hermite Spline
+
+Hermitian splines are a very basic and powerful type of interpolation spline. To define a Hermitian curve segment, we need four geometric constraints:
+
+- Starting point position $\mathbf{P_0}$
+- Ending point position $\mathbf{P_1}$
+- Starting point tangent vector $\mathbf{P_0'}$
+- Ending point tangent vector $\mathbf{P_1'}$
+
+Mathematical Derivation Our goal is to find a cubic polynomial vector function $\mathbf{P}(u)=\mathbf{a}u^3+\mathbf{b}u^2+\mathbf{c}u+\mathbf{d}$ with parameters in the range $u \in [0, 1]$, satisfying the four conditions mentioned above.
+
+Here, $\mathbf{P}(u)$ is a three-dimensional vector $(P_x(u), P_y(u), P_z(u))$, and the coefficients $\mathbf{a}, \mathbf{b}, \mathbf{c}, \mathbf{d}$ are also three-dimensional vectors. We can derive the function independently for each component $(x, y, z)$. Taking the $x$-component as an example:
+$$
+P_x(u)=a_xu^3+b_xu^2+c_xu+d_x
+$$
+
+Its first derivative (the x-component of the tangent vector) is:
+$$
+P_x'(u)=3a_xu^2+2b_xu+c_x
+$$
+
+We substitute the four constraints:
+1. $P_x(0)=d_x=P_{0x}$
+2. $P_x(1)=a_x+b_x+c_x+d_x=P_{1x}$
+3. $P_x'(0)=c_x$
+4. $P_x'(1)=3a_x+2b_x+c_x$
+
+We have obtained a system of four linear equations with unknown coefficients $(a_x,b_x,c_x,d_x)$. Solving this system of equations, we get:
+$$
+d_x=P_x(0)\\
+c_x=P'_x(0)\\
+a_x=2(P_x(0)-P_x(1))+P_x'(0)+P_x'(1)\\
+b_x=3(P_x(1)-P_x(0))-2P_x'(0)-P_x'(1)
+$$
+
+Substituting the solved coefficients back into the original polynomial yields a more elegant matrix form:
+$$
+\mathbf{P}(u)=\begin{bmatrix}u^3&u^2&u&1\end{bmatrix}\begin{bmatrix}2&-2&1&1\\
+-3&3&-2&-1\\0&0&1&0\\1&0&0&0\end{bmatrix}\begin{bmatrix}\mathbf{P_0}\\\mathbf{P_1}\\\mathbf{P_0'}\\\mathbf{P_1'}\end{bmatrix}
+$$
+
+This formula can be simplified to $\mathbf{P}(u)=\mathbf{U}^T\mathbf{M}_H\mathbf{B}_H$, where:
+- $\mathbf{U}^T=\begin{bmatrix}u^3&u^2&u&1\end{bmatrix}$ is the parameter vector.
+- $\mathbf{M}_H$ is the Hermite Basis Matrix.
+- $\mathbf{B}_H$ is the geometric constraint vector.
+
+Blending Functions: If we further expand the matrix and write $\mathbf{P}(u)$ as a linear combination of geometric constraints, we obtain:
+$$
+\mathbf{P}(u)=(2u^3-3u^2+1)\mathbf{P_0}+(-2u^3+3u^2)\mathbf{P_1}+(u^3-2u^2+u)\mathbf{P_0'}+(u^3-u^2)\mathbf{P_1'}
+$$
+
+The four polynomials in $u$ here are Hermitian mixture functions. They act like "weights," determining how much each of the four geometric constraints (two points and two tangent vectors) contributes to the final position at parameter $u$.
+
+How to splice them? To create a long, smooth composite Hermitian curve, we simply use the endpoint $\mathbf{P_1}$ and the endpoint tangent vector $\mathbf{P_1'}$ of the previous segment as the starting point $\mathbf{P_0}$ and the starting point tangent vector $\mathbf{P_0'}$ of the next segment. This automatically ensures the continuity of $C^1$.
+
 # Conclusion
