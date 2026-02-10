@@ -3,7 +3,7 @@
         {
             "id": 1,
             "title": "Lecture 1: Mathematical foundations, Keyframe technology and Velocity Control",
-            "intro": "Overview of computer animation principles, history, and fundamental concepts."
+            "intro": "This lecture introduces the mathematical foundations of geometric transformations, rotation representations, and spline-based keyframe interpolation, presenting a unified framework for achieving smooth, controllable, and physically plausible motion in computer animation."
         },
         {
             "id": 2,

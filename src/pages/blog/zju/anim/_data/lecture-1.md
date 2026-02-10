@@ -437,3 +437,9 @@ With this table, we can perform bidirectional queries:
 5. Use this $u$ to calculate the final position of the object on the space curve $\mathbf{P}(u)$.
 
 # Conclusion
+
+In this lecture, we have explored the essential mathematical tools that underpin modern computer animation, from geometric transformations and rotation representations to keyframe interpolation and velocity control. By introducing homogeneous coordinates, we established a unified framework for combining translation, scaling, and rotation into efficient matrix operations. We then examined the limitations of traditional rotation representations and demonstrated how quaternions provide a robust, compact, and interpolation-friendly solution for handling orientation in three-dimensional space.
+
+On the motion generation side, we analyzed how spline curves such as Hermite, Bézier, and Catmull–Rom splines enable the construction of smooth and controllable trajectories, satisfying important continuity constraints. Furthermore, through arc-length parameterization and speed control curves, we showed how to decouple geometric paths from temporal behavior, allowing animators to precisely shape acceleration and deceleration patterns.
+
+Together, these techniques form the theoretical and practical foundation of keyframe-based animation systems. By combining intuitive external controls with mathematically rigorous internal representations, modern animation pipelines can achieve both artistic flexibility and computational efficiency. Mastery of these principles is essential for designing reliable, expressive, and scalable animation systems in real-world applications.
