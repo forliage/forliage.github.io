@@ -33,7 +33,7 @@
         {
             "id": 7,
             "title": "Lecture 7: Group Animation (II)",
-            "intro": "Motion capture technology and data processing."
+            "intro": "This lecture systematically introduces multi-level motion modeling methods in group animation, covering pedestrian dynamics models based on social forces, RVO/ORCA local obstacle avoidance mechanisms, and continuous medium flow field models, achieving a unified characterization from microscopic individual behavior to macroscopic group flow."
         },
         {
             "id": 8,
