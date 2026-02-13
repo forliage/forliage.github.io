@@ -18,7 +18,7 @@
         {
             "id": 4,
             "title": "Lecture 4: Portrait Morphing and 2D Polygon Shape Gradients Based on StyleGAN",
-            "intro": "Skeleton setup, skinning, and weight painting."
+            "intro": "This lecture integrates deep generative models with classical geometric methods, systematically explaining portrait deformation techniques based on StyleGAN and diffusion models, as well as two-dimensional polygon shape gradation methods based on intrinsic geometric constraints, achieving a balance between high realism and strong controllability."
         },
         {
             "id": 5,
