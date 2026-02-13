@@ -28,7 +28,7 @@
         {
             "id": 6,
             "title": "Lecture 6: Group Animation (I)",
-            "intro": "Mesh deformation techniques and shape interpolation."
+            "intro": "This lecture systematically explains the theoretical basis and engineering framework of collective behavior in group animation, and uses the Boids model as the core to reveal the computer simulation mechanism of complex group motion patterns emerging from simple local rules."
         },
         {
             "id": 7,
