@@ -13,7 +13,7 @@
         {
             "id": 3,
             "title": "Lecture 3: 2D Image Morphing",
-            "intro": "Linear, spline, and Bezier interpolation for smooth motion."
+            "intro": "This lecture systematically introduces the basic principles and classic algorithms of 2D image deformation. It demonstrates how to achieve smooth transition animations based on grids and feature lines by combining geometric transformations and color fusion, and extends the application to viewpoint deformation and modern learning methods."
         },
         {
             "id": 4,
