@@ -4,3 +4,5 @@ dist/
 .env
 pnpm-lock.yaml
 yarn.lock
+
+_legacy_backup
