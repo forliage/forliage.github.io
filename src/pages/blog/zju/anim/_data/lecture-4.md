@@ -114,15 +114,14 @@ The diffusion model comprises two processes:
 
 $$
 q(x_t | x_{t-1}) = \mathcal{N}(x_t; \sqrt{1 - \beta_t}x_{t-1}, \beta_t\mathbf{I})
-
 $$
 Where $\beta_t$ is a preset, small constant (noise variance) that increases with $t$.
 
 2. **Reverse/Denoising Process**: This is the process the model needs to learn. It starts with pure noise $x_T$ and iteratively removes noise step by step until a clear image $x_0$ is recovered. This process is parameterized by a neural network (usually a U-Net architecture) $p_\theta$:
 
 $$ p_\theta(x_{t-1} | x_t) = \mathcal{N}(x_{t-1}; \mu_\theta(x_t, t), \Sigma_\theta(x_t, t))
-
-$$ In practice, the model usually does not directly predict the denoised image $\mu_\theta$, but rather predicts the noise $\epsilon_t$ added at step $t$. The loss function is to make the noise predicted by the model $\epsilon_\theta(x_t, t)$ as close as possible to the actual added noise $\epsilon$.
+$$ 
+In practice, the model usually does not directly predict the denoised image $\mu_\theta$, but rather predicts the noise $\epsilon_t$ added at step $t$. The loss function is to make the noise predicted by the model $\epsilon_\theta(x_t, t)$ as close as possible to the actual added noise $\epsilon$.
     
 
 ## 2.2. Controlling Diffusion Models with ControlNet
