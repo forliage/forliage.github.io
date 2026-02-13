@@ -363,7 +363,7 @@ $$
 
 #### **2.3.3 Catmull-Rom Spline**
 
-Animators usually want the curve to **pass through** all the key points they specify. Hermite requires specifying tangent vectors, and Bézier only passes through the start and end points. Catmull-Rom spline solves this problem. It is an **interpolation spline** that automatically calculates the tangent vectors of each internal key point, ensuring that the entire curve is C¹ continuous.
+Animators usually want the curve to **pass through** all the key points they specify. Hermite requires specifying tangent vectors, and Bézier only passes through the start and end points. Catmull-Rom spline solves this problem. It is an **interpolation spline** that automatically calculates the tangent vectors of each internal key point, ensuring that the entire curve is $C^1$ continuous.
 
 *   Given a series of control points $\mathbf{P}_{i-1}, \mathbf{P}_i, \mathbf{P}_{i+1}, \mathbf{P}_{i+2}$.
 *   The curve segment between $\mathbf{P}_i$ and $\mathbf{P}_{i+1}$ is jointly determined by these four points.

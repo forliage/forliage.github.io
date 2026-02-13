@@ -8,7 +8,7 @@
         {
             "id": 2,
             "title": "Lecture 2: Particle Systems",
-            "intro": "Forward and inverse kinematics, skeletal animation basics."
+            "intro": "This lecture systematically introduces how particle systems can efficiently simulate the blurring phenomenon in nature and special effects by simplifying physical modeling, numerical integration, and diverse rendering methods. It further extends to advanced technologies such as material point methods to achieve realistic and controllable dynamic visual effects."
         },
         {
             "id": 3,
