@@ -38,7 +38,7 @@
         {
             "id": 8,
             "title": "Lecture 8: Joint (character) animation (I)",
-            "intro": "Algorithmic animation generation and behavioral systems."
+            "intro": "This lecture systematically introduces the skeletal hierarchy and kinematic principles in joint animation, focusing on the mathematical foundations of forward and inverse kinematics and their analytical and numerical solution methods, laying a theoretical and engineering foundation for character motion control."
         },
         {
             "id": 9,
