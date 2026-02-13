@@ -94,9 +94,10 @@ The W space of StyleGAN, due to its good disentanglement and smoothness, is very
 
 **Implementation Method:** Given two implicit codes $w_1$ and $w_2$, we can generate an intermediate implicit code $w_{\text{interp}}$ using simple linear interpolation:
 
-$$ w_{\text{interp}}(t) = (1 - t)w_1 + t w_2, \quad t \in [0, 1]
-
-$$ Then, $w_{\text{interp}}(t)$ is fed into the synthesis network $g$ to obtain the $t$-th frame image $I(t) = g(w_{\text{interp}}(t))$ during the gradation process.
+$$ 
+w_{\text{interp}}(t) = (1 - t)w_1 + t w_2, \quad t \in [0, 1]
+$$ 
+Then, $w_{\text{interp}}(t)$ is fed into the synthesis network $g$ to obtain the $t$-th frame image $I(t) = g(w_{\text{interp}}(t))$ during the gradation process.
 
 Thanks to the superior properties of the W-space, this simple linear interpolation can produce extremely natural and high-quality visual gradient effects. We can even selectively interpolate different levels of style; for example, interpolating only coarse styles to change face shape and posture while keeping skin tone and lighting unchanged, thus achieving more creative control.
 
