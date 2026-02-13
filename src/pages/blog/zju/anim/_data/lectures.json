@@ -23,7 +23,7 @@
         {
             "id": 5,
             "title": "Lecture 5: 3D Image Morphing",
-            "intro": "Particle systems, rigid body dynamics, and collision detection."
+            "intro": "This lecture systematically introduces the core ideas and main technical routes of 3D shape deformation, covering methods based on surface parameterization, voxel representation and implicit functions, to achieve high-quality 3D morphological transitions from geometrically consistent deformation to complex topological changes."
         },
         {
             "id": 6,
