@@ -1,0 +1,525 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import Layout from "../../../layouts/Layout.astro";
+import Header from "../../../components/Header.astro";
+
+export async function getStaticPaths() {
+    const collections = [
+        "technical_views",
+        "paper_insights",
+        "common_tips",
+    ] as const;
+    const paths: any[] = [];
+
+    for (const collectionName of collections) {
+        const entries = await getCollection(collectionName);
+        // Sort by date descending
+        entries.sort(
+            (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+        );
+
+        for (let i = 0; i < entries.length; i++) {
+            const entry = entries[i];
+            const prevEntry = i < entries.length - 1 ? entries[i + 1] : null; // Older post
+            const nextEntry = i > 0 ? entries[i - 1] : null; // Newer post
+
+            paths.push({
+                params: { collection: collectionName, slug: entry.slug },
+                props: { entry, collectionName, prevEntry, nextEntry },
+            });
+        }
+    }
+
+    return paths;
+}
+
+interface Props {
+    entry: CollectionEntry<
+        "technical_views" | "paper_insights" | "common_tips"
+    >;
+    collectionName: string;
+    prevEntry: CollectionEntry<any> | null;
+    nextEntry: CollectionEntry<any> | null;
+}
+
+const { entry, collectionName, prevEntry, nextEntry } = Astro.props;
+const { Content, headings } = await entry.render();
+
+// Configuration Mapping
+const config: Record<
+    string,
+    { title: string; color: string; backLink: string }
+> = {
+    technical_views: {
+        title: "Technical Views",
+        color: "#f1c40f",
+        backLink: "/blog/tech/views",
+    },
+    paper_insights: {
+        title: "Paper Insights",
+        color: "#fa7298",
+        backLink: "/blog/tech/papers",
+    },
+    common_tips: {
+        title: "Common Tips",
+        color: "#ff9800",
+        backLink: "/blog/tech/tips",
+    },
+};
+
+const theme = config[collectionName] || {
+    title: "Blog",
+    color: "#333",
+    backLink: "/blog/tech",
+};
+
+// Filter TOC headings
+const tocHeadings = headings.filter((h) => h.depth <= 3);
+---
+
+<Layout title={`${entry.data.title} - ${theme.title}`}>
+    <Header />
+
+    <main class="article-page" style={`--theme-color: ${theme.color}`}>
+        <aside class="sidebar">
+            <!-- Progress Ring -->
+            <div class="progress-container">
+                <svg class="progress-ring" width="120" height="120">
+                    <circle
+                        class="progress-ring-bg"
+                        stroke="#f0f0f0"
+                        stroke-width="8"
+                        fill="transparent"
+                        r="52"
+                        cx="60"
+                        cy="60"></circle>
+                    <circle
+                        id="progress-circle"
+                        class="progress-ring-circle"
+                        stroke="var(--theme-color)"
+                        stroke-width="8"
+                        fill="transparent"
+                        r="52"
+                        cx="60"
+                        cy="60"></circle>
+                </svg>
+                <div class="progress-text">
+                    <span
+                        id="progress-percent"
+                        style="color: var(--theme-color)">0%</span
+                    >
+                    <span class="progress-label">Read</span>
+                </div>
+            </div>
+
+            <!-- Back Link -->
+            <a href={theme.backLink} class="back-link">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    ><line x1="19" y1="12" x2="5" y2="12"></line><polyline
+                        points="12 19 5 12 12 5"></polyline></svg
+                >
+                Back to {theme.title}
+            </a>
+
+            <!-- TOC -->
+            <nav class="toc">
+                <h3>Contents</h3>
+                <ul>
+                    {
+                        tocHeadings.map((h) => (
+                            <li class={`toc-item toc-level-${h.depth}`}>
+                                <a href={`#${h.slug}`}>{h.text}</a>
+                            </li>
+                        ))
+                    }
+                </ul>
+            </nav>
+        </aside>
+
+        <article class="content" id="main-content">
+            <div class="article-inner">
+                <header class="article-header">
+                    <h1 class="article-title">{entry.data.title}</h1>
+                    <div class="article-meta">
+                        <span
+                            class="badge category-badge"
+                            style={`color: ${theme.color}; background: ${theme.color}15;`}
+                        >
+                            {theme.title}
+                        </span>
+                        <span class="meta-date"
+                            >{entry.data.pubDate.toLocaleDateString()}</span
+                        >
+                    </div>
+                </header>
+
+                <div class="markdown-content">
+                    <Content />
+                </div>
+
+                <!-- Navigation -->
+                <div class="article-navigation">
+                    {
+                        prevEntry ? (
+                            <a
+                                href={`/blog/${collectionName}/${prevEntry.slug}`}
+                                class="nav-btn prev"
+                            >
+                                <span class="nav-label">Previous Post</span>
+                                <span class="nav-title">
+                                    {prevEntry.data.title}
+                                </span>
+                            </a>
+                        ) : (
+                            <div class="nav-placeholder" />
+                        )
+                    }
+
+                    {
+                        nextEntry ? (
+                            <a
+                                href={`/blog/${collectionName}/${nextEntry.slug}`}
+                                class="nav-btn next"
+                            >
+                                <span class="nav-label">Next Post</span>
+                                <span class="nav-title">
+                                    {nextEntry.data.title}
+                                </span>
+                            </a>
+                        ) : (
+                            <div class="nav-placeholder" />
+                        )
+                    }
+                </div>
+            </div>
+        </article>
+    </main>
+</Layout>
+
+<script>
+    // Logic ported from zju/[courseId]/[lectureId].astro for TOC & Progress
+    const updateProgress = () => {
+        const content = document.getElementById("main-content");
+        if (!content) return;
+
+        const scrollTop = window.scrollY;
+        const docHeight = content.scrollHeight;
+        const winHeight = window.innerHeight;
+        /* Subtract winHeight to reach 100% when bottom of content hits bottom of screen */
+        const scrollPercent = scrollTop / (docHeight - winHeight);
+        const scrollPercentRounded = Math.min(
+            Math.round(Math.max(0, scrollPercent) * 100),
+            100,
+        );
+
+        const progressText = document.getElementById("progress-percent");
+        if (progressText) progressText.textContent = `${scrollPercentRounded}%`;
+
+        const circle = document.getElementById("progress-circle");
+        if (circle) {
+            const radius = 52;
+            const circumference = radius * 2 * Math.PI;
+            (circle as any).style.strokeDasharray =
+                `${circumference} ${circumference}`;
+            (circle as any).style.strokeDashoffset = (
+                circumference -
+                (scrollPercentRounded / 100) * circumference
+            ).toString();
+        }
+    };
+
+    const updateActiveTOC = () => {
+        const headings = document.querySelectorAll(
+            ".markdown-content h1, .markdown-content h2, .markdown-content h3",
+        );
+        const tocLinks = document.querySelectorAll(".toc a");
+
+        let activeId = "";
+        // Find the first heading that is above the cutoff line
+        headings.forEach((h) => {
+            const rect = h.getBoundingClientRect();
+            if (rect.top <= 150) activeId = h.id;
+        });
+
+        tocLinks.forEach((link) => {
+            if (link.getAttribute("href") === `#${activeId}`) {
+                link.classList.add("active");
+                // Optional: Scroll TOC to keep active item in view
+                link.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            } else {
+                link.classList.remove("active");
+            }
+        });
+    };
+
+    window.addEventListener("scroll", () => {
+        updateProgress();
+        updateActiveTOC();
+    });
+    // Initial call
+    updateProgress();
+</script>
+
+<style>
+    :root {
+        --sidebar-width: 280px;
+        --content-max-width: 900px; /* Readable width */
+    }
+
+    .article-page {
+        display: grid;
+        grid-template-columns: var(--sidebar-width) 1fr;
+        min-height: 100vh;
+        padding-top: 80px;
+        background: #fbfbfb;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 80px;
+        width: var(--sidebar-width);
+        height: calc(100vh - 80px);
+        background: white;
+        border-right: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 2.5rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        overflow-y: auto;
+        z-index: 50;
+    }
+
+    .progress-container {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+    }
+    .progress-ring {
+        transform: rotate(-90deg);
+    }
+    .progress-ring-circle {
+        transition: stroke-dashoffset 0.1s linear;
+    }
+    .progress-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+    }
+    #progress-percent {
+        font-size: 1.5rem;
+        font-weight: 800;
+    }
+    .progress-label {
+        font-size: 0.8rem;
+        color: #999;
+    }
+
+    .back-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.8rem 1rem;
+        background: #f8f8f8;
+        border-radius: 12px;
+        color: #666;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: 0.2s;
+    }
+    .back-link:hover {
+        background: #f0f0f0;
+        color: #333;
+        transform: translateX(-2px);
+    }
+
+    .toc h3 {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        color: #aaa;
+        margin-bottom: 1rem;
+        letter-spacing: 1px;
+    }
+    .toc ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .toc-item a {
+        display: block;
+        padding: 6px 12px;
+        color: #666;
+        text-decoration: none;
+        font-size: 0.9rem;
+        border-radius: 6px;
+        transition: 0.2s;
+        border-left: 2px solid transparent;
+    }
+    .toc-item a:hover {
+        color: var(--theme-color);
+        background: rgba(0, 0, 0, 0.02);
+    }
+    .toc-item a.active {
+        color: var(--theme-color);
+        font-weight: 600;
+        border-left-color: var(--theme-color);
+        background: #fff;
+    }
+    .toc-level-3 {
+        padding-left: 1rem;
+        font-size: 0.85rem;
+    }
+
+    /* Content Area */
+    .content {
+        grid-column: 2;
+        padding: 4rem 3rem;
+        background: white;
+    }
+    .article-inner {
+        max-width: var(--content-max-width);
+        margin: 0 auto;
+    }
+
+    .article-header {
+        margin-bottom: 4rem;
+        text-align: center;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #eee;
+    }
+    .article-title {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #111;
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+    }
+    .article-meta {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+    }
+    .badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    .meta-date {
+        color: #888;
+        font-size: 0.95rem;
+    }
+
+    /* Markdown Restyling to match ZJU */
+    .markdown-content {
+        font-size: 1.15rem;
+        line-height: 1.8;
+        color: #333;
+    }
+    .markdown-content :global(h1) {
+        font-size: 2.2rem;
+        margin-top: 3rem;
+    }
+    .markdown-content :global(h2) {
+        font-size: 1.8rem;
+        margin-top: 2.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #eee;
+    }
+    .markdown-content :global(h3) {
+        font-size: 1.4rem;
+        margin-top: 2rem;
+    }
+    .markdown-content :global(p) {
+        margin-bottom: 1.5rem;
+    }
+    .markdown-content :global(a) {
+        color: var(--theme-color);
+        text-decoration: underline;
+    }
+
+    /* Code Blocks */
+    .markdown-content :global(pre) {
+        border-radius: 12px;
+        padding: 1.5rem;
+        background: #282c34 !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        margin: 2rem 0;
+    }
+
+    /* Images */
+    .markdown-content :global(img) {
+        max-width: 100%;
+        border-radius: 8px;
+        margin: 2rem auto;
+        display: block;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Navigation Footer */
+    .article-navigation {
+        display: flex;
+        gap: 2rem;
+        margin-top: 5rem;
+        padding-top: 3rem;
+        border-top: 1px solid #f0f0f0;
+    }
+    .nav-btn {
+        flex: 1;
+        padding: 1.5rem;
+        border: 1px solid #eee;
+        border-radius: 12px;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        transition: 0.3s;
+    }
+    .nav-btn:hover {
+        border-color: var(--theme-color);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+    }
+    .nav-btn.next {
+        text-align: right;
+    }
+    .nav-label {
+        font-size: 0.85rem;
+        color: #999;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .nav-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #333;
+    }
+    .nav-placeholder {
+        flex: 1;
+    }
+
+    @media (max-width: 1000px) {
+        .sidebar {
+            display: none;
+        }
+        .article-page {
+            grid-template-columns: 1fr;
+        }
+        .content {
+            padding: 2rem;
+        }
+    }
+</style>
