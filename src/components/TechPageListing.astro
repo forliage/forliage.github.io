@@ -1,0 +1,390 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "./Header.astro";
+import { type CollectionEntry, getCollection } from "astro:content";
+
+interface Props {
+    title: string;
+    description: string;
+    collectionName: "technical_views" | "paper_insights" | "common_tips";
+    colorTheme: string; // Hex color
+}
+
+const { title, description, collectionName, colorTheme } = Astro.props;
+
+// Fetch posts
+const posts = (await getCollection(collectionName)).sort(
+    (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+// Get unique tags for filter suggestions
+const allTags = [...new Set(posts.flatMap((post) => post.data.tags || []))];
+---
+
+<Layout title={`${title} - Liuye Zhao`}>
+    <Header />
+
+    <main class="tech-listing-page" style={`--theme-color: ${colorTheme}`}>
+        <!-- Back Button -->
+        <a href="/blog/tech" class="back-button">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                ><line x1="19" y1="12" x2="5" y2="12"></line><polyline
+                    points="12 19 5 12 12 5"></polyline></svg
+            >
+            Back to Tech
+        </a>
+
+        <!-- Header Section -->
+        <section class="page-header">
+            <h1 class="page-title">{title}</h1>
+            <p class="page-subtitle">{description}</p>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input
+                    type="text"
+                    id="search-input"
+                    placeholder="Search by tags or title..."
+                    autocomplete="off"
+                />
+                <svg
+                    class="search-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    ><circle cx="11" cy="11" r="8"></circle><line
+                        x1="21"
+                        y1="21"
+                        x2="16.65"
+                        y2="16.65"></line></svg
+                >
+            </div>
+
+            <!-- Tag Cloud -->
+            <div class="tag-cloud">
+                {
+                    allTags.map((tag) => (
+                        <button class="filter-tag" data-tag={tag}>
+                            #{tag}
+                        </button>
+                    ))
+                }
+            </div>
+        </section>
+
+        <!-- Listing Grid -->
+        <section class="listing-grid" id="listing-grid">
+            {
+                posts.map((post) => (
+                    <a
+                        href={`/blog/${collectionName}/${post.slug}`}
+                        class="post-card"
+                        data-tags={
+                            post.data.tags?.join(",").toLowerCase() || ""
+                        }
+                        data-title={post.data.title.toLowerCase()}
+                    >
+                        <div class="card-content">
+                            <div class="card-cover">
+                                {post.data.heroImage ? (
+                                    <img
+                                        src={post.data.heroImage}
+                                        alt={post.data.title}
+                                    />
+                                ) : (
+                                    <div class="placeholder-cover">
+                                        <span>{post.data.title[0]}</span>
+                                    </div>
+                                )}
+                            </div>
+                            <div class="card-info">
+                                <h3>{post.data.title}</h3>
+                                <p class="post-date">
+                                    {post.data.pubDate.toLocaleDateString()}
+                                </p>
+                                <div class="card-tags">
+                                    {post.data.tags?.slice(0, 3).map((tag) => (
+                                        <span class="mini-tag">#{tag}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                ))
+            }
+            {
+                posts.length === 0 && (
+                    <div class="empty-state">
+                        <p>No articles found yet. Check back soon!</p>
+                    </div>
+                )
+            }
+        </section>
+
+        <div
+            id="no-results"
+            style="display: none; text-align: center; color: #888; margin-top: 2rem;"
+        >
+            No matching articles found.
+        </div>
+    </main>
+</Layout>
+
+<script>
+    // Client-side search logic
+    const searchInput = document.getElementById(
+        "search-input",
+    ) as HTMLInputElement;
+    const cards = document.querySelectorAll(".post-card");
+    const noResults = document.getElementById("no-results");
+    const filterTags = document.querySelectorAll(".filter-tag");
+
+    function filterPosts(query: string) {
+        const lowerQuery = query.toLowerCase();
+        let visibleCount = 0;
+
+        cards.forEach((card) => {
+            const title = (card as HTMLElement).dataset.title || "";
+            const tags = (card as HTMLElement).dataset.tags || "";
+
+            if (title.includes(lowerQuery) || tags.includes(lowerQuery)) {
+                (card as HTMLElement).style.display = "block";
+                visibleCount++;
+            } else {
+                (card as HTMLElement).style.display = "none";
+            }
+        });
+
+        if (noResults) {
+            noResults.style.display = visibleCount === 0 ? "block" : "none";
+        }
+    }
+
+    searchInput?.addEventListener("input", (e) => {
+        filterPosts((e.target as HTMLInputElement).value);
+    });
+
+    filterTags.forEach((btn) => {
+        btn.addEventListener("click", () => {
+            const tag = (btn as HTMLElement).dataset.tag || "";
+            if (searchInput) {
+                searchInput.value = tag;
+                filterPosts(tag);
+            }
+        });
+    });
+</script>
+
+<style>
+    .tech-listing-page {
+        min-height: 100vh;
+        padding: 6rem 2rem;
+        background: #fafffa; /* ZJU bg */
+        color: #333;
+    }
+
+    /* Back Button (ZJU Style) */
+    .back-button {
+        position: fixed;
+        top: 100px;
+        left: 2rem;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 50px;
+        color: var(--theme-color);
+        text-decoration: none;
+        transition: 0.3s;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .back-button:hover {
+        transform: translateX(-4px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Header */
+    .page-header {
+        max-width: 800px;
+        margin: 0 auto 4rem;
+        text-align: center;
+    }
+    .page-title {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(120deg, var(--theme-color), #333);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .page-subtitle {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Search */
+    .search-container {
+        position: relative;
+        max-width: 500px;
+        margin: 0 auto 1.5rem;
+    }
+    #search-input {
+        width: 100%;
+        padding: 16px 50px 16px 24px;
+        border: 2px solid rgba(0, 0, 0, 0.05);
+        border-radius: 50px;
+        font-size: 1rem;
+        background: #fff;
+        transition: 0.3s;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+    #search-input:focus {
+        outline: none;
+        border-color: var(--theme-color);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+    .search-icon {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #ccc;
+    }
+
+    /* Tag Cloud */
+    .tag-cloud {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .filter-tag {
+        background: rgba(0, 0, 0, 0.03);
+        border: none;
+        padding: 6px 14px;
+        border-radius: 20px;
+        color: #555;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: 0.2s;
+    }
+    .filter-tag:hover {
+        background: var(--theme-color);
+        color: #fff;
+    }
+
+    /* Grid */
+    .listing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 30px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* Post Card (ZJU Style) */
+    .post-card {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        background: #fff;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        border: 1px solid transparent;
+        height: 100%; /* Uniform height */
+        display: flex;
+        flex-direction: column;
+    }
+    .post-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        border-color: var(--theme-color);
+    }
+
+    .card-cover {
+        height: 180px;
+        overflow: hidden;
+        background: #f0f0f0;
+        position: relative;
+    }
+    .card-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: 0.5s;
+    }
+    .post-card:hover .card-cover img {
+        transform: scale(1.05);
+    }
+
+    .placeholder-cover {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.8),
+            rgba(255, 255, 255, 0.2)
+        );
+        color: var(--theme-color);
+        font-size: 4rem;
+        font-weight: 700;
+        opacity: 0.5;
+    }
+
+    .card-info {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .card-info h3 {
+        margin: 0 0 0.5rem;
+        font-size: 1.25rem;
+        color: #222;
+        line-height: 1.4;
+    }
+    .post-date {
+        font-size: 0.85rem;
+        color: #999;
+        margin-bottom: 1rem;
+    }
+
+    .card-tags {
+        margin-top: auto;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .mini-tag {
+        font-size: 0.75rem;
+        padding: 3px 10px;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.04);
+        color: #666;
+    }
+</style>
