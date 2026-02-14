@@ -1,21 +1,410 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
+
+const categories = [
+    {
+        id: "views",
+        title: "Technical Views",
+        description:
+            "Personal insights on software trends and engineering philosophy.",
+        link: "#",
+    },
+    {
+        id: "papers",
+        title: "Paper Insights",
+        description:
+            "Deep dives into academic research and breakthrough algorithms.",
+        link: "#",
+    },
+    {
+        id: "tips",
+        title: "Common Tips",
+        description:
+            "A collection of practical engineering tricks and daily shortcuts.",
+        link: "#",
+    },
+];
 ---
 
-<Layout title="Technical Articles - Liuye Zhao">
+<Layout title="Technique Discussion - Liuye Zhao">
     <Header />
-    <main>
-        <h1>Technical Articles</h1>
-        <p>Coming soon...</p>
+
+    <main class="tech-page">
+        <!-- Background Meteors Container -->
+        <div id="meteors-container"></div>
+
+        <!-- Back Button -->
+        <a href="/blog" class="back-button">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                ><line x1="19" y1="12" x2="5" y2="12"></line><polyline
+                    points="12 19 5 12 12 5"></polyline></svg
+            >
+            Back
+        </a>
+
+        <div class="page-header">
+            <h1 class="page-title">Technique Discussion</h1>
+            <p class="page-subtitle">
+                Exploration, analysis, and engineering wisdom.
+            </p>
+        </div>
+
+        <div class="doors-container">
+            {
+                categories.map((cat) => (
+                    <div class="door-wrapper">
+                        <div class="door-inner-wrapper">
+                            <div class="door-label">
+                                <h3>{cat.title}</h3>
+                                <p>{cat.description}</p>
+                            </div>
+                            <a
+                                href={cat.link}
+                                class="door-unit"
+                                id={`door-${cat.id}`}
+                            >
+                                <div class="door-frame">
+                                    <div class="starfield-box">
+                                        <div class="stars" />
+                                        <div class="stars2" />
+                                        <div class="stars3" />
+                                    </div>
+                                </div>
+                                <div class="particle-emitter" />
+                            </a>
+                            <a href={cat.link} class="enter-btn">
+                                ENTER
+                            </a>
+                        </div>
+                    </div>
+                ))
+            }
+        </div>
     </main>
 </Layout>
 
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // --- Meteor Shower Logic (Unified with ZJU) ---
+        const meteorsContainer = document.getElementById("meteors-container");
+        if (meteorsContainer) {
+            const createMeteor = () => {
+                const meteor = document.createElement("div");
+                meteor.classList.add("meteor");
+                const startX = Math.random() * 100 + 20;
+                const startY = Math.random() * 100 - 50;
+                const width = Math.random() * 100 + 50;
+                meteor.style.left = `${startX}%`;
+                meteor.style.top = `${startY}%`;
+                meteor.style.width = `${width}px`;
+                const duration = Math.random() * 1 + 1;
+                meteor.style.animationDuration = `${duration}s`;
+                meteorsContainer.appendChild(meteor);
+                setTimeout(() => meteor.remove(), duration * 1000);
+            };
+            setInterval(createMeteor, 300);
+        }
+
+        // --- Particle System for Doors ---
+        const emitters = document.querySelectorAll(".particle-emitter");
+        emitters.forEach((emitter) => {
+            setInterval(() => {
+                const p = document.createElement("div");
+                p.classList.add("particle");
+                const size = Math.random() * 4 + 2;
+                p.style.width = `${size}px`;
+                p.style.height = `${size}px`;
+                p.style.left = `${Math.random() * 100}%`;
+                p.style.top = `${Math.random() * 100}%`;
+                p.style.setProperty("--tx", `${(Math.random() - 0.5) * 100}px`);
+                p.style.setProperty("--ty", `${-Math.random() * 100}px`);
+                p.style.animationDuration = `${Math.random() * 1 + 1}s`;
+                emitter.appendChild(p);
+                setTimeout(() => p.remove(), 2000);
+            }, 100);
+        });
+    });
+</script>
+
 <style>
-    main {
-        max-width: 960px;
-        margin: auto;
-        padding: 3rem 1rem;
+    :root {
+        --text-color: #333;
+        --highlight-color: #f075ae;
+        --door-width: 280px;
+        --door-height: 420px;
+    }
+
+    .tech-page {
+        min-height: 100vh;
+        padding: 8rem 2rem 4rem;
+        max-width: 1400px;
+        margin: 0 auto;
+        position: relative;
+        overflow-x: hidden;
+        perspective: 1500px;
+    }
+
+    /* --- Shared Background / Back Button (ZJU Sync) --- */
+    #meteors-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+    }
+    :global(.meteor) {
+        position: absolute;
+        height: 2px;
+        background: linear-gradient(90deg, #a18cd1, transparent);
+        opacity: 0;
+        transform: rotate(-45deg);
+        filter: drop-shadow(0 0 6px #a18cd1);
+        animation: shower linear;
+    }
+    @keyframes shower {
+        0% {
+            opacity: 0;
+            transform: rotate(-45deg) translateX(0);
+        }
+        10% {
+            opacity: 0.7;
+        }
+        100% {
+            opacity: 0;
+            transform: rotate(-45deg) translateX(-1000px);
+        }
+    }
+    .back-button {
+        position: fixed;
+        top: 100px;
+        left: 2rem;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        background: rgba(255, 240, 245, 0.7);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(240, 117, 174, 0.3);
+        border-radius: 50px;
+        color: #f075ae;
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+    .back-button:hover {
+        transform: translateX(-4px);
+        background: rgba(255, 240, 245, 0.9);
+    }
+
+    /* --- Page Header --- */
+    .page-header {
         text-align: center;
+        margin-bottom: 4rem;
+        position: relative;
+        z-index: 10;
+    }
+    .page-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        background: linear-gradient(120deg, #f075ae, #a18cd1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .page-subtitle {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    /* --- 3D Doors Grid --- */
+    .doors-container {
+        display: flex;
+        justify-content: center;
+        gap: 6rem;
+        margin-top: 2rem;
+        position: relative;
+        z-index: 10;
+        flex-wrap: wrap;
+    }
+
+    .door-wrapper {
+        perspective: 1000px;
+    }
+
+    .door-inner-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .door-label {
+        text-align: center;
+        max-width: 240px;
+    }
+
+    .door-label h3 {
+        font-size: 1.5rem;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .door-label p {
+        font-size: 0.9rem;
+        color: #888;
+        line-height: 1.4;
+    }
+
+    /* --- The 3D Door Unit --- */
+    .door-unit {
+        width: var(--door-width);
+        height: var(--door-height);
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        display: block;
+    }
+
+    .door-unit:hover {
+        transform: rotateY(-25deg) scale(1.05); /* 3D Perspective rotation */
+    }
+
+    .door-frame {
+        position: absolute;
+        inset: 0;
+        background: #000;
+        border: 4px solid #333;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow:
+            0 0 30px rgba(161, 140, 209, 0.3),
+            0 0 100px rgba(0, 0, 0, 0.5);
+    }
+
+    .door-frame::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        box-shadow: inset 0 0 50px rgba(161, 140, 209, 0.4);
+        pointer-events: none;
+    }
+
+    /* --- Cosmic Starfield Inside Door --- */
+    .starfield-box {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, #0b0e23 0%, #000 100%);
+        overflow: hidden;
+    }
+
+    .stars,
+    .stars2,
+    .stars3 {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 200%;
+        height: 200%;
+        background-image:
+            radial-gradient(
+                white,
+                rgba(255, 255, 255, 0.2) 2px,
+                transparent 40px
+            ),
+            radial-gradient(
+                white,
+                rgba(255, 255, 255, 0.15) 1px,
+                transparent 30px
+            );
+        background-size:
+            550px 550px,
+            350px 350px;
+        background-position:
+            0 0,
+            40px 60px;
+        animation: flyThrough 20s linear infinite;
+        opacity: 0.5;
+    }
+    .stars2 {
+        background-size: 200px 200px;
+        animation-duration: 15s;
+        opacity: 0.3;
+    }
+    .stars3 {
+        background-size: 100px 100px;
+        animation-duration: 10s;
+        opacity: 0.2;
+    }
+
+    @keyframes flyThrough {
+        from {
+            transform: translateZ(0) scale(1);
+        }
+        to {
+            transform: translateZ(500px) scale(3.5);
+        }
+    }
+
+    /* --- Particle Emitter --- */
+    .particle-emitter {
+        position: absolute;
+        inset: -20px;
+        pointer-events: none;
+        z-index: 11;
+    }
+
+    :global(.particle) {
+        position: absolute;
+        background: #f075ae;
+        border-radius: 50%;
+        filter: blur(1px);
+        opacity: 0;
+        animation: emit-particle forwards ease-out;
+    }
+
+    @keyframes emit-particle {
+        0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0.8;
+        }
+        100% {
+            transform: translate(var(--tx), var(--ty)) scale(0);
+            opacity: 0;
+        }
+    }
+
+    /* --- Enter Button --- */
+    .enter-btn {
+        padding: 10px 30px;
+        background: transparent;
+        border: 2px solid #f075ae;
+        border-radius: 8px;
+        color: #f075ae;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-decoration: none;
+        transition: all 0.3s;
+        opacity: 0.8;
+    }
+    .enter-btn:hover {
+        background: #f075ae;
+        color: white;
+        box-shadow: 0 0 20px rgba(240, 117, 174, 0.4);
+        opacity: 1;
+        transform: translateY(-2px);
     }
 </style>
