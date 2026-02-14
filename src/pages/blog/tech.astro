@@ -189,7 +189,7 @@ const categories = [
         spawn() {
             const cx = this.width / 2;
             const cy = this.height / 2;
-            // Dimensions of the door frame (approximate)
+            // Dimensions of the door frame (approximate) - match CSS var --door-w/h
             const dw = 280;
             const dh = 420;
             const hw = dw / 2;
@@ -198,48 +198,50 @@ const categories = [
             // Pick a random side
             const side = Math.floor(Math.random() * 4);
             let x = 0, y = 0, vx = 0, vy = 0;
-            const speed = Math.random() * 2 + 1; // Outward speed
+            // Higher speed for wider scattering
+            const speed = Math.random() * 3 + 1.5; 
 
             if (side === 0) { // Top Edge
                 x = cx - hw + Math.random() * dw;
                 y = cy - hh;
-                vx = (Math.random() - 0.5) * 0.5; 
+                vx = (Math.random() - 0.5); 
                 vy = -speed; // Up
             } else if (side === 1) { // Right Edge
                 x = cx + hw;
                 y = cy - hh + Math.random() * dh;
                 vx = speed; // Right
-                vy = (Math.random() - 0.5) * 0.5;
+                vy = (Math.random() - 0.5);
             } else if (side === 2) { // Bottom Edge
                 x = cx - hw + Math.random() * dw;
                 y = cy + hh;
-                vx = (Math.random() - 0.5) * 0.5;
+                vx = (Math.random() - 0.5);
                 vy = speed; // Down
             } else { // Left Edge
                 x = cx - hw;
                 y = cy - hh + Math.random() * dh;
                 vx = -speed; // Left
-                vy = (Math.random() - 0.5) * 0.5;
+                vy = (Math.random() - 0.5);
             }
 
             this.particles.push({
                 x, y, vx, vy,
                 life: 1.0,
-                color: `rgba(240, 117, 174, ${Math.random() * 0.5 + 0.5})`
+                // Pinkish with variation
+                color: `rgba(240, 117, 174, ${Math.random() * 0.4 + 0.6})`
             });
         }
 
         animate() {
             this.ctx.clearRect(0, 0, this.width, this.height);
             
-            // Spawn multiple particles per frame for DENSITY
-            for(let i=0; i<4; i++) this.spawn();
+            // Spawn MANY particles per frame for "Dense Ring" effect
+            for(let i=0; i<8; i++) this.spawn();
 
             for (let i = this.particles.length - 1; i >= 0; i--) {
                 const p = this.particles[i];
                 p.x += p.vx;
                 p.y += p.vy;
-                p.life -= 0.015;
+                p.life -= 0.02; // Slower fade = longer visible trail
 
                 if (p.life <= 0) {
                     this.particles.splice(i, 1);
@@ -249,7 +251,8 @@ const categories = [
                 this.ctx.globalAlpha = p.life;
                 this.ctx.fillStyle = p.color;
                 this.ctx.beginPath();
-                this.ctx.arc(p.x, p.y, 2 * p.life, 0, Math.PI * 2);
+                // Larger particles
+                this.ctx.arc(p.x, p.y, Math.random() * 2 + 1, 0, Math.PI * 2);
                 this.ctx.fill();
             }
             this.ctx.globalAlpha = 1;
@@ -290,7 +293,7 @@ const categories = [
         --door-w: 280px;
         --door-h: 420px;
         --tunnel-depth: 400px;
-        --primary-bg: #fff; /* Restored Light Background */
+        --primary-bg: #fafffa; /* ZJU Default Background */
         --primary-text: #333;
     }
 
@@ -303,7 +306,7 @@ const categories = [
     .tech-page {
         min-height: 100vh;
         padding: 6rem 2rem;
-        background: var(--primary-bg); /* Use Light BG */
+        background: var(--primary-bg);
         color: var(--primary-text);
         position: relative;
         /* Ensure no overflow from 3D elements */
@@ -347,7 +350,6 @@ const categories = [
     .doors-container {
         display: flex; justify-content: center; gap: 6rem; flex-wrap: wrap;
         perspective: 2000px; z-index: 10; position: relative;
-        /* Ensure flex container doesn't overflow horizontally */
         max-width: 100%;
     }
 
@@ -391,13 +393,17 @@ const categories = [
     /* Faces */
     .face { position: absolute; backface-visibility: hidden; }
 
-    /* Front Frame */
+    /* Front Frame (Visible now!) */
     .front-frame {
         width: 100%; height: 100%;
-        border: 4px solid #111; /* Dark frame */
+        /* Metallic / Glassy Border to be visible on light bg */
+        border: 4px solid #aaa; 
+        background: rgba(0,0,0,0.1);
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
         transform: translateZ(0);
         pointer-events: none;
         z-index: 10;
+        border-radius: 2px;
     }
 
     /* Tunnel Walls - Standard CSS 3D */
