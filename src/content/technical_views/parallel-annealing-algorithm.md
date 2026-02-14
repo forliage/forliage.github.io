@@ -6,39 +6,43 @@ tags: ["Optimization", "Parallel Computing", "Simulated Annealing"]
 heroImage: "/images/PSA.gif"
 ---
 
-## 第一部分：引言 - 从物理退火到模拟退火(SA)
+# I.Introduction - From Physical Annealing to Simulated Annealing (SA)
 
-众所周知，组合优化问题(Combinatorial Optimization)是计算机科学中的一大难题，例如TSP、VLSI Layout等。这类问题的解空间通常随着问题规模呈指数级增长，使得暴力枚举变得不切实际。
+Combinatorial optimization is a well-known and challenging problem in computer science, including problems like the Transformation of Spirals (TSP) and VLSI Layout. The solution space for these problems typically grows exponentially with the problem size, making brute-force enumeration impractical.
 
-许多局部搜索算法，如Hill Climbing，虽然高效，但极易陷入Local Optima，而无法找到全局最优解。
+Many local search algorithms, such as Hill Climbing, while efficient, are prone to getting trapped in local optimization and failing to find the global optimum.
 
-模拟退火算法的灵感，正来自于冶金学中的物理退火过程。
+The inspiration for simulated annealing comes from the physical annealing process in metallurgy.
 
-*   **Physical Annealing**：将固体（如金属）加热至足够高的温度，使其内部粒子处于无序但高能量的状态。然后，缓慢地、有控制地降低温度。在这个过程中，粒子有足够的时间和“机会”去寻找能量最低、结构最稳定的晶格状态。如果降温过快（淬火），粒子会被“冻结”在能量较高的非晶格的亚稳态。
-*   **Simulated Annealing,SA**：1983年，S. Kirkpatrick, C. D. Gelatt Jr., M. P. Vecchi 等人受到这一物理过程的启发，将其思想抽象为一种通用的随机优化算法。
-    *   **State**：对应于优化问题的一个解`S`。
-    *   **Energy**：对应于优化问题的Cost Function `E(S)`。我们的目标是找到使`E(S)`最小的`S`。
-    *   **Temperature**：对应于控制参数`T`，它会随着算法迭代逐渐降低。
-    *   **寻找新状态**：对应于从当前解`S`通过某种Neighborhood Function生成一个新解`S'`。
+*   **Physical Annealing**：A solid (such as a metal) is heated to a sufficiently high temperature, causing its internal particles to be in a disordered but high-energy state. Then, the temperature is slowly and controlledly lowered. During this process, the particles have enough time and "opportunity" to find the lowest-energy, most structurally stable lattice state. If the cooling is too rapid (quenching), the particles will be "frozen" in a higher-energy, metastable, amorphous state.
+*   **Simulated Annealing,SA**：Inspired by this physical process, S. Kirkpatrick, C. D. Gelatt Jr., M. P. Vecchi abstracted this idea into a general random optimization algorithm.
+    *   **State**：This corresponds to a solution $S$ to the optimization problem.
+    *   **Energy**：This corresponds to the cost function $E(S)$ of the optimization problem. Our goal is to find the solution $S$ that minimizes $E(S)$.
+    *   **Temperature**：This corresponds to the control parameter $T$ and decreases gradually with each iteration of the algorithm.
+    *   **Finding New States**：This corresponds to generating a new solution $S'$ from the current solution $S$ through a neighborhood function.
 
-**SA的核心思想**：
+**The Core Idea of SA**:
 
-算法不仅仅接收比当前解更好的新解($\\Delta E=E(S')-E(S)<0$)，还能以一定的概率接受一个更差的解($\\Delta E>0$)。这个接受概率由Metropolis准则给出： $$P(\\text{accept } S')=\\begin{cases}1,\\quad\\text{ if } \\Delta E<0\\ e^{-\\frac{\\Delta E}{T}},\\text{if }\\Delta E\\geq 0\\ \\end{cases}$$ 这个概率性的"向坏处走"的举动，是SA算法的灵魂。
+Algorithm not only accepts better new solutions ($\Delta E=E(S')-E(S)<0$), but also accepts worse solutions with a certain probability ($\Delta E>0$). This acceptance probability is given by the Metropolis criterion: 
+$$
+P(\text{accept } S')=\begin{cases}1,\quad\text{ if } \Delta E<0\\ e^{-\frac{\Delta E}{T}},\text{if }\Delta E\geq 0 \end{cases}
+$$ 
+This probability of "going downhill" is the soul of the SA algorithm.
 
-*   **高温时**(`T`很大)：$e^{-\\frac{\\Delta E}{T}}$趋近于1.算法几乎会接受任何新解，表现出强烈的随机探索行为，使其有能力"翻越"高山，避免陷入局部最优。
-*   **低温时**(`T`很小)：$e^{-\\frac{\\Delta E}{T}}$趋近于0.算法变得非常贪婪，几乎只接受更好的解，从而在已经找到的较优区域内进行精细搜索(Exploitation)。
+*   **High Temperature**($T$ large)：$e^{-\frac{\Delta E}{T}}$ approaches 1. The algorithm almost accepts any new solution, showing strong random exploration behavior, allowing it to "climb over" mountains and avoid getting stuck in local optima.
+*   **Low Temperature**($T$ small)：$e^{-\frac{\Delta E}{T}}$ approaches 0. The algorithm becomes very greedy, almost only accepting better solutions, allowing it to perform fine-grained search in the already found better region (Exploitation).
 
-**算法伪代码**
+**Algorithm Pseudo Code**
 
-```
-1. 初始化: 
-   - 初始解 S_current = generate_initial_solution()
-   - 初始温度 T = T_initial
-   - 终止温度 T_final
-   - 冷却率 alpha (0 < alpha < 1)
+```cpp
+1. Initialization: 
+   - Initial solution S_current = generate_initial_solution()
+   - Initial temperature T = T_initial
+   - Final temperature T_final
+   - Cooling rate alpha (0 < alpha < 1)
    - S_best = S_current
 2. while T > T_final:
-3.    for i = 1 to L: // 在每个温度下迭代L次
+3.    for i = 1 to L: // Iterate L times at each temperature
 4.       S_new = generate_neighbor(S_current)
 5.       delta_E = E(S_new) - E(S_current)
 6.       if delta_E < 0:
@@ -48,162 +52,190 @@ heroImage: "/images/PSA.gif"
 10.      else:
 11.         if random(0, 1) < exp(-delta_E / T):
 12.            S_current = S_new
-13.   T = T * alpha // 降温
+13.   T = T * alpha // Cooling
 14. return S_best
 ```
 
-## 第二部分：模拟退火算法的数学基石
+# II.The mathematical foundation of simulated annealing algorithm
 
-SA的收敛性可以通过Markov Chain理论严谨的证明。
+The convergence of SA can be rigorously proven through Markov Chain theory.
 
-我们将算法的执行过程看作一个状态序列$S\_0,S\_1,S\_2,...$，其中每个状态是解空间中的一个解。
+We consider the execution process of the algorithm as a sequence of states $S_0,S_1,S_2,...$，where each state is a solution in the solution space.
 
-### 1.固定温度下的齐次马尔可夫链
+## 2.1. Fixed temperature homogeneous Markov chain
 
-首先，我们考虑在一个固定的温度$T$下，算法的迭代过程构成一个齐次马尔可夫链(Homogeneous Markov Chain)。
+First, we consider that the algorithm's iteration process at a fixed temperature $T$ forms a homogeneous Markov chain (Homogeneous Markov Chain).
 
-*   **状态空间**：问题的所有可能解$\\Omega$。
-*   **转移概率**：从状态$i$转移到状态$j$的概率$P\_{ij}(T)$。
+*   **State Space**：The set of all possible solutions $\Omega$.
+*   **Transition Probability**：The probability of transitioning from state $i$ to state $j$ at temperature $T$，denoted as $P_{ij}(T)$.
 
-$$P\_{ij}(T) = G\_{ij} \\cdot A\_{ij}(T)$$ 其中，$G\_{ij}$是从状态$i$生成邻居$j$的概率(由邻域函数决定)，$A\_{ij}(T)$是接受$j$的概率(由Metropolis准则决定)。
+$$
+P_{ij}(T) = G_{ij} \cdot A_{ij}(T)
+$$ 
+where $G_{ij}$ is the probability of generating neighbor $j$ from state $i$ (determined by the neighborhood function), and $A_{ij}(T)$ is the acceptance probability of $j$ (determined by the Metropolis criterion).
 
-这条马尔可夫链有一个重要的性质：它存在一个**稳态分布**(Stationary Distribution)。当$t \\to \\infty$时，系统处于状态$i$的概率$\\pi\_i (T)$会收敛到一个不随时间变化的值。这个稳态分布是**吉布斯/玻尔兹曼分布**(Gibbs/Boltzmann Distribution)： $$\\pi\_i (T)=\\frac{1}{Z(T)} e^{-\\frac{E(i)}{T}}$$ 其中，$Z(T)=\\sum\\limits\_j e^{-\\frac{E(j)}{T}}$是归一化因子，称为配分函数。
+This Markov chain has an important property: it has a **stationary distribution**. When $t \to \infty$, the probability $\pi_i (T)$ that the system is in state $i$ converges to a value that does not change with time. This steady-state distribution is the **Gibbs/Boltzmann distribution**: 
+$$
+\pi_i (T)=\frac{1}{Z(T)} e^{-\frac{E(i)}{T}}
+$$ 
+where $Z(T)=\sum\limits_j e^{-\frac{E(j)}{T}}$ is the normalization factor, called the partition function.
 
-**证明(基于细致平衡条件):**
+**Proof (Based on the Detailed Balance Condition):**
 
-一个马尔可夫链存在稳态分布$\\pi$的充分条件是Detailed Balance Condition成立： $$\\pi\_i P\_{ij} = \\pi\_j P\_{ji}\\quad \\forall i,j \\in \\Omega$$ 我们来验证。假设$E(j)>E(i)$，则$\\Delta E=E(j)-E(i)>0$。 $$A\_{ij}(T) = e^{-\\frac{E(j)-E(i)}{T}}\\text{ and } A\_{ji}(T)=1$$ 代入细致平衡条件： $$\\text{LHS}=\\pi\_i P\_{ij} = \\left(\\frac{1}{Z(T)}e^{-\\frac{E(i)}{T}}\\right)\\cdot G\_{ij}\\cdot e^{-\\frac{E(i)-E(j)}{T}}=\\frac{G\_{ij}}{Z(T)}e^{-\\frac{E(j)}{T}}$$ $$\\text{RHS}=\\pi\_j P\_{ji} = \\left(\\frac{1}{Z(T)}e^{-\\frac{E(j)}{T}}\\right)\\cdot G\_{ji}\\cdot 1 = \\frac{G\_{ji}}{Z(T)} e^{-\\frac{E(j)}{T}}$$
+A Markov chain has a steady-state distribution $\pi$ if and only if the Detailed Balance Condition holds: 
+$$
+\pi_i P_{ij} = \pi_j P_{ji}\quad \forall i,j \in \Omega
+$$
+We verify this. Assuming $E(j)>E(i)$, then $\Delta E=E(j)-E(i)>0$. 
+$$
+A_{ij}(T) = e^{-\frac{E(j)-E(i)}{T}}\text{ and } A_{ji}(T)=1
+$$ 
+Substitute into the detailed balance condition: 
+$$
+\text{LHS}=\pi_i P_{ij} = \left(\frac{1}{Z(T)}e^{-\frac{E(i)}{T}}\right)\cdot G_{ij}\cdot e^{-\frac{E(i)-E(j)}{T}}=\frac{G_{ij}}{Z(T)}e^{-\frac{E(j)}{T}}
+$$ 
+$$
+\text{RHS}=\pi_j P_{ji} = \left(\frac{1}{Z(T)}e^{-\frac{E(j)}{T}}\right)\cdot G_{ji}\cdot 1 = \frac{G_{ji}}{Z(T)} e^{-\frac{E(j)}{T}}
+$$
 
-如果我们的邻域生成函数是对称的，即$G\_{ij}=G\_{ji}$例如，在TSP中，随机交换两个城市，这个操作是可逆的，概率相同），那么左右两边相等，细致平衡条件满足。
+If our neighborhood generation function is symmetric, i.e., $G_{ij}=G_{ji}$, for example, in TSP, randomly swapping two cities, this operation is reversible with the same probability, then the left and right sides are equal, and the detailed balance condition is satisfied.
 
-**稳态分布的意义：**
+**The Significance of the Steady-State Distribution:**
 
-在温度$T$下，经过足够多的迭代，算法访问到状态$i$的概率正比于$e^{-\\frac{E(i)}{T}}$。这意味着：能量越低的状态，被访问到的概率指数级地越高。
+At temperature $T$, after sufficient iterations, the probability that the algorithm visits state $i$ is proportional to $e^{-\frac{E(i)}{T}}$. This means that: states with lower energy are visited with exponentially higher probability.
 
-### 2.降温过程与非齐次马尔可夫链
+## 2.2. Cooling Process and Inhomogeneous Markov Chain
 
-SA算法的温度是变化的，因此它是一个非齐次马尔可夫链（Inhomogeneous Markov Chain）。其收敛性证明要复杂得多，但核心思想是：
+The temperature in SA algorithm is changing, so it is an inhomogeneous Markov Chain (Inhomogeneous Markov Chain). Its convergence proof is much more complex, but the core idea is:
 
-**定理**:如果满足以下两个条件，SA算法将以概率1收敛到全局最优解：
+**Theorem**: If the following two conditions are satisfied, the SA algorithm will converge to the global optimal solution with probability 1:
 
-1.  **遍历性**（Ergodicity）：对于任意温度$T > 0$，其对应的马尔可夫链都是不可约的。这意味着从任意解$i$出发，经过有限步，都有可能到达任意其他解$j$。这要求我们的邻域函数设计得当，能够连通整个解空间。
-2.  **足够慢的冷却**（Sufficiently Slow Cooling）：温度$T(k)$（$k$是迭代次数）必须下降得足够慢，以保证在每个温度下，系统都有足够的时间趋近其稳态分布。Geman和Geman在1984年证明，如果冷却进度表满足： $$T(k) \\ge \\frac{C}{\\log(k+k\_0)}$$ 其中$C$是一个足够大的常数（至少是解空间“能垒”的最大高度），算法就能保证收敛到全局最优。
+1.  **Ergodicity**：For any temperature $T > 0$, the corresponding Markov chain is irreducible. This means that from any solution $i$, it is possible to reach any other solution $j$ in a finite number of steps. This requires our neighborhood function to be designed appropriately, so that the entire solution space is connected.
+2.  **Sufficiently Slow Cooling**：Temperature $T(k)$（$k$ is iteration number） must decrease slowly enough to ensure that the system has enough time to approach its steady-state distribution at each temperature. Geman and Geman proved in 1984 that if the cooling schedule satisfies: 
+$$
+T(k) \ge \frac{C}{\log(k+k_0)}
+$$ 
+where $C$ is a sufficiently large constant (at least the maximum height of the energy barrier in the solution space), the algorithm can guarantee convergence to the global optimum.
 
-**直观理解**：
+**Intuitive Understanding**：
 
-当$T\\to 0$时，吉布斯分布$\\pi\_i (T)$的特性是： $$\\lim\\limits\_{T\\to 0} \\pi\_i (T) = \\begin{cases}\\frac{1}{|S\_{opt}|}\\text{ if } i \\in S\_{opt}\\ 0\\quad \\text{otherwise}\\ \\end{cases}$$
+When $T\to 0$，the Gibbs distribution $\pi_i (T)$ has the following properties: 
+$$
+\lim\limits_{T\to 0} \pi_i (T) = \begin{cases}\frac{1}{|S_{opt}|}\text{ if } i \in S_{opt}\\ 0\quad \text{otherwise}\end{cases}
+$$
 
-其中$S\_{opt}$是全局最优解的集合。这意味着当温度趋于0时，概率将全部集中在全局最优解上。足够慢的降温，就是为了让这个非齐次马$T$尔可夫链能“追踪”上随温度变化的稳态分布，最终停留在全局最优点。
+where $S_{opt}$ is the set of global optimal solutions. This means that as temperature approaches 0, the probability concentrates entirely on the global optimal solutions. Slow cooling ensures that the non-homogeneous Markov chain can "follow" the changing steady-state distribution at each temperature, eventually settling at the global optimum.
 
-然而，对数冷却在实践中太慢了。我们通常采用指数冷却$T\_{k+1} = \\alpha T\_k$，它虽然不能在理论上保证100%收敛到全局最优，但在有限时间内能得到非常高质量的近似解，这是一种理论与实践的权衡。
+However, logarithmic cooling is too slow in practice. We typically use exponential cooling $T_{k+1} =\alpha T_k$. While it cannot theoretically guarantee 100% convergence to the global optimum, it can obtain very high-quality approximate solutions within a finite time, representing a trade-off between theory and practice.
 
-## 第三部分：并行化的动机与挑战
+# III. Parallelization Motivation and Challenges
 
-SA算法有两个致命弱点，使其在面对大规模问题时力不从心：
+SA algorithm has two fatal weaknesses, making it powerless against large-scale problems:
 
-1.  **天生的序列性**（Inherent Sequentiality）：第$k+1$次迭代的状态依赖于第$k$次迭代的结果，这是一个严格的马尔可夫链，难以直接并行化一个链的内部。
-2.  **收敛速度慢**（Slow Convergence）：为了保证解的质量，冷却过程必须非常缓慢，导致迭代次数极多。
+1.  **Inherent Sequentiality**：The state at iteration $k+1$ depends on the result of iteration $k$, which is a strict Markov chain, making it difficult to parallelize the internal chain.
+2.  **Slow Convergence**：To ensure solution quality, the cooling process must be very slow, leading to a large number of iterations.
 
-并行计算的崛起为我们提供了克服这些缺点的强大武器。并行化的核心目标是：在不显著牺牲（有时甚至能提高）解质量的前提下，大幅度缩短寻找最优解所需的真实时间（Wall Clock Time）。
+Parallel computing has provided us with powerful weapons to overcome these weaknesses. The core goal of parallelization is: to shorten the real time (Wall Clock Time) needed to find the optimal solution without significantly sacrificing (sometimes even improving) the solution quality.
 
-**并行化的挑战**:
+**Challenges of Parallelization**:
 
-*   **破坏马尔可夫性**：并行执行可能破坏算法的马尔可夫性质，导致其理论收敛性不再成立。
-*   **通信开销**（Communication Overhead）：并行进程/线程间的信息交换会带来额外的时间开销。如果通信过于频繁或数据量过大，可能会抵消并行计算带来的收益。
-*   **负载均衡**（Load Balancing）：如何将计算任务均匀分配给所有处理单元，避免某些单元空闲而另一些单元过载。
-*   **同步问题**（Synchronization）：多个进程如何协调工作，特别是在需要共享信息（如当前最优解）时。
+*   **Breakdown of Markov Property**：Parallel execution may destroy the Markov property of the algorithm, leading to its theoretical convergence no longer holding.
+*   **Communication Overhead**：Information exchange between parallel processes/threads incurs additional time overhead. If communication is too frequent or the data volume is too large, it may offset the benefits of parallel computing.
+*   **Load Balancing**：How to evenly distribute computing tasks among all processing units, avoiding some units being idle while others are overloaded.
+*   **Synchronization**：How multiple processes coordinate their work, especially when sharing information (e.g., the current optimal solution).
 
-## 第四部分：并行退火算法的主要流派
+# IV. Major Flavors of Parallel Simulated Annealing
 
-根据并行化的粒度和策略不同，PSA算法可以分为几个主要类别。
+Based on the granularity and strategy of parallelization, PSA algorithms can be divided into several major categories.
 
-### 流派一：独立搜索（Independent Searches / Multi-start SA）
+## Flavor One: Independent Searches (Multi-start SA)
 
-这是最简单、最直接的并行化方式。
+This is the simplest and most direct way to parallelize.
 
-*   **思想**：在$N$个处理器上，同时独立地运行$N$个完全不相关的SA算法。每个算法拥有自己的初始解、随机数种子和完整的冷却过程。最后，从这$N$个结果中选出最好的一个作为最终解。
-*   **优点**:
-    *   无通信开销：各进程间“零交流”，完美并行，加速比（Speedup）接近线性。
-    *   易于实现：代码改动极小。
-    *   增强探索性：从不同的初始点开始搜索，增加了找到全局最优解所在“盆地”的概率。
-*   **缺点**:无协同效应：一个进程的“好发现”无法帮助其他进程，浪费了宝贵的计算信息。可能会出现多个进程在同一个差的区域里重复搜索。
+*   **Idea**：On $N$ processors, run $N$ independent SA algorithms that are completely unrelated. Each algorithm has its own initial solution, random seed, and complete cooling process. Finally, select the best one from these $N$ results as the final solution.
+*   **Advantages**:
+    *   No communication overhead: processes exchange zero information, perfect parallelization, and linear speedup.
+    *   Easy to implement: minimal code changes.
+    *   Enhanced exploration: starting from different initial points increases the probability of finding the global optimal solution.
+*   **Disadvantages**: No synergy effect: one process's "good discovery" cannot help other processes, wasting valuable computing information. Multiple processes may repeatedly search in the same suboptimal region.
 
-### 流派二：并行移动（Parallel Moves）
+## Flavor Two: Parallel Moves
 
-这种策略试图并行化单个SA链的内部循环。
+This strategy attempts to parallelize the internal loop of a single SA chain.
 
-*   **思想**：在每个温度下，主进程持有当前解`S_current`。它将`S_current`广播给$N$个从属进程。每个从属进程独立地生成一个`S_current`的邻居解`S'_i`并计算其能量`E(S'_i)`。然后，所有`S'_i`被送回主进程，主进程根据某种规则选择一个作为下一个`S_current`。
-    *   **选择规则1**（最贪婪）：选择所有S'\_i和S\_current中能量最低的那个。
-    *   **选择规则2**（Metropolis变体）：从所有被接受的移动中（包括那些概率性接受的坏移动）随机选择一个。
-*   **优点**：在一次迭代中探索了更多的邻居，可能加速收敛。
-*   **缺点**：
-    *   高通信/同步开销：每次迭代都需要广播和收集，主从进程间同步频繁。
-    *   接受率降低：并行生成的多个邻居中，只要有一个是好移动，就可能被选中，这使得接受坏移动的概率大大降低，算法行为趋向于贪婪，容易过早陷入局部最优。
-    *   理论基础薄弱：严重破坏了原始SA的马尔可夫链结构，收敛性难以保证。
+*   **Idea**：At each temperature, the master process holds the current solution $S_\text{current}$, which it broadcasts to $N$ slave processes. Each slave process independently generates a neighbor solution $S'_i$ of $S_\text{current}$ and calculates its energy $E(S'_i)$. Then, all $S'_i$ are sent back to the master process, which selects one as the next $S_\text{current}$ based on some rule.
+    *   **Rule 1** (Most Greedy)：Select the lowest energy solution among all $S'_i$ and $S_\text{current}$.
+    *   **Rule 2** (Metropolis Variant)：Randomly select one from all accepted moves (including those probabilistically accepted bad moves).
+*   **Advantages**：Explore more neighbors in one iteration, potentially accelerating convergence.
+*   **Disadvantages**：
+    *   High communication/synchronization overhead: each iteration requires broadcasting and collecting, frequent synchronization between master and slave processes.
+    *   Acceptance rate reduction: when multiple neighbors are generated in parallel, as long as one is a good move, it may be selected, reducing the acceptance probability of bad moves, making the algorithm behavior greedy and easily trapped in local optima.
+    *   Weak theoretical foundation: This severely disrupts the original SA's Markov chain structure, making convergence difficult to guarantee.
 
-### 流派三：交互式搜索（Interacting Searches / Cooperative SA）
+## Flavor Three: Interactive Searches (Cooperative SA)
 
-这是介于独立搜索和并行移动之间的一种折中，也是目前研究和应用最广泛的流派。它允许多个SA链（称为Walker或Agent）并行运行，但它们之间会周期性地或异步地交换信息。
+This is a compromise between independent searches and parallel moves, and it is currently the most widely studied and applied flavor. It allows multiple SA chains (called Walkers or Agents) to run in parallel, but they periodically or asynchronously exchange information.
 
-*   **思想**：$N$个SA链并行运行。它们可以交换的信息包括：
-    *   当前解
-    *   迄今为止找到的最优解
-    *   当前温度
-*   **常见的交互策略**：
-    *   迁移模型（Migration Model）：类似于并行遗传算法。各个SA链独立运行一段时间（一个epoch）后，进行一次“迁移”。例如，每个链将自己找到的最优解发送给邻居链，并用收到的更优解替换自己的当前解。这有助于将好的基因（解的结构）传播到整个种群。
-    *   中央黑板模型（Blackboard Model）：所有链共享一个全局的“黑板”，上面记录着全局最优解`S_global_best`。每个链在本地运行自己的SA过程，但会定期地：
-        *   将自己找到的更优解更新到黑板上。
-        *   从黑板上读取`S_global_best`，并有一定概率用它来重置（re-seed）自己的当前解，从而跳出自己所在的局部最优区域。
-*   **优点**:
-    *   协同搜索：兼顾了探索（多个独立链）和利用（信息共享），好的解可以引导其他链的搜索方向。
-    *   鲁棒性强：一个链陷入局部最优，可以被其他链“拉出来”。
-    *   通信开销可控：通信频率可以根据问题调整，远低于并行移动模型。
-*   **缺点**：
-    *   参数增多：需要设计迁移拓扑、通信频率、信息交换策略等，增加了算法的复杂度。
-    *   理论分析复杂：多条马尔可夫链的耦合行为分析起来非常困难。
+*   **Idea**：$N$ SA chains run in parallel. They can exchange information including:
+    *   Current solution
+    *   Best solution found so far
+    *   Current temperature
+*   **Common Interaction Strategies**:
+    *   Migration Model：Similar to parallel genetic algorithms. Each SA chain runs independently for a period (one epoch) and then performs a "migration". For example, each chain sends its best solution to its neighbor and replaces its current solution with the received better solution. This helps spread good genes (solution structure) throughout the population.
+    *   Central Blackboard Model：All chains share a global "blackboard" that records the global best solution $S_\text{global\_best}$. Each chain runs its own SA process locally, but periodically:
+        *   Updates the best solution found so far to the blackboard.
+        *   Reads $S_\text{global\_best}$ from the blackboard and resets (re-seeds) its current solution with a certain probability, thus escaping the local optimum it is in.
+*   **Advantages**:
+    *   Cooperative search: Combines exploration (multiple independent chains) and exploitation (information sharing), good solutions can guide other chains' search direction.
+    *   Robust: One chain getting stuck in a local optimum can be "pulled out" by other chains.
+    *   Controllable communication overhead: Communication frequency can be adjusted based on the problem, far below the parallel move model.
+*   **Disadvantages**:
+    *   Increased parameters: Need to design migration topology, communication frequency, information exchange strategy, etc., increasing algorithm complexity.
+    *   Complex theoretical analysis: Coupled behavior of multiple Markov chains is very difficult to analyze.
 
-## 第五部分：拓展与前沿
+# V.Extensions and Frontiers
 
-*   **自适应并行退火**（Adaptive PSA）：算法的参数（如冷却率、迁移频率）不再是固定的，而是根据搜索过程的反馈（如解的多样性、接受率等）动态调整，使算法更加“智能”。
-*   **异构并行退火**：在CPU+GPU等异构平台上，不同计算能力的单元执行不同的任务。例如，让GPU执行大量的独立短链进行广泛探索，而CPU执行少数长链进行深度挖掘，并负责协调。
-*   **与机器学习结合**：
-    *   使用强化学习来动态调整SA参数。
-    *   将SA嵌入到神经网络的训练中，用于权重优化，特别是对于那些梯度不明显的网络结构。
-*   **量子退火**（Quantum Annealing）：这是一种物理实现而非模拟。它利用量子隧穿效应来“穿过”能量壁垒，而不是像经典SA那样“翻过”它。D-Wave公司的量子计算机就是基于这个原理。它是SA在量子计算领域的终极模拟。
+*   **Adaptive Parallel Annealing**：Algorithm parameters (e.g., cooling rate, migration frequency) are no longer fixed but dynamically adjusted based on search feedback (e.g., solution diversity, acceptance rate), making the algorithm more "intelligent".
+*   **Heterogeneous Parallel Annealing**：On CPU+GPU etc. heterogeneous platforms, different computing units perform different tasks. For example, let the GPU execute many independent short chains for extensive exploration, while the CPU executes a few long chains for deep mining and responsible coordination.
+*   **Machine Learning Integration**：
+    *   Use reinforcement learning to dynamically adjust SA parameters.
+    *   SA can be embedded into the training of neural networks for weight optimization, especially for network structures where gradients are not obvious.
+*   **Quantum Annealing**：This is a physical implementation, not a simulation. It utilizes the quantum tunneling effect to "pass through" the energy barrier, rather than "flipping" it as in classical scalars. D-Wave's quantum computer is based on this principle. It is the ultimate simulation of scalars in the field of quantum computing.
 
-## 第六部分：重要应用领域
+# VI. Important Application Areas
 
-PSA的强大能力使其在众多NP-hard问题中大放异彩：
+PSA's powerful ability makes it shine in many NP-hard problems:
 
-1.  电子设计自动化（EDA）：
-    *   VLSI布局（Placement）：将数百万个逻辑门放置在芯片上，目标是最小化总线长和布线拥塞度。解空间极其巨大。
-    *   VLSI布线（Routing）：连接布局好的逻辑门，目标是100%连接且满足各种物理约束。
-2.  旅行商问题（TSP）及其变体：
-    *   车辆路径规划（Vehicle Routing Problem, VRP）、物流配送、无人机路径规划等。
-3.  生物信息学：
-    *   蛋白质折叠：预测蛋白质的三维结构，这是一个能量最小化问题，其构象空间是天文数字。
-    *   基因序列比对。
-4.  图像处理：
-    *   图像恢复/去噪：将含噪图像看作一个高能量状态，寻找能量最低的原始清晰图像。
-    *   图像分割。
-5.  机器学习：
-    *   超参数优化：在巨大的超参数空间中为模型寻找最佳配置。
-    *   训练玻尔兹曼机（Boltzmann Machines）：这是一种随机神经网络，其训练过程本身就与SA有紧密联系。
+1.  Electronic Design Automation (EDA):
+    *   VLSI Layout (Placement): Place millions of logic gates on a chip, with the goal of minimizing bus length and routing congestion. The solution space is extremely large.
+    *   VLSI routing connects pre-laid logic gates, aiming for $100\%$ connectivity while satisfying various physical constraints.
+2.  Traveling Salesman Problem (TSP) and its variants:
+    *   Vehicle Routing Problem (VRP), logistics distribution, drone path planning, etc.
+3.  Bioinformatics:
+    *   Protein folding: Predict the three-dimensional structure of proteins, which is an energy minimization problem, with its conformation space being astronomical.
+    *   Gene sequence alignment.
+4.  Image Processing:
+    *   Image recovery/denoising: Treat noisy images as high-energy states, finding the original clear image with the lowest energy.
+    *   Image segmentation.
+5.  Machine Learning:
+    *   Hyperparameter optimization: Find the best configuration in the vast hyperparameter space for models.
+    *   Training Boltzmann Machines: This is a random neural network, and its training process is closely related to SA.
 
-## 第七部分：实践 - 高性能实现
+# VII. Practical Implementation - High Performance Implementation
 
-理论终须实践。我们以经典的TSP问题为例，展示两种PSA的实现：C++多线程（模拟交互式搜索的简化版——独立搜索）和CUDA（大规模独立搜索）。
+Theory must be put into practice. We take the classic TSP problem as an example to show two implementations of PSA: C++ multi-threading (a simplified version of interactive search - independent search) and CUDA (large-scale independent search).
 
-**问题定义**：给定$N$个城市的坐标，找到一条访问每个城市一次并最终返回起点的最短路径。
+**Problem Definition**: Given $N$ city coordinates, find the shortest path that visits each city once and returns to the starting point.
 
-*   **解的定义**：一个城市的排列，例如 $\[0, 4, 1, 3, 2\]$。
-*   **代价函数**：路径的总欧几里得距离。
-*   **邻域函数**：2-opt，即随机选择路径中的两段边，将其断开并以另一种方式重连（相当于颠倒了两个城市之间的一段子路径）。
+*   **Definition of a solution**: A permutation of cities, such as $[0, 4, 1, 3, 2]$.
+*   **Cost function**: The total Euclidean distance of the path.
+*   **Neighborhood function**: 2-opt, which randomly selects two segments of the path, disconnects them, and reconnects them in another way (equivalent to inverting a segment of the path between two cities).
 
-1.  C++ 多线程实现 (独立搜索模型)
+1.  C++ Multithreaded Implementation (Independent Search Model)
 
-我们将使用 std::thread 来启动多个独立的SA实例。
+We will use std::thread to start multiple independent SA instances.
 
-```
+```cpp
 // parallel_sa_tsp.cpp
 #include <iostream>
 #include <vector>
@@ -213,27 +245,27 @@ PSA的强大能力使其在众多NP-hard问题中大放异彩：
 #include <thread>
 #include <mutex>
 
-// 城市结构体
+// City structure
 struct City {
     double x, y;
 };
 
-// 计算两城市间距离
+// Calculate the distance between two cities
 double distance(const City& a, const City& b) {
     return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2));
 }
 
-// 计算路径总长度
+// Calculate the total path length
 double total_distance(const std::vector<int>& path, const std::vector<City>& cities) {
     double dist = 0.0;
     for (size_t i = 0; i < path.size() - 1; ++i) {
         dist += distance(cities[path[i]], cities[path[i + 1]]);
     }
-    dist += distance(cities[path.back()], cities[path.front()]); // 回到起点
+    dist += distance(cities[path.back()], cities[path.front()]); // Return to the starting point
     return dist;
 }
 
-// 单个模拟退火线程函数
+// Single simulated annealing thread function
 void simulated_annealing_worker(
     int thread_id,
     const std::vector<City>& cities,
@@ -241,14 +273,14 @@ void simulated_annealing_worker(
     double& min_distance,
     std::mutex& mtx) 
 {
-    // 线程安全的随机数生成器
+    // Thread-safe random number generator
     std::mt19937 rng(std::chrono::high_resolution_clock::now().time_since_epoch().count() + thread_id);
     std::uniform_real_distribution<double> dist(0.0, 1.0);
 
-    // 初始化路径
+    // Initialize path
     std::vector<int> current_path(cities.size());
     std::iota(current_path.begin(), current_path.end(), 0);
-    std::shuffle(current_path.begin() + 1, current_path.end(), rng); // 随机打乱（起点固定为0）
+    std::shuffle(current_path.begin() + 1, current_path.end(), rng); // Randomly shuffle (fixed starting point)
 
     double current_energy = total_distance(current_path, cities);
     std::vector<int> local_best_path = current_path;
@@ -259,8 +291,8 @@ void simulated_annealing_worker(
     double alpha = 0.999;
 
     while (T > T_final) {
-        for (int i = 0; i < 100; ++i) { // 每个温度迭代100次
-            // 生成新邻居 (2-opt)
+        for (int i = 0; i < 100; ++i) { // Each temperature iteration 100 times
+            // Generate new neighbor (2-opt)
             std::vector<int> new_path = current_path;
             int a = std::uniform_int_distribution<int>(1, cities.size() - 2)(rng);
             int b = std::uniform_int_distribution<int>(a + 1, cities.size() - 1)(rng);
@@ -281,7 +313,7 @@ void simulated_annealing_worker(
         T *= alpha;
     }
 
-    // 更新全局最优解（需要加锁）
+    // Update global optimal solution (need to lock)
     std::lock_guard<std::mutex> lock(mtx);
     if (local_min_energy < min_distance) {
         min_distance = local_min_energy;
@@ -291,16 +323,16 @@ void simulated_annealing_worker(
 }
 
 int main() {
-    // 创建TSP问题实例
+    // Create TSP problem instance
     const int num_cities = 50;
     std::vector<City> cities(num_cities);
-    std::mt19937 city_rng(123); // 固定种子以复现
+    std::mt19937 city_rng(123); // Fixed seed to reproduce
     std::uniform_real_distribution<double> coord_dist(0.0, 100.0);
     for (int i = 0; i < num_cities; ++i) {
         cities[i] = {coord_dist(city_rng), coord_dist(city_rng)};
     }
 
-    const int num_threads = std::thread::hardware_concurrency(); // 获取CPU核心数
+    const int num_threads = std::thread::hardware_concurrency(); // Get CPU core count
     std::cout << "Using " << num_threads << " threads." << std::endl;
 
     std::vector<int> global_best_path;
@@ -328,19 +360,19 @@ int main() {
 }
 ```
 
-这个实现清晰地展示了独立搜索模型的并行策略：每个线程都是一个独立的求解器，它们通过一个互斥锁（mutex）来安全地更新全局最优解。
+This implementation clearly shows the parallel strategy of the independent search model: each thread is an independent solver, and they update the global optimal solution through a mutex lock.
 
-2.  CUDA 实现 (大规模独立搜索)
+2.  CUDA Implementation (Large-scale Independent Search)
 
-GPU拥有成千上万的计算核心，非常适合执行大规模的独立搜索。每个CUDA线程将负责一个完整的SA退火过程。
+GPU has thousands of computing cores, making it ideal for performing large-scale independent searches. Each CUDA thread will be responsible for a complete SA annealing process.
 
-关键点：
+Key points:
 
-*   设备端随机数：在GPU上进行随机算法，必须为每个线程初始化一个独立的随机数生成器状态。我们将使用 cuRAND 库。
-*   数据结构：城市坐标、路径等数据需要从CPU（Host）拷贝到GPU（Device）。
-*   Kernel函数：这是在GPU上执行的核心代码，每个线程都在这里运行自己的SA循环。
+*   Device-side random numbers: When performing random algorithms on the GPU, each thread must initialize an independent random number generator state. We will use the cuRAND library.
+*   Data structure: City coordinates, paths, etc. need to be copied from CPU (Host) to GPU (Device).
+*   Kernel function: This is the core code executed on the GPU, where each thread runs its own SA loop.
 
-```
+```cpp
 // parallel_sa_tsp.cu
 #include <iostream>
 #include <vector>
@@ -350,19 +382,19 @@ GPU拥有成千上万的计算核心，非常适合执行大规模的独立搜�
 #include <curand_kernel.h>
 
 #define NUM_CITIES 50
-#define NUM_WALKERS 10240 // 启动大量的独立SA实例（walkers）
+#define NUM_WALKERS 10240 // Launch a large number of independent SA instances (walkers)
 
-// 城市结构体
+// City structure
 struct City {
     float x, y;
 };
 
-// GPU设备函数：计算两点距离
+// GPU device function: Calculate the distance between two points
 __device__ float distance_gpu(const City& a, const City& b) {
     return sqrtf(powf(a.x - b.x, 2) + powf(a.y - b.y, 2));
 }
 
-// GPU设备函数：计算路径总长度
+// GPU device function: Calculate the total path length
 __device__ float total_distance_gpu(int* path, City* cities) {
     float dist = 0.0f;
     for (int i = 0; i < NUM_CITIES - 1; ++i) {
@@ -372,16 +404,16 @@ __device__ float total_distance_gpu(int* path, City* cities) {
     return dist;
 }
 
-// CUDA Kernel: 每个线程执行一个完整的SA过程
+// CUDA Kernel: Each thread executes a complete SA process
 __global__ void parallel_sa_kernel(City* d_cities, int* d_best_paths, float* d_min_distances, curandState* states) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (tid >= NUM_WALKERS) return;
 
-    // 1. 初始化每个线程的随机数生成器
+    // 1. Initialize each thread's random number generator
     curandState local_state = states[tid];
 
-    // 2. 初始化路径 (存储在每个线程的局部内存中)
+    // 2. Initialize path (stored in each thread's local memory)
     int current_path[NUM_CITIES];
     for (int i = 0; i < NUM_CITIES; ++i) current_path[i] = i;
     // Fisher-Yates shuffle
@@ -397,7 +429,7 @@ __global__ void parallel_sa_kernel(City* d_cities, int* d_best_paths, float* d_m
     int local_best_path[NUM_CITIES];
     for(int i=0; i T_final) {
         for (int i = 0; i < 50; ++i) {
-            // 生成邻居 (2-opt)
+            // Generate neighbor (2-opt)
             int a = 1 + (int)(curand_uniform(&local_state) * (NUM_CITIES - 2));
             int b = 1 + (int)(curand_uniform(&local_state) * (NUM_CITIES - 2));
             if (a == b) continue;
@@ -408,13 +440,13 @@ __global__ void parallel_sa_kernel(City* d_cities, int* d_best_paths, float* d_m
             for(int k=0; k>>(d_states, NUM_WALKERS, time(0));
     
     
-    // 5. 启动SA Kernel
+    // 5. Launch SA Kernel
     int threadsPerBlock = 256;
     int blocksPerGrid = (NUM_WALKERS + threadsPerBlock - 1) / threadsPerBlock;
     
     std::cout << "Launching " << NUM_WALKERS << " walkers on GPU..." << std::endl;
     parallel_sa_kernel<<>>(d_cities, d_best_paths, d_min_distances, d_states);
-    cudaDeviceSynchronize(); // 等待kernel执行完毕
+    cudaDeviceSynchronize(); // Waiting for the kernel to finish executing
     
     err = cudaGetLastError();
     if (err != cudaSuccess) {
@@ -423,13 +455,13 @@ __global__ void parallel_sa_kernel(City* d_cities, int* d_best_paths, float* d_m
     }
 
 
-    // 6. 将结果拷贝回CPU
+    // 6. Copy results back to CPU
     std::vector<int> h_best_paths(NUM_WALKERS * NUM_CITIES);
     std::vector<float> h_min_distances(NUM_WALKERS);
     cudaMemcpy(h_best_paths.data(), d_best_paths, NUM_WALKERS * NUM_CITIES * sizeof(int), cudaMemcpyDeviceToHost);
     cudaMemcpy(h_min_distances.data(), d_min_distances, NUM_WALKERS * sizeof(float), cudaMemcpyDeviceToHost);
 
-    // 7. 在CPU上寻找全局最优解
+    // 7. Find the global optimal solution on the CPU
     float global_min_dist = h_min_distances[0];
     int best_walker_idx = 0;
     for (int i = 1; i < NUM_WALKERS; ++i) {
@@ -446,7 +478,7 @@ __global__ void parallel_sa_kernel(City* d_cities, int* d_best_paths, float* d_m
     }
     std::cout << h_best_paths[best_walker_idx * NUM_CITIES] << std::endl;
 
-    // 8. 释放GPU内存
+    // 8. Free GPU memory
     cudaFree(d_cities);
     cudaFree(d_best_paths);
     cudaFree(d_min_distances);
@@ -456,8 +488,8 @@ __global__ void parallel_sa_kernel(City* d_cities, int* d_best_paths, float* d_m
 }
 ```
 
-这个CUDA实现利用了GPU的大规模并行性，在瞬间完成了成千上万次独立的退火过程，极大地增加了找到高质量解的概率，并且花费的时间远少于在CPU上串行执行同样次数的退火。
+This CUDA implementation leverages the large-scale parallelism of the GPU, completing thousands of independent annealing processes in an instant, greatly increasing the probability of finding high-quality solutions, and saving a lot of time compared to serial execution on the CPU.
 
-## 总结与展望
+## Conclusion and Prospects
 
-未来，随着计算能力的进一步提升，以及与AI、量子计算等前沿领域的深度融合，并行退火及其衍生算法必将在解决人类面临的更宏大、更复杂的优化问题中，扮演愈发重要的角色。
+In the future, as computing power continues to improve, and with the integration of AI, quantum computing, and other frontier fields, parallel annealing and its derivative algorithms will play an increasingly important role in solving the more complex optimization problems humans face.
