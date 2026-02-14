@@ -55,9 +55,10 @@ const categories = [
                             <!-- The 5 faces of the tunnel -->
                             <div class="face front-frame"></div>
                             <div class="face tunnel-wall top"></div>
-                            <div class="tunnel-wall bottom"></div> <!-- Not face class to avoid conflict -->
-                            <div class="tunnel-wall left"></div>
-                            <div class="tunnel-wall right"></div>
+                            <div class="face tunnel-wall bottom"></div>
+                            <div class="face tunnel-wall left"></div>
+                            <div class="face tunnel-wall right"></div>
+                            <!-- Back screen for stars -->
                             <div class="face back-screen">
                                 <canvas class="starfield-canvas"></canvas>
                             </div>
@@ -77,34 +78,24 @@ const categories = [
     class StarfieldEngine {
         canvas: HTMLCanvasElement;
         ctx: CanvasRenderingContext2D;
-        stars: { x: number; y: number; z: number; prevZ: number }[];
-        speed: number;
+        stars: { x: number; y: number; z: number; size: number; opacity: number; opacitySpeed: number }[];
         width: number;
         height: number;
         centerX: number;
         centerY: number;
-        warpSpeed: boolean;
         animationId: number;
 
         constructor(canvas: HTMLCanvasElement) {
             this.canvas = canvas;
             this.ctx = canvas.getContext('2d', { alpha: false })!;
             this.stars = [];
-            this.speed = 2; // Base speed
-            this.warpSpeed = false;
             
             this.resize();
-            this.initStars(800); // Massive star count
+            this.initStars(400); // Dense star count
             this.animate();
 
-            // Handle resize
             const observer = new ResizeObserver(() => this.resize());
             observer.observe(canvas);
-
-            // Warp effect on hover
-            const parent = canvas.closest('.door-cube-scene');
-            parent?.addEventListener('mouseenter', () => this.warpSpeed = true);
-            parent?.addEventListener('mouseleave', () => this.warpSpeed = false);
         }
 
         resize() {
@@ -117,37 +108,38 @@ const categories = [
         initStars(count: number) {
             this.stars = [];
             for (let i = 0; i < count; i++) {
-                this.stars.push(this.createStar());
+                this.stars.push(this.createStar(true)); // Spread initially
             }
         }
 
-        createStar() {
+        createStar(randomZ = false) {
             return {
-                x: (Math.random() - 0.5) * this.width * 2, // Spread wider than screen
-                y: (Math.random() - 0.5) * this.height * 2,
-                z: Math.random() * 1000,
-                prevZ: Math.random() * 1000
+                x: (Math.random() - 0.5) * this.width * 3, // Wide spread
+                y: (Math.random() - 0.5) * this.height * 3,
+                z: randomZ ? Math.random() * 1000 : 1000, // Spawn far away
+                size: Math.random() * 2 + 0.5,
+                opacity: Math.random(),
+                opacitySpeed: Math.random() * 0.05 + 0.01
             };
         }
 
         animate() {
-            // dynamic speed ramp
-            const targetSpeed = this.warpSpeed ? 40 : 2;
-            this.speed += (targetSpeed - this.speed) * 0.05;
-
-            // Clear with semi-transparent black for trails if warping
-            this.ctx.fillStyle = this.warpSpeed ? 'rgba(0, 0, 0, 0.2)' : '#000000';
+            // Clear with SOLID BLACK for the deep space look inside the door
+            this.ctx.fillStyle = '#000000';
             this.ctx.fillRect(0, 0, this.width, this.height);
 
-            this.stars.forEach(star => {
-                star.prevZ = star.z;
-                star.z -= this.speed;
+            const speed = 8; // Constant connection speed
 
-                if (star.z <= 0) {
-                    star.z = 1000;
-                    star.prevZ = 1000;
-                    star.x = (Math.random() - 0.5) * this.width * 2;
-                    star.y = (Math.random() - 0.5) * this.height * 2;
+            this.stars.forEach(star => {
+                star.z -= speed;
+
+                // Blinking effect
+                star.opacity += star.opacitySpeed;
+                if (star.opacity > 1 || star.opacity < 0.2) star.opacitySpeed *= -1;
+
+                // Reset star if it passes camera
+                if (star.z <= 1) {
+                    Object.assign(star, this.createStar(false));
                 }
 
                 // Project 3D to 2D
@@ -155,21 +147,15 @@ const categories = [
                 const px = star.x * k + this.centerX;
                 const py = star.y * k + this.centerY;
 
-                // Previous pos for trails
-                const pk = 128.0 / star.prevZ;
-                const ppx = star.x * pk + this.centerX;
-                const ppy = star.y * pk + this.centerY;
-
+                // Only draw if within bounds
                 if (px >= 0 && px <= this.width && py >= 0 && py <= this.height) {
-                    const size = (1 - star.z / 1000) * 3; // Closer stars are bigger
-                    const shade = Math.floor((1 - star.z / 1000) * 255);
+                    // Size scales with proximity
+                    const scaleSize = (1 - star.z / 1000) * 4 * star.size;
                     
                     this.ctx.beginPath();
-                    this.ctx.strokeStyle = `rgb(${shade},${shade},${shade})`;
-                    this.ctx.lineWidth = size;
-                    this.ctx.moveTo(ppx, ppy);
-                    this.ctx.lineTo(px, py);
-                    this.ctx.stroke();
+                    this.ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, Math.min(1, star.opacity))})`;
+                    this.ctx.arc(px, py, Math.max(0.5, scaleSize), 0, Math.PI * 2);
+                    this.ctx.fill();
                 }
             });
 
@@ -196,57 +182,58 @@ const categories = [
         }
 
         resize() {
-            // Canvas covers the whole interactive area
             this.width = this.canvas.width = this.canvas.clientWidth;
             this.height = this.canvas.height = this.canvas.clientHeight;
         }
 
         spawn() {
-            // Emitting from a rectangle in the center (the door frame)
-            // Hardcoded approximation of door size relative to canvas
-            // Door is approx 280x420 centered
             const cx = this.width / 2;
             const cy = this.height / 2;
+            // Dimensions of the door frame (approximate)
             const dw = 280;
             const dh = 420;
-            const halfW = dw / 2;
-            const halfH = dh / 2;
+            const hw = dw / 2;
+            const hh = dh / 2;
 
-            // Pick a random point on perimeter
+            // Pick a random side
             const side = Math.floor(Math.random() * 4);
             let x, y, vx, vy;
-            const speed = Math.random() * 1.5 + 0.5;
+            const speed = Math.random() * 2 + 1; // Outward speed
 
-            if (side === 0) { // Top
-                x = cx - halfW + Math.random() * dw;
-                y = cy - halfH;
-                vx = (Math.random() - 0.5); vy = -speed;
-            } else if (side === 1) { // Right
-                x = cx + halfW;
-                y = cy - halfH + Math.random() * dh;
-                vx = speed; vy = (Math.random() - 0.5);
-            } else if (side === 2) { // Bottom
-                x = cx - halfW + Math.random() * dw;
-                y = cy + halfH;
-                vx = (Math.random() - 0.5); vy = speed;
-            } else { // Left
-                x = cx - halfW;
-                y = cy - halfH + Math.random() * dh;
-                vx = -speed; vy = (Math.random() - 0.5);
+            if (side === 0) { // Top Edge
+                x = cx - hw + Math.random() * dw;
+                y = cy - hh;
+                vx = (Math.random() - 0.5) * 0.5; 
+                vy = -speed; // Up
+            } else if (side === 1) { // Right Edge
+                x = cx + hw;
+                y = cy - hh + Math.random() * dh;
+                vx = speed; // Right
+                vy = (Math.random() - 0.5) * 0.5;
+            } else if (side === 2) { // Bottom Edge
+                x = cx - hw + Math.random() * dw;
+                y = cy + hh;
+                vx = (Math.random() - 0.5) * 0.5;
+                vy = speed; // Down
+            } else { // Left Edge
+                x = cx - hw;
+                y = cy - hh + Math.random() * dh;
+                vx = -speed; // Left
+                vy = (Math.random() - 0.5) * 0.5;
             }
 
             this.particles.push({
                 x, y, vx, vy,
                 life: 1.0,
-                color: `hsl(${330 + Math.random() * 30}, 80%, 60%)` // Pink/Purple range
+                color: `rgba(240, 117, 174, ${Math.random() * 0.5 + 0.5})`
             });
         }
 
         animate() {
             this.ctx.clearRect(0, 0, this.width, this.height);
             
-            // Spawn multiple particles per frame for density
-            for(let i=0; i<3; i++) this.spawn();
+            // Spawn multiple particles per frame for DENSITY
+            for(let i=0; i<4; i++) this.spawn();
 
             for (let i = this.particles.length - 1; i >= 0; i--) {
                 const p = this.particles[i];
@@ -262,7 +249,7 @@ const categories = [
                 this.ctx.globalAlpha = p.life;
                 this.ctx.fillStyle = p.color;
                 this.ctx.beginPath();
-                this.ctx.arc(p.x, p.y, 2.5 * p.life, 0, Math.PI * 2);
+                this.ctx.arc(p.x, p.y, 2 * p.life, 0, Math.PI * 2);
                 this.ctx.fill();
             }
             this.ctx.globalAlpha = 1;
@@ -272,7 +259,7 @@ const categories = [
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-        // Init Background Meteors (ZJU style)
+        // Init Background Meteors
         const meteorsContainer = document.getElementById("meteors-container");
         if (meteorsContainer) {
             const createMeteor = () => {
@@ -288,7 +275,7 @@ const categories = [
             setInterval(createMeteor, 300);
         }
 
-        // Init Starfield and Particle Engines
+        // Init Canvases
         document.querySelectorAll('.starfield-canvas').forEach(canvas => {
             new StarfieldEngine(canvas as HTMLCanvasElement);
         });
@@ -302,24 +289,33 @@ const categories = [
     :root {
         --door-w: 280px;
         --door-h: 420px;
-        --tunnel-depth: 400px; /* Deep tunnel */
+        --tunnel-depth: 400px;
+        --primary-bg: #fff; /* Restored Light Background */
+        --primary-text: #333;
+    }
+
+    /* FIX: Scrollbar Jitter */
+    body, html {
+        margin: 0; padding: 0;
+        overflow-x: hidden; width: 100%;
     }
 
     .tech-page {
         min-height: 100vh;
         padding: 6rem 2rem;
-        background: #050510; /* Deep space bg */
-        color: #fff;
+        background: var(--primary-bg); /* Use Light BG */
+        color: var(--primary-text);
+        position: relative;
+        /* Ensure no overflow from 3D elements */
         overflow-x: hidden;
-        perspective: 1200px;
-        font-family: system-ui, sans-serif;
+        overflow-y: hidden; 
     }
 
     /* Common UI Elements */
     .back-button {
         position: fixed; top: 100px; left: 2rem; z-index: 100;
         display: flex; align-items: center; gap: 8px; padding: 12px 20px;
-        background: rgba(255, 240, 245, 0.1); backdrop-filter: blur(10px);
+        background: rgba(255, 240, 245, 0.7); backdrop-filter: blur(10px);
         border: 1px solid rgba(240, 117, 174, 0.3); border-radius: 50px;
         color: #f075ae; text-decoration: none; transition: 0.3s;
     }
@@ -331,7 +327,7 @@ const categories = [
         background: linear-gradient(120deg, #f075ae, #a18cd1);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .page-subtitle { color: #889; font-size: 1.1rem; }
+    .page-subtitle { color: #555; font-size: 1.1rem; }
 
     /* Meteors */
     #meteors-container { position: fixed; inset: 0; pointer-events: none; }
@@ -351,6 +347,8 @@ const categories = [
     .doors-container {
         display: flex; justify-content: center; gap: 6rem; flex-wrap: wrap;
         perspective: 2000px; z-index: 10; position: relative;
+        /* Ensure flex container doesn't overflow horizontally */
+        max-width: 100%;
     }
 
     .door-wrapper {
@@ -359,16 +357,17 @@ const categories = [
     }
 
     .door-label-top { text-align: center; max-width: 260px; z-index: 20; pointer-events: none;}
-    .door-label-top h3 { font-size: 1.6rem; margin: 0 0 0.5rem 0; color: #fff; text-shadow: 0 0 10px rgba(240,117,174,0.5); }
-    .door-label-top p { color: #aaa; font-size: 0.9rem; margin: 0; }
+    .door-label-top h3 { font-size: 1.6rem; margin: 0 0 0.5rem 0; color: #222; }
+    .door-label-top p { color: #666; font-size: 0.9rem; margin: 0; }
 
     /* The interactive container */
     .door-cube-scene {
-        width: 400px; height: 540px; /* Larger than door to hold particles */
+        width: 450px; height: 600px; /* Bounding box for particles */
         position: relative;
         display: flex; justify-content: center; align-items: center;
-        perspective: 1200px;
+        perspective: 1000px; /* Stronger perspective */
         text-decoration: none;
+        overflow: visible; /* Allow particles to fly out */
     }
 
     /* Particle Canvas Layer */
@@ -381,93 +380,70 @@ const categories = [
         width: var(--door-w); height: var(--door-h);
         position: relative;
         transform-style: preserve-3d;
-        transform: rotateY(-15deg); /* Initial nice angle */
+        transform: rotateY(-15deg); 
         transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
     
     .door-cube-scene:hover .cube-assembly {
-        transform: rotateY(0deg) scale(1.02); /* Face forward on hover */
+        transform: rotateY(0deg) scale(1.02);
     }
 
     /* Faces */
-    .face, .tunnel-wall {
-        position: absolute;
-        backface-visibility: hidden; /* Optimization */
-    }
+    .face { position: absolute; backface-visibility: hidden; }
 
-    /* Front Frame (The Entrance) */
+    /* Front Frame */
     .front-frame {
         width: 100%; height: 100%;
-        border: 4px solid #333;
-        box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        border: 4px solid #111; /* Dark frame */
         transform: translateZ(0);
         pointer-events: none;
         z-index: 10;
     }
 
-    /* The Tunnel Walls - Using CSS 3D Transforms */
-    /* Left Wall */
+    /* Tunnel Walls - Standard CSS 3D */
+    .tunnel-wall { position: absolute; backface-visibility: hidden; }
+
     .tunnel-wall.left {
         width: var(--tunnel-depth); height: 100%;
-        background: linear-gradient(90deg, #111, #000);
-        transform-origin: left;
-        transform: rotateY(90deg);
-        left: 0; top: 0;
+        background: linear-gradient(90deg, #222, #000);
+        transform-origin: left; transform: rotateY(90deg); left: 0; top: 0;
     }
-    /* Right Wall */
     .tunnel-wall.right {
         width: var(--tunnel-depth); height: 100%;
-        background: linear-gradient(-90deg, #111, #000);
-        transform-origin: right;
-        transform: rotateY(-90deg);
-        right: 0; top: 0;
+        background: linear-gradient(-90deg, #222, #000);
+        transform-origin: right; transform: rotateY(-90deg); right: 0; top: 0;
     }
-    /* Top Wall */
     .tunnel-wall.top {
         width: 100%; height: var(--tunnel-depth);
-        background: linear-gradient(180deg, #111, #000);
-        transform-origin: top;
-        transform: rotateX(-90deg);
-        top: 0; left: 0;
+        background: linear-gradient(180deg, #222, #000);
+        transform-origin: top; transform: rotateX(-90deg); top: 0; left: 0;
     }
-    /* Bottom Wall */
     .tunnel-wall.bottom {
         width: 100%; height: var(--tunnel-depth);
-        background: linear-gradient(0deg, #111, #000);
-        transform-origin: bottom;
-        transform: rotateX(90deg);
-        bottom: 0; left: 0;
+        background: linear-gradient(0deg, #222, #000);
+        transform-origin: bottom; transform: rotateX(90deg); bottom: 0; left: 0;
     }
 
-    /* Back Screen (Canvas for Stars) */
+    /* Back Screen (Canvas) */
     .back-screen {
         width: 100%; height: 100%;
         background: #000;
         transform: translateZ(calc(-1 * var(--tunnel-depth)));
-        display: flex;
-        overflow: hidden;
+        display: flex; overflow: hidden;
     }
     
-    .starfield-canvas {
-        width: 100%; height: 100%;
-    }
+    .starfield-canvas { width: 100%; height: 100%; }
 
     /* Enter Button */
     .enter-btn {
-        margin-top: 1rem;
-        padding: 10px 40px;
-        border: 1px solid var(--accent);
-        color: var(--accent);
-        border-radius: 4px;
-        text-decoration: none;
-        letter-spacing: 2px;
-        font-weight: 700;
-        transition: 0.3s;
-        box-shadow: 0 0 10px rgba(240, 117, 174, 0.2);
+        margin-top: 1rem; padding: 10px 40px;
+        border: 2px solid var(--primary-text);
+        color: var(--primary-text);
+        border-radius: 4px; text-decoration: none;
+        letter-spacing: 2px; font-weight: 700; transition: 0.3s;
     }
     .enter-btn:hover {
-        background: var(--accent);
-        color: #fff;
-        box-shadow: 0 0 30px rgba(240, 117, 174, 0.6);
+        background: #f075ae; border-color: #f075ae;
+        color: #fff; box-shadow: 0 0 20px rgba(240, 117, 174, 0.4);
     }
 </style>
