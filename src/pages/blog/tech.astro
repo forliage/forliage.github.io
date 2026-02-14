@@ -287,16 +287,41 @@ const categories = [
         transform: rotateY(0deg) scale(1.05); /* Slight pop, face front */
     }
 
-    /* Front Frame (Bigger Border) */
+    /* Front Frame (Liuli/Glass Style) */
     .front-frame {
         position: absolute; width: 100%; height: 100%;
-        border: 6px solid #888; 
-        box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        border-radius: 12px; /* Slightly rounder key */
+        border: 2px solid rgba(255,255,255,0.2);
+        
+        /* 
+           Simulate Thick Colored Glass (Liuli)
+           1. Inset Shadow for Volume (Colored)
+           2. Inner Highlight (White) for Specular Reflection
+           3. Inner Shadow (Black) for Depth
+           4. Outer Glow (Colored) for Emission
+        */
+        box-shadow: 
+            /* Main Body of Glass (Thick Inner Rim) */
+            inset 0 0 20px rgba(0,0,0,0.5),
+            
+            /* Inner Colored Glow (The 'Soul') */
+            inset 0 0 10px var(--accent-color),
+            
+            /* Top-Left Specular Highlight (The 'Shine') */
+            inset 2px 2px 5px rgba(255,255,255,0.9),
+            
+            /* Bottom-Right Deep Shadow (The 'Weight') */
+            inset -2px -2px 5px rgba(0,0,0,0.5),
+            
+            /* Outer Colored Aura */
+            0 0 15px var(--accent-color);
+            
+        /* Glass Texture Base */
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(2px);
         transform: translateZ(0); 
         pointer-events: none;
-        z-index: 10;
-        border-radius: 4px;
-        background: transparent;
+        z-index: 20;
     }
     
     /* Back Screen (Canvas) */
