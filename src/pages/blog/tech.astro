@@ -73,14 +73,15 @@ const categories = [
                                 class="door-unit"
                                 id={`door-${cat.id}`}
                             >
-                                <div class="door-frame">
-                                    <div class="starfield-box">
-                                        <div class="stars" />
-                                        <div class="stars2" />
-                                        <div class="stars3" />
+                                <div class="door-3d-context">
+                                    <div class="door-frame">
+                                        <div class="door-depth" />
+                                        <div class="starfield-box">
+                                            <div class="warp-stars" />
+                                        </div>
                                     </div>
+                                    <div class="particle-emitter" />
                                 </div>
-                                <div class="particle-emitter" />
                             </a>
                             <a href={cat.link} class="enter-btn">
                                 ENTER
@@ -107,31 +108,85 @@ const categories = [
                 meteor.style.left = `${startX}%`;
                 meteor.style.top = `${startY}%`;
                 meteor.style.width = `${width}px`;
-                const duration = Math.random() * 1 + 1;
+                const duration = Math.random() * 1 + 1.5;
                 meteor.style.animationDuration = `${duration}s`;
                 meteorsContainer.appendChild(meteor);
                 setTimeout(() => meteor.remove(), duration * 1000);
             };
-            setInterval(createMeteor, 300);
+            setInterval(createMeteor, 400);
         }
 
-        // --- Particle System for Doors ---
-        const emitters = document.querySelectorAll(".particle-emitter");
-        emitters.forEach((emitter) => {
-            setInterval(() => {
+        // --- Optimized Warp Starfield Generation ---
+        const warpBoxes = document.querySelectorAll(".warp-stars");
+        warpBoxes.forEach((box) => {
+            for (let i = 0; i < 40; i++) {
+                const star = document.createElement("div");
+                star.classList.add("warp-star");
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 80 + 20; // Ensure they spread out
+                star.style.setProperty("--angle", `${angle}rad`);
+                star.style.setProperty("--dist", `${distance}%`);
+                star.style.animationDelay = `${Math.random() * 3}s`;
+                box.appendChild(star);
+            }
+        });
+
+        // --- Perimeter Particle System for Doors ---
+        const units = document.querySelectorAll(".door-unit");
+        units.forEach((unit) => {
+            const emitter = unit.querySelector(".particle-emitter");
+            if (!emitter) return;
+
+            const spawnParticle = () => {
                 const p = document.createElement("div");
                 p.classList.add("particle");
-                const size = Math.random() * 4 + 2;
+
+                // Randomly pick an edge: 0=top, 1=right, 2=bottom, 3=left
+                const edge = Math.floor(Math.random() * 4);
+                let x, y, tx, ty;
+
+                if (edge === 0) {
+                    // Top
+                    x = Math.random() * 100;
+                    y = 0;
+                    tx = (Math.random() - 0.5) * 60;
+                    ty = -Math.random() * 80 - 20;
+                } else if (edge === 1) {
+                    // Right
+                    x = 100;
+                    y = Math.random() * 100;
+                    tx = Math.random() * 80 + 20;
+                    ty = (Math.random() - 0.5) * 60;
+                } else if (edge === 2) {
+                    // Bottom
+                    x = Math.random() * 100;
+                    y = 100;
+                    tx = (Math.random() - 0.5) * 60;
+                    ty = Math.random() * 80 + 20;
+                } else {
+                    // Left
+                    x = 0;
+                    y = Math.random() * 100;
+                    tx = -Math.random() * 80 - 20;
+                    ty = (Math.random() - 0.5) * 60;
+                }
+
+                p.style.left = `${x}%`;
+                p.style.top = `${y}%`;
+                p.style.setProperty("--tx", `${tx}px`);
+                p.style.setProperty("--ty", `${ty}px`);
+
+                const size = Math.random() * 3 + 1.5;
                 p.style.width = `${size}px`;
                 p.style.height = `${size}px`;
-                p.style.left = `${Math.random() * 100}%`;
-                p.style.top = `${Math.random() * 100}%`;
-                p.style.setProperty("--tx", `${(Math.random() - 0.5) * 100}px`);
-                p.style.setProperty("--ty", `${-Math.random() * 100}px`);
-                p.style.animationDuration = `${Math.random() * 1 + 1}s`;
+                p.style.animationDuration = `${Math.random() * 0.8 + 0.8}s`;
+
                 emitter.appendChild(p);
-                setTimeout(() => p.remove(), 2000);
-            }, 100);
+                setTimeout(() => p.remove(), 1600);
+            };
+
+            // Spawn particles periodically
+            setInterval(spawnParticle, 80);
         });
     });
 </script>
@@ -142,6 +197,7 @@ const categories = [
         --highlight-color: #f075ae;
         --door-width: 280px;
         --door-height: 420px;
+        --depth: 40px;
     }
 
     .tech-page {
@@ -150,19 +206,17 @@ const categories = [
         max-width: 1400px;
         margin: 0 auto;
         position: relative;
-        overflow-x: hidden;
-        perspective: 1500px;
+        overflow-x: hidden; /* Fix layout jitter */
+        contain: paint;
     }
 
-    /* --- Shared Background / Back Button (ZJU Sync) --- */
+    /* --- Shared Background (Normalized) --- */
     #meteors-container {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        inset: 0;
         pointer-events: none;
         z-index: 0;
+        overflow: hidden;
     }
     :global(.meteor) {
         position: absolute;
@@ -186,6 +240,7 @@ const categories = [
             transform: rotate(-45deg) translateX(-1000px);
         }
     }
+
     .back-button {
         position: fixed;
         top: 100px;
@@ -203,23 +258,25 @@ const categories = [
         font-size: 0.95rem;
         font-weight: 500;
         text-decoration: none;
-        transition: 0.3s;
+        transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     .back-button:hover {
         transform: translateX(-4px);
         background: rgba(255, 240, 245, 0.9);
+        box-shadow: 0 4px 15px rgba(240, 117, 174, 0.2);
     }
 
     /* --- Page Header --- */
     .page-header {
         text-align: center;
-        margin-bottom: 4rem;
+        margin-bottom: 5rem;
         position: relative;
         z-index: 10;
     }
     .page-title {
         font-size: 3.5rem;
         font-weight: 800;
+        margin-bottom: 0.5rem;
         background: linear-gradient(120deg, #f075ae, #a18cd1);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -238,148 +295,155 @@ const categories = [
         position: relative;
         z-index: 10;
         flex-wrap: wrap;
+        perspective: 2000px;
     }
 
     .door-wrapper {
-        perspective: 1000px;
+        margin-bottom: 4rem;
     }
 
     .door-inner-wrapper {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 2rem;
+        gap: 2.5rem;
     }
 
     .door-label {
         text-align: center;
-        max-width: 240px;
+        max-width: 260px;
+        transition: 0.3s;
     }
-
     .door-label h3 {
-        font-size: 1.5rem;
-        color: #333;
-        margin-bottom: 0.5rem;
+        font-size: 1.6rem;
+        color: #222;
+        margin-bottom: 0.6rem;
+        font-weight: 700;
     }
-
     .door-label p {
-        font-size: 0.9rem;
-        color: #888;
-        line-height: 1.4;
+        font-size: 0.95rem;
+        color: #777;
+        line-height: 1.5;
     }
 
-    /* --- The 3D Door Unit --- */
+    /* --- Enhanced 3D Door Unit --- */
     .door-unit {
         width: var(--door-width);
         height: var(--door-height);
         position: relative;
-        transform-style: preserve-3d;
-        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
+        text-decoration: none;
         display: block;
+        transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        transform-style: preserve-3d;
     }
 
+    .door-3d-context {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+    }
+
+    /* Recessed 3D Look */
     .door-unit:hover {
-        transform: rotateY(-25deg) scale(1.05); /* 3D Perspective rotation */
+        transform: rotateY(-30deg) rotateX(5deg) scale(1.05);
     }
 
     .door-frame {
         position: absolute;
         inset: 0;
         background: #000;
-        border: 4px solid #333;
-        border-radius: 12px;
+        border: 4px solid #1a1a1a;
+        border-radius: 16px;
         overflow: hidden;
         box-shadow:
-            0 0 30px rgba(161, 140, 209, 0.3),
-            0 0 100px rgba(0, 0, 0, 0.5);
+            20px 20px 60px rgba(0, 0, 0, 0.4),
+            0 0 40px rgba(161, 140, 209, 0.2);
+        transform-style: preserve-3d;
     }
 
-    .door-frame::after {
-        content: "";
+    /* Depth sides to create a real 3D room feel */
+    .door-depth {
         position: absolute;
         inset: 0;
-        box-shadow: inset 0 0 50px rgba(161, 140, 209, 0.4);
+        border: var(--depth) solid transparent;
+        border-top-color: #0c0c14;
+        border-bottom-color: #0c0c14;
+        border-left-color: #14141d;
+        border-right-color: #14141d;
+        filter: brightness(0.7);
         pointer-events: none;
+        z-index: 2;
     }
 
-    /* --- Cosmic Starfield Inside Door --- */
+    /* --- Hyperdrive Warp Starfield --- */
     .starfield-box {
         position: absolute;
         inset: 0;
         background: radial-gradient(circle at center, #0b0e23 0%, #000 100%);
         overflow: hidden;
+        z-index: 1;
     }
 
-    .stars,
-    .stars2,
-    .stars3 {
+    .warp-stars {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 200%;
-        height: 200%;
-        background-image:
-            radial-gradient(
-                white,
-                rgba(255, 255, 255, 0.2) 2px,
-                transparent 40px
-            ),
-            radial-gradient(
-                white,
-                rgba(255, 255, 255, 0.15) 1px,
-                transparent 30px
-            );
-        background-size:
-            550px 550px,
-            350px 350px;
-        background-position:
-            0 0,
-            40px 60px;
-        animation: flyThrough 20s linear infinite;
-        opacity: 0.5;
-    }
-    .stars2 {
-        background-size: 200px 200px;
-        animation-duration: 15s;
-        opacity: 0.3;
-    }
-    .stars3 {
-        background-size: 100px 100px;
-        animation-duration: 10s;
-        opacity: 0.2;
+        inset: 0;
+        perspective: 400px;
     }
 
-    @keyframes flyThrough {
-        from {
-            transform: translateZ(0) scale(1);
+    :global(.warp-star) {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 2px;
+        height: 2px;
+        background: #fff;
+        border-radius: 50%;
+        opacity: 0;
+        animation: warpDrive 3s linear infinite;
+        box-shadow:
+            0 0 10px #fff,
+            0 0 20px #a18cd1;
+    }
+
+    @keyframes warpDrive {
+        0% {
+            transform: rotate(var(--angle)) translateX(0) scale(0);
+            opacity: 0;
         }
-        to {
-            transform: translateZ(500px) scale(3.5);
+        20% {
+            opacity: 1;
+        }
+        100% {
+            transform: rotate(var(--angle)) translateX(var(--dist))
+                translateZ(400px) scale(2.5);
+            opacity: 0;
         }
     }
 
     /* --- Particle Emitter --- */
     .particle-emitter {
         position: absolute;
-        inset: -20px;
+        inset: -40px;
         pointer-events: none;
         z-index: 11;
+        overflow: visible;
     }
 
     :global(.particle) {
         position: absolute;
         background: #f075ae;
         border-radius: 50%;
-        filter: blur(1px);
+        filter: blur(1.5px);
         opacity: 0;
-        animation: emit-particle forwards ease-out;
+        animation: emit-perimeter-particle forwards
+            cubic-bezier(0.165, 0.84, 0.44, 1);
     }
 
-    @keyframes emit-particle {
+    @keyframes emit-perimeter-particle {
         0% {
             transform: translate(0, 0) scale(1);
-            opacity: 0.8;
+            opacity: 0.9;
         }
         100% {
             transform: translate(var(--tx), var(--ty)) scale(0);
@@ -389,22 +453,28 @@ const categories = [
 
     /* --- Enter Button --- */
     .enter-btn {
-        padding: 10px 30px;
-        background: transparent;
+        padding: 12px 40px;
+        background: white;
         border: 2px solid #f075ae;
-        border-radius: 8px;
+        border-radius: 50px;
         color: #f075ae;
         font-weight: 700;
-        letter-spacing: 2px;
+        letter-spacing: 2.5px;
         text-decoration: none;
-        transition: all 0.3s;
-        opacity: 0.8;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        opacity: 1;
+        box-shadow: 0 4px 15px rgba(240, 117, 174, 0.15);
     }
     .enter-btn:hover {
         background: #f075ae;
         color: white;
-        box-shadow: 0 0 20px rgba(240, 117, 174, 0.4);
-        opacity: 1;
-        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(240, 117, 174, 0.4);
+        transform: translateY(-3px) scale(1.05);
+    }
+
+    @media (max-width: 1024px) {
+        .doors-container {
+            gap: 3rem;
+        }
     }
 </style>
