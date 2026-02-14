@@ -79,11 +79,11 @@ const categories = [
         canvas: HTMLCanvasElement;
         ctx: CanvasRenderingContext2D;
         stars: { x: number; y: number; z: number; size: number; opacity: number; opacitySpeed: number }[];
-        width: number;
-        height: number;
-        centerX: number;
-        centerY: number;
-        animationId: number;
+        width!: number;
+        height!: number;
+        centerX!: number;
+        centerY!: number;
+        animationId!: number;
 
         constructor(canvas: HTMLCanvasElement) {
             this.canvas = canvas;
@@ -167,8 +167,8 @@ const categories = [
         canvas: HTMLCanvasElement;
         ctx: CanvasRenderingContext2D;
         particles: { x: number; y: number; vx: number; vy: number; life: number; color: string }[];
-        width: number;
-        height: number;
+        width!: number;
+        height!: number;
         
         constructor(canvas: HTMLCanvasElement) {
             this.canvas = canvas;
@@ -197,7 +197,7 @@ const categories = [
 
             // Pick a random side
             const side = Math.floor(Math.random() * 4);
-            let x, y, vx, vy;
+            let x = 0, y = 0, vx = 0, vy = 0;
             const speed = Math.random() * 2 + 1; // Outward speed
 
             if (side === 0) { // Top Edge
