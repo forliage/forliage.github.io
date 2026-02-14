@@ -3,7 +3,7 @@ title: "Debian virtual machine cache cleanup"
 description: "Tips for cleaning up the cache in your Debian virtual machine"
 pubDate: 2026-02-14
 tags: ["Debian", "cleanup"]
-heroImage: "images/debian.png"
+heroImage: "/images/debian.png"
 ---
 
 Sometimes, our virtual machines, such as Ubuntu and Debian,are installed on the E drive. Simply cleaning up the cache won't remove it. Here's a great method to successfully clean up and release the cache.
