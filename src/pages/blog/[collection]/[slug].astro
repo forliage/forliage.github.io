@@ -433,16 +433,22 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
     .markdown-content :global(h1) {
         font-size: 2.2rem;
         margin-top: 3rem;
+        font-weight: 700;
+        color: #111;
     }
     .markdown-content :global(h2) {
         font-size: 1.8rem;
         margin-top: 2.5rem;
         padding-bottom: 0.5rem;
-        border-bottom: 1px solid #eee;
+        border-bottom: 2px solid #fef2f7;
+        font-weight: 700;
+        color: #111;
     }
     .markdown-content :global(h3) {
         font-size: 1.4rem;
         margin-top: 2rem;
+        font-weight: 700;
+        color: #111;
     }
     .markdown-content :global(p) {
         margin-bottom: 1.5rem;
@@ -452,22 +458,93 @@ const tocHeadings = headings.filter((h) => h.depth <= 3);
         text-decoration: underline;
     }
 
-    /* Code Blocks */
-    .markdown-content :global(pre) {
+    /* Images - Match ZJU style */
+    .markdown-content :global(img) {
+        max-width: 60% !important; /* Force smaller width like ZJU */
+        height: auto !important;
         border-radius: 12px;
-        padding: 1.5rem;
-        background: #282c34 !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        margin: 2rem 0;
+        margin: 2.5rem auto !important;
+        display: block;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     }
 
-    /* Images */
-    .markdown-content :global(img) {
-        max-width: 100%;
-        border-radius: 8px;
-        margin: 2rem auto;
+    /* KaTeX / Math - Match ZJU fixes */
+    .markdown-content :global(.katex-display) {
+        text-align: center;
+        width: 100%;
+        margin: 2rem 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+    .markdown-content :global(.katex-mathml),
+    .markdown-content :global(.katex-html .sr-only) {
+        display: none !important;
+    }
+    .markdown-content :global(.katex) {
+        font-size: 1.15em;
+        line-height: normal !important;
+        text-indent: 0;
+    }
+    .markdown-content :global(.katex *) {
+        line-height: normal !important;
+        -webkit-font-smoothing: antialiased !important;
+    }
+    .markdown-content :global(.katex .vlist div) {
+        white-space: nowrap;
+    }
+    .markdown-content :global(.katex-display > .katex) {
+        white-space: normal;
+    }
+
+    /* Code Blocks - Mac Window Style */
+    .markdown-content :global(pre.astro-code) {
+        position: relative;
+        padding-top: 2.5rem !important; /* Space for header */
+        padding-bottom: 1.5rem !important;
+        margin: 2.5rem 0 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+        border: 1px solid rgba(0, 0, 0, 0.05) !important;
+        overflow: hidden !important;
+        background: #ffffff !important; /* Force light background */
+    }
+
+    /* Force text color for light theme code blocks if Shiki defaults to dark */
+    .markdown-content :global(pre.astro-code code) {
+        background: transparent !important;
+    }
+
+    .markdown-content :global(pre.astro-code::before) {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2.5rem;
+        background: #f5f5f7;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        z-index: 1;
+    }
+    .markdown-content :global(pre.astro-code::after) {
+        content: "";
+        position: absolute;
+        top: 0.8rem;
+        left: 1rem;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #ff5f56; /* Red */
+        box-shadow:
+            20px 0 0 #ffbd2e,
+            40px 0 0 #27c93f; /* Yellow & Green */
+        z-index: 2;
+    }
+    .markdown-content :global(pre.astro-code code) {
         display: block;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        padding: 0 1.5rem !important;
+        font-family: "JetBrains Mono", "Fira Code", "Menlo", monospace;
+        font-size: 0.95rem;
+        line-height: 1.7;
     }
 
     /* Navigation Footer */
