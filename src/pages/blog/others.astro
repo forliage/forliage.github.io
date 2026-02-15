@@ -21,7 +21,7 @@ const courses: Course[] = [
         id: "cmu-15-462",
         title: "CMU 15-462 Computer Graphics",
         intro: "Comprehensive introduction to computer graphics including rasterization, geometry, and animation.",
-        size: 140,
+        size: 160,
         color: "#e57373", // Reddish
         secondaryColor: "#ffcdd2", // Light Pink
         ringColor: "rgba(229, 115, 115, 0.6)",
@@ -33,7 +33,7 @@ const courses: Course[] = [
         id: "cmu-15-458",
         title: "CMU 15-458 Discrete Differential Geometry",
         intro: "Study of discrete geometric structures and their application in computer graphics and shape analysis.",
-        size: 110,
+        size: 130,
         color: "#64b5f6", // Blue
         secondaryColor: "#bbdefb", // Light Blue
         ringColor: "rgba(100, 181, 246, 0.6)",
@@ -45,7 +45,7 @@ const courses: Course[] = [
         id: "stanford-cs231n",
         title: "Stanford CS231n Computer Vision",
         intro: "In-depth look at Deep Learning for Computer Vision, focusing on CNNs and visual recognition.",
-        size: 160,
+        size: 150,
         color: "#81c784", // Green
         secondaryColor: "#c8e6c9", // Light Green
         ringColor: "rgba(129, 199, 132, 0.6)",
@@ -57,7 +57,7 @@ const courses: Course[] = [
         id: "ucsd-cse-272",
         title: "UCSD CSE 272 Advanced Image Synthesis",
         intro: "Advanced rendering topics: Path tracing, light transport, and physically based rendering.",
-        size: 130,
+        size: 140,
         color: "#ba68c8", // Purple
         secondaryColor: "#e1bee7", // Light Purple
         ringColor: "rgba(186, 104, 200, 0.6)",
@@ -98,16 +98,17 @@ const courses: Course[] = [
     <main class="universe-container">
         <!-- Galaxy Background Canvas -->
         <canvas id="galaxy-canvas"></canvas>
-        
+
         <!-- Nebula Fog Layers (Always visible but subtle) -->
         <div class="nebula-layer layer-1"></div>
         <div class="nebula-layer layer-2"></div>
-        
+
         <!-- Floating Light Nebulas (Visible after entrance) -->
         <div id="floating-nebulas" class="floating-nebulas">
             <div class="nebula-cloud cloud-1"></div>
             <div class="nebula-cloud cloud-2"></div>
             <div class="nebula-cloud cloud-3"></div>
+            <div class="nebula-cloud cloud-4"></div>
         </div>
 
         <!-- Entrance Screen -->
@@ -118,7 +119,7 @@ const courses: Course[] = [
 
         <!-- Planetary System (Hidden initially) -->
         <div id="solar-system" class="solar-system">
-             <!-- Back Button (Consistent with other pages) -->
+            <!-- Back Button (Consistent with other pages) -->
             <a href="/blog" class="back-button">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -141,44 +142,62 @@ const courses: Course[] = [
             <div id="focus-overlay" class="focus-overlay"></div>
 
             <div class="planets-wrapper" id="planets-wrapper">
-                {courses.map((course, index) => {
-                    // Calculate random positions logic in CSS or inline style for 3D depth
-                    // We distribute them in a semi-circle or zig-zag 3D patterns
-                    // Using simple alternating offset for demonstration
-                    const xOffset = (index % 2 === 0 ? 1 : -1) * (150 + Math.random() * 100);
-                    const zDepth = -index * 400; // Receding further into distance
-                    const yOffset = (Math.random() - 0.5) * 300;
-                    
-                    return (
-                        <div 
-                            class="planet-container" 
-                            id={`planet-${course.id}`}
-                            data-x={xOffset}
-                            data-y={yOffset}
-                            data-z={zDepth}
-                            style={`
+                {
+                    courses.map((course, index) => {
+                        // Optimized Layout Logic: Spiral / Zig-Zag
+                        // Far more spread out to avoid clutter
+                        // X spread: -400 to 400
+                        // Z spread: -500 per step
+
+                        const side = index % 2 === 0 ? 1 : -1;
+                        const xBase = 350; // Base spread from center
+                        const xRandom = Math.random() * 100;
+                        const xOffset = side * (xBase + xRandom);
+
+                        const zDepth = -index * 600; // Much deeper spacing (was 400)
+
+                        // Y Offset to vary vertical position
+                        const yOffset = (Math.random() - 0.5) * 400;
+
+                        return (
+                            <div
+                                class="planet-container"
+                                id={`planet-${course.id}`}
+                                data-x={xOffset}
+                                data-y={yOffset}
+                                data-z={zDepth}
+                                style={`
                                 --planet-size: ${course.size}px;
                                 --planet-color: ${course.color};
                                 --secondary-color: ${course.secondaryColor};
                                 --ring-color: ${course.ringColor};
                                 --orbit-speed: ${course.orbitSpeed}s;
                                 transform: translate3d(${xOffset}px, ${yOffset}px, ${zDepth}px);
+                                z-index: ${100 - index}; /* Explicit layering, front items higher */
                             `}
-                        >
-                            <div class="planet-body">
-                                <div class={`planet-surface ${course.textureType}`}></div>
-                                <div class="planet-shadow"></div>
-                                <div class="planet-ring"></div>
+                            >
+                                <div class="planet-body">
+                                    <div
+                                        class={`planet-surface ${course.textureType}`}
+                                    />
+                                    <div class="planet-shadow" />
+                                    <div class="planet-ring" />
+                                </div>
+
+                                <div class="planet-info">
+                                    <h2 class="planet-title">{course.title}</h2>
+                                    <p class="planet-intro">{course.intro}</p>
+                                    <a
+                                        href={`/blog/others/${course.id}`}
+                                        class="visit-btn"
+                                    >
+                                        LAND ON PLANET
+                                    </a>
+                                </div>
                             </div>
-                            
-                            <div class="planet-info">
-                                <h2 class="planet-title">{course.title}</h2>
-                                <p class="planet-intro">{course.intro}</p>
-                                <a href={`/blog/others/${course.id}`} class="visit-btn">LAND ON PLANET</a>
-                            </div>
-                        </div>
-                    );
-                })}
+                        );
+                    })
+                }
             </div>
         </div>
     </main>
@@ -186,22 +205,24 @@ const courses: Course[] = [
 
 <script>
     /* --- Galaxy Particle Engine --- */
-    const canvas = document.getElementById('galaxy-canvas') as HTMLCanvasElement;
-    const ctx = canvas.getContext('2d');
+    const canvas = document.getElementById(
+        "galaxy-canvas",
+    ) as HTMLCanvasElement;
+    const ctx = canvas.getContext("2d");
 
     let width = 0;
     let height = 0;
     let particles: Particle[] = [];
-    const particleCount = 4000; // Increased count
+    const particleCount = 4000; // Increased count based on feedback
 
     interface Particle {
         x: number;
         y: number;
-        z: number; // Not used for canvas 2d projection here but for logic
+        z: number;
         size: number;
         color: string;
         angle: number;
-        radius: number; // Distance from center
+        radius: number;
         speed: number;
     }
 
@@ -212,62 +233,54 @@ const courses: Course[] = [
 
     function initGalaxy() {
         particles = [];
-        const maxRadius = Math.max(width, height) * 0.8; // Larger Galaxy
-        
-        for (let i = 0; i < particleCount; i++) {
-            // Spiral Galaxy Logic
-            // r = a + b * theta
-            const armCount = 2; // Two main arms visually cleaner
-            const spin = i / particleCount * armCount * Math.PI * 2 + Math.random() * 0.5;
-            
-            // Logarithmic distribution for density at center
-            const randomDist = Math.pow(Math.random(), 1.5);
-            const distance = randomDist * maxRadius; 
-            
-            // Add randomness to cloud width (arm thickness)
-            const armWidth = Math.max(20, distance * 0.3); // Wider arms at edge
-            const randomOffset = (Math.random() - 0.5) * armWidth * 2; 
+        const maxRadius = Math.max(width, height) * 0.9; // Even larger screen fill
 
-            // Color gradient based on distance
-            // Center = Hot/White/Cyan, Edge = Purple/Pink/Blue
+        for (let i = 0; i < particleCount; i++) {
+            const armCount = 2;
+            const spin =
+                (i / particleCount) * armCount * Math.PI * 2 +
+                Math.random() * 0.5;
+            const randomDist = Math.pow(Math.random(), 1.5);
+            const distance = randomDist * maxRadius;
+            const armWidth = Math.max(20, distance * 0.3);
+            const randomOffset = (Math.random() - 0.5) * armWidth * 2;
+
+            // More vibrant colors
             let color;
-            if (distance < maxRadius * 0.2) {
-                // Core
-                color = `rgba(255, 250, 240, ${0.8 + Math.random() * 0.2})`;
-            } else if (distance < maxRadius * 0.5) {
-                // Mid
-                color = `rgba(100, 200, 255, ${0.6 + Math.random() * 0.2})`;
+            if (distance < maxRadius * 0.15) {
+                color = `rgba(255, 250, 240, ${0.9 + Math.random() * 0.1})`;
+            } else if (distance < maxRadius * 0.4) {
+                color = `rgba(100, 220, 255, ${0.7 + Math.random() * 0.3})`;
             } else {
-                // Edge
-                color = `rgba(200, 100, 255, ${0.4 + Math.random() * 0.3})`;
+                color = `rgba(220, 100, 255, ${0.5 + Math.random() * 0.4})`;
             }
 
             particles.push({
-                x: 0, y: 0, z: 0,
+                x: 0,
+                y: 0,
+                z: 0,
                 angle: spin,
                 radius: distance + randomOffset,
-                speed: (0.0005 + Math.random() * 0.001) / (distance * 0.001 + 1), 
-                size: Math.random() * 2 + (1 - randomDist) * 2, // Larger stars in center
-                color: color
+                speed:
+                    (0.0005 + Math.random() * 0.001) / (distance * 0.001 + 1),
+                size: Math.random() * 2 + (1 - randomDist) * 2.5,
+                color: color,
             });
         }
     }
 
     function animateGalaxy() {
         if (!ctx) return;
-        
-        ctx.fillStyle = '#050510'; // Deep space fade
+
+        ctx.fillStyle = "#050510";
         ctx.fillRect(0, 0, width, height);
-        
+
         ctx.save();
         ctx.translate(width / 2, height / 2);
+        ctx.scale(1, 0.55); // Slightly less tilted
 
-        // Tilt the galaxy for 3D effect
-        ctx.scale(1, 0.5); 
-
-        particles.forEach(p => {
+        particles.forEach((p) => {
             p.angle += p.speed;
-            
             const x = Math.cos(p.angle) * p.radius;
             const y = Math.sin(p.angle) * p.radius;
 
@@ -281,9 +294,11 @@ const courses: Course[] = [
         requestAnimationFrame(animateGalaxy);
     }
 
-    window.addEventListener('resize', () => { resize(); initGalaxy(); });
-    
-    // Init Visuals
+    window.addEventListener("resize", () => {
+        resize();
+        initGalaxy();
+    });
+
     if (canvas) {
         resize();
         initGalaxy();
@@ -291,79 +306,87 @@ const courses: Course[] = [
     }
 
     /* --- Interaction Logic --- */
-    const enterBtn = document.getElementById('enter-btn');
-    const entranceScreen = document.getElementById('entrance-screen');
-    const solarSystem = document.getElementById('solar-system');
-    const galaxyCanvas = document.getElementById('galaxy-canvas');
-    const floatingNebulas = document.getElementById('floating-nebulas');
+    const enterBtn = document.getElementById("enter-btn");
+    const entranceScreen = document.getElementById("entrance-screen");
+    const solarSystem = document.getElementById("solar-system");
+    const galaxyCanvas = document.getElementById("galaxy-canvas");
+    const floatingNebulas = document.getElementById("floating-nebulas");
 
-    if (enterBtn && entranceScreen && solarSystem && galaxyCanvas && floatingNebulas) {
-        enterBtn.addEventListener('click', () => {
-             // 1. Fade out entrance text
-             entranceScreen.style.opacity = '0';
-             entranceScreen.style.pointerEvents = 'none';
+    if (
+        enterBtn &&
+        entranceScreen &&
+        solarSystem &&
+        galaxyCanvas &&
+        floatingNebulas
+    ) {
+        enterBtn.addEventListener("click", () => {
+            entranceScreen.style.opacity = "0";
+            entranceScreen.style.pointerEvents = "none";
 
-             // 2. Zoom/Dissolve Galaxy
-             galaxyCanvas.style.transition = 'transform 2s ease-in, opacity 2s ease';
-             galaxyCanvas.style.transform = 'scale(4) rotate(90deg)'; // Much larger zoom
-             galaxyCanvas.style.opacity = '0';
+            galaxyCanvas.style.transition =
+                "transform 2.5s ease-in, opacity 2.5s ease";
+            galaxyCanvas.style.transform = "scale(6) rotate(120deg)"; // Massive zoom
+            galaxyCanvas.style.opacity = "0";
 
-             // 3. Show Solar System & Nebulas
-             setTimeout(() => {
-                 solarSystem.style.opacity = '1';
-                 solarSystem.style.pointerEvents = 'auto';
-                 floatingNebulas.style.opacity = '1';
-                 
-                 // Trigger entrance animations for planets
-                 const planets = document.querySelectorAll('.planet-container');
-                 planets.forEach((p, i) => {
-                     setTimeout(() => {
-                         p.classList.add('visible');
-                     }, i * 200);
-                 });
-             }, 1000);
+            setTimeout(() => {
+                solarSystem.style.opacity = "1";
+                // Important: Allow pointer events on container but ensure children catch them
+                solarSystem.style.pointerEvents = "auto";
+                floatingNebulas.style.opacity = "1";
+
+                const planets = document.querySelectorAll(".planet-container");
+                planets.forEach((p, i) => {
+                    setTimeout(() => {
+                        p.classList.add("visible");
+                    }, i * 150);
+                });
+            }, 800);
         });
     }
 
     /* --- Focus Logic --- */
-    const planetsWrapper = document.getElementById('planets-wrapper');
-    const focusOverlay = document.getElementById('focus-overlay');
-    const planets = document.querySelectorAll('.planet-container');
+    const planetsWrapper = document.getElementById("planets-wrapper");
+    const focusOverlay = document.getElementById("focus-overlay");
+    const planets = document.querySelectorAll(".planet-container");
 
     if (planetsWrapper && focusOverlay) {
-        planets.forEach(planet => {
-            planet.addEventListener('click', (e) => {
-                // Don't trigger if clicking link
-                if ((e.target as HTMLElement).tagName === 'A') return;
+        planets.forEach((planet) => {
+            planet.addEventListener("click", (e) => {
+                // Ignore link clicks inside focus mode
+                if ((e.target as HTMLElement).closest("a")) return;
+                // prevent bubbling if clicking inner elements
+                e.stopPropagation();
 
                 const target = e.currentTarget as HTMLElement;
-                const x = parseFloat(target.dataset.x || '0');
-                const y = parseFloat(target.dataset.y || '0');
-                const z = parseFloat(target.dataset.z || '0');
+                const x = parseFloat(target.dataset.x || "0");
+                const y = parseFloat(target.dataset.y || "0");
+                const z = parseFloat(target.dataset.z || "0");
 
-                // Enter Focus Mode
-                document.body.classList.add('focus-mode');
-                focusOverlay.classList.add('active');
+                document.body.classList.add("focus-mode");
+                focusOverlay.classList.add("active");
 
-                // Center the wrapper on this planet
-                // We need to negate the planet's position to bring it to (0,0,0) center of wrapper
-                // Then apply a large forward transition to bring it close to camera
+                // Move wrapper to center the target planet
+                // Bring it closer (offset z by +500)
                 planetsWrapper.style.transform = `
-                    translate3d(${-x}px, ${-y}px, ${-z + 300}px) 
+                    translate3d(${-x}px, ${-y}px, ${-z + 500}px) 
                 `;
 
-                // Add focused class to target, remove from others
-                planets.forEach(p => p.classList.remove('focused'));
-                target.classList.add('focused');
+                planets.forEach((p) => p.classList.remove("focused"));
+                target.classList.add("focused");
             });
         });
 
-        // Click overlay to exit focus
-        focusOverlay.addEventListener('click', () => {
-            document.body.classList.remove('focus-mode');
-            focusOverlay.classList.remove('active');
-            planetsWrapper.style.transform = 'none';
-            planets.forEach(p => p.classList.remove('focused'));
+        const resetFocus = () => {
+            document.body.classList.remove("focus-mode");
+            focusOverlay.classList.remove("active");
+            planetsWrapper.style.transform = "none";
+            planets.forEach((p) => p.classList.remove("focused"));
+        };
+
+        focusOverlay.addEventListener("click", resetFocus);
+        // Also allow clicking background wrapper to reset (if not clicking a planet)
+        planetsWrapper.addEventListener("click", (e) => {
+            if (e.target === planetsWrapper) resetFocus();
         });
     }
 </script>
@@ -371,7 +394,6 @@ const courses: Course[] = [
 <style>
     :root {
         --space-bg: #050510;
-        --star-color: #ffffff;
     }
 
     .universe-container {
@@ -379,100 +401,122 @@ const courses: Course[] = [
         width: 100vw;
         height: 100vh;
         background-color: var(--space-bg);
-        overflow: hidden; /* Hide overflow for immersive feel */
-        font-family: 'Outfit', sans-serif;
+        overflow: hidden;
+        font-family: "Outfit", sans-serif;
     }
 
-    /* Galaxy Canvas */
     #galaxy-canvas {
         position: absolute;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         z-index: 1;
     }
 
-    /* Nebula Layers (CSS Clouds) */
-    .nebula-layer {
-        position: absolute;
-        top: 0; left: 0;
-        width: 200%; height: 200%;
-        background-image: 
-            radial-gradient(circle at 50% 50%, rgba(76, 29, 149, 0.1), transparent 60%),
-            radial-gradient(circle at 20% 80%, rgba(219, 39, 119, 0.05), transparent 50%);
-        filter: blur(80px);
-        z-index: 2;
-        animation: drift 60s infinite linear;
-        opacity: 0.5;
-        pointer-events: none;
-    }
-    
-    .layer-2 {
-        animation-direction: reverse;
-        animation-duration: 90s;
-        background-image: 
-            radial-gradient(circle at 80% 20%, rgba(56, 189, 248, 0.08), transparent 50%);
-    }
-
-    /* Floating Light Nebulas (Foreground) */
+    /* Nebulas - Enhanced Visibility */
     .floating-nebulas {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        z-index: 3; pointer-events: none; opacity: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+        pointer-events: none;
+        opacity: 0;
         transition: opacity 2s ease;
+        mix-blend-mode: screen; /* Brighter blending */
     }
 
     .nebula-cloud {
         position: absolute;
         border-radius: 50%;
-        filter: blur(60px);
-        opacity: 0.4;
-        animation: floatNebula 20s infinite ease-in-out alternate;
+        filter: blur(80px);
+        opacity: 0.6; /* Increased opacity */
+        animation: floatNebula 25s infinite ease-in-out alternate;
     }
 
     .cloud-1 {
-        top: 20%; left: 20%; width: 400px; height: 300px;
-        background: radial-gradient(circle, rgba(100, 200, 255, 0.3), transparent 70%);
+        top: 10%;
+        left: 10%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(
+            circle,
+            rgba(100, 200, 255, 0.4),
+            transparent 70%
+        );
     }
     .cloud-2 {
-        bottom: 30%; right: 15%; width: 500px; height: 400px;
-        background: radial-gradient(circle, rgba(255, 100, 200, 0.2), transparent 70%);
+        bottom: 10%;
+        right: 5%;
+        width: 600px;
+        height: 500px;
+        background: radial-gradient(
+            circle,
+            rgba(255, 100, 200, 0.3),
+            transparent 70%
+        );
         animation-delay: -5s;
     }
     .cloud-3 {
-        top: 60%; left: 40%; width: 300px; height: 300px;
-        background: radial-gradient(circle, rgba(150, 100, 255, 0.25), transparent 70%);
+        top: 40%;
+        left: 40%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(
+            circle,
+            rgba(150, 100, 255, 0.35),
+            transparent 70%
+        );
         animation-delay: -10s;
+    }
+    .cloud-4 {
+        /* New Cloud */
+        bottom: 20%;
+        left: 20%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(
+            circle,
+            rgba(100, 255, 200, 0.25),
+            transparent 70%
+        );
+        animation-delay: -15s;
     }
 
     @keyframes floatNebula {
-        0% { transform: translate(0, 0) scale(1); }
-        100% { transform: translate(30px, -20px) scale(1.1); }
+        0% {
+            transform: translate(0, 0) scale(1);
+        }
+        100% {
+            transform: translate(50px, -30px) scale(1.1);
+        }
     }
 
-    @keyframes drift {
-        0% { transform: translate(0, 0); }
-        50% { transform: translate(-10%, -5%); }
-        100% { transform: translate(0, 0); }
-    }
-
-    /* Entrance Screen */
+    /* Entrance */
     .entrance-screen {
         position: absolute;
-        top: 0; left: 0; w-100%; h-100%;
-        display: flex; flex-direction: column; 
-        justify-content: center; align-items: center;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
         z-index: 100;
-        width: 100%; height: 100%;
         transition: opacity 1s ease;
     }
 
     .galaxy-title {
         font-size: 3.5rem;
         color: #fff;
-        text-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+        text-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
         margin-bottom: 3rem;
-        letter-spacing: 8px; /* WIDER */
+        letter-spacing: 10px;
         text-transform: uppercase;
-        font-weight: 700; /* BOLDER */
+        font-weight: 800;
         text-align: center;
     }
 
@@ -489,6 +533,7 @@ const courses: Course[] = [
         letter-spacing: 4px;
         text-transform: uppercase;
         font-weight: 600;
+        z-index: 101; /* Ensure clickable */
     }
 
     .enter-button:hover {
@@ -498,193 +543,215 @@ const courses: Course[] = [
         letter-spacing: 6px;
     }
 
-    /* Solar System Container */
+    /* Solar System */
     .solar-system {
         position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         z-index: 10;
-        opacity: 0; /* Hidden initially */
-        pointer-events: none; /* Initially none, later auto */
+        opacity: 0;
+        pointer-events: none;
         transition: opacity 2s ease;
-        perspective: 1200px;
-        /* Scrollable content inside fixed perspective */
-        overflow-y: auto; 
+        perspective: 1500px; /* Deeper perspective */
+        overflow-y: auto;
         overflow-x: hidden;
     }
 
     .planets-wrapper {
         position: relative;
-        min-height: 250vh; /* Deep scroll */
+        min-height: 300vh; /* Very Deep scroll */
         width: 100%;
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding-top: 25vh; /* Centers first item better */
+        padding-top: 20vh;
         transform-style: preserve-3d;
         transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
-    /* Individual Planet Container */
+    /* Planet Container */
     .planet-container {
-        position: absolute; /* Using absolute positioning for layout in 3D wrapper */
-        left: 50%; top: 50%; /* Centered origin */
-        /* Translate handled by inline style */
-        
+        position: absolute;
+        left: 50%;
+        top: 50%;
         display: flex;
         align-items: center;
-        gap: 50px;
+        gap: 40px;
         opacity: 0;
         cursor: pointer;
         transform-style: preserve-3d;
-        transition: opacity 1s ease, filter 0.5s ease;
+        transition:
+            opacity 1s ease,
+            filter 0.5s ease;
+        /* Ensure clickability despite 3D depth */
+        pointer-events: auto;
     }
-    
+
     .planet-container.visible {
         opacity: 1;
     }
 
-    /* Focus Mode Styles */
+    /* Focus visual states */
     body.focus-mode .planet-container:not(.focused) {
-        filter: blur(5px) grayscale(0.5);
-        opacity: 0.3;
+        filter: blur(8px) grayscale(0.7);
+        opacity: 0.2;
         pointer-events: none;
     }
 
     body.focus-mode .planet-container.focused {
-        z-index: 100;
-        /* We scale the focused item slightly for emphasis */
+        z-index: 1000 !important; /* Force to front */
     }
-    
+
     body.focus-mode .planet-container.focused .planet-info {
         opacity: 1;
         pointer-events: auto;
-        transform: scale(1.1) translateX(20px);
-        background: rgba(0, 0, 0, 0.6); /* Darker backdrop for readability */
+        transform: scale(1.1) translateX(30px);
+        background: rgba(0, 0, 0, 0.7);
     }
 
     .focus-overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.6);
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
         z-index: 9;
-        opacity: 0; pointer-events: none;
+        opacity: 0;
+        pointer-events: none;
         transition: opacity 0.5s ease;
-        backdrop-filter: blur(2px);
-    }
-    
-    .focus-overlay.active {
-        opacity: 1; pointer-events: auto;
+        backdrop-filter: blur(4px);
     }
 
-    /* Planet Body Visualization */
+    .focus-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* Planet Visuals */
     .planet-body {
         width: var(--planet-size);
         height: var(--planet-size);
         position: relative;
         transform-style: preserve-3d;
-        /* Tilt for better ring view */
-        transform: rotateZ(10deg) rotateX(20deg); 
+        transform: rotateZ(10deg) rotateX(20deg);
         transition: transform 0.5s ease;
     }
-    
+
     .planet-container:hover .planet-body {
-        transform: rotateZ(10deg) rotateX(20deg) scale(1.1);
+        transform: rotateZ(10deg) rotateX(20deg) scale(1.15);
     }
 
-    /* Planet Surface (Sphere look) */
     .planet-surface {
-        width: 100%; height: 100%;
+        width: 100%;
+        height: 100%;
         border-radius: 50%;
-        /* No black anymore - use colored atmosphere */
         background: var(--planet-color);
         position: relative;
         overflow: hidden;
-        box-shadow: 
-            inset -20px -20px 50px rgba(0,0,0,0.8), /* Shadow side */
-            inset 10px 10px 30px rgba(255,255,255,0.6), /* Lit highlight */
-            0 0 30px var(--planet-color); /* Glow */
+        box-shadow:
+            inset -20px -20px 50px rgba(0, 0, 0, 0.8),
+            inset 10px 10px 30px rgba(255, 255, 255, 0.6),
+            0 0 40px var(--planet-color);
     }
 
-    /* Texture Simulations - IMPROVED (No black) */
+    /* Textures */
     .planet-surface.striped {
-        /* Colored stripes */
         background: repeating-linear-gradient(
             0deg,
             var(--planet-color),
-            var(--planet-color) 10px,
-            var(--secondary-color) 10px,
-            var(--secondary-color) 15px
+            var(--planet-color) 12px,
+            var(--secondary-color) 12px,
+            var(--secondary-color) 18px
         );
         background-size: 100% 200%;
-        animation: spinTexture var(--orbit-speed) linear infinite; /* Dynamic speed */
+        animation: spinTexture var(--orbit-speed) linear infinite;
     }
 
     .planet-surface.gaseous {
-        /* Cloud noise */
-        background: radial-gradient(circle at 30% 30%, transparent 0%, rgba(255,255,255,0.2) 100%),
-                    var(--planet-color);
-        /* Use SVG filter or complex gradient for better gas effect if possible, simplified here */
-        box-shadow: inset 0 0 50px var(--secondary-color);
+        background:
+            radial-gradient(
+                circle at 30% 30%,
+                transparent 0%,
+                rgba(255, 255, 255, 0.3) 100%
+            ),
+            var(--planet-color);
+        box-shadow: inset 0 0 60px var(--secondary-color);
         filter: blur(1px);
     }
-    
+
     .planet-surface.cratered {
-        /* Spots */
-        background-image: 
-            radial-gradient(circle at 20% 40%, var(--secondary-color) 5%, transparent 6%),
-            radial-gradient(circle at 60% 70%, var(--secondary-color) 8%, transparent 9%),
-            radial-gradient(circle at 80% 20%, var(--secondary-color) 15%, transparent 16%);
+        background-image:
+            radial-gradient(
+                circle at 20% 40%,
+                var(--secondary-color) 6%,
+                transparent 7%
+            ),
+            radial-gradient(
+                circle at 60% 70%,
+                var(--secondary-color) 10%,
+                transparent 11%
+            ),
+            radial-gradient(
+                circle at 80% 20%,
+                var(--secondary-color) 18%,
+                transparent 19%
+            );
         background-color: var(--planet-color);
-        background-size: 200% 100%; /* Wider for spin */
+        background-size: 200% 100%;
         animation: spinTexture var(--orbit-speed) linear infinite;
     }
 
     @keyframes spinTexture {
-        0% { background-position: 0% 0%; }
-        100% { background-position: 200% 0%; }
+        0% {
+            background-position: 0% 0%;
+        }
+        100% {
+            background-position: 200% 0%;
+        }
     }
 
-    /* Planet Rings */
+    /* Rings */
     .planet-ring {
         position: absolute;
-        top: 50%; left: 50%;
-        width: 160%; height: 160%;
+        top: 50%;
+        left: 50%;
+        width: 170%;
+        height: 170%;
         border-radius: 50%;
-        border: 20px solid var(--ring-color); /* Thicker ring */
-        border-top-color: transparent; /* Gap effect behind */
-        border-bottom-color: rgba(255, 255, 255, 0.2); /* Front highlight */
+        border: 25px solid var(--ring-color);
+        border-top-color: transparent;
+        border-bottom-color: rgba(255, 255, 255, 0.3);
         transform: translate(-50%, -50%) rotateX(75deg) rotateY(10deg);
-        box-shadow: 0 0 20px var(--ring-color);
+        box-shadow: 0 0 25px var(--ring-color);
         pointer-events: none;
     }
 
-    /* Planet Info Card */
+    /* Info Card */
     .planet-info {
-        width: 300px;
-        padding: 20px;
-        background: rgba(255, 255, 255, 0.05); /* Very light glass */
-        backdrop-filter: blur(10px);
-        border-radius: 12px;
+        width: 320px;
+        padding: 25px;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(12px);
+        border-radius: 16px;
         border-left: 4px solid var(--planet-color);
         color: #fff;
-        opacity: 0.8;
+        opacity: 0.9;
         transition: all 0.3s ease;
-        /* Position relative to planet in flex container */
     }
 
-    .planet-info:hover {
-        background: rgba(255, 255, 255, 0.15);
-        opacity: 1;
-    }
-
+    /* Make info visible but distinct */
     .planet-title {
-        font-size: 1.5rem;
+        font-size: 1.6rem;
         margin: 0 0 0.5rem 0;
         color: var(--planet-color);
-        text-shadow: 0 0 10px var(--ring-color);
+        text-shadow: 0 0 15px var(--ring-color);
     }
 
     .planet-intro {
-        font-size: 0.95rem;
+        font-size: 1rem;
         color: #ddd;
         line-height: 1.6;
         margin-bottom: 1.5rem;
@@ -692,31 +759,35 @@ const courses: Course[] = [
 
     .visit-btn {
         display: inline-block;
-        padding: 10px 20px;
-        border: 1px solid var(--planet-color);
+        padding: 12px 24px;
+        border: 2px solid var(--planet-color);
         color: var(--planet-color);
         text-decoration: none;
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         letter-spacing: 2px;
         transition: all 0.3s;
         text-transform: uppercase;
-        font-weight: 700;
-        border-radius: 4px;
-        position: relative;
-        z-index: 200; /* Ensure clickable */
+        font-weight: 800;
+        border-radius: 6px;
+        z-index: 200;
+        cursor: pointer;
     }
 
     .visit-btn:hover {
         background: var(--planet-color);
         color: #000;
-        box-shadow: 0 0 20px var(--planet-color);
+        box-shadow: 0 0 25px var(--planet-color);
     }
 
-    /* Back Button Override for this page */
+    /* Back Button */
     .back-button {
         position: fixed;
-        top: 100px; left: 2rem; z-index: 200;
-        display: flex; align-items: center; gap: 8px;
+        top: 100px;
+        left: 2rem;
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        gap: 8px;
         padding: 10px 20px;
         background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(10px);
@@ -726,34 +797,30 @@ const courses: Course[] = [
         text-decoration: none;
         transition: 0.3s;
     }
-    
     .back-button:hover {
         background: rgba(255, 255, 255, 0.2);
     }
 
     @media (max-width: 768px) {
-        /* Mobile Reset */
         .planets-wrapper {
             height: auto;
             min-height: 100vh;
             padding-top: 150px;
         }
-
         .planet-container {
-            position: relative; /* Stack normal flow */
-            left: auto; top: auto;
-            transform: none !important; /* Remove 3D positioning */
-            flex-direction: column;
+            position: relative;
+            left: auto;
+            top: auto;
+            transform: none !important;
             margin-bottom: 100px;
+            flex-direction: column;
             text-align: center;
         }
-
         .planet-info {
             width: 90%;
             border-left: none;
             border-bottom: 4px solid var(--planet-color);
         }
-
         .galaxy-title {
             font-size: 2rem;
             letter-spacing: 2px;
