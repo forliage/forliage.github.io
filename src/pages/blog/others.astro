@@ -270,9 +270,6 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     interface OrbitPlanet {
         el: HTMLElement;
         theta: number;
-        a: number; // Semi-major
-        b: number; // Semi-minor
-        e: number; // Eccentricity
         speedFactor: number;
         isFocused: boolean;
     }
@@ -284,12 +281,6 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         const planetEls = document.querySelectorAll(".planet-container");
         orbitPlanets = [];
 
-        // Define ellipse bounds
-        const a = Math.min(width * 0.45, 600);
-        const b = Math.min(height * 0.35, 400);
-        const e = 0.6; // Eccentricity
-        const c = a * e; // Focus distance from center
-
         planetEls.forEach((el, i) => {
             const speedFactor = parseFloat(
                 (el as HTMLElement).dataset.speedFactor || "1.0",
@@ -297,9 +288,6 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
             orbitPlanets.push({
                 el: el as HTMLElement,
                 theta: (i / planetEls.length) * Math.PI * 2,
-                a: a,
-                b: b,
-                e: e,
                 speedFactor: speedFactor,
                 isFocused: false,
             });
@@ -310,56 +298,50 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     function updatePlanets() {
         if (!isJourneyStarted) return;
 
-        const centerX = width / 2;
-        const centerY = height / 2;
-        const a_val = Math.min(width * 0.45, 500);
-        const b_val = Math.min(height * 0.35, 300);
+        // 1. DYNAMIC BOUNDS: Calculate ellipse based on screen, focus at (0,0)
+        // Ensure leftmost point (-a-c) stays on screen
+        const padding = 50;
         const e_val = 0.65;
-        const c_val = a_val * e_val;
-
-        // The Focus is at screen center. Ellipse center is at -c.
-        // x_rel = a * cos(theta) - c
-        // y_rel = b * sin(theta)
+        // -a - c = -a(1+e) must be > -width/2 + padding
+        const max_dist_left = width / 2 - padding;
+        const a_val = Math.min(max_dist_left / (1 + e_val), height * 0.45, 500);
+        const b_val = a_val * 0.5; // Flatter ellipse for depth feel
+        const c_val = a_val * e_val; // Focus offset from ellipse center
 
         orbitPlanets.forEach((p) => {
             if (p.isFocused) return;
 
-            // Kepler's speed: dTheta/dt = k / r^2
-            // r = distance from focus (screen center)
+            // 2. KEPLER SPEED: dTheta/dt = h/r^2 (Conservation of Angular Momentum)
+            // Relative to focus at (0,0)
             const x_rel = a_val * Math.cos(p.theta) - c_val;
             const y_rel = b_val * Math.sin(p.theta);
             const r = Math.sqrt(x_rel ** 2 + y_rel ** 2);
 
-            // Adjust speed based on r (Inverse square)
-            const baseSpeed = 0.01 * p.speedFactor;
-            const k = baseSpeed * 20000;
-            const dTheta = k / (r * r + 1000); // Add epsilon to avoid infinity
+            // Use same base constant for all to maintain order/no collisions
+            const baseH = 0.5 * p.speedFactor;
+            const dTheta = baseH / (r * 0.1 + 40);
 
-            p.theta += Math.min(dTheta, 0.05);
+            p.theta += dTheta;
 
-            // Calculate final coords
-            const fx = a_val * Math.cos(p.theta) - c_val;
-            const fy = b_val * Math.sin(p.theta);
+            // 3. PERSPECTIVE SCALING (Near/Far)
+            // y_rel > 0 is "front", y_rel < 0 is "back"
+            const depthFactor = y_rel / b_val; // -1 to 1
+            const scale = 0.5 + (depthFactor + 1) * 0.4; // 0.5 to 1.3
+            const opacity = 0.5 + (depthFactor + 1) * 0.25; // 0.5 to 1.0
 
-            // Vertical Perspective: Use theta to determine depth
-            // When theta=0 (periapsis), it's far/near depending on geometry.
-            // Let's say sin(theta) controls Z.
-            const depth = Math.sin(p.theta); // -1 (back) to 1 (front)
-            const scale = 0.5 + (depth + 1) * 0.4; // 0.5 to 1.3
-            const opacity = 0.4 + (depth + 1) * 0.3; // 0.4 to 1.0
+            // 4. RADIAL AXIS ALIGNMENT (Points to Focus)
+            // Pole-to-pole axis should point to galaxy center (0,0).
+            // Planet is at (x_rel, y_rel). Central vector is (-x_rel, -y_rel).
+            const angleToCenterRad = Math.atan2(-y_rel, -x_rel);
+            const angleToCenterDeg = angleToCenterRad * (180 / Math.PI);
 
-            // Radial Axis Alignment (Yellow Line)
-            // The axis should point to center (0,0).
-            // The vector from planet to center is (-fx, -fy).
-            const angleToCenter = Math.atan2(-fy, -fx) * (180 / Math.PI);
-
-            p.el.style.transform = `translate3d(${fx}px, ${fy}px, 0) scale(${scale})`;
-            p.el.style.zIndex = Math.floor((depth + 1) * 100).toString();
+            p.el.style.transform = `translate3d(${x_rel}px, ${y_rel}px, 0) scale(${scale})`;
+            p.el.style.zIndex = Math.floor((depthFactor + 1) * 100).toString();
             p.el.style.opacity = opacity.toString();
 
-            // Update CSS variables for rotation axis and visual alignment
-            p.el.style.setProperty("--tilt-x", `${20 + depth * 10}deg`);
-            p.el.style.setProperty("--tilt-z", `${angleToCenter + 90}deg`);
+            // Apply radial tilt: The pole (axis) points to center
+            p.el.style.setProperty("--tilt-x", `${15 + depthFactor * 5}deg`);
+            p.el.style.setProperty("--tilt-z", `${angleToCenterDeg + 90}deg`);
         });
 
         requestAnimationFrame(updatePlanets);
