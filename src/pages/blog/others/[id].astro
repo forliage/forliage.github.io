@@ -32,6 +32,14 @@ const { planet } = Astro.props;
             <div class="planet-title-card">
                 <h1>{planet.title}</h1>
                 <div class="status-badge">ATMOSPHERE: STABLE</div>
+                <!-- Control Status Hint -->
+                <div id="control-guide" class="control-guide">
+                    <div class="indicator">
+                        <span class="dot"></span>
+                        <span class="mode-text">CINEMATIC MODE</span>
+                    </div>
+                    <div class="hint-text">TOGGLE CAPSLOCK TO EXPLORE</div>
+                </div>
             </div>
         </div>
 
@@ -215,19 +223,127 @@ const { planet } = Astro.props;
         scene.add(stars);
     }
 
+    // --- INTERACTIVE EXPLORATION LOGIC ---
+    let isExploring = false;
+    const keys = { w: false, a: false, s: false, d: false };
+    const player = {
+        pos: new THREE.Vector3(0, 15, 60),
+        yaw: 0,
+        pitch: 0,
+        speed: 0.8,
+        lookSensitivity: 0.002,
+    };
+
+    const guide = document.getElementById("control-guide");
+    const modeText = guide?.querySelector(".mode-text");
+
+    function updateExplorationState() {
+        const checkCapsLock = (event: any) => {
+            isExploring = event.getModifierState("CapsLock");
+            if (guide) {
+                if (isExploring) {
+                    guide.classList.add("active");
+                    if (modeText)
+                        modeText.textContent = "EXPLORATION MODE ACTIVE";
+                } else {
+                    guide.classList.remove("active");
+                    if (modeText) modeText.textContent = "CINEMATIC MODE";
+                }
+            }
+        };
+        window.addEventListener("keydown", checkCapsLock);
+        window.addEventListener("keyup", checkCapsLock);
+        // Initial check
+        window.addEventListener(
+            "mousedown",
+            (e) => {
+                isExploring = e.getModifierState("CapsLock");
+            },
+            { once: true },
+        );
+    }
+
+    // Capture WASD
+    window.addEventListener("keydown", (e) => {
+        const k = e.key.toLowerCase();
+        if (keys.hasOwnProperty(k)) keys[k as keyof typeof keys] = true;
+    });
+    window.addEventListener("keyup", (e) => {
+        const k = e.key.toLowerCase();
+        if (keys.hasOwnProperty(k)) keys[k as keyof typeof keys] = false;
+    });
+
+    // Capture Mouse Move for Look
+    window.addEventListener("mousemove", (e) => {
+        if (!isExploring) return;
+        player.yaw -= e.movementX * player.lookSensitivity;
+        player.pitch -= e.movementY * player.lookSensitivity;
+        player.pitch = Math.max(
+            -Math.PI / 3,
+            Math.min(Math.PI / 3, player.pitch),
+        );
+    });
+
+    function getTerrainHeight(x: number, z: number) {
+        let y = 0;
+        y += Math.sin(x * 0.03) * Math.cos(z * 0.03) * 18.0;
+        y += Math.sin(x * 0.12) * Math.sin(z * 0.12) * 6.0;
+        y += Math.abs(Math.sin(x * 0.4) * Math.cos(z * 0.4)) * 4.0;
+        return y + 8.0; // Stand height
+    }
+
     function animate() {
         requestID = requestAnimationFrame(animate);
         const time = Date.now() * 0.0005;
 
-        // Twinkling stars
         if (stars) {
             (stars.material as THREE.PointsMaterial).opacity =
                 0.5 + Math.sin(time * 4) * 0.3;
         }
 
-        // Cinematic camera pan - mostly ground focused
-        camera.position.x = Math.sin(time * 0.1) * 15;
-        camera.lookAt(0, -5, -60);
+        if (isExploring) {
+            // Movement Relative to Camera
+            const forward = new THREE.Vector3(
+                Math.sin(player.yaw),
+                0,
+                Math.cos(player.yaw),
+            ).normalize();
+            const right = new THREE.Vector3()
+                .crossVectors(new THREE.Vector3(0, 1, 0), forward)
+                .normalize();
+
+            if (keys.w) player.pos.addScaledVector(forward, -player.speed);
+            if (keys.s) player.pos.addScaledVector(forward, player.speed);
+            if (keys.a) player.pos.addScaledVector(right, -player.speed);
+            if (keys.d) player.pos.addScaledVector(right, player.speed);
+
+            // Boundary Constraint (180 unit radius)
+            const d = player.pos.length();
+            if (d > 180) player.pos.setLength(180);
+
+            // Surface Snapping
+            player.pos.y = getTerrainHeight(player.pos.x, player.pos.z);
+
+            // Apply to Camera
+            camera.position.set(player.pos.x, player.pos.y, player.pos.z);
+            camera.rotation.set(0, 0, 0);
+            camera.rotation.order = "YXZ";
+            camera.rotation.y = player.yaw;
+            camera.rotation.x = player.pitch;
+        } else {
+            // Cinematic Camera Panning (Smooth Transition Back)
+            const targetX = Math.sin(time * 0.1) * 15;
+            const targetPos = new THREE.Vector3(targetX, 18, 70);
+            camera.position.lerp(targetPos, 0.05);
+
+            const targetLook = new THREE.Vector3(0, -5, -60);
+            const m = new THREE.Matrix4();
+            m.lookAt(camera.position, targetLook, new THREE.Vector3(0, 1, 0));
+            camera.quaternion.slerp(
+                new THREE.Quaternion().setFromRotationMatrix(m),
+                0.05,
+            );
+        }
 
         renderer.render(scene, camera);
     }
@@ -302,6 +418,7 @@ const { planet } = Astro.props;
         border-radius: 15px;
         border-left: 4px solid #fff;
         margin: 20px;
+        min-width: 250px;
     }
     h1 {
         font-size: 1.8rem;
@@ -316,5 +433,47 @@ const { planet } = Astro.props;
         font-weight: 800;
         letter-spacing: 2px;
         font-size: 0.65rem;
+        margin-bottom: 15px;
+    }
+
+    /* Control Guide UI */
+    .control-guide {
+        margin-top: 10px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 10px;
+        transition: all 0.5s;
+    }
+    .indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+    .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 0 5px #fff;
+        transition: background 0.3s;
+    }
+    .control-guide.active .dot {
+        background: #0f0;
+        box-shadow: 0 0 10px #0f0;
+    }
+    .mode-text {
+        color: #fff;
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+    }
+    .hint-text {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.65rem;
+        font-weight: 500;
+        letter-spacing: 1px;
+    }
+    .control-guide.active .mode-text {
+        color: #0f0;
     }
 </style>
