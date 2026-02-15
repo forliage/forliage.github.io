@@ -36,30 +36,41 @@ const { planet } = Astro.props;
         </div>
 
         <!-- 3D Environment Canvas -->
-        <div id="landing-canvas-container"></div>
+        <div id="landing-canvas-container" data-planet-color={planet.color}>
+        </div>
     </main>
 </Layout>
 
-<script define:vars={{ planetColor: planet.color }}>
+<script>
     import * as THREE from "three";
 
-    let scene, camera, renderer, terrain;
-    const container = document.getElementById("landing-canvas-container");
+    // Typed declarations for Three.js objects
+    let scene: THREE.Scene;
+    let camera: THREE.PerspectiveCamera;
+    let renderer: THREE.WebGLRenderer;
+    let terrain: THREE.Mesh;
+    let requestID: number;
+
+    const container = document.getElementById(
+        "landing-canvas-container",
+    ) as HTMLDivElement;
+    const planetColor = container?.dataset.planetColor || "#ffffff";
 
     function init() {
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0a0a0c); // Near black for space feel
-        scene.fog = new THREE.FogExp2(0x1a1a1e, 0.04); // Deep cinematic fog
+        if (!container) return;
 
-        camera = new THREE.PerspectiveCamera(
-            60,
-            window.innerWidth / window.innerHeight,
-            0.1,
-            2000,
-        );
-        camera.position.set(0, 8, 35);
+        // 1. Scene Setup
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0a0c);
+        scene.fog = new THREE.FogExp2(0x1a1a1e, 0.04);
+
+        // 2. Camera Setup
+        const aspect = window.innerWidth / window.innerHeight;
+        camera = new THREE.PerspectiveCamera(60, aspect, 0.1, 2000);
+        camera.position.set(0, 12, 50);
         camera.lookAt(0, 5, 0);
 
+        // 3. Renderer Setup
         renderer = new THREE.WebGLRenderer({
             antialias: true,
             powerPreference: "high-performance",
@@ -67,88 +78,96 @@ const { planet } = Astro.props;
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 0.8;
+        renderer.toneMappingExposure = 1.0;
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
-        // ADVANCED LIGHTING (Ray Tracing Logic)
-        const sun = new THREE.DirectionalLight(0xffffff, 4.0);
+        // 4. Lighting
+        const sun = new THREE.DirectionalLight(0xffffff, 5.0);
         sun.position.set(100, 150, 50);
         sun.castShadow = true;
-        sun.shadow.mapSize.width = 4096;
-        sun.shadow.mapSize.height = 4096;
+        sun.shadow.mapSize.set(2048, 2048);
         sun.shadow.camera.left = -100;
         sun.shadow.camera.right = 100;
         sun.shadow.camera.top = 100;
         sun.shadow.camera.bottom = -100;
-        sun.shadow.radius = 4; // Soft shadows
         scene.add(sun);
 
-        const fillLight = new THREE.PointLight(planetColor, 15, 100);
-        fillLight.position.set(-20, 20, 10);
+        const fillLight = new THREE.PointLight(planetColor, 25, 100);
+        fillLight.position.set(-30, 20, 10);
         scene.add(fillLight);
 
-        const amb = new THREE.AmbientLight(0x151520, 0.4);
+        const amb = new THREE.AmbientLight(0x404040, 0.6);
         scene.add(amb);
 
+        // 5. Geometry & Objects
         generateTerrain();
+        addRocks();
+
         animate();
     }
 
     function generateTerrain() {
-        // High-fidelity Procedural Terrain
-        const geo = new THREE.PlaneGeometry(300, 300, 256, 256);
+        const size = 400;
+        const resolution = 128;
+        const geo = new THREE.PlaneGeometry(size, size, resolution, resolution);
         geo.rotateX(-Math.PI / 2);
 
         const pos = geo.attributes.position;
         for (let i = 0; i < pos.count; i++) {
             const x = pos.getX(i);
             const z = pos.getZ(i);
-            // Complex Noise Harmonics for "Ray Tracing" level detail
-            let y = Math.sin(x * 0.08) * Math.cos(z * 0.08) * 6.0;
-            y += Math.sin(x * 0.3) * Math.sin(z * 0.3) * 2.0;
-            y += (Math.random() - 0.5) * 0.4;
+            // Simulated perlin noise for hills
+            let y = Math.sin(x * 0.05) * Math.cos(z * 0.05) * 8.0;
+            y += Math.sin(x * 0.2) * Math.sin(z * 0.2) * 2.5;
+            y += Math.sin(x * 0.5) * 0.5;
             pos.setY(i, y);
         }
         geo.computeVertexNormals();
 
-        // PBR Material (Reflectance/Roughness)
         const mat = new THREE.MeshStandardMaterial({
             color: new THREE.Color(planetColor),
-            roughness: 0.75,
-            metalness: 0.15,
-            emissive: new THREE.Color(planetColor).darken(0.8),
-            emissiveIntensity: 0.1,
+            roughness: 0.8,
+            metalness: 0.1,
             flatShading: false,
         });
 
         terrain = new THREE.Mesh(geo, mat);
         terrain.receiveShadow = true;
         scene.add(terrain);
+    }
 
-        // REFRACTIVE CRYSTALS (Raytracing simulation)
-        for (let i = 0; i < 70; i++) {
+    function addRocks() {
+        const rockCount = 60;
+        for (let i = 0; i < rockCount; i++) {
             const size = Math.random() * 4 + 1;
             const bGeo = new THREE.DodecahedronGeometry(size, 0);
 
+            // Crystalline/Refractive material
             const bMat = new THREE.MeshPhysicalMaterial({
                 color: planetColor,
-                roughness: 0.05,
+                roughness: 0.1,
                 metalness: 0.4,
-                ior: 1.6,
-                transmission: 0.6, // Refraction
-                thickness: 2.5,
-                clearcoat: 1.0,
-                clearcoatRoughness: 0.1,
-                opacity: 0.9,
+                ior: 1.5,
+                transmission: 0.6,
+                thickness: 2,
                 transparent: true,
+                opacity: 0.9,
+                reflectivity: 0.5,
             });
 
             const rock = new THREE.Mesh(bGeo, bMat);
-            const rx = (Math.random() - 0.5) * 150;
-            const rz = (Math.random() - 0.5) * 150;
-            rock.position.set(rx, -2, rz);
+            const rx = (Math.random() - 0.5) * 200;
+            const rz = (Math.random() - 0.5) * 200;
+
+            // Basic ground estimation for rock height
+            const ry =
+                Math.sin(rx * 0.05) * Math.cos(rz * 0.05) * 8.0 +
+                Math.sin(rx * 0.2) * Math.sin(rz * 0.2) * 2.5 -
+                size * 0.5;
+
+            rock.position.set(rx, ry, rz);
             rock.rotation.set(
                 Math.random() * Math.PI,
                 Math.random() * Math.PI,
@@ -161,23 +180,27 @@ const { planet } = Astro.props;
     }
 
     function animate() {
-        requestAnimationFrame(animate);
-        const time = Date.now() * 0.0006;
+        requestID = requestAnimationFrame(animate);
+        const time = Date.now() * 0.0005;
 
-        // Cinematic Panning
-        camera.position.x = Math.sin(time * 0.1) * 3.0;
-        camera.position.y = 8 + Math.cos(time * 0.2) * 1.0;
-        camera.lookAt(0, 4, -10);
+        // Subtle cinematic camera pan
+        camera.position.x = Math.sin(time * 0.1) * 10;
+        camera.lookAt(0, 5, -20);
 
         renderer.render(scene, camera);
     }
 
-    window.addEventListener("resize", () => {
+    // Cleanup on window resize
+    const handleResize = () => {
+        if (!camera || !renderer) return;
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
-    });
+    };
 
+    window.addEventListener("resize", handleResize);
+
+    // Initial call
     init();
 </script>
 
