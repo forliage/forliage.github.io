@@ -109,8 +109,8 @@ const { planet } = Astro.props;
     }
 
     function generateTerrain() {
-        const size = 400;
-        const resolution = 128;
+        const size = 500;
+        const resolution = 256; // High density for more detail
         const geo = new THREE.PlaneGeometry(size, size, resolution, resolution);
         geo.rotateX(-Math.PI / 2);
 
@@ -118,19 +118,22 @@ const { planet } = Astro.props;
         for (let i = 0; i < pos.count; i++) {
             const x = pos.getX(i);
             const z = pos.getZ(i);
-            // Simulated perlin noise for hills
-            let y = Math.sin(x * 0.05) * Math.cos(z * 0.05) * 8.0;
-            y += Math.sin(x * 0.2) * Math.sin(z * 0.2) * 2.5;
-            y += Math.sin(x * 0.5) * 0.5;
+
+            // Fractal Brownian Motion (FBM) with more octaves for sharper hills
+            let y = 0;
+            y += Math.sin(x * 0.04) * Math.cos(z * 0.04) * 12.0;
+            y += Math.sin(x * 0.15) * Math.sin(z * 0.15) * 4.0;
+            y += Math.sin(x * 0.4) * Math.cos(z * 0.4) * 1.5;
+            y += (Math.random() - 0.5) * 0.2; // Tiny surface roughness
             pos.setY(i, y);
         }
         geo.computeVertexNormals();
 
         const mat = new THREE.MeshStandardMaterial({
             color: new THREE.Color(planetColor),
-            roughness: 0.8,
-            metalness: 0.1,
-            flatShading: false,
+            roughness: 0.65, // Lower roughness for more defined highlights
+            metalness: 0.2,
+            flatShading: false, // Smooth shading but with more geometry detail
         });
 
         terrain = new THREE.Mesh(geo, mat);
@@ -228,47 +231,51 @@ const { planet } = Astro.props;
         height: 100%;
         pointer-events: none;
         z-index: 100;
-        padding: 40px;
+        padding: 30px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        align-items: flex-start; /* Title to side */
     }
 
     .btn-back {
         pointer-events: auto;
         text-decoration: none;
         color: #fff;
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.08);
         backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 12px 24px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 10px 20px;
         border-radius: 50px;
         font-weight: 700;
-        align-self: flex-start;
+        font-size: 0.9rem;
         transition: all 0.3s;
     }
     .btn-back:hover {
-        background: rgba(255, 255, 255, 0.25);
-        transform: translateX(-5px);
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
     }
 
     .planet-title-card {
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-        padding: 40px;
-        border-radius: 20px;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(10px);
+        padding: 20px 30px;
+        border-radius: 15px;
+        border-left: 4px solid #fff;
+        margin: 20px;
     }
     h1 {
-        font-size: 4rem;
+        font-size: 1.8rem;
         text-transform: uppercase;
-        letter-spacing: 10px;
-        font-weight: 950;
-        margin-bottom: 10px;
+        letter-spacing: 4px;
+        font-weight: 900;
+        margin-bottom: 5px;
         color: #fff;
     }
     .status-badge {
         color: #0f0;
         font-weight: 800;
-        letter-spacing: 3px;
-        font-size: 0.8rem;
+        letter-spacing: 2px;
+        font-size: 0.65rem;
     }
 </style>
