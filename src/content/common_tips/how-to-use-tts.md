@@ -80,11 +80,11 @@ And the official support uses **SSML** to fine-tune speech rate, volume, pitch, 
 
 ## 2.1 Voice Selection and Parameter Tuning (The 5 Most Commonly Used Knobs for Scientific Research Dubbing)
 
-### 1.Select Voice (voice)
+### 1.Select Voice
 
 Use `edge_tts.list_voices()` to pull the available voice list (with locale, gender, name), then pick ShortName as the parameter to pass in.
 
-### 2.Speech rate rate, 3.Volume volume, 4.Pitch pitch
+### 2.Speech rate, 3.Volume, 4.Pitch
 
 `edge-tts` supports rate/volume/pitch parameters (command line and code are both supported).
 
