@@ -256,6 +256,8 @@ const { planet } = Astro.props;
         window.addEventListener("keyup", sync);
         window.addEventListener("mousedown", sync);
         window.addEventListener("mousemove", sync);
+        window.addEventListener("pointerdown", sync);
+        window.addEventListener("focus", sync);
     }
 
     // Capture WASD
