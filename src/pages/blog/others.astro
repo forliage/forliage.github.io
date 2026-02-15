@@ -661,8 +661,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         overflow: hidden;
         position: relative;
         box-shadow:
-            inset 0 40px 60px rgba(255, 255, 255, 0.15),
-            inset 0 -40px 80px rgba(0, 0, 0, 0.6),
+            inset 0 0 80px rgba(0, 0, 0, 0.8),
             0 0 50px var(--planet-color);
         &::after {
             content: "";
@@ -743,11 +742,12 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         left: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(
-            180deg,
-            transparent 10%,
-            rgba(0, 0, 0, 0.4) 40%,
-            rgba(0, 0, 0, 0.95) 90%
+        /* Use radial-gradient for more natural spherical lighting */
+        background: radial-gradient(
+            circle at 50% 0%,
+            transparent 0%,
+            rgba(0, 0, 0, 0.3) 35%,
+            rgba(0, 0, 0, 0.9) 90%
         );
         mix-blend-mode: multiply;
         border-radius: 50%;
