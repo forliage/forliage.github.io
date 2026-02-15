@@ -1,0 +1,251 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import Header from "../../../components/Header.astro";
+
+export async function getStaticPaths() {
+    const planets = [
+        { id: "cmu-15-462", color: "#ff6b6b", title: "CMU 15-462" },
+        { id: "cmu-15-458", color: "#4dabf7", title: "CMU 15-458" },
+        { id: "stanford-cs231n", color: "#69db7c", title: "Stanford CS231n" },
+        { id: "ucsd-cse-272", color: "#da77f2", title: "UCSD CSE 272" },
+        { id: "games-101", color: "#ffa94d", title: "Games 101" },
+        { id: "games-202", color: "#adb5bd", title: "Games 202" },
+    ];
+    return planets.map((p) => ({
+        params: { id: p.id },
+        props: { planet: p },
+    }));
+}
+
+const { id } = Astro.params;
+const { planet } = Astro.props;
+---
+
+<Layout title={`${planet.title} - Landing Surface`}>
+    <Header />
+    <main class="landing-container">
+        <!-- Overlay UI -->
+        <div class="ui-overlay">
+            <a href="/blog/others" class="btn-back">
+                <span class="icon">🚀</span> LEAVE PLANET
+            </a>
+            <div class="planet-title-card">
+                <h1>{planet.title}</h1>
+                <div class="status-badge">ATMOSPHERE: STABLE</div>
+            </div>
+        </div>
+
+        <!-- 3D Environment Canvas -->
+        <div id="landing-canvas-container"></div>
+    </main>
+</Layout>
+
+<script define:vars={{ planetColor: planet.color }}>
+    import * as THREE from "three";
+
+    let scene, camera, renderer, terrain;
+    const container = document.getElementById("landing-canvas-container");
+
+    function init() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0a0c); // Near black for space feel
+        scene.fog = new THREE.FogExp2(0x1a1a1e, 0.04); // Deep cinematic fog
+
+        camera = new THREE.PerspectiveCamera(
+            60,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            2000,
+        );
+        camera.position.set(0, 8, 35);
+        camera.lookAt(0, 5, 0);
+
+        renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            powerPreference: "high-performance",
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 0.8;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        // ADVANCED LIGHTING (Ray Tracing Logic)
+        const sun = new THREE.DirectionalLight(0xffffff, 4.0);
+        sun.position.set(100, 150, 50);
+        sun.castShadow = true;
+        sun.shadow.mapSize.width = 4096;
+        sun.shadow.mapSize.height = 4096;
+        sun.shadow.camera.left = -100;
+        sun.shadow.camera.right = 100;
+        sun.shadow.camera.top = 100;
+        sun.shadow.camera.bottom = -100;
+        sun.shadow.radius = 4; // Soft shadows
+        scene.add(sun);
+
+        const fillLight = new THREE.PointLight(planetColor, 15, 100);
+        fillLight.position.set(-20, 20, 10);
+        scene.add(fillLight);
+
+        const amb = new THREE.AmbientLight(0x151520, 0.4);
+        scene.add(amb);
+
+        generateTerrain();
+        animate();
+    }
+
+    function generateTerrain() {
+        // High-fidelity Procedural Terrain
+        const geo = new THREE.PlaneGeometry(300, 300, 256, 256);
+        geo.rotateX(-Math.PI / 2);
+
+        const pos = geo.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+            const x = pos.getX(i);
+            const z = pos.getZ(i);
+            // Complex Noise Harmonics for "Ray Tracing" level detail
+            let y = Math.sin(x * 0.08) * Math.cos(z * 0.08) * 6.0;
+            y += Math.sin(x * 0.3) * Math.sin(z * 0.3) * 2.0;
+            y += (Math.random() - 0.5) * 0.4;
+            pos.setY(i, y);
+        }
+        geo.computeVertexNormals();
+
+        // PBR Material (Reflectance/Roughness)
+        const mat = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(planetColor),
+            roughness: 0.75,
+            metalness: 0.15,
+            emissive: new THREE.Color(planetColor).darken(0.8),
+            emissiveIntensity: 0.1,
+            flatShading: false,
+        });
+
+        terrain = new THREE.Mesh(geo, mat);
+        terrain.receiveShadow = true;
+        scene.add(terrain);
+
+        // REFRACTIVE CRYSTALS (Raytracing simulation)
+        for (let i = 0; i < 70; i++) {
+            const size = Math.random() * 4 + 1;
+            const bGeo = new THREE.DodecahedronGeometry(size, 0);
+
+            const bMat = new THREE.MeshPhysicalMaterial({
+                color: planetColor,
+                roughness: 0.05,
+                metalness: 0.4,
+                ior: 1.6,
+                transmission: 0.6, // Refraction
+                thickness: 2.5,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.1,
+                opacity: 0.9,
+                transparent: true,
+            });
+
+            const rock = new THREE.Mesh(bGeo, bMat);
+            const rx = (Math.random() - 0.5) * 150;
+            const rz = (Math.random() - 0.5) * 150;
+            rock.position.set(rx, -2, rz);
+            rock.rotation.set(
+                Math.random() * Math.PI,
+                Math.random() * Math.PI,
+                0,
+            );
+            rock.castShadow = true;
+            rock.receiveShadow = true;
+            scene.add(rock);
+        }
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        const time = Date.now() * 0.0006;
+
+        // Cinematic Panning
+        camera.position.x = Math.sin(time * 0.1) * 3.0;
+        camera.position.y = 8 + Math.cos(time * 0.2) * 1.0;
+        camera.lookAt(0, 4, -10);
+
+        renderer.render(scene, camera);
+    }
+
+    window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    init();
+</script>
+
+<style>
+    .landing-container {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        background: #000;
+        font-family: "Outfit", sans-serif;
+    }
+    #landing-canvas-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .ui-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 100;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .btn-back {
+        pointer-events: auto;
+        text-decoration: none;
+        color: #fff;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-weight: 700;
+        align-self: flex-start;
+        transition: all 0.3s;
+    }
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateX(-5px);
+    }
+
+    .planet-title-card {
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+        padding: 40px;
+        border-radius: 20px;
+    }
+    h1 {
+        font-size: 4rem;
+        text-transform: uppercase;
+        letter-spacing: 10px;
+        font-weight: 950;
+        margin-bottom: 10px;
+        color: #fff;
+    }
+    .status-badge {
+        color: #0f0;
+        font-weight: 800;
+        letter-spacing: 3px;
+        font-size: 0.8rem;
+    }
+</style>
