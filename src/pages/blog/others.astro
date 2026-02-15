@@ -283,115 +283,6 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         animateGalaxy();
     }
 
-    /* --- Step 2: Keplerian Orbital Physics --- */
-    interface OrbitData {
-        a: number; // Semi-major axis
-        e: number; // Eccentricity
-        inclination: number; // Orbital tilt
-        phase: number; // Random starting anomaly
-        speed: number; // Mean motion factor
-    }
-
-    const orbitParams: Record<string, OrbitData> = {
-        "cmu-15-462": {
-            a: 380,
-            e: 0.15,
-            inclination: 0.1,
-            phase: Math.random() * 6,
-            speed: 0.00015,
-        },
-        "cmu-15-458": {
-            a: 520,
-            e: 0.25,
-            inclination: -0.1,
-            phase: Math.random() * 6,
-            speed: 0.00012,
-        },
-        "stanford-cs231n": {
-            a: 680,
-            e: 0.1,
-            inclination: 0.05,
-            phase: Math.random() * 6,
-            speed: 0.0001,
-        },
-        "ucsd-cse-272": {
-            a: 850,
-            e: 0.35,
-            inclination: -0.05,
-            phase: Math.random() * 6,
-            speed: 0.00008,
-        },
-        "games-101": {
-            a: 1050,
-            e: 0.2,
-            inclination: 0.08,
-            phase: Math.random() * 6,
-            speed: 0.00007,
-        },
-        "games-202": {
-            a: 1250,
-            e: 0.3,
-            inclination: -0.12,
-            phase: Math.random() * 6,
-            speed: 0.00006,
-        },
-    };
-
-    /**
-     * Solve Kepler's Equation M = E - e*sin(E) for Eccentric Anomaly E
-     */
-    function solveKepler(M: number, e: number): number {
-        let E = M;
-        for (let i = 0; i < 5; i++) {
-            E = E - (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
-        }
-        return E;
-    }
-
-    function updateOrbits(timestamp: number) {
-        if (!solarSystem || !solarSystem.classList.contains("active")) return;
-
-        planets.forEach((planet) => {
-            const id = planet.id.replace("planet-", "");
-            const params = orbitParams[id];
-            if (!params || planet.classList.contains("focused")) return;
-
-            // Mean Anomaly M
-            const M = (params.phase + timestamp * params.speed) % (Math.PI * 2);
-            // Eccentric Anomaly E
-            const E = solveKepler(M, params.e);
-
-            // Elliptic coordinates in orbital plane
-            const b = params.a * Math.sqrt(1 - params.e ** 2);
-            let x = params.a * (Math.cos(E) - params.e);
-            let y = b * Math.sin(E);
-
-            // Slightly rotate for inclination
-            const cosI = Math.cos(params.inclination);
-            const sinI = Math.sin(params.inclination);
-            const xRot = x;
-            const yRot = y * cosI;
-            const zRot = y * sinI; // Used for scale/depth
-
-            // Mapping to viewport
-            const scale = 0.6 + (zRot / params.a) * 0.4;
-            const opacity = 0.3 + (zRot / params.a + 1) * 0.35;
-            const zDepth = Math.floor(zRot + 500);
-
-            (planet as HTMLElement).style.left = `calc(40% + ${xRot}px)`;
-            (planet as HTMLElement).style.top = `calc(50% + ${yRot}px)`;
-            (planet as HTMLElement).style.transform =
-                `translate(-50%, -50%) scale(${scale})`;
-            (planet as HTMLElement).style.zIndex = zDepth.toString();
-            (planet as HTMLElement).style.opacity = opacity.toString();
-        });
-    }
-
-    function sceneLoop(timestamp: number) {
-        updateOrbits(timestamp);
-        requestAnimationFrame(sceneLoop);
-    }
-
     /* --- Core Interactions --- */
     const enterBtn = document.getElementById("enter-btn");
     const entranceScreen = document.getElementById("entrance-screen");
@@ -409,11 +300,9 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
             solarSystem.classList.add("active");
             searchContainer.classList.remove("hidden");
 
-            planets.forEach((p, i) => {
-                setTimeout(() => p.classList.add("visible"), i * 200);
+            document.querySelectorAll(".planet-container").forEach((p, i) => {
+                setTimeout(() => p.classList.add("visible"), i * 150);
             });
-
-            requestAnimationFrame(sceneLoop);
         }, 800);
     }
 
@@ -442,13 +331,14 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
             const matchesTag = activeTag === "all" || tags.includes(activeTag);
 
             if (matchesQuery && matchesTag) {
-                (p as HTMLElement).style.pointerEvents = "auto";
-                (p as HTMLElement).style.visibility = "visible";
-                (p as HTMLElement).classList.remove("hidden-orbital");
+                (p as HTMLElement).style.display = "flex";
+                setTimeout(() => ((p as HTMLElement).style.opacity = "1"), 10);
             } else {
-                (p as HTMLElement).style.visibility = "hidden";
-                (p as HTMLElement).style.pointerEvents = "none";
-                (p as HTMLElement).classList.add("hidden-orbital");
+                (p as HTMLElement).style.opacity = "0";
+                setTimeout(
+                    () => ((p as HTMLElement).style.display = "none"),
+                    500,
+                );
             }
         });
     }
@@ -474,6 +364,12 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
                 if (p !== planet) p.classList.add("dimmed");
             });
 
+            // Adjusted offset to prevent button cutoff
+            planet.scrollIntoView({
+                behavior: "smooth",
+                inline: "center",
+                block: "center",
+            });
             backBtn?.classList.remove("hidden");
         });
     });
@@ -622,7 +518,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         font-weight: 700;
     }
 
-    /* PLANETARY SYSTEM - UPGRADED TO ORBITAL SCENE */
+    /* PLANETARY SYSTEM */
     .solar-system {
         position: absolute;
         top: 0;
@@ -630,10 +526,11 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         width: 100%;
         height: 100%;
         z-index: 10;
-        overflow: hidden;
+        overflow-x: auto;
+        overflow-y: hidden;
         display: none;
         transition: opacity 1s;
-        perspective: 1200px;
+        scroll-behavior: smooth;
     }
     .solar-system.active {
         display: block;
@@ -641,58 +538,37 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     }
 
     .planets-wrapper {
-        position: relative;
-        width: 100%;
+        display: flex;
+        align-items: center;
         height: 100%;
-        transform-style: preserve-3d;
+        padding: 80px 35vw 0;
+        width: max-content;
     }
 
     .planet-container {
-        position: absolute;
-        top: 50%;
-        left: 50%;
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 450px;
+        width: 500px;
+        margin-right: 380px;
         cursor: pointer;
-        /* TRANSITIONING: Smooth glide between orbit and focus */
         transition:
+            transform 1s cubic-bezier(0.19, 1, 0.22, 1),
             opacity 0.8s,
             filter 0.8s;
-        transform-style: preserve-3d;
-        will-change: transform, opacity, z-index;
         opacity: 0;
     }
     .planet-container.visible {
         opacity: 1;
     }
-
-    /* FOCUS OVERRIDE: Reset to screen center when focused */
     .planet-container.focused {
-        z-index: 1000 !important;
-        transform: translate(-50%, -50%) scale(1.4) !important;
-        left: 50% !important;
-        top: 50% !important;
-        transition:
-            transform 1.2s cubic-bezier(0.19, 1, 0.22, 1),
-            left 1.2s cubic-bezier(0.19, 1, 0.22, 1),
-            top 1.2s cubic-bezier(0.19, 1, 0.22, 1);
-    }
-
+        transform: scale(1.3) translateY(0);
+        z-index: 180;
+    } /* Reduced scale and reset translate */
     .planet-container.dimmed {
-        opacity: 0.05;
-        filter: blur(15px);
+        opacity: 0.08;
+        filter: blur(12px);
         pointer-events: none;
-    }
-
-    .planet-container.hidden-orbital {
-        opacity: 0 !important;
-        visibility: hidden !important;
-        pointer-events: none !important;
-        transition:
-            opacity 0.5s,
-            visibility 0.5s;
     }
 
     /* Planet Visualization */
@@ -700,7 +576,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         position: relative;
         width: var(--planet-size);
         height: var(--planet-size);
-        margin-bottom: 40px;
+        margin-bottom: 60px;
         transform-style: preserve-3d;
     }
     .planet-glow {
