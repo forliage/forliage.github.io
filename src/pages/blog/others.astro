@@ -97,7 +97,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     <Header />
 
     <main class="universe-container">
-        <!-- Back Button - Adjusted Positioning -->
+        <!-- Back Button Fixed -->
         <a href="/blog" class="back-link">
             <span class="back-icon">←</span>
             <span class="back-text">Back to Blog</span>
@@ -109,7 +109,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
             <div class="galaxy-glow-center"></div>
         </div>
 
-        <!-- Search UI - Adjusted Z-Index and Spacing -->
+        <!-- Search UI -->
         <div id="search-container" class="search-container hidden">
             <div class="search-box">
                 <input
@@ -130,7 +130,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
             </div>
         </div>
 
-        <!-- Solar System Scroll - Pushed down to avoid Search Bar -->
+        <!-- Solar System Scroll -->
         <div id="solar-system" class="solar-system">
             <div class="planets-wrapper" id="planets-wrapper">
                 {
@@ -178,7 +178,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
             </div>
         </div>
 
-        <!-- Entrance UI - Smaller Text, Bigger Galaxy -->
+        <!-- Entrance UI -->
         <div id="entrance-screen" class="entrance-screen">
             <h1 class="galaxy-title">Explore <br /> The Cosmos</h1>
             <button id="enter-btn" class="enter-button">START JOURNEY</button>
@@ -191,7 +191,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
 </Layout>
 
 <script>
-    /* --- Phase 7: Ultra-Dense Star Field (20k Stars) --- */
+    /* --- Phase 6: Ultra-Dense & Vibrant Galaxy --- */
     const canvas = document.getElementById(
         "galaxy-canvas",
     ) as HTMLCanvasElement;
@@ -210,38 +210,38 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     function initGalaxy(density = 1.0) {
         if (!width) return;
         particles = [];
-        const maxRadius = Math.sqrt(width ** 2 + height ** 2) * 1.8;
-        // 20,000 Stars for maximum richness
-        const count = 20000 * density;
+        const maxRadius = Math.sqrt(width ** 2 + height ** 2) * 1.5;
+        // Increased Star Count for Phase 6
+        const count = 9000 * density;
 
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
-            // Use pow(x, 1.8) to concentrate stars more at the center core
-            const distance = Math.pow(Math.random(), 1.8) * maxRadius;
+            const distance = Math.pow(Math.random(), 1.3) * maxRadius;
 
+            // Richer Color Pools
             const rand = Math.random();
             let colorPool = [
                 "255, 255, 255",
-                "180, 220, 255",
-                "255, 200, 220",
-                "220, 255, 180",
-                "230, 200, 255",
-                "255, 230, 180",
+                "150, 200, 255",
+                "255, 180, 200",
+                "200, 255, 150",
+                "220, 180, 255",
+                "255, 220, 150",
             ];
             let baseColor =
                 colorPool[Math.floor(Math.random() * colorPool.length)];
 
-            // Soften core stars to keep them from being too bright
-            const opacityMod = distance < maxRadius * 0.15 ? 0.25 : 0.8;
+            // Particles closer to center are slightly brighter but smaller
+            const opacityMod = distance < maxRadius * 0.2 ? 0.3 : 1.0;
 
             particles.push({
                 angle: angle,
                 radius: distance,
                 speed:
-                    (0.00005 + Math.random() * 0.00012) /
-                    (distance * 0.0004 + 0.1),
-                size: Math.random() * 1.8,
-                opacity: (Math.random() * 0.6 + 0.1) * opacityMod,
+                    (0.00008 + Math.random() * 0.00015) /
+                    (distance * 0.0003 + 0.1),
+                size: Math.random() * 2.2,
+                opacity: (Math.random() * 0.7 + 0.1) * opacityMod,
                 color: `rgba(${baseColor},`,
             });
         }
@@ -254,9 +254,9 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
 
         ctx.save();
         ctx.translate(width / 2, height / 2);
-        // Tilted Elliptical Disk
-        ctx.scale(1.5, 0.6);
-        ctx.rotate(0.35);
+        // Elliptical & Tilted
+        ctx.scale(1.4, 0.65);
+        ctx.rotate(0.3);
 
         particles.forEach((p) => {
             p.angle += p.speed;
@@ -293,6 +293,9 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     function startJourney() {
         if (!entranceScreen || !solarSystem || !searchContainer) return;
         entranceScreen.style.opacity = "0";
+        // Expand galaxy logic scale subtly
+        initGalaxy(1.5);
+
         setTimeout(() => {
             entranceScreen.style.display = "none";
             solarSystem.classList.add("active");
@@ -335,7 +338,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
                 (p as HTMLElement).style.opacity = "0";
                 setTimeout(
                     () => ((p as HTMLElement).style.display = "none"),
-                    400,
+                    500,
                 );
             }
         });
@@ -393,12 +396,12 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         color: #fff;
     }
 
-    /* BACK LINK Positioning Fix */
+    /* BACK BUTTON */
     .back-link {
         position: fixed;
-        top: 40px;
-        left: 40px;
-        z-index: 300;
+        top: 25px;
+        left: 25px;
+        z-index: 200;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -406,19 +409,18 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         color: rgba(255, 255, 255, 0.7);
         font-weight: 500;
         font-size: 0.95rem;
-        padding: 10px 20px;
-        border-radius: 25px;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(15px);
+        padding: 8px 16px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     .back-link:hover {
         color: #fff;
-        background: rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.15);
         transform: translateX(-5px) scale(1.05);
-        border-color: rgba(255, 255, 255, 0.4);
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
     }
 
     #galaxy-wrapper {
@@ -439,57 +441,57 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 70vw;
-        height: 40vh;
-        transform: translate(-50%, -50%) rotate(0.35rad);
+        width: 60vw;
+        height: 30vh;
+        transform: translate(-50%, -50%) rotate(0.3rad);
         background: radial-gradient(
             ellipse,
-            rgba(120, 160, 255, 0.28) 0%,
-            rgba(220, 120, 255, 0.18) 40%,
-            transparent 75%
+            rgba(100, 150, 255, 0.25) 0%,
+            rgba(200, 100, 255, 0.15) 30%,
+            transparent 70%
         );
         pointer-events: none;
-        filter: blur(80px);
-        opacity: 0.85;
+        filter: blur(60px);
+        opacity: 0.8;
     }
 
-    /* SEARCH UI - Spacing Adjustment */
+    /* SEARCH UI */
     .search-container {
         position: fixed;
-        top: 50px;
+        top: 90px;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 200;
+        z-index: 110;
         width: 90%;
-        max-width: 650px;
-        transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+        max-width: 600px;
+        transition: all 0.5s ease;
     }
     .search-container.hidden {
         opacity: 0;
-        transform: translate(-50%, -60px);
+        transform: translate(-50%, -40px);
         pointer-events: none;
     }
 
     .search-box {
-        background: rgba(8, 8, 16, 0.55);
-        backdrop-filter: blur(35px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 28px;
-        padding: 20px;
+        background: rgba(10, 10, 20, 0.4);
+        backdrop-filter: blur(30px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 24px;
+        padding: 18px;
         box-shadow:
-            0 25px 50px rgba(0, 0, 0, 0.7),
-            0 0 30px rgba(100, 200, 255, 0.15);
+            0 20px 40px rgba(0, 0, 0, 0.6),
+            0 0 20px rgba(100, 200, 255, 0.1);
     }
 
     #course-search {
         width: 100%;
         background: transparent;
         border: none;
-        border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
         color: #fff;
-        font-size: 1.15rem;
+        font-size: 1.1rem;
         padding: 12px;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
         outline: none;
         transition: border-color 0.3s;
     }
@@ -499,15 +501,15 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
 
     .tag-filters {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         flex-wrap: wrap;
     }
     .tag-btn {
-        background: rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.06);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #ddd;
-        padding: 6px 20px;
-        border-radius: 20px;
+        color: #ccc;
+        padding: 6px 18px;
+        border-radius: 18px;
         cursor: pointer;
         font-size: 0.85rem;
         transition: all 0.3s;
@@ -516,11 +518,10 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     .tag-btn.active {
         background: #fff;
         color: #000;
-        font-weight: 800;
-        transform: translateY(-2px);
+        font-weight: bold;
     }
 
-    /* PLANETARY SYSTEM - Spacing to avoid Search Bar */
+    /* PLANETARY SYSTEM */
     .solar-system {
         position: absolute;
         top: 0;
@@ -543,7 +544,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         display: flex;
         align-items: center;
         height: 100%;
-        padding: 10vh 40vw 0 40vw; /* Padding top to push planets down */
+        padding: 0 35vw;
         width: max-content;
     }
 
@@ -551,8 +552,8 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 550px;
-        margin-right: 350px;
+        width: 500px;
+        margin-right: 300px;
         cursor: pointer;
         transition:
             transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -564,36 +565,36 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         opacity: 1;
     }
     .planet-container.focused {
-        transform: scale(1.4) translateY(-30px);
-        z-index: 180;
+        transform: scale(1.4) translateY(-20px);
+        z-index: 150;
     }
     .planet-container.dimmed {
-        opacity: 0.12;
-        filter: blur(10px) grayscale(0.9);
+        opacity: 0.15;
+        filter: blur(8px) grayscale(0.8);
         pointer-events: none;
     }
 
-    /* PLANET Visuals & AXIS Fix */
+    /* ROUGH TEXTURES & GLOW (Phase 6) */
     .planet-visual {
         position: relative;
         width: var(--planet-size);
         height: var(--planet-size);
-        margin-bottom: 70px;
+        margin-bottom: 60px;
         transform-style: preserve-3d;
     }
     .planet-glow {
         position: absolute;
-        top: -35%;
-        left: -35%;
-        width: 170%;
-        height: 170%;
+        top: -30%;
+        left: -30%;
+        width: 160%;
+        height: 160%;
         background: radial-gradient(
             circle,
             var(--planet-color) 0%,
             transparent 70%
         );
-        opacity: 0.55;
-        filter: blur(25px);
+        opacity: 0.5;
+        filter: blur(20px);
         pointer-events: none;
     }
 
@@ -602,9 +603,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         height: 100%;
         position: relative;
         transform-style: preserve-3d;
-        /* AXIS Fix: Tilt to be Perpendicular to the Rings (rotateX 75deg) */
-        /* Planet should be tilted so its 'poles' face up/down relative to ring plane */
-        transform: rotateX(15deg) rotateZ(5deg);
+        transform: rotateX(20deg) rotateZ(10deg);
     }
 
     .planet-surface {
@@ -614,65 +613,66 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         background: var(--planet-color);
         overflow: hidden;
         box-shadow:
-            inset -45px -45px 90px rgba(0, 0, 0, 0.9),
-            inset 25px 25px 55px rgba(255, 255, 255, 0.4),
-            0 0 60px var(--planet-color);
-        position: relative;
+            inset -40px -40px 80px rgba(0, 0, 0, 0.9),
+            inset 20px 20px 50px rgba(255, 255, 255, 0.4),
+            0 0 50px var(--planet-color);
+        /* Adding Rough Texture Overlay */
+        &::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.15;
+            mix-blend-mode: overlay;
+            pointer-events: none;
+        }
     }
 
-    /* Bounding Box FIX: Ensure pseudo-element follows border radius and overflow hidden */
-    .planet-surface::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-        opacity: 0.18;
-        mix-blend-mode: overlay;
-        pointer-events: none;
-    }
-
-    /* AXIS Alignment: Textures should move vertically (pole to pole) relative to tilt */
     .planet-surface.striped {
         background: repeating-linear-gradient(
             0deg,
             var(--planet-color),
-            var(--planet-color) 30px,
-            var(--secondary-color) 30px,
-            var(--secondary-color) 55px
+            var(--planet-color) 25px,
+            var(--secondary-color) 25px,
+            var(--secondary-color) 45px
         );
         background-size: 100% 200%;
         animation: surfaceSpin var(--orbit-speed) linear infinite;
     }
     .planet-surface.gaseous {
         background: linear-gradient(
-            180deg,
-            var(--planet-color) 15%,
-            var(--secondary-color) 35%,
-            var(--planet-color) 55%,
-            var(--secondary-color) 85%
+            135deg,
+            var(--planet-color) 20%,
+            var(--secondary-color) 40%,
+            var(--planet-color) 60%,
+            var(--secondary-color) 80%
         );
-        background-size: 100% 400%;
-        animation: surfaceSpin 12s linear infinite;
+        background-size: 400% 400%;
+        animation: gasFlow 10s ease infinite;
     }
     .planet-surface.cratered {
         background:
             radial-gradient(
-                circle at 40% 40%,
-                var(--secondary-color) 12%,
+                circle at 30% 30%,
+                var(--secondary-color) 10%,
+                transparent 20%
+            ),
+            radial-gradient(
+                circle at 70% 60%,
+                var(--secondary-color) 15%,
                 transparent 25%
             ),
             radial-gradient(
-                circle at 60% 70%,
-                var(--secondary-color) 18%,
-                transparent 30%
+                circle at 10% 80%,
+                var(--secondary-color) 8%,
+                transparent 15%
             ),
             var(--planet-color);
-        background-size: 200% 200%;
-        animation: surfaceSpin 35s linear infinite reverse;
+        background-size: 200% 100%;
+        animation: surfaceSpin 30s linear infinite reverse;
     }
 
     @keyframes surfaceSpin {
@@ -683,6 +683,17 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
             background-position: 0% 200%;
         }
     }
+    @keyframes gasFlow {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
 
     .planet-shadow {
         position: absolute;
@@ -691,22 +702,21 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         width: 100%;
         height: 100%;
         background: radial-gradient(
-            circle at 85% 15%,
-            transparent 15%,
-            rgba(0, 0, 0, 0.9) 95%
+            circle at 80% 20%,
+            transparent 20%,
+            rgba(0, 0, 0, 0.85) 90%
         );
         border-radius: 50%;
         pointer-events: none;
-        z-index: 5;
     }
 
-    /* SATURN RINGS */
+    /* DETAILED SATURN RINGS */
     .planet-rings {
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 230%;
-        height: 230%;
+        width: 220%;
+        height: 220%;
         transform: translate(-50%, -50%) rotateX(75deg) rotateY(5deg);
         pointer-events: none;
         transform-style: preserve-3d;
@@ -724,39 +734,95 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     .ring-inner {
         width: 100%;
         height: 100%;
-        border-width: 25px;
+        border-width: 20px;
         border-color: var(--ring-color);
-        opacity: 0.65;
+        opacity: 0.6;
     }
     .ring-outer {
-        width: 135%;
-        height: 135%;
-        border-width: 15px;
+        width: 130%;
+        height: 130%;
+        border-width: 12px;
         border-color: var(--ring-color);
-        opacity: 0.35;
+        opacity: 0.3;
     }
+    /* "Grooved" Detail with record-like texture */
     .ring-detail {
-        width: 118%;
-        height: 118%;
-        border-width: 50px;
+        width: 115%;
+        height: 115%;
+        border-width: 40px;
         border-color: transparent;
         background: repeating-conic-gradient(
             from 0deg,
             transparent 0,
-            transparent 0.8deg,
-            rgba(255, 255, 255, 0.12) 0.8deg,
-            rgba(255, 255, 255, 0.12) 1.6deg
+            transparent 1deg,
+            rgba(255, 255, 255, 0.1) 1deg,
+            rgba(255, 255, 255, 0.1) 2deg
         );
         -webkit-mask-image: radial-gradient(
             circle,
-            transparent 42%,
-            #000 43%,
-            #000 54%,
-            transparent 55%
+            transparent 40%,
+            #000 41%,
+            #000 55%,
+            transparent 56%
         );
     }
 
-    /* GALAXY ENTRANCE - Massive scale, Tiny text */
+    /* INFO CARD */
+    .planet-info {
+        background: rgba(15, 15, 25, 0.4);
+        backdrop-filter: blur(25px);
+        border-radius: 20px;
+        padding: 28px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: center;
+        width: 100%;
+        max-width: 380px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        transform: translateY(30px);
+        opacity: 0;
+        transition: all 0.5s ease;
+    }
+    .planet-container:hover .planet-info,
+    .planet-container.focused .planet-info {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .planet-title {
+        font-size: 1.6rem;
+        color: var(--planet-color);
+        margin-bottom: 12px;
+        font-weight: 800;
+        text-shadow: 0 0 20px var(--planet-color);
+    }
+    .planet-intro {
+        color: #ddd;
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 25px;
+    }
+
+    .visit-btn {
+        display: inline-block;
+        padding: 14px 34px;
+        border: 2.5px solid var(--planet-color);
+        color: var(--planet-color);
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 900;
+        font-size: 0.95rem;
+        letter-spacing: 3px;
+        transition: all 0.4s;
+        background: rgba(0, 0, 0, 0.3);
+    }
+    .visit-btn:hover {
+        background: var(--planet-color);
+        color: #000;
+        box-shadow: 0 0 40px var(--planet-color);
+        transform: translateY(-3px);
+    }
+
+    /* ENTRANCE */
     .entrance-screen {
         position: absolute;
         top: 0;
@@ -771,94 +837,36 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         transition: opacity 1s cubic-bezier(0.19, 1, 0.22, 1);
     }
     .galaxy-title {
-        font-size: 4.5rem; /* Shrunk title to make Galaxy feel bigger */
+        font-size: 7.5rem;
         text-transform: uppercase;
-        font-weight: 900;
-        letter-spacing: 20px;
+        font-weight: 950;
+        letter-spacing: 25px;
         text-align: center;
-        margin-bottom: 50px;
-        line-height: 1.2;
-        background: linear-gradient(
-            to bottom,
-            #fff 40%,
-            rgba(255, 255, 255, 0.5) 100%
-        );
+        margin-bottom: 60px;
+        line-height: 1.1;
+        background: linear-gradient(to bottom, #fff 30%, #999 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+        filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.4));
     }
     .enter-button {
-        padding: 22px 70px;
-        font-size: 1.2rem;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1.5px solid rgba(255, 255, 255, 0.5);
+        padding: 24px 80px;
+        font-size: 1.3rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(255, 255, 255, 0.6);
         color: #fff;
         border-radius: 100px;
         cursor: pointer;
-        letter-spacing: 6px;
+        letter-spacing: 8px;
         transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-        backdrop-filter: blur(12px);
+        backdrop-filter: blur(10px);
     }
     .enter-button:hover {
         background: #fff;
         color: #000;
-        box-shadow: 0 0 45px #fff;
-        transform: scale(1.08) translateY(-4px);
-    }
-
-    .planet-info {
-        background: rgba(12, 12, 22, 0.5);
-        backdrop-filter: blur(30px);
-        border-radius: 22px;
-        padding: 30px;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        text-align: center;
-        width: 100%;
-        max-width: 400px;
-        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
-        transform: translateY(40px);
-        opacity: 0;
-        transition: all 0.6s ease;
-        z-index: 10;
-    }
-    .planet-container:hover .planet-info,
-    .planet-container.focused .planet-info {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    .planet-title {
-        font-size: 1.7rem;
-        color: var(--planet-color);
-        margin-bottom: 15px;
-        font-weight: 900;
-        text-shadow: 0 0 25px var(--planet-color);
-    }
-    .planet-intro {
-        color: #eee;
-        font-size: 1.05rem;
-        line-height: 1.6;
-        margin-bottom: 30px;
-    }
-
-    .visit-btn {
-        display: inline-block;
-        padding: 15px 38px;
-        border: 3px solid var(--planet-color);
-        color: var(--planet-color);
-        text-decoration: none;
-        border-radius: 14px;
-        font-weight: 900;
-        font-size: 1rem;
-        letter-spacing: 4px;
-        transition: all 0.4s;
-        background: rgba(0, 0, 0, 0.4);
-    }
-    .visit-btn:hover {
-        background: var(--planet-color);
-        color: #000;
-        box-shadow: 0 0 50px var(--planet-color);
-        transform: scale(1.05) translateY(-2px);
+        box-shadow: 0 0 60px #fff;
+        transform: scale(1.1) translateY(-5px);
+        font-weight: bold;
     }
 
     .back-to-galaxy {
@@ -866,23 +874,22 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         bottom: 50px;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 250;
-        background: rgba(0, 0, 0, 0.6);
-        border: 2px solid #fff;
+        z-index: 200;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1.5px solid #fff;
         color: #fff;
-        padding: 14px 45px;
-        border-radius: 45px;
+        padding: 12px 40px;
+        border-radius: 40px;
         cursor: pointer;
-        backdrop-filter: blur(20px);
-        font-weight: 800;
-        letter-spacing: 3px;
+        backdrop-filter: blur(15px);
+        font-weight: 700;
+        letter-spacing: 2px;
         transition: all 0.3s;
     }
     .back-to-galaxy:hover {
         background: #fff;
         color: #000;
-        box-shadow: 0 0 40px #fff;
-        transform: scale(1.05);
+        box-shadow: 0 0 30px #fff;
     }
     .back-to-galaxy.hidden {
         display: none;
@@ -890,21 +897,15 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
 
     @media (max-width: 768px) {
         .galaxy-title {
-            font-size: 2.8rem;
-            letter-spacing: 8px;
+            font-size: 3.5rem;
+            letter-spacing: 12px;
         }
         .planets-wrapper {
-            padding: 5vh 5vw;
+            padding: 0 10vw;
         }
         .planet-container {
             width: 90vw;
-            margin-right: 40px;
-        }
-        .back-link {
-            top: 20px;
-            left: 20px;
-            padding: 6px 14px;
-            font-size: 0.85rem;
+            margin-right: 50px;
         }
     }
 </style>
