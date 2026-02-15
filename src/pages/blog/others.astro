@@ -384,7 +384,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     :root {
         --space-bg: #010103;
         --accent-glow: rgba(100, 150, 255, 0.25);
-        /* AXIS ALIGNMENT: Planet rotation axis perpendicular to ring plane */
+        /* AXIS ALIGNMENT: Tilted perpendicular to rings (Phase 9 preferred) */
         --tilt-x: 20deg;
         --tilt-z: 10deg;
         --ring-tilt: 75deg;
@@ -632,25 +632,34 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     }
 
     .planet-surface.striped {
-        background: repeating-linear-gradient(
-            0deg,
-            var(--planet-color),
-            var(--planet-color) 30px,
-            var(--secondary-color) 30px,
-            var(--secondary-color) 55px
-        );
-        background-size: 100% 200%;
+        background:
+            radial-gradient(
+                circle at 50% 50%,
+                rgba(255, 255, 255, 0.05) 0%,
+                transparent 80%
+            ),
+            repeating-linear-gradient(
+                0.5deg,
+                var(--planet-color),
+                var(--planet-color) 30px,
+                var(--secondary-color) 30px,
+                var(--secondary-color) 55px
+            );
+        background-size: 200% 100%;
         animation: surfaceSpin var(--orbit-speed) linear infinite;
     }
     .planet-surface.gaseous {
+        /* Lane direction 175deg is roughly "horizontal" but allows X movement visibility */
         background: linear-gradient(
-            180deg,
+            175deg,
             var(--planet-color) 0%,
-            var(--secondary-color) 50%,
+            var(--secondary-color) 25%,
+            var(--planet-color) 50%,
+            var(--secondary-color) 75%,
             var(--planet-color) 100%
         );
-        background-size: 100% 300%;
-        animation: surfaceSpin 15s ease infinite alternate;
+        background-size: 250% 100%;
+        animation: surfaceSpin 15s linear infinite;
     }
     .planet-surface.cratered {
         background:
@@ -664,6 +673,11 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
                 var(--secondary-color) 18%,
                 transparent 30%
             ),
+            radial-gradient(
+                circle at 10% 50%,
+                var(--secondary-color) 10%,
+                transparent 20%
+            ),
             var(--planet-color);
         background-size: 200% 100%;
         animation: surfaceSpin 40s linear infinite;
@@ -674,7 +688,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
             background-position: 0% 0%;
         }
         100% {
-            background-position: 0% 200%;
+            background-position: 200% 0%;
         }
     }
 
