@@ -1,0 +1,37 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import Header from "../../../components/Header.astro";
+
+export function getStaticPaths() {
+    const ids = [
+        "cmu-15-462",
+        "cmu-15-458",
+        "stanford-cs231n",
+        "ucsd-cse-272",
+        "games-101",
+        "games-202",
+    ];
+    return ids.map((id) => ({ params: { slug: id } }));
+}
+
+const { slug } = Astro.params;
+---
+
+<Layout title={`Note: ${slug}`}>
+    <Header />
+    <main
+        style="min-height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 2rem;"
+    >
+        <h1 style="font-size: 3rem; margin-bottom: 1rem; color: #f075ae;">
+            {slug}
+        </h1>
+        <p style="font-size: 1.2rem; color: #555;">
+            Lecture notes and details coming soon.
+        </p>
+        <a
+            href="/blog/others"
+            style="margin-top: 2rem; color: #5dd3b6; text-decoration: underline;"
+            >Return to Galaxy</a
+        >
+    </main>
+</Layout>
