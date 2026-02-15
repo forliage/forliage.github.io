@@ -97,7 +97,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     <Header />
 
     <main class="universe-container">
-        <!-- Back Button Fixed -->
+        <!-- Back Button - Adjusted Position -->
         <a href="/blog" class="back-link">
             <span class="back-icon">←</span>
             <span class="back-text">Back to Blog</span>
@@ -178,7 +178,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
             </div>
         </div>
 
-        <!-- Entrance UI -->
+        <!-- Entrance UI - Smaller Title -->
         <div id="entrance-screen" class="entrance-screen">
             <h1 class="galaxy-title">Explore <br /> The Cosmos</h1>
             <button id="enter-btn" class="enter-button">START JOURNEY</button>
@@ -191,7 +191,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
 </Layout>
 
 <script>
-    /* --- Phase 6: Ultra-Dense & Vibrant Galaxy --- */
+    /* --- Phase 7: Ultra-Dense Galaxy (22k Stars) --- */
     const canvas = document.getElementById(
         "galaxy-canvas",
     ) as HTMLCanvasElement;
@@ -210,38 +210,37 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     function initGalaxy(density = 1.0) {
         if (!width) return;
         particles = [];
-        const maxRadius = Math.sqrt(width ** 2 + height ** 2) * 1.5;
-        // Increased Star Count for Phase 6
-        const count = 9000 * density;
+        const maxRadius = Math.sqrt(width ** 2 + height ** 2) * 1.8;
+        // 22k Stars
+        const count = 22000 * density;
 
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const distance = Math.pow(Math.random(), 1.3) * maxRadius;
+            const distance = Math.pow(Math.random(), 1.4) * maxRadius;
 
-            // Richer Color Pools
-            const rand = Math.random();
             let colorPool = [
                 "255, 255, 255",
-                "150, 200, 255",
-                "255, 180, 200",
-                "200, 255, 150",
-                "220, 180, 255",
-                "255, 220, 150",
+                "180, 220, 255",
+                "255, 200, 220",
+                "220, 255, 180",
+                "230, 200, 255",
+                "255, 230, 180",
             ];
             let baseColor =
                 colorPool[Math.floor(Math.random() * colorPool.length)];
 
-            // Particles closer to center are slightly brighter but smaller
-            const opacityMod = distance < maxRadius * 0.2 ? 0.3 : 1.0;
+            // Soften central stars significantly to keep title readable
+            const isCore = distance < maxRadius * 0.12;
+            const opacityMod = isCore ? 0.15 : 0.7;
 
             particles.push({
                 angle: angle,
                 radius: distance,
                 speed:
-                    (0.00008 + Math.random() * 0.00015) /
+                    (0.00004 + Math.random() * 0.0001) /
                     (distance * 0.0003 + 0.1),
-                size: Math.random() * 2.2,
-                opacity: (Math.random() * 0.7 + 0.1) * opacityMod,
+                size: isCore ? Math.random() * 1.5 : Math.random() * 2.2,
+                opacity: Math.random() * opacityMod * 0.8 + 0.1,
                 color: `rgba(${baseColor},`,
             });
         }
@@ -254,8 +253,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
 
         ctx.save();
         ctx.translate(width / 2, height / 2);
-        // Elliptical & Tilted
-        ctx.scale(1.4, 0.65);
+        ctx.scale(1.4, 0.4); // Flat cinematic ellipse
         ctx.rotate(0.3);
 
         particles.forEach((p) => {
@@ -293,9 +291,6 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     function startJourney() {
         if (!entranceScreen || !solarSystem || !searchContainer) return;
         entranceScreen.style.opacity = "0";
-        // Expand galaxy logic scale subtly
-        initGalaxy(1.5);
-
         setTimeout(() => {
             entranceScreen.style.display = "none";
             solarSystem.classList.add("active");
@@ -365,6 +360,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
                 if (p !== planet) p.classList.add("dimmed");
             });
 
+            // Ensure centered planet is lowered slightly for visual balance
             planet.scrollIntoView({
                 behavior: "smooth",
                 inline: "center",
@@ -396,31 +392,31 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         color: #fff;
     }
 
-    /* BACK BUTTON */
+    /* BACK LINK - Repositioned away from edge */
     .back-link {
         position: fixed;
-        top: 25px;
-        left: 25px;
-        z-index: 200;
+        top: 35px;
+        left: 35px;
+        z-index: 300;
         display: flex;
         align-items: center;
         gap: 10px;
         text-decoration: none;
         color: rgba(255, 255, 255, 0.7);
         font-weight: 500;
-        font-size: 0.95rem;
-        padding: 8px 16px;
-        border-radius: 20px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        font-size: 1rem;
+        padding: 10px 22px;
+        border-radius: 40px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(25px);
+        transition: all 0.4s ease;
     }
     .back-link:hover {
         color: #fff;
         background: rgba(255, 255, 255, 0.15);
-        transform: translateX(-5px) scale(1.05);
-        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateX(5px);
+        border-color: rgba(255, 255, 255, 0.4);
     }
 
     #galaxy-wrapper {
@@ -441,46 +437,44 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 60vw;
-        height: 30vh;
-        transform: translate(-50%, -50%) rotate(0.3rad);
+        width: 70vw;
+        height: 35vh;
+        transform: translate(-50%, -50%) rotate(0.4rad);
         background: radial-gradient(
             ellipse,
-            rgba(100, 150, 255, 0.25) 0%,
-            rgba(200, 100, 255, 0.15) 30%,
-            transparent 70%
+            rgba(120, 180, 255, 0.2) 0%,
+            rgba(220, 120, 255, 0.1) 40%,
+            transparent 80%
         );
         pointer-events: none;
-        filter: blur(60px);
+        filter: blur(100px);
         opacity: 0.8;
     }
 
-    /* SEARCH UI */
+    /* SEARCH UI - Clean Spacing */
     .search-container {
         position: fixed;
-        top: 90px;
+        top: 35px;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 110;
+        z-index: 250;
         width: 90%;
-        max-width: 600px;
-        transition: all 0.5s ease;
+        max-width: 500px;
+        transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
     }
     .search-container.hidden {
         opacity: 0;
-        transform: translate(-50%, -40px);
+        transform: translate(-50%, -60px);
         pointer-events: none;
     }
 
     .search-box {
-        background: rgba(10, 10, 20, 0.4);
-        backdrop-filter: blur(30px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 24px;
-        padding: 18px;
-        box-shadow:
-            0 20px 40px rgba(0, 0, 0, 0.6),
-            0 0 20px rgba(100, 200, 255, 0.1);
+        background: rgba(10, 10, 25, 0.6);
+        backdrop-filter: blur(35px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        padding: 14px;
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8);
     }
 
     #course-search {
@@ -489,29 +483,25 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         border: none;
         border-bottom: 2px solid rgba(255, 255, 255, 0.1);
         color: #fff;
-        font-size: 1.1rem;
-        padding: 12px;
-        margin-bottom: 12px;
+        font-size: 1rem;
+        padding: 10px;
+        margin-bottom: 8px;
         outline: none;
-        transition: border-color 0.3s;
-    }
-    #course-search:focus {
-        border-color: #fff;
     }
 
     .tag-filters {
         display: flex;
-        gap: 8px;
+        gap: 6px;
         flex-wrap: wrap;
     }
     .tag-btn {
-        background: rgba(255, 255, 255, 0.06);
+        background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #ccc;
-        padding: 6px 18px;
-        border-radius: 18px;
+        color: #bbb;
+        padding: 4px 12px;
+        border-radius: 10px;
         cursor: pointer;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         transition: all 0.3s;
     }
     .tag-btn:hover,
@@ -519,9 +509,10 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         background: #fff;
         color: #000;
         font-weight: bold;
+        border-color: #fff;
     }
 
-    /* PLANETARY SYSTEM */
+    /* PLANETARY SYSTEM - Padding-Top to avoid search bar occlusion */
     .solar-system {
         position: absolute;
         top: 0;
@@ -544,8 +535,8 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         display: flex;
         align-items: center;
         height: 100%;
-        padding: 0 35vw;
-        width: max-content;
+        padding: 12vh 40vw 0 40vw;
+        width: max-content; /* 12vh cushion for search bar */
     }
 
     .planet-container {
@@ -553,28 +544,27 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         flex-direction: column;
         align-items: center;
         width: 500px;
-        margin-right: 300px;
+        margin-right: 400px;
         cursor: pointer;
         transition:
-            transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
-            opacity 0.6s,
-            filter 0.6s;
+            transform 1s cubic-bezier(0.19, 1, 0.22, 1),
+            opacity 0.6s;
         opacity: 0;
     }
     .planet-container.visible {
         opacity: 1;
     }
     .planet-container.focused {
-        transform: scale(1.4) translateY(-20px);
+        transform: scale(1.3) translateY(30px);
         z-index: 150;
     }
     .planet-container.dimmed {
-        opacity: 0.15;
-        filter: blur(8px) grayscale(0.8);
+        opacity: 0.08;
+        filter: blur(12px) grayscale(1);
         pointer-events: none;
     }
 
-    /* ROUGH TEXTURES & GLOW (Phase 6) */
+    /* PLANET VISUALS - ROTATION AXIS & BOUNDING BOX FIX */
     .planet-visual {
         position: relative;
         width: var(--planet-size);
@@ -593,8 +583,8 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
             var(--planet-color) 0%,
             transparent 70%
         );
-        opacity: 0.5;
-        filter: blur(20px);
+        opacity: 0.4;
+        filter: blur(30px);
         pointer-events: none;
     }
 
@@ -603,7 +593,8 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         height: 100%;
         position: relative;
         transform-style: preserve-3d;
-        transform: rotateX(20deg) rotateZ(10deg);
+        /* Tilt so spinning axis is perpendicular to rotateX(75deg) rings */
+        transform: rotateX(15deg) rotateY(15deg);
     }
 
     .planet-surface {
@@ -611,87 +602,73 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         height: 100%;
         border-radius: 50%;
         background: var(--planet-color);
-        overflow: hidden;
+        position: relative;
+        overflow: hidden; /* Clicks boundary box artifacts */
         box-shadow:
-            inset -40px -40px 80px rgba(0, 0, 0, 0.9),
-            inset 20px 20px 50px rgba(255, 255, 255, 0.4),
-            0 0 50px var(--planet-color);
-        /* Adding Rough Texture Overlay */
+            inset -45px -45px 90px rgba(0, 0, 0, 0.95),
+            inset 25px 25px 60px rgba(255, 255, 255, 0.45);
+
+        /* NOISE FIXED: Border radius 50% on pseudo-element + overflow hidden above */
         &::after {
             content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-            opacity: 0.15;
+            top: -10%;
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.18;
             mix-blend-mode: overlay;
-            pointer-events: none;
+            border-radius: 50%;
         }
     }
 
+    /* SURFACE ANIMATIONS - Spinning across the tilted equator */
     .planet-surface.striped {
         background: repeating-linear-gradient(
-            0deg,
+            90deg,
             var(--planet-color),
-            var(--planet-color) 25px,
-            var(--secondary-color) 25px,
-            var(--secondary-color) 45px
+            var(--planet-color) 35px,
+            var(--secondary-color) 35px,
+            var(--secondary-color) 65px
         );
-        background-size: 100% 200%;
+        background-size: 200% 100%;
         animation: surfaceSpin var(--orbit-speed) linear infinite;
     }
     .planet-surface.gaseous {
         background: linear-gradient(
-            135deg,
-            var(--planet-color) 20%,
-            var(--secondary-color) 40%,
-            var(--planet-color) 60%,
-            var(--secondary-color) 80%
+            90deg,
+            var(--planet-color),
+            var(--secondary-color),
+            var(--planet-color)
         );
-        background-size: 400% 400%;
-        animation: gasFlow 10s ease infinite;
+        background-size: 200% 100%;
+        animation: surfaceSpin 15s linear infinite;
     }
     .planet-surface.cratered {
         background:
             radial-gradient(
                 circle at 30% 30%,
-                var(--secondary-color) 10%,
-                transparent 20%
+                var(--secondary-color) 12%,
+                transparent 22%
             ),
             radial-gradient(
-                circle at 70% 60%,
-                var(--secondary-color) 15%,
-                transparent 25%
-            ),
-            radial-gradient(
-                circle at 10% 80%,
-                var(--secondary-color) 8%,
-                transparent 15%
+                circle at 70% 50%,
+                var(--secondary-color) 18%,
+                transparent 28%
             ),
             var(--planet-color);
         background-size: 200% 100%;
-        animation: surfaceSpin 30s linear infinite reverse;
+        animation: surfaceSpin 30s linear infinite;
     }
 
+    /* Scrolling X instead of Y to align with ring plane tilt */
     @keyframes surfaceSpin {
         0% {
             background-position: 0% 0%;
         }
         100% {
-            background-position: 0% 200%;
-        }
-    }
-    @keyframes gasFlow {
-        0% {
-            background-position: 0% 50%;
-        }
-        50% {
-            background-position: 100% 50%;
-        }
-        100% {
-            background-position: 0% 50%;
+            background-position: -200% 0%;
         }
     }
 
@@ -702,22 +679,22 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         width: 100%;
         height: 100%;
         background: radial-gradient(
-            circle at 80% 20%,
-            transparent 20%,
-            rgba(0, 0, 0, 0.85) 90%
+            circle at 10% 15%,
+            transparent 15%,
+            rgba(0, 0, 0, 0.95) 100%
         );
         border-radius: 50%;
         pointer-events: none;
     }
 
-    /* DETAILED SATURN RINGS */
+    /* RINGS */
     .planet-rings {
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 220%;
-        height: 220%;
-        transform: translate(-50%, -50%) rotateX(75deg) rotateY(5deg);
+        width: 230%;
+        height: 230%;
+        transform: translate(-50%, -50%) rotateX(75deg);
         pointer-events: none;
         transform-style: preserve-3d;
     }
@@ -734,29 +711,28 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     .ring-inner {
         width: 100%;
         height: 100%;
-        border-width: 20px;
+        border-width: 25px;
         border-color: var(--ring-color);
-        opacity: 0.6;
+        opacity: 0.55;
     }
     .ring-outer {
-        width: 130%;
-        height: 130%;
-        border-width: 12px;
+        width: 145%;
+        height: 145%;
+        border-width: 18px;
         border-color: var(--ring-color);
-        opacity: 0.3;
+        opacity: 0.25;
     }
-    /* "Grooved" Detail with record-like texture */
     .ring-detail {
-        width: 115%;
-        height: 115%;
-        border-width: 40px;
+        width: 122%;
+        height: 122%;
+        border-width: 48px;
         border-color: transparent;
         background: repeating-conic-gradient(
             from 0deg,
             transparent 0,
-            transparent 1deg,
-            rgba(255, 255, 255, 0.1) 1deg,
-            rgba(255, 255, 255, 0.1) 2deg
+            transparent 0.5deg,
+            rgba(255, 255, 255, 0.1) 0.5deg,
+            rgba(255, 255, 255, 0.1) 1deg
         );
         -webkit-mask-image: radial-gradient(
             circle,
@@ -769,18 +745,18 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
 
     /* INFO CARD */
     .planet-info {
-        background: rgba(15, 15, 25, 0.4);
-        backdrop-filter: blur(25px);
+        background: rgba(10, 10, 25, 0.7);
+        backdrop-filter: blur(40px);
         border-radius: 20px;
-        padding: 28px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
         text-align: center;
         width: 100%;
-        max-width: 380px;
-        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
-        transform: translateY(30px);
+        max-width: 420px;
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+        transform: translateY(50px);
         opacity: 0;
-        transition: all 0.5s ease;
+        transition: all 0.6s ease;
     }
     .planet-container:hover .planet-info,
     .planet-container.focused .planet-info {
@@ -789,40 +765,37 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     }
 
     .planet-title {
-        font-size: 1.6rem;
+        font-size: 1.8rem;
         color: var(--planet-color);
-        margin-bottom: 12px;
-        font-weight: 800;
-        text-shadow: 0 0 20px var(--planet-color);
+        margin-bottom: 15px;
+        font-weight: 900;
     }
     .planet-intro {
-        color: #ddd;
+        color: #ccc;
         font-size: 1rem;
         line-height: 1.6;
-        margin-bottom: 25px;
+        margin-bottom: 30px;
     }
 
     .visit-btn {
         display: inline-block;
-        padding: 14px 34px;
+        padding: 15px 40px;
         border: 2.5px solid var(--planet-color);
         color: var(--planet-color);
         text-decoration: none;
-        border-radius: 12px;
-        font-weight: 900;
-        font-size: 0.95rem;
+        border-radius: 14px;
+        font-weight: 800;
+        font-size: 1rem;
         letter-spacing: 3px;
         transition: all 0.4s;
-        background: rgba(0, 0, 0, 0.3);
     }
     .visit-btn:hover {
         background: var(--planet-color);
         color: #000;
-        box-shadow: 0 0 40px var(--planet-color);
-        transform: translateY(-3px);
+        box-shadow: 0 0 50px var(--planet-color);
     }
 
-    /* ENTRANCE */
+    /* ENTRANCE - Cinematic smaller title */
     .entrance-screen {
         position: absolute;
         top: 0;
@@ -834,39 +807,35 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         justify-content: center;
         align-items: center;
         z-index: 100;
-        transition: opacity 1s cubic-bezier(0.19, 1, 0.22, 1);
+        transition: opacity 1.5s ease;
     }
     .galaxy-title {
-        font-size: 7.5rem;
+        font-size: 4.5rem;
         text-transform: uppercase;
-        font-weight: 950;
-        letter-spacing: 25px;
+        font-weight: 900;
+        letter-spacing: 12px;
         text-align: center;
-        margin-bottom: 60px;
+        margin-bottom: 50px;
         line-height: 1.1;
-        background: linear-gradient(to bottom, #fff 30%, #999 100%);
+        background: linear-gradient(to bottom, #fff 40%, #777 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.4));
     }
     .enter-button {
         padding: 24px 80px;
-        font-size: 1.3rem;
-        background: rgba(255, 255, 255, 0.05);
-        border: 2px solid rgba(255, 255, 255, 0.6);
+        font-size: 1.1rem;
+        background: transparent;
+        border: 2px solid rgba(255, 255, 255, 0.8);
         color: #fff;
         border-radius: 100px;
         cursor: pointer;
-        letter-spacing: 8px;
-        transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-        backdrop-filter: blur(10px);
+        letter-spacing: 6px;
+        transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
     }
     .enter-button:hover {
         background: #fff;
         color: #000;
-        box-shadow: 0 0 60px #fff;
-        transform: scale(1.1) translateY(-5px);
-        font-weight: bold;
+        box-shadow: 0 0 60px rgba(255, 255, 255, 0.6);
     }
 
     .back-to-galaxy {
@@ -874,38 +843,34 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         bottom: 50px;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 200;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1.5px solid #fff;
+        z-index: 260;
+        background: rgba(0, 0, 0, 0.8);
+        border: 2px solid #fff;
         color: #fff;
         padding: 12px 40px;
-        border-radius: 40px;
+        border-radius: 50px;
         cursor: pointer;
-        backdrop-filter: blur(15px);
-        font-weight: 700;
+        backdrop-filter: blur(25px);
+        font-weight: 800;
         letter-spacing: 2px;
-        transition: all 0.3s;
     }
     .back-to-galaxy:hover {
         background: #fff;
         color: #000;
-        box-shadow: 0 0 30px #fff;
-    }
-    .back-to-galaxy.hidden {
-        display: none;
     }
 
     @media (max-width: 768px) {
         .galaxy-title {
-            font-size: 3.5rem;
-            letter-spacing: 12px;
-        }
-        .planets-wrapper {
-            padding: 0 10vw;
+            font-size: 2.8rem;
+            letter-spacing: 6px;
         }
         .planet-container {
             width: 90vw;
-            margin-right: 50px;
+            margin-right: 40px;
+        }
+        .back-link {
+            top: 20px;
+            left: 20px;
         }
     }
 </style>
