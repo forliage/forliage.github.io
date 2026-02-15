@@ -3,7 +3,7 @@ title: "Hybrid NeRF: Bridging Explicit and Implicit Representations"
 description: "An in-depth analysis of Hybrid NeRF architectures combining the best of voxel grids and neural fields."
 pubDate: 2024-03-15
 tags: ["NeRF", "Rendering", "3D Vision"]
-heroImage: "/images/zju.png"
+heroImage: "/images/hybrid-nerf.png"
 ---
 
 **Note: All images and tables used in this article are from the original paper, and here is the [link](https://openaccess.thecvf.com/content/CVPR2024/papers/Turki_HybridNeRF_Efficient_Neural_Rendering_via_Adaptive_Volumetric_Surfaces_CVPR_2024_paper.pdf) to the original paper.**
