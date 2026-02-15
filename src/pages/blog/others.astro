@@ -11,6 +11,8 @@ interface Course {
     secondaryColor: string;
     ringColor: string;
     textureType: "striped" | "gaseous" | "cratered";
+    orbitA: number; // Semi-major axis
+    orbitB: number; // Semi-minor axis
     orbitSpeed: number;
     tags: string[];
 }
@@ -25,7 +27,9 @@ const courses: Course[] = [
         secondaryColor: "#ff9b9b",
         ringColor: "rgba(255, 107, 107, 0.4)",
         textureType: "striped",
-        orbitSpeed: 8,
+        orbitA: 600,
+        orbitB: 250,
+        orbitSpeed: 0.008,
         tags: ["Graphics", "Math"],
     },
     {
@@ -37,7 +41,9 @@ const courses: Course[] = [
         secondaryColor: "#74c0fc",
         ringColor: "rgba(77, 171, 247, 0.4)",
         textureType: "gaseous",
-        orbitSpeed: 12,
+        orbitA: 450,
+        orbitB: 180,
+        orbitSpeed: 0.012,
         tags: ["Geometry", "Math"],
     },
     {
@@ -49,7 +55,9 @@ const courses: Course[] = [
         secondaryColor: "#8ce99a",
         ringColor: "rgba(105, 219, 124, 0.4)",
         textureType: "cratered",
-        orbitSpeed: 15,
+        orbitA: 750,
+        orbitB: 320,
+        orbitSpeed: 0.005,
         tags: ["AI", "Vision"],
     },
     {
@@ -61,7 +69,9 @@ const courses: Course[] = [
         secondaryColor: "#e599f7",
         ringColor: "rgba(218, 119, 242, 0.4)",
         textureType: "gaseous",
-        orbitSpeed: 10,
+        orbitA: 350,
+        orbitB: 140,
+        orbitSpeed: 0.015,
         tags: ["Graphics", "Rendering"],
     },
     {
@@ -73,7 +83,9 @@ const courses: Course[] = [
         secondaryColor: "#ffc078",
         ringColor: "rgba(255, 169, 77, 0.4)",
         textureType: "striped",
-        orbitSpeed: 6,
+        orbitA: 850,
+        orbitB: 380,
+        orbitSpeed: 0.004,
         tags: ["Graphics", "Games"],
     },
     {
@@ -85,7 +97,9 @@ const courses: Course[] = [
         secondaryColor: "#dee2e6",
         ringColor: "rgba(173, 181, 189, 0.4)",
         textureType: "cratered",
-        orbitSpeed: 14,
+        orbitA: 520,
+        orbitB: 210,
+        orbitSpeed: 0.01,
         tags: ["Graphics", "Real-time"],
     },
 ];
@@ -97,7 +111,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     <Header />
 
     <main class="universe-container">
-        <!-- Back Link - Moved down slightly to avoid top bar -->
+        <!-- Back Link -->
         <a href="/blog" class="back-link">
             <span class="back-icon">←</span>
             <span class="back-text">Back to Blog</span>
@@ -109,7 +123,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
             <div class="galaxy-glow-center"></div>
         </div>
 
-        <!-- Search UI - Moved down and to the right -->
+        <!-- Search UI -->
         <div id="search-container" class="search-container hidden">
             <div class="search-box">
                 <input
@@ -130,25 +144,29 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
             </div>
         </div>
 
-        <!-- Solar System Scroll -->
+        <!-- Solar System Content (Absolute Orbitals) -->
         <div id="solar-system" class="solar-system">
-            <div class="planets-wrapper" id="planets-wrapper">
-                {
-                    courses.map((course) => (
-                        <div
-                            class="planet-container"
-                            id={`planet-${course.id}`}
-                            data-tags={course.tags.join(",")}
-                            style={`
-                            --planet-size: ${course.size}px;
-                            --planet-color: ${course.color};
-                            --secondary-color: ${course.secondaryColor};
-                            --ring-color: ${course.ringColor};
-                            --orbit-speed: ${course.orbitSpeed}s;
-                        `}
-                        >
-                            <div class="planet-visual">
-                                <div class="planet-glow" />
+            {
+                courses.map((course) => (
+                    <div
+                        class="planet-container"
+                        id={`planet-${course.id}`}
+                        data-id={course.id}
+                        data-tags={course.tags.join(",")}
+                        data-a={course.orbitA}
+                        data-b={course.orbitB}
+                        data-speed={course.orbitSpeed}
+                        style={`
+                        --planet-size: ${course.size}px;
+                        --planet-color: ${course.color};
+                        --secondary-color: ${course.secondaryColor};
+                        --ring-color: ${course.ringColor};
+                        --orbit-speed-val: ${course.orbitSpeed};
+                    `}
+                    >
+                        <div class="planet-visual">
+                            <div class="planet-glow" />
+                            <div class="planet-body-wrapper">
                                 <div class="planet-body">
                                     <div
                                         class={`planet-surface ${course.textureType}`}
@@ -161,21 +179,21 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="planet-info">
-                                <h2 class="planet-title">{course.title}</h2>
-                                <p class="planet-intro">{course.intro}</p>
-                                <a
-                                    href={`/blog/others/${course.id}`}
-                                    class="visit-btn"
-                                >
-                                    LAND ON PLANET
-                                </a>
-                            </div>
                         </div>
-                    ))
-                }
-            </div>
+
+                        <div class="planet-info">
+                            <h2 class="planet-title">{course.title}</h2>
+                            <p class="planet-intro">{course.intro}</p>
+                            <a
+                                href={`/blog/others/${course.id}`}
+                                class="visit-btn"
+                            >
+                                LAND ON PLANET
+                            </a>
+                        </div>
+                    </div>
+                ))
+            }
         </div>
 
         <!-- Entrance UI -->
@@ -191,15 +209,15 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
 </Layout>
 
 <script>
-    /* --- Phase 8: White Center & Balanced Brightness --- */
+    /* --- Galaxy Logic --- */
     const canvas = document.getElementById(
         "galaxy-canvas",
     ) as HTMLCanvasElement;
     const ctx = canvas.getContext("2d");
     let width = 0,
         height = 0;
-    let particles: any[] = [];
-    let animationId: number;
+    let galaxyParticles: any[] = [];
+    let galaxyAnimationId: number;
 
     function resize() {
         if (!canvas) return;
@@ -209,7 +227,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
 
     function initGalaxy(density = 1.0) {
         if (!width) return;
-        particles = [];
+        galaxyParticles = [];
         const maxRadius = Math.sqrt(width ** 2 + height ** 2) * 1.5;
         const count = 12000 * density;
 
@@ -217,7 +235,6 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
             const angle = Math.random() * Math.PI * 2;
             const distance = Math.pow(Math.random(), 2.2) * maxRadius;
 
-            // COLOR LOGIC: Pure White at center, colors outward
             let baseColor = "255, 255, 255";
             if (distance > maxRadius * 0.12) {
                 const colorPool = [
@@ -231,11 +248,10 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
                     colorPool[Math.floor(Math.random() * colorPool.length)];
             }
 
-            // Lower Brightness: Reduced opacity scale
             const radialO = 1.0 - distance / maxRadius;
             const opacity = (Math.random() * 0.45 + 0.15) * radialO;
 
-            particles.push({
+            galaxyParticles.push({
                 angle: angle,
                 radius: distance,
                 speed:
@@ -258,11 +274,10 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         ctx.scale(1.5, 0.5);
         ctx.rotate(0.25);
 
-        particles.forEach((p) => {
+        galaxyParticles.forEach((p) => {
             p.angle += p.speed;
             const x = Math.cos(p.angle) * p.radius;
             const y = Math.sin(p.angle) * p.radius;
-
             ctx.beginPath();
             ctx.fillStyle = `${p.color}${p.opacity})`;
             ctx.arc(x, y, p.size, 0, Math.PI * 2);
@@ -270,7 +285,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         });
 
         ctx.restore();
-        animationId = requestAnimationFrame(animateGalaxy);
+        galaxyAnimationId = requestAnimationFrame(animateGalaxy);
     }
 
     if (canvas) {
@@ -283,12 +298,93 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         animateGalaxy();
     }
 
-    /* --- Core Interactions --- */
+    /* --- Orbital Physics & Interactivity --- */
+    const planets = document.querySelectorAll(".planet-container");
+    const backBtn = document.getElementById("back-to-galaxy-btn");
     const enterBtn = document.getElementById("enter-btn");
     const entranceScreen = document.getElementById("entrance-screen");
     const solarSystem = document.getElementById("solar-system");
     const searchContainer = document.getElementById("search-container");
-    const backBtn = document.getElementById("back-to-galaxy-btn");
+
+    interface PlanetState {
+        el: HTMLElement;
+        a: number;
+        b: number;
+        c: number; // Focus distance
+        angle: number;
+        baseSpeed: number;
+        isFocused: boolean;
+        currentX: number;
+        currentY: number;
+    }
+
+    let planetStates: PlanetState[] = [];
+
+    function initPlanets() {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        // Base coordinate system is roughly 1920x1080
+        const scale = Math.min(vw / 1920, vh / 1080) * 0.9;
+
+        planetStates = Array.from(planets).map((el, i) => {
+            const rawA = parseFloat((el as HTMLElement).dataset.a || "500");
+            const rawB = parseFloat((el as HTMLElement).dataset.b || "200");
+            const a = rawA * scale;
+            const b = rawB * scale;
+            return {
+                el: el as HTMLElement,
+                a: a,
+                b: b,
+                c: Math.sqrt(a * a - b * b),
+                angle: (i / planets.length) * Math.PI * 2,
+                baseSpeed: parseFloat(
+                    (el as HTMLElement).dataset.speed || "0.01",
+                ),
+                isFocused: false,
+                currentX: 0,
+                currentY: 0,
+            };
+        });
+    }
+
+    function updatePhysics() {
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+
+        planetStates.forEach((state) => {
+            if (state.isFocused) {
+                state.el.style.left = `50%`;
+                state.el.style.top = `50%`;
+                state.el.style.transform = `translate(-50%, -50%) scale(1.4)`;
+                return;
+            }
+
+            // Keplerian Variable Speed: Faster at periapsis
+            const x = state.a * Math.cos(state.angle) - state.c;
+            const y = state.b * Math.sin(state.angle);
+
+            const r = Math.sqrt(x * x + y * y);
+            // v ~ 1/r simplified
+            const speedFactor = (state.a * 1.5) / (r + 150);
+            state.angle += state.baseSpeed * speedFactor;
+
+            state.currentX = centerX + x;
+            state.currentY = centerY + y;
+
+            state.el.style.left = `${state.currentX}px`;
+            state.el.style.top = `${state.currentY}px`;
+            state.el.style.transform = `translate(-50%, -50%)`;
+
+            // Axis Sync: atan2 to center, +90deg to point pole at focus
+            const angleToCenter = Math.atan2(-y, -x) * (180 / Math.PI);
+            state.el.style.setProperty(
+                "--dynamic-axis-tilt",
+                `${angleToCenter + 90}deg`,
+            );
+        });
+
+        requestAnimationFrame(updatePhysics);
+    }
 
     function startJourney() {
         if (!entranceScreen || !solarSystem || !searchContainer) return;
@@ -297,10 +393,13 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
 
         setTimeout(() => {
             entranceScreen.style.display = "none";
-            solarSystem.classList.add("active");
+            solarSystem.style.display = "block";
+            solarSystem.style.opacity = "1";
             searchContainer.classList.remove("hidden");
+            initPlanets();
+            updatePhysics();
 
-            document.querySelectorAll(".planet-container").forEach((p, i) => {
+            planets.forEach((p, i) => {
                 setTimeout(() => p.classList.add("visible"), i * 150);
             });
         }, 800);
@@ -308,12 +407,44 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
 
     enterBtn?.addEventListener("click", startJourney);
 
-    /* --- Search Logic --- */
+    /* --- Detailed Interaction --- */
+    planets.forEach((p) => {
+        p.addEventListener("click", (e) => {
+            if ((e.target as HTMLElement).closest("a")) return;
+            const id = (p as HTMLElement).dataset.id;
+            const state = planetStates.find(
+                (s) => (s.el as HTMLElement).dataset.id === id,
+            );
+
+            if (state && !state.isFocused) {
+                planetStates.forEach((s) => {
+                    s.isFocused = false;
+                    s.el.classList.remove("focused", "dimmed");
+                });
+
+                state.isFocused = true;
+                state.el.classList.add("focused");
+                planetStates.forEach((s) => {
+                    if (s !== state) s.el.classList.add("dimmed");
+                });
+                backBtn?.classList.remove("hidden");
+            }
+        });
+    });
+
+    backBtn?.addEventListener("click", () => {
+        planetStates.forEach((s) => {
+            s.isFocused = false;
+            s.el.classList.remove("focused", "dimmed");
+        });
+        backBtn.classList.add("hidden");
+    });
+
+    /* --- Search Filter --- */
     const searchInput = document.getElementById(
         "course-search",
     ) as HTMLInputElement;
     const tagBtns = document.querySelectorAll(".tag-btn");
-    const planets = document.querySelectorAll(".planet-container");
 
     function filterPlanets() {
         const query = searchInput.value.toLowerCase();
@@ -322,23 +453,21 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
                 .querySelector(".tag-btn.active")
                 ?.getAttribute("data-tag") || "all";
 
-        planets.forEach((p) => {
+        planetStates.forEach((state) => {
+            const p = state.el;
             const title =
                 p.querySelector(".planet-title")?.textContent?.toLowerCase() ||
                 "";
-            const tags = (p as HTMLElement).dataset.tags?.split(",") || [];
+            const tags = p.dataset.tags?.split(",") || [];
             const matchesQuery = title.includes(query);
             const matchesTag = activeTag === "all" || tags.includes(activeTag);
 
             if (matchesQuery && matchesTag) {
-                (p as HTMLElement).style.display = "flex";
-                setTimeout(() => ((p as HTMLElement).style.opacity = "1"), 10);
+                p.style.display = "flex";
+                setTimeout(() => (p.style.opacity = "1"), 10);
             } else {
-                (p as HTMLElement).style.opacity = "0";
-                setTimeout(
-                    () => ((p as HTMLElement).style.display = "none"),
-                    500,
-                );
+                p.style.opacity = "0";
+                setTimeout(() => (p.style.display = "none"), 500);
             }
         });
     }
@@ -351,43 +480,15 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
             filterPlanets();
         });
     });
-
-    /* --- Focus Animation --- */
-    planets.forEach((planet) => {
-        planet.addEventListener("click", (e) => {
-            if ((e.target as HTMLElement).closest("a")) return;
-            if (planet.classList.contains("focused")) return;
-
-            planets.forEach((p) => p.classList.remove("focused", "dimmed"));
-            planet.classList.add("focused");
-            planets.forEach((p) => {
-                if (p !== planet) p.classList.add("dimmed");
-            });
-
-            // Adjusted offset to prevent button cutoff
-            planet.scrollIntoView({
-                behavior: "smooth",
-                inline: "center",
-                block: "center",
-            });
-            backBtn?.classList.remove("hidden");
-        });
-    });
-
-    backBtn?.addEventListener("click", () => {
-        planets.forEach((p) => p.classList.remove("focused", "dimmed"));
-        backBtn.classList.add("hidden");
-    });
 </script>
 
 <style>
     :root {
         --space-bg: #010103;
-        --accent-glow: rgba(100, 150, 255, 0.25);
-        /* AXIS ALIGNMENT: Tilted perpendicular to rings (Phase 9 preferred) */
-        --tilt-x: 20deg;
-        --tilt-z: 10deg;
+        /** Axis Variables **/
+        --dynamic-axis-tilt: 0deg;
         --ring-tilt: 75deg;
+        --fixed-rotation-x: 15deg;
     }
 
     .universe-container {
@@ -400,19 +501,17 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         color: #fff;
     }
 
-    /* BACK BUTTON - Moved down to avoid top header overlap */
+    /* UI ELEMENTS */
     .back-link {
         position: fixed;
         top: 110px;
         left: 40px;
-        z-index: 250;
+        z-index: 300;
         display: flex;
         align-items: center;
         gap: 12px;
         text-decoration: none;
         color: rgba(255, 255, 255, 0.7);
-        font-weight: 600;
-        font-size: 0.9rem;
         padding: 8px 18px;
         border-radius: 30px;
         background: rgba(255, 255, 255, 0.06);
@@ -423,10 +522,54 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     .back-link:hover {
         color: #fff;
         background: rgba(255, 255, 255, 0.15);
-        transform: translateX(-5px);
         border-color: rgba(255, 255, 255, 0.3);
     }
 
+    .search-container {
+        position: fixed;
+        top: 110px;
+        right: 40px;
+        z-index: 300;
+        width: auto;
+        max-width: 400px;
+        transition: all 0.5s ease;
+    }
+    .search-container.hidden {
+        opacity: 0;
+        transform: translateY(-30px);
+        pointer-events: none;
+    }
+    .search-box {
+        background: rgba(10, 10, 25, 0.5);
+        backdrop-filter: blur(40px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 12px 18px;
+    }
+    #course-search {
+        width: 100%;
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        color: #fff;
+        outline: none;
+    }
+    .tag-btn {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #aaa;
+        padding: 3px 12px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        cursor: pointer;
+    }
+    .tag-btn.active {
+        background: #fff;
+        color: #000;
+        font-weight: 700;
+    }
+
+    /* GALAXY */
     #galaxy-wrapper {
         position: absolute;
         top: 0;
@@ -436,11 +579,6 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         z-index: 1;
         pointer-events: none;
     }
-    #galaxy-canvas {
-        width: 100%;
-        height: 100%;
-    }
-
     .galaxy-glow-center {
         position: absolute;
         top: 50%;
@@ -454,71 +592,11 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
             rgba(150, 200, 255, 0.1) 40%,
             transparent 75%
         );
-        pointer-events: none;
         filter: blur(100px);
         opacity: 0.8;
     }
 
-    /* SEARCH UI - Moved down to match Back Button */
-    .search-container {
-        position: fixed;
-        top: 110px;
-        right: 40px;
-        z-index: 220;
-        width: auto;
-        max-width: 400px;
-        transition: all 0.5s ease;
-    }
-    .search-container.hidden {
-        opacity: 0;
-        transform: translateY(-30px);
-        pointer-events: none;
-    }
-
-    .search-box {
-        background: rgba(10, 10, 25, 0.5);
-        backdrop-filter: blur(40px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        padding: 12px 18px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-    }
-
-    #course-search {
-        width: 100%;
-        background: transparent;
-        border: none;
-        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-        color: #fff;
-        font-size: 0.95rem;
-        padding: 6px;
-        margin-bottom: 8px;
-        outline: none;
-    }
-
-    .tag-filters {
-        display: flex;
-        gap: 5px;
-        flex-wrap: wrap;
-    }
-    .tag-btn {
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        color: #aaa;
-        padding: 3px 12px;
-        border-radius: 12px;
-        cursor: pointer;
-        font-size: 0.75rem;
-        transition: all 0.3s;
-    }
-    .tag-btn:hover,
-    .tag-btn.active {
-        background: #fff;
-        color: #000;
-        font-weight: 700;
-    }
-
-    /* PLANETARY SYSTEM */
+    /* ORBITAL SYSTEM */
     .solar-system {
         position: absolute;
         top: 0;
@@ -526,57 +604,44 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         width: 100%;
         height: 100%;
         z-index: 10;
-        overflow-x: auto;
-        overflow-y: hidden;
         display: none;
+        opacity: 0;
         transition: opacity 1s;
-        scroll-behavior: smooth;
-    }
-    .solar-system.active {
-        display: block;
-        opacity: 1;
-    }
-
-    .planets-wrapper {
-        display: flex;
-        align-items: center;
-        height: 100%;
-        padding: 80px 35vw 0;
-        width: max-content;
     }
 
     .planet-container {
+        position: absolute;
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 500px;
-        margin-right: 380px;
+        justify-content: center;
+        width: 350px;
         cursor: pointer;
         transition:
-            transform 1s cubic-bezier(0.19, 1, 0.22, 1),
             opacity 0.8s,
-            filter 0.8s;
+            filter 0.8s,
+            transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
         opacity: 0;
     }
     .planet-container.visible {
         opacity: 1;
     }
-    .planet-container.focused {
-        transform: scale(1.3) translateY(0);
-        z-index: 180;
-    } /* Reduced scale and reset translate */
     .planet-container.dimmed {
-        opacity: 0.08;
-        filter: blur(12px);
+        opacity: 0.05;
+        filter: blur(15px);
         pointer-events: none;
     }
+    .planet-container.focused {
+        z-index: 200;
+        width: 450px;
+    }
 
-    /* Planet Visualization */
+    /* Planet Visualization Components */
     .planet-visual {
         position: relative;
         width: var(--planet-size);
         height: var(--planet-size);
-        margin-bottom: 60px;
+        margin-bottom: 40px;
         transform-style: preserve-3d;
     }
     .planet-glow {
@@ -585,6 +650,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         left: -30%;
         width: 160%;
         height: 160%;
+        border-radius: 50%;
         background: radial-gradient(
             circle,
             var(--planet-color) 0%,
@@ -592,8 +658,15 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         );
         opacity: 0.45;
         filter: blur(25px);
-        pointer-events: none;
-        border-radius: 50%;
+    }
+
+    .planet-body-wrapper {
+        width: 100%;
+        height: 100%;
+        /* DYNAMIC AXIS ROTATION FROM JS */
+        transform: rotateZ(var(--dynamic-axis-tilt))
+            rotateX(var(--fixed-rotation-x));
+        transform-style: preserve-3d;
     }
 
     .planet-body {
@@ -601,8 +674,6 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         height: 100%;
         position: relative;
         transform-style: preserve-3d;
-        /* CORRECT AXIS: Tilted perpendicular to rings */
-        transform: rotateX(var(--tilt-x)) rotateZ(var(--tilt-z));
     }
 
     .planet-surface {
@@ -631,6 +702,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         }
     }
 
+    /* Textures */
     .planet-surface.striped {
         background:
             radial-gradient(
@@ -646,10 +718,9 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
                 var(--secondary-color) 55px
             );
         background-size: 200% 100%;
-        animation: surfaceSpin var(--orbit-speed) linear infinite;
+        animation: surfaceSpin var(--orbit-speed-val, 10s) linear infinite;
     }
     .planet-surface.gaseous {
-        /* Lane direction 175deg is roughly "horizontal" but allows X movement visibility */
         background: linear-gradient(
             175deg,
             var(--planet-color) 0%,
@@ -682,7 +753,6 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         background-size: 200% 100%;
         animation: surfaceSpin 40s linear infinite;
     }
-
     @keyframes surfaceSpin {
         0% {
             background-position: 0% 0%;
@@ -698,23 +768,21 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         left: 0;
         width: 100%;
         height: 100%;
+        border-radius: 50%;
         background: radial-gradient(
             circle at 85% 15%,
             transparent 15%,
             rgba(0, 0, 0, 0.85) 85%
         );
-        border-radius: 50%;
-        pointer-events: none;
     }
 
-    /* RINGS - TIED TO PLANET AXIS */
+    /* Rings */
     .planet-rings {
         position: absolute;
         top: 50%;
         left: 50%;
         width: 230%;
         height: 230%;
-        /* Adjusted positioning to stay synced with planet body center while tilted */
         transform: translate(-50%, -50%) rotateX(var(--ring-tilt)) rotateY(2deg);
         pointer-events: none;
         transform-style: preserve-3d;
@@ -764,9 +832,9 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         );
     }
 
-    /* INFO CARD - Improved layout to avoid cut-off */
+    /* Info Panel */
     .planet-info {
-        background: rgba(8, 8, 20, 0.6);
+        background: rgba(8, 8, 20, 0.65);
         backdrop-filter: blur(40px);
         border-radius: 20px;
         padding: 25px;
@@ -777,14 +845,13 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
         transform: translateY(30px);
         opacity: 0;
-        transition: all 0.5s ease;
+        transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
     }
     .planet-container:hover .planet-info,
     .planet-container.focused .planet-info {
         opacity: 1;
         transform: translateY(10px);
     }
-
     .planet-title {
         font-size: 1.6rem;
         color: var(--planet-color);
@@ -794,10 +861,8 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     .planet-intro {
         color: #ccc;
         font-size: 0.95rem;
-        line-height: 1.5;
         margin-bottom: 25px;
     }
-
     .visit-btn {
         display: inline-block;
         padding: 14px 36px;
@@ -806,10 +871,9 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         text-decoration: none;
         border-radius: 12px;
         font-weight: 900;
-        font-size: 0.9rem;
         letter-spacing: 3px;
-        transition: all 0.3s;
         background: rgba(0, 0, 0, 0.3);
+        transition: 0.3s;
     }
     .visit-btn:hover {
         background: var(--planet-color);
@@ -829,7 +893,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         justify-content: center;
         align-items: center;
         z-index: 100;
-        transition: opacity 1s ease;
+        transition: 1s ease;
     }
     .galaxy-title {
         font-size: 5rem;
@@ -838,7 +902,6 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         letter-spacing: 15px;
         text-align: center;
         margin-bottom: 50px;
-        line-height: 1.2;
         color: #fff;
         text-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
     }
@@ -851,7 +914,7 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         border-radius: 100px;
         cursor: pointer;
         letter-spacing: 6px;
-        transition: all 0.5s ease;
+        transition: 0.5s ease;
     }
     .enter-button:hover {
         background: #fff;
@@ -865,28 +928,19 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         bottom: 50px;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 250;
+        z-index: 350;
         background: rgba(255, 255, 255, 0.1);
-        border: 1.5px solid #fff;
+        border: 2px solid #fff;
         color: #fff;
         padding: 12px 40px;
         border-radius: 40px;
         cursor: pointer;
         backdrop-filter: blur(20px);
         font-weight: 700;
-        letter-spacing: 2px;
-        transition: all 0.3s;
+        transition: 0.3s;
     }
-    .back-to-galaxy:hover {
-        background: #fff;
-        color: #000;
-    }
-
-    @media (max-width: 1024px) {
-        .search-container,
-        .back-link {
-            top: 90px;
-        }
+    .back-to-galaxy.hidden {
+        display: none;
     }
 
     @media (max-width: 768px) {
@@ -896,7 +950,6 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         }
         .planet-container {
             width: 85vw;
-            margin-right: 60px;
         }
         .search-container {
             position: relative;
@@ -904,12 +957,6 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
             right: 0;
             margin: 0 auto;
             width: 90%;
-        }
-        .back-link {
-            top: 70px;
-        }
-        .planets-wrapper {
-            padding-top: 60px;
         }
     }
 </style>
