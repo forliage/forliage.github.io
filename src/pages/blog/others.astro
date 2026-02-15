@@ -384,9 +384,9 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
     :root {
         --space-bg: #010103;
         --accent-glow: rgba(100, 150, 255, 0.25);
-        /* AXIS ALIGNMENT: Match rings normal axis */
-        --tilt-x: 15deg; /* Perpendicular to rotateX(75deg) */
-        --tilt-z: 0deg;
+        /* AXIS ALIGNMENT: Planet rotation axis perpendicular to ring plane */
+        --tilt-x: 20deg;
+        --tilt-z: 10deg;
         --ring-tilt: 75deg;
     }
 
