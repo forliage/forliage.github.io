@@ -1,21 +1,604 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
+
+interface Course {
+    id: string;
+    title: string;
+    intro: string;
+    // Cosmetic properties for the planet
+    size: number; // size in px (base size)
+    color: string; // Base color/atmosphere
+    ringColor: string; // Ring color
+    textureType: "striped" | "gaseous" | "cratered"; // Simple procedural texture types
+    orbitRadius: number; // For positioning logic (not real orbit, just layout)
+    orbitSpeed: number; // Rotation speed
+}
+
+const courses: Course[] = [
+    {
+        id: "cmu-15-462",
+        title: "CMU 15-462 Computer Graphics",
+        intro: "Comprehensive introduction to computer graphics including rasterization, geometry, and animation.",
+        size: 140,
+        color: "#d4a5a5", // Muted reddish
+        ringColor: "rgba(212, 165, 165, 0.4)",
+        textureType: "striped",
+        orbitRadius: 0,
+        orbitSpeed: 20,
+    },
+    {
+        id: "cmu-15-458",
+        title: "CMU 15-458 Discrete Differential Geometry",
+        intro: "Study of discrete geometric structures and their application in computer graphics and shape analysis.",
+        size: 110,
+        color: "#90caf9", // Light blue
+        ringColor: "rgba(144, 202, 249, 0.4)",
+        textureType: "gaseous",
+        orbitRadius: 0,
+        orbitSpeed: 25,
+    },
+    {
+        id: "stanford-cs231n",
+        title: "Stanford CS231n Computer Vision",
+        intro: "In-depth look at Deep Learning for Computer Vision, focusing on CNNs and visual recognition.",
+        size: 160,
+        color: "#a5d6a7", // Greenish
+        ringColor: "rgba(165, 214, 167, 0.4)",
+        textureType: "cratered",
+        orbitRadius: 0,
+        orbitSpeed: 30,
+    },
+    {
+        id: "ucsd-cse-272",
+        title: "UCSD CSE 272 Advanced Image Synthesis",
+        intro: "Advanced rendering topics: Path tracing, light transport, and physically based rendering.",
+        size: 130,
+        color: "#ce93d8", // Purple
+        ringColor: "rgba(206, 147, 216, 0.4)",
+        textureType: "gaseous",
+        orbitRadius: 0,
+        orbitSpeed: 22,
+    },
+    {
+        id: "games-101",
+        title: "Games 101",
+        intro: "Introduction to Computer Graphics: Rendering, Geometry, and Modeling fundamentals.",
+        size: 120,
+        color: "#ffcc80", // Orange
+        ringColor: "rgba(255, 204, 128, 0.4)",
+        textureType: "striped",
+        orbitRadius: 0,
+        orbitSpeed: 18,
+    },
+    {
+        id: "games-202",
+        title: "Games 202",
+        intro: "Real-time High Quality Rendering: Shadows, Global Illumination, and physically based materials.",
+        size: 150,
+        color: "#b0bec5", // Grey/Metallic
+        ringColor: "rgba(176, 190, 197, 0.4)",
+        textureType: "cratered",
+        orbitRadius: 0,
+        orbitSpeed: 28,
+    },
+];
 ---
 
 <Layout title="Other Lecture Notes - Liuye Zhao">
     <Header />
-    <main>
-        <h1>Other Lecture Notes</h1>
-        <p>Coming soon...</p>
+
+    <main class="universe-container">
+        <!-- Galaxy Background Canvas -->
+        <canvas id="galaxy-canvas"></canvas>
+        
+        <!-- Nebula Fog Layers -->
+        <div class="nebula-layer layer-1"></div>
+        <div class="nebula-layer layer-2"></div>
+
+        <!-- Entrance Screen -->
+        <div id="entrance-screen" class="entrance-screen">
+            <h1 class="galaxy-title">Explore the Cosmos of Knowledge</h1>
+            <button id="enter-btn" class="enter-button">ENTER GALAXY</button>
+        </div>
+
+        <!-- Planetary System (Hidden initially) -->
+        <div id="solar-system" class="solar-system">
+             <!-- Back Button (Consistent with other pages) -->
+            <a href="/blog" class="back-button">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back to Base
+            </a>
+
+            <div class="planets-wrapper">
+                {courses.map((course, index) => {
+                    // Calculate random positions logic in CSS or inline style for 3D depth
+                    // We distribute them in a semi-circle or zig-zag 3D patterns
+                    // Using simple alternating offset for demonstration
+                    const xOffset = (index % 2 === 0 ? 1 : -1) * (150 + Math.random() * 100);
+                    const zDepth = -index * 300; // Receding into distance
+                    const yOffset = (Math.random() - 0.5) * 200;
+                    
+                    return (
+                        <div 
+                            class="planet-container" 
+                            style={`
+                                --planet-size: ${course.size}px;
+                                --planet-color: ${course.color};
+                                --ring-color: ${course.ringColor};
+                                --orbit-speed: ${course.orbitSpeed}s;
+                                transform: translate3d(${xOffset}px, ${yOffset}px, ${zDepth}px);
+                            `}
+                        >
+                            <div class="planet-body">
+                                <div class={`planet-surface ${course.textureType}`}></div>
+                                <div class="planet-shadow"></div>
+                                <div class="planet-ring"></div>
+                            </div>
+                            
+                            <div class="planet-info">
+                                <h2 class="planet-title">{course.title}</h2>
+                                <p class="planet-intro">{course.intro}</p>
+                                <a href={`/blog/others/${course.id}`} class="visit-btn">LAND ON PLANET</a>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
     </main>
 </Layout>
 
+<script>
+    /* --- Galaxy Particle Engine --- */
+    const canvas = document.getElementById('galaxy-canvas') as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d');
+
+    let width = 0;
+    let height = 0;
+    let particles: Particle[] = [];
+    const particleCount = 2000;
+
+    interface Particle {
+        x: number;
+        y: number;
+        z: number;
+        size: number;
+        color: string;
+        angle: number;
+        radius: number; // Distance from center
+        speed: number;
+    }
+
+    function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    }
+
+    function initGalaxy() {
+        particles = [];
+        for (let i = 0; i < particleCount; i++) {
+            // Spiral Galaxy Logic
+            // r = a + b * theta
+            const armCount = 3;
+            const spin = i / particleCount * armCount * Math.PI * 2;
+            const distance = Math.pow(Math.random(), 2) * Math.max(width, height) * 0.4; // Concentrate center
+            
+            // Add some randomness to cloud
+            const randomOffset = (Math.random() - 0.5) * 100 * (distance / 500); 
+
+            // Color gradient based on distance
+            // Center = Hot/White/Blue, Edge = Purple/Red
+            const r = distance > 200 ? 200 + Math.random() * 55 : 240;
+            const g = distance > 200 ? 100 + Math.random() * 50 : 240;
+            const b = 255;
+            const color = `rgba(${r}, ${g}, ${b}, ${Math.random() * 0.8})`;
+
+            particles.push({
+                x: 0, y: 0, z: 0,
+                angle: spin,
+                radius: distance + randomOffset,
+                speed: (0.001 + Math.random() * 0.002) / (distance * 0.005 + 1), // Outer moves slower angularly
+                size: Math.random() * 1.5 + 0.5,
+                color: color
+            });
+        }
+    }
+
+    function animateGalaxy() {
+        if (!ctx) return;
+        
+        ctx.fillStyle = '#050510'; // Deep space fade
+        ctx.fillRect(0, 0, width, height);
+        
+        ctx.save();
+        ctx.translate(width / 2, height / 2);
+
+        // Tilt the galaxy slightly for 3D effect
+        ctx.scale(1, 0.6); 
+
+        particles.forEach(p => {
+            p.angle += p.speed;
+            
+            const x = Math.cos(p.angle) * p.radius;
+            const y = Math.sin(p.angle) * p.radius;
+
+            ctx.beginPath();
+            ctx.fillStyle = p.color;
+            ctx.arc(x, y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        ctx.restore();
+        requestAnimationFrame(animateGalaxy);
+    }
+
+    window.addEventListener('resize', () => { resize(); initGalaxy(); });
+    
+    // Init Visuals
+    if (canvas) {
+        resize();
+        initGalaxy();
+        animateGalaxy();
+    }
+
+    /* --- Interaction Logic --- */
+    const enterBtn = document.getElementById('enter-btn');
+    const entranceScreen = document.getElementById('entrance-screen');
+    const solarSystem = document.getElementById('solar-system');
+    const galaxyCanvas = document.getElementById('galaxy-canvas');
+
+    if (enterBtn && entranceScreen && solarSystem && galaxyCanvas) {
+        enterBtn.addEventListener('click', () => {
+             // 1. Fade out entrance text
+             entranceScreen.style.opacity = '0';
+             entranceScreen.style.pointerEvents = 'none';
+
+             // 2. Zoom/Dissolve Galaxy
+             galaxyCanvas.style.transition = 'transform 2s ease-in, opacity 2s ease';
+             galaxyCanvas.style.transform = 'scale(3) rotate(90deg)';
+             galaxyCanvas.style.opacity = '0';
+
+             // 3. Show Solar System
+             setTimeout(() => {
+                 solarSystem.style.opacity = '1';
+                 solarSystem.style.pointerEvents = 'auto';
+                 
+                 // Trigger entrance animations for planets
+                 const planets = document.querySelectorAll('.planet-container');
+                 planets.forEach((p, i) => {
+                     setTimeout(() => {
+                         p.classList.add('visible');
+                     }, i * 200);
+                 });
+             }, 1000);
+        });
+    }
+</script>
+
 <style>
-    main {
-        max-width: 960px;
-        margin: auto;
-        padding: 3rem 1rem;
-        text-align: center;
+    :root {
+        --space-bg: #050510;
+        --star-color: #ffffff;
+    }
+
+    .universe-container {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        background-color: var(--space-bg);
+        overflow: hidden;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    /* Galaxy Canvas */
+    #galaxy-canvas {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: 1;
+    }
+
+    /* Nebula Layers (CSS Clouds) */
+    .nebula-layer {
+        position: absolute;
+        top: 0; left: 0;
+        width: 200%; height: 200%;
+        background-image: 
+            radial-gradient(circle at 50% 50%, rgba(76, 29, 149, 0.1), transparent 60%),
+            radial-gradient(circle at 20% 80%, rgba(219, 39, 119, 0.05), transparent 50%);
+        filter: blur(60px);
+        z-index: 2;
+        animation: drift 60s infinite linear;
+        opacity: 0.5;
+        pointer-events: none;
+    }
+    
+    .layer-2 {
+        animation-direction: reverse;
+        animation-duration: 90s;
+        background-image: 
+            radial-gradient(circle at 80% 20%, rgba(56, 189, 248, 0.08), transparent 50%);
+    }
+
+    @keyframes drift {
+        0% { transform: translate(0, 0); }
+        50% { transform: translate(-10%, -5%); }
+        100% { transform: translate(0, 0); }
+    }
+
+    /* Entrance Screen */
+    .entrance-screen {
+        position: absolute;
+        top: 0; left: 0; w-100%; h-100%;
+        display: flex; flex-direction: column; 
+        justify-content: center; align-items: center;
+        z-index: 100;
+        width: 100%; height: 100%;
+        transition: opacity 1s ease;
+    }
+
+    .galaxy-title {
+        font-size: 3.5rem;
+        color: #fff;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        margin-bottom: 2rem;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        font-weight: 200;
+    }
+
+    .enter-button {
+        padding: 15px 50px;
+        font-size: 1.2rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        border-radius: 50px;
+        cursor: pointer;
+        backdrop-filter: blur(10px);
+        transition: all 0.5s ease;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    .enter-button:hover {
+        background: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+        transform: scale(1.1);
+        letter-spacing: 4px;
+    }
+
+    /* Solar System Container */
+    .solar-system {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 10;
+        opacity: 0; /* Hidden initially */
+        pointer-events: none;
+        transition: opacity 2s ease;
+        perspective: 1200px;
+        overflow-y: auto; /* Allow scrolling for deep content */
+        overflow-x: hidden;
+    }
+
+    .planets-wrapper {
+        position: relative;
+        min-height: 200vh; /* Make it scrollable/deep */
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 150px; /* Space for back button */
+        padding-bottom: 200px;
+        transform-style: preserve-3d;
+    }
+
+    /* Individual Planet Container */
+    .planet-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 50px;
+        margin-bottom: 150px;
+        opacity: 0;
+        transform: translateY(100px); /* Initial slide up pos, combined with JS transform later */
+        transition: opacity 1s ease, transform 1s ease;
+        
+        /* 
+           Since we set explicit transform in JS loop (translate3d), 
+           we need a way to combine it with the entrance animation.
+           Here we assume the 'visible' class will just reset opacity.
+           We might need a wrapper for layout to avoid conflict.
+        */
+    }
+    
+    .planet-container.visible {
+        opacity: 1;
+        /* The translate3d is inline, so we don't override transform here */
+    }
+
+    /* Planet Body Visualization */
+    .planet-body {
+        width: var(--planet-size);
+        height: var(--planet-size);
+        position: relative;
+        transform-style: preserve-3d;
+        /* Rotate the whole planet assembly slightly to see rings better */
+        transform: rotateZ(10deg) rotateX(20deg); 
+    }
+
+    /* Planet Surface (Sphere look) */
+    .planet-surface {
+        width: 100%; height: 100%;
+        border-radius: 50%;
+        background: var(--planet-color);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 
+            inset -10px -10px 20px rgba(0,0,0,0.8), /* Shadow side */
+            inset 10px 10px 20px rgba(255,255,255,0.4), /* Lit side */
+            0 0 20px var(--planet-color); /* Glow */
+    }
+
+    /* Texture Simulations */
+    .planet-surface.striped {
+        background: repeating-linear-gradient(
+            0deg,
+            var(--planet-color),
+            var(--planet-color) 10px,
+            rgba(0,0,0,0.1) 10px,
+            rgba(0,0,0,0.1) 15px
+        );
+        background-size: 100% 200%;
+        animation: spinTexture 20s linear infinite;
+    }
+
+    .planet-surface.gaseous {
+        background: radial-gradient(circle at 30% 30%, transparent 0%, rgba(0,0,0,0.3) 100%),
+                    var(--planet-color);
+        filter: blur(1px);
+    }
+    
+    .planet-surface.cratered {
+        background-image: 
+            radial-gradient(circle at 20% 40%, rgba(0,0,0,0.1) 5%, transparent 6%),
+            radial-gradient(circle at 60% 70%, rgba(0,0,0,0.1) 8%, transparent 9%),
+            radial-gradient(circle at 80% 20%, rgba(0,0,0,0.05) 15%, transparent 16%);
+        background-color: var(--planet-color);
+    }
+
+    @keyframes spinTexture {
+        0% { background-position: 0% 0%; }
+        100% { background-position: 200% 0%; }
+    }
+
+    /* Planet Rings */
+    .planet-ring {
+        position: absolute;
+        top: 50%; left: 50%;
+        width: 160%; height: 160%;
+        border-radius: 50%;
+        border: 15px solid var(--ring-color);
+        border-top-color: transparent; /* Gap effect or shadow effect */
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+        transform: translate(-50%, -50%) rotateX(75deg) rotateY(10deg);
+        box-shadow: 0 0 10px var(--ring-color);
+        pointer-events: none;
+    }
+    
+    /* Simulate shadow on ring behind planet - simplified */
+    .planet-ring::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 15px solid transparent;
+        border-top: 15px solid rgba(0,0,0,0.5); /* Shadow part */
+        transform: rotate(0deg); /* Adjust based on light source */
+    }
+
+    /* Planet Info Card */
+    .planet-info {
+        width: 300px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.05); /* Very light glass */
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        border-left: 4px solid var(--planet-color);
+        color: #fff;
+        opacity: 0.9;
+        transition: transform 0.3s ease;
+    }
+
+    .planet-info:hover {
+        transform: scale(1.05);
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .planet-title {
+        font-size: 1.5rem;
+        margin: 0 0 0.5rem 0;
+        color: var(--planet-color);
+        text-shadow: 0 0 10px var(--ring-color);
+    }
+
+    .planet-intro {
+        font-size: 0.9rem;
+        color: #ddd;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+    }
+
+    .visit-btn {
+        display: inline-block;
+        padding: 8px 16px;
+        border: 1px solid var(--planet-color);
+        color: var(--planet-color);
+        text-decoration: none;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+        transition: all 0.3s;
+        text-transform: uppercase;
+    }
+
+    .visit-btn:hover {
+        background: var(--planet-color);
+        color: #000;
+        box-shadow: 0 0 15px var(--planet-color);
+    }
+
+    /* Back Button Override for this page */
+    .back-button {
+        position: fixed;
+        top: 100px; left: 2rem; z-index: 200;
+        display: flex; align-items: center; gap: 8px;
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        border-radius: 50px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+    
+    .back-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    @media (max-width: 768px) {
+        .planet-container {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+            transform: translate3d(0,0,0) !important; /* Reset complicated 3D layout for mobile */
+            margin-bottom: 80px;
+        }
+
+        .planet-info {
+            width: 90%;
+            border-left: none;
+            border-bottom: 4px solid var(--planet-color);
+        }
+
+        .galaxy-title {
+            font-size: 2rem;
+            text-align: center;
+            padding: 0 20px;
+        }
     }
 </style>
