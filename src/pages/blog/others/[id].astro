@@ -44,7 +44,11 @@ const { planet } = Astro.props;
         </div>
 
         <!-- 3D Environment Canvas -->
-        <div id="landing-canvas-container" data-planet-color={planet.color}>
+        <div
+            id="landing-canvas-container"
+            data-planet-color={planet.color}
+            data-planet-id={planet.id}
+        >
         </div>
     </main>
 </Layout>
@@ -58,11 +62,24 @@ const { planet } = Astro.props;
     let renderer: THREE.WebGLRenderer;
     let terrain: THREE.Mesh;
     let requestID: number;
+    let seed: number = 0;
 
     const container = document.getElementById(
         "landing-canvas-container",
     ) as HTMLDivElement;
     const planetColor = container?.dataset.planetColor || "#ffffff";
+    const planetId = container?.dataset.planetId || "default";
+
+    // Simple hash for seeding
+    function getSeed(str: string) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = (hash << 5) - hash + str.charCodeAt(i);
+            hash |= 0;
+        }
+        return Math.abs(hash);
+    }
+    seed = getSeed(planetId);
 
     function init() {
         if (!container) return;
@@ -128,17 +145,31 @@ const { planet } = Astro.props;
         geo.rotateX(-Math.PI / 2);
 
         const pos = geo.attributes.position;
-        for (let i = 0; i < pos.count; i++) {
-            const x = pos.getX(i);
-            const z = pos.getZ(i);
+        const sx = (seed % 1000) * 0.5;
+        const sz = (seed % 777) * 0.3;
 
-            // Sharper craggy terrain with ridges
+        // Vary "personality" (frequency and amplitude) based on seed
+        const freqMap = 0.8 + (seed % 4) * 0.15; // 0.8 to 1.25
+        const ampMap = 0.9 + (seed % 3) * 0.15; // 0.9 to 1.2
+
+        for (let i = 0; i < pos.count; i++) {
+            const x = pos.getX(i) + sx;
+            const z = pos.getZ(i) + sz;
+
+            // Seeded procedural terrain
             let y = 0;
-            y += Math.sin(x * 0.03) * Math.cos(z * 0.03) * 18.0; // Base mountains
-            y += Math.sin(x * 0.12) * Math.sin(z * 0.12) * 6.0; // Medium hills
-            // Ridge/Crack effect using absolute sine
+            y +=
+                Math.sin(x * 0.03 * freqMap) *
+                Math.cos(z * 0.03 * freqMap) *
+                18.0 *
+                ampMap;
+            y +=
+                Math.sin(x * 0.12 * freqMap) *
+                Math.sin(z * 0.12 * freqMap) *
+                6.0 *
+                ampMap;
             y += Math.abs(Math.sin(x * 0.4) * Math.cos(z * 0.4)) * 4.0;
-            y += (Math.random() - 0.5) * 0.8; // Sharp surface noise
+            y += (Math.random() - 0.5) * 0.8;
             pos.setY(i, y);
         }
         geo.computeVertexNormals();
@@ -157,11 +188,21 @@ const { planet } = Astro.props;
 
     function addRocks() {
         const rockCount = 60;
-        for (let i = 0; i < rockCount; i++) {
-            const size = Math.random() * 4 + 1;
-            const bGeo = new THREE.DodecahedronGeometry(size, 0);
+        const freqMap = 0.8 + (seed % 4) * 0.15;
+        const ampMap = 0.9 + (seed % 3) * 0.15;
 
-            // Crystalline/Refractive material
+        for (let i = 0; i < rockCount; i++) {
+            // Seeded deterministic noise for placement
+            const s1 = Math.sin(seed * 0.1 + i * 2.3) * 10000;
+            const s2 = Math.cos(seed * 0.2 + i * 1.7) * 10000;
+            const noise1 = s1 - Math.floor(s1); // 0 to 1
+            const noise2 = s2 - Math.floor(s2); // 0 to 1
+
+            const rx = (noise1 - 0.5) * 220;
+            const rz = (noise2 - 0.5) * 220;
+            const size = noise1 * 4 + 1;
+
+            const bGeo = new THREE.DodecahedronGeometry(size, 0);
             const bMat = new THREE.MeshPhysicalMaterial({
                 color: planetColor,
                 roughness: 0.1,
@@ -175,22 +216,24 @@ const { planet } = Astro.props;
             });
 
             const rock = new THREE.Mesh(bGeo, bMat);
-            const rx = (Math.random() - 0.5) * 200;
-            const rz = (Math.random() - 0.5) * 200;
 
-            // Improved height estimation based on same noise
+            // Sync height with seeded terrain
+            const sx = rx + (seed % 1000) * 0.5;
+            const sz = rz + (seed % 777) * 0.3;
             const ry =
-                Math.sin(rx * 0.03) * Math.cos(rz * 0.03) * 18.0 +
-                Math.sin(rx * 0.12) * Math.sin(rz * 0.12) * 6.0 +
-                Math.abs(Math.sin(rx * 0.4) * Math.cos(rz * 0.4)) * 4.0 -
+                Math.sin(sx * 0.03 * freqMap) *
+                    Math.cos(sz * 0.03 * freqMap) *
+                    18.0 *
+                    ampMap +
+                Math.sin(sx * 0.12 * freqMap) *
+                    Math.sin(sz * 0.12 * freqMap) *
+                    6.0 *
+                    ampMap +
+                Math.abs(Math.sin(sx * 0.4) * Math.cos(sz * 0.4)) * 4.0 -
                 size * 0.5;
 
             rock.position.set(rx, ry, rz);
-            rock.rotation.set(
-                Math.random() * Math.PI,
-                Math.random() * Math.PI,
-                0,
-            );
+            rock.rotation.set(noise1 * Math.PI, noise2 * Math.PI, 0);
             rock.castShadow = true;
             rock.receiveShadow = true;
             scene.add(rock);
@@ -282,10 +325,23 @@ const { planet } = Astro.props;
     });
 
     function getTerrainHeight(x: number, z: number) {
+        const sx = x + (seed % 1000) * 0.5;
+        const sz = z + (seed % 777) * 0.3;
+        const freqMap = 0.8 + (seed % 4) * 0.15;
+        const ampMap = 0.9 + (seed % 3) * 0.15;
+
         let y = 0;
-        y += Math.sin(x * 0.03) * Math.cos(z * 0.03) * 18.0;
-        y += Math.sin(x * 0.12) * Math.sin(z * 0.12) * 6.0;
-        y += Math.abs(Math.sin(x * 0.4) * Math.cos(z * 0.4)) * 4.0;
+        y +=
+            Math.sin(sx * 0.03 * freqMap) *
+            Math.cos(sz * 0.03 * freqMap) *
+            18.0 *
+            ampMap;
+        y +=
+            Math.sin(sx * 0.12 * freqMap) *
+            Math.sin(sz * 0.12 * freqMap) *
+            6.0 *
+            ampMap;
+        y += Math.abs(Math.sin(sx * 0.4) * Math.cos(sz * 0.4)) * 4.0;
         return y + 8.0; // Stand height
     }
 
