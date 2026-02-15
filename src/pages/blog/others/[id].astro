@@ -238,29 +238,24 @@ const { planet } = Astro.props;
     const modeText = guide?.querySelector(".mode-text");
 
     function updateExplorationState() {
-        const checkCapsLock = (event: any) => {
-            isExploring = event.getModifierState("CapsLock");
-            if (guide) {
-                if (isExploring) {
-                    guide.classList.add("active");
+        const sync = (event: any) => {
+            if (typeof event.getModifierState !== "function") return;
+            const newState = event.getModifierState("CapsLock");
+            if (newState !== isExploring) {
+                isExploring = newState;
+                if (guide) {
+                    guide.classList.toggle("active", isExploring);
                     if (modeText)
-                        modeText.textContent = "EXPLORATION MODE ACTIVE";
-                } else {
-                    guide.classList.remove("active");
-                    if (modeText) modeText.textContent = "CINEMATIC MODE";
+                        modeText.textContent = isExploring
+                            ? "EXPLORATION MODE ACTIVE"
+                            : "CINEMATIC MODE";
                 }
             }
         };
-        window.addEventListener("keydown", checkCapsLock);
-        window.addEventListener("keyup", checkCapsLock);
-        // Initial check
-        window.addEventListener(
-            "mousedown",
-            (e) => {
-                isExploring = e.getModifierState("CapsLock");
-            },
-            { once: true },
-        );
+        window.addEventListener("keydown", sync);
+        window.addEventListener("keyup", sync);
+        window.addEventListener("mousedown", sync);
+        window.addEventListener("mousemove", sync);
     }
 
     // Capture WASD
@@ -359,6 +354,7 @@ const { planet } = Astro.props;
     window.addEventListener("resize", handleResize);
 
     // Initial call
+    updateExplorationState();
     init();
 </script>
 
