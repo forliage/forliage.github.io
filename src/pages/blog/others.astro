@@ -6,7 +6,6 @@ interface Course {
     id: string;
     title: string;
     intro: string;
-    // Cosmetic properties
     size: number;
     color: string;
     secondaryColor: string;
@@ -89,32 +88,32 @@ const courses: Course[] = [
     <Header />
 
     <main class="universe-container">
-        <!-- SVG Filter Definitions for Realistic Noise -->
+        <!-- SVG Filter Definitions for Realistic Noise Nebulas -->
         <svg style="display: none;">
             <filter id="nebula-noise">
                 <feTurbulence
                     type="fractalNoise"
-                    baseFrequency="0.015"
-                    numOctaves="3"
+                    baseFrequency="0.012"
+                    numOctaves="4"
                     seed="5"></feTurbulence>
-                <feDisplacementMap in="SourceGraphic" scale="100"
+                <feDisplacementMap in="SourceGraphic" scale="150"
                 ></feDisplacementMap>
             </filter>
         </svg>
 
-        <!-- Galaxy Background (Scale handled via JS) -->
+        <!-- Galaxy Background (Absolute, behind scroll) -->
         <div id="galaxy-wrapper">
             <canvas id="galaxy-canvas"></canvas>
         </div>
 
-        <!-- Realistic Nebulas (Smoke/Noise) -->
+        <!-- Realistic Nebulas (Fixed Background Layer) -->
         <div id="floating-nebulas" class="floating-nebulas">
             <div class="nebula-cloud cloud-1"></div>
             <div class="nebula-cloud cloud-2"></div>
             <div class="nebula-cloud cloud-3"></div>
         </div>
 
-        <!-- Solar System Tunnel -->
+        <!-- Horizontal Scroll Container -->
         <div id="solar-system" class="solar-system">
             <!-- Back Button -->
             <a href="/blog" class="back-button">
@@ -138,49 +137,34 @@ const courses: Course[] = [
             <div id="focus-overlay" class="focus-overlay"></div>
 
             <div class="planets-wrapper" id="planets-wrapper">
+                <!-- Spacer for Title -->
+                <div class="title-spacer"></div>
+
                 {
                     courses.map((course, index) => {
-                        // WIDENED TUNNEL GRID
-                        const side = index % 2 === 0 ? 1 : -1;
-
-                        // Massive X-Spread (±35vw) to guarantee no overlap with center or text
-                        const xOffset = side * 35; // Use VW units for responsiveness logic in JS or approximation here in PX? Let's use PX but large.
-                        const xPx = side * 500; // 500px left/right
-
-                        // Y Axis: Slight up/down
-                        const yOffset =
-                            index % 3 === 0 ? -150 : index % 3 === 1 ? 150 : 0;
-
-                        // Z Axis: Massive 1000px separation
-                        const zDepth = -(index * 1200 + 600);
-
                         return (
                             <div
                                 class="planet-container"
                                 id={`planet-${course.id}`}
-                                data-x={xPx}
-                                data-y={yOffset}
-                                data-z={zDepth}
                                 style={`
                                 --planet-size: ${course.size}px;
                                 --planet-color: ${course.color};
                                 --secondary-color: ${course.secondaryColor};
                                 --ring-color: ${course.ringColor};
                                 --orbit-speed: ${course.orbitSpeed}s;
-                                transform: translate3d(${xPx}px, ${yOffset}px, ${zDepth}px);
                             `}
                             >
-                                <div class="planet-body">
-                                    <div
-                                        class={`planet-surface ${course.textureType}`}
-                                    />
-                                    <div class="planet-shadow" />
-                                    <div class="planet-ring" />
+                                <div class="planet-visual">
+                                    <div class="planet-body">
+                                        <div
+                                            class={`planet-surface ${course.textureType}`}
+                                        />
+                                        <div class="planet-shadow" />
+                                        <div class="planet-ring" />
+                                    </div>
                                 </div>
 
-                                <div
-                                    class={`planet-info info-${side > 0 ? "right" : "left"}`}
-                                >
+                                <div class="planet-info">
                                     <h2 class="planet-title">{course.title}</h2>
                                     <p class="planet-intro">{course.intro}</p>
                                     <a
@@ -194,19 +178,25 @@ const courses: Course[] = [
                         );
                     })
                 }
+
+                <!-- Spacer for End -->
+                <div class="end-spacer"></div>
             </div>
         </div>
 
-        <!-- Entrance Screen -->
+        <!-- Entrance Screen (Overlay) -->
         <div id="entrance-screen" class="entrance-screen">
             <h1 class="galaxy-title">Explore the Cosmos</h1>
-            <button id="enter-btn" class="enter-button">ENTER GALAXY</button>
+            <p class="galaxy-subtitle">
+                Scroll horizontally to navigate the stars
+            </p>
+            <button id="enter-btn" class="enter-button">START JOURNEY</button>
         </div>
     </main>
 </Layout>
 
 <script>
-    /* --- Galaxy Particle Engine --- */
+    /* --- Robust Galaxy Engine (Native Scale) --- */
     const canvas = document.getElementById(
         "galaxy-canvas",
     ) as HTMLCanvasElement;
@@ -216,23 +206,25 @@ const courses: Course[] = [
     let particles: any[] = [];
     let animationId: number;
 
-    const galaxyWrapper = document.getElementById("galaxy-wrapper");
-
     function resize() {
         if (!canvas) return;
         width = canvas.width = window.innerWidth;
         height = canvas.height = window.innerHeight;
     }
 
-    function initGalaxy() {
+    function initGalaxy(expanseFactor = 1.0) {
         if (!width) return;
-        // Restore MASSIVE scale
-        const maxRadius = Math.max(width, height) * 1.5;
-
         particles = [];
-        for (let i = 0; i < 4000; i++) {
-            const spin = (i / 4000) * 3 * Math.PI * 2;
-            const distance = Math.pow(Math.random(), 1.5) * maxRadius;
+
+        // Ensure galaxy covers 1.5x screen diagonal to cover corners during rotation
+        const maxRadius =
+            Math.sqrt(width * width + height * height) * 0.8 * expanseFactor;
+
+        const count = 3000 * expanseFactor; // More stars if expanding
+
+        for (let i = 0; i < count; i++) {
+            const spin = (i / count) * 3 * Math.PI * 2;
+            const distance = Math.pow(Math.random(), 1.2) * maxRadius;
 
             let color = `rgba(255, 255, 255, ${Math.random()})`;
             if (distance > maxRadius * 0.1)
@@ -244,7 +236,7 @@ const courses: Course[] = [
                 angle: spin,
                 radius: distance,
                 speed:
-                    (0.0002 + Math.random() * 0.0005) / (distance * 0.0005 + 1),
+                    (0.0001 + Math.random() * 0.0002) / (distance * 0.0005 + 1),
                 size: Math.random() * 2.5,
                 color: color,
             });
@@ -258,7 +250,8 @@ const courses: Course[] = [
 
         ctx.save();
         ctx.translate(width / 2, height / 2);
-        ctx.scale(1, 0.6);
+        // Subtle tilt, no CSS scale needed
+        ctx.scale(1, 0.8);
 
         particles.forEach((p) => {
             p.angle += p.speed;
@@ -281,7 +274,7 @@ const courses: Course[] = [
             initGalaxy();
         });
         resize();
-        initGalaxy();
+        initGalaxy(); // Start normal sized
         animateGalaxy();
     }
 
@@ -292,28 +285,21 @@ const courses: Course[] = [
     const floatingNebulas = document.getElementById("floating-nebulas");
 
     function startJourney() {
-        if (
-            !entranceScreen ||
-            !galaxyWrapper ||
-            !solarSystem ||
-            !floatingNebulas
-        )
-            return;
+        if (!entranceScreen || !solarSystem || !floatingNebulas) return;
 
-        // 1. Animate Out
+        // 1. Text fades out
         entranceScreen.style.opacity = "0";
 
-        // Massive Zoom Out (Scale Up)
-        galaxyWrapper.style.transition =
-            "transform 2.5s cubic-bezier(0.7, 0, 0.3, 1), opacity 2.5s ease";
-        galaxyWrapper.style.transform = "scale(5) rotate(90deg)";
-        galaxyWrapper.style.opacity = "0";
+        // 2. Expand Galaxy via Logic (re-init with bigger radius)
+        // We do a smooth transition by quickly adding more distant stars?
+        // Or actually, let's keep it simple: The canvas is static background, we just reveal the content.
+        // Re-init with larger scale to simulate "zoom in" without pixelation
+        initGalaxy(2.5);
 
-        // 2. Remove Overlays from Layout (The "Unkillable" Fix)
-        // Ensure nothing blocks clicks after animation
+        // 3. Reveal System
         setTimeout(() => {
+            // Remove overlays physically
             entranceScreen.style.display = "none";
-            galaxyWrapper.style.display = "none";
 
             solarSystem.style.opacity = "1";
             solarSystem.style.pointerEvents = "auto";
@@ -325,14 +311,14 @@ const courses: Course[] = [
                     p.classList.add("visible");
                 }, i * 150);
             });
-        }, 1200); // Shorter than transition to ensure overlapping interactions work sooner
+        }, 800);
     }
 
     if (enterBtn) {
         enterBtn.addEventListener("click", startJourney);
     }
 
-    /* --- Focus & Click Logic --- */
+    /* --- Focus Logic (Simplified) --- */
     const planetsWrapper = document.getElementById("planets-wrapper");
     const focusOverlay = document.getElementById("focus-overlay");
 
@@ -346,16 +332,16 @@ const courses: Course[] = [
             ) as HTMLElement;
 
             if (planetContainer) {
-                const x = parseFloat(planetContainer.dataset.x || "0");
-                const y = parseFloat(planetContainer.dataset.y || "0");
-                const z = parseFloat(planetContainer.dataset.z || "0");
+                // Focus Logic: Just centers it in view and dims others
+                // But since it's scrollable, maybe we just use scrollIntoView?
+                planetContainer.scrollIntoView({
+                    behavior: "smooth",
+                    inline: "center",
+                    block: "center",
+                });
 
                 document.body.classList.add("focus-mode");
                 focusOverlay.classList.add("active");
-
-                // Move wrapper to center target
-                // Z offset + 500 to bring close
-                planetsWrapper.style.transform = `translate3d(${-x}px, ${-y}px, ${-z + 500}px)`;
 
                 document
                     .querySelectorAll(".planet-container")
@@ -367,7 +353,6 @@ const courses: Course[] = [
         const resetFocus = () => {
             document.body.classList.remove("focus-mode");
             focusOverlay.classList.remove("active");
-            planetsWrapper.style.transform = "none";
             document
                 .querySelectorAll(".planet-container")
                 .forEach((p) => p.classList.remove("focused"));
@@ -397,23 +382,22 @@ const courses: Course[] = [
         left: 0;
         width: 100%;
         height: 100%;
-        z-index: 1;
+        z-index: 0; /* Base Layer */
         pointer-events: none;
-        transform-origin: center center;
     }
     #galaxy-canvas {
         width: 100%;
         height: 100%;
     }
 
-    /* REALISTIC NEBULAS (SVG Noise) */
+    /* REALISTIC NEBULAS (Fixed Background) */
     .floating-nebulas {
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        z-index: 5;
+        z-index: 1;
         pointer-events: none;
         opacity: 0;
         transition: opacity 2s ease;
@@ -422,43 +406,43 @@ const courses: Course[] = [
     .nebula-cloud {
         position: absolute;
         border-radius: 50%;
-        filter: url(#nebula-noise) blur(30px); /* The Magic: Noise Filter */
-        opacity: 0.6;
-        animation: breath 15s infinite alternate ease-in-out;
-        mix-blend-mode: screen; /* Lighten effect */
+        filter: url(#nebula-noise) blur(30px);
+        opacity: 0.5;
+        animation: breath 20s infinite alternate ease-in-out;
+        mix-blend-mode: screen;
     }
 
     .cloud-1 {
-        top: 20%;
-        left: 10%;
-        width: 600px;
-        height: 500px;
+        top: 10%;
+        left: 5%;
+        width: 800px;
+        height: 600px;
         background: radial-gradient(
             circle,
-            rgba(50, 200, 255, 0.5),
+            rgba(50, 200, 255, 0.4),
             transparent 70%
         );
     }
     .cloud-2 {
-        bottom: 10%;
+        bottom: 5%;
         right: 5%;
-        width: 700px;
-        height: 600px;
+        width: 900px;
+        height: 700px;
         background: radial-gradient(
             circle,
-            rgba(255, 50, 150, 0.4),
+            rgba(255, 50, 150, 0.35),
             transparent 70%
         );
         animation-delay: -5s;
     }
     .cloud-3 {
-        top: 40%;
+        top: 30%;
         left: 40%;
-        width: 500px;
-        height: 500px;
+        width: 600px;
+        height: 600px;
         background: radial-gradient(
             circle,
-            rgba(150, 50, 255, 0.4),
+            rgba(150, 50, 255, 0.3),
             transparent 70%
         );
         animation-delay: -10s;
@@ -466,16 +450,16 @@ const courses: Course[] = [
 
     @keyframes breath {
         0% {
-            transform: scale(1) rotate(0deg);
-            opacity: 0.5;
+            transform: scale(1) translate(0, 0);
+            opacity: 0.4;
         }
         100% {
-            transform: scale(1.1) rotate(5deg);
-            opacity: 0.8;
+            transform: scale(1.1) translate(20px, -10px);
+            opacity: 0.7;
         }
     }
 
-    /* Solar System Tunnel */
+    /* Solar System: Horizontal Scroll */
     .solar-system {
         position: absolute;
         top: 0;
@@ -486,54 +470,67 @@ const courses: Course[] = [
         opacity: 0;
         pointer-events: none; /* Initially none */
         transition: opacity 1s ease;
-        perspective: 1500px;
-        overflow-y: scroll; /* Allow deep scroll */
-        overflow-x: hidden;
+        overflow-x: auto; /* Horizontal Scroll */
+        overflow-y: hidden;
+        /* Custom Scrollbar */
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
     }
 
     .planets-wrapper {
-        position: relative;
-        min-height: 500vh; /* Extremely Deep tunnel */
-        width: 100%;
-        display: flex;
-        flex-direction: column;
+        display: flex; /* Row Layout */
         align-items: center;
-        padding-top: 50vh;
-        transform-style: preserve-3d;
-        transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+        height: 100%;
+        width: max-content; /* Grow with content */
+        padding: 0 10vw;
+    }
+
+    /* Initial Spacer */
+    .title-spacer {
+        min-width: 50vw;
+    }
+    .end-spacer {
+        min-width: 30vw;
     }
 
     /* Planet Item */
     .planet-container {
-        position: absolute;
-        left: 50%;
-        top: 50%;
+        position: relative;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
-        width: auto;
-        height: auto;
+        width: 600px; /* Each planet gets 600px slot */
+        height: 100%;
         opacity: 0;
         transition:
             opacity 1s ease,
             filter 0.5s ease;
-        pointer-events: auto !important; /* Force Clickable */
+        pointer-events: auto !important;
         cursor: pointer;
-        transform-style: preserve-3d;
+        margin-right: 150px; /* Gap between planets */
     }
 
     .planet-container.visible {
         opacity: 1;
     }
 
+    /* Visual Wrapper */
+    .planet-visual {
+        position: relative;
+        height: 400px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        perspective: 1000px;
+    }
+
     /* Focus Mode States */
     body.focus-mode .planet-container:not(.focused) {
-        filter: blur(15px) grayscale(0.9);
-        opacity: 0.1;
+        filter: blur(10px) grayscale(0.8);
+        opacity: 0.3;
         pointer-events: none !important;
-    }
-    body.focus-mode .planet-container.focused {
-        z-index: 2000;
     }
 
     .focus-overlay {
@@ -542,73 +539,68 @@ const courses: Course[] = [
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.85);
+        background: rgba(0, 0, 0, 0.8);
         z-index: 99;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.5s ease;
-        backdrop-filter: blur(8px);
+        backdrop-filter: blur(5px);
     }
     .focus-overlay.active {
         opacity: 1;
         pointer-events: auto;
     }
 
-    /* Info positioning - Strict Side */
+    /* Info positioning: Below Planet */
     .planet-info {
-        position: absolute;
-        width: 300px;
-        padding: 25px;
+        width: 100%;
+        max-width: 320px;
+        text-align: center;
+        padding: 20px;
         background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(10px);
         border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-top: 2px solid var(--planet-color);
         color: #fff;
-        opacity: 0.9;
+        opacity: 0.8;
         transition:
             transform 0.3s ease,
             opacity 0.3s ease;
+        transform: translateY(20px);
     }
 
-    .info-right {
-        left: 160%;
-        text-align: left;
-        border-left: 4px solid var(--planet-color);
-    }
-    .info-left {
-        right: 160%;
-        text-align: right;
-        border-right: 4px solid var(--planet-color);
-        direction: rtl;
-    }
-    .info-left * {
-        direction: ltr;
+    .planet-container:hover .planet-info,
+    .planet-container.focused .planet-info {
+        opacity: 1;
+        transform: translateY(0);
+        background: rgba(255, 255, 255, 0.1);
     }
 
     .planet-title {
-        font-size: 1.6rem;
+        font-size: 1.8rem;
         color: var(--planet-color);
-        margin: 0 0 0.5rem 0;
-        text-shadow: 0 0 20px var(--ring-color);
+        margin: 0 0 0.8rem 0;
+        text-shadow: 0 0 15px var(--ring-color);
     }
     .planet-intro {
         font-size: 1rem;
-        color: #ddd;
-        line-height: 1.6;
-        margin-bottom: 1.2rem;
+        color: #ccc;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
     }
 
     .visit-btn {
         display: inline-block;
-        padding: 12px 24px;
+        padding: 12px 30px;
         border: 2px solid var(--planet-color);
         color: var(--planet-color);
         text-decoration: none;
         font-size: 0.9rem;
         letter-spacing: 2px;
-        font-weight: 800;
-        border-radius: 6px;
+        font-weight: 700;
+        border-radius: 8px;
         pointer-events: auto;
+        transition: all 0.3s;
     }
     .visit-btn:hover {
         background: var(--planet-color);
@@ -627,7 +619,7 @@ const courses: Course[] = [
     }
 
     .planet-container:hover .planet-body {
-        transform: rotateX(20deg) rotateZ(10deg) scale(1.2);
+        transform: rotateX(20deg) rotateZ(10deg) scale(1.15);
     }
 
     .planet-surface {
@@ -695,10 +687,10 @@ const courses: Course[] = [
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 180%;
-        height: 180%;
+        width: 170%;
+        height: 170%;
         border-radius: 50%;
-        border: 35px solid var(--ring-color);
+        border: 30px solid var(--ring-color);
         border-top-color: transparent;
         border-bottom-color: rgba(255, 255, 255, 0.5);
         transform: translate(-50%, -50%) rotateX(75deg) rotateY(10deg);
@@ -706,7 +698,7 @@ const courses: Course[] = [
         pointer-events: none;
     }
 
-    /* UI Overlay */
+    /* Entrance UI */
     .entrance-screen {
         position: absolute;
         top: 0;
@@ -722,43 +714,52 @@ const courses: Course[] = [
         pointer-events: auto;
     }
     .galaxy-title {
-        font-size: 5rem;
+        font-size: 4rem;
         color: #fff;
         text-shadow: 0 0 60px rgba(255, 255, 255, 0.6);
         text-transform: uppercase;
         font-weight: 900;
-        letter-spacing: 20px;
+        letter-spacing: 12px;
         text-align: center;
-        margin-bottom: 3rem;
+        margin-bottom: 1rem;
     }
+    .galaxy-subtitle {
+        color: #aaa;
+        font-size: 1.2rem;
+        margin-bottom: 3rem;
+        letter-spacing: 2px;
+        opacity: 0.8;
+    }
+
     .enter-button {
         padding: 20px 60px;
-        font-size: 1.5rem;
-        background: rgba(0, 0, 0, 0.5);
-        border: 2px solid #fff;
+        font-size: 1.2rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.4);
         color: #fff;
         border-radius: 60px;
         cursor: pointer;
         text-transform: uppercase;
-        letter-spacing: 6px;
+        letter-spacing: 4px;
         transition: all 0.3s;
+        backdrop-filter: blur(10px);
     }
     .enter-button:hover {
         background: #fff;
         color: #000;
-        box-shadow: 0 0 50px #fff;
-        transform: scale(1.1);
+        box-shadow: 0 0 40px #fff;
+        transform: scale(1.05);
     }
 
     .back-button {
         position: fixed;
-        top: 40px;
-        left: 40px;
+        top: 30px;
+        left: 30px;
         z-index: 200;
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 12px 24px;
+        gap: 10px;
+        padding: 10px 20px;
         border: 1px solid rgba(255, 255, 255, 0.3);
         border-radius: 30px;
         color: #fff;
@@ -767,31 +768,28 @@ const courses: Course[] = [
     }
 
     @media (max-width: 768px) {
-        .planets-wrapper {
-            padding-top: 150px;
-            min-height: 100vh;
-        }
         .planet-container {
-            position: relative;
-            left: auto;
-            top: auto;
-            transform: none !important;
-            flex-direction: column;
-            margin-bottom: 120px;
-            pointer-events: auto !important;
+            width: 90vw;
+            margin-right: 5vw;
+            margin-left: 5vw;
+        }
+        .title-spacer,
+        .end-spacer {
+            display: none;
+        }
+        .galaxy-title {
+            font-size: 2.5rem;
+            letter-spacing: 5px;
         }
         .planet-info {
-            position: relative;
-            left: auto;
-            right: auto;
-            top: 20px;
-            width: 90%;
-            text-align: center;
-            border: none;
-            border-bottom: 3px solid var(--planet-color);
+            max-width: 90%;
         }
-        .info-left {
-            direction: ltr;
+        .solar-system {
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+        }
+        .planet-container {
+            scroll-snap-align: center;
         }
     }
 </style>
