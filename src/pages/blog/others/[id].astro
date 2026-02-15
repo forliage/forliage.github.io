@@ -61,14 +61,18 @@ const { planet } = Astro.props;
 
         // 1. Scene Setup
         scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0a0a0c);
-        scene.fog = new THREE.FogExp2(0x1a1a1e, 0.04);
+        scene.background = new THREE.Color(0x050507);
+        scene.fog = new THREE.FogExp2(0x101015, 0.015); // Clearer atmosphere
 
         // 2. Camera Setup
-        const aspect = window.innerWidth / window.innerHeight;
-        camera = new THREE.PerspectiveCamera(60, aspect, 0.1, 2000);
-        camera.position.set(0, 12, 50);
-        camera.lookAt(0, 5, 0);
+        camera = new THREE.PerspectiveCamera(
+            55,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            2000,
+        );
+        camera.position.set(0, 18, 70); // Higher vantage for more ground
+        camera.lookAt(0, 0, -40);
 
         // 3. Renderer Setup
         renderer = new THREE.WebGLRenderer({
@@ -98,12 +102,13 @@ const { planet } = Astro.props;
         fillLight.position.set(-30, 20, 10);
         scene.add(fillLight);
 
-        const amb = new THREE.AmbientLight(0x404040, 0.6);
+        const amb = new THREE.AmbientLight(0x404040, 0.8);
         scene.add(amb);
 
         // 5. Geometry & Objects
         generateTerrain();
         addRocks();
+        addStars();
 
         animate();
     }
@@ -119,12 +124,13 @@ const { planet } = Astro.props;
             const x = pos.getX(i);
             const z = pos.getZ(i);
 
-            // Fractal Brownian Motion (FBM) with more octaves for sharper hills
+            // Sharper craggy terrain with ridges
             let y = 0;
-            y += Math.sin(x * 0.04) * Math.cos(z * 0.04) * 12.0;
-            y += Math.sin(x * 0.15) * Math.sin(z * 0.15) * 4.0;
-            y += Math.sin(x * 0.4) * Math.cos(z * 0.4) * 1.5;
-            y += (Math.random() - 0.5) * 0.2; // Tiny surface roughness
+            y += Math.sin(x * 0.03) * Math.cos(z * 0.03) * 18.0; // Base mountains
+            y += Math.sin(x * 0.12) * Math.sin(z * 0.12) * 6.0; // Medium hills
+            // Ridge/Crack effect using absolute sine
+            y += Math.abs(Math.sin(x * 0.4) * Math.cos(z * 0.4)) * 4.0;
+            y += (Math.random() - 0.5) * 0.8; // Sharp surface noise
             pos.setY(i, y);
         }
         geo.computeVertexNormals();
@@ -164,10 +170,11 @@ const { planet } = Astro.props;
             const rx = (Math.random() - 0.5) * 200;
             const rz = (Math.random() - 0.5) * 200;
 
-            // Basic ground estimation for rock height
+            // Improved height estimation based on same noise
             const ry =
-                Math.sin(rx * 0.05) * Math.cos(rz * 0.05) * 8.0 +
-                Math.sin(rx * 0.2) * Math.sin(rz * 0.2) * 2.5 -
+                Math.sin(rx * 0.03) * Math.cos(rz * 0.03) * 18.0 +
+                Math.sin(rx * 0.12) * Math.sin(rz * 0.12) * 6.0 +
+                Math.abs(Math.sin(rx * 0.4) * Math.cos(rz * 0.4)) * 4.0 -
                 size * 0.5;
 
             rock.position.set(rx, ry, rz);
@@ -182,13 +189,45 @@ const { planet } = Astro.props;
         }
     }
 
+    let stars: THREE.Points;
+    function addStars() {
+        const starCount = 300;
+        const pos = new Float32Array(starCount * 3);
+
+        for (let i = 0; i < starCount; i++) {
+            pos[i * 3] = (Math.random() - 0.5) * 1000;
+            pos[i * 3 + 1] = Math.random() * 400 + 100; // Elevated sky
+            pos[i * 3 + 2] = (Math.random() - 0.5) * 1000;
+        }
+
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+
+        const mat = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 1.2,
+            transparent: true,
+            opacity: 0.8,
+            sizeAttenuation: true,
+        });
+
+        stars = new THREE.Points(geo, mat);
+        scene.add(stars);
+    }
+
     function animate() {
         requestID = requestAnimationFrame(animate);
         const time = Date.now() * 0.0005;
 
-        // Subtle cinematic camera pan
-        camera.position.x = Math.sin(time * 0.1) * 10;
-        camera.lookAt(0, 5, -20);
+        // Twinkling stars
+        if (stars) {
+            (stars.material as THREE.PointsMaterial).opacity =
+                0.5 + Math.sin(time * 4) * 0.3;
+        }
+
+        // Cinematic camera pan - mostly ground focused
+        camera.position.x = Math.sin(time * 0.1) * 15;
+        camera.lookAt(0, -5, -60);
 
         renderer.render(scene, camera);
     }
