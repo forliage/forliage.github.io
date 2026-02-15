@@ -661,8 +661,8 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         overflow: hidden;
         position: relative;
         box-shadow:
-            inset -45px -45px 90px rgba(0, 0, 0, 0.9),
-            inset 25px 25px 60px rgba(255, 255, 255, 0.4),
+            inset 0 40px 60px rgba(255, 255, 255, 0.15),
+            inset 0 -40px 80px rgba(0, 0, 0, 0.6),
             0 0 50px var(--planet-color);
         &::after {
             content: "";
@@ -743,11 +743,13 @@ const allTags = [...new Set(courses.flatMap((c) => c.tags))].sort();
         left: 0;
         width: 100%;
         height: 100%;
-        background: radial-gradient(
-            circle at 85% 15%,
-            transparent 15%,
-            rgba(0, 0, 0, 0.85) 85%
+        background: linear-gradient(
+            180deg,
+            transparent 10%,
+            rgba(0, 0, 0, 0.4) 40%,
+            rgba(0, 0, 0, 0.95) 90%
         );
+        mix-blend-mode: multiply;
         border-radius: 50%;
     }
 
