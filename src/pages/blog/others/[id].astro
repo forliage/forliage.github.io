@@ -187,7 +187,7 @@ const { planet } = Astro.props;
     }
 
     function addRocks() {
-        const rockCount = 60;
+        const rockCount = 150; // Increased density for more detail
         const freqMap = 0.8 + (seed % 4) * 0.15;
         const ampMap = 0.9 + (seed % 3) * 0.15;
 
@@ -195,23 +195,32 @@ const { planet } = Astro.props;
             // Seeded deterministic noise for placement
             const s1 = Math.sin(seed * 0.1 + i * 2.3) * 10000;
             const s2 = Math.cos(seed * 0.2 + i * 1.7) * 10000;
-            const noise1 = s1 - Math.floor(s1); // 0 to 1
-            const noise2 = s2 - Math.floor(s2); // 0 to 1
+            const noise1 = s1 - Math.floor(s1);
+            const noise2 = s2 - Math.floor(s2);
 
-            const rx = (noise1 - 0.5) * 220;
-            const rz = (noise2 - 0.5) * 220;
-            const size = noise1 * 4 + 1;
+            const rx = (noise1 - 0.5) * 350; // Wider area
+            const rz = (noise2 - 0.5) * 350;
 
-            const bGeo = new THREE.DodecahedronGeometry(size, 0);
+            // Varied sizes: some small pebbles, some large boulders
+            const sizeBase = i % 7 === 0 ? 7 : 1.8;
+            const size = noise1 * sizeBase + 0.4;
+
+            // Varied shapes: mix of dodecahedrons and icosahedrons for raw geometric feel
+            const detail = i % 5 === 0 ? 1 : 0;
+            const bGeo =
+                i % 2 === 0
+                    ? new THREE.DodecahedronGeometry(size, detail)
+                    : new THREE.IcosahedronGeometry(size, detail);
+
             const bMat = new THREE.MeshPhysicalMaterial({
                 color: planetColor,
-                roughness: 0.1,
-                metalness: 0.4,
-                ior: 1.5,
-                transmission: 0.6,
-                thickness: 2,
+                roughness: 0.2,
+                metalness: 0.3,
+                ior: 1.65,
+                transmission: 0.45,
+                thickness: 4,
                 transparent: true,
-                opacity: 0.9,
+                opacity: 0.8,
                 reflectivity: 0.5,
             });
 
@@ -230,10 +239,10 @@ const { planet } = Astro.props;
                     6.0 *
                     ampMap +
                 Math.abs(Math.sin(sx * 0.4) * Math.cos(sz * 0.4)) * 4.0 -
-                size * 0.5;
+                size * 0.4;
 
             rock.position.set(rx, ry, rz);
-            rock.rotation.set(noise1 * Math.PI, noise2 * Math.PI, 0);
+            rock.rotation.set(noise1 * Math.PI, noise2 * Math.PI, noise1 * 0.5);
             rock.castShadow = true;
             rock.receiveShadow = true;
             scene.add(rock);
