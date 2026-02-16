@@ -61,6 +61,8 @@ const { planet } = Astro.props;
     let camera: THREE.PerspectiveCamera;
     let renderer: THREE.WebGLRenderer;
     let terrain: THREE.Mesh;
+    let flagpole: THREE.Group;
+    let flag: THREE.Mesh;
     let requestID: number;
     let seed: number = 0;
 
@@ -134,6 +136,7 @@ const { planet } = Astro.props;
         generateTerrain();
         addRocks();
         addStars();
+        addFlagpole();
 
         animate();
     }
@@ -275,6 +278,59 @@ const { planet } = Astro.props;
         scene.add(stars);
     }
 
+    function addFlagpole() {
+        flagpole = new THREE.Group();
+
+        // 1. Pole Geometry
+        const poleGeo = new THREE.CylinderGeometry(0.2, 0.2, 25, 12);
+        const poleMat = new THREE.MeshStandardMaterial({
+            color: 0x999999,
+            metalness: 0.9,
+            roughness: 0.1,
+        });
+        const poleMesh = new THREE.Mesh(poleGeo, poleMat);
+        poleMesh.position.y = 12.5;
+        poleMesh.castShadow = true;
+        flagpole.add(poleMesh);
+
+        // 2. Flag Geometry
+        const flagGeo = new THREE.PlaneGeometry(8, 5, 20, 20);
+        const flagMat = new THREE.MeshStandardMaterial({
+            color: new THREE.Color(planetColor),
+            side: THREE.DoubleSide,
+            roughness: 0.7,
+        });
+        flag = new THREE.Mesh(flagGeo, flagMat);
+        flag.position.set(4.1, 22, 0); // At the top of the pole
+        flag.castShadow = true;
+        flagpole.add(flag);
+
+        // 3. Seeded Position away from origin (center)
+        const angle = (seed % 360) * (Math.PI / 180);
+        const dist = 70 + (seed % 40); // 70 to 110 units away
+        const fx = Math.cos(angle) * dist;
+        const fz = Math.sin(angle) * dist;
+
+        // Sync with terrain height
+        const freqMap = 0.8 + (seed % 4) * 0.15;
+        const ampMap = 0.9 + (seed % 3) * 0.15;
+        const sx = fx + (seed % 1000) * 0.5;
+        const sz = fz + (seed % 777) * 0.3;
+        const fy =
+            Math.sin(sx * 0.03 * freqMap) *
+                Math.cos(sz * 0.03 * freqMap) *
+                18.0 *
+                ampMap +
+            Math.sin(sx * 0.12 * freqMap) *
+                Math.sin(sz * 0.12 * freqMap) *
+                6.0 *
+                ampMap +
+            Math.abs(Math.sin(sx * 0.4) * Math.cos(sz * 0.4)) * 4.0;
+
+        flagpole.position.set(fx, fy, fz);
+        scene.add(flagpole);
+    }
+
     // --- INTERACTIVE EXPLORATION LOGIC ---
     let isExploring = false;
     const keys = { w: false, a: false, s: false, d: false };
@@ -361,6 +417,20 @@ const { planet } = Astro.props;
         if (stars) {
             (stars.material as THREE.PointsMaterial).opacity =
                 0.5 + Math.sin(time * 4) * 0.3;
+        }
+
+        // --- Waving Flag Animation ---
+        if (flag) {
+            const pos = flag.geometry.attributes.position;
+            for (let i = 0; i < pos.count; i++) {
+                const x = pos.getX(i);
+                const y = pos.getY(i);
+                // Simple sine wave for waving effect
+                // x factor makes it wave away from the pole (x=0 is at the pole)
+                const wave = Math.sin(x * 0.5 + time * 5) * (x * 0.15);
+                pos.setZ(i, wave);
+            }
+            pos.needsUpdate = true;
         }
 
         if (isExploring) {
