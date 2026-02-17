@@ -114,13 +114,13 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
 
         if (colorCtx && roughCtx && bumpCtx) {
             const baseGrad = colorCtx.createLinearGradient(0, 0, size, size);
-            baseGrad.addColorStop(0, "#ffffff");
-            baseGrad.addColorStop(0.5, "#f6f8fb");
-            baseGrad.addColorStop(1, "#e9edf3");
+            baseGrad.addColorStop(0, "#fffef9");
+            baseGrad.addColorStop(0.5, "#f7eddc");
+            baseGrad.addColorStop(1, "#efdec2");
             colorCtx.fillStyle = baseGrad;
             colorCtx.fillRect(0, 0, size, size);
 
-            colorCtx.strokeStyle = "rgba(154, 166, 182, 0.2)";
+            colorCtx.strokeStyle = "rgba(156, 124, 84, 0.18)";
             colorCtx.lineWidth = Math.max(1, size * 0.012);
             for (let i = 0; i < 12; i++) {
                 const y = size * (0.18 + i * 0.058) + (Math.random() - 0.5) * 2.5;
@@ -141,18 +141,18 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                 const x = Math.random() * size;
                 const y = Math.random() * size;
                 const a = 0.03 + Math.random() * 0.06;
-                colorCtx.fillStyle = `rgba(166, 176, 192, ${a})`;
+                colorCtx.fillStyle = `rgba(146, 112, 76, ${a})`;
                 colorCtx.fillRect(x, y, 1, 1);
             }
 
-            colorCtx.fillStyle = "rgba(180, 192, 208, 0.18)";
+            colorCtx.fillStyle = "rgba(158, 124, 86, 0.16)";
             colorCtx.beginPath();
             colorCtx.ellipse(size * 0.14, size * 0.56, size * 0.11, size * 0.22, 0, 0, Math.PI * 2);
             colorCtx.fill();
 
-            roughCtx.fillStyle = "rgb(138,138,138)";
+            roughCtx.fillStyle = "rgb(146,146,146)";
             roughCtx.fillRect(0, 0, size, size);
-            roughCtx.strokeStyle = "rgba(102,102,102,0.26)";
+            roughCtx.strokeStyle = "rgba(110,102,90,0.24)";
             roughCtx.lineWidth = 1;
             for (let i = 0; i < 26; i++) {
                 roughCtx.beginPath();
@@ -171,7 +171,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             for (let i = 0; i < 700; i++) {
                 const x = Math.random() * size;
                 const y = Math.random() * size;
-                const v = 120 + Math.floor(Math.random() * 50);
+                const v = 126 + Math.floor(Math.random() * 46);
                 roughCtx.fillStyle = `rgb(${v},${v},${v})`;
                 roughCtx.fillRect(x, y, 1, 1);
             }
@@ -212,59 +212,8 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         return { horseDetailMap, horseDetailRoughnessMap, horseDetailBumpMap };
     }
 
-    function collectSurfacePoints(
-        root: THREE.Object3D,
-        maxPoints = 1200,
-    ): THREE.Vector3[] {
-        const points: THREE.Vector3[] = [];
-        root.updateMatrixWorld(true);
-
-        const meshes: THREE.Mesh[] = [];
-        root.traverse((node) => {
-            if ((node as THREE.Mesh).isMesh) meshes.push(node as THREE.Mesh);
-        });
-
-        const budgetPerMesh = Math.max(40, Math.floor(maxPoints / Math.max(meshes.length, 1)));
-        const temp = new THREE.Vector3();
-
-        meshes.forEach((mesh) => {
-            const geometry = mesh.geometry as THREE.BufferGeometry;
-            const position = geometry.getAttribute("position");
-            if (!position) return;
-
-            const step = Math.max(1, Math.floor(position.count / budgetPerMesh));
-            for (let i = 0; i < position.count; i += step) {
-                temp.fromBufferAttribute(position, i);
-                temp.applyMatrix4(mesh.matrixWorld);
-                root.worldToLocal(temp);
-                points.push(temp.clone());
-            }
-        });
-
-        return points;
-    }
-
-    function pickSurfacePoint(
-        points: THREE.Vector3[],
-        predicate: (p: THREE.Vector3) => boolean,
-        score: (p: THREE.Vector3) => number,
-        fallback: THREE.Vector3,
-    ): THREE.Vector3 {
-        let best = fallback.clone();
-        let bestScore = -Infinity;
-        for (const p of points) {
-            if (!predicate(p)) continue;
-            const s = score(p);
-            if (s > bestScore) {
-                bestScore = s;
-                best = p;
-            }
-        }
-        return best.clone();
-    }
-
     // Physical Parameters
-    const HORSE_COUNT = 7;
+    const HORSE_COUNT = 6;
     const RADIUS = 28;
     const ORBIT_SPEED = 0.0035;
     const HORSE_BASE_Y = 5.2;
@@ -413,48 +362,68 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             envMapIntensity: 3.4,
         });
 
-        const maneGoldMat = new THREE.MeshPhysicalMaterial({
-            color: 0xffc44d,
-            metalness: 1.0,
-            roughness: 0.08,
-            clearcoat: 0.95,
-            clearcoatRoughness: 0.035,
-            envMapIntensity: 5.0,
-            emissive: new THREE.Color(0x4a3408),
-            emissiveIntensity: 0.18,
-        });
-
-        const trimGoldMat = maneGoldMat.clone();
-        trimGoldMat.color = new THREE.Color(0xffd977);
-        trimGoldMat.roughness = 0.06;
-        trimGoldMat.envMapIntensity = 5.25;
-
-        const gildedPaintColor = new THREE.Color(0xffb400);
-        const eyePaintColor = new THREE.Color(0x111114);
-        const porcelainPaintColor = new THREE.Color(0xffffff);
-
-        // Glazed porcelain material formula
-        const porcelainCoreMat = new THREE.MeshPhysicalMaterial({
-            color: 0xfafcff,
+        // 1) Glazed porcelain: creamy-white ceramic with mild yellow glaze texture.
+        const glazedPorcelainMat = new THREE.MeshPhysicalMaterial({
+            color: 0xfaf4e7,
             map: horseDetailMap,
             roughnessMap: horseDetailRoughnessMap,
             bumpMap: horseDetailBumpMap,
-            bumpScale: 0.35,
+            bumpScale: 0.32,
             metalness: 0.0,
-            roughness: 0.34,
-            clearcoat: 0.95,
-            clearcoatRoughness: 0.075,
+            roughness: 0.32,
+            clearcoat: 0.94,
+            clearcoatRoughness: 0.08,
             ior: 1.52,
             transmission: 0.0,
-            thickness: 0.22,
+            thickness: 0.26,
             attenuationDistance: 2.0,
-            attenuationColor: new THREE.Color(0xf7faff),
-            sheen: 0.18,
+            attenuationColor: new THREE.Color(0xf5e7cf),
+            sheen: 0.14,
             sheenColor: new THREE.Color(0xffffff),
-            sheenRoughness: 0.32,
-            envMapIntensity: 1.35,
+            sheenRoughness: 0.36,
+            envMapIntensity: 1.45,
+            specularIntensity: 0.95,
+            specularColor: new THREE.Color(0xfffbf3),
+            side: THREE.DoubleSide,
+        });
+
+        // 2) Fur-like shading formula: high roughness + strong sheen (fiber feel), pink.
+        const furPinkMat = new THREE.MeshPhysicalMaterial({
+            color: 0xf3a6c6,
+            roughnessMap: horseDetailRoughnessMap,
+            bumpMap: horseDetailBumpMap,
+            bumpScale: 0.22,
+            metalness: 0.0,
+            roughness: 0.82,
+            clearcoat: 0.04,
+            clearcoatRoughness: 0.9,
+            ior: 1.38,
+            transmission: 0.0,
+            thickness: 0.0,
+            sheen: 1.0,
+            sheenColor: new THREE.Color(0xffd6e8),
+            sheenRoughness: 0.98,
+            envMapIntensity: 0.72,
+            specularIntensity: 0.26,
+            specularColor: new THREE.Color(0xffe9f2),
+            side: THREE.DoubleSide,
+        });
+
+        // 3) Liuli (glass-like): slight transparency, warm yellow tint.
+        const liuliYellowMat = new THREE.MeshPhysicalMaterial({
+            color: 0xffd355,
+            metalness: 0.0,
+            roughness: 0.16,
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.04,
+            ior: 1.5,
+            transmission: 0.24,
+            thickness: 0.6,
+            attenuationDistance: 2.2,
+            attenuationColor: new THREE.Color(0xffd670),
+            envMapIntensity: 2.5,
             specularIntensity: 1.0,
-            specularColor: new THREE.Color(0xffffff),
+            specularColor: new THREE.Color(0xfff2cc),
             side: THREE.DoubleSide,
         });
 
@@ -500,22 +469,13 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
 
             // The Horse Body
             const horse = cloneSkinned(horseTemplate);
-            const horseBodyMat = porcelainCoreMat.clone();
-            horseBodyMat.envMap = globalEnvMap;
-            horseBodyMat.clearcoat = 0.95;
-            horseBodyMat.clearcoatRoughness = 0.08;
-            horseBodyMat.specularIntensity = 0.98;
-            horseBodyMat.specularColor = new THREE.Color(0xffffff);
-            horseBodyMat.envMapIntensity = 1.25;
             horse.scale.set(0.075, 0.075, 0.075);
             horse.rotation.y = Math.PI; // Correct CCW Inverse Orientation
             horse.updateMatrixWorld(true);
 
             const rawBounds = new THREE.Box3().setFromObject(horse);
             const rawCenter = new THREE.Vector3();
-            const horseSize = new THREE.Vector3();
             rawBounds.getCenter(rawCenter);
-            rawBounds.getSize(horseSize);
 
             // Align to local origin: center on XZ and place feet at Y=0.
             horse.position.x -= rawCenter.x;
@@ -525,204 +485,46 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             decorationGroup.add(horse);
             horse.updateMatrixWorld(true);
 
-            const alignedBounds = new THREE.Box3().setFromObject(horse);
-            alignedBounds.getSize(horseSize);
+            const styleIndex = i % 3;
+            const horseBodyMat =
+                styleIndex === 0
+                    ? glazedPorcelainMat.clone()
+                    : styleIndex === 1
+                      ? furPinkMat.clone()
+                      : liuliYellowMat.clone();
+            horseBodyMat.envMap = globalEnvMap;
+            horseBodyMat.vertexColors = false;
 
-            // Use sampled mesh points (not skeleton bounds) to get stable zones.
-            const sampledPoints = collectSurfacePoints(horse, 2400);
-            const sampledMin = new THREE.Vector3(Infinity, Infinity, Infinity);
-            const sampledMax = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
-            sampledPoints.forEach((p) => {
-                sampledMin.min(p);
-                sampledMax.max(p);
-            });
-            if (!Number.isFinite(sampledMin.x)) {
-                sampledMin.copy(alignedBounds.min);
-                sampledMax.copy(alignedBounds.max);
+            if (styleIndex === 0) {
+                horseBodyMat.clearcoat = 0.94;
+                horseBodyMat.clearcoatRoughness = 0.08;
+                horseBodyMat.roughness = 0.32;
+                horseBodyMat.envMapIntensity = 1.45;
+            } else if (styleIndex === 1) {
+                // Fur formula emphasis: rough diffuse base + strong sheen for fiber glint.
+                horseBodyMat.roughness = 0.84;
+                horseBodyMat.sheen = 1.0;
+                horseBodyMat.sheenColor = new THREE.Color(0xffd6e8);
+                horseBodyMat.sheenRoughness = 0.98;
+                horseBodyMat.envMapIntensity = 0.72;
+            } else {
+                horseBodyMat.transmission = 0.24;
+                horseBodyMat.thickness = 0.6;
+                horseBodyMat.roughness = 0.16;
+                horseBodyMat.attenuationDistance = 2.2;
+                horseBodyMat.attenuationColor = new THREE.Color(0xffd670);
+                horseBodyMat.envMapIntensity = 2.5;
             }
-            const sampledSize = sampledMax.clone().sub(sampledMin);
-
-            const majorAxis: "x" | "z" =
-                sampledSize.x >= sampledSize.z ? "x" : "z";
-
-            const majorCoord = (p: THREE.Vector3) =>
-                majorAxis === "x" ? p.x : p.z;
-            const minorCoord = (p: THREE.Vector3) =>
-                majorAxis === "x" ? p.z : p.x;
-
-            const majorMin = majorAxis === "x" ? sampledMin.x : sampledMin.z;
-            const majorMax = majorAxis === "x" ? sampledMax.x : sampledMax.z;
-            const minorMin = majorAxis === "x" ? sampledMin.z : sampledMin.x;
-            const minorMax = majorAxis === "x" ? sampledMax.z : sampledMax.x;
-            const yMin = sampledMin.y;
-            const yMax = sampledMax.y;
-            const majorSpan = Math.max(majorMax - majorMin, 1e-5);
-            const minorCenter = (minorMin + minorMax) * 0.5;
-            const minorHalfSpan = Math.max((minorMax - minorMin) * 0.5, 1e-5);
-            const ySpan = Math.max(yMax - yMin, 1e-5);
-
-            let highMajorHeadScore = 0;
-            let lowMajorHeadScore = 0;
-            sampledPoints.forEach((p) => {
-                const majorN = (majorCoord(p) - majorMin) / majorSpan;
-                const yN = (p.y - yMin) / ySpan;
-                const sideAbs =
-                    Math.abs((minorCoord(p) - minorCenter) / minorHalfSpan);
-                if (yN > 0.5 && sideAbs > 0.14) {
-                    if (majorN > 0.72) highMajorHeadScore++;
-                    if (majorN < 0.28) lowMajorHeadScore++;
-                }
-            });
-            const headOnHighMajor = highMajorHeadScore >= lowMajorHeadScore;
-            const headProgressOf = (majorN: number) =>
-                headOnHighMajor ? majorN : 1 - majorN;
-            const majorNFromHeadProgress = (headProgress: number) =>
-                headOnHighMajor ? headProgress : 1 - headProgress;
-            const localPointFromRatios = (
-                headProgress: number,
-                yRatio: number,
-                sideRatio: number,
-            ) => {
-                const majorN = majorNFromHeadProgress(headProgress);
-                const majorValue = majorMin + majorN * majorSpan;
-                const minorValue = minorCenter + sideRatio * minorHalfSpan;
-                const yValue = yMin + yRatio * ySpan;
-                return majorAxis === "x"
-                    ? new THREE.Vector3(majorValue, yValue, minorValue)
-                    : new THREE.Vector3(minorValue, yValue, majorValue);
-            };
-
-            // Only keep selected gilded areas: forehead, back thin line, hooves, and black eyes.
-            const vertexPos = new THREE.Vector3();
 
             horse.traverse((node) => {
-                if (!(node as THREE.Mesh).isMesh) return;
-                const mesh = node as THREE.Mesh;
-                const geometry = mesh.geometry as THREE.BufferGeometry;
-                const position = geometry.getAttribute("position");
-                if (!position) return;
-
-                geometry.computeVertexNormals();
-                geometry.normalizeNormals();
-
-                const colors = new Float32Array(position.count * 3);
-                for (let vi = 0; vi < position.count; vi++) {
-                    vertexPos.fromBufferAttribute(position, vi);
-                    vertexPos.applyMatrix4(mesh.matrixWorld);
-                    horse.worldToLocal(vertexPos);
-
-                    const major = majorCoord(vertexPos);
-                    const minor = minorCoord(vertexPos);
-                    const majorN = (major - majorMin) / majorSpan;
-                    const yN = (vertexPos.y - yMin) / ySpan;
-                    const sideN = (minor - minorCenter) / minorHalfSpan;
-                    const sideAbs = Math.abs(sideN);
-                    const headProgress = headProgressOf(majorN);
-
-                    const isHoofGold = yN < 0.09;
-                    const isBackGold =
-                        headProgress > 0.48 &&
-                        headProgress < 0.61 &&
-                        yN > 0.67 &&
-                        yN < 0.78 &&
-                        sideAbs < 0.2;
-                    const isHeadGold =
-                        headProgress > 0.88 &&
-                        headProgress < 0.98 &&
-                        yN > 0.66 &&
-                        yN < 0.88 &&
-                        sideAbs < 0.3;
-
-                    const isEyeBlack =
-                        headProgress > 0.9 &&
-                        headProgress < 0.985 &&
-                        yN > 0.62 &&
-                        yN < 0.76 &&
-                        sideAbs > 0.2 &&
-                        sideAbs < 0.34;
-
-                    const color = isEyeBlack
-                        ? eyePaintColor
-                        : isHoofGold || isBackGold || isHeadGold
-                          ? gildedPaintColor
-                          : porcelainPaintColor;
-
-                    const ci = vi * 3;
-                    colors[ci] = color.r;
-                    colors[ci + 1] = color.g;
-                    colors[ci + 2] = color.b;
+                if ((node as THREE.Mesh).isMesh) {
+                    const mesh = node as THREE.Mesh;
+                    const geometry = mesh.geometry as THREE.BufferGeometry;
+                    geometry.computeVertexNormals();
+                    geometry.normalizeNormals();
+                    mesh.material = horseBodyMat;
                 }
-
-                geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-                geometry.getAttribute("color").needsUpdate = true;
-
-                horseBodyMat.vertexColors = true;
-                mesh.material = horseBodyMat;
             });
-
-            const maneTargets = [0.46, 0.55, 0.64, 0.73, 0.81, 0.88, 0.94];
-            const maneAnchors = maneTargets.map((headProgress, idx) => {
-                const yTarget =
-                    idx < 2 ? 0.71 : idx < 5 ? 0.79 : 0.85 - (idx - 5) * 0.02;
-                const target = localPointFromRatios(headProgress, yTarget, 0);
-                return pickSurfacePoint(
-                    sampledPoints,
-                    (p) => {
-                        const pHead =
-                            headProgressOf((majorCoord(p) - majorMin) / majorSpan);
-                        const yN = (p.y - yMin) / ySpan;
-                        const sideAbs = Math.abs(
-                            (minorCoord(p) - minorCenter) / minorHalfSpan,
-                        );
-                        return (
-                            Math.abs(pHead - headProgress) < 0.17 &&
-                            yN > 0.64 &&
-                            yN < 0.93 &&
-                            sideAbs < 0.28
-                        );
-                    },
-                    (p) => {
-                        const pHead =
-                            headProgressOf((majorCoord(p) - majorMin) / majorSpan);
-                        const yN = (p.y - yMin) / ySpan;
-                        const sideAbs = Math.abs(
-                            (minorCoord(p) - minorCenter) / minorHalfSpan,
-                        );
-                        return (
-                            -p.distanceToSquared(target) * 8 +
-                            yN * 1.8 -
-                            sideAbs * 1.8 -
-                            Math.abs(pHead - headProgress) * 2.6
-                        );
-                    },
-                    target,
-                );
-            });
-
-            const maneCurve = new THREE.CatmullRomCurve3(maneAnchors);
-            const maneMesh = new THREE.Mesh(
-                new THREE.TubeGeometry(
-                    maneCurve,
-                    34,
-                    Math.max(ySpan * 0.0115, 0.009),
-                    9,
-                    false,
-                ),
-                maneGoldMat,
-            );
-            horse.add(maneMesh);
-
-            const maneRidge = new THREE.Mesh(
-                new THREE.TubeGeometry(
-                    maneCurve,
-                    34,
-                    Math.max(ySpan * 0.0062, 0.0056),
-                    8,
-                    false,
-                ),
-                trimGoldMat,
-            );
-            horse.add(maneRidge);
 
             decorationGroup.position.y = HORSE_BASE_Y;
             module.add(decorationGroup);
