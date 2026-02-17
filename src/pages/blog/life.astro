@@ -83,6 +83,7 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
 <script>
     import * as THREE from "three";
     import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+    import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 
     let scene: THREE.Scene;
     let camera: THREE.PerspectiveCamera;
@@ -138,18 +139,31 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
         renderer.toneMappingExposure = 1.2;
         container.appendChild(renderer.domElement);
 
-        // 3. Lighting
-        const sun = new THREE.DirectionalLight(0xfff0dd, 2);
+        // --- NEW: Environment for Reflections ---
+        const generator = new THREE.PMREMGenerator(renderer);
+        scene.environment = generator.fromScene(
+            new RoomEnvironment(),
+            0.04,
+        ).texture;
+
+        // 3. Lighting (Boosted for visibility)
+        const sun = new THREE.DirectionalLight(0xfff5ee, 3);
         sun.position.set(20, 50, 40);
         sun.castShadow = true;
         scene.add(sun);
 
-        const fill = new THREE.PointLight(0xffffff, 500, 100);
-        fill.position.set(-20, 10, 20);
+        const fill = new THREE.PointLight(0xffffff, 800, 100);
+        fill.position.set(-20, 20, 20);
         scene.add(fill);
 
-        const ambient = new THREE.AmbientLight(0xffffff, 0.3);
+        const ambient = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambient);
+
+        // Top Light to catch the cones
+        const topLight = new THREE.SpotLight(0xffd700, 1000);
+        topLight.position.set(0, 80, 0);
+        topLight.angle = Math.PI / 3;
+        scene.add(topLight);
 
         // 4. Load & Construct
         await createCarousel();
@@ -183,7 +197,7 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
             // The horse model is animated, but we'll use its static form and apply colors
             horseModel.scale.set(0.05, 0.05, 0.05); // Scale down the realistic horse
         } catch (e) {
-            console.error("Failed to load realistic horse, using fallback", e);
+            console.error("Failed to load realistic horse", e);
             // ... fallback logic if needed
             return;
         }
@@ -193,13 +207,16 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
             metalness: 1.0,
             roughness: 0.1,
             clearcoat: 1.0,
+            reflectivity: 1.0,
+            envMapIntensity: 1.5,
         });
 
         const whiteMat = new THREE.MeshPhysicalMaterial({
             color: 0xffffff,
-            metalness: 0.05,
-            roughness: 0.2,
+            metalness: 0.0,
+            roughness: 0.1,
             clearcoat: 1.0,
+            envMapIntensity: 0.8,
         });
 
         // Pillar & Platter
