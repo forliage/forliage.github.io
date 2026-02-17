@@ -432,11 +432,6 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         const gildedPaintColor = new THREE.Color(0xffb400);
         const eyePaintColor = new THREE.Color(0x111114);
         const porcelainPaintColor = new THREE.Color(0xffffff);
-        const horseEyeMat = new THREE.MeshStandardMaterial({
-            color: 0x0d0d12,
-            metalness: 0.08,
-            roughness: 0.14,
-        });
 
         // Glazed porcelain material formula
         const porcelainCoreMat = new THREE.MeshPhysicalMaterial({
@@ -597,63 +592,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                     : new THREE.Vector3(minorValue, yValue, majorValue);
             };
 
-            const eyeLAnchor = pickSurfacePoint(
-                sampledPoints,
-                (p) => {
-                    const majorN = (majorCoord(p) - majorMin) / majorSpan;
-                    const headProgress = headProgressOf(majorN);
-                    const yN = (p.y - yMin) / ySpan;
-                    const sideN = (minorCoord(p) - minorCenter) / minorHalfSpan;
-                    return (
-                        headProgress > 0.86 &&
-                        yN > 0.58 &&
-                        yN < 0.76 &&
-                        sideN > 0.16
-                    );
-                },
-                (p) => {
-                    const majorN = (majorCoord(p) - majorMin) / majorSpan;
-                    const headProgress = headProgressOf(majorN);
-                    const yN = (p.y - yMin) / ySpan;
-                    const sideN = (minorCoord(p) - minorCenter) / minorHalfSpan;
-                    return (
-                        headProgress * 2.3 -
-                        Math.abs(yN - 0.67) * 5.2 -
-                        Math.abs(sideN - 0.28) * 7.2
-                    );
-                },
-                localPointFromRatios(0.91, 0.67, 0.28),
-            );
-
-            const eyeRAnchor = pickSurfacePoint(
-                sampledPoints,
-                (p) => {
-                    const majorN = (majorCoord(p) - majorMin) / majorSpan;
-                    const headProgress = headProgressOf(majorN);
-                    const yN = (p.y - yMin) / ySpan;
-                    const sideN = (minorCoord(p) - minorCenter) / minorHalfSpan;
-                    return (
-                        headProgress > 0.86 &&
-                        yN > 0.58 &&
-                        yN < 0.76 &&
-                        sideN < -0.16
-                    );
-                },
-                (p) => {
-                    const majorN = (majorCoord(p) - majorMin) / majorSpan;
-                    const headProgress = headProgressOf(majorN);
-                    const yN = (p.y - yMin) / ySpan;
-                    const sideN = (minorCoord(p) - minorCenter) / minorHalfSpan;
-                    return (
-                        headProgress * 2.3 -
-                        Math.abs(yN - 0.67) * 5.2 -
-                        Math.abs(sideN + 0.28) * 7.2
-                    );
-                },
-                localPointFromRatios(0.91, 0.67, -0.28),
-            );
-
-            // Dye only selected spots: head, tail base, back patch, hooves and black eyes.
+            // Only keep selected gilded areas: forehead, back thin line, hooves, and black eyes.
             const vertexPos = new THREE.Vector3();
 
             horse.traverse((node) => {
@@ -686,19 +625,21 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                         headProgress < 0.61 &&
                         yN > 0.67 &&
                         yN < 0.78 &&
-                        sideAbs < 0.24;
+                        sideAbs < 0.2;
                     const isHeadGold =
                         headProgress > 0.88 &&
-                        yN > 0.52 &&
-                        yN < 0.82 &&
-                        sideAbs < 0.36;
+                        headProgress < 0.98 &&
+                        yN > 0.66 &&
+                        yN < 0.88 &&
+                        sideAbs < 0.3;
 
                     const isEyeBlack =
                         headProgress > 0.9 &&
-                        yN > 0.6 &&
-                        yN < 0.73 &&
-                        sideAbs > 0.22 &&
-                        sideAbs < 0.36;
+                        headProgress < 0.985 &&
+                        yN > 0.62 &&
+                        yN < 0.76 &&
+                        sideAbs > 0.2 &&
+                        sideAbs < 0.34;
 
                     const color = isEyeBlack
                         ? eyePaintColor
@@ -719,21 +660,52 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                 mesh.material = horseBodyMat;
             });
 
-            const maneSide = -0.24;
-            const maneCurve = new THREE.CatmullRomCurve3([
-                localPointFromRatios(0.46, 0.71, maneSide * 0.35),
-                localPointFromRatios(0.57, 0.8, maneSide * 0.56),
-                localPointFromRatios(0.68, 0.87, maneSide * 0.74),
-                localPointFromRatios(0.79, 0.9, maneSide * 0.84),
-                localPointFromRatios(0.89, 0.87, maneSide * 0.78),
-                localPointFromRatios(0.95, 0.81, maneSide * 0.64),
-            ]);
+            const maneTargets = [0.46, 0.55, 0.64, 0.73, 0.81, 0.88, 0.94];
+            const maneAnchors = maneTargets.map((headProgress, idx) => {
+                const yTarget =
+                    idx < 2 ? 0.71 : idx < 5 ? 0.79 : 0.85 - (idx - 5) * 0.02;
+                const target = localPointFromRatios(headProgress, yTarget, 0);
+                return pickSurfacePoint(
+                    sampledPoints,
+                    (p) => {
+                        const pHead =
+                            headProgressOf((majorCoord(p) - majorMin) / majorSpan);
+                        const yN = (p.y - yMin) / ySpan;
+                        const sideAbs = Math.abs(
+                            (minorCoord(p) - minorCenter) / minorHalfSpan,
+                        );
+                        return (
+                            Math.abs(pHead - headProgress) < 0.17 &&
+                            yN > 0.64 &&
+                            yN < 0.93 &&
+                            sideAbs < 0.28
+                        );
+                    },
+                    (p) => {
+                        const pHead =
+                            headProgressOf((majorCoord(p) - majorMin) / majorSpan);
+                        const yN = (p.y - yMin) / ySpan;
+                        const sideAbs = Math.abs(
+                            (minorCoord(p) - minorCenter) / minorHalfSpan,
+                        );
+                        return (
+                            -p.distanceToSquared(target) * 8 +
+                            yN * 1.8 -
+                            sideAbs * 1.8 -
+                            Math.abs(pHead - headProgress) * 2.6
+                        );
+                    },
+                    target,
+                );
+            });
+
+            const maneCurve = new THREE.CatmullRomCurve3(maneAnchors);
             const maneMesh = new THREE.Mesh(
                 new THREE.TubeGeometry(
                     maneCurve,
-                    36,
-                    Math.max(ySpan * 0.017, 0.016),
-                    10,
+                    34,
+                    Math.max(ySpan * 0.0115, 0.009),
+                    9,
                     false,
                 ),
                 maneGoldMat,
@@ -743,67 +715,14 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             const maneRidge = new THREE.Mesh(
                 new THREE.TubeGeometry(
                     maneCurve,
-                    36,
-                    Math.max(ySpan * 0.008, 0.0085),
+                    34,
+                    Math.max(ySpan * 0.0062, 0.0056),
                     8,
                     false,
                 ),
                 trimGoldMat,
             );
             horse.add(maneRidge);
-
-            const backLineCurve = new THREE.CatmullRomCurve3([
-                localPointFromRatios(0.47, 0.71, maneSide * 0.06),
-                localPointFromRatios(0.54, 0.74, maneSide * 0.1),
-                localPointFromRatios(0.61, 0.72, maneSide * 0.08),
-            ]);
-            const backLineMesh = new THREE.Mesh(
-                new THREE.TubeGeometry(
-                    backLineCurve,
-                    20,
-                    Math.max(ySpan * 0.009, 0.0085),
-                    8,
-                    false,
-                ),
-                trimGoldMat,
-            );
-            horse.add(backLineMesh);
-
-            const noseBand = new THREE.Mesh(
-                new THREE.TorusGeometry(
-                    Math.max(ySpan * 0.032, 0.03),
-                    Math.max(ySpan * 0.0055, 0.0055),
-                    8,
-                    18,
-                ),
-                trimGoldMat,
-            );
-            noseBand.position.copy(localPointFromRatios(0.92, 0.56, 0));
-            if (majorAxis === "x") noseBand.rotation.y = Math.PI / 2;
-            horse.add(noseBand);
-
-            const forelock = new THREE.Mesh(
-                new THREE.SphereGeometry(Math.max(ySpan * 0.026, 0.02), 10, 8),
-                trimGoldMat,
-            );
-            forelock.position.copy(localPointFromRatios(0.94, 0.83, maneSide * 0.92));
-            forelock.scale.set(1, 1.35, 0.8);
-            horse.add(forelock);
-
-            const eyeRadius = Math.max(ySpan * 0.018, 0.015);
-            const eyeL = new THREE.Mesh(
-                new THREE.SphereGeometry(eyeRadius, 10, 8),
-                horseEyeMat,
-            );
-            eyeL.position.copy(eyeLAnchor);
-            horse.add(eyeL);
-
-            const eyeR = new THREE.Mesh(
-                new THREE.SphereGeometry(eyeRadius, 10, 8),
-                horseEyeMat,
-            );
-            eyeR.position.copy(eyeRAnchor);
-            horse.add(eyeR);
 
             decorationGroup.position.y = HORSE_BASE_Y;
             module.add(decorationGroup);
