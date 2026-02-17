@@ -146,24 +146,23 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
             0.04,
         ).texture;
 
-        // 3. Lighting (Boosted for visibility)
-        const sun = new THREE.DirectionalLight(0xfff5ee, 3);
-        sun.position.set(20, 50, 40);
+        // 3. Lighting (Cinema Grade)
+        const sun = new THREE.DirectionalLight(0xfff5ee, 4);
+        sun.position.set(30, 60, 40);
         sun.castShadow = true;
         scene.add(sun);
 
-        const fill = new THREE.PointLight(0xffffff, 800, 100);
-        fill.position.set(-20, 20, 20);
+        const fill = new THREE.PointLight(0xffffff, 1200, 150);
+        fill.position.set(-30, 30, 30);
         scene.add(fill);
 
-        const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+        const ambient = new THREE.AmbientLight(0xffffff, 1.2);
         scene.add(ambient);
 
-        // Top Light to catch the cones
-        const topLight = new THREE.SpotLight(0xffd700, 1000);
-        topLight.position.set(0, 80, 0);
-        topLight.angle = Math.PI / 3;
-        scene.add(topLight);
+        // Underlight for the horses
+        const floorLight = new THREE.PointLight(0xffd700, 500, 50);
+        floorLight.position.set(0, -5, 0);
+        scene.add(floorLight);
 
         // 4. Load & Construct
         await createCarousel();
@@ -194,11 +193,9 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
         try {
             const gltf = await gltfLoader.loadAsync(horseUrl);
             horseModel = gltf.scene;
-            // The horse model is animated, but we'll use its static form and apply colors
-            horseModel.scale.set(0.05, 0.05, 0.05); // Scale down the realistic horse
+            horseModel.scale.set(0.06, 0.06, 0.06);
         } catch (e) {
             console.error("Failed to load realistic horse", e);
-            // ... fallback logic if needed
             return;
         }
 
@@ -208,15 +205,22 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
             roughness: 0.1,
             clearcoat: 1.0,
             reflectivity: 1.0,
-            envMapIntensity: 1.5,
+            envMapIntensity: 2.5,
         });
 
+        // "Glazed Porcelain" (琉璃陶瓷) Material Formula
         const whiteMat = new THREE.MeshPhysicalMaterial({
             color: 0xffffff,
             metalness: 0.0,
-            roughness: 0.1,
+            roughness: 0.05,
+            transmission: 0.2, // Subsurface scattering feel
+            thickness: 2.0,
+            ior: 1.55,
             clearcoat: 1.0,
-            envMapIntensity: 0.8,
+            clearcoatRoughness: 0.02,
+            envMapIntensity: 2.0,
+            specularIntensity: 1.0,
+            specularColor: new THREE.Color(0xffffff),
         });
 
         // Pillar & Platter
@@ -228,7 +232,7 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
         carouselGroup.add(pillar);
 
         const base = new THREE.Mesh(
-            new THREE.CylinderGeometry(28, 28, 2, 64),
+            new THREE.CylinderGeometry(28, 28, 2.5, 64),
             goldMat,
         );
         base.position.y = -2;
@@ -270,7 +274,11 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
                 }
             });
             horseInstance.position.y = 15;
-            horseInstance.rotation.y = -Math.PI / 2; // Orient correctly
+
+            // Fix orientation: face tangentially (along the orbit path)
+            // Default model faces +X. We want it to face the direction of rotation.
+            horseInstance.rotation.y = 0;
+
             horseInstance.userData = { index: i, clickable: true };
             module.add(horseInstance);
 
@@ -279,7 +287,8 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
                 0,
                 Math.sin(angle) * radius,
             );
-            module.rotation.y = -angle; // Face direction of travel
+            // Orient the group so that the horse (facing +X internally) points along the tangent
+            module.rotation.y = -angle;
 
             carouselGroup.add(module);
             horseModules.push(module);
