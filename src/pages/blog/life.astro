@@ -96,6 +96,82 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
     let mouse = new THREE.Vector2();
     let globalEnvMap: THREE.Texture;
 
+    function createPorcelainMaps(size = 256) {
+        const colorCanvas = document.createElement("canvas");
+        colorCanvas.width = size;
+        colorCanvas.height = size;
+        const colorCtx = colorCanvas.getContext("2d");
+
+        const roughCanvas = document.createElement("canvas");
+        roughCanvas.width = size;
+        roughCanvas.height = size;
+        const roughCtx = roughCanvas.getContext("2d");
+
+        if (colorCtx && roughCtx) {
+            colorCtx.fillStyle = "#f7efe3";
+            colorCtx.fillRect(0, 0, size, size);
+
+            for (let i = 0; i < 5000; i++) {
+                const x = Math.random() * size;
+                const y = Math.random() * size;
+                const r = 0.35 + Math.random() * 1.2;
+                const alpha = 0.03 + Math.random() * 0.06;
+                const hue = 34 + Math.floor((Math.random() - 0.5) * 8);
+                colorCtx.fillStyle = `hsla(${hue}, 35%, ${90 + Math.random() * 7}%, ${alpha})`;
+                colorCtx.beginPath();
+                colorCtx.arc(x, y, r, 0, Math.PI * 2);
+                colorCtx.fill();
+            }
+
+            colorCtx.strokeStyle = "rgba(220, 210, 190, 0.12)";
+            for (let i = 0; i < 120; i++) {
+                colorCtx.beginPath();
+                colorCtx.moveTo(Math.random() * size, Math.random() * size);
+                colorCtx.bezierCurveTo(
+                    Math.random() * size,
+                    Math.random() * size,
+                    Math.random() * size,
+                    Math.random() * size,
+                    Math.random() * size,
+                    Math.random() * size,
+                );
+                colorCtx.stroke();
+            }
+
+            roughCtx.fillStyle = "rgb(58,58,58)";
+            roughCtx.fillRect(0, 0, size, size);
+
+            for (let i = 0; i < 12000; i++) {
+                const x = Math.random() * size;
+                const y = Math.random() * size;
+                const v = 48 + Math.floor(Math.random() * 48);
+                roughCtx.fillStyle = `rgb(${v},${v},${v})`;
+                roughCtx.fillRect(x, y, 1, 1);
+            }
+
+            roughCtx.strokeStyle = "rgba(40,40,40,0.35)";
+            for (let i = 0; i < 140; i++) {
+                roughCtx.beginPath();
+                roughCtx.moveTo(Math.random() * size, Math.random() * size);
+                roughCtx.lineTo(Math.random() * size, Math.random() * size);
+                roughCtx.stroke();
+            }
+        }
+
+        const porcelainMap = new THREE.CanvasTexture(colorCanvas);
+        porcelainMap.wrapS = THREE.RepeatWrapping;
+        porcelainMap.wrapT = THREE.RepeatWrapping;
+        porcelainMap.repeat.set(2.4, 2.4);
+        porcelainMap.colorSpace = THREE.SRGBColorSpace;
+
+        const porcelainRoughnessMap = new THREE.CanvasTexture(roughCanvas);
+        porcelainRoughnessMap.wrapS = THREE.RepeatWrapping;
+        porcelainRoughnessMap.wrapT = THREE.RepeatWrapping;
+        porcelainRoughnessMap.repeat.set(2.4, 2.4);
+
+        return { porcelainMap, porcelainRoughnessMap };
+    }
+
     // Physical Parameters
     const HORSE_COUNT = 9;
     const RADIUS = 28;
@@ -139,7 +215,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.35;
+        renderer.toneMappingExposure = 1.1;
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         container.appendChild(renderer.domElement);
 
@@ -150,37 +226,41 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             0.04,
         ).texture;
         scene.environment = globalEnvMap;
-        scene.environmentIntensity = 1.2;
+        scene.environmentIntensity = 1.55;
 
         // 3. Lighting (Porcelain + Gilded Metal Rig)
-        const keyLight = new THREE.DirectionalLight(0xfff3df, 7.2);
-        keyLight.position.set(45, 65, 55);
+        const keyLight = new THREE.DirectionalLight(0xfff2dc, 3.8);
+        keyLight.position.set(42, 62, 48);
         scene.add(keyLight);
 
-        const rimLight = new THREE.DirectionalLight(0xfff7e6, 5.0);
-        rimLight.position.set(-55, 35, -45);
+        const rimLight = new THREE.DirectionalLight(0xe8f0ff, 2.2);
+        rimLight.position.set(-52, 34, -42);
         scene.add(rimLight);
 
         const topWarmLight = new THREE.SpotLight(
-            0xffe1a8,
-            1200,
-            200,
+            0xffdfad,
+            620,
+            180,
             Math.PI / 3,
-            0.35,
-            1.2,
+            0.45,
+            1.4,
         );
         topWarmLight.position.set(0, 72, 15);
         topWarmLight.target.position.set(0, 16, 0);
         scene.add(topWarmLight);
         scene.add(topWarmLight.target);
 
-        const bounceLight = new THREE.PointLight(0xffd68a, 900, 140, 2);
-        bounceLight.position.set(0, -8, 0);
+        const bounceLight = new THREE.PointLight(0xffd8a0, 260, 120, 2);
+        bounceLight.position.set(0, -6, 0);
         scene.add(bounceLight);
 
-        const ambient = new THREE.AmbientLight(0xf6efe2, 1.8);
+        const sideFill = new THREE.PointLight(0xfff4db, 220, 170, 2);
+        sideFill.position.set(35, 25, -5);
+        scene.add(sideFill);
+
+        const ambient = new THREE.AmbientLight(0xfff8ef, 0.45);
         scene.add(ambient);
-        const hemi = new THREE.HemisphereLight(0xfff6e8, 0x11151f, 2.1);
+        const hemi = new THREE.HemisphereLight(0xfff8ec, 0x090c14, 0.78);
         scene.add(hemi);
 
         // 4. Construct
@@ -225,28 +305,58 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         if (!horseTemplate) return;
 
         // --- PREMIUM MATERIAL FORMULAS ---
+        const { porcelainMap, porcelainRoughnessMap } = createPorcelainMaps();
+
         const goldMat = new THREE.MeshPhysicalMaterial({
-            color: 0xe4bf63,
+            color: 0xd7b15a,
             metalness: 1.0,
-            roughness: 0.18,
-            clearcoat: 0.45,
-            clearcoatRoughness: 0.08,
-            envMapIntensity: 2.8,
+            roughness: 0.14,
+            clearcoat: 0.65,
+            clearcoatRoughness: 0.07,
+            envMapIntensity: 3.4,
         });
 
+        const goldDetailMat = goldMat.clone();
+        goldDetailMat.color = new THREE.Color(0xffe2a5);
+        goldDetailMat.roughness = 0.09;
+        goldDetailMat.envMapIntensity = 3.9;
+
         // "Glazed Porcelain" (琉璃陶瓷) Material Formula
-        const porcelainMat = new THREE.MeshPhysicalMaterial({
-            color: 0xf8f1e6,
-            metalness: 0.03,
-            roughness: 0.28,
+        const porcelainCoreMat = new THREE.MeshPhysicalMaterial({
+            color: 0xf7eee2,
+            map: porcelainMap,
+            roughnessMap: porcelainRoughnessMap,
+            metalness: 0.0,
+            roughness: 0.16,
             clearcoat: 1.0,
-            clearcoatRoughness: 0.04,
+            clearcoatRoughness: 0.02,
+            ior: 1.52,
+            transmission: 0.08,
+            thickness: 0.55,
+            attenuationDistance: 2.6,
+            attenuationColor: new THREE.Color(0xfff4e4),
+            sheen: 0.2,
+            sheenColor: new THREE.Color(0xffffff),
+            sheenRoughness: 0.34,
+            envMapIntensity: 2.9,
+            specularIntensity: 1.0,
+            specularColor: new THREE.Color(0xfff3e3),
+            side: THREE.DoubleSide,
+        });
+
+        const porcelainGlazeMat = new THREE.MeshPhysicalMaterial({
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.18,
+            metalness: 0.0,
+            roughness: 0.03,
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.01,
             ior: 1.5,
-            envMapIntensity: 2.1,
-            specularIntensity: 0.9,
-            specularColor: new THREE.Color(0xfff1d6),
-            emissive: new THREE.Color(0x2a2015),
-            emissiveIntensity: 0.1,
+            envMapIntensity: 3.2,
+            specularIntensity: 1.0,
+            specularColor: new THREE.Color(0xfff8ef),
+            depthWrite: false,
             side: THREE.DoubleSide,
         });
 
@@ -292,8 +402,17 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
 
             // The Horse Body
             const horse = cloneSkinned(horseTemplate);
-            const horseBodyMat = porcelainMat.clone();
+            const horseBodyMat = porcelainCoreMat.clone();
             horseBodyMat.envMap = globalEnvMap;
+            horseBodyMat.clearcoat = porcelainGlazeMat.clearcoat;
+            horseBodyMat.clearcoatRoughness =
+                porcelainGlazeMat.clearcoatRoughness;
+            horseBodyMat.specularIntensity = porcelainGlazeMat.specularIntensity;
+            horseBodyMat.specularColor = porcelainGlazeMat.specularColor.clone();
+            horseBodyMat.envMapIntensity = Math.max(
+                horseBodyMat.envMapIntensity,
+                porcelainGlazeMat.envMapIntensity,
+            );
             horse.traverse((node) => {
                 if ((node as THREE.Mesh).isMesh) {
                     const mesh = node as THREE.Mesh;
@@ -305,78 +424,165 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             });
             horse.scale.set(0.075, 0.075, 0.075);
             horse.rotation.y = Math.PI; // Correct CCW Inverse Orientation
+            horse.updateMatrixWorld(true);
+
+            const rawBounds = new THREE.Box3().setFromObject(horse);
+            const rawCenter = new THREE.Vector3();
+            const horseSize = new THREE.Vector3();
+            rawBounds.getCenter(rawCenter);
+            rawBounds.getSize(horseSize);
+
+            // Align to local origin: center on XZ and place feet at Y=0.
+            horse.position.x -= rawCenter.x;
+            horse.position.z -= rawCenter.z;
+            horse.position.y -= rawBounds.min.y;
             horse.userData = { index: i, clickable: true };
             decorationGroup.add(horse);
+            horse.updateMatrixWorld(true);
+
+            const alignedBounds = new THREE.Box3().setFromObject(horse);
+            alignedBounds.getSize(horseSize);
+
+            const majorAxis: "x" | "z" =
+                horseSize.x >= horseSize.z ? "x" : "z";
+            const majorHalf =
+                (majorAxis === "x" ? horseSize.x : horseSize.z) * 0.5;
+            const minorHalf =
+                (majorAxis === "x" ? horseSize.z : horseSize.x) * 0.5;
+
+            const axisVec = (major: number, minor: number, y: number) =>
+                majorAxis === "x"
+                    ? new THREE.Vector3(major, y, minor)
+                    : new THREE.Vector3(minor, y, major);
+
+            const saddleY = horseSize.y * 0.62;
+            const neckY = horseSize.y * 0.78;
+            const legY = horseSize.y * 0.2;
+            const frontMajor = majorHalf * 0.82;
+            const backMajor = -majorHalf * 0.72;
 
             // --- GILDED DECORATIONS (鎏金配饰) ---
 
             // A. Luxury Saddle (马鞍)
             const saddleBase = new THREE.Mesh(
-                new THREE.TorusGeometry(1.4, 0.6, 12, 24, Math.PI),
+                new THREE.BoxGeometry(
+                    Math.max(majorHalf * 0.95, 1.8),
+                    Math.max(horseSize.y * 0.08, 0.35),
+                    Math.max(minorHalf * 1.1, 0.9),
+                ),
                 goldMat,
             );
-            saddleBase.rotation.x = Math.PI / 2;
-            saddleBase.position.set(0, 16.2, 0);
+            saddleBase.position.copy(axisVec(0, 0, saddleY));
             decorationGroup.add(saddleBase);
 
             const saddlePad = new THREE.Mesh(
-                new THREE.BoxGeometry(2, 0.5, 3),
-                goldMat,
+                new THREE.BoxGeometry(
+                    Math.max(majorHalf * 0.72, 1.2),
+                    Math.max(horseSize.y * 0.12, 0.28),
+                    Math.max(horseSize.y * 0.035, 0.12),
+                ),
+                goldDetailMat,
             );
-            saddlePad.position.set(0, 16.5, 0);
+            saddlePad.position.copy(axisVec(0, minorHalf * 0.62, saddleY - 0.35));
             decorationGroup.add(saddlePad);
 
-            // B. Gilded Bridle/Headgear (头饰/马勒)
-            // Ring around the muzzle
-            const muzzleRing = new THREE.Mesh(
-                new THREE.TorusGeometry(0.6, 0.15, 8, 16),
-                goldMat,
+            const saddlePadMirror = saddlePad.clone();
+            saddlePadMirror.position.copy(
+                axisVec(0, -minorHalf * 0.62, saddleY - 0.35),
             );
-            muzzleRing.position.set(0, 19.5, -4.5);
-            muzzleRing.rotation.y = Math.PI / 2;
+            decorationGroup.add(saddlePadMirror);
+
+            const bellyBelt = new THREE.Mesh(
+                new THREE.TorusGeometry(
+                    Math.max(minorHalf * 0.62, 0.55),
+                    Math.max(horseSize.y * 0.014, 0.05),
+                    14,
+                    30,
+                ),
+                goldDetailMat,
+            );
+            bellyBelt.position.copy(axisVec(0, 0, horseSize.y * 0.5));
+            if (majorAxis === "x") bellyBelt.rotation.y = Math.PI / 2;
+            decorationGroup.add(bellyBelt);
+
+            // B. Gilded Bridle/Headgear (头饰/马勒)
+            const muzzleRing = new THREE.Mesh(
+                new THREE.TorusGeometry(
+                    Math.max(horseSize.y * 0.095, 0.35),
+                    Math.max(horseSize.y * 0.016, 0.06),
+                    12,
+                    24,
+                ),
+                goldDetailMat,
+            );
+            muzzleRing.position.copy(axisVec(frontMajor, 0, neckY * 0.95));
+            if (majorAxis === "x") muzzleRing.rotation.y = Math.PI / 2;
+            else muzzleRing.rotation.x = Math.PI / 2;
             decorationGroup.add(muzzleRing);
 
             // Decorative star/medal on head
             const headMedal = new THREE.Mesh(
-                new THREE.SphereGeometry(0.5, 8, 8),
-                goldMat,
+                new THREE.SphereGeometry(Math.max(horseSize.y * 0.052, 0.2), 12, 12),
+                goldDetailMat,
             );
-            headMedal.position.set(0, 21.5, -3.2);
+            headMedal.position.copy(
+                axisVec(frontMajor * 0.96, 0, neckY + horseSize.y * 0.04),
+            );
             decorationGroup.add(headMedal);
 
             // C. Decorative Straps (饰带)
-            // Connecting neck to saddle
-            const strapL = new THREE.Mesh(
-                new THREE.TorusGeometry(3, 0.1, 8, 16, Math.PI / 2),
-                goldMat,
-            );
-            strapL.position.set(0.6, 18, -1.5);
-            strapL.rotation.z = Math.PI / 4;
-            decorationGroup.add(strapL);
+            const reinRadius = Math.max(horseSize.y * 0.008, 0.03);
+            [1, -1].forEach((sideSign) => {
+                const reinCurve = new THREE.CatmullRomCurve3([
+                    axisVec(frontMajor * 0.95, sideSign * minorHalf * 0.36, neckY),
+                    axisVec(
+                        majorHalf * 0.45,
+                        sideSign * minorHalf * 0.5,
+                        horseSize.y * 0.69,
+                    ),
+                    axisVec(0, sideSign * minorHalf * 0.55, saddleY + 0.05),
+                ]);
+                const rein = new THREE.Mesh(
+                    new THREE.TubeGeometry(reinCurve, 20, reinRadius, 10, false),
+                    goldDetailMat,
+                );
+                decorationGroup.add(rein);
+            });
 
-            const strapR = new THREE.Mesh(
-                new THREE.TorusGeometry(3, 0.1, 8, 16, Math.PI / 2),
-                goldMat,
+            const tailCharm = new THREE.Mesh(
+                new THREE.CylinderGeometry(
+                    Math.max(horseSize.y * 0.015, 0.05),
+                    Math.max(horseSize.y * 0.015, 0.05),
+                    Math.max(horseSize.y * 0.25, 0.8),
+                    12,
+                ),
+                goldDetailMat,
             );
-            strapR.position.set(-0.6, 18, -1.5);
-            strapR.rotation.z = -Math.PI / 4;
-            decorationGroup.add(strapR);
+            tailCharm.position.copy(axisVec(backMajor, 0, horseSize.y * 0.52));
+            tailCharm.rotation.z = Math.PI / 14;
+            if (majorAxis === "z") tailCharm.rotation.x = Math.PI / 14;
+            decorationGroup.add(tailCharm);
 
             // D. Leg Gilding (鎏金腿饰)
-            const legBandOffsets = [
-                new THREE.Vector3(0.95, 12.4, 2.3),
-                new THREE.Vector3(-0.95, 12.4, 2.3),
-                new THREE.Vector3(0.95, 12.4, -2.6),
-                new THREE.Vector3(-0.95, 12.4, -2.6),
-            ];
-            legBandOffsets.forEach((offset) => {
-                const legBand = new THREE.Mesh(
-                    new THREE.TorusGeometry(0.35, 0.08, 10, 20),
-                    goldMat,
-                );
-                legBand.position.copy(offset);
-                legBand.rotation.x = Math.PI / 2;
-                decorationGroup.add(legBand);
+            const legMajor = majorHalf * 0.42;
+            const legMinor = minorHalf * 0.44;
+            [-1, 1].forEach((majorSign) => {
+                [-1, 1].forEach((minorSign) => {
+                    const legBand = new THREE.Mesh(
+                        new THREE.TorusGeometry(
+                            Math.max(horseSize.y * 0.048, 0.12),
+                            Math.max(horseSize.y * 0.01, 0.03),
+                            12,
+                            24,
+                        ),
+                        goldDetailMat,
+                    );
+                    legBand.position.copy(
+                        axisVec(majorSign * legMajor, minorSign * legMinor, legY),
+                    );
+                    legBand.rotation.x = Math.PI / 2;
+                    decorationGroup.add(legBand);
+                });
             });
 
             decorationGroup.position.y = 15;
