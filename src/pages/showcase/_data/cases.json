@@ -1,13 +1,13 @@
 {
     "cases": [
         {
-            "id": "GLASS BUNNY",
+            "id": "case-1",
             "title": "Glass Bunny",
             "intro": "Beautiful Glass Bunny with different color",
             "gif": "/images/out3.png"
         },
         {
-            "id": "WOOD BUNNY",
+            "id": "case-2",
             "title": "Wood Bunny",
             "intro": "Exquisite Wood Bunny with different materials",
             "gif": "/images/PSA.gif"
