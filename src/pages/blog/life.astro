@@ -66,7 +66,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             </div>
 
             <div class="controls-hint">
-                DRAG TO ROTATE • CLICK A HORSE TO EXPLORE
+                DRAG TO ROTATE | CLICK A HORSE TO EXPLORE
             </div>
         </div>
 
@@ -212,11 +212,62 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         return { horseDetailMap, horseDetailRoughnessMap, horseDetailBumpMap };
     }
 
+    function collectSurfacePoints(
+        root: THREE.Object3D,
+        maxPoints = 1200,
+    ): THREE.Vector3[] {
+        const points: THREE.Vector3[] = [];
+        root.updateMatrixWorld(true);
+
+        const meshes: THREE.Mesh[] = [];
+        root.traverse((node) => {
+            if ((node as THREE.Mesh).isMesh) meshes.push(node as THREE.Mesh);
+        });
+
+        const budgetPerMesh = Math.max(40, Math.floor(maxPoints / Math.max(meshes.length, 1)));
+        const temp = new THREE.Vector3();
+
+        meshes.forEach((mesh) => {
+            const geometry = mesh.geometry as THREE.BufferGeometry;
+            const position = geometry.getAttribute("position");
+            if (!position) return;
+
+            const step = Math.max(1, Math.floor(position.count / budgetPerMesh));
+            for (let i = 0; i < position.count; i += step) {
+                temp.fromBufferAttribute(position, i);
+                temp.applyMatrix4(mesh.matrixWorld);
+                root.worldToLocal(temp);
+                points.push(temp.clone());
+            }
+        });
+
+        return points;
+    }
+
+    function pickSurfacePoint(
+        points: THREE.Vector3[],
+        predicate: (p: THREE.Vector3) => boolean,
+        score: (p: THREE.Vector3) => number,
+        fallback: THREE.Vector3,
+    ): THREE.Vector3 {
+        let best = fallback.clone();
+        let bestScore = -Infinity;
+        for (const p of points) {
+            if (!predicate(p)) continue;
+            const s = score(p);
+            if (s > bestScore) {
+                bestScore = s;
+                best = p;
+            }
+        }
+        return best.clone();
+    }
+
     // Physical Parameters
     const HORSE_COUNT = 7;
     const RADIUS = 28;
     const ORBIT_SPEED = 0.0035;
-    const HORSE_BASE_Y = 11;
+    const HORSE_BASE_Y = 5.2;
 
     // Interaction states
     let isDragging = false;
@@ -367,27 +418,27 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         goldDetailMat.roughness = 0.09;
         goldDetailMat.envMapIntensity = 3.9;
 
-        // "Glazed Porcelain" (琉璃陶瓷) Material Formula
+        // Glazed porcelain material formula
         const porcelainCoreMat = new THREE.MeshPhysicalMaterial({
-            color: 0xe8d5be,
+            color: 0xf2e4d2,
             map: horseDetailMap,
             roughnessMap: horseDetailRoughnessMap,
             bumpMap: horseDetailBumpMap,
-            bumpScale: 0.28,
+            bumpScale: 0.4,
             metalness: 0.0,
-            roughness: 0.3,
-            clearcoat: 0.85,
-            clearcoatRoughness: 0.04,
+            roughness: 0.4,
+            clearcoat: 0.92,
+            clearcoatRoughness: 0.12,
             ior: 1.52,
-            transmission: 0.02,
-            thickness: 0.35,
-            attenuationDistance: 2.6,
+            transmission: 0.0,
+            thickness: 0.22,
+            attenuationDistance: 2.0,
             attenuationColor: new THREE.Color(0xf1dfcc),
             sheen: 0.18,
             sheenColor: new THREE.Color(0xffffff),
             sheenRoughness: 0.32,
-            envMapIntensity: 2.0,
-            specularIntensity: 0.9,
+            envMapIntensity: 1.55,
+            specularIntensity: 1.0,
             specularColor: new THREE.Color(0xf7e7d1),
             side: THREE.DoubleSide,
         });
@@ -416,7 +467,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         roof.position.y = 48;
         carouselGroup.add(roof);
 
-        // 2. Horse Instances (9 Slots)
+        // 2. Horse Instances
         for (let i = 0; i < HORSE_COUNT; i++) {
             const angle = (i / HORSE_COUNT) * Math.PI * 2;
             const module = new THREE.Group();
@@ -436,11 +487,11 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             const horse = cloneSkinned(horseTemplate);
             const horseBodyMat = porcelainCoreMat.clone();
             horseBodyMat.envMap = globalEnvMap;
-            horseBodyMat.clearcoat = 0.75;
-            horseBodyMat.clearcoatRoughness = 0.06;
-            horseBodyMat.specularIntensity = 0.75;
+            horseBodyMat.clearcoat = 0.92;
+            horseBodyMat.clearcoatRoughness = 0.11;
+            horseBodyMat.specularIntensity = 0.98;
             horseBodyMat.specularColor = new THREE.Color(0xf6e8d7);
-            horseBodyMat.envMapIntensity = 2.0;
+            horseBodyMat.envMapIntensity = 1.45;
             horse.traverse((node) => {
                 if ((node as THREE.Mesh).isMesh) {
                     const mesh = node as THREE.Mesh;
@@ -483,116 +534,241 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                     ? new THREE.Vector3(major, y, minor)
                     : new THREE.Vector3(minor, y, major);
 
-            const saddleY = horseSize.y * 0.62;
-            const neckY = horseSize.y * 0.78;
+            const saddleY = horseSize.y * 0.6;
+            const neckY = horseSize.y * 0.76;
             const legY = horseSize.y * 0.12;
-            const frontMajor = majorHalf * 0.74;
-            const backMajor = -majorHalf * 0.64;
+            const frontMajor = majorHalf * 0.72;
+            const backMajor = -majorHalf * 0.62;
 
-            // --- GILDED DECORATIONS (鎏金配饰) ---
+            const majorCoord = (p: THREE.Vector3) =>
+                majorAxis === "x" ? p.x : p.z;
+            const minorCoord = (p: THREE.Vector3) =>
+                majorAxis === "x" ? p.z : p.x;
+            const minorOffset = (value: number) =>
+                majorAxis === "x"
+                    ? new THREE.Vector3(0, 0, value)
+                    : new THREE.Vector3(value, 0, 0);
 
-            // A. Luxury Saddle (马鞍)
+            const surfacePoints = collectSurfacePoints(horse, 900);
+            const anchorByTarget = (
+                target: THREE.Vector3,
+                predicate: (p: THREE.Vector3) => boolean,
+                favorY = 0,
+            ) =>
+                pickSurfacePoint(
+                    surfacePoints,
+                    predicate,
+                    (p) => -p.distanceToSquared(target) * 6 + p.y * favorY,
+                    target,
+                );
+
+            const bodyAnchor = anchorByTarget(
+                axisVec(0, 0, saddleY),
+                (p) =>
+                    Math.abs(majorCoord(p)) < majorHalf * 0.5 &&
+                    p.y > horseSize.y * 0.38 &&
+                    p.y < horseSize.y * 0.82,
+                0.2,
+            );
+
+            const headAnchor = anchorByTarget(
+                axisVec(frontMajor, 0, neckY * 0.96),
+                (p) => majorCoord(p) > majorHalf * 0.42 && p.y > horseSize.y * 0.54,
+                0.25,
+            );
+
+            const noseAnchor = anchorByTarget(
+                axisVec(frontMajor * 1.02, 0, neckY * 0.84),
+                (p) => majorCoord(p) > majorHalf * 0.58 && p.y > horseSize.y * 0.45,
+                -0.1,
+            );
+
+            const tailAnchor = anchorByTarget(
+                axisVec(backMajor, 0, horseSize.y * 0.45),
+                (p) =>
+                    majorCoord(p) < -majorHalf * 0.34 &&
+                    p.y > horseSize.y * 0.24 &&
+                    p.y < horseSize.y * 0.64,
+                -0.1,
+            );
+
+            const eyeLAnchor = anchorByTarget(
+                axisVec(frontMajor * 0.9, minorHalf * 0.12, neckY * 0.9),
+                (p) =>
+                    majorCoord(p) > majorHalf * 0.55 &&
+                    minorCoord(p) > 0 &&
+                    p.y > horseSize.y * 0.58,
+                0.1,
+            );
+
+            const eyeRAnchor = anchorByTarget(
+                axisVec(frontMajor * 0.9, -minorHalf * 0.12, neckY * 0.9),
+                (p) =>
+                    majorCoord(p) > majorHalf * 0.55 &&
+                    minorCoord(p) < 0 &&
+                    p.y > horseSize.y * 0.58,
+                0.1,
+            );
+
+            const pickLegAnchor = (majorSign: number, minorSign: number) => {
+                const targetMajor = majorSign * majorHalf * 0.24;
+                const targetMinor = minorSign * minorHalf * 0.18;
+                const target = axisVec(targetMajor, targetMinor, legY * 1.06);
+                return pickSurfacePoint(
+                    surfacePoints,
+                    (p) =>
+                        majorCoord(p) * majorSign > majorHalf * 0.04 &&
+                        minorCoord(p) * minorSign > minorHalf * 0.04 &&
+                        p.y < horseSize.y * 0.42,
+                    (p) =>
+                        -p.distanceToSquared(target) * 8 -
+                        Math.abs(p.y - legY) * 1.2,
+                    target,
+                );
+            };
+
+            // Gilded ornaments are mounted to horse local anchors.
+            const adornmentGroup = new THREE.Group();
+            horse.add(adornmentGroup);
+
             const saddleBand = new THREE.Mesh(
                 new THREE.TorusGeometry(
-                    Math.max(minorHalf * 0.2, 0.12),
-                    Math.max(horseSize.y * 0.006, 0.014),
-                    6,
-                    14,
-                    Math.PI * 1.05,
-                ),
-                goldMat,
-            );
-            saddleBand.position.copy(axisVec(0, 0, saddleY));
-            if (majorAxis === "x") saddleBand.rotation.y = Math.PI / 2;
-            else saddleBand.rotation.x = Math.PI / 2;
-            decorationGroup.add(saddleBand);
-
-            const saddleGem = new THREE.Mesh(
-                new THREE.SphereGeometry(Math.max(horseSize.y * 0.018, 0.05), 8, 8),
-                goldDetailMat,
-            );
-            saddleGem.position.copy(axisVec(0, 0, saddleY + horseSize.y * 0.03));
-            decorationGroup.add(saddleGem);
-
-            // B. Gilded Bridle/Headgear (头饰/马勒)
-            const browBand = new THREE.Mesh(
-                new THREE.TorusGeometry(
-                    Math.max(horseSize.y * 0.04, 0.1),
-                    Math.max(horseSize.y * 0.005, 0.012),
+                    Math.max(minorHalf * 0.145, 0.085),
+                    Math.max(horseSize.y * 0.0038, 0.01),
                     6,
                     14,
                     Math.PI,
                 ),
+                goldMat,
+            );
+            saddleBand.position.copy(
+                bodyAnchor.clone().add(new THREE.Vector3(0, horseSize.y * 0.008, 0)),
+            );
+            if (majorAxis === "x") saddleBand.rotation.y = Math.PI / 2;
+            else saddleBand.rotation.x = Math.PI / 2;
+            adornmentGroup.add(saddleBand);
+
+            const saddleGem = new THREE.Mesh(
+                new THREE.SphereGeometry(Math.max(horseSize.y * 0.013, 0.032), 8, 8),
                 goldDetailMat,
             );
-            browBand.position.copy(axisVec(frontMajor * 0.86, 0, neckY * 0.96));
+            saddleGem.position.copy(
+                bodyAnchor.clone().add(new THREE.Vector3(0, horseSize.y * 0.024, 0)),
+            );
+            adornmentGroup.add(saddleGem);
+
+            [1, -1].forEach((side) => {
+                const sideStud = new THREE.Mesh(
+                    new THREE.SphereGeometry(
+                        Math.max(horseSize.y * 0.009, 0.022),
+                        7,
+                        7,
+                    ),
+                    goldDetailMat,
+                );
+                sideStud.position.copy(
+                    bodyAnchor
+                        .clone()
+                        .add(minorOffset(side * minorHalf * 0.085))
+                        .add(new THREE.Vector3(0, horseSize.y * 0.004, 0)),
+                );
+                adornmentGroup.add(sideStud);
+            });
+
+            const browBand = new THREE.Mesh(
+                new THREE.TorusGeometry(
+                    Math.max(horseSize.y * 0.028, 0.07),
+                    Math.max(horseSize.y * 0.0034, 0.009),
+                    6,
+                    12,
+                    Math.PI,
+                ),
+                goldDetailMat,
+            );
+            browBand.position.copy(
+                headAnchor.clone().add(new THREE.Vector3(0, -horseSize.y * 0.008, 0)),
+            );
             if (majorAxis === "x") browBand.rotation.y = Math.PI / 2;
             else browBand.rotation.x = Math.PI / 2;
-            decorationGroup.add(browBand);
+            adornmentGroup.add(browBand);
 
             const headCrest = new THREE.Mesh(
-                new THREE.SphereGeometry(Math.max(horseSize.y * 0.016, 0.045), 8, 8),
+                new THREE.SphereGeometry(Math.max(horseSize.y * 0.012, 0.03), 8, 8),
                 goldDetailMat,
             );
-            headCrest.position.copy(axisVec(frontMajor * 0.9, 0, neckY));
-            decorationGroup.add(headCrest);
+            headCrest.position.copy(
+                headAnchor.clone().add(new THREE.Vector3(0, horseSize.y * 0.015, 0)),
+            );
+            adornmentGroup.add(headCrest);
 
-            const eyeMat = new THREE.MeshStandardMaterial({
-                color: 0x20160e,
-                metalness: 0.02,
-                roughness: 0.2,
-            });
-            const eyeRadius = Math.max(horseSize.y * 0.011, 0.04);
-            [1, -1].forEach((sideSign) => {
-                const eye = new THREE.Mesh(
-                    new THREE.SphereGeometry(eyeRadius, 8, 8),
-                    eyeMat,
-                );
-                eye.position.copy(
-                    axisVec(
-                        frontMajor * 0.88,
-                        sideSign * minorHalf * 0.08,
-                        neckY * 0.9,
-                    ),
-                );
-                decorationGroup.add(eye);
-            });
-
-            // C. Tail Accent (尾饰)
-            const tailRing = new THREE.Mesh(
+            const noseRing = new THREE.Mesh(
                 new THREE.TorusGeometry(
-                    Math.max(minorHalf * 0.09, 0.09),
-                    Math.max(horseSize.y * 0.004, 0.01),
+                    Math.max(horseSize.y * 0.017, 0.04),
+                    Math.max(horseSize.y * 0.0028, 0.007),
                     6,
                     12,
                 ),
                 goldDetailMat,
             );
-            tailRing.position.copy(axisVec(backMajor * 0.9, 0, horseSize.y * 0.46));
+            noseRing.position.copy(noseAnchor);
+            if (majorAxis === "x") noseRing.rotation.y = Math.PI / 2;
+            else noseRing.rotation.x = Math.PI / 2;
+            adornmentGroup.add(noseRing);
+
+            const eyeMat = new THREE.MeshStandardMaterial({
+                color: 0x23180f,
+                metalness: 0.02,
+                roughness: 0.18,
+            });
+            const eyeRadius = Math.max(horseSize.y * 0.0095, 0.024);
+            const eyeL = new THREE.Mesh(
+                new THREE.SphereGeometry(eyeRadius, 8, 8),
+                eyeMat,
+            );
+            eyeL.position.copy(eyeLAnchor);
+            adornmentGroup.add(eyeL);
+
+            const eyeR = new THREE.Mesh(
+                new THREE.SphereGeometry(eyeRadius, 8, 8),
+                eyeMat,
+            );
+            eyeR.position.copy(eyeRAnchor);
+            adornmentGroup.add(eyeR);
+
+            const tailRing = new THREE.Mesh(
+                new THREE.TorusGeometry(
+                    Math.max(minorHalf * 0.052, 0.05),
+                    Math.max(horseSize.y * 0.003, 0.0078),
+                    6,
+                    12,
+                ),
+                goldDetailMat,
+            );
+            tailRing.position.copy(
+                tailAnchor.clone().add(new THREE.Vector3(0, -horseSize.y * 0.004, 0)),
+            );
             if (majorAxis === "x") tailRing.rotation.y = Math.PI / 2;
             else tailRing.rotation.x = Math.PI / 2;
-            decorationGroup.add(tailRing);
+            adornmentGroup.add(tailRing);
 
-            // D. Leg Gilding (鎏金腿饰)
-            const legMajor = majorHalf * 0.22;
-            const legMinor = minorHalf * 0.14;
-            [-1, 1].forEach((majorSign) => {
-                [-1, 1].forEach((minorSign) => {
-                    const legBand = new THREE.Mesh(
-                        new THREE.TorusGeometry(
-                            Math.max(horseSize.y * 0.017, 0.05),
-                            Math.max(horseSize.y * 0.0035, 0.009),
-                            6,
-                            12,
-                        ),
-                        goldDetailMat,
-                    );
-                    legBand.position.copy(
-                        axisVec(majorSign * legMajor, minorSign * legMinor, legY),
-                    );
-                    legBand.rotation.x = Math.PI / 2;
-                    decorationGroup.add(legBand);
-                });
+            [
+                pickLegAnchor(-1, -1),
+                pickLegAnchor(-1, 1),
+                pickLegAnchor(1, -1),
+                pickLegAnchor(1, 1),
+            ].forEach((anchor) => {
+                const legBand = new THREE.Mesh(
+                    new THREE.TorusGeometry(
+                        Math.max(horseSize.y * 0.012, 0.03),
+                        Math.max(horseSize.y * 0.0026, 0.0068),
+                        6,
+                        10,
+                    ),
+                    goldDetailMat,
+                );
+                legBand.position.copy(anchor);
+                legBand.rotation.x = Math.PI / 2;
+                adornmentGroup.add(legBand);
             });
 
             decorationGroup.position.y = HORSE_BASE_Y;
@@ -664,7 +840,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
 
         horseModules.forEach((mod, i) => {
             const hCont = mod.children[1] as THREE.Group;
-            const bob = Math.sin(time * 2.2 + i * 1.1) * 1.6;
+            const bob = Math.sin(time * 2.2 + i * 1.1) * 1.2;
             hCont.position.y = HORSE_BASE_Y + bob;
 
             // Subtle rotation sway for more life
@@ -830,3 +1006,4 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         }
     }
 </style>
+
