@@ -172,6 +172,23 @@ const { planet } = Astro.props;
                 6.0 *
                 ampMap;
             y += Math.abs(Math.sin(x * 0.4) * Math.cos(z * 0.4)) * 4.0;
+
+            // --- Advanced Geological Features ---
+            // 1. Canyons: Large scale subtractive valleys
+            const valleyNoise =
+                Math.sin(x * 0.015 + seed * 0.1) *
+                Math.cos(z * 0.015 + seed * 0.2);
+            if (valleyNoise < -0.3) {
+                y -= (Math.abs(valleyNoise) - 0.3) * 60.0;
+            }
+
+            // 2. Cracks: Sharp, narrow crevices
+            const crack1 = Math.sin(x * 0.8 + seed * 0.5);
+            const crack2 = Math.cos(z * 0.8 + seed * 0.8);
+            if (Math.abs(crack1 * crack2) > 0.95) {
+                y -= 10.0;
+            }
+
             y += (Math.random() - 0.5) * 0.8;
             pos.setY(i, y);
         }
@@ -232,7 +249,7 @@ const { planet } = Astro.props;
             // Sync height with seeded terrain
             const sx = rx + (seed % 1000) * 0.5;
             const sz = rz + (seed % 777) * 0.3;
-            const ry =
+            const ry_base =
                 Math.sin(sx * 0.03 * freqMap) *
                     Math.cos(sz * 0.03 * freqMap) *
                     18.0 *
@@ -241,8 +258,22 @@ const { planet } = Astro.props;
                     Math.sin(sz * 0.12 * freqMap) *
                     6.0 *
                     ampMap +
-                Math.abs(Math.sin(sx * 0.4) * Math.cos(sz * 0.4)) * 4.0 -
-                size * 0.4;
+                Math.abs(Math.sin(sx * 0.4) * Math.cos(sz * 0.4)) * 4.0;
+
+            let ry = ry_base;
+
+            // Canyon subtraction for rocks
+            const vNoise =
+                Math.sin(sx * 0.015 + seed * 0.1) *
+                Math.cos(sz * 0.015 + seed * 0.2);
+            if (vNoise < -0.3) ry -= (Math.abs(vNoise) - 0.3) * 60.0;
+
+            // Crack subtraction
+            const c1 = Math.sin(sx * 0.8 + seed * 0.5);
+            const c2 = Math.cos(sz * 0.8 + seed * 0.8);
+            if (Math.abs(c1 * c2) > 0.95) ry -= 10.0;
+
+            ry -= size * 0.4;
 
             rock.position.set(rx, ry, rz);
             rock.rotation.set(noise1 * Math.PI, noise2 * Math.PI, noise1 * 0.5);
@@ -316,7 +347,8 @@ const { planet } = Astro.props;
         const ampMap = 0.9 + (seed % 3) * 0.15;
         const sx = fx + (seed % 1000) * 0.5;
         const sz = fz + (seed % 777) * 0.3;
-        const fy =
+
+        const fy_base =
             Math.sin(sx * 0.03 * freqMap) *
                 Math.cos(sz * 0.03 * freqMap) *
                 18.0 *
@@ -326,6 +358,19 @@ const { planet } = Astro.props;
                 6.0 *
                 ampMap +
             Math.abs(Math.sin(sx * 0.4) * Math.cos(sz * 0.4)) * 4.0;
+
+        let fy = fy_base;
+
+        // Canyon subtraction
+        const vNoise =
+            Math.sin(sx * 0.015 + seed * 0.1) *
+            Math.cos(sz * 0.015 + seed * 0.2);
+        if (vNoise < -0.3) fy -= (Math.abs(vNoise) - 0.3) * 60.0;
+
+        // Crack subtraction
+        const c1 = Math.sin(sx * 0.8 + seed * 0.5);
+        const c2 = Math.cos(sz * 0.8 + seed * 0.8);
+        if (Math.abs(c1 * c2) > 0.95) fy -= 10.0;
 
         flagpole.position.set(fx, fy, fz);
         scene.add(flagpole);
@@ -407,6 +452,18 @@ const { planet } = Astro.props;
             6.0 *
             ampMap;
         y += Math.abs(Math.sin(sx * 0.4) * Math.cos(sz * 0.4)) * 4.0;
+
+        // Canyon subtraction
+        const vNoise =
+            Math.sin(sx * 0.015 + seed * 0.1) *
+            Math.cos(sz * 0.015 + seed * 0.2);
+        if (vNoise < -0.3) y -= (Math.abs(vNoise) - 0.3) * 60.0;
+
+        // Crack subtraction
+        const c1 = Math.sin(sx * 0.8 + seed * 0.5);
+        const c2 = Math.cos(sz * 0.8 + seed * 0.8);
+        if (Math.abs(c1 * c2) > 0.95) y -= 10.0;
+
         return y + 8.0; // Stand height
     }
 
