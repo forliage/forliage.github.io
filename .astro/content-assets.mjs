@@ -1,1 +1,10 @@
-export default new Map();
+
+import __ASTRO_IMAGE_IMPORT_2eKKiu from "img_hybrid_nerf/img4.png?astroContentImageFlag=&importer=src%2Fcontent%2Fpaper_insights%2Fhybrid-nerf.md";
+import __ASTRO_IMAGE_IMPORT_Nqfxe from "img_hybrid_nerf/img5.png?astroContentImageFlag=&importer=src%2Fcontent%2Fpaper_insights%2Fhybrid-nerf.md";
+import __ASTRO_IMAGE_IMPORT_ZBTfd2 from "img_hybrid_nerf/img6.png?astroContentImageFlag=&importer=src%2Fcontent%2Fpaper_insights%2Fhybrid-nerf.md";
+import __ASTRO_IMAGE_IMPORT_1eC05 from "img_hybrid_nerf/img2.png?astroContentImageFlag=&importer=src%2Fcontent%2Fpaper_insights%2Fhybrid-nerf.md";
+import __ASTRO_IMAGE_IMPORT_Z23eJXi from "img_hybrid_nerf/img7.png?astroContentImageFlag=&importer=src%2Fcontent%2Fpaper_insights%2Fhybrid-nerf.md";
+import __ASTRO_IMAGE_IMPORT_Z92VER from "img_hybrid_nerf/tab1.png?astroContentImageFlag=&importer=src%2Fcontent%2Fpaper_insights%2Fhybrid-nerf.md";
+import __ASTRO_IMAGE_IMPORT_24tbCx from "img_hybrid_nerf/tab3.png?astroContentImageFlag=&importer=src%2Fcontent%2Fpaper_insights%2Fhybrid-nerf.md";
+export default new Map([["img_hybrid_nerf/img4.png?astroContentImageFlag=&importer=src%2Fcontent%2Fpaper_insights%2Fhybrid-nerf.md", __ASTRO_IMAGE_IMPORT_2eKKiu], ["img_hybrid_nerf/img5.png?astroContentImageFlag=&importer=src%2Fcontent%2Fpaper_insights%2Fhybrid-nerf.md", __ASTRO_IMAGE_IMPORT_Nqfxe], ["img_hybrid_nerf/img6.png?astroContentImageFlag=&importer=src%2Fcontent%2Fpaper_insights%2Fhybrid-nerf.md", __ASTRO_IMAGE_IMPORT_ZBTfd2], ["img_hybrid_nerf/img2.png?astroContentImageFlag=&importer=src%2Fcontent%2Fpaper_insights%2Fhybrid-nerf.md", __ASTRO_IMAGE_IMPORT_1eC05], ["img_hybrid_nerf/img7.png?astroContentImageFlag=&importer=src%2Fcontent%2Fpaper_insights%2Fhybrid-nerf.md", __ASTRO_IMAGE_IMPORT_Z23eJXi], ["img_hybrid_nerf/tab1.png?astroContentImageFlag=&importer=src%2Fcontent%2Fpaper_insights%2Fhybrid-nerf.md", __ASTRO_IMAGE_IMPORT_Z92VER], ["img_hybrid_nerf/tab3.png?astroContentImageFlag=&importer=src%2Fcontent%2Fpaper_insights%2Fhybrid-nerf.md", __ASTRO_IMAGE_IMPORT_24tbCx]]);
+		

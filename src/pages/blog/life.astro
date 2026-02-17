@@ -84,6 +84,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
     import * as THREE from "three";
     import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
     import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+    import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js";
 
     let scene: THREE.Scene;
     let camera: THREE.PerspectiveCamera;
@@ -163,8 +164,10 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         fillLight.position.set(0, -10, 0); // Underglow for the horses
         scene.add(fillLight);
 
-        const ambient = new THREE.AmbientLight(0xffffff, 1.5);
+        const ambient = new THREE.AmbientLight(0xffffff, 1.2);
         scene.add(ambient);
+        const hemi = new THREE.HemisphereLight(0xf7f0df, 0x1a1f28, 1.1);
+        scene.add(hemi);
 
         // 4. Construct
         await createCarousel();
@@ -196,19 +199,16 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         const horseUrl =
             "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/models/gltf/Horse.glb";
 
-        let horseMeshTemplate: THREE.Mesh | null = null;
+        let horseTemplate: THREE.Group | null = null;
         try {
             const gltf = await gltfLoader.loadAsync(horseUrl);
-            gltf.scene.traverse((node) => {
-                if ((node as THREE.Mesh).isMesh)
-                    horseMeshTemplate = node as THREE.Mesh;
-            });
+            horseTemplate = gltf.scene;
         } catch (e) {
             console.error("Critical: Failed to load horse", e);
             return;
         }
 
-        if (!horseMeshTemplate) return;
+        if (!horseTemplate) return;
 
         // --- PREMIUM MATERIAL FORMULAS ---
         const goldMat = new THREE.MeshPhysicalMaterial({
@@ -222,17 +222,14 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
 
         // "Glazed Porcelain" (琉璃陶瓷) Material Formula
         const porcelainMat = new THREE.MeshPhysicalMaterial({
-            color: 0xffffff,
+            color: 0xf5efe5,
             metalness: 0.0,
-            roughness: 0.05,
-            transmission: 0.25, // Internal depth
-            thickness: 2.0,
-            ior: 1.55,
+            roughness: 0.22,
             clearcoat: 1.0,
-            clearcoatRoughness: 0.02,
-            envMapIntensity: 2.5,
-            specularIntensity: 1.0,
-            specularColor: new THREE.Color(0xffffff),
+            clearcoatRoughness: 0.08,
+            envMapIntensity: 1.8,
+            specularIntensity: 0.95,
+            specularColor: new THREE.Color(0xfff3dd),
         });
 
         // 1. Structure
@@ -276,8 +273,13 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             const decorationGroup = new THREE.Group();
 
             // The Horse Body
-            const horse = horseMeshTemplate.clone();
-            horse.material = porcelainMat;
+            const horse = cloneSkinned(horseTemplate);
+            horse.traverse((node) => {
+                if ((node as THREE.Mesh).isMesh) {
+                    const mesh = node as THREE.Mesh;
+                    mesh.material = porcelainMat;
+                }
+            });
             horse.scale.set(0.075, 0.075, 0.075);
             horse.rotation.y = Math.PI; // Correct CCW Inverse Orientation
             horse.userData = { index: i, clickable: true };
