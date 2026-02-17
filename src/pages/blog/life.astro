@@ -413,7 +413,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             envMapIntensity: 3.4,
         });
 
-        const gildedPaintColor = new THREE.Color(0xffd15f);
+        const gildedPaintColor = new THREE.Color(0xffbf2a);
         const eyePaintColor = new THREE.Color(0x111114);
         const porcelainPaintColor = new THREE.Color(0xffffff);
 
@@ -512,21 +512,60 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             const alignedBounds = new THREE.Box3().setFromObject(horse);
             alignedBounds.getSize(horseSize);
 
+            // Use sampled mesh points (not skeleton bounds) to get stable zones.
+            const sampledPoints = collectSurfacePoints(horse, 2400);
+            const sampledMin = new THREE.Vector3(Infinity, Infinity, Infinity);
+            const sampledMax = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
+            sampledPoints.forEach((p) => {
+                sampledMin.min(p);
+                sampledMax.max(p);
+            });
+            if (!Number.isFinite(sampledMin.x)) {
+                sampledMin.copy(alignedBounds.min);
+                sampledMax.copy(alignedBounds.max);
+            }
+            const sampledSize = sampledMax.clone().sub(sampledMin);
+
             const majorAxis: "x" | "z" =
-                horseSize.x >= horseSize.z ? "x" : "z";
-            const majorHalf =
-                (majorAxis === "x" ? horseSize.x : horseSize.z) * 0.5;
-            const minorHalf =
-                (majorAxis === "x" ? horseSize.z : horseSize.x) * 0.5;
+                sampledSize.x >= sampledSize.z ? "x" : "z";
 
             const majorCoord = (p: THREE.Vector3) =>
                 majorAxis === "x" ? p.x : p.z;
             const minorCoord = (p: THREE.Vector3) =>
                 majorAxis === "x" ? p.z : p.x;
+
+            const majorMin = majorAxis === "x" ? sampledMin.x : sampledMin.z;
+            const majorMax = majorAxis === "x" ? sampledMax.x : sampledMax.z;
+            const minorMin = majorAxis === "x" ? sampledMin.z : sampledMin.x;
+            const minorMax = majorAxis === "x" ? sampledMax.z : sampledMax.x;
+            const yMin = sampledMin.y;
+            const yMax = sampledMax.y;
+            const majorSpan = Math.max(majorMax - majorMin, 1e-5);
+            const minorCenter = (minorMin + minorMax) * 0.5;
+            const minorHalfSpan = Math.max((minorMax - minorMin) * 0.5, 1e-5);
+            const ySpan = Math.max(yMax - yMin, 1e-5);
+
+            let highMajorHeadScore = 0;
+            let lowMajorHeadScore = 0;
+            sampledPoints.forEach((p) => {
+                const majorN = (majorCoord(p) - majorMin) / majorSpan;
+                const yN = (p.y - yMin) / ySpan;
+                const sideAbs =
+                    Math.abs((minorCoord(p) - minorCenter) / minorHalfSpan);
+                if (yN > 0.5 && sideAbs > 0.14) {
+                    if (majorN > 0.72) highMajorHeadScore++;
+                    if (majorN < 0.28) lowMajorHeadScore++;
+                }
+            });
+            const headOnHighMajor = highMajorHeadScore >= lowMajorHeadScore;
+            const headMin = headOnHighMajor ? 0.66 : 0.0;
+            const headMax = headOnHighMajor ? 1.0 : 0.34;
+            const tailMin = headOnHighMajor ? 0.0 : 0.66;
+            const tailMax = headOnHighMajor ? 0.34 : 1.0;
+
             // Directly dye horse regions to avoid floating accessories:
             // head, tail, back and hooves -> gilded; eyes -> black.
             const vertexPos = new THREE.Vector3();
-            const eyeBand = Math.max(minorHalf * 0.08, 0.016);
 
             horse.traverse((node) => {
                 if (!(node as THREE.Mesh).isMesh) return;
@@ -546,29 +585,30 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
 
                     const major = majorCoord(vertexPos);
                     const minor = minorCoord(vertexPos);
-                    const y = vertexPos.y;
+                    const majorN = (major - majorMin) / majorSpan;
+                    const yN = (vertexPos.y - yMin) / ySpan;
+                    const sideN = (minor - minorCenter) / minorHalfSpan;
+                    const sideAbs = Math.abs(sideN);
 
-                    const isHoofGold = y < horseSize.y * 0.13;
+                    const inHead = majorN >= headMin && majorN <= headMax;
+                    const inTail = majorN >= tailMin && majorN <= tailMax;
+
+                    const isHoofGold = yN < 0.2;
                     const isBackGold =
-                        y > horseSize.y * 0.62 &&
-                        y < horseSize.y * 0.84 &&
-                        Math.abs(major) < majorHalf * 0.58;
-                    const isHeadGold =
-                        major > majorHalf * 0.44 &&
-                        y > horseSize.y * 0.4 &&
-                        y < horseSize.y * 0.88;
-                    const isTailGold =
-                        major < -majorHalf * 0.5 &&
-                        y > horseSize.y * 0.22 &&
-                        y < horseSize.y * 0.72;
+                        yN > 0.58 &&
+                        yN < 0.85 &&
+                        majorN > 0.25 &&
+                        majorN < 0.75 &&
+                        sideAbs < 0.58;
+                    const isHeadGold = inHead && yN > 0.46 && yN < 0.9;
+                    const isTailGold = inTail && yN > 0.2 && yN < 0.78;
 
                     const isEyeBlack =
-                        major > majorHalf * 0.58 &&
-                        major < majorHalf * 0.96 &&
-                        y > horseSize.y * 0.56 &&
-                        y < horseSize.y * 0.78 &&
-                        (Math.abs(minor - minorHalf * 0.2) < eyeBand ||
-                            Math.abs(minor + minorHalf * 0.2) < eyeBand);
+                        inHead &&
+                        yN > 0.56 &&
+                        yN < 0.78 &&
+                        sideAbs > 0.2 &&
+                        sideAbs < 0.62;
 
                     const color = isEyeBlack
                         ? eyePaintColor
