@@ -114,14 +114,14 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
 
         if (colorCtx && roughCtx && bumpCtx) {
             const baseGrad = colorCtx.createLinearGradient(0, 0, size, size);
-            baseGrad.addColorStop(0, "#f8ecdd");
-            baseGrad.addColorStop(0.5, "#e8d7c2");
-            baseGrad.addColorStop(1, "#d8c1a4");
+            baseGrad.addColorStop(0, "#ffffff");
+            baseGrad.addColorStop(0.5, "#f6f8fb");
+            baseGrad.addColorStop(1, "#e9edf3");
             colorCtx.fillStyle = baseGrad;
             colorCtx.fillRect(0, 0, size, size);
 
-            colorCtx.strokeStyle = "rgba(138, 104, 72, 0.34)";
-            colorCtx.lineWidth = Math.max(1, size * 0.016);
+            colorCtx.strokeStyle = "rgba(154, 166, 182, 0.2)";
+            colorCtx.lineWidth = Math.max(1, size * 0.012);
             for (let i = 0; i < 12; i++) {
                 const y = size * (0.18 + i * 0.058) + (Math.random() - 0.5) * 2.5;
                 colorCtx.beginPath();
@@ -140,19 +140,19 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             for (let i = 0; i < 280; i++) {
                 const x = Math.random() * size;
                 const y = Math.random() * size;
-                const a = 0.08 + Math.random() * 0.14;
-                colorCtx.fillStyle = `rgba(120, 86, 54, ${a})`;
+                const a = 0.03 + Math.random() * 0.06;
+                colorCtx.fillStyle = `rgba(166, 176, 192, ${a})`;
                 colorCtx.fillRect(x, y, 1, 1);
             }
 
-            colorCtx.fillStyle = "rgba(113, 82, 54, 0.28)";
+            colorCtx.fillStyle = "rgba(180, 192, 208, 0.18)";
             colorCtx.beginPath();
             colorCtx.ellipse(size * 0.14, size * 0.56, size * 0.11, size * 0.22, 0, 0, Math.PI * 2);
             colorCtx.fill();
 
-            roughCtx.fillStyle = "rgb(110,110,110)";
+            roughCtx.fillStyle = "rgb(138,138,138)";
             roughCtx.fillRect(0, 0, size, size);
-            roughCtx.strokeStyle = "rgba(70,70,70,0.42)";
+            roughCtx.strokeStyle = "rgba(102,102,102,0.26)";
             roughCtx.lineWidth = 1;
             for (let i = 0; i < 26; i++) {
                 roughCtx.beginPath();
@@ -171,14 +171,14 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             for (let i = 0; i < 700; i++) {
                 const x = Math.random() * size;
                 const y = Math.random() * size;
-                const v = 65 + Math.floor(Math.random() * 90);
+                const v = 120 + Math.floor(Math.random() * 50);
                 roughCtx.fillStyle = `rgb(${v},${v},${v})`;
                 roughCtx.fillRect(x, y, 1, 1);
             }
 
             bumpCtx.fillStyle = "rgb(128,128,128)";
             bumpCtx.fillRect(0, 0, size, size);
-            bumpCtx.strokeStyle = "rgba(196,196,196,0.6)";
+            bumpCtx.strokeStyle = "rgba(182,182,182,0.52)";
             bumpCtx.lineWidth = Math.max(1, size * 0.016);
             for (let i = 0; i < 10; i++) {
                 const y = size * (0.18 + i * 0.07);
@@ -188,7 +188,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                 bumpCtx.stroke();
             }
 
-            bumpCtx.fillStyle = "rgba(210,210,210,0.6)";
+            bumpCtx.fillStyle = "rgba(198,198,198,0.5)";
             bumpCtx.beginPath();
             bumpCtx.ellipse(size * 0.16, size * 0.6, size * 0.08, size * 0.16, 0, 0, Math.PI * 2);
             bumpCtx.fill();
@@ -418,28 +418,46 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         goldDetailMat.roughness = 0.09;
         goldDetailMat.envMapIntensity = 3.9;
 
+        const ornamentGoldMat = goldMat.clone();
+        ornamentGoldMat.color = new THREE.Color(0xffd86a);
+        ornamentGoldMat.roughness = 0.07;
+        ornamentGoldMat.clearcoat = 0.9;
+        ornamentGoldMat.clearcoatRoughness = 0.04;
+        ornamentGoldMat.envMapIntensity = 4.7;
+        ornamentGoldMat.emissive = new THREE.Color(0x3d2e09);
+        ornamentGoldMat.emissiveIntensity = 0.16;
+
+        const ornamentGoldDetailMat = goldDetailMat.clone();
+        ornamentGoldDetailMat.color = new THREE.Color(0xffefb0);
+        ornamentGoldDetailMat.roughness = 0.045;
+        ornamentGoldDetailMat.clearcoat = 0.96;
+        ornamentGoldDetailMat.clearcoatRoughness = 0.03;
+        ornamentGoldDetailMat.envMapIntensity = 5.1;
+        ornamentGoldDetailMat.emissive = new THREE.Color(0x4b380b);
+        ornamentGoldDetailMat.emissiveIntensity = 0.2;
+
         // Glazed porcelain material formula
         const porcelainCoreMat = new THREE.MeshPhysicalMaterial({
-            color: 0xf2e4d2,
+            color: 0xfafcff,
             map: horseDetailMap,
             roughnessMap: horseDetailRoughnessMap,
             bumpMap: horseDetailBumpMap,
-            bumpScale: 0.4,
+            bumpScale: 0.35,
             metalness: 0.0,
-            roughness: 0.4,
-            clearcoat: 0.92,
-            clearcoatRoughness: 0.12,
+            roughness: 0.34,
+            clearcoat: 0.95,
+            clearcoatRoughness: 0.075,
             ior: 1.52,
             transmission: 0.0,
             thickness: 0.22,
             attenuationDistance: 2.0,
-            attenuationColor: new THREE.Color(0xf1dfcc),
+            attenuationColor: new THREE.Color(0xf7faff),
             sheen: 0.18,
             sheenColor: new THREE.Color(0xffffff),
             sheenRoughness: 0.32,
-            envMapIntensity: 1.55,
+            envMapIntensity: 1.35,
             specularIntensity: 1.0,
-            specularColor: new THREE.Color(0xf7e7d1),
+            specularColor: new THREE.Color(0xffffff),
             side: THREE.DoubleSide,
         });
 
@@ -487,11 +505,11 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             const horse = cloneSkinned(horseTemplate);
             const horseBodyMat = porcelainCoreMat.clone();
             horseBodyMat.envMap = globalEnvMap;
-            horseBodyMat.clearcoat = 0.92;
-            horseBodyMat.clearcoatRoughness = 0.11;
+            horseBodyMat.clearcoat = 0.95;
+            horseBodyMat.clearcoatRoughness = 0.08;
             horseBodyMat.specularIntensity = 0.98;
-            horseBodyMat.specularColor = new THREE.Color(0xf6e8d7);
-            horseBodyMat.envMapIntensity = 1.45;
+            horseBodyMat.specularColor = new THREE.Color(0xffffff);
+            horseBodyMat.envMapIntensity = 1.25;
             horse.traverse((node) => {
                 if ((node as THREE.Mesh).isMesh) {
                     const mesh = node as THREE.Mesh;
@@ -639,7 +657,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                     14,
                     Math.PI,
                 ),
-                goldMat,
+                ornamentGoldMat,
             );
             saddleBand.position.copy(
                 bodyAnchor.clone().add(new THREE.Vector3(0, horseSize.y * 0.008, 0)),
@@ -650,7 +668,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
 
             const saddleGem = new THREE.Mesh(
                 new THREE.SphereGeometry(Math.max(horseSize.y * 0.013, 0.032), 8, 8),
-                goldDetailMat,
+                ornamentGoldDetailMat,
             );
             saddleGem.position.copy(
                 bodyAnchor.clone().add(new THREE.Vector3(0, horseSize.y * 0.024, 0)),
@@ -664,7 +682,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                         7,
                         7,
                     ),
-                    goldDetailMat,
+                    ornamentGoldDetailMat,
                 );
                 sideStud.position.copy(
                     bodyAnchor
@@ -683,7 +701,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                     12,
                     Math.PI,
                 ),
-                goldDetailMat,
+                ornamentGoldDetailMat,
             );
             browBand.position.copy(
                 headAnchor.clone().add(new THREE.Vector3(0, -horseSize.y * 0.008, 0)),
@@ -694,7 +712,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
 
             const headCrest = new THREE.Mesh(
                 new THREE.SphereGeometry(Math.max(horseSize.y * 0.012, 0.03), 8, 8),
-                goldDetailMat,
+                ornamentGoldDetailMat,
             );
             headCrest.position.copy(
                 headAnchor.clone().add(new THREE.Vector3(0, horseSize.y * 0.015, 0)),
@@ -708,7 +726,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                     6,
                     12,
                 ),
-                goldDetailMat,
+                ornamentGoldDetailMat,
             );
             noseRing.position.copy(noseAnchor);
             if (majorAxis === "x") noseRing.rotation.y = Math.PI / 2;
@@ -742,7 +760,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                     6,
                     12,
                 ),
-                goldDetailMat,
+                ornamentGoldDetailMat,
             );
             tailRing.position.copy(
                 tailAnchor.clone().add(new THREE.Vector3(0, -horseSize.y * 0.004, 0)),
@@ -764,7 +782,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                         6,
                         10,
                     ),
-                    goldDetailMat,
+                    ornamentGoldDetailMat,
                 );
                 legBand.position.copy(anchor);
                 legBand.rotation.x = Math.PI / 2;
