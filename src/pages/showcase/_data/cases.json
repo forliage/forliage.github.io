@@ -2,9 +2,9 @@
     "cases": [
         {
             "id": "case-1",
-            "title": "Case 1 Title",
-            "intro": "Write your own introduction for Case 1 here.",
-            "gif": "/images/PSA.gif"
+            "title": "Glass Bunny",
+            "intro": "Beautiful Glass Bunny with different color",
+            "gif": "/images/out1.png"
         },
         {
             "id": "case-2",
