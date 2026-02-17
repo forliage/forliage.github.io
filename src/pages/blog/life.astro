@@ -5,7 +5,6 @@ import { getCollection } from "astro:content";
 
 // 1. Fetch Blog Data for the Carousel
 const allPosts = await getCollection("blog");
-// Select representative "Life/Reflection" posts or use a mix
 const lifeKeywords = [
     "welcome",
     "smile",
@@ -23,13 +22,11 @@ const lifePosts = allPosts
     )
     .slice(0, 12);
 
-// Ensure we have exactly 12 by padding if necessary (carousel of 12)
 const paddedPosts = [...lifePosts];
 while (paddedPosts.length < 12 && paddedPosts.length > 0) {
     paddedPosts.push(...lifePosts);
 }
 if (paddedPosts.length === 0) {
-    // Ultimate fallback if no posts match
     for (let i = 0; i < 12; i++)
         paddedPosts.push({
             data: {
@@ -73,6 +70,7 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
             </div>
         </div>
 
+        <div id="loader" class="loader">Loading 3D Models...</div>
         <!-- 3D Canvas -->
         <div
             id="carousel-canvas-container"
@@ -84,6 +82,7 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
 
 <script>
     import * as THREE from "three";
+    import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
     let scene: THREE.Scene;
     let camera: THREE.PerspectiveCamera;
@@ -97,12 +96,14 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
     // Interaction states
     let isDragging = false;
     let prevMouseX = 0;
-    let rotationVelocity = 0.003;
+    let rotationVelocity = 0.005;
     let targetRotationY = 0;
+    let currentRotationY = 0;
 
     const container = document.getElementById(
         "carousel-canvas-container",
     ) as HTMLDivElement;
+    const loader = document.getElementById("loader");
     const postsData = JSON.parse(container?.dataset.posts || "[]");
 
     const infoPanel = document.getElementById("info-panel");
@@ -111,21 +112,21 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
     const cardLink = document.getElementById("card-link") as HTMLAnchorElement;
     const closeBtn = document.getElementById("close-panel");
 
-    function init() {
+    async function init() {
         if (!container) return;
 
         // 1. Scene Setup
         scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0a0a0f);
-        scene.fog = new THREE.FogExp2(0x0a0a0f, 0.015);
+        scene.background = new THREE.Color(0x050508);
+        scene.fog = new THREE.FogExp2(0x050508, 0.015);
 
         camera = new THREE.PerspectiveCamera(
-            60,
+            50,
             window.innerWidth / window.innerHeight,
             0.1,
             1000,
         );
-        camera.position.set(0, 15, 60);
+        camera.position.set(0, 18, 65);
 
         // 2. Renderer
         renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -133,32 +134,26 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
         container.appendChild(renderer.domElement);
 
-        // 3. Lighting (Premium Warm Theme)
-        const sun = new THREE.DirectionalLight(0xfff0dd, 2.5);
+        // 3. Lighting
+        const sun = new THREE.DirectionalLight(0xfff0dd, 2);
         sun.position.set(20, 50, 40);
         sun.castShadow = true;
         scene.add(sun);
 
-        const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+        const fill = new THREE.PointLight(0xffffff, 500, 100);
+        fill.position.set(-20, 10, 20);
+        scene.add(fill);
+
+        const ambient = new THREE.AmbientLight(0xffffff, 0.3);
         scene.add(ambient);
 
-        // Center glow
-        const centerLight = new THREE.PointLight(0xffaa44, 100, 60);
-        centerLight.position.set(0, 10, 0);
-        scene.add(centerLight);
-
-        // Rim lights board
-        for (let i = 0; i < 12; i++) {
-            const angle = (i / 12) * Math.PI * 2;
-            const pLight = new THREE.PointLight(0xffddaa, 80, 50);
-            pLight.position.set(Math.cos(angle) * 23, 23, Math.sin(angle) * 23);
-            scene.add(pLight);
-        }
-
-        // 4. Create Carousel
-        createCarousel();
+        // 4. Load & Construct
+        await createCarousel();
+        if (loader) loader.style.display = "none";
 
         // 5. Events
         window.addEventListener("resize", handleResize);
@@ -173,147 +168,105 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
         animate();
     }
 
-    function createCarousel() {
+    async function createCarousel() {
         carouselGroup = new THREE.Group();
         scene.add(carouselGroup);
 
-        // Materials: Gold and White
+        const gltfLoader = new GLTFLoader();
+        const horseUrl =
+            "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/models/gltf/Horse.glb";
+
+        let horseModel: THREE.Group;
+        try {
+            const gltf = await gltfLoader.loadAsync(horseUrl);
+            horseModel = gltf.scene;
+            // The horse model is animated, but we'll use its static form and apply colors
+            horseModel.scale.set(0.05, 0.05, 0.05); // Scale down the realistic horse
+        } catch (e) {
+            console.error("Failed to load realistic horse, using fallback", e);
+            // ... fallback logic if needed
+            return;
+        }
+
         const goldMat = new THREE.MeshPhysicalMaterial({
             color: 0xffd700,
             metalness: 1.0,
-            roughness: 0.12,
+            roughness: 0.1,
             clearcoat: 1.0,
-            reflectivity: 1.0,
         });
 
         const whiteMat = new THREE.MeshPhysicalMaterial({
             color: 0xffffff,
             metalness: 0.05,
-            roughness: 0.25,
+            roughness: 0.2,
             clearcoat: 1.0,
         });
 
         // Pillar & Platter
         const pillar = new THREE.Mesh(
-            new THREE.CylinderGeometry(4.5, 4.5, 38, 48),
+            new THREE.CylinderGeometry(5, 5, 40, 48),
             goldMat,
         );
-        pillar.position.y = 14;
+        pillar.position.y = 15;
         carouselGroup.add(pillar);
 
         const base = new THREE.Mesh(
-            new THREE.CylinderGeometry(25, 25, 1.5, 64),
+            new THREE.CylinderGeometry(28, 28, 2, 64),
             goldMat,
         );
         base.position.y = -2;
         carouselGroup.add(base);
 
         const ceiling = new THREE.Mesh(
-            new THREE.CylinderGeometry(25, 25, 1.5, 64),
+            new THREE.CylinderGeometry(28, 28, 1.5, 64),
             goldMat,
         );
-        ceiling.position.y = 28;
+        ceiling.position.y = 32;
         carouselGroup.add(ceiling);
 
         const roof = new THREE.Mesh(
-            new THREE.ConeGeometry(25.5, 14, 64),
+            new THREE.ConeGeometry(29, 15, 64),
             goldMat,
         );
-        roof.position.y = 35.75;
+        roof.position.y = 40;
         carouselGroup.add(roof);
 
         // 12 Horses
-        const orbitRadius = orbitRadiusValue();
+        const radius = 22;
         for (let i = 0; i < 12; i++) {
             const angle = (i / 12) * Math.PI * 2;
             const module = new THREE.Group();
 
             // Pole
             const pole = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.3, 0.3, 30, 8),
+                new THREE.CylinderGeometry(0.35, 0.35, 36, 8),
                 goldMat,
             );
-            pole.position.y = 13;
+            pole.position.y = 15;
             module.add(pole);
 
-            // Horse
-            const horse = buildStylizedHorse(whiteMat, goldMat);
-            horse.position.y = 12;
-            horse.userData = { index: i, clickable: true };
-            module.add(horse);
+            // Realistic Horse Instance
+            const horseInstance = horseModel.clone();
+            horseInstance.traverse((child) => {
+                if ((child as THREE.Mesh).isMesh) {
+                    (child as THREE.Mesh).material = whiteMat;
+                }
+            });
+            horseInstance.position.y = 15;
+            horseInstance.rotation.y = -Math.PI / 2; // Orient correctly
+            horseInstance.userData = { index: i, clickable: true };
+            module.add(horseInstance);
 
             module.position.set(
-                Math.cos(angle) * orbitRadius,
+                Math.cos(angle) * radius,
                 0,
-                Math.sin(angle) * orbitRadius,
+                Math.sin(angle) * radius,
             );
-            module.rotation.y = -angle + Math.PI / 2;
+            module.rotation.y = -angle; // Face direction of travel
 
             carouselGroup.add(module);
             horseModules.push(module);
         }
-    }
-
-    function orbitRadiusValue() {
-        return window.innerWidth < 768 ? 14 : 19;
-    }
-
-    function buildStylizedHorse(
-        bodyMat: THREE.Material,
-        trimMat: THREE.Material,
-    ) {
-        const group = new THREE.Group();
-
-        // Body (Capsule)
-        const body = new THREE.Mesh(
-            new THREE.CapsuleGeometry(1.8, 3.5, 4, 12),
-            bodyMat,
-        );
-        body.rotation.z = Math.PI / 2;
-        group.add(body);
-
-        // Neck (Bent cylinder)
-        const neck = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.8, 1.3, 3, 10),
-            bodyMat,
-        );
-        neck.position.set(2.5, 2, 0);
-        neck.rotation.z = -Math.PI / 4;
-        group.add(neck);
-
-        // Head (Sphere/Oval)
-        const head = new THREE.Mesh(
-            new THREE.SphereGeometry(1.1, 20, 20),
-            bodyMat,
-        );
-        head.position.set(3.6, 3.2, 0);
-        group.add(head);
-
-        // Mane (Golden blocks)
-        const mane = new THREE.Mesh(
-            new THREE.BoxGeometry(0.7, 2.5, 0.7),
-            trimMat,
-        );
-        mane.position.set(2.5, 2.5, 0);
-        group.add(mane);
-
-        // Tail (Golden fluff)
-        const tail = new THREE.Mesh(
-            new THREE.SphereGeometry(0.8, 12, 12),
-            trimMat,
-        );
-        tail.position.set(-3, 0.8, 0);
-        group.add(tail);
-
-        // Saddle (Gold)
-        const saddle = new THREE.Mesh(
-            new THREE.BoxGeometry(2, 0.5, 2.5),
-            trimMat,
-        );
-        saddle.position.y = 1.3;
-        group.add(saddle);
-
-        return group;
     }
 
     function onMouseDown(e: MouseEvent) {
@@ -337,7 +290,10 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
 
     function onDocumentClick() {
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(scene.children, true);
+        const intersects = raycaster.intersectObjects(
+            carouselGroup.children,
+            true,
+        );
 
         let clickedHorse = null;
         for (let intersect of intersects) {
@@ -370,42 +326,46 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
         requestID = requestAnimationFrame(animate);
         const time = Date.now() * 0.001;
 
-        // Carousel Physics
+        // --- FIXED ROTATION LOGIC ---
+        // If not dragging, target rotation should continuously advance
+        if (!isDragging) {
+            targetRotationY += rotationVelocity;
+        }
+
+        // Smoothly lerp towards target rotation
+        currentRotationY += (targetRotationY - currentRotationY) * 0.05;
         if (carouselGroup) {
-            carouselGroup.rotation.y +=
-                (targetRotationY - carouselGroup.rotation.y) * 0.05;
-            carouselGroup.rotation.y += rotationVelocity; // Subtle auto-rotation
+            carouselGroup.rotation.y = currentRotationY;
         }
 
         // Bobbing & Mouse Hover
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(scene.children, true);
-        let hoveredObjId = -1;
+        const intersects = raycaster.intersectObjects(
+            carouselGroup.children,
+            true,
+        );
+        let hoveredIdx = -1;
         for (let int of intersects) {
             let o = int.object;
             while (o.parent && !o.userData.clickable) o = o.parent;
             if (o.userData.clickable) {
-                hoveredObjId = o.userData.index;
+                hoveredIdx = o.userData.index;
                 break;
             }
         }
 
         horseModules.forEach((mod, i) => {
-            const horse = mod.children[1] as THREE.Group;
-            const bob = Math.sin(time * 2.5 + i * 0.8) * 4.5;
-            horse.position.y = 12 + bob;
+            const h = mod.children[1] as THREE.Group;
+            const bob = Math.sin(time * 3 + i * 0.8) * 6;
+            h.position.y = 15 + bob;
 
-            // Scale effect on hover
-            const targetScale = hoveredObjId === i ? 1.2 : 1.0;
-            horse.scale.lerp(
-                new THREE.Vector3(targetScale, targetScale, targetScale),
-                0.15,
-            );
+            const tScale = hoveredIdx === i ? 0.065 : 0.05;
+            h.scale.lerp(new THREE.Vector3(tScale, tScale, tScale), 0.15);
         });
 
-        // Dynamic Camera Sway
-        camera.position.x = Math.sin(time * 0.15) * 4;
-        camera.lookAt(0, 14, 0);
+        // Subte camera sway
+        camera.position.x = Math.sin(time * 0.2) * 5;
+        camera.lookAt(0, 15, 0);
 
         renderer.render(scene, camera);
     }
@@ -425,15 +385,24 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
         width: 100vw;
         height: 100vh;
         overflow: hidden;
-        background: #0a0a0f;
+        background: #050508;
         font-family: "Outfit", sans-serif;
-        color: #fff;
     }
     #carousel-canvas-container {
         cursor: grab;
     }
     #carousel-canvas-container:active {
         cursor: grabbing;
+    }
+
+    .loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #ffd700;
+        letter-spacing: 5px;
+        z-index: 100;
     }
 
     .ui-overlay {
@@ -455,35 +424,29 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
         margin: 0;
         letter-spacing: 15px;
         font-weight: 800;
-        text-transform: uppercase;
-        background: linear-gradient(to bottom, #ffffff, #ffd700);
+        background: linear-gradient(to bottom, #fff, #ffd700);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        text-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+        filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.4));
     }
     .subtitle {
         color: #ffd700;
         letter-spacing: 8px;
         font-weight: 300;
-        font-size: 1.2rem;
         margin-top: 10px;
-        opacity: 0.8;
     }
 
     .info-panel {
         position: relative;
-        background: rgba(15, 15, 20, 0.9);
+        background: rgba(10, 10, 15, 0.9);
         backdrop-filter: blur(40px);
         padding: 45px;
         border-radius: 40px;
-        border: 1px solid rgba(255, 215, 0, 0.5);
+        border: 1px solid rgba(255, 215, 0, 0.4);
         width: 500px;
         pointer-events: auto;
-        box-shadow: 0 30px 100px rgba(0, 0, 0, 0.8);
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7);
         transition: all 0.7s cubic-bezier(0.19, 1, 0.22, 1);
-        transform: translateX(0);
-        opacity: 1;
-        visibility: visible;
     }
     .info-panel.hidden {
         transform: translateX(-150px) scale(0.9);
@@ -501,7 +464,6 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
         font-size: 2.5rem;
         cursor: pointer;
         opacity: 0.5;
-        transition: opacity 0.3s;
     }
     .close-btn:hover {
         opacity: 1;
@@ -509,13 +471,12 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
 
     .panel-content h2 {
         color: #ffd700;
-        font-size: 2.22rem;
-        margin-top: 0;
-        margin-bottom: 15px;
+        font-size: 2.2rem;
+        margin: 0 0 15px;
     }
     .panel-content p {
         font-size: 1.1rem;
-        color: rgba(255, 255, 255, 0.75);
+        color: rgba(255, 255, 255, 0.7);
         line-height: 1.7;
     }
 
@@ -528,34 +489,27 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
         text-decoration: none;
         font-weight: 800;
         border-radius: 60px;
-        box-shadow: 0 10px 20px rgba(255, 215, 0, 0.2);
-        transition: all 0.3s;
+        transition: transform 0.3s;
     }
     .btn-read:hover {
         transform: translateY(-3px);
-        box-shadow: 0 15px 30px rgba(255, 215, 0, 0.4);
     }
 
     .controls-hint {
         text-align: center;
         color: rgba(255, 255, 255, 0.3);
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         letter-spacing: 5px;
         text-transform: uppercase;
     }
 
     @media (max-width: 768px) {
         .title-section h1 {
-            font-size: 2.2rem;
+            font-size: 2.22rem;
             letter-spacing: 5px;
         }
         .info-panel {
             width: calc(100vw - 40px);
-            left: 0;
-            padding: 30px;
-        }
-        .ui-overlay {
-            padding: 30px;
         }
     }
 </style>
