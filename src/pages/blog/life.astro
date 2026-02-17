@@ -3,7 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import { getCollection } from "astro:content";
 
-// 1. Fetch Blog Data for the Carousel
+// 1. Fetch Blog Data
 const allPosts = await getCollection("blog");
 const lifeKeywords = [
     "welcome",
@@ -70,7 +70,7 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
             </div>
         </div>
 
-        <div id="loader" class="loader">Loading 3D Models...</div>
+        <div id="loader" class="loader">Fired Up 3D Engine...</div>
         <!-- 3D Canvas -->
         <div
             id="carousel-canvas-container"
@@ -118,8 +118,8 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
 
         // 1. Scene Setup
         scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x050508);
-        scene.fog = new THREE.FogExp2(0x050508, 0.015);
+        scene.background = new THREE.Color(0x020205);
+        scene.fog = new THREE.FogExp2(0x020205, 0.012);
 
         camera = new THREE.PerspectiveCamera(
             50,
@@ -127,44 +127,49 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
             0.1,
             1000,
         );
-        camera.position.set(0, 18, 65);
+        camera.position.set(0, 20, 70);
 
         // 2. Renderer
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true,
+            powerPreference: "high-performance",
+        });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.2;
+        renderer.toneMappingExposure = 1.5;
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
         container.appendChild(renderer.domElement);
 
-        // --- NEW: Environment for Reflections ---
-        const generator = new THREE.PMREMGenerator(renderer);
-        scene.environment = generator.fromScene(
+        // Environment for Reflections (Crucial for Glass/Metal)
+        const pmremGenerator = new THREE.PMREMGenerator(renderer);
+        scene.environment = pmremGenerator.fromScene(
             new RoomEnvironment(),
             0.04,
         ).texture;
 
-        // 3. Lighting (Cinema Grade)
-        const sun = new THREE.DirectionalLight(0xfff5ee, 4);
-        sun.position.set(30, 60, 40);
+        // 3. Lighting (Premium Studio Array)
+        const sun = new THREE.DirectionalLight(0xffffff, 4.5);
+        sun.position.set(40, 60, 40);
         sun.castShadow = true;
         scene.add(sun);
 
-        const fill = new THREE.PointLight(0xffffff, 1200, 150);
-        fill.position.set(-30, 30, 30);
-        scene.add(fill);
+        const backlight = new THREE.PointLight(0xfff0dd, 1500, 120);
+        backlight.position.set(-30, 20, -30);
+        scene.add(backlight);
 
         const ambient = new THREE.AmbientLight(0xffffff, 1.2);
         scene.add(ambient);
 
-        // Underlight for the horses
-        const floorLight = new THREE.PointLight(0xffd700, 500, 50);
-        floorLight.position.set(0, -5, 0);
-        scene.add(floorLight);
+        // Spotlights for specific sparkle
+        const spot = new THREE.SpotLight(0xffd700, 2000, 150, Math.PI / 4, 0.5);
+        spot.position.set(0, 80, 20);
+        scene.add(spot);
 
-        // 4. Load & Construct
+        // 4. Load Models & Construct
         await createCarousel();
         if (loader) loader.style.display = "none";
 
@@ -189,16 +194,16 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
         const horseUrl =
             "https://raw.githubusercontent.com/mrdoob/three.js/master/examples/models/gltf/Horse.glb";
 
-        let horseModel: THREE.Group;
+        let horseMesh: THREE.Mesh;
         try {
             const gltf = await gltfLoader.loadAsync(horseUrl);
-            horseModel = gltf.scene;
-            horseModel.scale.set(0.06, 0.06, 0.06);
+            horseMesh = gltf.scene.children[0] as THREE.Mesh;
         } catch (e) {
-            console.error("Failed to load realistic horse", e);
+            console.error("Failed to load horse model", e);
             return;
         }
 
+        // --- Materials ---
         const goldMat = new THREE.MeshPhysicalMaterial({
             color: 0xffd700,
             metalness: 1.0,
@@ -208,87 +213,94 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
             envMapIntensity: 2.5,
         });
 
-        // "Glazed Porcelain" (琉璃陶瓷) Material Formula
-        const whiteMat = new THREE.MeshPhysicalMaterial({
+        const porcelainMat = new THREE.MeshPhysicalMaterial({
             color: 0xffffff,
             metalness: 0.0,
-            roughness: 0.05,
-            transmission: 0.2, // Subsurface scattering feel
-            thickness: 2.0,
-            ior: 1.55,
+            roughness: 0.02,
+            transmission: 0.35, // Glazed look
+            thickness: 1.5,
+            ior: 1.45,
             clearcoat: 1.0,
             clearcoatRoughness: 0.02,
-            envMapIntensity: 2.0,
+            envMapIntensity: 2.2,
             specularIntensity: 1.0,
             specularColor: new THREE.Color(0xffffff),
         });
 
-        // Pillar & Platter
+        // 1. Structure
         const pillar = new THREE.Mesh(
-            new THREE.CylinderGeometry(5, 5, 40, 48),
+            new THREE.CylinderGeometry(5.5, 5.5, 45, 64),
             goldMat,
         );
         pillar.position.y = 15;
         carouselGroup.add(pillar);
 
-        const base = new THREE.Mesh(
-            new THREE.CylinderGeometry(28, 28, 2.5, 64),
+        const platter = new THREE.Mesh(
+            new THREE.CylinderGeometry(30, 30, 3, 64),
             goldMat,
         );
-        base.position.y = -2;
-        carouselGroup.add(base);
+        platter.position.y = -2;
+        carouselGroup.add(platter);
 
         const ceiling = new THREE.Mesh(
-            new THREE.CylinderGeometry(28, 28, 1.5, 64),
+            new THREE.CylinderGeometry(30, 30, 2, 64),
             goldMat,
         );
-        ceiling.position.y = 32;
+        ceiling.position.y = 35;
         carouselGroup.add(ceiling);
 
         const roof = new THREE.Mesh(
-            new THREE.ConeGeometry(29, 15, 64),
+            new THREE.ConeGeometry(31, 16, 64),
             goldMat,
         );
-        roof.position.y = 40;
+        roof.position.y = 44;
         carouselGroup.add(roof);
 
-        // 12 Horses
-        const radius = 22;
+        // 2. Horse Instances
+        const radius = 24;
         for (let i = 0; i < 12; i++) {
             const angle = (i / 12) * Math.PI * 2;
             const module = new THREE.Group();
 
             // Pole
             const pole = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.35, 0.35, 36, 8),
+                new THREE.CylinderGeometry(0.35, 0.35, 40, 8),
                 goldMat,
             );
             pole.position.y = 15;
             module.add(pole);
 
-            // Realistic Horse Instance
-            const horseInstance = horseModel.clone();
-            horseInstance.traverse((child) => {
-                if ((child as THREE.Mesh).isMesh) {
-                    (child as THREE.Mesh).material = whiteMat;
-                }
-            });
-            horseInstance.position.y = 15;
+            // Horse Container (for easier rotation)
+            const horseContainer = new THREE.Group();
 
-            // Fix orientation: face tangentially (along the orbit path)
-            // Default model faces +X. We want it to face the direction of rotation.
-            horseInstance.rotation.y = 0;
+            // The Realistic Horse
+            const horse = horseMesh.clone();
+            horse.material = porcelainMat;
+            horse.scale.set(0.065, 0.065, 0.065);
+            horse.rotation.y = Math.PI; // FLIP head orientation as requested (Inverse)
+            horse.userData = { index: i, clickable: true };
+            horseContainer.add(horse);
 
-            horseInstance.userData = { index: i, clickable: true };
-            module.add(horseInstance);
+            // Gilded Saddle (鎏金马鞍)
+            const saddle = new THREE.Mesh(
+                new THREE.TorusGeometry(1.2, 0.6, 12, 24, Math.PI),
+                goldMat,
+            );
+            saddle.rotation.x = Math.PI / 2;
+            saddle.position.set(0, 15, 0); // Roughly on back
+            horseContainer.add(saddle);
 
+            horseContainer.position.y = 15;
+            module.add(horseContainer);
+
+            // Positioning
             module.position.set(
                 Math.cos(angle) * radius,
                 0,
                 Math.sin(angle) * radius,
             );
-            // Orient the group so that the horse (facing +X internally) points along the tangent
-            module.rotation.y = -angle;
+            // Face tangentially (perpendicular to radius)
+            module.rotation.y = -angle + Math.PI / 2;
 
             carouselGroup.add(module);
             horseModules.push(module);
@@ -352,19 +364,16 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
         requestID = requestAnimationFrame(animate);
         const time = Date.now() * 0.001;
 
-        // --- FIXED ROTATION LOGIC ---
-        // If not dragging, target rotation should continuously advance
+        // Carousel Rotation
         if (!isDragging) {
             targetRotationY += rotationVelocity;
         }
-
-        // Smoothly lerp towards target rotation
         currentRotationY += (targetRotationY - currentRotationY) * 0.05;
         if (carouselGroup) {
             carouselGroup.rotation.y = currentRotationY;
         }
 
-        // Bobbing & Mouse Hover
+        // Bobbing & Mouse Interactions
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(
             carouselGroup.children,
@@ -381,16 +390,19 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
         }
 
         horseModules.forEach((mod, i) => {
-            const h = mod.children[1] as THREE.Group;
+            const container = mod.children[1] as THREE.Group;
             const bob = Math.sin(time * 3 + i * 0.8) * 6;
-            h.position.y = 15 + bob;
+            container.position.y = 15 + bob;
 
-            const tScale = hoveredIdx === i ? 0.065 : 0.05;
-            h.scale.lerp(new THREE.Vector3(tScale, tScale, tScale), 0.15);
+            const tScale = hoveredIdx === i ? 1.25 : 1.0;
+            container.scale.lerp(
+                new THREE.Vector3(tScale, tScale, tScale),
+                0.15,
+            );
         });
 
-        // Subte camera sway
-        camera.position.x = Math.sin(time * 0.2) * 5;
+        // Delicate camera sway
+        camera.position.x = Math.sin(time * 0.1) * 8;
         camera.lookAt(0, 15, 0);
 
         renderer.render(scene, camera);
@@ -411,7 +423,7 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
         width: 100vw;
         height: 100vh;
         overflow: hidden;
-        background: #050508;
+        background: #020205;
         font-family: "Outfit", sans-serif;
     }
     #carousel-canvas-container {
@@ -427,8 +439,20 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
         left: 50%;
         transform: translate(-50%, -50%);
         color: #ffd700;
-        letter-spacing: 5px;
+        font-size: 1.5rem;
+        letter-spacing: 12px;
         z-index: 100;
+        text-transform: uppercase;
+        animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+        0%,
+        100% {
+            opacity: 0.3;
+        }
+        50% {
+            opacity: 1;
+        }
     }
 
     .ui-overlay {
@@ -446,33 +470,33 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
     }
 
     .title-section h1 {
-        font-size: 5rem;
+        font-size: 5.5rem;
         margin: 0;
-        letter-spacing: 15px;
-        font-weight: 800;
-        background: linear-gradient(to bottom, #fff, #ffd700);
+        letter-spacing: 20px;
+        font-weight: 900;
+        background: linear-gradient(to bottom, #fff 30%, #ffd700 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.4));
+        filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.4));
     }
     .subtitle {
         color: #ffd700;
-        letter-spacing: 8px;
+        letter-spacing: 10px;
         font-weight: 300;
-        margin-top: 10px;
+        margin-top: 15px;
     }
 
     .info-panel {
         position: relative;
-        background: rgba(10, 10, 15, 0.9);
-        backdrop-filter: blur(40px);
-        padding: 45px;
-        border-radius: 40px;
-        border: 1px solid rgba(255, 215, 0, 0.4);
-        width: 500px;
+        background: rgba(5, 5, 10, 0.92);
+        backdrop-filter: blur(50px);
+        padding: 50px;
+        border-radius: 45px;
+        border: 1px solid rgba(255, 215, 0, 0.5);
+        width: 520px;
         pointer-events: auto;
-        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7);
-        transition: all 0.7s cubic-bezier(0.19, 1, 0.22, 1);
+        box-shadow: 0 40px 120px rgba(0, 0, 0, 0.9);
+        transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
     }
     .info-panel.hidden {
         transform: translateX(-150px) scale(0.9);
@@ -482,60 +506,69 @@ const finalPosts = paddedPosts.slice(0, 12).map((p) => ({
 
     .close-btn {
         position: absolute;
-        top: 20px;
-        right: 25px;
+        top: 25px;
+        right: 30px;
         background: none;
         border: none;
         color: #ffd700;
-        font-size: 2.5rem;
+        font-size: 3rem;
         cursor: pointer;
         opacity: 0.5;
+        transition: 0.3s;
     }
     .close-btn:hover {
         opacity: 1;
+        transform: rotate(90deg);
     }
 
     .panel-content h2 {
         color: #ffd700;
-        font-size: 2.2rem;
-        margin: 0 0 15px;
+        font-size: 2.5rem;
+        margin-top: 0;
+        margin-bottom: 20px;
     }
     .panel-content p {
-        font-size: 1.1rem;
-        color: rgba(255, 255, 255, 0.7);
-        line-height: 1.7;
+        font-size: 1.15rem;
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.8;
     }
 
     .btn-read {
         display: inline-block;
-        margin-top: 30px;
-        padding: 14px 40px;
-        background: linear-gradient(135deg, #ffd700, #ffb000);
+        margin-top: 35px;
+        padding: 16px 45px;
+        background: linear-gradient(135deg, #ffd700, #ffc000);
         color: #000;
         text-decoration: none;
-        font-weight: 800;
-        border-radius: 60px;
-        transition: transform 0.3s;
+        font-weight: 900;
+        border-radius: 70px;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
     }
     .btn-read:hover {
-        transform: translateY(-3px);
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
     }
 
     .controls-hint {
         text-align: center;
         color: rgba(255, 255, 255, 0.3);
-        font-size: 0.85rem;
-        letter-spacing: 5px;
+        font-size: 0.9rem;
+        letter-spacing: 6px;
         text-transform: uppercase;
     }
 
     @media (max-width: 768px) {
         .title-section h1 {
-            font-size: 2.22rem;
+            font-size: 2.2rem;
             letter-spacing: 5px;
         }
         .info-panel {
             width: calc(100vw - 40px);
+            left: 0;
+            padding: 30px;
+        }
+        .ui-overlay {
+            padding: 30px;
         }
     }
 </style>
