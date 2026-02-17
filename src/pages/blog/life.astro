@@ -124,7 +124,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         // 1. Scene Setup
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0x020205);
-        scene.fog = new THREE.FogExp2(0x020205, 0.01);
+        scene.fog = new THREE.FogExp2(0x020205, 0.0065);
 
         camera = new THREE.PerspectiveCamera(
             50,
@@ -139,7 +139,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.8;
+        renderer.toneMappingExposure = 1.35;
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         container.appendChild(renderer.domElement);
 
@@ -150,23 +150,37 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             0.04,
         ).texture;
         scene.environment = globalEnvMap;
+        scene.environmentIntensity = 1.2;
 
-        // 3. Lighting (Premium Studio Quality)
-        const sun = new THREE.DirectionalLight(0xffffff, 4.5);
-        sun.position.set(50, 80, 50);
-        scene.add(sun);
+        // 3. Lighting (Porcelain + Gilded Metal Rig)
+        const keyLight = new THREE.DirectionalLight(0xfff3df, 7.2);
+        keyLight.position.set(45, 65, 55);
+        scene.add(keyLight);
 
-        const pointLight1 = new THREE.PointLight(0xffffff, 2500, 150);
-        pointLight1.position.set(-50, 40, 40);
-        scene.add(pointLight1);
+        const rimLight = new THREE.DirectionalLight(0xfff7e6, 5.0);
+        rimLight.position.set(-55, 35, -45);
+        scene.add(rimLight);
 
-        const fillLight = new THREE.PointLight(0xffd700, 1000, 100);
-        fillLight.position.set(0, -10, 0); // Underglow for the horses
-        scene.add(fillLight);
+        const topWarmLight = new THREE.SpotLight(
+            0xffe1a8,
+            1200,
+            200,
+            Math.PI / 3,
+            0.35,
+            1.2,
+        );
+        topWarmLight.position.set(0, 72, 15);
+        topWarmLight.target.position.set(0, 16, 0);
+        scene.add(topWarmLight);
+        scene.add(topWarmLight.target);
 
-        const ambient = new THREE.AmbientLight(0xffffff, 1.2);
+        const bounceLight = new THREE.PointLight(0xffd68a, 900, 140, 2);
+        bounceLight.position.set(0, -8, 0);
+        scene.add(bounceLight);
+
+        const ambient = new THREE.AmbientLight(0xf6efe2, 1.8);
         scene.add(ambient);
-        const hemi = new THREE.HemisphereLight(0xf7f0df, 0x1a1f28, 1.1);
+        const hemi = new THREE.HemisphereLight(0xfff6e8, 0x11151f, 2.1);
         scene.add(hemi);
 
         // 4. Construct
@@ -212,24 +226,28 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
 
         // --- PREMIUM MATERIAL FORMULAS ---
         const goldMat = new THREE.MeshPhysicalMaterial({
-            color: 0xffd700,
+            color: 0xe4bf63,
             metalness: 1.0,
-            roughness: 0.1,
-            clearcoat: 1.0,
-            envMapIntensity: 3.5,
-            reflectivity: 1.0,
+            roughness: 0.18,
+            clearcoat: 0.45,
+            clearcoatRoughness: 0.08,
+            envMapIntensity: 2.8,
         });
 
         // "Glazed Porcelain" (琉璃陶瓷) Material Formula
         const porcelainMat = new THREE.MeshPhysicalMaterial({
-            color: 0xf5efe5,
-            metalness: 0.0,
-            roughness: 0.22,
+            color: 0xf8f1e6,
+            metalness: 0.03,
+            roughness: 0.28,
             clearcoat: 1.0,
-            clearcoatRoughness: 0.08,
-            envMapIntensity: 1.8,
-            specularIntensity: 0.95,
-            specularColor: new THREE.Color(0xfff3dd),
+            clearcoatRoughness: 0.04,
+            ior: 1.5,
+            envMapIntensity: 2.1,
+            specularIntensity: 0.9,
+            specularColor: new THREE.Color(0xfff1d6),
+            emissive: new THREE.Color(0x2a2015),
+            emissiveIntensity: 0.1,
+            side: THREE.DoubleSide,
         });
 
         // 1. Structure
@@ -274,10 +292,15 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
 
             // The Horse Body
             const horse = cloneSkinned(horseTemplate);
+            const horseBodyMat = porcelainMat.clone();
+            horseBodyMat.envMap = globalEnvMap;
             horse.traverse((node) => {
                 if ((node as THREE.Mesh).isMesh) {
                     const mesh = node as THREE.Mesh;
-                    mesh.material = porcelainMat;
+                    const geometry = mesh.geometry as THREE.BufferGeometry;
+                    geometry.computeVertexNormals();
+                    geometry.normalizeNormals();
+                    mesh.material = horseBodyMat;
                 }
             });
             horse.scale.set(0.075, 0.075, 0.075);
@@ -338,6 +361,23 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             strapR.position.set(-0.6, 18, -1.5);
             strapR.rotation.z = -Math.PI / 4;
             decorationGroup.add(strapR);
+
+            // D. Leg Gilding (鎏金腿饰)
+            const legBandOffsets = [
+                new THREE.Vector3(0.95, 12.4, 2.3),
+                new THREE.Vector3(-0.95, 12.4, 2.3),
+                new THREE.Vector3(0.95, 12.4, -2.6),
+                new THREE.Vector3(-0.95, 12.4, -2.6),
+            ];
+            legBandOffsets.forEach((offset) => {
+                const legBand = new THREE.Mesh(
+                    new THREE.TorusGeometry(0.35, 0.08, 10, 20),
+                    goldMat,
+                );
+                legBand.position.copy(offset);
+                legBand.rotation.x = Math.PI / 2;
+                decorationGroup.add(legBand);
+            });
 
             decorationGroup.position.y = 15;
             module.add(decorationGroup);
