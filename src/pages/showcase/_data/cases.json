@@ -1,0 +1,22 @@
+{
+    "cases": [
+        {
+            "id": "case-1",
+            "title": "Case 1 Title",
+            "intro": "Write your own introduction for Case 1 here.",
+            "gif": "/images/PSA.gif"
+        },
+        {
+            "id": "case-2",
+            "title": "Case 2 Title",
+            "intro": "Write your own introduction for Case 2 here.",
+            "gif": "/images/PSA.gif"
+        },
+        {
+            "id": "case-3",
+            "title": "Case 3 Title",
+            "intro": "Write your own introduction for Case 3 here.",
+            "gif": "/images/PSA.gif"
+        }
+    ]
+}

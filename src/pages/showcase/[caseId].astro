@@ -1,0 +1,300 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Header from "../../components/Header.astro";
+import showcaseData from "./_data/cases.json";
+
+interface ShowcaseCase {
+    id: string;
+    title: string;
+    intro: string;
+    gif: string;
+}
+
+export async function getStaticPaths() {
+    const cases = (showcaseData.cases ?? []) as ShowcaseCase[];
+    return cases.map((item) => ({
+        params: { caseId: item.id },
+        props: { item },
+    }));
+}
+
+interface Props {
+    item: ShowcaseCase;
+}
+
+const { item } = Astro.props as Props;
+
+let markdownContent = "";
+let headings: Array<{ depth: number; text: string; slug: string }> = [];
+
+try {
+    const mdModules = import.meta.glob("/src/pages/showcase/_data/*.readme.md", {
+        eager: true,
+    });
+    const readmePath = `/src/pages/showcase/_data/${item.id}.readme.md`;
+    const mdModule = mdModules[readmePath] as any;
+
+    if (mdModule) {
+        markdownContent = mdModule.compiledContent
+            ? mdModule.compiledContent()
+            : "";
+        if (mdModule.getHeadings) {
+            headings = mdModule.getHeadings().filter((h: any) => h.depth <= 3);
+        }
+    } else {
+        markdownContent = `<p>No README found for <code>${item.id}</code>. Please add <code>${item.id}.readme.md</code> in <code>src/pages/showcase/_data/</code>.</p>`;
+    }
+} catch (error) {
+    markdownContent =
+        "<p>Failed to load README content. Please check the markdown file.</p>";
+}
+---
+
+<Layout title={`${item.title} - Showcase`}>
+    <Header />
+
+    <main class="case-page">
+        <a href="/showcase" class="back-link">
+            <span aria-hidden="true">&#8592;</span>
+            Back to Showcase
+        </a>
+
+        <section class="case-header">
+            <div class="gif-wrap">
+                <img src={item.gif} alt={`${item.title} preview`} />
+            </div>
+            <div class="summary">
+                <p class="label">Showcase Detail</p>
+                <h1>{item.title}</h1>
+                <p>{item.intro}</p>
+            </div>
+        </section>
+
+        <section class="case-content">
+            <aside class="toc">
+                <h2>Contents</h2>
+                {
+                    headings.length > 0 ? (
+                        <ul>
+                            {headings.map((h) => (
+                                <li class={`toc-level-${h.depth}`}>
+                                    <a href={`#${h.slug}`}>{h.text}</a>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p class="empty-toc">No section headings yet.</p>
+                    )
+                }
+            </aside>
+
+            <article class="article markdown-content" set:html={markdownContent} />
+        </section>
+    </main>
+</Layout>
+
+<script>
+    const tocLinks = Array.from(document.querySelectorAll(".toc a"));
+    const contentHeadings = Array.from(
+        document.querySelectorAll(
+            ".markdown-content h1, .markdown-content h2, .markdown-content h3",
+        ),
+    );
+
+    const updateActiveToc = () => {
+        let activeId = "";
+        contentHeadings.forEach((heading) => {
+            const rect = heading.getBoundingClientRect();
+            if (rect.top <= 120) {
+                activeId = heading.id;
+            }
+        });
+
+        tocLinks.forEach((link) => {
+            link.classList.toggle("active", link.getAttribute("href") === `#${activeId}`);
+        });
+    };
+
+    window.addEventListener("scroll", updateActiveToc);
+    updateActiveToc();
+</script>
+
+<style>
+    .case-page {
+        max-width: 1280px;
+        margin: 2rem auto 4rem;
+        padding: 0 3rem;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin-bottom: 1.2rem;
+        font-weight: 500;
+    }
+
+    .case-header {
+        display: grid;
+        grid-template-columns: minmax(260px, 360px) 1fr;
+        gap: 1.2rem;
+        background: #fff;
+        border-radius: 16px;
+        padding: 1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1rem;
+    }
+
+    .gif-wrap {
+        height: 220px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #eceff1;
+    }
+
+    .gif-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .summary {
+        align-self: center;
+    }
+
+    .summary .label {
+        color: #5dd3b6;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 0.8rem;
+        margin-bottom: 0.25rem;
+        font-weight: 600;
+    }
+
+    .summary h1 {
+        margin: 0 0 0.4rem;
+        font-size: 2.2rem;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 0.45rem;
+    }
+
+    .summary p {
+        color: #4a4a4a;
+    }
+
+    .case-content {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 1rem;
+        align-items: start;
+    }
+
+    .toc {
+        position: sticky;
+        top: 96px;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        padding: 1rem;
+    }
+
+    .toc h2 {
+        font-size: 1rem;
+        margin-bottom: 0.65rem;
+    }
+
+    .toc ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .toc li {
+        margin-bottom: 0.25rem;
+    }
+
+    .toc li a {
+        display: block;
+        padding: 0.4rem 0.5rem;
+        border-radius: 8px;
+        color: #4a4a4a;
+        text-decoration: none;
+        line-height: 1.3;
+        font-size: 0.9rem;
+    }
+
+    .toc li a:hover,
+    .toc li a.active {
+        background: #e8f9ff;
+        color: #2c9f88;
+    }
+
+    .toc-level-2 {
+        padding-left: 0.6rem;
+    }
+
+    .toc-level-3 {
+        padding-left: 1.2rem;
+    }
+
+    .empty-toc {
+        color: #6b6b6b;
+        font-size: 0.9rem;
+    }
+
+    .article {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        padding: 1.6rem 1.8rem;
+    }
+
+    .markdown-content {
+        font-size: 1rem;
+        color: #333;
+        line-height: 1.8;
+    }
+
+    .markdown-content :global(h1),
+    .markdown-content :global(h2),
+    .markdown-content :global(h3) {
+        scroll-margin-top: 95px;
+        margin: 1.8rem 0 0.8rem;
+    }
+
+    .markdown-content :global(p) {
+        margin-bottom: 0.8rem;
+    }
+
+    .markdown-content :global(img) {
+        max-width: 100%;
+        border-radius: 12px;
+        display: block;
+        margin: 1rem 0;
+    }
+
+    .markdown-content :global(pre.astro-code) {
+        border-radius: 12px;
+        margin: 1rem 0;
+        overflow-x: auto;
+    }
+
+    @media (max-width: 980px) {
+        .case-page {
+            padding: 0 1rem;
+        }
+
+        .case-header {
+            grid-template-columns: 1fr;
+        }
+
+        .case-content {
+            grid-template-columns: 1fr;
+        }
+
+        .toc {
+            position: static;
+        }
+    }
+</style>

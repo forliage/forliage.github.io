@@ -1,0 +1,378 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import showcaseData from "./showcase/_data/cases.json";
+
+interface ShowcaseCase {
+    id: string;
+    title: string;
+    intro: string;
+    gif: string;
+}
+
+const showcaseCases = (showcaseData.cases ?? []) as ShowcaseCase[];
+
+// Keep at most 9 images here. Replace with your own images whenever needed.
+const heroSlides = [
+    "/images/imagea001.png",
+    "/images/imagea002.png",
+    "/images/imagea003.png",
+    "/images/imagea004.png",
+    "/images/imagea005.png",
+    "/images/imagea006.png",
+    "/images/imagea007.png",
+    "/images/imagea008.png",
+    "/images/imagea009.png",
+];
+---
+
+<Layout title="Showcase - Liuye Zhao">
+    <Header />
+
+    <main class="showcase-page">
+        <section class="hero-panel">
+            <div class="hero-carousel" data-carousel>
+                <div class="slides">
+                    {
+                        heroSlides.map((src, index) => (
+                            <img
+                                src={src}
+                                alt={`Showcase preview ${index + 1}`}
+                                class={`slide ${index === 0 ? "is-active" : ""}`}
+                                loading={index === 0 ? "eager" : "lazy"}
+                            />
+                        ))
+                    }
+                </div>
+
+                <button class="carousel-btn prev" aria-label="Previous slide">
+                    &#10094;
+                </button>
+                <button class="carousel-btn next" aria-label="Next slide">
+                    &#10095;
+                </button>
+
+                <div class="carousel-dots">
+                    {
+                        heroSlides.map((_, index) => (
+                            <button
+                                class={`dot ${index === 0 ? "is-active" : ""}`}
+                                data-index={index}
+                                aria-label={`Go to slide ${index + 1}`}
+                            />
+                        ))
+                    }
+                </div>
+            </div>
+
+            <article class="hero-intro">
+                <h1>Hi there!</h1>
+                <p>
+                    This is my showcase space. I keep selected works and project
+                    records here.
+                </p>
+                <p>
+                    You can update this text directly in
+                    <code>src/pages/showcase.astro</code> and replace the 9
+                    preview images on the left at any time.
+                </p>
+            </article>
+        </section>
+
+        <section class="cases-section">
+            <h2>Work I did while at CC98 (the official university BBS of ZJU)</h2>
+
+            <div class="case-list">
+                {
+                    showcaseCases.map((item, index) => (
+                        <a href={`/showcase/${item.id}`} class="case-card">
+                            <div class="gif-box">
+                                <img
+                                    src={item.gif}
+                                    alt={`${item.title} preview`}
+                                    loading="lazy"
+                                />
+                            </div>
+                            <div class="case-info">
+                                <p class="case-index">Case {index + 1}</p>
+                                <h3>{item.title}</h3>
+                                <p>{item.intro}</p>
+                            </div>
+                        </a>
+                    ))
+                }
+            </div>
+        </section>
+    </main>
+</Layout>
+
+<script>
+    const carousel = document.querySelector("[data-carousel]");
+
+    if (carousel) {
+        const slides = Array.from(carousel.querySelectorAll(".slide"));
+        const dots = Array.from(carousel.querySelectorAll(".dot"));
+        const prevButton = carousel.querySelector(".carousel-btn.prev");
+        const nextButton = carousel.querySelector(".carousel-btn.next");
+        let currentIndex = 0;
+        let timer = null;
+
+        const setActive = (index) => {
+            slides.forEach((slide, i) => {
+                slide.classList.toggle("is-active", i === index);
+            });
+            dots.forEach((dot, i) => {
+                dot.classList.toggle("is-active", i === index);
+            });
+            currentIndex = index;
+        };
+
+        const goTo = (step) => {
+            if (slides.length <= 1) return;
+            const nextIndex = (currentIndex + step + slides.length) % slides.length;
+            setActive(nextIndex);
+        };
+
+        const stopAuto = () => {
+            if (timer) {
+                window.clearInterval(timer);
+                timer = null;
+            }
+        };
+
+        const startAuto = () => {
+            stopAuto();
+            timer = window.setInterval(() => goTo(1), 3600);
+        };
+
+        prevButton?.addEventListener("click", () => {
+            goTo(-1);
+            startAuto();
+        });
+
+        nextButton?.addEventListener("click", () => {
+            goTo(1);
+            startAuto();
+        });
+
+        dots.forEach((dot, index) => {
+            dot.addEventListener("click", () => {
+                setActive(index);
+                startAuto();
+            });
+        });
+
+        carousel.addEventListener("mouseenter", stopAuto);
+        carousel.addEventListener("mouseleave", startAuto);
+        startAuto();
+    }
+</script>
+
+<style>
+    .showcase-page {
+        max-width: 1280px;
+        margin: 2rem auto 4rem;
+        padding: 0 3rem;
+    }
+
+    .hero-panel {
+        display: grid;
+        grid-template-columns: minmax(280px, 420px) 1fr;
+        gap: 1.25rem;
+        align-items: stretch;
+    }
+
+    .hero-carousel {
+        position: relative;
+        background: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .slides {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        min-height: 330px;
+    }
+
+    .slide {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.35s ease;
+    }
+
+    .slide.is-active {
+        opacity: 1;
+    }
+
+    .carousel-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.86);
+        color: #333;
+        font-size: 1.2rem;
+        cursor: pointer;
+        z-index: 3;
+    }
+
+    .carousel-btn.prev {
+        left: 12px;
+    }
+
+    .carousel-btn.next {
+        right: 12px;
+    }
+
+    .carousel-dots {
+        position: absolute;
+        left: 50%;
+        bottom: 14px;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        z-index: 3;
+    }
+
+    .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+    }
+
+    .dot.is-active {
+        background: #5dd3b6;
+    }
+
+    .hero-intro {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        padding: 1.75rem;
+    }
+
+    .hero-intro h1 {
+        font-size: 3rem;
+        line-height: 1.05;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 0.7rem;
+    }
+
+    .hero-intro p {
+        color: #444;
+        margin-bottom: 0.9rem;
+        font-size: 1rem;
+    }
+
+    .hero-intro code {
+        font-size: 0.85rem;
+    }
+
+    .cases-section {
+        margin-top: 2.25rem;
+    }
+
+    .cases-section h2 {
+        font-size: 2.8rem;
+        margin-bottom: 1rem;
+        line-height: 1.15;
+    }
+
+    .case-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .case-card {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 1rem;
+        align-items: center;
+        background: #fff;
+        border-radius: 14px;
+        padding: 0.8rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.18s ease;
+    }
+
+    .case-card:hover {
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .gif-box {
+        border-radius: 12px;
+        overflow: hidden;
+        height: 180px;
+        background: #e9ecef;
+    }
+
+    .gif-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .case-index {
+        font-size: 0.82rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #5dd3b6;
+        margin-bottom: 0.2rem;
+        font-weight: 600;
+    }
+
+    .case-info h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.45rem;
+    }
+
+    .case-info p {
+        color: #4a4a4a;
+        margin: 0;
+    }
+
+    @media (max-width: 980px) {
+        .showcase-page {
+            padding: 0 1rem;
+        }
+
+        .hero-panel {
+            grid-template-columns: 1fr;
+        }
+
+        .hero-intro h1 {
+            font-size: 2.2rem;
+        }
+
+        .cases-section h2 {
+            font-size: 1.9rem;
+        }
+
+        .case-card {
+            grid-template-columns: 1fr;
+        }
+
+        .gif-box {
+            height: 200px;
+        }
+    }
+</style>
