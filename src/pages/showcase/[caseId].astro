@@ -268,10 +268,14 @@ try {
     }
 
     .markdown-content :global(img) {
-        max-width: 100%;
+        width: auto !important;
+        height: auto !important;
+        max-width: min(100%, 860px);
+        max-height: min(72vh, 760px);
+        object-fit: contain;
         border-radius: 12px;
         display: block;
-        margin: 1rem 0;
+        margin: 1rem auto;
     }
 
     .markdown-content :global(pre.astro-code) {
