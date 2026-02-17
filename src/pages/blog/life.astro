@@ -413,7 +413,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             envMapIntensity: 3.4,
         });
 
-        const gildedPaintColor = new THREE.Color(0xffbf2a);
+        const gildedPaintColor = new THREE.Color(0xffb400);
         const eyePaintColor = new THREE.Color(0x111114);
         const porcelainPaintColor = new THREE.Color(0xffffff);
 
@@ -558,13 +558,10 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                 }
             });
             const headOnHighMajor = highMajorHeadScore >= lowMajorHeadScore;
-            const headMin = headOnHighMajor ? 0.66 : 0.0;
-            const headMax = headOnHighMajor ? 1.0 : 0.34;
-            const tailMin = headOnHighMajor ? 0.0 : 0.66;
-            const tailMax = headOnHighMajor ? 0.34 : 1.0;
+            const headProgressOf = (majorN: number) =>
+                headOnHighMajor ? majorN : 1 - majorN;
 
-            // Directly dye horse regions to avoid floating accessories:
-            // head, tail, back and hooves -> gilded; eyes -> black.
+            // Dye only selected spots: head, tail base, back patch, hooves and black eyes.
             const vertexPos = new THREE.Vector3();
 
             horse.traverse((node) => {
@@ -589,26 +586,32 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                     const yN = (vertexPos.y - yMin) / ySpan;
                     const sideN = (minor - minorCenter) / minorHalfSpan;
                     const sideAbs = Math.abs(sideN);
+                    const headProgress = headProgressOf(majorN);
 
-                    const inHead = majorN >= headMin && majorN <= headMax;
-                    const inTail = majorN >= tailMin && majorN <= tailMax;
-
-                    const isHoofGold = yN < 0.2;
+                    const isHoofGold = yN < 0.09;
                     const isBackGold =
+                        headProgress > 0.38 &&
+                        headProgress < 0.58 &&
+                        yN > 0.64 &&
+                        yN < 0.8 &&
+                        sideAbs < 0.34;
+                    const isHeadGold =
+                        headProgress > 0.8 &&
                         yN > 0.58 &&
-                        yN < 0.85 &&
-                        majorN > 0.25 &&
-                        majorN < 0.75 &&
-                        sideAbs < 0.58;
-                    const isHeadGold = inHead && yN > 0.46 && yN < 0.9;
-                    const isTailGold = inTail && yN > 0.2 && yN < 0.78;
+                        yN < 0.9 &&
+                        sideAbs < 0.48;
+                    const isTailGold =
+                        headProgress < 0.23 &&
+                        yN > 0.56 &&
+                        yN < 0.8 &&
+                        sideAbs < 0.52;
 
                     const isEyeBlack =
-                        inHead &&
-                        yN > 0.56 &&
-                        yN < 0.78 &&
-                        sideAbs > 0.2 &&
-                        sideAbs < 0.62;
+                        headProgress > 0.84 &&
+                        yN > 0.6 &&
+                        yN < 0.74 &&
+                        sideAbs > 0.24 &&
+                        sideAbs < 0.46;
 
                     const color = isEyeBlack
                         ? eyePaintColor
