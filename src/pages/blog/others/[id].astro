@@ -63,7 +63,6 @@ const { planet } = Astro.props;
     let terrain: THREE.Mesh;
     let flagpole: THREE.Group;
     let flag: THREE.Mesh;
-    let treasures: THREE.Group[] = [];
     let requestID: number;
     let seed: number = 0;
 
@@ -138,7 +137,6 @@ const { planet } = Astro.props;
         addRocks();
         addStars();
         addFlagpole();
-        addTreasures();
 
         animate();
     }
@@ -378,69 +376,6 @@ const { planet } = Astro.props;
         scene.add(flagpole);
     }
 
-    function addTreasures() {
-        const count = 15;
-        const freqMap = 0.8 + (seed % 4) * 0.15;
-        const ampMap = 0.9 + (seed % 3) * 0.15;
-
-        for (let i = 0; i < count; i++) {
-            const group = new THREE.Group();
-
-            // Seeded deterministic placement
-            const s1 = Math.sin(seed * 0.5 + i * 3.7) * 10000;
-            const s2 = Math.cos(seed * 0.6 + i * 1.9) * 10000;
-            const noise1 = s1 - Math.floor(s1);
-            const noise2 = s2 - Math.floor(s2);
-
-            const tx = (noise1 - 0.5) * 300;
-            const tz = (noise2 - 0.5) * 300;
-
-            // Geometry: Octahedron for "gem" look
-            const geo = new THREE.OctahedronGeometry(1.2, 0);
-            const mat = new THREE.MeshStandardMaterial({
-                color: planetColor,
-                emissive: planetColor,
-                emissiveIntensity: 2.0,
-                metalness: 0.9,
-                roughness: 0.1,
-            });
-            const mesh = new THREE.Mesh(geo, mat);
-            group.add(mesh);
-
-            // Point Light for glow effect on surroundings
-            const light = new THREE.PointLight(planetColor, 30, 25);
-            light.position.set(0, 0, 0);
-            group.add(light);
-
-            // Sync height with terrain
-            const sx = tx + (seed % 1000) * 0.5;
-            const sz = tz + (seed % 777) * 0.3;
-            const ty_base =
-                Math.sin(sx * 0.03 * freqMap) *
-                    Math.cos(sz * 0.03 * freqMap) *
-                    18.0 *
-                    ampMap +
-                Math.sin(sx * 0.12 * freqMap) *
-                    Math.sin(sz * 0.12 * freqMap) *
-                    6.0 *
-                    ampMap +
-                Math.abs(Math.sin(sx * 0.4) * Math.cos(sz * 0.4)) * 4.0;
-
-            let ty = ty_base;
-            const vNoise =
-                Math.sin(sx * 0.015 + seed * 0.1) *
-                Math.cos(sz * 0.015 + seed * 0.2);
-            if (vNoise < -0.3) ty -= (Math.abs(vNoise) - 0.3) * 60.0;
-            const c1 = Math.sin(sx * 0.8 + seed * 0.5);
-            const c2 = Math.cos(sz * 0.8 + seed * 0.8);
-            if (Math.abs(c1 * c2) > 0.95) ty -= 10.0;
-
-            group.position.set(tx, ty + 4, tz); // Hovering at +4 height
-            scene.add(group);
-            treasures.push(group);
-        }
-    }
-
     // --- INTERACTIVE EXPLORATION LOGIC ---
     let isExploring = false;
     const keys = { w: false, a: false, s: false, d: false };
@@ -554,15 +489,6 @@ const { planet } = Astro.props;
             }
             pos.needsUpdate = true;
         }
-
-        // --- Treasure Floating Animation ---
-        treasures.forEach((t, i) => {
-            t.position.y += Math.sin(time * 3 + i) * 0.05;
-            t.rotation.y += 0.02;
-            // Pulsing light intensity
-            const light = t.children[1] as THREE.PointLight;
-            if (light) light.intensity = 20 + Math.sin(time * 5 + i) * 10;
-        });
 
         if (isExploring) {
             // Movement Relative to Camera
