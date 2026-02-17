@@ -91,6 +91,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
     let renderer: THREE.WebGLRenderer;
     let carouselGroup: THREE.Group;
     let horseModules: THREE.Group[] = [];
+    let horseShadowMeshes: THREE.Mesh[] = [];
     let requestID: number;
     let raycaster = new THREE.Raycaster();
     let mouse = new THREE.Vector2();
@@ -212,15 +213,43 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         return { horseDetailMap, horseDetailRoughnessMap, horseDetailBumpMap };
     }
 
+    function createSoftShadowTexture(size = 256) {
+        const canvas = document.createElement("canvas");
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return new THREE.CanvasTexture(canvas);
+
+        const grad = ctx.createRadialGradient(
+            size * 0.5,
+            size * 0.5,
+            size * 0.08,
+            size * 0.5,
+            size * 0.5,
+            size * 0.5,
+        );
+        grad.addColorStop(0, "rgba(0,0,0,0.85)");
+        grad.addColorStop(0.45, "rgba(0,0,0,0.52)");
+        grad.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, size, size);
+
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.wrapS = THREE.ClampToEdgeWrapping;
+        tex.wrapT = THREE.ClampToEdgeWrapping;
+        return tex;
+    }
+
     // Physical Parameters
     const HORSE_COUNT = 6;
     const RADIUS = 28;
     const ORBIT_SPEED = 0.0035;
     const HORSE_BASE_Y = 5.2;
-    const BOB_AMPLITUDE = 0.95;
-    const BOB_FREQ = 1.85;
-    const SWAY_AMPLITUDE = 0.016;
-    const SWAY_FREQ = 1.45;
+    const BOB_AMPLITUDE = 0.72;
+    const BOB_FREQ = 1.35;
+    const SWAY_AMPLITUDE = 0.011;
+    const SWAY_FREQ = 1.05;
 
     // Interaction states
     let isDragging = false;
@@ -263,8 +292,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.1;
         renderer.outputColorSpace = THREE.SRGBColorSpace;
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.shadowMap.enabled = false;
         container.appendChild(renderer.domElement);
 
         // PMREM for High-End Material Reflections
@@ -335,6 +363,8 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
 
     async function createCarousel() {
         carouselGroup = new THREE.Group();
+        horseModules = [];
+        horseShadowMeshes = [];
         scene.add(carouselGroup);
 
         const gltfLoader = new GLTFLoader();
@@ -359,6 +389,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         horseDetailMap.anisotropy = maxAniso;
         horseDetailRoughnessMap.anisotropy = maxAniso;
         horseDetailBumpMap.anisotropy = maxAniso;
+        const shadowTexture = createSoftShadowTexture(256);
 
         const goldMat = new THREE.MeshPhysicalMaterial({
             color: 0xd7b15a,
@@ -440,26 +471,12 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             goldMat,
         );
         pillar.position.y = 15;
-        pillar.receiveShadow = true;
         carouselGroup.add(pillar);
 
         const diskGeo = new THREE.CylinderGeometry(33, 33, 3, 64);
         const base = new THREE.Mesh(diskGeo, goldMat);
         base.position.y = -2;
-        base.receiveShadow = true;
         carouselGroup.add(base);
-
-        // Shadow catcher on the carousel deck, so horse shadows stay visible on metallic base.
-        const shadowCatcher = new THREE.Mesh(
-            new THREE.CircleGeometry(31.1, 96),
-            new THREE.ShadowMaterial({
-                opacity: 0.48,
-            }),
-        );
-        shadowCatcher.rotation.x = -Math.PI / 2;
-        shadowCatcher.position.y = -0.47;
-        shadowCatcher.receiveShadow = true;
-        carouselGroup.add(shadowCatcher);
 
         const ceiling = new THREE.Mesh(diskGeo, goldMat);
         ceiling.position.y = 40;
@@ -472,41 +489,53 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         roof.position.y = 48;
         carouselGroup.add(roof);
 
-        // Bright main lamp on top of the center pillar, casting downward shadows.
+        // Bright main lamp on top of the center pillar, casting visible downward beam.
         const centerLampTarget = new THREE.Object3D();
         centerLampTarget.position.set(0, -2, 0);
         carouselGroup.add(centerLampTarget);
 
         const centerLamp = new THREE.SpotLight(
             0xfff6d6,
-            980,
-            180,
-            Math.PI / 5.2,
-            0.34,
-            1.45,
+            1650,
+            220,
+            Math.PI / 2.65,
+            0.2,
+            1.15,
         );
         centerLamp.position.set(0, 39.1, 0);
         centerLamp.target = centerLampTarget;
-        centerLamp.castShadow = true;
-        centerLamp.shadow.mapSize.set(1536, 1536);
-        centerLamp.shadow.camera.near = 6;
-        centerLamp.shadow.camera.far = 130;
-        centerLamp.shadow.bias = -0.00008;
-        centerLamp.shadow.normalBias = 0.015;
         carouselGroup.add(centerLamp);
+
+        const centerLampFill = new THREE.PointLight(0xffebb8, 520, 95, 2);
+        centerLampFill.position.set(0, 37.8, 0);
+        carouselGroup.add(centerLampFill);
 
         const lampBulb = new THREE.Mesh(
             new THREE.SphereGeometry(1.45, 28, 28),
             new THREE.MeshStandardMaterial({
                 color: 0xffefbd,
                 emissive: 0xffc85c,
-                emissiveIntensity: 3.6,
+                emissiveIntensity: 4.8,
                 roughness: 0.18,
                 metalness: 0.0,
             }),
         );
         lampBulb.position.copy(centerLamp.position);
         carouselGroup.add(lampBulb);
+
+        const lampBeam = new THREE.Mesh(
+            new THREE.ConeGeometry(28.5, 42, 48, 1, true),
+            new THREE.MeshBasicMaterial({
+                color: 0xffd777,
+                transparent: true,
+                opacity: 0.18,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+                side: THREE.DoubleSide,
+            }),
+        );
+        lampBeam.position.set(0, 19, 0);
+        carouselGroup.add(lampBeam);
 
         // 2. Horse Instances
         for (let i = 0; i < HORSE_COUNT; i++) {
@@ -519,7 +548,6 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                 goldMat,
             );
             pole.position.y = 15;
-            pole.receiveShadow = true;
             module.add(pole);
 
             // Container for Horse + Detailed Gilded Decorations
@@ -581,10 +609,25 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                     geometry.computeVertexNormals();
                     geometry.normalizeNormals();
                     mesh.material = horseBodyMat;
-                    mesh.castShadow = true;
-                    mesh.receiveShadow = false;
                 }
             });
+
+            // Dynamic soft shadow blob, fixed on deck and bound to each horse module.
+            const horseShadow = new THREE.Mesh(
+                new THREE.PlaneGeometry(7.3, 4.2),
+                new THREE.MeshBasicMaterial({
+                    map: shadowTexture,
+                    color: 0x000000,
+                    transparent: true,
+                    depthWrite: false,
+                    opacity: 0.4,
+                }),
+            );
+            horseShadow.rotation.x = -Math.PI / 2;
+            horseShadow.position.set(0, -0.48, 0);
+            horseShadow.renderOrder = 3;
+            module.add(horseShadow);
+            horseShadowMeshes.push(horseShadow);
 
             decorationGroup.position.y = HORSE_BASE_Y;
             module.add(decorationGroup);
@@ -665,11 +708,23 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             // Subtle sway with damping to avoid visible jitter.
             const swayTarget = Math.sin(time * SWAY_FREQ + i) * SWAY_AMPLITUDE;
             hCont.rotation.z += (swayTarget - hCont.rotation.z) * verticalDamp;
+
+            const shadow = horseShadowMeshes[i];
+            if (shadow) {
+                const bob = hCont.position.y - HORSE_BASE_Y;
+                const size = THREE.MathUtils.clamp(1.04 - bob * 0.12, 0.84, 1.16);
+                shadow.scale.set(size, size, 1);
+                const mat = shadow.material as THREE.MeshBasicMaterial;
+                const targetOpacity = THREE.MathUtils.clamp(
+                    0.44 - bob * 0.12,
+                    0.23,
+                    0.54,
+                );
+                mat.opacity += (targetOpacity - mat.opacity) * verticalDamp;
+            }
         });
 
-        // Cinematic lookAt logic
-        const camTargetX = Math.sin(time * 0.1) * 15;
-        camera.position.x += (camTargetX - camera.position.x) * (1 - Math.exp(-4 * delta));
+        // Keep camera stable to reduce perceived jitter.
         camera.lookAt(0, 20, 0);
 
         renderer.render(scene, camera);
