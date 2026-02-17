@@ -413,28 +413,9 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             envMapIntensity: 3.4,
         });
 
-        const goldDetailMat = goldMat.clone();
-        goldDetailMat.color = new THREE.Color(0xffe2a5);
-        goldDetailMat.roughness = 0.09;
-        goldDetailMat.envMapIntensity = 3.9;
-
-        const ornamentGoldMat = goldMat.clone();
-        ornamentGoldMat.color = new THREE.Color(0xffd86a);
-        ornamentGoldMat.roughness = 0.07;
-        ornamentGoldMat.clearcoat = 0.9;
-        ornamentGoldMat.clearcoatRoughness = 0.04;
-        ornamentGoldMat.envMapIntensity = 4.7;
-        ornamentGoldMat.emissive = new THREE.Color(0x3d2e09);
-        ornamentGoldMat.emissiveIntensity = 0.16;
-
-        const ornamentGoldDetailMat = goldDetailMat.clone();
-        ornamentGoldDetailMat.color = new THREE.Color(0xffefb0);
-        ornamentGoldDetailMat.roughness = 0.045;
-        ornamentGoldDetailMat.clearcoat = 0.96;
-        ornamentGoldDetailMat.clearcoatRoughness = 0.03;
-        ornamentGoldDetailMat.envMapIntensity = 5.1;
-        ornamentGoldDetailMat.emissive = new THREE.Color(0x4b380b);
-        ornamentGoldDetailMat.emissiveIntensity = 0.2;
+        const gildedPaintColor = new THREE.Color(0xffd15f);
+        const eyePaintColor = new THREE.Color(0x111114);
+        const porcelainPaintColor = new THREE.Color(0xffffff);
 
         // Glazed porcelain material formula
         const porcelainCoreMat = new THREE.MeshPhysicalMaterial({
@@ -510,15 +491,6 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             horseBodyMat.specularIntensity = 0.98;
             horseBodyMat.specularColor = new THREE.Color(0xffffff);
             horseBodyMat.envMapIntensity = 1.25;
-            horse.traverse((node) => {
-                if ((node as THREE.Mesh).isMesh) {
-                    const mesh = node as THREE.Mesh;
-                    const geometry = mesh.geometry as THREE.BufferGeometry;
-                    geometry.computeVertexNormals();
-                    geometry.normalizeNormals();
-                    mesh.material = horseBodyMat;
-                }
-            });
             horse.scale.set(0.075, 0.075, 0.075);
             horse.rotation.y = Math.PI; // Correct CCW Inverse Orientation
             horse.updateMatrixWorld(true);
@@ -547,246 +519,74 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             const minorHalf =
                 (majorAxis === "x" ? horseSize.z : horseSize.x) * 0.5;
 
-            const axisVec = (major: number, minor: number, y: number) =>
-                majorAxis === "x"
-                    ? new THREE.Vector3(major, y, minor)
-                    : new THREE.Vector3(minor, y, major);
-
-            const saddleY = horseSize.y * 0.6;
-            const neckY = horseSize.y * 0.76;
-            const legY = horseSize.y * 0.12;
-            const frontMajor = majorHalf * 0.72;
-            const backMajor = -majorHalf * 0.62;
-
             const majorCoord = (p: THREE.Vector3) =>
                 majorAxis === "x" ? p.x : p.z;
             const minorCoord = (p: THREE.Vector3) =>
                 majorAxis === "x" ? p.z : p.x;
-            const minorOffset = (value: number) =>
-                majorAxis === "x"
-                    ? new THREE.Vector3(0, 0, value)
-                    : new THREE.Vector3(value, 0, 0);
+            // Directly dye horse regions to avoid floating accessories:
+            // head, tail, back and hooves -> gilded; eyes -> black.
+            const vertexPos = new THREE.Vector3();
+            const eyeBand = Math.max(minorHalf * 0.08, 0.016);
 
-            const surfacePoints = collectSurfacePoints(horse, 900);
-            const anchorByTarget = (
-                target: THREE.Vector3,
-                predicate: (p: THREE.Vector3) => boolean,
-                favorY = 0,
-            ) =>
-                pickSurfacePoint(
-                    surfacePoints,
-                    predicate,
-                    (p) => -p.distanceToSquared(target) * 6 + p.y * favorY,
-                    target,
-                );
+            horse.traverse((node) => {
+                if (!(node as THREE.Mesh).isMesh) return;
+                const mesh = node as THREE.Mesh;
+                const geometry = mesh.geometry as THREE.BufferGeometry;
+                const position = geometry.getAttribute("position");
+                if (!position) return;
 
-            const bodyAnchor = anchorByTarget(
-                axisVec(0, 0, saddleY),
-                (p) =>
-                    Math.abs(majorCoord(p)) < majorHalf * 0.5 &&
-                    p.y > horseSize.y * 0.38 &&
-                    p.y < horseSize.y * 0.82,
-                0.2,
-            );
+                geometry.computeVertexNormals();
+                geometry.normalizeNormals();
 
-            const headAnchor = anchorByTarget(
-                axisVec(frontMajor, 0, neckY * 0.96),
-                (p) => majorCoord(p) > majorHalf * 0.42 && p.y > horseSize.y * 0.54,
-                0.25,
-            );
+                const colors = new Float32Array(position.count * 3);
+                for (let vi = 0; vi < position.count; vi++) {
+                    vertexPos.fromBufferAttribute(position, vi);
+                    vertexPos.applyMatrix4(mesh.matrixWorld);
+                    horse.worldToLocal(vertexPos);
 
-            const noseAnchor = anchorByTarget(
-                axisVec(frontMajor * 1.02, 0, neckY * 0.84),
-                (p) => majorCoord(p) > majorHalf * 0.58 && p.y > horseSize.y * 0.45,
-                -0.1,
-            );
+                    const major = majorCoord(vertexPos);
+                    const minor = minorCoord(vertexPos);
+                    const y = vertexPos.y;
 
-            const tailAnchor = anchorByTarget(
-                axisVec(backMajor, 0, horseSize.y * 0.45),
-                (p) =>
-                    majorCoord(p) < -majorHalf * 0.34 &&
-                    p.y > horseSize.y * 0.24 &&
-                    p.y < horseSize.y * 0.64,
-                -0.1,
-            );
+                    const isHoofGold = y < horseSize.y * 0.13;
+                    const isBackGold =
+                        y > horseSize.y * 0.62 &&
+                        y < horseSize.y * 0.84 &&
+                        Math.abs(major) < majorHalf * 0.58;
+                    const isHeadGold =
+                        major > majorHalf * 0.44 &&
+                        y > horseSize.y * 0.4 &&
+                        y < horseSize.y * 0.88;
+                    const isTailGold =
+                        major < -majorHalf * 0.5 &&
+                        y > horseSize.y * 0.22 &&
+                        y < horseSize.y * 0.72;
 
-            const eyeLAnchor = anchorByTarget(
-                axisVec(frontMajor * 0.9, minorHalf * 0.12, neckY * 0.9),
-                (p) =>
-                    majorCoord(p) > majorHalf * 0.55 &&
-                    minorCoord(p) > 0 &&
-                    p.y > horseSize.y * 0.58,
-                0.1,
-            );
+                    const isEyeBlack =
+                        major > majorHalf * 0.58 &&
+                        major < majorHalf * 0.96 &&
+                        y > horseSize.y * 0.56 &&
+                        y < horseSize.y * 0.78 &&
+                        (Math.abs(minor - minorHalf * 0.2) < eyeBand ||
+                            Math.abs(minor + minorHalf * 0.2) < eyeBand);
 
-            const eyeRAnchor = anchorByTarget(
-                axisVec(frontMajor * 0.9, -minorHalf * 0.12, neckY * 0.9),
-                (p) =>
-                    majorCoord(p) > majorHalf * 0.55 &&
-                    minorCoord(p) < 0 &&
-                    p.y > horseSize.y * 0.58,
-                0.1,
-            );
+                    const color = isEyeBlack
+                        ? eyePaintColor
+                        : isHoofGold || isBackGold || isHeadGold || isTailGold
+                          ? gildedPaintColor
+                          : porcelainPaintColor;
 
-            const pickLegAnchor = (majorSign: number, minorSign: number) => {
-                const targetMajor = majorSign * majorHalf * 0.24;
-                const targetMinor = minorSign * minorHalf * 0.18;
-                const target = axisVec(targetMajor, targetMinor, legY * 1.06);
-                return pickSurfacePoint(
-                    surfacePoints,
-                    (p) =>
-                        majorCoord(p) * majorSign > majorHalf * 0.04 &&
-                        minorCoord(p) * minorSign > minorHalf * 0.04 &&
-                        p.y < horseSize.y * 0.42,
-                    (p) =>
-                        -p.distanceToSquared(target) * 8 -
-                        Math.abs(p.y - legY) * 1.2,
-                    target,
-                );
-            };
+                    const ci = vi * 3;
+                    colors[ci] = color.r;
+                    colors[ci + 1] = color.g;
+                    colors[ci + 2] = color.b;
+                }
 
-            // Gilded ornaments are mounted to horse local anchors.
-            const adornmentGroup = new THREE.Group();
-            horse.add(adornmentGroup);
+                geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+                geometry.getAttribute("color").needsUpdate = true;
 
-            const saddleBand = new THREE.Mesh(
-                new THREE.TorusGeometry(
-                    Math.max(minorHalf * 0.145, 0.085),
-                    Math.max(horseSize.y * 0.0038, 0.01),
-                    6,
-                    14,
-                    Math.PI,
-                ),
-                ornamentGoldMat,
-            );
-            saddleBand.position.copy(
-                bodyAnchor.clone().add(new THREE.Vector3(0, horseSize.y * 0.008, 0)),
-            );
-            if (majorAxis === "x") saddleBand.rotation.y = Math.PI / 2;
-            else saddleBand.rotation.x = Math.PI / 2;
-            adornmentGroup.add(saddleBand);
-
-            const saddleGem = new THREE.Mesh(
-                new THREE.SphereGeometry(Math.max(horseSize.y * 0.013, 0.032), 8, 8),
-                ornamentGoldDetailMat,
-            );
-            saddleGem.position.copy(
-                bodyAnchor.clone().add(new THREE.Vector3(0, horseSize.y * 0.024, 0)),
-            );
-            adornmentGroup.add(saddleGem);
-
-            [1, -1].forEach((side) => {
-                const sideStud = new THREE.Mesh(
-                    new THREE.SphereGeometry(
-                        Math.max(horseSize.y * 0.009, 0.022),
-                        7,
-                        7,
-                    ),
-                    ornamentGoldDetailMat,
-                );
-                sideStud.position.copy(
-                    bodyAnchor
-                        .clone()
-                        .add(minorOffset(side * minorHalf * 0.085))
-                        .add(new THREE.Vector3(0, horseSize.y * 0.004, 0)),
-                );
-                adornmentGroup.add(sideStud);
-            });
-
-            const browBand = new THREE.Mesh(
-                new THREE.TorusGeometry(
-                    Math.max(horseSize.y * 0.028, 0.07),
-                    Math.max(horseSize.y * 0.0034, 0.009),
-                    6,
-                    12,
-                    Math.PI,
-                ),
-                ornamentGoldDetailMat,
-            );
-            browBand.position.copy(
-                headAnchor.clone().add(new THREE.Vector3(0, -horseSize.y * 0.008, 0)),
-            );
-            if (majorAxis === "x") browBand.rotation.y = Math.PI / 2;
-            else browBand.rotation.x = Math.PI / 2;
-            adornmentGroup.add(browBand);
-
-            const headCrest = new THREE.Mesh(
-                new THREE.SphereGeometry(Math.max(horseSize.y * 0.012, 0.03), 8, 8),
-                ornamentGoldDetailMat,
-            );
-            headCrest.position.copy(
-                headAnchor.clone().add(new THREE.Vector3(0, horseSize.y * 0.015, 0)),
-            );
-            adornmentGroup.add(headCrest);
-
-            const noseRing = new THREE.Mesh(
-                new THREE.TorusGeometry(
-                    Math.max(horseSize.y * 0.017, 0.04),
-                    Math.max(horseSize.y * 0.0028, 0.007),
-                    6,
-                    12,
-                ),
-                ornamentGoldDetailMat,
-            );
-            noseRing.position.copy(noseAnchor);
-            if (majorAxis === "x") noseRing.rotation.y = Math.PI / 2;
-            else noseRing.rotation.x = Math.PI / 2;
-            adornmentGroup.add(noseRing);
-
-            const eyeMat = new THREE.MeshStandardMaterial({
-                color: 0x23180f,
-                metalness: 0.02,
-                roughness: 0.18,
-            });
-            const eyeRadius = Math.max(horseSize.y * 0.0095, 0.024);
-            const eyeL = new THREE.Mesh(
-                new THREE.SphereGeometry(eyeRadius, 8, 8),
-                eyeMat,
-            );
-            eyeL.position.copy(eyeLAnchor);
-            adornmentGroup.add(eyeL);
-
-            const eyeR = new THREE.Mesh(
-                new THREE.SphereGeometry(eyeRadius, 8, 8),
-                eyeMat,
-            );
-            eyeR.position.copy(eyeRAnchor);
-            adornmentGroup.add(eyeR);
-
-            const tailRing = new THREE.Mesh(
-                new THREE.TorusGeometry(
-                    Math.max(minorHalf * 0.052, 0.05),
-                    Math.max(horseSize.y * 0.003, 0.0078),
-                    6,
-                    12,
-                ),
-                ornamentGoldDetailMat,
-            );
-            tailRing.position.copy(
-                tailAnchor.clone().add(new THREE.Vector3(0, -horseSize.y * 0.004, 0)),
-            );
-            if (majorAxis === "x") tailRing.rotation.y = Math.PI / 2;
-            else tailRing.rotation.x = Math.PI / 2;
-            adornmentGroup.add(tailRing);
-
-            [
-                pickLegAnchor(-1, -1),
-                pickLegAnchor(-1, 1),
-                pickLegAnchor(1, -1),
-                pickLegAnchor(1, 1),
-            ].forEach((anchor) => {
-                const legBand = new THREE.Mesh(
-                    new THREE.TorusGeometry(
-                        Math.max(horseSize.y * 0.012, 0.03),
-                        Math.max(horseSize.y * 0.0026, 0.0068),
-                        6,
-                        10,
-                    ),
-                    ornamentGoldDetailMat,
-                );
-                legBand.position.copy(anchor);
-                legBand.rotation.x = Math.PI / 2;
-                adornmentGroup.add(legBand);
+                horseBodyMat.vertexColors = true;
+                mesh.material = horseBodyMat;
             });
 
             decorationGroup.position.y = HORSE_BASE_Y;
