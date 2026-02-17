@@ -113,78 +113,110 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         const bumpCtx = bumpCanvas.getContext("2d");
 
         if (colorCtx && roughCtx && bumpCtx) {
-            const baseGrad = colorCtx.createLinearGradient(0, 0, 0, size);
-            baseGrad.addColorStop(0, "#fbf4ea");
-            baseGrad.addColorStop(1, "#f2e6d8");
+            const baseGrad = colorCtx.createLinearGradient(0, 0, size, size);
+            baseGrad.addColorStop(0, "#f8ecdd");
+            baseGrad.addColorStop(0.5, "#e8d7c2");
+            baseGrad.addColorStop(1, "#d8c1a4");
             colorCtx.fillStyle = baseGrad;
             colorCtx.fillRect(0, 0, size, size);
 
-            colorCtx.strokeStyle = "rgba(200, 170, 130, 0.22)";
-            colorCtx.lineWidth = Math.max(1, size * 0.012);
-            for (let i = 0; i < 10; i++) {
-                const y = size * (0.2 + i * 0.065) + (Math.random() - 0.5) * 2;
+            colorCtx.strokeStyle = "rgba(138, 104, 72, 0.34)";
+            colorCtx.lineWidth = Math.max(1, size * 0.016);
+            for (let i = 0; i < 12; i++) {
+                const y = size * (0.18 + i * 0.058) + (Math.random() - 0.5) * 2.5;
                 colorCtx.beginPath();
-                colorCtx.moveTo(size * 0.1, y);
+                colorCtx.moveTo(size * 0.07, y);
                 colorCtx.bezierCurveTo(
-                    size * 0.35,
-                    y - size * 0.06,
-                    size * 0.7,
-                    y + size * 0.06,
-                    size * 0.92,
+                    size * 0.28,
+                    y - size * 0.08,
+                    size * 0.72,
+                    y + size * 0.08,
+                    size * 0.95,
                     y,
                 );
                 colorCtx.stroke();
             }
 
-            colorCtx.fillStyle = "rgba(155, 125, 90, 0.22)";
+            for (let i = 0; i < 280; i++) {
+                const x = Math.random() * size;
+                const y = Math.random() * size;
+                const a = 0.08 + Math.random() * 0.14;
+                colorCtx.fillStyle = `rgba(120, 86, 54, ${a})`;
+                colorCtx.fillRect(x, y, 1, 1);
+            }
+
+            colorCtx.fillStyle = "rgba(113, 82, 54, 0.28)";
             colorCtx.beginPath();
-            colorCtx.ellipse(size * 0.12, size * 0.56, size * 0.1, size * 0.2, 0, 0, Math.PI * 2);
+            colorCtx.ellipse(size * 0.14, size * 0.56, size * 0.11, size * 0.22, 0, 0, Math.PI * 2);
             colorCtx.fill();
 
-            roughCtx.fillStyle = "rgb(88,88,88)";
+            roughCtx.fillStyle = "rgb(110,110,110)";
             roughCtx.fillRect(0, 0, size, size);
-            roughCtx.strokeStyle = "rgba(120,120,120,0.35)";
+            roughCtx.strokeStyle = "rgba(70,70,70,0.42)";
             roughCtx.lineWidth = 1;
-            for (let i = 0; i < 22; i++) {
+            for (let i = 0; i < 26; i++) {
                 roughCtx.beginPath();
                 roughCtx.moveTo(size * 0.08, size * (0.15 + i * 0.03));
                 roughCtx.bezierCurveTo(
                     size * 0.3,
-                    size * (0.12 + i * 0.03),
+                    size * (0.1 + i * 0.03),
                     size * 0.7,
-                    size * (0.18 + i * 0.03),
+                    size * (0.2 + i * 0.03),
                     size * 0.92,
                     size * (0.15 + i * 0.03),
                 );
                 roughCtx.stroke();
             }
 
+            for (let i = 0; i < 700; i++) {
+                const x = Math.random() * size;
+                const y = Math.random() * size;
+                const v = 65 + Math.floor(Math.random() * 90);
+                roughCtx.fillStyle = `rgb(${v},${v},${v})`;
+                roughCtx.fillRect(x, y, 1, 1);
+            }
+
             bumpCtx.fillStyle = "rgb(128,128,128)";
             bumpCtx.fillRect(0, 0, size, size);
-            bumpCtx.strokeStyle = "rgba(180,180,180,0.45)";
-            bumpCtx.lineWidth = Math.max(1, size * 0.013);
-            for (let i = 0; i < 8; i++) {
-                const y = size * (0.22 + i * 0.08);
+            bumpCtx.strokeStyle = "rgba(196,196,196,0.6)";
+            bumpCtx.lineWidth = Math.max(1, size * 0.016);
+            for (let i = 0; i < 10; i++) {
+                const y = size * (0.18 + i * 0.07);
                 bumpCtx.beginPath();
-                bumpCtx.moveTo(size * 0.12, y);
-                bumpCtx.quadraticCurveTo(size * 0.55, y - size * 0.06, size * 0.9, y);
+                bumpCtx.moveTo(size * 0.08, y);
+                bumpCtx.quadraticCurveTo(size * 0.55, y - size * 0.085, size * 0.94, y);
                 bumpCtx.stroke();
             }
+
+            bumpCtx.fillStyle = "rgba(210,210,210,0.6)";
+            bumpCtx.beginPath();
+            bumpCtx.ellipse(size * 0.16, size * 0.6, size * 0.08, size * 0.16, 0, 0, Math.PI * 2);
+            bumpCtx.fill();
         }
 
         const horseDetailMap = new THREE.CanvasTexture(colorCanvas);
         horseDetailMap.colorSpace = THREE.SRGBColorSpace;
+        horseDetailMap.wrapS = THREE.RepeatWrapping;
+        horseDetailMap.wrapT = THREE.RepeatWrapping;
+        horseDetailMap.repeat.set(1.8, 1.4);
 
         const horseDetailRoughnessMap = new THREE.CanvasTexture(roughCanvas);
+        horseDetailRoughnessMap.wrapS = THREE.RepeatWrapping;
+        horseDetailRoughnessMap.wrapT = THREE.RepeatWrapping;
+        horseDetailRoughnessMap.repeat.set(1.8, 1.4);
         const horseDetailBumpMap = new THREE.CanvasTexture(bumpCanvas);
+        horseDetailBumpMap.wrapS = THREE.RepeatWrapping;
+        horseDetailBumpMap.wrapT = THREE.RepeatWrapping;
+        horseDetailBumpMap.repeat.set(1.8, 1.4);
 
         return { horseDetailMap, horseDetailRoughnessMap, horseDetailBumpMap };
     }
 
     // Physical Parameters
-    const HORSE_COUNT = 9;
+    const HORSE_COUNT = 7;
     const RADIUS = 28;
     const ORBIT_SPEED = 0.0035;
+    const HORSE_BASE_Y = 11;
 
     // Interaction states
     let isDragging = false;
@@ -316,6 +348,10 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         // --- PREMIUM MATERIAL FORMULAS ---
         const { horseDetailMap, horseDetailRoughnessMap, horseDetailBumpMap } =
             createHorseDetailMaps(128);
+        const maxAniso = renderer.capabilities.getMaxAnisotropy();
+        horseDetailMap.anisotropy = maxAniso;
+        horseDetailRoughnessMap.anisotropy = maxAniso;
+        horseDetailBumpMap.anisotropy = maxAniso;
 
         const goldMat = new THREE.MeshPhysicalMaterial({
             color: 0xd7b15a,
@@ -333,42 +369,26 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
 
         // "Glazed Porcelain" (琉璃陶瓷) Material Formula
         const porcelainCoreMat = new THREE.MeshPhysicalMaterial({
-            color: 0xf7eee2,
+            color: 0xe8d5be,
             map: horseDetailMap,
             roughnessMap: horseDetailRoughnessMap,
             bumpMap: horseDetailBumpMap,
-            bumpScale: 0.11,
+            bumpScale: 0.28,
             metalness: 0.0,
-            roughness: 0.2,
-            clearcoat: 1.0,
-            clearcoatRoughness: 0.02,
+            roughness: 0.3,
+            clearcoat: 0.85,
+            clearcoatRoughness: 0.04,
             ior: 1.52,
-            transmission: 0.06,
-            thickness: 0.48,
+            transmission: 0.02,
+            thickness: 0.35,
             attenuationDistance: 2.6,
-            attenuationColor: new THREE.Color(0xfff4e4),
-            sheen: 0.24,
+            attenuationColor: new THREE.Color(0xf1dfcc),
+            sheen: 0.18,
             sheenColor: new THREE.Color(0xffffff),
-            sheenRoughness: 0.28,
-            envMapIntensity: 2.6,
-            specularIntensity: 1.0,
-            specularColor: new THREE.Color(0xfff3e3),
-            side: THREE.DoubleSide,
-        });
-
-        const porcelainGlazeMat = new THREE.MeshPhysicalMaterial({
-            color: 0xffffff,
-            transparent: true,
-            opacity: 0.18,
-            metalness: 0.0,
-            roughness: 0.03,
-            clearcoat: 1.0,
-            clearcoatRoughness: 0.01,
-            ior: 1.5,
-            envMapIntensity: 3.2,
-            specularIntensity: 1.0,
-            specularColor: new THREE.Color(0xfff8ef),
-            depthWrite: false,
+            sheenRoughness: 0.32,
+            envMapIntensity: 2.0,
+            specularIntensity: 0.9,
+            specularColor: new THREE.Color(0xf7e7d1),
             side: THREE.DoubleSide,
         });
 
@@ -416,15 +436,11 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             const horse = cloneSkinned(horseTemplate);
             const horseBodyMat = porcelainCoreMat.clone();
             horseBodyMat.envMap = globalEnvMap;
-            horseBodyMat.clearcoat = porcelainGlazeMat.clearcoat;
-            horseBodyMat.clearcoatRoughness =
-                porcelainGlazeMat.clearcoatRoughness;
-            horseBodyMat.specularIntensity = porcelainGlazeMat.specularIntensity;
-            horseBodyMat.specularColor = porcelainGlazeMat.specularColor.clone();
-            horseBodyMat.envMapIntensity = Math.max(
-                horseBodyMat.envMapIntensity,
-                porcelainGlazeMat.envMapIntensity,
-            );
+            horseBodyMat.clearcoat = 0.75;
+            horseBodyMat.clearcoatRoughness = 0.06;
+            horseBodyMat.specularIntensity = 0.75;
+            horseBodyMat.specularColor = new THREE.Color(0xf6e8d7);
+            horseBodyMat.envMapIntensity = 2.0;
             horse.traverse((node) => {
                 if ((node as THREE.Mesh).isMesh) {
                     const mesh = node as THREE.Mesh;
@@ -469,139 +485,105 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
 
             const saddleY = horseSize.y * 0.62;
             const neckY = horseSize.y * 0.78;
-            const legY = horseSize.y * 0.16;
-            const frontMajor = majorHalf * 0.82;
-            const backMajor = -majorHalf * 0.72;
+            const legY = horseSize.y * 0.12;
+            const frontMajor = majorHalf * 0.74;
+            const backMajor = -majorHalf * 0.64;
 
             // --- GILDED DECORATIONS (鎏金配饰) ---
 
             // A. Luxury Saddle (马鞍)
             const saddleBand = new THREE.Mesh(
                 new THREE.TorusGeometry(
-                    Math.max(minorHalf * 0.33, 0.2),
-                    Math.max(horseSize.y * 0.01, 0.022),
-                    8,
-                    20,
-                    Math.PI * 1.12,
+                    Math.max(minorHalf * 0.2, 0.12),
+                    Math.max(horseSize.y * 0.006, 0.014),
+                    6,
+                    14,
+                    Math.PI * 1.05,
                 ),
                 goldMat,
             );
-            saddleBand.position.copy(axisVec(0, 0, saddleY + horseSize.y * 0.015));
+            saddleBand.position.copy(axisVec(0, 0, saddleY));
             if (majorAxis === "x") saddleBand.rotation.y = Math.PI / 2;
             else saddleBand.rotation.x = Math.PI / 2;
             decorationGroup.add(saddleBand);
 
             const saddleGem = new THREE.Mesh(
-                new THREE.SphereGeometry(Math.max(horseSize.y * 0.032, 0.1), 10, 10),
+                new THREE.SphereGeometry(Math.max(horseSize.y * 0.018, 0.05), 8, 8),
                 goldDetailMat,
             );
-            saddleGem.position.copy(axisVec(0, 0, saddleY + horseSize.y * 0.08));
+            saddleGem.position.copy(axisVec(0, 0, saddleY + horseSize.y * 0.03));
             decorationGroup.add(saddleGem);
 
             // B. Gilded Bridle/Headgear (头饰/马勒)
             const browBand = new THREE.Mesh(
                 new THREE.TorusGeometry(
-                    Math.max(horseSize.y * 0.072, 0.18),
-                    Math.max(horseSize.y * 0.009, 0.02),
-                    8,
-                    20,
-                    Math.PI * 1.08,
+                    Math.max(horseSize.y * 0.04, 0.1),
+                    Math.max(horseSize.y * 0.005, 0.012),
+                    6,
+                    14,
+                    Math.PI,
                 ),
                 goldDetailMat,
             );
-            browBand.position.copy(axisVec(frontMajor * 0.94, 0, neckY * 0.98));
+            browBand.position.copy(axisVec(frontMajor * 0.86, 0, neckY * 0.96));
             if (majorAxis === "x") browBand.rotation.y = Math.PI / 2;
             else browBand.rotation.x = Math.PI / 2;
             decorationGroup.add(browBand);
 
             const headCrest = new THREE.Mesh(
-                new THREE.SphereGeometry(Math.max(horseSize.y * 0.028, 0.09), 10, 10),
+                new THREE.SphereGeometry(Math.max(horseSize.y * 0.016, 0.045), 8, 8),
                 goldDetailMat,
             );
-            headCrest.position.copy(
-                axisVec(frontMajor * 0.98, 0, neckY + horseSize.y * 0.05),
-            );
+            headCrest.position.copy(axisVec(frontMajor * 0.9, 0, neckY));
             decorationGroup.add(headCrest);
 
             const eyeMat = new THREE.MeshStandardMaterial({
-                color: 0x1a120a,
-                metalness: 0.05,
-                roughness: 0.18,
+                color: 0x20160e,
+                metalness: 0.02,
+                roughness: 0.2,
             });
-            const eyeRadius = Math.max(horseSize.y * 0.017, 0.06);
+            const eyeRadius = Math.max(horseSize.y * 0.011, 0.04);
             [1, -1].forEach((sideSign) => {
                 const eye = new THREE.Mesh(
-                    new THREE.SphereGeometry(eyeRadius, 10, 10),
+                    new THREE.SphereGeometry(eyeRadius, 8, 8),
                     eyeMat,
                 );
                 eye.position.copy(
                     axisVec(
-                        frontMajor * 0.92,
-                        sideSign * minorHalf * 0.14,
-                        neckY * 0.93,
+                        frontMajor * 0.88,
+                        sideSign * minorHalf * 0.08,
+                        neckY * 0.9,
                     ),
                 );
                 decorationGroup.add(eye);
             });
 
-            const maneTailMat = new THREE.MeshStandardMaterial({
-                color: 0x6a4b2b,
-                metalness: 0.0,
-                roughness: 0.82,
-            });
-            const maneStrip = new THREE.Mesh(
-                new THREE.CapsuleGeometry(
-                    Math.max(horseSize.y * 0.012, 0.03),
-                    Math.max(horseSize.y * 0.2, 0.65),
-                    3,
-                    6,
-                ),
-                maneTailMat,
-            );
-            maneStrip.position.copy(axisVec(frontMajor * 0.54, 0, neckY * 0.96));
-            if (majorAxis === "x") maneStrip.rotation.z = Math.PI / 2;
-            else maneStrip.rotation.x = Math.PI / 2;
-            decorationGroup.add(maneStrip);
-
-            const tailTuft = new THREE.Mesh(
-                new THREE.ConeGeometry(
-                    Math.max(horseSize.y * 0.018, 0.05),
-                    Math.max(horseSize.y * 0.17, 0.52),
-                    8,
-                ),
-                maneTailMat,
-            );
-            tailTuft.position.copy(axisVec(backMajor * 1.02, 0, horseSize.y * 0.43));
-            if (majorAxis === "x") tailTuft.rotation.z = -Math.PI / 2;
-            else tailTuft.rotation.x = Math.PI / 2;
-            decorationGroup.add(tailTuft);
-
             // C. Tail Accent (尾饰)
             const tailRing = new THREE.Mesh(
                 new THREE.TorusGeometry(
-                    Math.max(minorHalf * 0.16, 0.14),
-                    Math.max(horseSize.y * 0.008, 0.02),
-                    8,
-                    18,
+                    Math.max(minorHalf * 0.09, 0.09),
+                    Math.max(horseSize.y * 0.004, 0.01),
+                    6,
+                    12,
                 ),
                 goldDetailMat,
             );
-            tailRing.position.copy(axisVec(backMajor * 0.96, 0, horseSize.y * 0.5));
+            tailRing.position.copy(axisVec(backMajor * 0.9, 0, horseSize.y * 0.46));
             if (majorAxis === "x") tailRing.rotation.y = Math.PI / 2;
             else tailRing.rotation.x = Math.PI / 2;
             decorationGroup.add(tailRing);
 
             // D. Leg Gilding (鎏金腿饰)
-            const legMajor = majorHalf * 0.36;
-            const legMinor = minorHalf * 0.32;
+            const legMajor = majorHalf * 0.22;
+            const legMinor = minorHalf * 0.14;
             [-1, 1].forEach((majorSign) => {
                 [-1, 1].forEach((minorSign) => {
                     const legBand = new THREE.Mesh(
                         new THREE.TorusGeometry(
-                            Math.max(horseSize.y * 0.028, 0.085),
-                            Math.max(horseSize.y * 0.006, 0.018),
-                            8,
-                            16,
+                            Math.max(horseSize.y * 0.017, 0.05),
+                            Math.max(horseSize.y * 0.0035, 0.009),
+                            6,
+                            12,
                         ),
                         goldDetailMat,
                     );
@@ -613,7 +595,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                 });
             });
 
-            decorationGroup.position.y = 15;
+            decorationGroup.position.y = HORSE_BASE_Y;
             module.add(decorationGroup);
 
             // Orbit Placement
@@ -682,8 +664,8 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
 
         horseModules.forEach((mod, i) => {
             const hCont = mod.children[1] as THREE.Group;
-            const bob = Math.sin(time * 2.4 + i * 1.1) * 2.8;
-            hCont.position.y = 15 + bob;
+            const bob = Math.sin(time * 2.2 + i * 1.1) * 1.6;
+            hCont.position.y = HORSE_BASE_Y + bob;
 
             // Subtle rotation sway for more life
             hCont.rotation.z = Math.sin(time * 1.8 + i) * 0.02;
