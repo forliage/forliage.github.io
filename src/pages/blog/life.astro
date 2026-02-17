@@ -244,12 +244,15 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
     // Physical Parameters
     const HORSE_COUNT = 6;
     const RADIUS = 28;
-    const ORBIT_SPEED = 0.0035;
+    const ORBIT_SPEED = 0.0028;
     const HORSE_BASE_Y = 5.2;
-    const BOB_AMPLITUDE = 0.72;
-    const BOB_FREQ = 1.35;
-    const SWAY_AMPLITUDE = 0.011;
-    const SWAY_FREQ = 1.05;
+    const BOB_AMPLITUDE = 0.62;
+    const BOB_FREQ = 1.18;
+    const SWAY_AMPLITUDE = 0.006;
+    const SWAY_FREQ = 0.82;
+    const SHADOW_DECK_Y = -0.48;
+    const LAMP_SOURCE_Y = 40.6;
+    const LAMP_BEAM_RADIUS = 30.5;
 
     // Interaction states
     let isDragging = false;
@@ -491,7 +494,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
 
         // Bright main lamp on top of the center pillar, casting visible downward beam.
         const centerLampTarget = new THREE.Object3D();
-        centerLampTarget.position.set(0, -2, 0);
+        centerLampTarget.position.set(0, SHADOW_DECK_Y, 0);
         carouselGroup.add(centerLampTarget);
 
         const centerLamp = new THREE.SpotLight(
@@ -502,12 +505,12 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             0.2,
             1.15,
         );
-        centerLamp.position.set(0, 39.1, 0);
+        centerLamp.position.set(0, LAMP_SOURCE_Y, 0);
         centerLamp.target = centerLampTarget;
         carouselGroup.add(centerLamp);
 
         const centerLampFill = new THREE.PointLight(0xffebb8, 520, 95, 2);
-        centerLampFill.position.set(0, 37.8, 0);
+        centerLampFill.position.set(0, LAMP_SOURCE_Y - 1.2, 0);
         carouselGroup.add(centerLampFill);
 
         const lampBulb = new THREE.Mesh(
@@ -524,7 +527,13 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         carouselGroup.add(lampBulb);
 
         const lampBeam = new THREE.Mesh(
-            new THREE.ConeGeometry(28.5, 42, 48, 1, true),
+            new THREE.ConeGeometry(
+                LAMP_BEAM_RADIUS,
+                LAMP_SOURCE_Y - SHADOW_DECK_Y,
+                48,
+                1,
+                true,
+            ),
             new THREE.MeshBasicMaterial({
                 color: 0xffd777,
                 transparent: true,
@@ -534,7 +543,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                 side: THREE.DoubleSide,
             }),
         );
-        lampBeam.position.set(0, 19, 0);
+        lampBeam.position.set(0, (LAMP_SOURCE_Y + SHADOW_DECK_Y) * 0.5, 0);
         carouselGroup.add(lampBeam);
 
         // 2. Horse Instances
@@ -624,7 +633,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                 }),
             );
             horseShadow.rotation.x = -Math.PI / 2;
-            horseShadow.position.set(0, -0.48, 0);
+            horseShadow.position.set(0, SHADOW_DECK_Y, 0);
             horseShadow.renderOrder = 3;
             module.add(horseShadow);
             horseShadowMeshes.push(horseShadow);
@@ -712,13 +721,18 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
             const shadow = horseShadowMeshes[i];
             if (shadow) {
                 const bob = hCont.position.y - HORSE_BASE_Y;
-                const size = THREE.MathUtils.clamp(1.04 - bob * 0.12, 0.84, 1.16);
+                const lampToDeck = LAMP_SOURCE_Y - SHADOW_DECK_Y;
+                const size = THREE.MathUtils.clamp(
+                    1 + (bob / lampToDeck) * 6.0,
+                    0.9,
+                    1.14,
+                );
                 shadow.scale.set(size, size, 1);
                 const mat = shadow.material as THREE.MeshBasicMaterial;
                 const targetOpacity = THREE.MathUtils.clamp(
-                    0.44 - bob * 0.12,
-                    0.23,
-                    0.54,
+                    0.42 - (size - 1) * 0.72,
+                    0.24,
+                    0.52,
                 );
                 mat.opacity += (targetOpacity - mat.opacity) * verticalDamp;
             }
