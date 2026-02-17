@@ -251,8 +251,9 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
     const SWAY_AMPLITUDE = 0.006;
     const SWAY_FREQ = 0.82;
     const SHADOW_DECK_Y = -0.48;
-    const LAMP_SOURCE_Y = 40.6;
-    const LAMP_BEAM_RADIUS = 30.5;
+    const ROOF_APEX_Y = 57.0;
+    const LAMP_SOURCE_Y = 64.5;
+    const LAMP_BEAM_RADIUS = 33.5;
 
     // Interaction states
     let isDragging = false;
@@ -513,12 +514,31 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
         centerLampFill.position.set(0, LAMP_SOURCE_Y - 1.2, 0);
         carouselGroup.add(centerLampFill);
 
+        const lampStem = new THREE.Mesh(
+            new THREE.CylinderGeometry(
+                0.24,
+                0.3,
+                LAMP_SOURCE_Y - ROOF_APEX_Y,
+                16,
+            ),
+            goldMat,
+        );
+        lampStem.position.set(0, (LAMP_SOURCE_Y + ROOF_APEX_Y) * 0.5, 0);
+        carouselGroup.add(lampStem);
+
+        const lampCap = new THREE.Mesh(
+            new THREE.SphereGeometry(0.72, 20, 20),
+            goldMat,
+        );
+        lampCap.position.set(0, ROOF_APEX_Y + 0.45, 0);
+        carouselGroup.add(lampCap);
+
         const lampBulb = new THREE.Mesh(
-            new THREE.SphereGeometry(1.45, 28, 28),
+            new THREE.SphereGeometry(2.35, 28, 28),
             new THREE.MeshStandardMaterial({
-                color: 0xffefbd,
+                color: 0xfff3d4,
                 emissive: 0xffc85c,
-                emissiveIntensity: 4.8,
+                emissiveIntensity: 6.6,
                 roughness: 0.18,
                 metalness: 0.0,
             }),
@@ -723,7 +743,7 @@ const finalPosts = paddedPosts.slice(0, 9).map((p) => ({
                 const bob = hCont.position.y - HORSE_BASE_Y;
                 const lampToDeck = LAMP_SOURCE_Y - SHADOW_DECK_Y;
                 const size = THREE.MathUtils.clamp(
-                    1 + (bob / lampToDeck) * 6.0,
+                    1 + (bob / lampToDeck) * 8.2,
                     0.9,
                     1.14,
                 );
