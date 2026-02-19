@@ -23,6 +23,12 @@
             "title": "Melting ice cream and chocolate bunny",
             "intro":"Delicious melting ice cream and chocolate bunny~",
             "gif": "/images/melt_front.gif"
+        },
+        {
+            "id": "case-5",
+            "title": "The bunny and the spheres fell into the water",
+            "intro":"Physical simulation for falling into the water of both bunny and spheres",
+            "gif": "/images/both_top.gif"
         }
     ]
 }
