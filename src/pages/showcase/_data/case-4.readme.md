@@ -2,16 +2,10 @@
 title: "Case 4 README"
 ---
 
-## Project Overview
+|![front](images/melt_front.gif)|![side](images/melt_side.gif)|
+|---|---|
+|![top](images/melt_top.gif)|![back](images/melt_back.gif)|
 
-Write your own project story for Case 3 in this file.
-
-## What I Did
-
-- Summarize the project context.
-- Summarize the key technical points.
-- Summarize the result and reflection.
-
-## Notes
-
-The showcase detail page reads this file and converts markdown to HTML automatically.
+|![front](images/chocolate_front.gif)|![side](images/chocolate_side.gif)|
+|---|---|
+|![top](images/chocolate_top.gif)|![back](images/chocolate_back.gif)|

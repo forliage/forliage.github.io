@@ -20,9 +20,9 @@
         },
         {
             "id": "case-4",
-            "title": "Case 4 Title",
-            "intro":"Write your own introduction for Case 4 here.",
-            "gif": "/images/image001.png"
+            "title": "Melting ice cream and chocolate bunny",
+            "intro":"Delicious melting ice cream and chocolate bunny~",
+            "gif": "/images/melt_front.gif"
         }
     ]
 }
