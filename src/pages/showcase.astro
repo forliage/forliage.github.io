@@ -113,9 +113,9 @@ const heroSlides = [
         const prevButton = carousel.querySelector(".carousel-btn.prev");
         const nextButton = carousel.querySelector(".carousel-btn.next");
         let currentIndex = 0;
-        let timer = null;
+        let timer: ReturnType<typeof window.setInterval> | null = null;
 
-        const setActive = (index) => {
+        const setActive = (index: number) => {
             slides.forEach((slide, i) => {
                 slide.classList.toggle("is-active", i === index);
             });
@@ -125,7 +125,7 @@ const heroSlides = [
             currentIndex = index;
         };
 
-        const goTo = (step) => {
+        const goTo = (step: number) => {
             if (slides.length <= 1) return;
             const nextIndex = (currentIndex + step + slides.length) % slides.length;
             setActive(nextIndex);
