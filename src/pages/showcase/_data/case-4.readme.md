@@ -16,7 +16,7 @@ title: "Case 4 README"
 |---|---|---|---|
 |**TOP**|![top](images/chocolate_top.gif)|![back](images/chocolate_back.gif)|**BACK**|
 
-The source cuda code can be found here: [melting ice cream bunny](https://github.com/forliage/forliage.github.io/blob/main/src/pages/showcase/_data/codes/melt_icecream_bunny.cu) and [melting chocolate bunny](https://github.com/forliage/forliage.github.io/blob/main/src/pages/showcase/_data/codes/melt_chocolate_bunny.cu),  which you should noted is that the stb_image.h, stb_image_write.h and the stanford-bunny.obj must be placed at the same file level.
+The source cuda code can be found here: [melting ice cream bunny](https://github.com/forliage/forliage.github.io/blob/main/src/pages/showcase/_data/codes/melt_icecream_bunny.cu) and [melting chocolate bunny](https://github.com/forliage/forliage.github.io/blob/main/src/pages/showcase/_data/codes/melt_chocolate_bunny.cu),  which you should noted is that the **stb_image.h**, **stb_image_write.h** and the **stanford-bunny.obj** must be placed at the same file level.
 
 ## 1. Overview
  

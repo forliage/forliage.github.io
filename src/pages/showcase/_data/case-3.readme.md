@@ -2,17 +2,11 @@
 title: "Case 3 README"
 ---
 
-
-
-
-
-
-
 |Strawberry|Lemon|Lime|
 |---|---|---|
 |![strawberry](images/JellyBunnyStrawberry.gif)|![lemon](images/JellyBunnyLemon.gif)|![lime](images/JellyBunnyLime.gif)|
 
-The source cuda code can be found [here](https://github.com/forliage/forliage.github.io/blob/main/src/pages/showcase/_data/codes/jellybunny.cu),  which you should noted is that the stb_image.h, stb_image_write.h and the stanford-bunny.obj must be placed at the same file level.
+The source cuda code can be found [here](https://github.com/forliage/forliage.github.io/blob/main/src/pages/showcase/_data/codes/jellybunny.cu),  which you should noted is that the **stb_image.h**, **stb_image_write.h** and the **stanford-bunny.obj** must be placed at the same file level.
 
 It's important to note that running this program on an RTX 4060 is not fast. The red image (red, the strawberry-flavored jelly rabbit) has a quality scale of 2.0 and took approximately 2 hours; the green image (green, the lime-flavored jelly rabbit) has a quality scale of 0.5 and took approximately 45 minutes. It's clear that the bottom image has significantly more noise than the top. In addition, I've provided jelly rabbits in Clear, Orange, Lemon, Blueberry, Grape, and Peach flavors. Due to computational limitations, I'm only providing two .gif files for demonstration purposes; readers are welcome to obtain the other beautiful jelly rabbits themselves. **Furthermore, if you have better methods or ideas for noise reduction and speeding up the process, please contact me at [masterforliage@gmail.com](mailto:masterforliage@gmail.com).**
 
