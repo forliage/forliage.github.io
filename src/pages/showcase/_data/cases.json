@@ -29,6 +29,12 @@
             "title": "The bunny and the spheres fell into the water",
             "intro":"Physical simulation for falling into the water of both bunny and spheres",
             "gif": "/images/both_top.gif"
+        },
+        {
+            "id": "case-6",
+            "title": "Bunny Dissolve",
+            "intro":"Physical simulation for Bunny Dissolve",
+            "gif": "/images/bunny_dissolve.gif"
         }
     ]
 }
