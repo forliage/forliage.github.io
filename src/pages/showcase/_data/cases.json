@@ -35,6 +35,12 @@
             "title": "Bunny Dissolve",
             "intro":"Physical simulation for Bunny Dissolve",
             "gif": "/images/bunny_dissolve.gif"
+        },
+        {
+            "id": "case-7",
+            "title": "Bunny Flow Field",
+            "intro":"Physical simulation for Bunny Flow Field",
+            "gif": "/images/bunny_flow_field.gif"
         }
     ]
 }
