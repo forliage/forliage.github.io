@@ -1,0 +1,9 @@
+{
+    "lectures": [
+        {
+            "id": 1,
+            "title": "Lecture 1: Relational Models",
+            "intro": "This lecture introduces the basic relational models in Database."
+        }
+    ]
+}
