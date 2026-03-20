@@ -230,8 +230,22 @@ $$
    $$ 
    r = \begin{array}{|c|c|} \hline A & B \\ \hline \alpha & 1 \\ \hline \beta & 2\\ \hline \end{array}\quad s=\begin{array}{|c|c|c|} \hline C & D & E\\ \hline \alpha & 10 & a \\ \hline \beta & 10 & a \\ \hline \beta & 20 & b \\ \hline \gamma & 10 & b \\ \hline \end{array} 
    $$ 
+
    $$ 
-   r \times s = \begin{array}{|c|c|c|c|c|} \hline A & B & C & D & E\\ \hline \alpha & 1 & \alpha & 10 & a \\ \hline \alpha & 1 & \beta & 10 & a \\ \hline \alpha & 1 & \beta & 20 & b \\ \hline \alpha & 1 & \gamma & 10 & b \\ \hline \beta & 2 & \alpha & 10 & a \\ \hline \beta & 2 & \beta & 10 & a \\ \hline \beta & 2 & \beta & 20 & b \\ \hline \beta & 2 & \gamma & 10 & b \\ \hline \end{array} $$
+   r \times s = \begin{array}{|c|c|c|c|c|} 
+   \hline A & B & C & D & E\\ 
+   \hline \alpha & 1 & \alpha & 10 & a \\ 
+   \hline \alpha & 1 & \beta & 10 & a \\ 
+   \hline \alpha & 1 & \beta & 20 & b \\ 
+   \hline \alpha & 1 & \gamma & 10 & b \\ 
+   \hline \beta & 2 & \alpha & 10 & a \\ 
+   \hline \beta & 2 & \beta & 10 & a \\ 
+   \hline \beta & 2 & \beta & 20 & b \\ 
+   \hline \beta & 2 & \gamma & 10 & b \\ 
+   \hline 
+   \end{array} 
+   $$
+
    * **Note:** If $r$ and $s$ have attributes with the same name, you need to resolve the conflict by renaming them first.
 
 6. **Rename (Rename) - $\rho$**
