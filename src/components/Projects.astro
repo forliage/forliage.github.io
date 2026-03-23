@@ -1,0 +1,218 @@
+---
+interface ProjectItem {
+	title: string;
+	introduction: string;
+	projectUrl: string;
+	image?: string;
+	imageAlt?: string;
+}
+
+const projects: ProjectItem[] = [
+	// Put project images in `public/images/` and set `image` to `/images/your-file.png`.
+	// Fill `projectUrl` with your full project page URL, for example `https://your-site.com/project`.
+	{
+		title: "liquid Glass Renderer",
+		introduction:
+			"The realtime rendering project for liquid glass.",
+		projectUrl: "https://github.com/forliage/Liquid_Glass_Renderer",
+		image: "/images/projects/liquid_glass_renderer.png",
+		imageAlt: "Project 01 preview",
+	},
+	{
+		title: "forliageEngine",
+		introduction:
+			"",
+		projectUrl: "",
+		image: "",
+		imageAlt: "Project 02 preview",
+	},
+];
+---
+
+<section id="projects" class="projects">
+	<h1 class="section-title">Selected Projects</h1>
+
+	<div class="project-list">
+		{
+			projects.map((project) => (
+				<article class="project-card">
+					<div class="project-media">
+						{project.image ? (
+							<img
+								src={project.image}
+								alt={project.imageAlt || `${project.title} preview`}
+								class="project-image"
+								loading="lazy"
+							/>
+						) : (
+							<div class="project-image placeholder" aria-label="Project image placeholder">
+								<span class="placeholder-title">Project Image</span>
+								<span class="placeholder-text">
+									Add image path in the component data.
+								</span>
+							</div>
+						)}
+					</div>
+
+					<div class="project-content">
+						<h3>{project.title}</h3>
+						<p>{project.introduction}</p>
+						<a
+							href={project.projectUrl}
+							class="project-link"
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							Project Page
+						</a>
+					</div>
+				</article>
+			))
+		}
+	</div>
+</section>
+
+<style>
+	.projects {
+		background: #fff;
+		padding: 2.5rem;
+		border-radius: 16px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+		margin-bottom: 3rem;
+	}
+
+	.section-title {
+		font-size: 2rem;
+		border-bottom: 2px solid #eee;
+		padding-bottom: 0.5rem;
+		margin-bottom: 1.5rem;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.project-list {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+	}
+
+	.project-card {
+		display: grid;
+		grid-template-columns: 190px 1fr;
+		gap: 1.5rem;
+		padding: 1.35rem;
+		border: 1px solid #e7edf2;
+		border-radius: 22px;
+		background: linear-gradient(180deg, #ffffff 0%, #fcfefd 100%);
+		align-items: center;
+	}
+
+	.project-media {
+		align-self: stretch;
+	}
+
+	.project-image {
+		width: 100%;
+		height: 170px;
+		display: block;
+		border-radius: 14px;
+		object-fit: cover;
+		background: #edf1f4;
+	}
+
+	.placeholder {
+		border: 1.5px dashed #cfd8df;
+		background:
+			linear-gradient(135deg, rgba(232, 249, 255, 0.8), rgba(250, 255, 250, 0.95)),
+			#f6fbfd;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.35rem;
+		padding: 1rem;
+		text-align: center;
+		color: #5a6872;
+	}
+
+	.placeholder-title {
+		font-size: 1rem;
+		font-weight: 600;
+		color: #37424a;
+	}
+
+	.placeholder-text {
+		font-size: 0.8rem;
+		line-height: 1.45;
+		max-width: 140px;
+	}
+
+	.project-content h3 {
+		font-size: 1.5rem;
+		margin-bottom: 0.55rem;
+		font-family: "Source Serif 4", serif;
+		color: #2b3137;
+	}
+
+	.project-content p {
+		font-family: "Source Serif 4", serif;
+		font-size: 0.95rem;
+		color: #444;
+		margin-bottom: 1rem;
+		line-height: 1.7;
+	}
+
+	.project-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.45rem 1rem;
+		border-radius: 8px;
+		border: 1px solid #d6dee6;
+		background: #fff;
+		font-size: 0.95rem;
+		font-weight: 500;
+		text-decoration: none;
+		transition:
+			background-color 0.2s ease,
+			border-color 0.2s ease,
+			color 0.2s ease;
+	}
+
+	.project-link:hover {
+		text-decoration: none;
+		background: #e8f9ff;
+		border-color: #bfe7f2;
+		color: #005bb5;
+	}
+
+	@media (max-width: 900px) {
+		.project-card {
+			grid-template-columns: 1fr;
+		}
+
+		.project-image {
+			height: 220px;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.projects {
+			padding: 1.5rem;
+		}
+
+		.project-card {
+			padding: 1rem;
+			border-radius: 18px;
+		}
+
+		.project-image {
+			height: 180px;
+		}
+
+		.project-content h3 {
+			font-size: 1.25rem;
+		}
+	}
+</style>
