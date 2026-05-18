@@ -3,20 +3,73 @@
 ---
 
 <aside class="sidebar">
-	<div class="photo-container">
-		<img src="/me.jpg" alt="Liuye Zhao" class="photo" />
+	<!-- Avatar Crest Backdrop Wreath -->
+	<div class="avatar-wrapper">
+		<div class="avatar-crest-backdrop">
+			<svg viewBox="0 0 200 200" class="crest-svg" xmlns="http://www.w3.org/2000/svg">
+				<!-- Shield Outlines -->
+				<path d="M100,20 C130,20 160,35 160,75 C160,120 100,165 100,165 C100,165 40,120 40,75 C40,35 70,20 100,20 Z" fill="none" stroke="rgba(30,64,175,0.06)" stroke-width="2.5" stroke-dasharray="4 2" />
+				<path d="M100,26 C125,26 152,39 152,75 C152,112 100,154 100,154 C100,154 48,112 48,75 C48,39 75,26 100,26 Z" fill="none" stroke="rgba(30,64,175,0.12)" stroke-width="1.5" />
+				
+				<!-- Laurel Leaves (Left Wreath) -->
+				<path d="M45,115 C35,95 38,65 52,48" fill="none" stroke="rgba(30,64,175,0.15)" stroke-width="1.5" />
+				<path d="M 39,105 C 34,105 34,98 42,99" fill="rgba(30,64,175,0.12)" />
+				<path d="M 37,88 C 31,87 33,80 40,83" fill="rgba(30,64,175,0.12)" />
+				<path d="M 39,71 C 34,68 37,62 43,67" fill="rgba(30,64,175,0.12)" />
+				<path d="M 45,55 C 41,51 45,46 50,51" fill="rgba(30,64,175,0.12)" />
+				
+				<!-- Laurel Leaves (Right Wreath) -->
+				<path d="M155,115 C165,95 162,65 148,48" fill="none" stroke="rgba(30,64,175,0.15)" stroke-width="1.5" />
+				<path d="M 161,105 C 166,105 166,98 158,99" fill="rgba(30,64,175,0.12)" />
+				<path d="M 163,88 C 169,87 167,80 160,83" fill="rgba(30,64,175,0.12)" />
+				<path d="M 161,71 C 166,68 163,62 157,67" fill="rgba(30,64,175,0.12)" />
+				<path d="M 155,55 C 159,51 155,46 150,51" fill="rgba(30,64,175,0.12)" />
+			</svg>
+		</div>
+		<div class="photo-container">
+			<img src="/me.jpg" alt="Liuye Zhao" class="photo" />
+		</div>
+		<!-- ZJU overlay badge bottom-right of avatar -->
+		<div class="floating-badge-zju">
+			<img src="/zju.png" alt="ZJU emblem" class="badge-zju-img" />
+		</div>
 	</div>
 
 	<div class="info-container">
 		<h1>Liuye Zhao</h1>
+		<div class="name-spacer"></div>
 		<p class="role">Undergraduate student</p>
-		<p class="affiliation">
-			@ Zhejiang University
-			<img src="/zju.png" alt="ZJU Logo" class="mini-logo" />
-		</p>
-		<a href="mailto:masterforliage@gmail.com" class="email-link"
-			>masterforliage@gmail.com</a
-		>
+		
+		<div class="pill-boxes-group">
+			<!-- Pill Box: Affiliation -->
+			<div class="pill-box">
+				<svg class="pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+					<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+				</svg>
+				<span>@ Zhejiang University</span>
+			</div>
+			<!-- Pill Box: Email -->
+			<div class="pill-box email-pill">
+				<svg class="pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+					<polyline points="22,6 12,13 2,6" />
+				</svg>
+				<a href="mailto:masterforliage@gmail.com" class="email-link">masterforliage@gmail.com</a>
+			</div>
+		</div>
+
+		<!-- Diamond Separator Side Column -->
+		<div class="diamond-divider-sidebar">
+			<div class="divider-line"></div>
+			<div class="divider-diamond">
+				<svg viewBox="0 0 100 100" class="diamond-svg">
+					<polygon points="50,15 85,50 50,85 15,50" fill="#ffffff" stroke="#cbd5e1" stroke-width="8" />
+					<polygon points="50,30 70,50 50,70 30,50" fill="#cbd5e1" />
+				</svg>
+			</div>
+			<div class="divider-line"></div>
+		</div>
 
 		<div class="social-icons">
 			<!-- Google Scholar -->
@@ -72,31 +125,77 @@
 			</a>
 		</div>
 	</div>
+
+	<!-- Blueprint Campus Gate at bottom -->
+	<div class="blueprint-gate">
+		<svg viewBox="0 0 240 60" fill="none" stroke="rgba(30,64,175,0.06)" stroke-width="1.2">
+			<!-- Colonnade base line -->
+			<line x1="10" y1="55" x2="230" y2="55" />
+			<!-- 4 Columns -->
+			<rect x="35" y="20" width="12" height="35" rx="1" />
+			<rect x="85" y="20" width="12" height="35" rx="1" />
+			<rect x="145" y="20" width="12" height="35" rx="1" />
+			<rect x="195" y="20" width="12" height="35" rx="1" />
+			<!-- Column tops -->
+			<line x1="30" y1="20" x2="52" y2="20" />
+			<line x1="80" y1="20" x2="102" y2="20" />
+			<line x1="140" y1="20" x2="162" y2="20" />
+			<line x1="190" y1="20" x2="212" y2="20" />
+			<!-- Architrave / Top triangular pediment -->
+			<polygon points="20,15 220,15 120,0" fill="rgba(30,64,175,0.01)" />
+			<line x1="20" y1="15" x2="220" y2="15" />
+			<line x1="25" y1="12" x2="215" y2="12" />
+			<circle cx="120" cy="9" r="2.5" />
+		</svg>
+	</div>
 </aside>
 
 <style>
 	.sidebar {
-		background: #fff;
-		padding: 1.75rem 1.25rem; /* Compact padding */
+		background: #ffffff;
+		padding: 2.25rem 1.25rem 3.5rem 1.25rem; /* Padding at bottom for blueprint gate */
 		border-radius: 16px;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Stronger shadow */
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+		border: 1px solid #e2e8f0;
 		display: flex;
 		flex-direction: column;
-		align-items: center; /* Center everything */
-		gap: 1rem; /* Compact gap */
+		align-items: center;
+		gap: 1.25rem;
 		height: fit-content;
-		position: sticky;
-		top: 100px;
 		text-align: center;
+		position: relative;
+		overflow: hidden; /* To clip bottom blueprint-gate */
+	}
+
+	.avatar-wrapper {
+		position: relative;
+		width: 170px;
+		height: 170px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.avatar-crest-backdrop {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		pointer-events: none;
+	}
+
+	.crest-svg {
+		width: 100%;
+		height: 100%;
 	}
 
 	.photo-container {
-		width: 130px; /* Compact image size */
-		height: 130px;
+		width: 110px;
+		height: 110px;
 		border-radius: 50%;
 		overflow: hidden;
-		border: 4px solid #fff; /* White border inside styling */
-		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+		border: 4px solid #ffffff;
+		box-shadow: 0 4px 15px rgba(30, 64, 175, 0.15); /* Blue-tint shadow */
+		z-index: 2;
 	}
 
 	.photo {
@@ -105,94 +204,187 @@
 		object-fit: cover;
 	}
 
+	/* Floating circular ZJU Badge overlay bottom-right of avatar */
+	.floating-badge-zju {
+		position: absolute;
+		bottom: 24px;
+		right: 24px;
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		background: #ffffff;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+		border: 2px solid #ffffff;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 3;
+	}
+
+	.badge-zju-img {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+	}
+
 	.info-container {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		gap: 0.5rem;
 		width: 100%;
+		z-index: 2;
 	}
 
 	h1 {
-		font-size: 1.5rem;
+		font-family: "Source Serif 4", serif;
+		font-size: 1.6rem;
 		font-weight: 700;
-		color: #333;
+		color: #0f172a; /* Slate 900 */
 		margin: 0;
+	}
+
+	.name-spacer {
+		width: 32px;
+		height: 3px;
+		background-color: #1e40af; /* Royal Blue */
+		border-radius: 2px;
+		margin: 0.25rem 0;
 	}
 
 	.role {
-		font-family: "Source Serif 4", serif;
-		font-size: 0.9rem; /* Reduced from 1rem */
-		font-weight: 400;
-		color: #555;
+		font-family: inherit;
+		font-size: 0.85rem;
+		font-weight: 500;
+		color: #64748b; /* Slate 500 */
 		margin: 0;
 	}
 
-	.affiliation {
+	.pill-boxes-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		width: 100%;
+		margin-top: 0.75rem;
+	}
+
+	.pill-box {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		border: 1px solid #e2e8f0;
+		background: #f8fafc;
+		padding: 0.45rem 0.85rem;
+		border-radius: 10px;
+		font-size: 0.8rem;
+		color: #334155; /* Slate 700 */
+		font-weight: 500;
+		width: 100%;
+		justify-content: center;
+	}
+
+	.pill-icon {
+		width: 14px;
+		height: 14px;
+		color: #1e40af; /* Royal Blue icon */
+		flex-shrink: 0;
+	}
+
+	.email-pill a {
+		color: #1e40af;
+		text-decoration: none;
+		word-break: break-all;
+	}
+
+	.email-pill a:hover {
+		text-decoration: underline;
+	}
+
+	/* Diamond Separator for Sidebar */
+	.diamond-divider-sidebar {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
-		font-family: "Source Serif 4", serif;
-		font-size: 0.85rem; /* Reduced from 0.95rem */
-		font-weight: 400;
-		color: #444;
-		margin: 0.25rem 0;
+		margin: 1rem 0;
+		width: 100%;
 	}
 
-	.mini-logo {
-		height: 20px; /* Adjusted icon size */
-		width: auto;
+	.divider-line {
+		flex: 1;
+		height: 1px;
+		background: #e2e8f0;
 	}
 
-	.email-link {
-		font-family: "Source Serif 4", serif;
-		color: #0066cc;
-		font-size: 0.85rem; /* Reduced from 0.9rem */
-		font-weight: 400;
-		text-decoration: none;
-		margin-bottom: 0.5rem; /* Compact margin */
+	.divider-diamond {
+		width: 14px;
+		height: 14px;
+		flex-shrink: 0;
 	}
 
-	.email-link:hover {
-		text-decoration: underline;
+	.diamond-svg {
+		width: 100%;
+		height: 100%;
 	}
 
 	.social-icons {
 		display: flex;
-		gap: 1rem;
-		margin-top: 0.5rem;
+		gap: 0.75rem;
+		justify-content: center;
+		width: 100%;
 	}
 
 	.icon-link {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: #555; /* Default icon color */
-		transition:
-			color 0.2s,
-			transform 0.2s;
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		background: #f8fafc;
+		border: 1px solid #e2e8f0;
+		color: #475569; /* Slate 600 */
+		transition: all 0.22s ease;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 	}
 
 	.icon {
-		width: 24px; /* Slightly smaller icons */
-		height: 24px;
+		width: 20px;
+		height: 20px;
 	}
 
 	.icon-link:hover {
 		transform: translateY(-2px);
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+		border-color: #cbd5e1;
 	}
 
 	.scholar:hover {
 		color: #4285f4;
+		background: #eff6ff;
 	}
 	.github:hover {
-		color: #333;
+		color: #0f172a;
+		background: #f1f5f9;
 	}
 	.linkedin:hover {
-		color: #0077b5;
+		color: #0a66c2;
+		background: #f0f9ff;
 	}
 	.orcid:hover {
 		color: #a6ce39;
+		background: #f7fee7;
+	}
+
+	/* Blueprint Gate line drawing */
+	.blueprint-gate {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		height: 55px;
+		overflow: hidden;
+		pointer-events: none;
+		z-index: 1;
 	}
 </style>

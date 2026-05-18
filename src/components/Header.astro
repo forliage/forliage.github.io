@@ -1,142 +1,191 @@
 ---
 const pathname = new URL(Astro.request.url).pathname;
-const currentPath = pathname.slice(1); // remove the first "/"
 ---
 
 <header class="glass-header">
+	<!-- SVG Constellation Net Background -->
+	<div class="header-bg-network">
+		<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+			<defs>
+				<radialGradient id="glow" cx="50%" cy="50%" r="50%">
+					<stop offset="0%" stop-color="#3b82f6" stop-opacity="0.12" />
+					<stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
+				</radialGradient>
+			</defs>
+			<rect width="100%" height="100%" fill="none" />
+			<circle cx="10%" cy="30%" r="80" fill="url(#glow)" />
+			<circle cx="70%" cy="50%" r="100" fill="url(#glow)" />
+			
+			<!-- Constellation Lines -->
+			<path d="M 80,15 L 120,40 L 180,10 L 250,35" stroke="rgba(255,255,255,0.06)" stroke-width="1.2" fill="none" />
+			<path d="M 120,40 L 150,70 L 220,60 L 250,35" stroke="rgba(255,255,255,0.06)" stroke-width="1.2" fill="none" />
+			<path d="M 640,15 L 690,45 L 750,25 L 780,50" stroke="rgba(255,255,255,0.06)" stroke-width="1.2" fill="none" />
+			<path d="M 690,45 L 710,75 L 770,65 L 780,50" stroke="rgba(255,255,255,0.06)" stroke-width="1.2" fill="none" />
+			<path d="M 810,10 L 860,35 L 910,15 L 950,45" stroke="rgba(255,255,255,0.05)" stroke-width="1" fill="none" />
+
+			<!-- Interactive nodes/dots -->
+			<circle cx="80" cy="15" r="1.5" fill="rgba(255,255,255,0.2)" />
+			<circle cx="120" cy="40" r="3" fill="rgba(59,130,246,0.4)" />
+			<circle cx="180" cy="10" r="1.5" fill="rgba(255,255,255,0.2)" />
+			<circle cx="250" cy="35" r="2" fill="rgba(255,255,255,0.25)" />
+			<circle cx="150" cy="70" r="2" fill="rgba(255,255,255,0.25)" />
+			<circle cx="220" cy="60" r="2.5" fill="rgba(59,130,246,0.3)" />
+			
+			<circle cx="640" cy="15" r="1.5" fill="rgba(255,255,255,0.2)" />
+			<circle cx="690" cy="45" r="2.5" fill="rgba(59,130,246,0.3)" />
+			<circle cx="750" cy="25" r="1.5" fill="rgba(255,255,255,0.2)" />
+			<circle cx="780" cy="50" r="3" fill="rgba(59,130,246,0.4)" />
+			<circle cx="710" cy="75" r="1.5" fill="rgba(255,255,255,0.15)" />
+			<circle cx="770" cy="65" r="2" fill="rgba(255,255,255,0.25)" />
+		</svg>
+	</div>
+
 	<div class="container">
-		<div class="logo-terminal">
-			<span class="text-indigo">Liuye Zhao@ZJU:~$</span><span
-				class="cursor-blink"></span>
-		</div>
+		<!-- Branding / Hexagon Logo + Dual Title -->
+		<a href="/" class="brand-link">
+			<div class="hexagon-logo">
+				<svg viewBox="0 0 100 100" class="hexagon-svg">
+					<polygon points="50,5 95,30 95,70 50,95 5,70 5,30" fill="none" stroke="#ffffff" stroke-width="6" />
+					<polygon points="50,13 88,34 88,66 50,87 12,66 12,34" fill="none" stroke="#3b82f6" stroke-width="3" opacity="0.8" />
+					<text x="50%" y="54%" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" font-family="system-ui, sans-serif" font-weight="900" font-size="34">LZ</text>
+				</svg>
+			</div>
+			<div class="brand-text">
+				<span class="brand-name">Liuye Zhao</span>
+				<span class="brand-subtitle">Visual Computing · ZJU</span>
+			</div>
+		</a>
+
 		<nav>
-			<a href="/" class={pathname === "/" ? "active" : ""}>Home</a>
-			<a
-				href="#publications"
-				class={pathname === "/publications" ? "active" : ""}
-				>Publications</a
-			>
-			<a href="/blog" class={pathname.startsWith("/blog") ? "active" : ""}
-				>Blog</a
-			>
-			<a
-				href="/showcase"
-				class={pathname.startsWith("/showcase") ? "active" : ""}
-				>Showcase</a
-			>
+			<a href="/" class={pathname === "/" ? "active" : ""}>
+				<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+					<polyline points="9 22 9 12 15 12 15 22" />
+				</svg>
+				Home
+			</a>
+			<a href="#publications" class={pathname === "/publications" ? "active" : ""}>Publications</a>
+			<a href="/blog" class={pathname.startsWith("/blog") ? "active" : ""}>Blog</a>
+			<a href="/showcase" class={pathname.startsWith("/showcase") ? "active" : ""}>Showcase</a>
 		</nav>
 	</div>
 </header>
 
 <style>
-	:root {
-		--color-header-bg: rgba(
-			209,
-			238,
-			204,
-			0.85
-		); /* #D1EECC with transparency */
-		--color-green-text: #76DBD1; /* Active page color */
-		--color-pink-text: #f075ae;
-		--color-indigo-text: #6367FF; /* Custom indigo color */
-		--color-inactive-text: #9FD3C7; /* Inactive page color */
-	}
-
 	.glass-header {
 		position: sticky;
 		top: 0;
 		width: 100%;
 		z-index: 100;
-		background: var(--color-header-bg);
-		backdrop-filter: blur(20px) saturate(180%);
-		-webkit-backdrop-filter: blur(20px) saturate(180%);
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Slightly stronger shadow */
-		padding: 1rem 0;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.3); /* Glassy border */
+		background: #090e1a; /* Solid deep academic navy blue */
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+		padding: 0.75rem 0;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+		overflow: hidden; /* Clip constellation lines */
+	}
+
+	.header-bg-network {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		z-index: 0;
 	}
 
 	.container {
-		max-width: 1280px;
+		max-width: 1200px;
 		margin: 0 auto;
-		padding: 0 3rem;
+		padding: 0 2rem;
 		display: flex;
-		justify-content: space-between; /* Space between logo and nav */
+		justify-content: space-between;
 		align-items: center;
+		position: relative;
+		z-index: 2;
 	}
 
-	.logo-terminal {
-		font-family: "Consolas", "Monaco", "Andale Mono", monospace;
-		font-weight: 400; /* Removed bold */
-		font-size: 1.15rem;
-		letter-spacing: -0.5px;
+	.brand-link {
 		display: flex;
 		align-items: center;
+		gap: 0.75rem;
+		text-decoration: none;
 	}
 
-	.text-indigo {
-		color: var(--color-indigo-text);
+	.hexagon-logo {
+		width: 38px;
+		height: 38px;
+		flex-shrink: 0;
 	}
 
-	.text-green {
-		color: var(--color-green-text);
+	.hexagon-svg {
+		width: 100%;
+		height: 100%;
 	}
 
-	.text-pink {
-		color: var(--color-pink-text);
+	.brand-text {
+		display: flex;
+		flex-direction: column;
 	}
 
-	.cursor-blink {
-		display: inline-block;
-		width: 2px; /* Thinner cursor */
-		height: 1.2em;
-		background-color: var(--color-indigo-text); /* Matched to indigo color */
-		margin-left: 2px;
-		animation: blink 1s step-end infinite;
-		vertical-align: text-bottom;
+	.brand-name {
+		color: #ffffff;
+		font-size: 1.35rem;
+		font-weight: 700;
+		line-height: 1.1;
+		letter-spacing: -0.3px;
 	}
 
-	@keyframes blink {
-		0%,
-		100% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 0;
-		}
+	.brand-subtitle {
+		color: #94a3b8; /* Slate 400 */
+		font-size: 0.78rem;
+		font-weight: 400;
+		letter-spacing: 0.5px;
+		margin-top: 2px;
 	}
 
 	nav {
 		display: flex;
-		gap: 2rem;
+		gap: 1.75rem;
+		align-items: center;
 	}
 
 	nav a {
-		color: var(--color-inactive-text);
-		font-weight: 400; /* Removed bold */
-		font-size: 1rem;
-		transition: all 0.3s ease;
+		color: #94a3b8; /* Slate 400 */
+		text-decoration: none;
+		font-size: 0.95rem;
+		font-weight: 500;
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.5rem 0;
+		transition: color 0.25s;
 		position: relative;
 	}
 
 	nav a:hover {
-		color: var(--color-green-text);
+		color: #ffffff;
 		text-decoration: none;
 	}
 
 	nav a.active {
-		color: var(--color-green-text);
+		color: #ffffff;
 	}
 
-	/* Optional: Add a subtle glow to active link */
+	.nav-icon {
+		width: 17px;
+		height: 17px;
+		color: inherit;
+		opacity: 0.9;
+	}
+
+	/* Elegant indicator bar at bottom edge of active tab */
 	nav a.active::after {
 		content: "";
 		position: absolute;
-		bottom: -4px;
+		bottom: -1rem; /* Aligns exactly with the bottom of header padding */
 		left: 0;
 		width: 100%;
-		height: 2px;
-		background-color: var(--color-green-text);
+		height: 3px;
+		background-color: #3b82f6; /* Premium royal blue active bar */
 		border-radius: 2px;
-		opacity: 0.6;
+		box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
 	}
 </style>

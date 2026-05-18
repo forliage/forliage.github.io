@@ -1,133 +1,191 @@
 ---
+interface Props {
+	isMerged?: boolean;
+}
 
+const { isMerged = false } = Astro.props;
 ---
 
-<section id="education" class="education">
-    <h1 class="section-title">Education</h1>
-    <div class="timeline">
-        <div class="timeline-item">
-            <div class="timeline-date">Sep. 2023 - Present</div>
-            <div class="timeline-marker"></div>
-            <div class="timeline-content">
-                <h3>
-                    Zhejiang University <img
-                        src="/logo.jpg"
-                        alt="ZJU Logo"
-                        class="edu-logo"
-                        style="height: 24px;"
-                    />
-                </h3>
-                <p class="role">
-                    Undergraduate student in Computer Science and Technology
-                </p>
-            </div>
-        </div>
-
-        <!-- 
+<section id="education" class={`education ${isMerged ? 'merged' : ''}`}>
+	<h1 class="section-title">
+		<span class="title-icon-wrapper">
+			<svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+				<path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
+			</svg>
+		</span>
+		Education
+	</h1>
+	
+	<div class="timeline">
 		<div class="timeline-item">
-			<div class="timeline-date">Sep. 2017 - Jun. 2021</div>
 			<div class="timeline-marker"></div>
 			<div class="timeline-content">
-				<h3>Zhejiang University <span class="logo-placeholder">🏫</span></h3>
-				<p class="role">B.S. in Computer Science (Chu Kochen Honors College)</p>
+				<div class="timeline-header">
+					<span class="timeline-date">Sep. 2023 - Present</span>
+					<span class="institution">Zhejiang University</span>
+					<div class="logo-group">
+						<img src="/zju.png" alt="ZJU Logo" class="edu-logo-img" />
+						<span class="zju-text-logo">浙江大学</span>
+					</div>
+				</div>
+				<p class="role">
+					Undergraduate student in Computer Science and Technology
+				</p>
 			</div>
 		</div>
-		-->
-    </div>
+	</div>
 </section>
 
 <style>
-    .education {
-        background: #fff;
-        padding: 1.5rem 2rem; /* Compact padding */
-        border-radius: 16px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        margin-bottom: 1.5rem;
-    }
+	.education {
+		background: #ffffff;
+		padding: 1.5rem 2rem;
+		border-radius: 16px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+		margin-bottom: 1.5rem;
+		border: 1px solid #e2e8f0;
+	}
 
-    .section-title {
-        font-size: 1.5rem;
-        border-bottom: 2px solid #eee;
-        padding-bottom: 0.5rem;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
+	.education.merged {
+		background: none !important;
+		padding: 0 !important;
+		border-radius: 0 !important;
+		box-shadow: none !important;
+		margin-bottom: 0 !important;
+		border: none !important;
+	}
 
-    .timeline {
-        position: relative;
-        padding-left: 0.5rem;
-    }
+	.section-title {
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: #0f172a; /* Slate 900 */
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
+		border-bottom: 2px solid #e2e8f0;
+		padding-bottom: 0.65rem;
+		margin-bottom: 1.25rem;
+	}
 
-    .timeline-item {
-        display: grid;
-        grid-template-columns: 120px 20px 1fr; /* Compact column */
-        gap: 1rem;
-        margin-bottom: 1.25rem; /* Compact margin */
-        align-items: start;
-    }
+	.merged .section-title {
+		border-bottom: 2px solid #e2e8f0; /* Keep neat border under column titles */
+	}
 
-    .timeline-item:last-child {
-        margin-bottom: 0;
-    }
+	.title-icon-wrapper {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border: 1.5px solid #1e40af; /* Royal Blue */
+		border-radius: 50%;
+		background: #eff6ff; /* Soft light blue */
+		color: #1e40af;
+		flex-shrink: 0;
+	}
 
-    .timeline-date {
-        text-align: right;
-        color: #888;
-        font-size: 0.9rem;
-        padding-top: 0.2rem;
-        font-family: "Consolas", monospace; /* Monospace for alignment */
-    }
+	.title-icon {
+		width: 16px;
+		height: 16px;
+	}
 
-    .timeline-marker {
-        width: 14px; /* Slightly larger */
-        height: 14px;
-        border: 2px solid #5dd3b6;
-        border-radius: 50%;
-        background: #fff; /* Hollow center */
-        position: relative;
-        margin-top: 0.35rem; /* Adjusted alignment */
-        justify-self: center; /* Center in the 20px column */
-        z-index: 1;
-    }
+	.timeline {
+		position: relative;
+		padding-left: 0.25rem;
+		margin-top: 1rem;
+	}
 
-    /* Line connecting markers */
-    .timeline-marker::after {
-        content: "";
-        position: absolute;
-        top: 14px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 2px;
-        height: calc(100% + 1.25rem); /* Adjust based on new gap */
-        background: #eee;
-        z-index: -1;
-    }
+	.timeline-item {
+		display: flex;
+		gap: 1rem;
+		position: relative;
+		align-items: start;
+	}
 
-    .timeline-item:last-child .timeline-marker::after {
-        display: none;
-    }
+	.timeline-marker {
+		width: 12px;
+		height: 12px;
+		border: 2px solid #1e40af; /* Royal Blue marker */
+		border-radius: 50%;
+		background: #ffffff;
+		position: relative;
+		margin-top: 0.4rem;
+		flex-shrink: 0;
+		z-index: 2;
+	}
 
-    .timeline-content h3 {
-        font-size: 1.1rem;
-        margin-bottom: 0.2rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #333; /* Darker title */
-        font-weight: 600;
-        font-family: "Source Serif 4", serif;
-    }
+	/* Timeline connection line */
+	.timeline-marker::after {
+		content: "";
+		position: absolute;
+		top: 12px;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 2px;
+		height: 100px; /* Long line that gets clipped by absolute layouts */
+		background: #cbd5e1; /* Slate 300 line */
+		z-index: -1;
+		display: none; /* Hide line since there is only one education item currently */
+	}
 
-    .role {
-        color: #555;
-        font-size: 0.85rem; /* Reduced from 0.95rem */
-        font-family: "Source Serif 4", serif;
-    }
+	.timeline-content {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		width: 100%;
+	}
 
-    .edu-logo {
-        vertical-align: middle;
-        object-fit: contain;
-    }
+	.timeline-header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+		font-family: "Segoe UI", sans-serif;
+	}
+
+	.timeline-date {
+		color: #64748b; /* Slate 500 */
+		font-size: 0.85rem;
+		font-weight: 500;
+	}
+
+	.institution {
+		font-family: "Source Serif 4", serif;
+		color: #0f172a; /* Slate 900 */
+		font-size: 0.95rem;
+		font-weight: 700;
+	}
+
+	.logo-group {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		background: #f8fafc;
+		border: 1px solid #e2e8f0;
+		padding: 0.15rem 0.45rem;
+		border-radius: 6px;
+	}
+
+	.edu-logo-img {
+		height: 16px;
+		width: auto;
+		object-fit: contain;
+		vertical-align: middle;
+	}
+
+	.zju-text-logo {
+		font-size: 0.72rem;
+		color: #1e40af;
+		font-weight: 700;
+		font-family: "Source Serif 4", serif;
+	}
+
+	.role {
+		color: #475569; /* Slate 600 */
+		font-size: 0.85rem;
+		font-family: "Source Serif 4", serif;
+		line-height: 1.4;
+		margin: 0;
+	}
 </style>

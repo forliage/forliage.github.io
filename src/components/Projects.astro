@@ -30,7 +30,14 @@ const projects: ProjectItem[] = [
 ---
 
 <section id="projects" class="projects">
-	<h1 class="section-title">Selected Projects</h1>
+	<h1 class="section-title">
+		<span class="title-icon-wrapper">
+			<svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+				<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+			</svg>
+		</span>
+		Selected Projects
+	</h1>
 
 	<div class="project-list">
 		{
@@ -74,21 +81,41 @@ const projects: ProjectItem[] = [
 
 <style>
 	.projects {
-		background: #fff;
-		padding: 1.5rem 2rem; /* Compact padding */
+		background: #ffffff;
+		padding: 1.5rem 2rem;
 		border-radius: 16px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-		margin-bottom: 1.5rem;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+		border: 1px solid #e2e8f0;
 	}
 
 	.section-title {
 		font-size: 1.5rem;
-		border-bottom: 2px solid #eee;
-		padding-bottom: 0.5rem;
-		margin-bottom: 1rem;
+		font-weight: 700;
+		color: #0f172a;
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.65rem;
+		border-bottom: 2px solid #e2e8f0;
+		padding-bottom: 0.65rem;
+		margin-bottom: 1.25rem;
+	}
+
+	.title-icon-wrapper {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border: 1.5px solid #1e40af;
+		border-radius: 50%;
+		background: #eff6ff;
+		color: #1e40af;
+		flex-shrink: 0;
+	}
+
+	.title-icon {
+		width: 16px;
+		height: 16px;
 	}
 
 	.project-list {

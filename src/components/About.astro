@@ -1,21 +1,40 @@
 ---
+interface Props {
+	isMerged?: boolean;
+}
 
+const { isMerged = false } = Astro.props;
 ---
 
-<section class="about-me">
-	<h1 class="section-title">About Me</h1>
+<section class={`about-me ${isMerged ? 'merged' : ''}`}>
+	<div class="title-container">
+		<h1 class="section-title">
+			<span class="title-icon-wrapper">
+				<svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+					<circle cx="12" cy="7" r="4" />
+				</svg>
+			</span>
+			About Me
+		</h1>
+		{isMerged && (
+			<div class="header-email">
+				<svg class="email-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+					<polyline points="22,6 12,13 2,6" />
+				</svg>
+				masterforliage@gmail.com
+			</div>
+		)}
+	</div>
 	<div class="content">
 		<p>
 			I am Liuye Zhao, an undergraduate student majoring in Computer
 			Science and Technology, Zhejiang University. I am now advised by
-			Professor <a href="http://www.cad.zju.edu.cn/home/jin"
-				>Xiaogang Jin</a
-			>.
+			Professor <a href="http://www.cad.zju.edu.cn/home/jin" class="professor-link">Xiaogang Jin</a>.
 		</p>
 		<p>
-			My current research focuses on rendering <strong
-				>related to deep learning</strong
-			>, aiming to realize the visual world using physical simulation and
+			My current research focuses on rendering <strong>related to deep learning</strong>, aiming to realize the visual world using physical simulation and
 			deep learning. This work is highly valuable in creating 3D and even
 			4D world models. Futhermore, I tend to explore various interesting
 			rendering techniques that maximize rendering speed while ensuring
@@ -27,9 +46,11 @@
 			computer graphics.
 		</p>
 
-		<p class="contact-line">
-			<strong>Email:</strong> masterforliage@gmail.com
-		</p>
+		{!isMerged && (
+			<p class="contact-line">
+				<strong>Email:</strong> masterforliage@gmail.com
+			</p>
+		)}
 		<p class="update-time">
 			<em>Last updated: May 2026</em>
 		</p>
@@ -38,42 +59,108 @@
 
 <style>
 	.about-me {
-		background: #fff;
-		padding: 1.5rem 2rem; /* Compact padding */
+		background: #ffffff;
+		padding: 1.5rem 2rem;
 		border-radius: 16px;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 		margin-bottom: 1.5rem;
+		border: 1px solid #e2e8f0;
+	}
+
+	.about-me.merged {
+		background: none !important;
+		padding: 0 !important;
+		border-radius: 0 !important;
+		box-shadow: none !important;
+		margin-bottom: 0 !important;
+		border: none !important;
+	}
+
+	.title-container {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		border-bottom: 2px solid #e2e8f0;
+		padding-bottom: 0.65rem;
+		margin-bottom: 1.25rem;
+		width: 100%;
 	}
 
 	.section-title {
 		font-size: 1.5rem;
-		border-bottom: 2px solid #eee;
-		padding-bottom: 0.5rem;
-		margin-bottom: 1rem;
+		font-weight: 700;
+		color: #0f172a; /* Slate 900 */
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.65rem;
+		border: none !important;
+		padding: 0 !important;
+		margin: 0 !important;
 	}
 
-	.tag {
-		font-size: 1.5rem;
-		background: #f0f0f0;
-		padding: 0.2rem 0.6rem;
-		border-radius: 20px;
-		vertical-align: middle;
+	.title-icon-wrapper {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border: 1.5px solid #1e40af; /* Royal Blue */
+		border-radius: 50%;
+		background: #eff6ff; /* Soft light blue */
+		color: #1e40af;
+		flex-shrink: 0;
+	}
+
+	.title-icon {
+		width: 16px;
+		height: 16px;
+	}
+
+	.header-email {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		color: #64748b; /* Slate 500 */
+		font-size: 0.85rem;
+		font-family: inherit;
+	}
+
+	.email-icon {
+		width: 15px;
+		height: 15px;
+		color: #1e40af;
+	}
+
+	.professor-link {
+		color: #1e40af;
+		font-weight: 500;
+	}
+
+	.professor-link:hover {
+		text-decoration: underline;
 	}
 
 	.content p {
 		margin-bottom: 0.75rem;
 		font-family: "Source Serif 4", serif;
-		font-size: 0.9rem; /* Reduced from 1rem */
-		font-weight: 400; /* No bold */
-		color: #444;
+		font-size: 0.95rem;
+		font-weight: 400;
+		color: #334155; /* Slate 700 */
+		line-height: 1.65;
+	}
+
+	.content p strong {
+		color: #0f172a;
+		font-weight: 600;
+	}
+
+	.contact-line {
+		margin-top: 1rem;
 	}
 
 	.update-time {
-		color: #888;
-		font-size: 0.9rem;
+		color: #64748b;
+		font-size: 0.85rem;
 		margin-top: 1.25rem;
 	}
 </style>

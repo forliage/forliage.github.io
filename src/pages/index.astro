@@ -18,10 +18,38 @@ import Publications from "../components/Publications.astro";
 		</div>
 
 		<div class="right-col">
-			<About />
-			<Experience />
-			<Education />
+			<!-- Unified major card containing About, Education, and Experience -->
+			<div class="unified-card">
+				<About isMerged={true} />
+				
+				<!-- High-end Horizontal Divider with Diamond Node -->
+				<div class="diamond-divider">
+					<div class="divider-line"></div>
+					<div class="divider-diamond">
+						<svg viewBox="0 0 100 100" class="diamond-svg">
+							<polygon points="50,15 85,50 50,85 15,50" fill="#ffffff" stroke="#1e40af" stroke-width="8" />
+							<polygon points="50,30 70,50 50,70 30,50" fill="#1e40af" />
+						</svg>
+					</div>
+					<div class="divider-line"></div>
+				</div>
+
+				<!-- Side-by-side columns with vertical separating rule -->
+				<div class="side-by-side-grid">
+					<div class="grid-column">
+						<Education isMerged={true} />
+					</div>
+					<div class="vertical-border"></div>
+					<div class="grid-column">
+						<Experience isMerged={true} />
+					</div>
+				</div>
+			</div>
+
+			<!-- Selected Projects Card -->
 			<Projects />
+
+			<!-- Publications Card -->
 			<Publications />
 		</div>
 	</main>
@@ -29,18 +57,122 @@ import Publications from "../components/Publications.astro";
 
 <style>
 	.main-container {
-		max-width: 1280px; /* Increased to reduce side margins */
-		margin: 1.5rem auto; /* Snug top/bottom margins */
-		padding: 0 3rem; /* Slightly more inner padding if wider */
+		max-width: 1200px; /* Aligned with Header container max-width */
+		margin: 2rem auto;
+		padding: 0 2rem;
 		display: grid;
-		grid-template-columns: 220px 1fr; /* Snug sidebar width */
-		gap: 2.25rem; /* Snug column gap */
+		grid-template-columns: 240px 1fr; /* Increased sidebar width slightly for crest spacing */
+		gap: 2.25rem;
+		align-items: start;
+	}
+
+	.left-col {
+		position: sticky;
+		top: 80px;
+	}
+
+	.right-col {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	/* Unified Academic Card Style */
+	.unified-card {
+		background: #ffffff;
+		border: 1px solid #e2e8f0;
+		border-radius: 16px;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+		padding: 2.25rem 2.5rem;
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+	}
+
+	/* Horizontal Diamond Divider */
+	.diamond-divider {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		margin: 2rem 0;
+		width: 100%;
+	}
+
+	.divider-line {
+		flex: 1;
+		height: 1px;
+		background: linear-gradient(
+			to right,
+			rgba(226, 232, 240, 0.2),
+			rgba(226, 232, 240, 1) 25%,
+			rgba(226, 232, 240, 1) 75%,
+			rgba(226, 232, 240, 0.2)
+		);
+	}
+
+	.divider-diamond {
+		width: 18px;
+		height: 18px;
+		flex-shrink: 0;
+	}
+
+	.diamond-svg {
+		width: 100%;
+		height: 100%;
+	}
+
+	/* Side-by-Side 2-column Grid */
+	.side-by-side-grid {
+		display: grid;
+		grid-template-columns: 1fr auto 1fr;
+		gap: 2rem;
+		width: 100%;
+		align-items: start;
+	}
+
+	.grid-column {
+		width: 100%;
+	}
+
+	.vertical-border {
+		width: 1px;
+		height: 100%;
+		min-height: 100px;
+		background: linear-gradient(
+			to bottom,
+			rgba(226, 232, 240, 0.2),
+			rgba(226, 232, 240, 1) 20%,
+			rgba(226, 232, 240, 1) 80%,
+			rgba(226, 232, 240, 0.2)
+		);
+		align-self: stretch;
+	}
+
+	/* Responsive Styles */
+	@media (max-width: 992px) {
+		.side-by-side-grid {
+			grid-template-columns: 1fr;
+			gap: 2rem;
+		}
+
+		.vertical-border {
+			display: none;
+		}
 	}
 
 	@media (max-width: 768px) {
 		.main-container {
 			grid-template-columns: 1fr;
-			gap: 1.5rem;
+			gap: 2rem;
+		}
+
+		.left-col {
+			position: static;
+		}
+
+		.unified-card {
+			padding: 1.5rem 1.75rem;
 		}
 	}
 </style>
