@@ -6,12 +6,18 @@ interface Props {
 const { isMerged = false } = Astro.props;
 ---
 
-<section id="experience" class={`experience ${isMerged ? 'merged' : ''}`}>
+<section id="experience" class={`experience ${isMerged ? "merged" : ""}`}>
 	<h1 class="section-title">
 		<span class="title-icon-wrapper">
-			<svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-				<rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-				<path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+			<svg
+				class="title-icon"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+			>
+				<rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+				<path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
 			</svg>
 		</span>
 		Experience
@@ -25,13 +31,39 @@ const { isMerged = false } = Astro.props;
 					<span class="timeline-date">Aug. 2026 -</span>
 					<span class="institution">University of Utah</span>
 					<div class="logo-group">
-						<img src="/utah.jpg" alt="Utah Logo" class="edu-logo-img" />
+						<img
+							src="/utah.jpg"
+							alt="Utah Logo"
+							class="edu-logo-img"
+						/>
 						<span class="utah-text-logo">UTAH</span>
 					</div>
 				</div>
 				<p class="role">
-					I will be attending <a href="https://www.cs.utah.edu/" class="link-styled">Kahlert School of Computing</a>, <a href="https://www.utah.edu/" class="link-styled">University of Utah</a> as a visiting scholar during the summer of 2026, where I will complete a student internship of several months under the guidance of Professor <a href="https://yangzzzy.github.io/" class="link-styled">Yin Yang</a>. I hope I will have a fulfilling and enjoyable internship experience!
+					I will be attending <a
+						href="https://www.cs.utah.edu/"
+						class="link-styled">Kahlert School of Computing</a
+					>, <a href="https://www.utah.edu/" class="link-styled"
+						>University of Utah</a
+					> as a visiting scholar during the summer of 2026, where I will
+					complete a student internship of several months under the guidance
+					of Professor <a
+						href="https://yangzzzy.github.io/"
+						class="link-styled">Yin Yang</a
+					>. I hope I will have a fulfilling and enjoyable internship
+					experience!
 				</p>
+			</div>
+		</div>
+
+		<div class="timeline-item">
+			<div class="timeline-marker"></div>
+			<div class="timeline-content">
+				<div class="timeline-header">
+					<span class="timeline-date"></span>
+					<span class="institution"></span>
+				</div>
+				<p class="role"></p>
 			</div>
 		</div>
 	</div>
@@ -94,6 +126,9 @@ const { isMerged = false } = Astro.props;
 		position: relative;
 		padding-left: 0.25rem;
 		margin-top: 1rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem; /* Gap between multiple timeline items */
 	}
 
 	.timeline-item {
@@ -123,10 +158,13 @@ const { isMerged = false } = Astro.props;
 		left: 50%;
 		transform: translateX(-50%);
 		width: 2px;
-		height: 100px;
+		height: calc(100% + 1.25rem); /* Reaches precisely to the next marker */
 		background: #cbd5e1;
 		z-index: -1;
-		display: none; /* Hide line since there is only one experience item currently */
+	}
+
+	.timeline-item:last-child .timeline-marker::after {
+		display: none; /* Terminates connecting line at last item */
 	}
 
 	.timeline-content {
