@@ -6,9 +6,7 @@ const currentPath = pathname.slice(1); // remove the first "/"
 <header class="glass-header">
 	<div class="container">
 		<div class="logo-terminal">
-			<span class="text-green">Liuye Zhao</span><span class="text-pink"
-				>@ZJU</span
-			><span class="text-green">:~$Hi there!</span><span
+			<span class="text-indigo">Liuye Zhao@ZJU:~$</span><span
 				class="cursor-blink"></span>
 		</div>
 		<nav>
@@ -40,6 +38,7 @@ const currentPath = pathname.slice(1); // remove the first "/"
 		); /* #E8F9FF with transparency */
 		--color-green-text: #5dd3b6;
 		--color-pink-text: #f075ae;
+		--color-indigo-text: #6367FF; /* Custom indigo color */
 		--color-inactive-text: #a5c89e;
 	}
 
@@ -74,6 +73,10 @@ const currentPath = pathname.slice(1); // remove the first "/"
 		align-items: center;
 	}
 
+	.text-indigo {
+		color: var(--color-indigo-text);
+	}
+
 	.text-green {
 		color: var(--color-green-text);
 	}
@@ -86,7 +89,7 @@ const currentPath = pathname.slice(1); // remove the first "/"
 		display: inline-block;
 		width: 2px; /* Thinner cursor */
 		height: 1.2em;
-		background-color: var(--color-pink-text);
+		background-color: var(--color-indigo-text); /* Matched to indigo color */
 		margin-left: 2px;
 		animation: blink 1s step-end infinite;
 		vertical-align: text-bottom;
