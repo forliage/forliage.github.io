@@ -57,12 +57,12 @@ import Publications from "../components/Publications.astro";
 
 <style>
 	.main-container {
-		max-width: 1200px; /* Aligned with Header container max-width */
-		margin: 2rem auto;
-		padding: 0 2rem;
+		max-width: 1380px; /* Expanded from 1200px for generous width */
+		margin: 1.25rem auto; /* Tightened from 2rem auto */
+		padding: 0 2.5rem; /* Spacious lateral padding */
 		display: grid;
-		grid-template-columns: 240px 1fr; /* Increased sidebar width slightly for crest spacing */
-		gap: 2.25rem;
+		grid-template-columns: 270px 1fr; /* Sidebar widened to 270px to completely avoid email wrapping */
+		gap: 1.75rem; /* Tightened from 2.25rem */
 		align-items: start;
 	}
 
@@ -74,7 +74,7 @@ import Publications from "../components/Publications.astro";
 	.right-col {
 		display: flex;
 		flex-direction: column;
-		gap: 1.5rem;
+		gap: 1rem; /* Tightened from 1.5rem between cards */
 	}
 
 	/* Unified Academic Card Style */
@@ -83,7 +83,7 @@ import Publications from "../components/Publications.astro";
 		border: 1px solid #e2e8f0;
 		border-radius: 16px;
 		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-		padding: 2.25rem 2.5rem;
+		padding: 1.75rem 2.25rem; /* Tightened from 2.25rem 2.5rem to look compact */
 		display: flex;
 		flex-direction: column;
 		width: 100%;
@@ -95,7 +95,7 @@ import Publications from "../components/Publications.astro";
 		align-items: center;
 		justify-content: center;
 		gap: 0.75rem;
-		margin: 2rem 0;
+		margin: 1.5rem 0; /* Tightened from 2rem */
 		width: 100%;
 	}
 
@@ -126,7 +126,7 @@ import Publications from "../components/Publications.astro";
 	.side-by-side-grid {
 		display: grid;
 		grid-template-columns: 1fr auto 1fr;
-		gap: 2rem;
+		gap: 1.75rem; /* Tightened from 2rem */
 		width: 100%;
 		align-items: start;
 	}
@@ -153,7 +153,7 @@ import Publications from "../components/Publications.astro";
 	@media (max-width: 992px) {
 		.side-by-side-grid {
 			grid-template-columns: 1fr;
-			gap: 2rem;
+			gap: 1.75rem;
 		}
 
 		.vertical-border {
@@ -164,7 +164,8 @@ import Publications from "../components/Publications.astro";
 	@media (max-width: 768px) {
 		.main-container {
 			grid-template-columns: 1fr;
-			gap: 2rem;
+			gap: 1.5rem;
+			padding: 0 1.5rem;
 		}
 
 		.left-col {

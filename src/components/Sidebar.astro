@@ -7,23 +7,26 @@
 	<div class="avatar-wrapper">
 		<div class="avatar-crest-backdrop">
 			<svg viewBox="0 0 200 200" class="crest-svg" xmlns="http://www.w3.org/2000/svg">
-				<!-- Shield Outlines -->
-				<path d="M100,20 C130,20 160,35 160,75 C160,120 100,165 100,165 C100,165 40,120 40,75 C40,35 70,20 100,20 Z" fill="none" stroke="rgba(30,64,175,0.06)" stroke-width="2.5" stroke-dasharray="4 2" />
-				<path d="M100,26 C125,26 152,39 152,75 C152,112 100,154 100,154 C100,154 48,112 48,75 C48,39 75,26 100,26 Z" fill="none" stroke="rgba(30,64,175,0.12)" stroke-width="1.5" />
+				<!-- Double circular boundaries for high-end academic crest feel -->
+				<circle cx="100" cy="100" r="92" fill="none" stroke="rgba(30, 64, 175, 0.05)" stroke-width="1.2" />
+				<circle cx="100" cy="100" r="86" fill="none" stroke="rgba(30, 64, 175, 0.08)" stroke-width="1.5" stroke-dasharray="3 3" />
+				<circle cx="100" cy="100" r="70" fill="none" stroke="rgba(30, 64, 175, 0.06)" stroke-width="1" />
 				
-				<!-- Laurel Leaves (Left Wreath) -->
-				<path d="M45,115 C35,95 38,65 52,48" fill="none" stroke="rgba(30,64,175,0.15)" stroke-width="1.5" />
-				<path d="M 39,105 C 34,105 34,98 42,99" fill="rgba(30,64,175,0.12)" />
-				<path d="M 37,88 C 31,87 33,80 40,83" fill="rgba(30,64,175,0.12)" />
-				<path d="M 39,71 C 34,68 37,62 43,67" fill="rgba(30,64,175,0.12)" />
-				<path d="M 45,55 C 41,51 45,46 50,51" fill="rgba(30,64,175,0.12)" />
+				<!-- Laurel Leaves Wreath Symmetrical Left Branch -->
+				<path d="M 52,142 C 38,122 36,92 52,65" fill="none" stroke="rgba(30, 64, 175, 0.16)" stroke-width="1.5" />
+				<circle cx="52" cy="142" r="1.5" fill="rgba(30, 64, 175, 0.2)" />
+				<path d="M 46,131 C 40,129 40,121 48,123" fill="rgba(30, 64, 175, 0.15)" />
+				<path d="M 42,114 C 36,111 38,103 46,106" fill="rgba(30, 64, 175, 0.15)" />
+				<path d="M 42,95 C 36,91 39,83 47,88" fill="rgba(30, 64, 175, 0.15)" />
+				<path d="M 46,76 C 41,71 46,63 52,69" fill="rgba(30, 64, 175, 0.15)" />
 				
-				<!-- Laurel Leaves (Right Wreath) -->
-				<path d="M155,115 C165,95 162,65 148,48" fill="none" stroke="rgba(30,64,175,0.15)" stroke-width="1.5" />
-				<path d="M 161,105 C 166,105 166,98 158,99" fill="rgba(30,64,175,0.12)" />
-				<path d="M 163,88 C 169,87 167,80 160,83" fill="rgba(30,64,175,0.12)" />
-				<path d="M 161,71 C 166,68 163,62 157,67" fill="rgba(30,64,175,0.12)" />
-				<path d="M 155,55 C 159,51 155,46 150,51" fill="rgba(30,64,175,0.12)" />
+				<!-- Laurel Leaves Wreath Symmetrical Right Branch -->
+				<path d="M 148,142 C 162,122 164,92 148,65" fill="none" stroke="rgba(30, 64, 175, 0.16)" stroke-width="1.5" />
+				<circle cx="148" cy="142" r="1.5" fill="rgba(30, 64, 175, 0.2)" />
+				<path d="M 154,131 C 160,129 160,121 152,123" fill="rgba(30, 64, 175, 0.15)" />
+				<path d="M 158,114 C 164,111 162,103 154,106" fill="rgba(30, 64, 175, 0.15)" />
+				<path d="M 158,95 C 164,91 161,83 153,88" fill="rgba(30, 64, 175, 0.15)" />
+				<path d="M 154,76 C 159,71 154,63 148,69" fill="rgba(30, 64, 175, 0.15)" />
 			</svg>
 		</div>
 		<div class="photo-container">
@@ -126,26 +129,76 @@
 		</div>
 	</div>
 
-	<!-- Blueprint Campus Gate at bottom -->
+	<!-- Blueprint Campus Gate at bottom (Stunning vector of ZJU Colonnade) -->
 	<div class="blueprint-gate">
-		<svg viewBox="0 0 240 60" fill="none" stroke="rgba(30,64,175,0.06)" stroke-width="1.2">
-			<!-- Colonnade base line -->
-			<line x1="10" y1="55" x2="230" y2="55" />
-			<!-- 4 Columns -->
-			<rect x="35" y="20" width="12" height="35" rx="1" />
-			<rect x="85" y="20" width="12" height="35" rx="1" />
-			<rect x="145" y="20" width="12" height="35" rx="1" />
-			<rect x="195" y="20" width="12" height="35" rx="1" />
-			<!-- Column tops -->
-			<line x1="30" y1="20" x2="52" y2="20" />
-			<line x1="80" y1="20" x2="102" y2="20" />
-			<line x1="140" y1="20" x2="162" y2="20" />
-			<line x1="190" y1="20" x2="212" y2="20" />
-			<!-- Architrave / Top triangular pediment -->
-			<polygon points="20,15 220,15 120,0" fill="rgba(30,64,175,0.01)" />
-			<line x1="20" y1="15" x2="220" y2="15" />
-			<line x1="25" y1="12" x2="215" y2="12" />
-			<circle cx="120" cy="9" r="2.5" />
+		<svg viewBox="0 0 270 65" fill="none" stroke="rgba(30, 64, 175, 0.08)" stroke-width="1.2" xmlns="http://www.w3.org/2000/svg">
+			<!-- Blueprint grid background lines for blueprint/CAD look -->
+			<line x1="0" y1="10" x2="270" y2="10" stroke-dasharray="1 5" stroke-width="0.6" opacity="0.25" />
+			<line x1="0" y1="25" x2="270" y2="25" stroke-dasharray="1 5" stroke-width="0.6" opacity="0.25" />
+			<line x1="0" y1="40" x2="270" y2="40" stroke-dasharray="1 5" stroke-width="0.6" opacity="0.25" />
+			<line x1="0" y1="55" x2="270" y2="55" stroke-dasharray="1 5" stroke-width="0.6" opacity="0.25" />
+			<line x1="45" y1="0" x2="45" y2="65" stroke-dasharray="1 5" stroke-width="0.6" opacity="0.2" />
+			<line x1="95" y1="0" x2="95" y2="65" stroke-dasharray="1 5" stroke-width="0.6" opacity="0.2" />
+			<line x1="135" y1="0" x2="135" y2="65" stroke-dasharray="1 5" stroke-width="0.6" opacity="0.2" />
+			<line x1="175" y1="0" x2="175" y2="65" stroke-dasharray="1 5" stroke-width="0.6" opacity="0.2" />
+			<line x1="225" y1="0" x2="225" y2="65" stroke-dasharray="1 5" stroke-width="0.6" opacity="0.2" />
+
+			<!-- Classical architectural bases / steps -->
+			<line x1="10" y1="60" x2="260" y2="60" stroke-width="1.5" />
+			<line x1="18" y1="57" x2="252" y2="57" stroke-width="1" />
+			<line x1="25" y1="54" x2="245" y2="54" stroke-width="0.8" />
+
+			<!-- Column 1 (X=45) -->
+			<rect x="41" y="24" width="12" height="30" />
+			<line x1="44" y1="24" x2="44" y2="54" stroke-width="0.6" opacity="0.6" />
+			<line x1="47" y1="24" x2="47" y2="54" stroke-width="0.6" opacity="0.6" />
+			<line x1="50" y1="24" x2="50" y2="54" stroke-width="0.6" opacity="0.6" />
+			<!-- Capital & Base -->
+			<rect x="39" y="21" width="16" height="3" rx="0.5" />
+			<rect x="39" y="54" width="16" height="3" rx="0.5" />
+
+			<!-- Column 2 (X=95) -->
+			<rect x="91" y="24" width="12" height="30" />
+			<line x1="94" y1="24" x2="94" y2="54" stroke-width="0.6" opacity="0.6" />
+			<line x1="97" y1="24" x2="97" y2="54" stroke-width="0.6" opacity="0.6" />
+			<line x1="100" y1="24" x2="100" y2="54" stroke-width="0.6" opacity="0.6" />
+			<!-- Capital & Base -->
+			<rect x="89" y="21" width="16" height="3" rx="0.5" />
+			<rect x="89" y="54" width="16" height="3" rx="0.5" />
+
+			<!-- Column 3 (X=175) -->
+			<rect x="171" y="24" width="12" height="30" />
+			<line x1="174" y1="24" x2="174" y2="54" stroke-width="0.6" opacity="0.6" />
+			<line x1="177" y1="24" x2="177" y2="54" stroke-width="0.6" opacity="0.6" />
+			<line x1="180" y1="24" x2="180" y2="54" stroke-width="0.6" opacity="0.6" />
+			<!-- Capital & Base -->
+			<rect x="169" y="21" width="16" height="3" rx="0.5" />
+			<rect x="169" y="54" width="16" height="3" rx="0.5" />
+
+			<!-- Column 4 (X=225) -->
+			<rect x="221" y="24" width="12" height="30" />
+			<line x1="224" y1="24" x2="224" y2="54" stroke-width="0.6" opacity="0.6" />
+			<line x1="227" y1="24" x2="227" y2="54" stroke-width="0.6" opacity="0.6" />
+			<line x1="230" y1="24" x2="230" y2="54" stroke-width="0.6" opacity="0.6" />
+			<!-- Capital & Base -->
+			<rect x="219" y="21" width="16" height="3" rx="0.5" />
+			<rect x="219" y="54" width="16" height="3" rx="0.5" />
+
+			<!-- Main architrave beams -->
+			<rect x="30" y="15" width="210" height="6" stroke-width="1.2" />
+			<!-- Triglyph markings above columns -->
+			<line x1="47" y1="15" x2="47" y2="21" stroke-width="1" />
+			<line x1="97" y1="15" x2="97" y2="21" stroke-width="1" />
+			<line x1="135" y1="15" x2="135" y2="21" stroke-width="1" />
+			<line x1="177" y1="15" x2="177" y2="21" stroke-width="1" />
+			<line x1="227" y1="15" x2="227" y2="21" stroke-width="1" />
+
+			<!-- Classical Pediment (triangular fronton) -->
+			<polygon points="25,15 245,15 135,2" stroke-width="1.5" />
+			<polygon points="29,14 241,14 135,4" opacity="0.7" stroke-width="0.8" />
+			<!-- Central decorative emblem inside pediment -->
+			<circle cx="135" cy="10" r="3.5" stroke-width="0.8" />
+			<circle cx="135" cy="10" r="1.5" stroke-width="0.5" />
 		</svg>
 	</div>
 </aside>
@@ -153,14 +206,14 @@
 <style>
 	.sidebar {
 		background: #ffffff;
-		padding: 2.25rem 1.25rem 3.5rem 1.25rem; /* Padding at bottom for blueprint gate */
+		padding: 1.75rem 1rem 3.5rem 1rem; /* Reduced horizontal padding to 1rem to maximize email space */
 		border-radius: 16px;
 		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 		border: 1px solid #e2e8f0;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 1.25rem;
+		gap: 1rem; /* Tightened from 1.25rem */
 		height: fit-content;
 		text-align: center;
 		position: relative;
@@ -231,7 +284,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.35rem; /* Tightened from 0.5rem */
 		width: 100%;
 		z-index: 2;
 	}
@@ -263,18 +316,18 @@
 	.pill-boxes-group {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: 0.45rem; /* Tightened from 0.5rem */
 		width: 100%;
-		margin-top: 0.75rem;
+		margin-top: 0.5rem;
 	}
 
 	.pill-box {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.45rem;
 		border: 1px solid #e2e8f0;
 		background: #f8fafc;
-		padding: 0.45rem 0.85rem;
+		padding: 0.4rem 0.65rem; /* Compact padding */
 		border-radius: 10px;
 		font-size: 0.8rem;
 		color: #334155; /* Slate 700 */
@@ -306,7 +359,7 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
-		margin: 1rem 0;
+		margin: 0.75rem 0; /* Tightened from 1rem */
 		width: 100%;
 	}
 
