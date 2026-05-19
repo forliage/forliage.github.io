@@ -6,51 +6,72 @@ interface Props {
 const { isMerged = false } = Astro.props;
 ---
 
-<section class={`about-me ${isMerged ? 'merged' : ''}`}>
+<section class={`about-me ${isMerged ? "merged" : ""}`}>
 	<div class="title-container">
 		<h1 class="section-title">
 			<span class="title-icon-wrapper">
-				<svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-					<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-					<circle cx="12" cy="7" r="4" />
+				<svg
+					class="title-icon"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+				>
+					<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+					<circle cx="12" cy="7" r="4"></circle>
 				</svg>
 			</span>
 			About Me
 		</h1>
-		{isMerged && (
-			<div class="header-email">
-				<svg class="email-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-					<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-					<polyline points="22,6 12,13 2,6" />
-				</svg>
-				masterforliage@gmail.com
-			</div>
-		)}
+		{
+			isMerged && (
+				<div class="header-email">
+					<svg
+						class="email-icon"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+						<polyline points="22,6 12,13 2,6" />
+					</svg>
+					masterforliage@gmail.com
+				</div>
+			)
+		}
 	</div>
 	<div class="content">
 		<p>
 			I am Liuye Zhao, an undergraduate student majoring in Computer
 			Science and Technology, Zhejiang University. I am now advised by
-			Professor <a href="http://www.cad.zju.edu.cn/home/jin" class="professor-link">Xiaogang Jin</a>.
+			Professor <a
+				href="http://www.cad.zju.edu.cn/home/jin"
+				class="professor-link">Xiaogang Jin</a
+			>.
 		</p>
 		<p>
-			My current research focuses on rendering <strong>related to deep learning</strong>, aiming to realize the visual world using physical simulation and
+			My current research focuses on <strong
+				>rendering related to deep learning</strong
+			>, aiming to realize the visual world using physical simulation and
 			deep learning. This work is highly valuable in creating 3D and even
 			4D world models. Futhermore, I tend to explore various interesting
-			rendering techniques that maximize rendering speed while ensuring
-			high-quality visual effects. This work has significant applications
+			<strong>rendering</strong> techniques that maximize rendering speed while
+			ensuring high-quality visual effects. This work has significant applications
 			in mobile rendering, film and television production, and animation.
 		</p>
 		<p>
-			I am also interested in various geometric processing methods in
-			computer graphics.
+			I am also interested in various <strong>geometric processing</strong
+			> methods in computer graphics.
 		</p>
 
-		{!isMerged && (
-			<p class="contact-line">
-				<strong>Email:</strong> masterforliage@gmail.com
-			</p>
-		)}
+		{
+			!isMerged && (
+				<p class="contact-line">
+					<strong>Email:</strong> masterforliage@gmail.com
+				</p>
+			)
+		}
 		<p class="update-time">
 			<em>Last updated: May 2026</em>
 		</p>
