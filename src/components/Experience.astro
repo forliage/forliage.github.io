@@ -146,7 +146,7 @@ const { isMerged = false } = Astro.props;
 		margin-top: 1.25rem;
 		display: flex;
 		flex-direction: column;
-		gap: 1.5rem; /* Gap between multiple timeline items */
+		gap: 1.75rem; /* Spacious spacing between timeline items */
 	}
 
 	.timeline-item {
@@ -158,15 +158,25 @@ const { isMerged = false } = Astro.props;
 	}
 
 	.timeline-left {
-		text-align: right;
-		padding-top: 0.25rem;
-		line-height: 1.3;
+		display: flex;
+		justify-content: flex-end;
+		align-items: start;
+		padding-top: 0.15rem;
 	}
 
+	/* Rounded Date Capsule Tag matching Figure 2 */
 	.timeline-date {
-		color: #1e40af; /* High-end royal blue for date column */
-		font-size: 0.85rem;
-		font-weight: 500;
+		background: #eff6ff; /* Soft high-end light blue */
+		border: 1px solid #dbeafe; /* Subtle sky blue border */
+		color: #1e40af; /* Deep royal blue text */
+		font-size: 0.75rem;
+		font-weight: 600;
+		padding: 0.35rem 0.55rem;
+		border-radius: 8px;
+		text-align: center;
+		line-height: 1.35;
+		display: inline-block;
+		box-shadow: 0 1px 2px rgba(30, 64, 175, 0.03);
 	}
 
 	.timeline-middle {
@@ -177,37 +187,68 @@ const { isMerged = false } = Astro.props;
 		align-self: stretch;
 	}
 
-	.timeline-marker {
-		width: 14px;
-		height: 14px;
-		border: 2px solid #1e40af; /* Royal Blue concentric ring */
+	/* First active marker: Glowing Blue Orb matching Figure 2 */
+	.timeline-item:first-child .timeline-marker {
+		width: 16px;
+		height: 16px;
+		background: #2563eb; /* Vibrant royal blue */
+		border: 2.5px solid #ffffff; /* Thick white ring */
+		box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25), 0 0 8px rgba(37, 99, 235, 0.6); /* Blue outer glow */
+		border-radius: 50%;
+		margin-top: 0.35rem;
+		flex-shrink: 0;
+		z-index: 3;
+	}
+	.timeline-item:first-child .marker-dot {
+		display: none; /* Solid orb, no inner dot needed */
+	}
+
+	/* Subsequent passive markers: Concentric target rings */
+	.timeline-item:not(:first-child) .timeline-marker {
+		width: 10px;
+		height: 10px;
+		border: 2px solid #2563eb; /* Blue border */
 		border-radius: 50%;
 		background: #ffffff;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		margin-top: 0.45rem;
+		margin-top: 0.55rem;
+		margin-left: 3px; /* Centered with 16px track width */
 		flex-shrink: 0;
-		z-index: 2;
+		z-index: 3;
+		box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
 	}
-
-	.marker-dot {
-		width: 6px;
-		height: 6px;
+	.timeline-item:not(:first-child) .marker-dot {
+		width: 4px;
+		height: 4px;
 		border-radius: 50%;
-		background: #1e40af; /* Inner blue dot */
+		background: #2563eb; /* Center blue dot */
 	}
 
-	/* Timeline connecting line attached to middle track */
-	.timeline-middle::after {
+	/* Timeline connecting line: Solid Blue for active, Dashed Slate for subsequent */
+	.timeline-item:first-child .timeline-middle::after {
+		content: "";
+		position: absolute;
+		top: 1.1rem;
+		bottom: -2rem; /* Reaches precisely to the next marker */
+		left: 50%;
+		transform: translateX(-50%);
+		width: 2.5px;
+		background: #2563eb; /* Solid Royal Blue line */
+		z-index: 1;
+	}
+
+	.timeline-item:nth-child(2) .timeline-middle::after {
 		content: "";
 		position: absolute;
 		top: 1rem;
-		bottom: -1.75rem; /* Reaches precisely to the next marker */
+		bottom: -2rem;
 		left: 50%;
 		transform: translateX(-50%);
 		width: 2px;
-		background: #cbd5e1; /* Slate 300 line */
+		border-left: 2px dashed #cbd5e1; /* Dashed slate connection line */
+		background: none;
 		z-index: 1;
 	}
 
