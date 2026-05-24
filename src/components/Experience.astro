@@ -25,7 +25,7 @@ const { isMerged = false } = Astro.props;
 
 	<div class="timeline">
 		<!-- Timeline Item 1 -->
-		 <div class="timeline-item">
+		 <div class="timeline-item is-active">
 			<div class="timeline-left">
 				<span class="timeline-date">May. - Jul. 2026</span>
 			</div>
@@ -186,8 +186,8 @@ const { isMerged = false } = Astro.props;
 		align-self: stretch;
 	}
 
-	/* First active marker: Glowing Blue Orb matching Figure 2 */
-	.timeline-item:first-child .timeline-marker {
+	/* Active marker: Glowing Blue Orb matching Figure 2 */
+	.timeline-item.is-active .timeline-marker {
 		width: 16px;
 		height: 16px;
 		background: #2563eb; /* Vibrant royal blue */
@@ -198,12 +198,12 @@ const { isMerged = false } = Astro.props;
 		flex-shrink: 0;
 		z-index: 3;
 	}
-	.timeline-item:first-child .marker-dot {
+	.timeline-item.is-active .marker-dot {
 		display: none; /* Solid orb, no inner dot needed */
 	}
 
 	/* Subsequent passive markers: Concentric target rings */
-	.timeline-item:not(:first-child) .timeline-marker {
+	.timeline-item:not(.is-active) .timeline-marker {
 		width: 10px;
 		height: 10px;
 		border: 2px solid #2563eb; /* Blue border */
@@ -218,7 +218,7 @@ const { isMerged = false } = Astro.props;
 		z-index: 3;
 		box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
 	}
-	.timeline-item:not(:first-child) .marker-dot {
+	.timeline-item:not(.is-active) .marker-dot {
 		width: 4px;
 		height: 4px;
 		border-radius: 50%;
@@ -226,7 +226,7 @@ const { isMerged = false } = Astro.props;
 	}
 
 	/* Timeline connecting line: Solid Blue for active, Dashed Slate for subsequent */
-	.timeline-item:first-child .timeline-middle::after {
+	.timeline-item.is-active .timeline-middle::after {
 		content: "";
 		position: absolute;
 		top: 1.1rem;
@@ -238,7 +238,7 @@ const { isMerged = false } = Astro.props;
 		z-index: 1;
 	}
 
-	.timeline-item:nth-child(2) .timeline-middle::after {
+	.timeline-item:not(.is-active) .timeline-middle::after {
 		content: "";
 		position: absolute;
 		top: 1rem;
